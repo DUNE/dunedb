@@ -3,9 +3,12 @@ const app = express()
 const pug = require('pug')
 const uuidv1 = require('uuid/v1');
 
-
+var morgan = require('morgan');
 const port = 12313;
 const uuid_url = "http://sietch.xyz/";
+
+app.use(morgan('tiny'));
+
 
 app.set('view engine', 'pug')
 app.set('views','pug');
