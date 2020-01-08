@@ -414,7 +414,7 @@ app.post("/savefile",middlewareCheckDataViewPrivs,file_upload_middleware,async f
         if (err) return res.status(500).send(err);
 
          res.json({
-          url: 'http://localhost:12313/retrievefile/'+fileinfo.name,
+          url: config.my_url+'/retrievefile/'+fileinfo.name,
           name: fileinfo.name,
           size: fileinfo.size
          });
