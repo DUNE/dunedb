@@ -1,21 +1,17 @@
-$(function(){
-	$("span.qrurl").first().each(function(){
-		var text = $(this).text();
-		if(text) {
-			console.log(text);
+
+function DrawQRCode(canvas,text){
 			var segs = qrcodegen.QrSegment.makeSegments(text);
 			var ecl = qrcodegen.QrCode.Ecc.HIGH;
 			var qr = qrcodegen.QrCode.encodeSegments(segs, ecl, 1, 40, -1, true);
 			var scale = 8; // pixels per module
 			var border = 8//4; // modules
-			var canvas = document.getElementById("qrcode-canvas");
 			// var svg = document.getElementById("qrcode-svg");
 			// canvas.style.display = "none";
 			// svg.style.display = "none";
 
-			qr.drawCanvas(scale, border, canvas);
 			var ctx = canvas.getContext("2d");
-			ctx.font = "14px Inconsolada";
+			qr.drawCanvas(scale, border, canvas);
+			ctx.font = "16px Inconsolada";
 			ctx.fillStyle = "black";
 			var width = canvas.width;
 			var height = canvas.height;
@@ -46,7 +42,4 @@ $(function(){
 			ctx.restore();
 
 			ctx.restore();
-		}
-
-	});
-})
+};

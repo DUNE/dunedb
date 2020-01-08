@@ -1,0 +1,164 @@
+head
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css')
+  
+  link(rel='stylesheet' href='/formio.js/formio.full.min.css')
+  <!-- link(rel='stylesheet' href='/formio.js/formio.builder.min.css') -->
+  script(src='/jquery/jquery.min.js')
+  script(src='/bootstrap/js/bootstrap.min.js')
+  script(src='/formio.js/formio.full.min.js')
+
+  script(type='text/javascript').
+    var schema=!{JSON.stringify( ((rec||{}).schema)||{}, null ,4 )};
+    var rec = !{JSON.stringify(rec||{},null,4)};
+    var metaschema={
+                "components": [
+                  {
+                    "label": "Form ID",
+                    "description": "This is the ID of the form",
+                    "spellcheck": true,
+                    "tableView": true,
+                    "validate": {
+                      "required": true,
+                      "pattern": "[\\w]+",
+                      "minLength": 3,
+                      "maxLength": 16,
+                      "unique": false,
+                      "multiple": false
+                    },
+                    "errorLabel": "Letters and numbers and underscores only, 3-16 chars",
+                    "key": "form_id",
+                    "type": "textfield",
+                    "input": true
+                  },
+                  {
+                    "label": "Form Title",
+                    "placeholder": "Short test description",
+                    "description": "This will be shown to users in menus to select this test.",
+                    "spellcheck": true,
+                    "tableView": true,
+                    "validate": {
+                      "required": true,
+                      "unique": false,
+                      "multiple": false
+                    },
+                    "key": "title",
+                    "type": "textfield",
+                    "input": true
+                  },
+                  {
+                    "label": "formbuilder",
+                    "tag": "div",
+                    "className": "formbuilder",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "tableView": false,
+                    "key": "formbuilder",
+                    "type": "htmlelement",
+                    "input": false,
+                    "validate": {
+                      "unique": false,
+                      "multiple": false
+                    }
+                  },
+                  {
+                    "label": "schema",
+                    "key": "schema",
+                    "type": "hidden",
+                    "input": true,
+                    "tableView": false,
+                    "validate": {
+                      "unique": false,
+                      "multiple": false
+                    }
+                  },
+                  {
+                    "label": "Commit Test Form",
+                    "showValidations": false,
+                    "theme": "success",
+                    "size": "lg",
+                    "disableOnInvalid": true,
+                    "tableView": false,
+                    "key": "submit",
+                    "type": "button",
+                    "input": true,
+                    "validate": {
+                      "unique": false,
+                      "multiple": false
+                    }
+                  }
+                ]
+              };
+
+
+  script(type='text/javascript').
+
+    // This is a bit confusing, since we have both a formbuilder, and a formrenderer which renders inside the built form.
+    var metaform;
+
+      window.onload = async function() {
+
+        function beforeSubmit(submission, next) {
+          // Run when you hit the "commit test form" button
+          console.log(submission);
+          var form_id = submission.form_id;
+          var posting = $.post('/testBuilder/'+form_id,submission);
+          posting.done(function(a,b,c) {
+            // POST operation completed but..
+            console.log(a,b,c);
+            next();
+          });
+          posting.fail(function(a,b,c) {
+            // On failure, add a failure message
+            next( [{message: "Failed to post  - "+c+' - '+a.status}] );
+
+            //- alert("posting failed");
+            console.log("posting fail",a,b,c)
+          });
+
+        };
+
+        // Create outer form.
+        metaform = await Formio.createForm(document.getElementById('metaform'),metaschema,{hooks:{beforeSubmit:beforeSubmit}});
+
+        // Create inner form.
+        var builder_element = $('div.formbuilder').get(0);
+        builder = new Formio.FormBuilder(builder_element,rec.schema||{},{});
+
+        $('input#commit-schema').val(JSON.stringify(schema));
+          builder.instance.ready.then(function(){
+          builder.instance.on('saveComponent',onBuild);
+          builder.instance.on('editComponent',onBuild);
+        });
+
+
+        metaform.submission = {data: {form_id: rec.form_id||'!{form_id}', title: rec.title, schema:JSON.stringify(rec.schema) }};
+        metaform.nosubmit = true;
+        
+
+      }
+
+    function onBuild() {
+      var schema_element = document.getElementById('schema');
+      schema_element.innerHTML='';
+      schema_element.appendChild(document.createTextNode(JSON.stringify(builder.instance.schema,null,2)));
+      metaform.submission.data.schema = JSON.stringify(builder.instance.schema);
+      
+      //- $('input[name="data[schema]"]').val(JSON.stringify(builder.instance.schema));
+    }
+   
+body
+  h2=form_id
+
+  #metaform
+
+
+  
+  pre#schema=JSON.stringify(((rec||{}).schema)||{},null,4)

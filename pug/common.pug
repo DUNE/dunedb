@@ -1,0 +1,15 @@
+
+mixin find-a-component
+    script(type='text/javascript' src='js/search')
+    form#component-full-text-search(method="get",action='/component-search')
+
+        label Full Text Search (doesn't work yet)
+        input(name='searchterms', placeholder="Full text search for component")
+
+
+mixin component-list(list)
+    each dummy,type in list
+        ul.component-list="type: "+type
+            each val,index in list[type]
+                li 
+                    a(href='/'+val.component_uuid)=val.name

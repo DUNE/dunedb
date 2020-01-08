@@ -1,0 +1,20 @@
+html
+    head
+        meta(http-equiv='content-type', content='text/html; charset=utf-8')
+        title Get a new QR code
+
+        script(src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous")
+        script(type="text/javascript", src="/js/geotag.js")
+
+    body
+         p You just looked up #{uuid}
+         p If this item is right in front of you, press the button below to geotag/timestamp it.
+         form.geotag(action="/geotag/"+uuid) 
+             input.latitude(type="hidden",name="latitude")
+             input.longitude(type="hidden",name="longitude")
+             input.accuracy(type="hidden",name="accuracy")
+             input.altitude(type="hidden",name="altitude")
+             input.timestamp(type="hidden",name="timestamp")
+             input(type='submit',value="Submit Geotag")
+
+         iframe.googlemap-currentpos(width="600",height="450",frameborder="0",style="border:0",allowfullscreen)

@@ -1,0 +1,172 @@
+{
+    "components" : [
+      {
+        "label" : "Component UUID",
+        "placeholder" : "Example: 123e4567-e89b-12d3-a456-426655440000",
+        "description" : "Database UUID. Found on QR code.",
+        "inputMask" : "********-****-****-****-************",
+        "spellcheck" : true,
+        "tableView" : true,
+        "validate" : {
+          "pattern" : "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
+          "customMessage" : "Needs to be hexadecimal in 8-4-4-4-12 layout",
+          "unique" : false,
+          "multiple" : false
+        },
+        "errorLabel" : "Not a UUID",
+        "key" : "component_uuid",
+        "type" : "textfield",
+        "input" : true
+      },
+      {
+        "label" : "Name",
+        "placeholder" : "example: apa 10",
+        "description" : "Human readable and searchable identifier or nickname",
+        "spellcheck" : true,
+        "tableView" : true,
+        "validate" : {
+          "unique" : false,
+          "multiple" : false
+        },
+        "key" : "name",
+        "type" : "textfield",
+        "input" : true
+      },
+      {
+        "label" : "Type",
+        "widget" : "choicesjs",
+        "placeholder" : "Select the component type",
+        "tableView" : true,
+        "data" : {
+          "values" : [
+            {
+              "label" : "APA",
+              "value" : "APA"
+            },
+            {
+              "label" : "Board",
+              "value" : "Board"
+            },
+            {
+              "label" : "Screw",
+              "value" : "Screw"
+            }
+          ]
+        },
+        "selectThreshold" : 0.3,
+        "validate" : {
+          "required" : true,
+          "unique" : false,
+          "multiple" : false
+        },
+        "key" : "type",
+        "type" : "select",
+        "input" : true
+      },
+      {
+        "label" : "Component of",
+        "placeholder" : "UUID of parent assembly",
+        "description" : "If this component is part of a larger assembly, give the UUID of the parent component here.",
+        "inputMask" : "********-****-****-****-************",
+        "spellcheck" : true,
+        "tableView" : true,
+        "validate" : {
+          "pattern" : "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
+          "unique" : false,
+          "multiple" : false
+        },
+        "errorLabel" : "Needs to be in hexadecimal 8-4-4-4-12 format",
+        "key" : "uuid1",
+        "type" : "textfield",
+        "input" : true
+      },
+      {
+        "title" : "APA Information",
+        "collapsible" : false,
+        "tableView" : false,
+        "key" : "panel",
+        "conditional" : {
+          "show" : true,
+          "when" : "type",
+          "eq" : "APA"
+        },
+        "type" : "panel",
+        "label" : "APanel",
+        "input" : false,
+        "validate" : {
+          "unique" : false,
+          "multiple" : false
+        },
+        "components" : [
+          {
+            "label" : "APA Number",
+            "mask" : false,
+            "spellcheck" : true,
+            "tableView" : false,
+            "delimiter" : false,
+            "requireDecimal" : false,
+            "inputFormat" : "plain",
+            "validate" : {
+              "required" : true,
+              "unique" : false,
+              "multiple" : false
+            },
+            "key" : "apaNumber",
+            "type" : "number",
+            "input" : true
+          }
+        ],
+        "path" : "panel"
+      },
+      {
+        "title" : "Board Information",
+        "collapsible" : false,
+        "tableView" : false,
+        "key" : "boardInformation",
+        "conditional" : {
+          "show" : true,
+          "when" : "type",
+          "eq" : "Board"
+        },
+        "type" : "panel",
+        "label" : "Board Information",
+        "input" : false,
+        "validate" : {
+          "unique" : false,
+          "multiple" : false
+        },
+        "components" : [
+          {
+            "label" : "Board Number",
+            "mask" : false,
+            "spellcheck" : true,
+            "tableView" : false,
+            "delimiter" : false,
+            "requireDecimal" : false,
+            "inputFormat" : "plain",
+            "validate" : {
+              "required" : true,
+              "unique" : false,
+              "multiple" : false
+            },
+            "key" : "boardNumber",
+            "type" : "number",
+            "input" : true
+          }
+        ],
+        "path" : "boardInformation"
+      },
+      {
+        "type" : "button",
+        "label" : "Submit",
+        "key" : "submit",
+        "disableOnInvalid" : true,
+        "input" : true,
+        "tableView" : false,
+        "validate" : {
+          "unique" : false,
+          "multiple" : false
+        }
+      }
+    ]
+}

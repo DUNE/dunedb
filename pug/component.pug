@@ -1,0 +1,96 @@
+
+extend default
+
+
+block vars
+  - var page_title=component.name || component_uuid;
+
+block extrascripts
+  script(type='text/javascript').
+    // I could do this by API query of the server, but this works for now.
+    var schema=!{JSON.stringify(schema||{})};
+    var component=!{JSON.stringify(component||{})};
+  
+
+  script(type='text/javascript').
+
+      var form = null;
+      function SubmitData(submission) {
+        // actually the 'submit' function
+        console.log("submitting data",submission);
+        var posting = $.post('/json/'+submission.data.component_uuid,submission);
+        posting.done(function(retval) {
+          // POST operation completed but..
+          if((retval.error)) form.setAlert("warning",c.error);
+          else form.setAlert(false);
+          if(retval.component) form.submission = {data: retval.component};
+
+          console.log("success retval",retval);
+
+        });
+        posting.fail(function(res,statusCode,statusMsg) {
+          // On failure, add a failure message
+          if(res.responseText && res.responseText.length>0) form.setAlert("danger",res.responseText);
+          else                                              form.setAlert("danger",statusMsg + " ("+statusCode+")");
+          //- alert("posting failed");
+          console.log("posting fail",res,statusCode,statusMsg);
+        });
+
+      };
+
+    var shortuuid = window.ShortUUID();
+
+    window.onload = async function() {
+      console.log("schema",schema);
+
+      form = await Formio.createForm(document.getElementById('builtform'),schema,
+      {
+          readOnly: #{canEdit?"false":"true"},
+      });
+      form.submission = {data: component};
+      form.on('submit',SubmitData);
+      form.nosubmit = true; // Use the beforeSubmit hook.
+
+      // Change the url to match
+      if(window.location.pathname.includes("NewComponent")) {
+        // Change the URL to match th new component component_uuid
+        history.replaceState(null, null, component.component_uuid);
+      }
+      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+shortuuid.fromUUID(component.component_uuid));
+
+      
+
+      }
+
+  style.
+    div#qr-code {
+    }
+    div#qr-code canvas {
+      border: 8px solid green;
+      border-radius: 8px;
+      width:100%;
+      height:auto
+    }
+block content
+  .container
+    .row
+        h2#name.col-md-8=(component.type)?(component.type+": "+component.name):"New Component"
+    .row
+      #builtform.col-md-8
+      div#qr-code.col-md-4
+        canvas#qrcode-canvas
+        a#contact-sheet-link(href='#') Click for printable labels
+        p Enter form data:
+          ul#tests
+            each test in tests
+              li
+                a(href='/'+component_uuid+'/test/'+test.form_id)=test.form_title
+    .row
+      h4 Tests Performed
+        each form,index in performed
+          p=index
+          ul.testsPerformed
+            each test,index in form
+              li 
+                a(href='/viewTest/'+test.form_id+"/"+test._id)=test.form_id+" ("+ test.timestamp+ ")"
+

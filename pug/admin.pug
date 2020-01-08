@@ -1,0 +1,46 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title="sietch admin";
+
+block content
+
+    h4 Admin Only:
+
+    p
+        a.componentform(href='/EditComponentForm') Edit the component information form
+
+    p
+        a.newform(href='/NewTestForm') New Test Form
+
+    p Edit test forms:
+
+        ul#tests
+              each test in tests
+                li
+                  a(href='/EditTestForm/'+test.form_id)=test.form_title
+
+    h4 Users with data entry permission:
+
+    p
+        a(href='/NewComponent') Register new component
+    
+
+    h2 Anyone
+    p
+        a(href='#') Search for component (unimplimented)
+    p 
+        a(href='#') Show all tests of type (unimplimented)
+
+    p List of all components in database
+        +component-list(all_components)
+
+    p Major features required: 
+        ul
+            li Search for component
+            li Sort tests by component type (?)
+            li File download support
+
+

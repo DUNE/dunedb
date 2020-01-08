@@ -1,0 +1,33 @@
+extend default
+
+
+block vars
+  - var page_title=form_id;
+
+block extrascripts
+  script(type='text/javascript').
+    // I could do this by API query of the server, but this works for now.
+    var formrec=!{JSON.stringify(form||{}, null ,4)}; 
+    var submission=!{JSON.stringify(submission||{}, null ,4)}; 
+
+  script(type='text/javascript').
+
+    window.onload = async function() {
+      form = await Formio.createForm(document.getElementById('builtform'),formrec.schema,
+        {
+          readOnly:true
+        });
+      form.nosubmit = true;
+      form.submission = {data: submission};
+
+      
+
+    }
+
+block content
+  h2=form_id
+
+  .container
+    .row
+      #builtform
+

@@ -1,0 +1,66 @@
+head
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css')
+  
+  link(rel='stylesheet' href='/formio.js/formio.full.min.css')
+  <!-- link(rel='stylesheet' href='/formio.js/formio.builder.min.css') -->
+  script(src='/jquery/jquery.min.js')
+  script(src='/bootstrap/js/bootstrap.min.js')
+  script(src='/formio.js/formio.full.min.js')
+
+  script(type='text/javascript').
+    var record=!{JSON.stringify(rec, null ,4)};
+    
+
+
+  script(type='text/javascript').
+    function onBuild() {
+      var schema_element = document.getElementById('schema');
+      schema_element.innerHTML='';
+      schema_element.appendChild(document.createTextNode(JSON.stringify(builder.instance.schema,null,2)));
+      $('input#commit-schema').val(JSON.stringify(builder.instance.schema));
+    }
+    window.onload = function() {
+      console.log("schema",record.schema)
+      builder = new Formio.FormBuilder(document.getElementById('builder'),record.schema||{},{});
+      $('input#commit-schema').val(JSON.stringify(schema));
+      builder.instance.ready.then(function(){
+        builder.instance.on('saveComponent',onBuild);
+        builder.instance.on('editComponent',onBuild);
+      });
+
+      // validate on client side.
+      $('form').on('submit',function(){
+        if($('input#form_id').val().length<1) {alert("Need to enter a form ID"); return false;}
+        if($('input#form_title').val().length<1) {alert("Need to enter a form title"); return false;}
+        return true;
+      });
+      $('input#form_id').on('change',function(){$('#id_warning').show();});
+    };
+
+body
+  h2=form_id
+  form(method="post")
+    label
+        | Form ID (only):
+        input#form_id(type="text",name='form_id', value=(rec.form_id || form_id ))
+        p#id_warning(style="display:none;color:red;") Changing this value will create a new form.
+
+    br
+    label
+        | Form Title (One-line description):
+        input#form_title(type="text",name='title',value=(rec.title ||form_id ))
+
+    div(style="margin:20px; border: 2px solid red; ")
+        #builder
+
+    input#commit-schema(type='hidden', name='schema', value=((rec||{}).schema)||{})
+    input#commit.btn.btn-lg.btn-success(type="submit" href="#",role="button" value='Commit Form')
+
+
+
+
+  
+  pre#schema=JSON.stringify(rec.schema||{},null,4)
