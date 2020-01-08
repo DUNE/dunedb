@@ -297,7 +297,7 @@ app.post('/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,r
 // Edit a test form.
 var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
 
-app.get("/NewTestForm", middlewareCheckFormEditPrivs, async function(req,res){
+app.get("/EditTestForm", middlewareCheckFormEditPrivs, async function(req,res){
   rec = {
     form_id: null,
     schema:default_form_schema
