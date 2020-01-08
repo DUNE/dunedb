@@ -9,7 +9,7 @@
 var defaults = {
   mongo_uri : "mongodb://localhost",
   mongo_db : "sietch_dev",
-  uuid_url : "http://sietch.xyz/",
+  my_url : "http://sietch.xyz/",
   http_server_port: 12313,
   localsecret: "this is a very well-kept secret" // for various local salting
 }
