@@ -15,12 +15,34 @@ block extrascripts
       }
       window.onload = function() {
         console.log("schema",record.schema)
-        builder = new Formio.FormBuilder(document.getElementById('builder'),record.schema||{},{});
+        builder = new Formio.FormBuilder(
+          document.getElementById('builder'), // html element
+          record.schema||{}, // starting schema
+          {
+               builder: {
+                  //- basic: false,
+                  //- advanced: false,
+                  //- data: false,
+                  //- layout: false,
+                  //- premium: false,
+
+                  custom: {
+                    title: 'Custom',
+                    default: true,
+                    weight: 100,
+                    components: {
+                      //- CustomGeoTag: true,
+                      //- file: true
+                    }
+                  }
+                }
+        });
         $('input#commit-schema').val(JSON.stringify(schema));
         builder.instance.ready.then(function(){
           builder.instance.on('saveComponent',onBuild);
           builder.instance.on('editComponent',onBuild);
         });
+        onBuild();
 
         // validate on client side.
         $('form').on('submit',function(){

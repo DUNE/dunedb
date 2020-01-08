@@ -297,18 +297,7 @@ app.post('/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,r
 // Edit a test form.
 var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
 
-app.get("/EditTestForm", middlewareCheckFormEditPrivs, async function(req,res){
-  rec = {
-    form_id: null,
-    schema:default_form_schema
-  }
-  res.render('EditTestForm.pug',
-    {form_id:null,
-     rec:rec
-    });
-});
-
-app.get("/EditTestForm/:form_id", middlewareCheckFormEditPrivs, async function(req,res){
+app.get("/EditTestForm/:form_id?", middlewareCheckFormEditPrivs, async function(req,res){
   var rec = await getForm(req.params.form_id);
   // if(!rec) return res.status(404).send("No such form exists");
   if(!rec) rec = {
@@ -322,20 +311,15 @@ app.get("/EditTestForm/:form_id", middlewareCheckFormEditPrivs, async function(r
 });
 
 // Set a form schema
-app.post("/EditTestForm/:form_id", middlewareCheckFormEditPrivs, async function(req,res,next) {
-	if(req.body && req.body.form_id && req.body.form_id != req.params.form_id) {
-		console.error("redirecting");
-		res.redirect(307, '/EditTestForm/'+req.body.form_id);
-		return;
-	}
+app.post("/EditTestForm/:form_id?", middlewareCheckFormEditPrivs, async function(req,res,next) {
 	console.log(chalk.blue("New Schema submission","testForm"));
 	console.log(req.body);
 
-	var form_id = req.params.form_id;
+	var form_id = req.body.form_id;
 	var forms = db.collection("testForms");
 
 	var updateRes = await forms.updateMany({form_id:form_id, current:true}, {$set: {current: false}});
-	console.log('updateRes',updateRes);
+	// console.log('updateRes',updateRes);
 	var new_record = JSON.parse(req.body.schema);
 	var new_record = {
 		schema: JSON.parse(req.body.schema),
@@ -349,6 +333,12 @@ app.post("/EditTestForm/:form_id", middlewareCheckFormEditPrivs, async function(
 	await forms.insertOne(new_record);
 	// Get it from the DB afresh.
 	var rec = await getForm(form_id,);
+  if(req.body.form_id != req.params.form_id) {
+    console.error("redirecting");
+    res.redirect(307, '/EditTestForm/'+req.body.form_id);
+    return;
+  }
+
 	res.render('EditTestForm.pug',{form_id: form_id, rec:rec});
 });
 
