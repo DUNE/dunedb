@@ -34,13 +34,16 @@ block content
     p 
         a(href='#') Show all tests of type (unimplimented)
 
-    p List of all components in database
-        +component-list(all_components)
+    h2 List of all components in database
+    +component-list(all_components)
 
-    p Major features required: 
+    h2 Major features required: 
         ul
+            li User authentication - Plug into Fermilab SSO
+            li User permission management (view data / submit data / edit data / edit forms)
+            li Workflow for many of the same test
+            li Documentation
             li Search for component
             li Sort tests by component type (?)
-            li File download support
 
 
