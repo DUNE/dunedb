@@ -249,7 +249,7 @@ async function get_component(req,res) {
   });
 }
 app.get('/'+uuid_regex, middlewareCheckDataViewPrivs, get_component);
-// app.get('/'+short_uuid_regex, middlewareCheckDataViewPrivs, get_component);
+app.get('/'+short_uuid_regex, middlewareCheckDataViewPrivs, get_component);
 
 app.get('/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,res){
   console.log("/json/"+data.component_uuid)
