@@ -1,14 +1,6 @@
-head
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css')
-  
-  link(rel='stylesheet' href='/formio.js/formio.full.min.css')
-  <!-- link(rel='stylesheet' href='/formio.js/formio.builder.min.css') -->
-  script(src='/jquery/jquery.min.js')
-  script(src='/bootstrap/js/bootstrap.min.js')
-  script(src='/formio.js/formio.full.min.js')
+extend default
+
+block extrascripts
 
   script(type='text/javascript').
     var record=!{JSON.stringify(rec, null ,4)};
@@ -24,7 +16,7 @@ head
     }
     window.onload = function() {
       console.log("schema",record.schema)
-      builder = new Formio.FormBuilder(document.getElementById('builder'),record.schema||{},{});
+      builder = new Formio.FormBuilder(document.getElementById('builder'),record.schema||{});
       $('input#commit-schema').val(JSON.stringify(schema));
       builder.instance.ready.then(function(){
         builder.instance.on('saveComponent',onBuild);
@@ -34,10 +26,11 @@ head
       // validate on client side.
     };
 
-body
+block content
   h2=form_id
   form(method="post")
     h2 Component Form
+    h2 hi
 
     div(style="margin:20px; border: 2px solid red; ")
         #builder

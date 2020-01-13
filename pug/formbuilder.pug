@@ -29,20 +29,20 @@ head
         document.getElementById('builder'), // html element
         record.schema||{}, // starting schema
         {
-             builder: {
-                basic: false,
-                advanced: false,
-                data: false,
-                layout: false,
-                customBasic: {
-                  title: 'Basic Components',
-                  default: true,
-                  weight: 0,
-                  components: {
-                    checkmatrix: true
-                  }
-                }
-              }
+             //- builder: {
+             //-    basic: false,
+             //-    advanced: false,
+             //-    data: false,
+             //-    layout: false,
+             //-    customBasic: {
+             //-      title: 'Basic Components',
+             //-      default: true,
+             //-      weight: 0,
+             //-      components: {
+             //-        checkmatrix: true
+             //-      }
+             //-    }
+             //-  }
         });
       $('input#commit-schema').val(JSON.stringify(schema));
       builder.instance.ready.then(function(){
