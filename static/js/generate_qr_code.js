@@ -2,7 +2,8 @@
 function DrawQRCode(canvas,text){
 			var segs = qrcodegen.QrSegment.makeSegments(text);
 			var ecl = qrcodegen.QrCode.Ecc.HIGH;
-			var qr = qrcodegen.QrCode.encodeSegments(segs, ecl, 1, 40, -1, true);
+			var minVersion = 8; // Determines size, but adds correction bits.
+			var qr = qrcodegen.QrCode.encodeSegments(segs, ecl, minVersion, 40, -1, true);
 			var scale = 8; // pixels per module
 			var border = 8//4; // modules
 			// var svg = document.getElementById("qrcode-svg");
