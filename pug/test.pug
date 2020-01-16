@@ -12,48 +12,57 @@ block extrascripts
 
   script(type='text/javascript').
 
-    window.onload = async function() {
-      var form = null;
-      function SubmitData(submission) {
-        // actually the 'submit' function
-        console.log("submitting data",submission);
-        var posting = $.post('/submit/'+formrec.form_id,submission);
-        posting.done(function(retval) {
-          // POST operation completed but..
-          if((retval.error)) form.setAlert("warning",c.error);
-          //- else form.setAlert(false);
-          if(retval.submission) form.submission = {data: retval.submission};
-          form.emit('submitDone', retval.submission);
-          console.log("success retval",retval);
+    var form = null;
 
-        });
-        posting.fail(function(res,statusCode,statusMsg) {
+    function SubmitData(submission) {
+      // actually the 'submit' function
+      console.log("submitting data",submission, JSON.stringify(submission));
+      function postSuccess(retval) {
+          if((retval.error)) form.setAlert("warning",retval.error);
+          console.log(retval);
+          form.emit('submitDone', retval.submission);
+           console.log("success retval",retval);
+      }
+      function postFail(res,statusCode,statusMsg){
           // On failure, add a failure message
           if(res.responseText && res.responseText.length>0) form.setAlert("danger",res.responseText);
           else                                              form.setAlert("danger",statusMsg + " ("+statusCode+")");
           //- alert("posting failed");
           console.log("posting fail",res,statusCode,statusMsg);
-        });
 
       };
+      console.log(submission);
+      $.ajax(
+        { contentType: "application/json",
+          method: "post",
+          url: "/submit/"+formrec.form_id,
+          data: JSON.stringify(submission),
+          dataType: "json",
+          //- success: postSuccess
+        }
+        );//.fail(postFail);
+
+    };
+
+    window.onload = async function() {
+
 
       console.log("schema",formrec.schema);
 
-      form = await Formio.createForm(document.getElementById('builtform'),formrec.schema,
-        {
-          //- readOnly: #{canEdit?"false":"true"},
-        });
+      form = await Formio.createForm(
+                  document.getElementById('builtform'),
+                  formrec.schema,{});
+                  //- { //readOnly: false;// #{canEdit?"false":"true"} 
+                  //- });
       //- form.url="https://nowhere.com";
+      console.log(form);
       form.submission = {data: submission};
       form.on('submit',SubmitData);
-
-      
 
     }
 
 block content
   h2=form_id
-
   .container
     .row
       #builtform

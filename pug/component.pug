@@ -3,10 +3,11 @@ extend default
 
 
 block vars
-  - var page_title=component.name || component_uuid;
+  - var page_title=(component||{}).name || component_uuid;
 
 block extrascripts
   script(type='text/javascript').
+    var component_uuid = "!{component_uuid}";
     // I could do this by API query of the server, but this works for now.
     var schema=!{JSON.stringify(schema||{})};
     var component=!{JSON.stringify(component||{})};
@@ -18,7 +19,7 @@ block extrascripts
       function SubmitData(submission) {
         // actually the 'submit' function
         console.log("submitting data",submission);
-        var posting = $.post('/json/'+submission.data.component_uuid,submission);
+        var posting = $.post('/component/json/'+component_uuid,submission);
         posting.done(function(retval) {
           // POST operation completed but..
           if((retval.error)) form.setAlert("warning",c.error);
@@ -47,7 +48,7 @@ block extrascripts
       {
           readOnly: #{canEdit?"false":"true"},
       });
-      form.submission = {data: component};
+      form.submission = {data: component||{component_uuid: component_uuid}};
       form.on('submit',SubmitData);
       form.nosubmit = true; // Use the beforeSubmit hook.
 
@@ -56,7 +57,7 @@ block extrascripts
         // Change the URL to match th new component component_uuid
         history.replaceState(null, null, component.component_uuid);
       }
-      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+shortuuid.fromUUID(component.component_uuid));
+      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+shortuuid.fromUUID(component_uuid));
 
       
 
@@ -74,7 +75,7 @@ block extrascripts
 block content
   .container
     .row
-        h2#name.col-md-8=(component.type)?(component.type+": "+component.name):"New Component"
+        h2#name.col-md-8=((component||{}).type)?((component||{}).type+": "+(component||{}).name):"New Component"
     .row
       #builtform.col-md-8
       div#qr-code.col-md-4

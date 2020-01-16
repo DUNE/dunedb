@@ -26,17 +26,17 @@ if(oldCoords) {
 
 
 
-$(function() {
-    $('form.geotag input[type=submit]').attr('disabled', 'disabled');
-    if (navigator.geolocation) 
-            navigator.geolocation.getCurrentPosition(pos => {
-                  console.log("found current geolocation",pos);
-                  const cacheValue = {timestamp:pos.timestamp, coords:$.extend({},pos.coords)};
-                  localStorage.setItem('cached-geolocation', JSON.stringify(cacheValue));
-                  console.log("cached",localStorage.getItem('cached-geolocation'));
-                  setCoords(pos);
-                });
-});
+// $(function() {
+//     $('form.geotag input[type=submit]').attr('disabled', 'disabled');
+//     if (navigator.geolocation) 
+//             navigator.geolocation.getCurrentPosition(pos => {
+//                   console.log("found current geolocation",pos);
+//                   const cacheValue = {timestamp:pos.timestamp, coords:$.extend({},pos.coords)};
+//                   localStorage.setItem('cached-geolocation', JSON.stringify(cacheValue));
+//                   console.log("cached",localStorage.getItem('cached-geolocation'));
+//                   setCoords(pos);
+//                 });
+// });
 
 // $(function(){
 // 	var ready =false;

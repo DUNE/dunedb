@@ -14,28 +14,28 @@ var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var config = require('./configuration.js');
 
-var passport = require('passport');
+
+const logRequestStart = (req,res,next) => {
+    console.dir(req);
+    console.log(`${req.method} ${req.originalUrl}`)
+    next()
+}
+app.use(logRequestStart)
 
 app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding via apache
+// 
 
+
+// app.use(bodyParser.urlencoded({ limit:'1000kb', extended : true }));
 app.use(bodyParser.json({ limit:'1000kb'}));
-app.use(bodyParser.urlencoded({ limit:'1000kb', extended : true }));
 app.use(morgan('tiny'));
 app.use(express.static(__dirname + '/static'));
 
 
-app.set('view engine', 'pug')
 app.set('view options', { pretty: true });
+app.set('view engine', 'pug')
 app.set('views','pug');
-
-app.use(session({ secret: config.localsecret, // session secret
-	  			  resave: false,
-  				  saveUninitialized: true,
-				  // cookie: { secure: true } // requires https
-
-				})); 
-app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
+  app.locals.pretty = true;
 
 var MongoDBStore = require('connect-mongodb-session')(session);
 var sessionstore = new MongoDBStore({
@@ -44,45 +44,96 @@ var sessionstore = new MongoDBStore({
 
   collection: 'sessions'
 });
+
 sessionstore.on('error', function(error) {
   console.log(error);
 });
 
-app.use(require('express-session')({
-  secret: config.localsecret,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+app.use(session({ 
+    secret: config.localsecret, // session secret
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },  // 1 week
+    store: sessionstore,
+  })); 
+
+
+// Configure Passport.
+
+var passport = require('passport');
+var Auth0Strategy = require('passport-auth0');
+
+console.log("config",config);
+// Configure Passport to use Auth0
+var strategy = new Auth0Strategy(
+  {
+    domain:       config.auth0_domain,
+    clientID:     config.auth0_client_id,
+    clientSecret: config.auth0_client_secret,
+    callbackURL:
+      config.auth0_callback_url || 'http://localhost:12313/callback'
   },
-  store: sessionstore,
-  // Boilerplate options, see:
-  // * https://www.npmjs.com/package/express-session#resave
-  // * https://www.npmjs.com/package/express-session#saveuninitialized
-  resave: true,
-  saveUninitialized: true
-}));
+  function (accessToken, refreshToken, extraParams, profile, done) {
+    // accessToken is the token to call Auth0 API (not needed in the most cases)
+    // extraParams.id_token has the JSON Web Token
+    // profile has all the information from the user
+    return done(null, profile);
+  }
+);
+passport.use(strategy);
+app.use(passport.initialize());
+app.use(passport.session());
 
-passport.serializeUser( (user, done) => {
+// passport.serializeUser( (user, done) => {
+//   console.log('serializeUser',user);
+//   var sessionUser = { _id: user._id, name: user.name, email: user.email, roles: user.roles }
+//   done(null, sessionUser)
+// })
+
+// passport.deserializeUser( (sessionUser, done) => {
+//   // The sessionUser object is different from the user mongoose collection
+//   // it's actually req.session.passport.user and comes from the session collection
+//   done(null, sessionUser)
+// })
+
+// You can use this section to keep a smaller payload
+passport.serializeUser(function (user, done) {
   console.log('serializeUser',user);
-  var sessionUser = { _id: user._id, name: user.name, email: user.email, roles: user.roles }
-  done(null, sessionUser)
-})
+  done(null, user);
+});
 
-passport.deserializeUser( (sessionUser, done) => {
-  // The sessionUser object is different from the user mongoose collection
-  // it's actually req.session.passport.user and comes from the session collection
-  done(null, sessionUser)
-})
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
+
+// make the req.user object available to the pug templates! Cool!
+app.use(function (req, res, next) {
+    res.locals.user = req.user;
+    next();
+});
+
+// ensure authorized: 
+function ensureAuthorized (req, res, next) {
+    if (req.user) { return next(); }
+    req.session.returnTo = req.originalUrl;
+    res.redirect('/login');
+};
+
+// authentication routes
+var authRouter = require('./auth');
+app.use('/',authRouter);
+
+app.get('/user', ensureAuthorized, function (req, res, next) {
+  const { _raw, _json, ...userProfile } = req.user;
+  res.render('user.pug', {
+    userProfile: JSON.stringify(userProfile, null, 2),
+    title: 'Profile page'
+  });
+});
+
 
 // route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
 
-    // if user is authenticated in the session, carry on 
-    if (req.isAuthenticated())
-        return next();
-
-    // if they aren't redirect them to the home page
-    res.redirect('/');
-}
 
 function hasFormEditPrivs(req)
 {
@@ -140,8 +191,10 @@ async function getForm(form_id,collection) {
 		var col  = db.collection(collection);
 		var rec = await col.findOne({form_id:form_id, current:true});
 		// console.log(chalk.green(JSON.stringify(rec,null,4)));
-    if(rec) console.log(chalk.blue("Found it"));
-		return rec;	
+    if(rec) {
+      console.log(chalk.blue("Found it"));
+    }
+    return rec;
 	} catch(err) {
 		console.error(err);
 
@@ -149,44 +202,6 @@ async function getForm(form_id,collection) {
 	}
 }
 
-/////////////////////////////
-// Edit the component form.
-
-app.get("/EditComponentForm", middlewareCheckFormEditPrivs, async function(req,res){
-  var rec = await getForm("componentForm","componentForm");
-  res.render('formbuilder.pug',
-  	{form_id:"Component",
-  	 form_title:((rec||{}).form_title)||"Untitiled",
-  	 rec:rec
-  	});
-});
-
-// Set a form schema
-app.post("/EditComponentForm", async function(req,res,next) {
-	// Fixme authenticate
-	console.log(chalk.blue("New Schema submission","componentForm"));
-	console.log(req.body);
-
-	form_id = "componentForm";
-	forms = db.collection("componentForm");
-
-	var updateRes = await forms.updateMany({form_id:form_id, current:true}, {$set: {current: false}});
-	console.log('updateRes',updateRes);
-	var new_record = JSON.parse(req.body.schema);
-	var new_record = {
-		schema: JSON.parse(req.body.schema),
-		form_id: "componentForm",
-		form_title: "Component",
-		current: true,
-		revised: new Date
-		// other metadata
-	}
-	console.log("inserting",new_record);
-	await forms.insertOne(new_record);
-	// Get it from the DB afresh.
-	var rec = await getForm(form_id, "componentForm");
-	res.render('EditComponentForm.pug',{rec:rec});
-});
 
 
 /////////////////////////////
@@ -212,6 +227,8 @@ app.get("/NewComponent",
   });
 });
 
+
+// Pull up an existing component for editing or just viewing.
 
 var uuid_regex = ':uuid([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})';
 var short_uuid_regex = ':shortuuid([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{21,22})';
@@ -239,6 +256,7 @@ async function get_component(req,res) {
   // var form = await getForm("componentForm","componentForm");
   console.log("component")
   console.log(component);
+  if(!component) return res.status(400).send("No such component ID.");
   res.render("component.pug",{
   	schema: form.schema,
   	component_uuid:component_uuid,
@@ -251,21 +269,30 @@ async function get_component(req,res) {
 app.get('/'+uuid_regex, middlewareCheckDataViewPrivs, get_component);
 app.get('/'+short_uuid_regex, middlewareCheckDataViewPrivs, get_component);
 
-app.get('/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,res){
+// Pull component data as json doc.
+app.get('/component/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,res){
   console.log("/json/"+data.component_uuid)
-  if(!req.params.uuid) return res.status(400).send("No uuid specified");
+  if(!req.params.uuid) return res.status(400).json({error:"No uuid specified"});
   // fresh retrival
   var component= components.findOne({component_uuid:uuid});
+  if(!component)  return res.status(400).json({error:"UUID not found"});
+
   res.json(component);
 });
 
-app.post('/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,res){
-  console.log('/json/ post req.body:',req.body);
+
+// Post component changes.
+
+
+async function post_component(req,res,next){
+  var component_uuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+  // console.log('/component/json/ post req.body:',req.body);
   var data = req.body.data;
   console.log("/json/"+data.component_uuid)
   if(!data.component_uuid) return res.status(400).send("No uuid specified");
+  if(component_uuid != data.component_uuid) return res.status(400).send("Form does not match url");
   var components = db.collection("components");
-  var existing= await components.findOne({component_uuid:data.component_uuid},{component_uuid:1});
+  var existing= await components.findOne({component_uuid:component_uuid},{component_uuid:1});
   if(!existing) {
   	// No conflict. Is this user allowed to enter data?
   	if(hasDataEntryPrivs(req)) {
@@ -279,114 +306,157 @@ app.post('/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,r
   	if(hasDataEditPrivs(req)) {
   		delete data._id; // The _id field is immutable, so delete if it's attached.
   		components.replaceOne({_id:existing._id},data); // fixme TRANSACTION LOG
- 	} else {
- 		return res.status(400).send("Component UUID "+data.component_uuid+" is already in database and you don't have edit priviledges.");
- 	}
+   	} else {
+ 		 return res.status(400).send("Component UUID "+component_uuid+" is already in database and you don't have edit priviledges.");
+ 	  }
   }
 
   // fresh retrival
-  var component= await components.findOne({component_uuid:data.component_uuid});
+  var component= await components.findOne({component_uuid:component_uuid});
   res.json({component:component});
-});
+};
+
+app.post('/component/json/'+uuid_regex, middlewareCheckDataViewPrivs,post_component);
+app.post('/component/json/'+short_uuid_regex, middlewareCheckDataViewPrivs,post_component);
 
 
 
 
 
-/////////////////////////////
-// Edit a test form.
+
+//////////////////////////////////////////////////////////////////////////
+// Editing and creating forms
+
+
+
+// Create a new test form
 var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
-
-app.get("/EditTestForm/:form_id?", middlewareCheckFormEditPrivs, async function(req,res){
+app.get("/NewTestForm/:form_id", middlewareCheckFormEditPrivs, async function(req,res){
   var rec = await getForm(req.params.form_id);
+  
+  if(!rec) {
+    var forms = db.collection("testForms");
+    // console.log('updateRes',updateRes);
+      var rec = {form_id: req.params.form_id,
+                schema: default_form_schema
+               }; 
+      delete rec._id;
+      rec.revised = new Date;  
+      rec.current = true;
+      rec.version = 0;
+      rec.revised_by = res.locals.user.email || "unknown";
+      console.log("inserting",rec);
+      await forms.insertOne(rec);
+  }
+
+  res.redirect("/EditTestForm/"+req.params.form_id);
+});
+
+// Edit existing test form
+app.get("/EditTestForm/:form_id?", middlewareCheckFormEditPrivs, async function(req,res){
+  // var rec = await getForm(req.params.form_id);
+  // if(!rec) return res.status(400).send("No such form exists");
+  res.render('EditTestForm.pug',{collection:"testForms",form_id:req.params.form_id});
+});
+
+// Edit component form.
+app.get("/EditComponentForm", middlewareCheckFormEditPrivs, async function(req,res){
+  res.render('EditComponentForm.pug',{collection:"componentForm",form_id:"componentForm"});
+});
+
+
+// Get a form schema
+app.get('/:collection(testForms|componentForm)/json/:form_id', async function(req,res,next){
+  var rec = await getForm(req.params.form_id, req.params.collection);
   // if(!rec) return res.status(404).send("No such form exists");
-  if(!rec) rec = {
-  	form_id: req.params.form_id,
-  	schema:default_form_schema
-  }
-  res.render('EditTestForm.pug',
-  	{form_id:req.params.form_id,
-  	 rec: rec||{}
-  	});
-});
-
-// Set a form schema
-app.post("/EditTestForm/:form_id?", middlewareCheckFormEditPrivs, async function(req,res,next) {
-	console.log(chalk.blue("New Schema submission","testForm"));
-	console.log(req.body);
-
-	var form_id = req.body.form_id;
-	var forms = db.collection("testForms");
-
-	var updateRes = await forms.updateMany({form_id:form_id, current:true}, {$set: {current: false}});
-	// console.log('updateRes',updateRes);
-	var new_record = JSON.parse(req.body.schema);
-	var new_record = {
-		schema: JSON.parse(req.body.schema),
-		form_id: form_id,
-		form_title:  req.body.title,
-		current: true,
-		revised: new Date
-		// other metadata
-	}
-	console.log("inserting",new_record);
-	await forms.insertOne(new_record);
-	// Get it from the DB afresh.
-	var rec = await getForm(form_id,);
-  if(req.body.form_id != req.params.form_id) {
-    console.error("redirecting");
-    res.redirect(307, '/EditTestForm/'+req.body.form_id);
-    return;
-  }
-
-	res.render('EditTestForm.pug',{form_id: form_id, rec:rec});
+  if(!rec) { res.status(400).json({error:"no such form "+req.params.form_id}); return next(); };
+  console.log(rec);
+  res.json(rec);
 });
 
 
+// Change the form schema.
+app.post('/:collection(testForms|componentform)/json/:form_id', middlewareCheckFormEditPrivs, async function(req,res,next){
+  console.log(chalk.blue("Schema submission","/testForms/json"));
+  console.log(req.body); 
 
-/// Get a form for testing
+  var form_id = req.params.form_id; 
 
-app.get("/"+uuid_regex+"/test/:form_id", async function(req,res,next) {
-    var form = await getForm(req.params.form_id,);
-    if(!form) return res.status(404).send("No such test form");
-    res.render('test.pug',{form_id:req.params.form_id, form:form, submission:{component_uuid: req.params.uuid}})
+  // Note this is OK because req.params.collection options are specified in the method regex
+  var old = await getForm(form_id,req.params.collection);
+  var forms = db.collection(req.params.collection);
+  var updateRes = await forms.updateMany({form_id:form_id, current:true}, {$set: {current: false}});
+
+  // console.log('updateRes',updateRes);
+  var new_record = {...req.body}; // shallow clone
+  new_record.form_id = form_id;
+  delete new_record._id;
+  new_record.revised = new Date;
+  new_record.current = true;
+  new_record.version = (old.version || 0) + 1;
+
+  console.log("inserting",new_record);
+  await forms.insertOne(new_record);
+
+
+    // Get it from the DB afresh.
+  var rec = await getForm(form_id,req.params.collection);
+  res.json(rec);
 });
 
 
-/// submit test orm data
-
-app.post("/submit/:form_id", async function(req,res,next) {
-  console.log(chalk.blue("Form submission",req.params.form_id));
-  console.dir(req.body);
-  var data = req.body;
-  // metadata.
-  data.form_id = req.params.form_id;
-  data.timestamp=new Date();
-  data.ip = req.ip;
-  data.user = req.user;
-  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
-  var col = db.collection(form_name);
-  try {
-    await col.insertOne(data);
-    res.send();
-  }
-  catch(err) {
-    console.error("error submitting form /submit/"+req.params.form_id);
-    console.error(err);
-    res.status(409).send(err);
-  } 
-});
 
 // view test data.
-app.get("/viewTest/:form_id/:record_id", async function(req,res,next) {
+
+async function seeTestData(req,res,next) {
   var form = await getForm(req.params.form_id,);
-  if(!form) return res.status(404).send("No such test form");  
+  if(!form) return res.status(400).send("No such test form");  
   var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
   var col = db.collection(form_name);
   var data = await col.findOne({_id:ObjectID(req.params.record_id)});
   console.log("retrieving",req.params.record_id,ObjectID(req.params.record_id),data);
   res.render('viewTest.pug',{form_id:req.params.form_id, form:form, submission:data.data})
+};
+app.get("/test/:form_id/:record_id", seeTestData);
+app.get("/"+ uuid_regex + "/test/:form_id/:record_id", seeTestData);
 
+
+/// Run an new test
+
+app.get("/"+uuid_regex+"/test/:form_id", async function(req,res,next) {
+    console.log("run a new test");
+    var form = await getForm(req.params.form_id,);
+    if(!form) return res.status(400).send("No such test form");
+    res.render('test.pug',{form_id:req.params.form_id, form:form, submission:{component_uuid: req.params.uuid}})
+});
+
+
+/// submit test form data
+var parse = require("co-body");
+app.post("/submit/:form_id", async function(req,res,next) {
+  console.log(chalk.blue("Form submission",req.params.form_id));
+  // var body = await parse.json(req);
+
+  console.log(req.body);
+  // console.dir(req.body);
+  // var data = req.body;
+  // // metadata.
+  // data.form_id = req.params.form_id;
+  // data.timestamp=new Date();
+  // data.ip = req.ip;
+  // data.user = req.user;
+  // var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
+  // var col = db.collection(form_name);
+  // try {
+  //   var result = await col.insertOne(data);
+  //   console.log('result',result);
+  //   res.json(result);
+  // }
+  // catch(err) {
+  //   console.error("error submitting form /submit/"+req.params.form_id);
+  //   console.error(err);
+  //   res.status(400).send(err);
+  // } 
 });
 
 /// submit file data
@@ -417,58 +487,8 @@ app.post("/savefile",middlewareCheckDataViewPrivs,file_upload_middleware,async f
 app.use('/retrievefile',express.static(__dirname+"/files"));
 
 
-// This version uses a form-in-a-form
-// Although it works, it's pretty annoying in many ways to keep maintained; just not 
-// worth the effort!
-// // Edit a test form schema
-// // Set a form schema
-// app.get("/testBuilder/:form_id", middlewareCheckFormEditPrivs, async function(req,res,next) {
-// 	var rec = await getForm(req.params.form_id,"testForms");
-//   	res.render('testBuilderMeta.pug',
-// 	  	{form_id:req.params.form_id,
-// 	  	 rec: rec
-//   		});
-
-// });
-// app.post("/testBuilder/:form_id", middlewareCheckFormEditPrivs, async function(req,res,next) {
-
-// 	var data = req.body.data;
-
-// 	// If the posted form ID doesn't match the URL, redirect so that it matches.
-// 	if(data && data.form_id != req.params.form_id) {
-// 		res.redirect(307, '/testBuilder/'+data.form_id);
-// 		return;
-// 	}
-
-// 	console.log(chalk.blue("New Schema submission","testForm"));
-// 	console.log(req.body);
-// 	console.log(chalk.blue("end of body"));
 
 
-// 	var form_id = data.form_id;
-// 	var testForms = db.collection("testForms");
-// 	var data = req.body.data;
-
-// 	var updateRes = await testForms.updateMany({form_id:form_id, current:true}, {$set: {current: false}});
-// 	console.log('updateRes',updateRes);
-// 	var new_record = {
-// 		schema: JSON.parse(data.schema),
-// 		form_id: data.form_id,
-// 		form_title:  data.title,
-// 		current: true,
-// 		revised: new Date
-// 		// other metadata
-// 	}
-// 	console.log("inserting",new_record);
-// 	await testForms.insertOne(new_record);
-
-// 	var rec = await getForm(req.params.form_id,"testForms");
-//   	res.render('testBuilderMeta.pug',
-// 	  	{form_id:req.params.form_id,
-// 	  	 rec: rec
-//   		});
-
-// });
 
 
 
@@ -501,49 +521,6 @@ app.all('/geotag/'+uuid_regex, (req,res) => {
 
 });
 
-
-
-
-app.get("/form/:form_id", async function(req,res,next) {
-    var rec = await getForm(req.params.form_id,"forms");
-	  res.render('form.pug',{form_id:req.params.form_id,schema:rec.schema})
-});
-
-// Set a form schema
-app.post("/formbuilder/:form_id", async function(req,res,next) {
-	// Fixme authenticate
-	console.log(chalk.blue("New Schema submission",req.params.form_id));
-	console.log(req.body);
-
-	forms = db.collection("forms");
-
-	var updateRes = await forms.updateMany({form_id:req.params.form_id, current:true}, {$set: {current: false}});
-	console.log('updateRes',updateRes);
-	var new_record = JSON.parse(req.body.schema);
-	var new_record = {
-		schema: JSON.parse(req.body.schema),
-		form_id: req.params.form_id,
-		current: true,
-		revised: new Date
-		// other metadata
-	}
-	new_record.form_id = req.params.form_id;
-	new_record.current = true;
-	console.log("inserting",new_record);
-	await forms.insertOne(new_record);
-	// Get it from the DB afresh.
-	var rec = await getForm(req.params.form_id);
-	res.render('formbuilder.pug',{form_id:req.params.form_id,schema:rec.schema})
-});
-
-app.get("/formbuilder/:form_id", async function(req,res,next) {
-  var rec = await getForm(req.params.form_id,"testForms");
-  res.render('formbuilder.pug',
-  	{form_id:req.params.form_id,
-  	 form_title:((rec||{}).form_title)||"Untitiled",
-  	 schema:(rec||{}).schema,
-  	});
-});
 
 
 
@@ -632,7 +609,7 @@ async function initialize_database()
 	var admin = db.collection('admin');
 	var status_obj = await admin.findOne({status_object: {$exists: true}});
 	console.log('status object',status_obj);
-	if(!status_obj) status_obj = {status_object: true, version: 0};
+	if(!status_obj) status_obj = {status_object: true, version: 1};
 
 	if(status_obj.version < 1) 
 	{

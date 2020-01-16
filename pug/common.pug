@@ -13,3 +13,31 @@ mixin component-list(list)
             each val,index in list[type]
                 li 
                     a(href='/'+val.component_uuid)=val.name
+
+mixin NewTestForm
+  a.NewTestForm(href='#', data-toggle="modal" data-target="#NewTestFormModal") New Test Form
+  #NewTestFormModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewTestFormLabel' aria-hidden='true')
+    .modal-dialog(role="document")
+      .modal-content
+        .modal-header
+          h5#NewTestFormLabel.modal-title New Test Form
+          button.close(type="button",data-dismiss="modal",aria-label="Close")
+            span(aria-hidden=true) &times;
+        .modal-body
+          div
+            | Enter the new form ID.
+            | Please use only alphanumerics and underscores
+            input.NewTestFormModalName.form-control(type="text")
+        .modal-footer
+          button.btn.btn-secondary(type="button", data-dismiss="modal") Close
+          button.btn.btn-primary.NewTestFormCreateButton(type="button") Create
+  script.
+    $('button.NewTestFormCreateButton').click(function(){
+      window.location.href="/NewTestForm/"+ $('button.NewTestFormCreateButton').parents('.modal-content').find('input').val();
+    })
+    $('input.NewTestFormModalName').on("keyup",function(e){
+      if(e.key=="Enter") {
+          window.location.href="/NewTestForm/"+ $(this).val();
+        }
+    })
+

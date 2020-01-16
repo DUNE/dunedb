@@ -3,7 +3,7 @@ html
   head
 
     block vars
-    title #{page_title || 'Otternet'}
+    title #{page_title || 'Sietch'}
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,7 +18,7 @@ html
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     script(src='/formio.js/formio.full.min.js')
 
-    link(rel='icon' type='image/png' href='images/Otterbein.png')
+    link(rel='icon' type='image/png' href='/images/Otterbein.png')
     // Main CSS sheet for basic layout, custom mods.
 
     script(type="text/javascript", src="/ext/qrcodegen.js")
@@ -55,9 +55,22 @@ html
                 //-       a.dropdown-item(href='#') Another action
                 //-       .dropdown-divider
                 //-       a.dropdown-item(href='#') Something else here
-            span.nav.navbar-nav.navbar-right
-                a.nav-link.disabled(href='#') Prototype APA assembly/QA/inventory database
+              
+                //- a.nav-link.disabled(href='#') Prototype APA assembly/QA/inventory database
+            ul.navbar-nav.navbar-right
+
+              if locals.user
+                li.nav-item
+                  a.nav-link(href="/user") Profile
+                li.nav-item
+                  a.nav-link(href="/logout") Log Out
+              else
+                li.nav-item
+                  a.nav-link(href="/login") Log In
+
+
             //- form.form-inline.my-2.my-lg-0
+
             //-   input.form-control.mr-sm-2(type='search' placeholder='Search' aria-label='Search')
             //-   button.btn.btn-outline-success.my-2.my-sm-0(type='submit') Search
 

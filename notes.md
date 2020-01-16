@@ -1,3 +1,13 @@
+Major todo:
+- Login and sessions
+- Make all form displays work by ajax calls instead of pug-coding the data.
+- Add geotag widget
+- After submitting form, go to edit or view screen
+- data tests of heavyweight data
+
+
+
+
 Database for sessions
 
 Main database ('sietch_dev' by default)
