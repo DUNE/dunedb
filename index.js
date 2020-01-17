@@ -16,7 +16,6 @@ var config = require('./configuration.js');
 
 
 const logRequestStart = (req,res,next) => {
-    console.dir(req);
     console.log(`${req.method} ${req.originalUrl}`)
     next()
 }
@@ -180,6 +179,43 @@ function middlewareCheckDataViewPrivs(req,res,next)
 	if(hasDataViewPrivs(req)) return next();
 	else return res.status(300).send("User does not have Data View priviledges");
 }
+
+
+// machine-to-machine authorization:
+const jwt = require('express-jwt');
+const jwtAuthz = require('express-jwt-authz');
+const jwksRsa = require('jwks-rsa');
+const checkJwt = jwt({
+  // Dynamically provide a signing key
+  // based on the kid in the header and 
+  // the signing keys provided by the JWKS endpoint.
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://dev-pserbfiw.auth0.com/.well-known/jwks.json`
+  }),
+
+  // Validate the audience and the issuer.
+  audience: 'https://dev-pserbfiw.auth0.com/api/v2/',
+  issuer: `https://dev-pserbfiw.auth0.com/`,
+  algorithms: ['RS256']
+});
+
+app.get('/api/public', function(req, res) {
+  res.json({
+    message: 'Hello from a public endpoint! You don\'t need to be authenticated to see this.'
+  });
+});
+
+// This route needs authentication
+app.get('/api/private', checkJwt, function(req, res) {
+  res.json({
+    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
+  });
+});
+
+
 
 // Get current form
 
@@ -432,32 +468,63 @@ app.get("/"+uuid_regex+"/test/:form_id", async function(req,res,next) {
 
 
 /// submit test form data
-var parse = require("co-body");
 app.post("/submit/:form_id", async function(req,res,next) {
   console.log(chalk.blue("Form submission",req.params.form_id));
   // var body = await parse.json(req);
 
   console.log(req.body);
-  // console.dir(req.body);
-  // var data = req.body;
-  // // metadata.
-  // data.form_id = req.params.form_id;
-  // data.timestamp=new Date();
-  // data.ip = req.ip;
-  // data.user = req.user;
-  // var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
-  // var col = db.collection(form_name);
-  // try {
-  //   var result = await col.insertOne(data);
-  //   console.log('result',result);
-  //   res.json(result);
-  // }
-  // catch(err) {
-  //   console.error("error submitting form /submit/"+req.params.form_id);
-  //   console.error(err);
-  //   res.status(400).send(err);
-  // } 
+  var data = req.body;
+  // metadata.
+  data.form_id = req.params.form_id;
+  data.timestamp=new Date();
+  data.ip = req.ip;
+  data.user = req.user;
+  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
+  var col = db.collection(form_name);
+  try {
+    var result = await col.insertOne(data);
+    console.log('result',result.ops);
+    res.json({_id: result.ops[0]._id});
+  }
+  catch(err) {
+    console.error("error submitting form /submit/"+req.params.form_id);
+    console.error(err);
+    res.status(400).json({error:err});
+  } 
 });
+
+/// submit from DAQ or other service
+app.post("/api/submit/:form_id", checkJwt, async function(req,res,next) {
+  console.log(chalk.blue("API submission",req.params.form_id));
+  var data = req.body;
+  // metadata.
+  data.form_id = req.params.form_id;
+  data.timestamp=new Date();
+  data.ip = req.ip;
+  data.user = "API";
+  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
+  var col = db.collection(form_name);
+  try {
+    var result = await col.insertOne(data);
+    console.log('result',result.ops);
+    res.json({_id: result.ops[0]._id});
+  }
+  catch(err) {
+    console.error("error submitting form /submit/"+req.params.form_id);
+    console.error(err);
+    res.status(400).json({error:err});
+  } 
+});
+app.get("/api/get/:form_id/:record_id", checkJwt, async function(req,res,next) {
+  console.log(chalk.blue("API submission",req.params.form_id));
+
+  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
+  var col = db.collection(form_name);
+  var data = await col.findOne({_id:ObjectID(req.params.record_id)});
+  if(data) return res.json(data);
+  res.status(400).json({error:'no such record'});
+});
+
 
 /// submit file data
 var file_upload_middleware = require('express-fileupload')();
