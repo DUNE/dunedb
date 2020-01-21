@@ -246,7 +246,7 @@ block extrascripts
         console.log("submitting data",submission);
         $.post({
             contentType: 'application/json',
-            url:  "/"+collection+"/json/"+form_id,
+            url:  "/json/"+collection+"/"+form_id,
             data: JSON.stringify(submission.data),
             success: schemaRecordChange
         }).fail(function(res,statusCode,statusMsg) {
@@ -269,7 +269,7 @@ block extrascripts
         console.log("metaform built",metaform);
         metaform.on('submit',SubmitData);
    
-        $.get('/'+collection+'/json/'+form_id,schemaRecordChange).fail(function(){
+        $.get('/json/'+collection+'/'+form_id,schemaRecordChange).fail(function(){
               $('#builder').html("No such form exists.")
           });
 
@@ -281,7 +281,7 @@ block extrascripts
 
           var data = $( '#metaform'  ).serialize();
           $.post({
-            url: '/'+collection+'/json/'+form_id,
+            url: '/json/'+collection+'/'+form_id,
             data: data,
             success: schemaRecordChange
           }).fail(function(j,textStatus,errorThrown){

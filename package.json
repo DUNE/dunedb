@@ -11,6 +11,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "bootstrap": "^4.4.1",
+    "bootstrap-autocomplete": "git+https://github.com/xcash/bootstrap-autocomplete.git",
     "chalk": "^3.0.0",
     "co-body": "^6.0.0",
     "connect-mongodb-session": "^2.2.0",

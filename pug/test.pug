@@ -35,7 +35,7 @@ block extrascripts
       $.ajax(
         { contentType: "application/json",
           method: "post",
-          url: "/submit/"+formrec.form_id,
+          url: "/json/submit/"+formrec.form_id,
           data: JSON.stringify(submission),
           dataType: "json",
           //- success: postSuccess

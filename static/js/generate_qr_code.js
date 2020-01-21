@@ -1,5 +1,7 @@
 
-function DrawQRCode(canvas,text){
+function DrawQRCode(canvases,text,desc){
+	$(canvases).each(function(){
+			var canvas = this;
 			var segs = qrcodegen.QrSegment.makeSegments(text);
 			var ecl = qrcodegen.QrCode.Ecc.HIGH;
 			var minVersion = 8; // Determines size, but adds correction bits.
@@ -22,6 +24,14 @@ function DrawQRCode(canvas,text){
 			ctx.save();
 			ctx.translate(-width/2,-height/2);
 			ctx.fillText(text,14,14);
+			// if(desc) ctx.fillText(desc,14,12);
+			ctx.restore();
+
+			ctx.rotate(90*Math.PI/180.)
+			ctx.save();
+			ctx.translate(-width/2,-height/2);
+			ctx.fillText(text,14,14);
+			// if(desc) ctx.fillText(desc,14,12);
 			ctx.restore();
 
 			ctx.rotate(90*Math.PI/180.)
@@ -36,11 +46,7 @@ function DrawQRCode(canvas,text){
 			ctx.fillText(text,14,14);
 			ctx.restore();
 
-			ctx.rotate(90*Math.PI/180.)
-			ctx.save();
-			ctx.translate(-width/2,-height/2);
-			ctx.fillText(text,14,14);
 			ctx.restore();
+	})
 
-			ctx.restore();
 };

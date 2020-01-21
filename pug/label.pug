@@ -1,0 +1,45 @@
+
+extend default
+
+
+block navbar
+  a(onclick="window.print(); return false;" href='#print') Print
+
+block vars
+   // -page_title=Label !{component.name};
+
+block extrascripts
+  script.
+      $(function(){
+        DrawQRCode($('.qr-code canvas'),'http://sietch.xyz/!{component.component_uuid}','!{component.name}');
+      });
+      
+  style(type='text/css').
+    div.qr-code {
+      //- background-color: green;
+      border: 2px solid black;
+    }
+    div.qr-code canvas {
+      border: 8px solid green;
+      border-radius: 8px;
+      width:100%;
+      height:auto
+    }
+
+block content
+  .container
+    .row
+      div.col-md-6.qr-code
+        canvas(height="700",width="700")
+      div.col-md-6.qr-code
+        canvas(height="700",width="700")
+    .row
+      div.col-md-6.qr-code
+        canvas(height="700",width="700")
+      div.col-md-6.qr-code
+        canvas(height="700",width="700")
+    .row
+      div.col-md-6.qr-code
+        canvas(height="700",width="700")
+      div.col-md-6.qr-code
+        canvas(height="700",width="700")

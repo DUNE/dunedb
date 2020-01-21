@@ -1,6 +1,8 @@
 
 extend default
 
+mixin label-link
+  a(href='/!{component_uuid}/label') Printable labels for this component
 
 block vars
   - var page_title=(component||{}).name || component_uuid;
@@ -13,13 +15,14 @@ block extrascripts
     var component=!{JSON.stringify(component||{})};
   
 
+
   script(type='text/javascript').
 
       var form = null;
       function SubmitData(submission) {
         // actually the 'submit' function
         console.log("submitting data",submission);
-        var posting = $.post('/component/json/'+component_uuid,submission);
+        var posting = $.post('/json/component/'+component_uuid,submission);
         posting.done(function(retval) {
           // POST operation completed but..
           if((retval.error)) form.setAlert("warning",c.error);
@@ -57,7 +60,7 @@ block extrascripts
         // Change the URL to match th new component component_uuid
         history.replaceState(null, null, component.component_uuid);
       }
-      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+shortuuid.fromUUID(component_uuid));
+      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+component_uuid);
 
       
 
@@ -76,12 +79,14 @@ block content
   .container
     .row
         h2#name.col-md-8=((component||{}).type)?((component||{}).type+": "+(component||{}).name):"New Component"
+    .row 
+      +label-link
     .row
       #builtform.col-md-8
       div#qr-code.col-md-4
         canvas#qrcode-canvas
-        a#contact-sheet-link(href='#') Click for printable labels
-        p Enter form data:
+        +label-link
+        p Run a test on this component:
           ul#tests
             each test in tests
               li

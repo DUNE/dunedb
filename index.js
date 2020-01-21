@@ -305,9 +305,21 @@ async function get_component(req,res) {
 app.get('/'+uuid_regex, middlewareCheckDataViewPrivs, get_component);
 app.get('/'+short_uuid_regex, middlewareCheckDataViewPrivs, get_component);
 
+async function component_label(req,res,next) {
+  var component_uuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+  component = await db.collection("components").findOne({component_uuid:component_uuid});
+  if(!component) return res.status(404).send("No such component exists yet in database");
+  console.log({component: component});
+  res.render('label.pug',{component: component});
+}
+app.get('/'+uuid_regex+'/label', middlewareCheckDataViewPrivs, component_label);
+app.get('/'+short_uuid_regex+'/label', middlewareCheckDataViewPrivs, component_label);
+
+
+
 // Pull component data as json doc.
-app.get('/component/json/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,res){
-  console.log("/json/"+data.component_uuid)
+app.get('/json/component/'+uuid_regex, middlewareCheckDataViewPrivs, async function(req,res){
+  console.log("/json/component/"+data.component_uuid)
   if(!req.params.uuid) return res.status(400).json({error:"No uuid specified"});
   // fresh retrival
   var component= components.findOne({component_uuid:uuid});
@@ -352,8 +364,8 @@ async function post_component(req,res,next){
   res.json({component:component});
 };
 
-app.post('/component/json/'+uuid_regex, middlewareCheckDataViewPrivs,post_component);
-app.post('/component/json/'+short_uuid_regex, middlewareCheckDataViewPrivs,post_component);
+app.post('/json/component/'+uuid_regex, middlewareCheckDataViewPrivs,post_component);
+app.post('/json/component/'+short_uuid_regex, middlewareCheckDataViewPrivs,post_component);
 
 
 
@@ -402,7 +414,7 @@ app.get("/EditComponentForm", middlewareCheckFormEditPrivs, async function(req,r
 
 
 // Get a form schema
-app.get('/:collection(testForms|componentForm)/json/:form_id', async function(req,res,next){
+app.get('/json/:collection(testForms|componentForm)/:form_id', async function(req,res,next){
   var rec = await getForm(req.params.form_id, req.params.collection);
   // if(!rec) return res.status(404).send("No such form exists");
   if(!rec) { res.status(400).json({error:"no such form "+req.params.form_id}); return next(); };
@@ -412,8 +424,8 @@ app.get('/:collection(testForms|componentForm)/json/:form_id', async function(re
 
 
 // Change the form schema.
-app.post('/:collection(testForms|componentform)/json/:form_id', middlewareCheckFormEditPrivs, async function(req,res,next){
-  console.log(chalk.blue("Schema submission","/testForms/json"));
+app.post('/json/:collection(testForms|componentform)/:form_id', middlewareCheckFormEditPrivs, async function(req,res,next){
+  console.log(chalk.blue("Schema submission","/json/testForms"));
   console.log(req.body); 
 
   var form_id = req.params.form_id; 
@@ -468,7 +480,35 @@ app.get("/"+uuid_regex+"/test/:form_id", async function(req,res,next) {
 
 
 /// submit test form data
-app.post("/submit/:form_id", async function(req,res,next) {
+async function submit_test_data(req,res,next) {
+    console.log(chalk.blue("Form submission",req.params.form_id));
+  // var body = await parse.json(req);
+
+  console.log(req.body);
+  var data = req.body;
+  // metadata.
+  data.form_id = req.params.form_id;
+  data.timestamp=new Date();
+  data.ip = req.ip;
+  data.user = req.user;
+  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
+  var col = db.collection(form_name);
+  try {
+    var result = await col.insertOne(data);
+    console.log('result',result.ops);
+    res.json({_id: result.ops[0]._id});
+  }
+  catch(err) {
+    console.error("error submitting form /submit/"+req.params.form_id);
+    console.error(err);
+    res.status(400).json({error:err});
+  } 
+}
+
+
+
+
+async function retrieve_test_data(req,res,next) {
   console.log(chalk.blue("Form submission",req.params.form_id));
   // var body = await parse.json(req);
 
@@ -491,39 +531,16 @@ app.post("/submit/:form_id", async function(req,res,next) {
     console.error(err);
     res.status(400).json({error:err});
   } 
-});
+}
 
-/// submit from DAQ or other service
-app.post("/api/submit/:form_id", checkJwt, async function(req,res,next) {
-  console.log(chalk.blue("API submission",req.params.form_id));
-  var data = req.body;
-  // metadata.
-  data.form_id = req.params.form_id;
-  data.timestamp=new Date();
-  data.ip = req.ip;
-  data.user = "API";
-  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
-  var col = db.collection(form_name);
-  try {
-    var result = await col.insertOne(data);
-    console.log('result',result.ops);
-    res.json({_id: result.ops[0]._id});
-  }
-  catch(err) {
-    console.error("error submitting form /submit/"+req.params.form_id);
-    console.error(err);
-    res.status(400).json({error:err});
-  } 
-});
-app.get("/api/get/:form_id/:record_id", checkJwt, async function(req,res,next) {
-  console.log(chalk.blue("API submission",req.params.form_id));
+app.post("/json/submit/:form_id", submit_test_data);
+app.post("/json/reteive/:form_id", retrieve_test_data);
 
-  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
-  var col = db.collection(form_name);
-  var data = await col.findOne({_id:ObjectID(req.params.record_id)});
-  if(data) return res.json(data);
-  res.status(400).json({error:'no such record'});
-});
+// Same thing as above, but this time we use jwt for authentication:
+app.post("/api/submit/:form_id", checkJwt, submit_test_data);
+app.get("/api/get/:form_id/:record_id", checkJwt, retrieve_test_data);
+
+
 
 
 /// submit file data
@@ -554,6 +571,22 @@ app.post("/savefile",middlewareCheckDataViewPrivs,file_upload_middleware,async f
 app.use('/retrievefile',express.static(__dirname+"/files"));
 
 
+
+// Autocomplete
+app.get("/autocomplete/uuid",async function(req,res,next) {
+  var q = req.query.q;
+  var regex = new RegExp(`^${q}*`);
+  var matches = await db.collection("components")
+    .find({component_uuid:{$regex: regex}})
+    .project({"component_uuid":1,name:1})
+    .toArray();
+  for(m of matches) {
+    m.val = m.component_uuid;
+    m.text = m.val + ' ' +m.name;
+  }
+  console.log(matches);
+  return res.json(matches)
+})
 
 
 
