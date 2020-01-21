@@ -2,7 +2,7 @@
 extend default
 
 mixin label-link
-  a(href='/!{component_uuid}/label') Printable labels for this component
+  a(href="/"+component_uuid+"/label") Printable labels for this component
 
 block vars
   - var page_title=(component||{}).name || component_uuid;

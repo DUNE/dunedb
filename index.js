@@ -469,6 +469,11 @@ app.get("/test/:form_id/:record_id", seeTestData);
 app.get("/"+ uuid_regex + "/test/:form_id/:record_id", seeTestData);
 
 
+app.get("/test/:form_id",middlewareCheckDataEntryPrivs,async function(req,res,next){
+  var form = await getForm(req.params.form_id,);
+  res.render('test_without_uuid.pug',{form_id:req.params.form_id,form:form});
+})
+
 /// Run an new test
 
 app.get("/"+uuid_regex+"/test/:form_id", async function(req,res,next) {

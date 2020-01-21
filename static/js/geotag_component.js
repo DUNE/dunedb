@@ -38,7 +38,7 @@ $(function() {
                 });
 });
 
-
+if(typeof(Formio)!="undefined") {
 /**
  * Get the input component class by referencing Formio.Components.components map.
  */
@@ -201,4 +201,4 @@ Formio.Components.components.file.schema = function(...extend) {
 
 // Formio.Components.components.file.builderInfo.schema=Formio.Components.components.file.schema();
 
-
+}

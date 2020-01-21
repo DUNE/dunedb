@@ -24,6 +24,7 @@
     "file-upload": "0.0.0",
     "formiojs": "^4.8.0-rc.1",
     "jquery": "^3.4.1",
+    "jsqr": "^1.2.0",
     "jwks-rsa": "^1.6.1",
     "mongodb": "^3.4.0",
     "morgan": "^1.9.1",

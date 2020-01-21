@@ -1,0 +1,1 @@
+../node_modules/jsqr/dist/jsQR.js
