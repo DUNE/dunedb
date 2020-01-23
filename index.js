@@ -29,6 +29,8 @@ app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding
 app.use(bodyParser.json({ limit:'1000kb'}));
 app.use(morgan('tiny'));
 app.use(express.static(__dirname + '/static'));
+let moment = require('moment');
+app.use(function(req,res,next){ res.locals.moment = moment; next(); }); // moment.js in pug
 
 
 app.set('view options', { pretty: true });
@@ -285,8 +287,8 @@ async function get_component(req,res) {
     console.log('checking for performed',test.form_id);
     var p = await db.collection("form_"+test.form_id).find({"data.component_uuid":component_uuid}).project({form_id:1, form_title:1, timestamp:1, user:1}).toArray();
     if(p.length>0) performed[test.form_id] = p;
+    console.dir(p);
   }
-  console.log('performed',performed);
   // equal:
   // var component = await components.findOne({component_uuid:req.params.uuid});
   // var form = await getForm("componentForm","componentForm");
@@ -413,7 +415,7 @@ app.get("/EditComponentForm", middlewareCheckFormEditPrivs, async function(req,r
 });
 
 
-// Get a form schema
+// API/Backend: Get a form schema
 app.get('/json/:collection(testForms|componentForm)/:form_id', async function(req,res,next){
   var rec = await getForm(req.params.form_id, req.params.collection);
   // if(!rec) return res.status(404).send("No such form exists");
@@ -423,7 +425,7 @@ app.get('/json/:collection(testForms|componentForm)/:form_id', async function(re
 });
 
 
-// Change the form schema.
+// API/Backend:  Change the form schema.
 app.post('/json/:collection(testForms|componentform)/:form_id', middlewareCheckFormEditPrivs, async function(req,res,next){
   console.log(chalk.blue("Schema submission","/json/testForms"));
   console.log(req.body); 
@@ -463,11 +465,14 @@ async function seeTestData(req,res,next) {
   var col = db.collection(form_name);
   var data = await col.findOne({_id:ObjectID(req.params.record_id)});
   console.log("retrieving",req.params.record_id,ObjectID(req.params.record_id),data);
-  res.render('viewTest.pug',{form_id:req.params.form_id, form:form, submission:data.data})
+  res.render('test.pug',{form_id:req.params.form_id, form:form, data:data, retrieved:true})
 };
+
 app.get("/test/:form_id/:record_id", seeTestData);
 app.get("/"+ uuid_regex + "/test/:form_id/:record_id", seeTestData);
 
+
+// Run a new test, but no UUID specified
 
 app.get("/test/:form_id",middlewareCheckDataEntryPrivs,async function(req,res,next){
   var form = await getForm(req.params.form_id,);

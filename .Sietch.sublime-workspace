@@ -1,0 +1,426 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"plan",
+				"plane_wave_frequency"
+			],
+			[
+				"osc_",
+				"osc_density"
+			],
+			[
+				"var",
+				"varying"
+			],
+			[
+				"np",
+				"numpy"
+			],
+			[
+				"gx",
+				"GetEventXY"
+			],
+			[
+				"speric",
+				"spherical"
+			],
+			[
+				"Update",
+				"UpdateVisibilities"
+			],
+			[
+				"get",
+				"getTimeOffset"
+			],
+			[
+				"v",
+				"v"
+			],
+			[
+				"I",
+				"I"
+			],
+			[
+				"if",
+				"interesting_defintions"
+			],
+			[
+				"DCa",
+				"DCACHE_STATUS_FILE"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 107.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"perm",
+				"Permute Lines: Reverse"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"bracket",
+				"Preferences: BracketGuard Settings - Default"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 485.0
+	},
+	"console":
+	{
+		"height": 204.0,
+		"history":
+		[
+			"sublime.log_commands(True)",
+			"sublime.log_input(True)",
+			"Run:sublime.log_input(True)",
+			"Run:sublime.log_input(True) ",
+			"Run:sublime.log_input(True) sublime.log_commands(True)",
+			"import urllib.request,os,hashlib; h = '6f4c264a24d933ce70df5dedcf1dcaee' + 'ebe013ee18cced0ef93d5f746d80ef60'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)",
+			"view.sel()[1]",
+			"view.sel()[0]",
+			"view.sel().length",
+			"view.sel().count()",
+			"view.sel().describe()",
+			"view.sel()",
+			"view.sel",
+			"view.self",
+			"view",
+			"self.view.sel()",
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)",
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/tagg/Sites/Sietch"
+	],
+	"file_history":
+	[
+		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/Problems/Waves/Waves-03.tex",
+		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/make",
+		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/Problems/Waves/Waves-02.tex",
+		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/README.md",
+		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/hw03.tex",
+		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/.git/modules/Homework1600/COMMIT_EDITMSG",
+		"/Users/tagg/Sites/Sietch/.git/COMMIT_EDITMSG",
+		"/Users/tagg/Sites/Sietch/static/instascan.min.js",
+		"/Users/tagg/Sites/Sietch/pug/label.pug",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-i0_miv/upload_to_db.py",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-inojza/upload_to_db.py",
+		"/Users/tagg/Sites/Sietch/upload_to_db.api",
+		"/Users/tagg/Sites/Sietch/auth.js",
+		"/Users/tagg/Desktop/tmp.json",
+		"/Users/tagg/Sites/Courses/Phys4910-Optics-2019-40-Fall/homework/Includes/macros.tex",
+		"/Users/tagg/Homework1500/LonCapaSolutions/uwe-02.tex",
+		"/Users/tagg/Homework1500/LonCapaSolutions/uwe-01.tex",
+		"/Users/tagg/Homework1500/.git/COMMIT_EDITMSG",
+		"/Users/tagg/Homework1500/Problems/vectors-11.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-10.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-09.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-08.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-07.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-06.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-05.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-04.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-03.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-02.tex",
+		"/Users/tagg/Homework1500/Problems/vectors-01.tex",
+		"/Users/tagg/Homework1500/Problems/units-02.tex",
+		"/Users/tagg/Homework1500/Problems/units-01.tex",
+		"/Users/tagg/Homework1500/Problems/ucm-03.tex",
+		"/Users/tagg/Homework1500/Problems/ucm-02.tex",
+		"/Users/tagg/Homework1500/Problems/ucm-01.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-14.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-13.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-12.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-11.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-10.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-09.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-08.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-07.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-06.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-05.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-04.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-03.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-02.tex",
+		"/Users/tagg/Homework1500/Problems/thermodynamics-01.tex",
+		"/Users/tagg/Homework1500/Problems/sho-09.tex",
+		"/Users/tagg/Homework1500/Problems/sho-08.tex",
+		"/Users/tagg/Homework1500/Problems/sho-07.tex",
+		"/Users/tagg/Homework1500/Problems/sho-06.tex",
+		"/Users/tagg/Homework1500/Problems/sho-05.tex",
+		"/Users/tagg/Homework1500/Problems/sho-04.tex",
+		"/Users/tagg/Homework1500/Problems/sho-03.tex",
+		"/Users/tagg/Homework1500/Problems/sho-02.tex",
+		"/Users/tagg/Homework1500/Problems/sho-01.tex",
+		"/Users/tagg/Homework1500/Problems/rotationalkinematics-03.tex",
+		"/Users/tagg/Homework1500/Problems/rotationalkinematics-02.tex",
+		"/Users/tagg/Homework1500/Problems/rotationalkinematics-01.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-11.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-10.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-09.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-08.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-07.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-06.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-05.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-04.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-03.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-02.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-09.tex",
+		"/Users/tagg/Homework1500/Problems/rigidbodies-01.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-08.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-06.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-07.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-05.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-04.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-03.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-02.tex",
+		"/Users/tagg/Homework1500/Problems/momentum-01.tex",
+		"/Users/tagg/Homework1500/Problems/kinetictheory-03.tex",
+		"/Users/tagg/Homework1500/Problems/kinetictheory-02.tex",
+		"/Users/tagg/Homework1500/Problems/kinetictheory-01.tex",
+		"/Users/tagg/Homework1500/Problems/idealgaslaw-03.tex",
+		"/Users/tagg/Homework1500/Problems/idealgaslaw-02.tex",
+		"/Users/tagg/Homework1500/Problems/idealgaslaw-01.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-09.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-08.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-07.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-06.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-04.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-05.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-03.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-02.tex",
+		"/Users/tagg/Homework1500/Problems/gravitation-01.tex",
+		"/Users/tagg/Homework1500/Problems/fluids-01.tex",
+		"/Users/tagg/Homework1500/Problems/entropy-03.tex",
+		"/Users/tagg/Homework1500/Problems/entropy-02.tex",
+		"/Users/tagg/Homework1500/Problems/entropy-01.tex",
+		"/Users/tagg/Homework1500/Problems/energy-17.tex",
+		"/Users/tagg/Homework1500/Problems/energy-16.tex",
+		"/Users/tagg/Sites/Sietch/pug/EditTestForm.pug",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-r6kaui/pm2.json",
+		"/Users/tagg/Sites/Sietch/pug/common.pug",
+		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/index.html",
+		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/style.css",
+		"/Users/tagg/Sites/Sietch/pug/user.pug",
+		"/Users/tagg/Sites/Sietch/index.js",
+		"/Users/tagg/Sites/Sietch/config.js",
+		"/Users/tagg/Sites/Sietch/pug/default.pug",
+		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/.git/MERGE_MSG",
+		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/.git/COMMIT_EDITMSG",
+		"/Users/tagg/Sites/Sietch/app.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-rmjboq/do_serve_hists.cgi",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-zzbvfv/serve_hists.cgi",
+		"/Users/tagg/OtternetDeploy/.git/COMMIT_EDITMSG",
+		"/Users/tagg/OtternetDeploy/node/templates/warmup/default.pug",
+		"/Users/tagg/OtternetDeploy/node/templates/warmup/student.pug",
+		"/Users/tagg/OtternetDeploy/node/templates/warmup/su.pug",
+		"/Users/tagg/OtternetDeploy/node/warmup.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-kjofc3/index.js",
+		"/Users/tagg/OtternetDeploy/node/index.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-cvf3gi/index.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-5xbw9a/warmup.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-citii_/warmup.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-jd9gkx/go.py",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-kd75ls/high_water_mark.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-vk6y49/ZZ-BACKUP-NOTES.txt"
+	],
+	"find":
+	{
+		"height": 37.0
+	},
+	"find_in_files":
+	{
+		"height": 95.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": false,
+		"use_buffer2": false,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 26.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 108.0
+	},
+	"output.sftp":
+	{
+		"height": 100.0
+	},
+	"pinned_build_system": "",
+	"project": ".Sietch.sublime-project",
+	"replace":
+	{
+		"height": 66.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"pug/inc/WireSpatialView.pug"
+			],
+			[
+				"json-pointer",
+				"static/js/third-party/json-pointer.js"
+			],
+			[
+				"Gallery",
+				"libargo/GalleryComposer.cpp"
+			],
+			[
+				"WireView",
+				"pug/inc/WireViewGL.pug"
+			],
+			[
+				"ThreePad.js",
+				"static/js/libs/ThreePad.js"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 72.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 578.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 416.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -3,12 +3,13 @@ extend default
 
 block vars
   - var page_title=form_id;
-
+  - console.log('data in pug:',data)
 block extrascripts
   script(type='text/javascript').
     // I could do this by API query of the server, but this works for now.
     var formrec=!{JSON.stringify(form||{}, null ,4)}; 
-    var submission=!{JSON.stringify(submission||{}, null ,4)}; 
+    var submission=!{JSON.stringify((data||{}).data||{}, null ,4)}; 
+    var retrieved=!{retrieved||false};
 
   script(type='text/javascript').
 
@@ -38,9 +39,9 @@ block extrascripts
           url: "/json/submit/"+formrec.form_id,
           data: JSON.stringify(submission),
           dataType: "json",
-          //- success: postSuccess
+          success: postSuccess
         }
-        );//.fail(postFail);
+        ).fail(postFail);
 
     };
 
@@ -49,20 +50,38 @@ block extrascripts
 
       console.log("schema",formrec.schema);
 
+      // Remove submit button if it's read-only
+      if(retrieved)
+        for(var i=0; i<formrec.schema.components.length; i++) {
+          var c = formrec.schema.components[i];
+          if(c.label=="Submit" && c.key=="submit") {
+            formrec.schema.components.splice(i,1);
+            break;
+          }
+        }
+
       form = await Formio.createForm(
                   document.getElementById('builtform'),
-                  formrec.schema,{});
-                  //- { //readOnly: false;// #{canEdit?"false":"true"} 
+                  formrec.schema,
+                  { readOnly: retrieved});
                   //- });
       //- form.url="https://nowhere.com";
       console.log(form);
       form.submission = {data: submission};
-      form.on('submit',SubmitData);
+      if(!retrieved) 
+              form.on('submit',SubmitData);
 
     }
 
 block content
   h2=form_id
+  if data 
+    p Test performed: 
+        span=moment(data.timestamp).format('MMM DD YYYY HH:MM')
+    if user
+      p Performed by:
+        span=(data.user||{}).displayName  +" ("+((data.user||{}).emails||[])[0].value+")"
+
   .container
     .row
       #builtform

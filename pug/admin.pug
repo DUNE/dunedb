@@ -7,53 +7,68 @@ block vars
 
 block content
 
-    h4 Admin Only:
+    .row
+        .col-md-6
+            .border.rounded.m-3
+                h2 Components
 
-    p
-        a.componentform(href='/EditComponentForm') Edit the component information form
 
-    p
-        //- a.newform(href='/EditTestForm') New Test Form
-        +NewTestForm
+                p.border.border-secondary.p-3.m-2
+                        a.h4(href='/NewComponent') Register new component
 
-    p Edit test forms:
+                .border.border-primary.p-3.m-2
+                  p Find a component by UUID:
+                    +uuid_autocomplete
 
-        ul#tests
-              each test in tests
-                li
-                  a(href='/EditTestForm/'+test.form_id)=test.form_title
+                  h4 List of all components in DB right now:
+                  +component-list(all_components)
 
-    h4 Users with data entry permission:
 
-    p
-        a(href='/NewComponent') Register new component
-    
 
-    h2 Anyone
-    p   Find a component by UUID:
-        +uuid_autocomplete
-    p
-        a(href='#') Search for component (unimplimented)
-    p 
-        a(href='#') Show all tests of type (unimplimented)
+                .border.border-danger.p-3.m-2
+                        a.h4.componentform(href='/EditComponentForm') Edit the component information form
 
-    h2 List of all components in database
-    +component-list(all_components)
 
-    h2 Proposal
-    p
-        a(href='Proposal notes.pdf') Proposal Notes
-    p
-        a(href='notes.md') Working notes
+        .col-md-6
+            .border.rounded.m-3
+                h2 Tests
 
-    h2 Major features required: 
-    ul
-            li User-printable QR code sheets
-            li User authentication - Plug into Fermilab SSO
-            li User permission management (view data / submit data / edit data / edit forms)
-            li Workflow for many of the same test
-            li Documentation
-            li Search for component
-            li Sort tests by component type (?)
+                .border.border-primary.p-3.m-2
+                  h4 Run a test:
+                  ul#tests
+                    each test in tests
+                      li
+                        a(href='/test/'+test.form_id)="Run "+test.form_title
+
+                .border.border-danger.p-3.m-2
+                  p.h4
+                    +NewTestForm
+
+                  h4 Edit an existing test form:
+                  ul#editTests
+                  each test in tests
+                    li
+                        a(href='/EditTestForm/'+test.form_id)="Edit "+test.form_title
+
+    .row.border-top.my-3
+
+    .row
+        .col-md-6
+            .border.rounded.m-3
+                h2 Proposal and notes
+                p
+                    a(href='Proposal notes.pdf') Proposal Notes
+                p
+                    a(href='notes.md') Working notes
+        .col-md-6
+            .border.rounded.m-3
+                h2 Major features required: 
+                ul
+                        li User authentication - Plug into Fermilab SSO
+                        li User permission management (view data / submit data / edit data / edit forms)
+                        li Workflow for many of the same test
+                        li Documentation
+                        li Search for component
+                        li Sort tests by component type (?)
 
 
