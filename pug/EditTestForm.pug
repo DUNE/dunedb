@@ -230,7 +230,26 @@ block extrascripts
           metaform.submission = {data: formdata};
           builder = new Formio.FormBuilder(
               $('.formbuilder_area').get(0), // html element
-              formdata.schema||{}, {}// starting schema
+              formdata.schema||{}, // starting schema
+              {
+                   builder: {
+                      //- basic: true,
+                      //- advanced: true,
+                      //- data: true,
+                      //- layout: true,
+
+                      custom: {
+                        title: 'Custom',
+                        default: false,
+                        weight: 0,
+                        components: {
+                          ComponentUUID:true,
+                          CustomGeoTagComponent: true,
+                        
+                        }
+                      }
+                  }
+              }
           );
 
           $('input#commit-schema').val(JSON.stringify(schema));

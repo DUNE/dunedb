@@ -80,9 +80,7 @@ block content
         span=moment(data.timestamp).format('MMM DD YYYY HH:MM')
     if user
       p Performed by:
-        span=(data.user||{}).displayName  +" ("+((data.user||{}).emails||[])[0].value+")"
+        span=(data.user||{}).displayName  +" ("+(((data.user||{}).emails||[])[0]||{}).value+")"
 
-  .container
-    .row
-      #builtform
+  #builtform
 

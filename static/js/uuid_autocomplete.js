@@ -1,7 +1,7 @@
 $(function(){
 	$('.component-uuid-autocomplete').autoComplete({
 	    resolverSettings: {
-	    	minLength: 2,
+	    	minLength: 3,
 	        url: '/autocomplete/uuid'
 	    }
 	})
@@ -12,4 +12,11 @@ $(function(){
 		// });.on('keypress'function(event){
 		// if(event.key=="Enter") {}
 	// });	
+
+	$('.uuid-autocomplete-container input').autoComplete({
+	    resolverSettings: {
+	    	minLength: 2,
+	        url: '/autocomplete/uuid'
+	    }
+	})
 })

@@ -22,13 +22,31 @@ block extrascripts
       function SubmitData(submission) {
         // actually the 'submit' function
         console.log("submitting data",submission);
-        var posting = $.post('/json/component/'+component_uuid,submission);
+        var posting =  $.ajax(
+          { contentType: "application/json",
+            method: "post",
+            url: "/json/component/"+component_uuid,
+            data: JSON.stringify(submission),
+            dataType: "json",
+          }
+        );
+
+
+
+
+
+        //- $.post('/json/component/'+component_uuid,submission);
+
         posting.done(function(retval) {
           // POST operation completed but..
           if((retval.error)) form.setAlert("warning",c.error);
           else form.setAlert(false);
           if(retval.component) form.submission = {data: retval.component};
-
+          if(window.location.pathname.includes("NewComponent")) {
+            // Change the URL to match th new component component_uuid, so we're now editing
+            history.replaceState(null, null, component.component_uuid);
+            $('#name').html(submission.name);
+          }
           console.log("success retval",retval);
 
         });
@@ -56,10 +74,7 @@ block extrascripts
       form.nosubmit = true; // Use the beforeSubmit hook.
 
       // Change the url to match
-      if(window.location.pathname.includes("NewComponent")) {
-        // Change the URL to match th new component component_uuid
-        history.replaceState(null, null, component.component_uuid);
-      }
+
       DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+component_uuid);
 
       
@@ -92,14 +107,17 @@ block content
               li
                 a(href='/'+component_uuid+'/test/'+test.form_id)=test.form_title
     .row
-      h4 Tests Performed
-        each form,index in performed
-          p=index
-          ul.testsPerformed
-            each test,index in form
-              li 
-                -var parenthetical= " (on "+ moment(test.timestamp).format('MMM DD YYYY');
-                -if(test.user) { parenthetical+=" by " + test.user.nickname|| test.user.displayName || test.user.emails[0] };
-                -parenthetical+=")";
-                a(href='/test/'+test.form_id+"/"+test._id)=test.form_title||test.form_name+parenthetical
-
+      .column
+        h4 Tests Performed
+        if Object.keys(performed).length>0 
+          each form,index in performed
+            p=index
+            ul.testsPerformed
+              each test,index in form
+                li 
+                  -var parenthetical= " (on "+ moment(test.timestamp).format('MMM DD YYYY');
+                  -if(test.user) { parenthetical+=" by " + test.user.nickname|| test.user.displayName || test.user.emails[0] };
+                  -parenthetical+=")";
+                  a(href='/test/'+test.form_id+"/"+test._id)=test.form_title||test.form_name+parenthetical
+        else
+         p (None yet)

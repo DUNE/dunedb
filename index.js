@@ -338,6 +338,7 @@ async function post_component(req,res,next){
   var component_uuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
   // console.log('/component/json/ post req.body:',req.body);
   var data = req.body.data;
+  console.log(data);
   console.log("/json/"+data.component_uuid)
   if(!data.component_uuid) return res.status(400).send("No uuid specified");
   if(component_uuid != data.component_uuid) return res.status(400).send("Form does not match url");
@@ -346,7 +347,7 @@ async function post_component(req,res,next){
   if(!existing) {
   	// No conflict. Is this user allowed to enter data?
   	if(hasDataEntryPrivs(req)) {
-  		components.insert(data); // fixme TRANSACTION LOG wutg req.body.metadata
+  		components.insertOne(data); // fixme TRANSACTION LOG wutg req.body.metadata
   		console.log("inserted",data);
   	}
   	else return res.status(400).send("You don't have data entry priviledges.");
@@ -485,7 +486,7 @@ app.get("/"+uuid_regex+"/test/:form_id", async function(req,res,next) {
     console.log("run a new test");
     var form = await getForm(req.params.form_id,);
     if(!form) return res.status(400).send("No such test form");
-    res.render('test.pug',{form_id:req.params.form_id, form:form, submission:{component_uuid: req.params.uuid}})
+    res.render('test.pug',{form_id:req.params.form_id, form:form, data:{data:{component_uuid: req.params.uuid}}})
 });
 
 
@@ -584,7 +585,8 @@ app.use('/retrievefile',express.static(__dirname+"/files"));
 
 // Autocomplete
 app.get("/autocomplete/uuid",async function(req,res,next) {
-  var q = req.query.q;
+  var q = req.query.q.replace(/[_-]/g,''); // Remove _ and - 
+  console.log("query",q);
   var regex = new RegExp(`^${q}*`);
   var matches = await db.collection("components")
     .find({component_uuid:{$regex: regex}})
@@ -738,7 +740,7 @@ async function initialize_database()
 		status_obj.version =1;
 	}
 	
-	status_obj.version =0; // removeme
+	//status_obj.version =0; // removeme
 	await admin.replaceOne({status_object: {$exists: true}}, status_obj, {upsert: true});
 
 }
