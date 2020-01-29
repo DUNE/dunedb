@@ -1,20 +1,12 @@
 
-$(function() {
-  const oldCoords = localStorage.getItem('cached-geolocation');
-  if(oldCoords) {
-    console.log("found cached geolocation",oldCoords);
-    setCoords(JSON.parse(oldCoords));
-  }
+if (navigator.geolocation) 
+        navigator.geolocation.getCurrentPosition(pos => {
+              console.log("found current geolocation",pos);
+              const newValue = {timestamp:pos.timestamp, coords:$.extend({},pos.coords)};
+              localStorage.setItem('cached-geolocation', JSON.stringify(newValue));
+              $(document).trigger('geolocation-update');
+        });
 
-    $('form.geotag input[type=submit]').attr('disabled', 'disabled');
-    if (navigator.geolocation) 
-            navigator.geolocation.getCurrentPosition(pos => {
-                  console.log("found current geolocation",pos);
-                  const newValue = {timestamp:pos.timestamp, coords:$.extend({},pos.coords)};
-                  localStorage.setItem('cached-geolocation', JSON.stringify(newValue));
-                  console.log("cached",localStorage.getItem('cached-geolocation'));
-            });
-});
 
 
 
@@ -82,18 +74,19 @@ CustomGeoTagComponent.prototype.render = function(element) {
     tooltip: this.interpolate(this.component.tooltip || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
   });
   tpl+="<fieldset>";
-  tpl += this.renderTemplate('button', {
-      label: 'mybuttonlabel',
+  if(!this.options.readOnly)
+    tpl += this.renderTemplate('button', {
+        label: 'mybuttonlabel',
 
-      input: {
-        type: 'button',
-        content: "Set to current location",
-        attr: {
-          class: "geotag-set-button btn btn-primary",
-          type: "button"
+        input: {
+          type: 'button',
+          content: "Set to current location (cached...)",
+          attr: {
+            class: "geotag-set-button btn btn-primary",
+            type: "button"
+          }
         }
-      }
-  });
+    });
 
   tpl += this.renderTemplate('html',{
     tag: 'div',
@@ -103,7 +96,6 @@ CustomGeoTagComponent.prototype.render = function(element) {
   // tpl += "</div>";
   tpl += "<div class='google-map-div' style='height:100px'></div>";
   tpl += "<div class='GeoTagTxt'>";
-  // tpl += "<iiiframe class='googlemap-currentpos' style='height:100 px'></iiiframe>";
   tpl += "</div>";
   tpl += "</fieldset>";
   console.log("template is",tpl);
@@ -121,6 +113,10 @@ CustomGeoTagComponent.prototype.attach = function(element)
   // Attach my handlers.
   var self = this;
   $('button',element).on('click',this.setToCurrentLocation.bind(this));
+  $(document).on('geolocation-update',function(){
+    console.log("geolocation-update")
+    $('button',self.element).text("Set to current location (ready)")
+  });
 
   // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
   console.log('attach',this,element);
@@ -172,7 +168,7 @@ CustomGeoTagComponent.prototype.setValue = function(value) {
   iframe.attr('src',
     "https://www.google.com/maps/embed/v1/place?q="+value.coords.latitude+"%2C"+value.coords.longitude+"&key=AIzaSyDeEyg3PmVpBIVCRyak53KViUWg2-qiOpM"
     );
-
+  $('div.GeoTagTxt').text(new Date((value.timestamp)).toString());
 
 };
 
