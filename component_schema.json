@@ -20,20 +20,6 @@
       "input": true
     },
     {
-      "label": "GeoTag",
-      "key": "geoTag",
-      "type": "CustomGeoTagComponent",
-      "input": true,
-      "tableView": false,
-      "widget": {
-        "type": "input"
-      },
-      "validate": {
-        "unique": false,
-        "multiple": false
-      }
-    },
-    {
       "label": "Name",
       "placeholder": "example: apa 10",
       "description": "Human readable and searchable identifier or nickname",
