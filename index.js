@@ -395,7 +395,7 @@ app.get("/NewTestForm/:form_id", middlewareCheckFormEditPrivs, async function(re
       rec.revised = new Date;  
       rec.current = true;
       rec.version = 0;
-      rec.revised_by = res.locals.user.email || "unknown";
+      rec.revised_by = ((res.locals||{}).user||{}).email || "unknown";
       console.log("inserting",rec);
       await forms.insertOne(rec);
   }
@@ -721,7 +721,7 @@ async function initialize_database()
 	var admin = db.collection('admin');
 	var status_obj = await admin.findOne({status_object: {$exists: true}});
 	console.log('status object',status_obj);
-	if(!status_obj) status_obj = {status_object: true, version: 1};
+	if(!status_obj) status_obj = {status_object: true, version: 0};
 
 	if(status_obj.version < 1) 
 	{
