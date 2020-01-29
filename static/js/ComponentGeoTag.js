@@ -165,10 +165,12 @@ CustomGeoTagComponent.prototype.setValue = function(value) {
     iframe.attr('height',div.height());
     div.append(iframe);
   }
-  iframe.attr('src',
-    "https://www.google.com/maps/embed/v1/place?q="+value.coords.latitude+"%2C"+value.coords.longitude+"&key=AIzaSyDeEyg3PmVpBIVCRyak53KViUWg2-qiOpM"
-    );
-  $('div.GeoTagTxt').text(new Date((value.timestamp)).toString());
+  if(value && value.coords && value.coords.latitude)
+    iframe.attr('src',
+      "https://www.google.com/maps/embed/v1/place?q="+value.coords.latitude+"%2C"+value.coords.longitude+"&key=AIzaSyDeEyg3PmVpBIVCRyak53KViUWg2-qiOpM"
+      );
+  if(value && value.timestamp)
+    $('div.GeoTagTxt').text(new Date((value.timestamp)).toString());
 
 };
 
