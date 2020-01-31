@@ -67,7 +67,8 @@ block extrascripts
 
       form = await Formio.createForm(document.getElementById('builtform'),schema,
       {
-          readOnly: #{canEdit?"false":"true"},
+          readOnly: true,
+          renderMode: 'html'
       });
       form.submission = {data: component||{component_uuid: component_uuid}};
       form.on('submit',SubmitData);
@@ -82,8 +83,6 @@ block extrascripts
       }
 
   style.
-    div#qr-code {
-    }
     div#qr-code canvas {
       border: 8px solid green;
       border-radius: 8px;

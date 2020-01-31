@@ -146,17 +146,39 @@
 	},
 	"expanded_folders":
 	[
-		"/Users/tagg/Sites/Sietch"
+		"/Users/tagg/Sites/Sietch",
+		"/Users/tagg/Sites/Sietch/pug",
+		"/Users/tagg/Sites/Sietch/static",
+		"/Users/tagg/Sites/Sietch/static/js"
 	],
 	"file_history":
 	[
+		"/Users/tagg/Sites/Sietch/component_schema.json",
+		"/Users/tagg/Sites/Sietch/static/js/ComponentGeoTag.js",
+		"/Users/tagg/Sites/Sietch/static/js/ComponentUUID.js",
+		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-y31jsb/googlesheetmaker.js",
+		"/Users/tagg/Sites/Sietch/.git/COMMIT_EDITMSG",
+		"/Users/tagg/Sites/Sietch/static/js/uuid_autocomplete.js",
+		"/Users/tagg/Sites/Sietch/static/js/Components_misc.js",
+		"/Users/tagg/Sites/Sietch/pug/EditTestForm.pug",
+		"/Users/tagg/Sites/Sietch/pug/default.pug",
+		"/Users/tagg/Sites/Sietch/node_modules/formiojs/dist/formio.full.js",
+		"/Users/tagg/Sites/Sietch/pug/test.pug",
+		"/Users/tagg/Sites/Sietch/pug/component.pug",
+		"/Users/tagg/Sites/Sietch/pug/test_without_uuid.pug",
+		"/Users/tagg/formio.js/src/Element.js",
+		"/Users/tagg/formio.js/gulpfile.js",
+		"/Users/tagg/Sites/Sietch/pug/uuid_geotag.pug",
+		"/Users/tagg/Sites/Sietch/pug/admin.pug",
+		"/Users/tagg/Sites/Sietch/index.js",
+		"/Users/tagg/Sites/Sietch/static/js/geotag_component.js",
+		"/Users/tagg/bin/keynoteToPdf",
 		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/Problems/Waves/Waves-03.tex",
 		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/make",
 		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/Problems/Waves/Waves-02.tex",
 		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/README.md",
 		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/Homework1600/hw03.tex",
 		"/Users/tagg/Sites/Courses/Phys1600-2020-20-Spring/.git/modules/Homework1600/COMMIT_EDITMSG",
-		"/Users/tagg/Sites/Sietch/.git/COMMIT_EDITMSG",
 		"/Users/tagg/Sites/Sietch/static/instascan.min.js",
 		"/Users/tagg/Sites/Sietch/pug/label.pug",
 		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-i0_miv/upload_to_db.py",
@@ -251,33 +273,14 @@
 		"/Users/tagg/Homework1500/Problems/entropy-01.tex",
 		"/Users/tagg/Homework1500/Problems/energy-17.tex",
 		"/Users/tagg/Homework1500/Problems/energy-16.tex",
-		"/Users/tagg/Sites/Sietch/pug/EditTestForm.pug",
 		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-r6kaui/pm2.json",
 		"/Users/tagg/Sites/Sietch/pug/common.pug",
 		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/index.html",
 		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/style.css",
 		"/Users/tagg/Sites/Sietch/pug/user.pug",
-		"/Users/tagg/Sites/Sietch/index.js",
 		"/Users/tagg/Sites/Sietch/config.js",
-		"/Users/tagg/Sites/Sietch/pug/default.pug",
 		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/.git/MERGE_MSG",
-		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/.git/COMMIT_EDITMSG",
-		"/Users/tagg/Sites/Sietch/app.js",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-rmjboq/do_serve_hists.cgi",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-zzbvfv/serve_hists.cgi",
-		"/Users/tagg/OtternetDeploy/.git/COMMIT_EDITMSG",
-		"/Users/tagg/OtternetDeploy/node/templates/warmup/default.pug",
-		"/Users/tagg/OtternetDeploy/node/templates/warmup/student.pug",
-		"/Users/tagg/OtternetDeploy/node/templates/warmup/su.pug",
-		"/Users/tagg/OtternetDeploy/node/warmup.js",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-kjofc3/index.js",
-		"/Users/tagg/OtternetDeploy/node/index.js",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-cvf3gi/index.js",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-5xbw9a/warmup.js",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-citii_/warmup.js",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-jd9gkx/go.py",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-kd75ls/high_water_mark.js",
-		"/var/folders/nb/630cg8h11pl4nlzmz80w_ltr0000gy/T/rsub-vk6y49/ZZ-BACKUP-NOTES.txt"
+		"/Users/tagg/Sites/Courses/Phys3700-Electronics-2020-20-Spring/.git/COMMIT_EDITMSG"
 	],
 	"find":
 	{
@@ -295,6 +298,26 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"template",
+			"render",
+			"coords",
+			"window",
+			"geotag",
+			"addMessage",
+			"wrap",
+			"hook",
+			"builder",
+			"cloneRows",
+			"renderTemplate",
+			".pug",
+			"Formio.use",
+			"formbuilder",
+			"new Date",
+			"/test",
+			"performed",
+			"/json/",
+			"video",
+			"view"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -348,6 +371,10 @@
 		]
 	},
 	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 120.0
+	},
 	"output.find_results":
 	{
 		"height": 108.0
@@ -360,7 +387,7 @@
 	"project": ".Sietch.sublime-project",
 	"replace":
 	{
-		"height": 66.0
+		"height": 48.0
 	},
 	"save_all_on_build": true,
 	"select_file":

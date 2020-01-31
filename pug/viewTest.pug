@@ -15,7 +15,8 @@ block extrascripts
     window.onload = async function() {
       form = await Formio.createForm(document.getElementById('builtform'),formrec.schema,
         {
-          readOnly:true
+          readOnly:true,
+          renderMode: 'html'
         });
       form.nosubmit = true;
       form.submission = {data: submission};

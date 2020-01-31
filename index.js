@@ -255,7 +255,7 @@ app.get("/NewComponent",
   var form = await getForm("componentForm","componentForm");
   // roll a new UUID.
   var component_uuid = uuidv4()
-  res.render("component.pug",{
+  res.render("component_edit.pug",{
   	schema: form.schema,
   	component_uuid:component_uuid,
   	component: {component_uuid:component_uuid},
@@ -306,6 +306,45 @@ async function get_component(req,res) {
 }
 app.get('/'+uuid_regex, middlewareCheckDataViewPrivs, get_component);
 app.get('/'+short_uuid_regex, middlewareCheckDataViewPrivs, get_component);
+
+async function edit_component(req,res) {
+  // deal with shortened form or full-form
+  var component_uuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+  console.log(get_component,component_uuid,req.params);
+
+  // get form and data in one go
+  let [form, component, tests] = await Promise.all([
+      getForm("componentForm","componentForm"),
+      db.collection("components").findOne({component_uuid:component_uuid}), 
+      getListOfTests(),
+    ]);
+
+  var performed={};
+  for(test of tests) {
+    console.log('checking for performed',test.form_id);
+    var p = await db.collection("form_"+test.form_id).find({"data.component_uuid":component_uuid}).project({form_id:1, form_title:1, timestamp:1, user:1}).toArray();
+    if(p.length>0) performed[test.form_id] = p;
+    console.dir(p);
+  }
+  // equal:
+  // var component = await components.findOne({component_uuid:req.params.uuid});
+  // var form = await getForm("componentForm","componentForm");
+  console.log("component")
+  console.log(component);
+  if(!component) return res.status(400).send("No such component ID.");
+  res.render("component_edit.pug",{
+    schema: form.schema,
+    component_uuid:component_uuid,
+    component: component,
+    canEdit: hasDataEditPrivs,
+    tests: tests,
+    performed: performed,
+  });
+}
+
+app.get('/'+uuid_regex+'/edit', middlewareCheckDataEditPrivs, edit_component);
+app.get('/'+short_uuid_regex+'/edit', middlewareCheckDataEditPrivs, edit_component);
+
 
 async function component_label(req,res,next) {
   var component_uuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
@@ -465,8 +504,8 @@ async function seeTestData(req,res,next) {
   var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
   var col = db.collection(form_name);
   var data = await col.findOne({_id:ObjectID(req.params.record_id)});
-  console.log("retrieving",req.params.record_id,ObjectID(req.params.record_id),data);
-  res.render('test.pug',{form_id:req.params.form_id, form:form, data:data, retrieved:true})
+  console.log("viewtest",req.params.record_id,ObjectID(req.params.record_id),data);
+  res.render('viewTest.pug',{form_id:req.params.form_id, form:form, data:data, retrieved:true})
 };
 
 app.get("/test/:form_id/:record_id", seeTestData);
