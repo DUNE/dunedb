@@ -31,12 +31,40 @@ components
 	- One document per component. Upsert on edit.
 	~~~~
 	{
-		component_uuid: text uuid
+		submit: {
+			insertDate:     date/time this record was inserted
+			ip:      	 ip address this was submitted from
+			user:    	 user info this was subitted by
+			version: 	 integer, auto-assigned
+			diffFrom:    ObjectID of record this replaced at time of submission.
+			diff:        json diff beteween this and previously recorded data.
+		}
+		effectiveDate:  date/time this one supercedes previous ones. Set to insert time
+	    componentUuid
 		type: text component type
 		name: human-readable name
 		...
 	}
 	~~~~
+
+
+To recover the correct record, do the same thing as Nick:
+	- If no rollback, target insert is end of time
+	- if no lookback, target effect is end-of-time
+	- Find the entry with the latest effective date before the target effective where insert date is before target insert.
+
+async function retrieveComponent(componentUuid,onDate,rollbackDate) {
+	// Find the right component
+	// rollbackdate and onDate must be in native Date() format or null
+
+	var query = {componentUuid:componentUuid};
+	if(rollbackDate) query["submit.insertDate"] = {$lt: rollbackDate}};  // rollback to things inserted before this time
+	if(onDate) query.effectiveDate = {$lt: onDate}; // rollback to things that happened before this time
+	var res = await db.collection('components').find(query).sort({effectiveDate:-1}).limit(1).toArray();
+	if(res.length<1) return null;
+	return res[0];
+}
+
 
 testForms
 	- One entry per schema, keyed with 'form_id'; use only the one marked as 'current'

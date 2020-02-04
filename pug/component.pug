@@ -2,14 +2,14 @@
 extend default
 
 mixin label-link
-  a(href="/"+component_uuid+"/label") Printable labels for this component
+  a(href="/"+componentUuid+"/label") Printable labels for this component
 
 block vars
-  - var page_title=(component||{}).name || component_uuid;
+  - var page_title=(component||{}).name || componentUuid;
 
 block extrascripts
   script(type='text/javascript').
-    var component_uuid = "!{component_uuid}";
+    var componentUuid = "!{componentUuid}";
     // I could do this by API query of the server, but this works for now.
     var schema=!{JSON.stringify(schema||{})};
     var component=!{JSON.stringify(component||{})};
@@ -25,7 +25,7 @@ block extrascripts
         var posting =  $.ajax(
           { contentType: "application/json",
             method: "post",
-            url: "/json/component/"+component_uuid,
+            url: "/json/component/"+componentUuid,
             data: JSON.stringify(submission),
             dataType: "json",
           }
@@ -35,7 +35,7 @@ block extrascripts
 
 
 
-        //- $.post('/json/component/'+component_uuid,submission);
+        //- $.post('/json/component/'+componentUuid,submission);
 
         posting.done(function(retval) {
           // POST operation completed but..
@@ -43,8 +43,8 @@ block extrascripts
           else form.setAlert(false);
           if(retval.component) form.submission = {data: retval.component};
           if(window.location.pathname.includes("NewComponent")) {
-            // Change the URL to match th new component component_uuid, so we're now editing
-            history.replaceState(null, null, component.component_uuid);
+            // Change the URL to match th new component componentUuid, so we're now editing
+            history.replaceState(null, null, component.componentUuid);
             $('#name').html(submission.name);
           }
           console.log("success retval",retval);
@@ -68,15 +68,15 @@ block extrascripts
       form = await Formio.createForm(document.getElementById('builtform'),schema,
       {
           readOnly: true,
-          renderMode: 'html'
+          //- renderMode: 'html'
       });
-      form.submission = {data: component||{component_uuid: component_uuid}};
+      form.submission = {data: component||{componentUuid: componentUuid}};
       form.on('submit',SubmitData);
       form.nosubmit = true; // Use the beforeSubmit hook.
 
       // Change the url to match
 
-      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+component_uuid);
+      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+componentUuid);
 
       
 
@@ -96,6 +96,10 @@ block content
     .row 
       +label-link
     .row
+      a(href='/'+componentUuid+'/edit') Edit this component
+    .row
+      a(href='/json/component/'+componentUuid) Raw JSON Document
+    .row
       #builtform.col-md-8
       div#qr-code.col-md-4
         canvas#qrcode-canvas
@@ -104,19 +108,18 @@ block content
           ul#tests
             each test in tests
               li
-                a(href='/'+component_uuid+'/test/'+test.form_id)=test.form_title
+                a(href='/'+componentUuid+'/test/'+test.form_id)=test.form_title
     .row
       .column
         h4 Tests Performed
-        if Object.keys(performed).length>0 
-          each form,index in performed
-            p=index
+          each form,index in tests
+            p=form.form_title
+          
             ul.testsPerformed
-              each test,index in form
+              each test,index in form.performed
                 li 
                   -var parenthetical= " (on "+ moment(test.timestamp).format('MMM DD YYYY');
                   -if(test.user) { parenthetical+=" by " + test.user.nickname|| test.user.displayName || test.user.emails[0] };
                   -parenthetical+=")";
-                  a(href='/test/'+test.form_id+"/"+test._id)=test.form_title||test.form_name+parenthetical
-        else
-         p (None yet)
+                  a(href='/test/'+test.form_id+"/"+test._id)=(form.form_title||test.form_name)+parenthetical
+        

@@ -23,7 +23,7 @@ var defaults = {
 
 var config;
 if(!config) config = require('deepmerge')(defaults,require('./config.js'));
-console.log("config:",config);
+// console.log("config:",config);
 
 
 module.exports = config;

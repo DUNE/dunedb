@@ -12,7 +12,7 @@ mixin component-list(list)
         ul.component-list="type: "+type
             each val,index in list[type]
                 li 
-                    a(href='/'+val.component_uuid)=val.name
+                    a(href='/'+val.componentUuid)=val.name
 
 mixin NewTestForm
   a.NewTestForm(href='#', data-toggle="modal" data-target="#NewTestFormModal") New Test Form

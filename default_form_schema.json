@@ -17,7 +17,7 @@
         "multiple": false
       },
       "errorLabel": "Not a UUID",
-      "key": "component_uuid",
+      "key": "componentUuid",
       "type": "ComponentUUID",
       "input": true
     },

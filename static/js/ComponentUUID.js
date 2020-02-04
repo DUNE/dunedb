@@ -14,6 +14,7 @@ var TextFieldComponent = Formio.Components.components.textfield;
 
 function ComponentUUID(component, options, data) {
   // This is a normal text field...
+  acuuid = this;
   TextFieldComponent.prototype.constructor.call(this, component, options, data);
 
   // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
@@ -37,6 +38,7 @@ function ComponentUUID(component, options, data) {
   // console.log("ctor",options);
 }
 
+var acuuid = null;
 // Perform typical ES5 inheritance
 ComponentUUID.prototype = Object.create(TextFieldComponent.prototype);
 ComponentUUID.prototype.constructor = ComponentUUID;
@@ -73,8 +75,16 @@ ComponentUUID.builderInfo = {
 
 ComponentUUID.prototype.renderElement = function(value,index) 
 {
-  var tpl = "<a class='uuid-link'></a>";
-  return TextFieldComponent.prototype.renderElement.call(this,value,index)+tpl;
+  console.log('renderElement',this,value,index);
+  var textvalue = value;
+  if(typeof value === "object") {
+    textvalue = value.uuidstr;
+  }
+
+  var tpl; 
+  if(textvalue)   tpl = "<a class='uuid-link' href='/"+textvalue+"'>link</a>";
+  else tpl = "<a class='uuid-link'></a>";
+  return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
 }
 
 ComponentUUID.prototype.attach = function(element) 
@@ -101,11 +111,19 @@ ComponentUUID.prototype.attach = function(element)
 ComponentUUID.setValue = function(value)
 {
   console.log(setValue,this);
-  if(this.options && this.options.readOnly) {
-    $('a',this.element).attr('href','/'+value).text(value);
-  } else {
-    return TextFieldComponent.prototype.setValue.call(this,value);
+  var textvalue = value;
+  if(typeof value === "object") {
+    textvalue = value.uuidstr;
   }
+  $('a',this.element).attr('href','/'+textvalue).text(textvalue);
+  return TextFieldComponent.prototype.setValue.call(this,textvalue);
+}
+
+ComponentUUID.getValue = function()
+{
+  console.log(getValue,this);
+  textvalue = TextFieldComponent.prototype.getValue.call(this);
+  return {uuidstr: textvalue};
 }
 
 
