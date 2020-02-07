@@ -81,10 +81,15 @@ ComponentUUID.prototype.renderElement = function(value,index)
     textvalue = value.uuidstr;
   }
 
-  var tpl; 
-  if(textvalue)   tpl = "<a class='uuid-link' href='/"+textvalue+"'>link</a>";
-  else tpl = "<a class='uuid-link'></a>";
-  return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
+  var tpl = "<div style='display:flex'>"; 
+  tpl += "<div style='flex:1 1 auto;'>";
+  tpl += TextFieldComponent.prototype.renderElement.call(this,textvalue,index);
+  tpl += "</div>";
+  if(textvalue)   tpl += "<a style='flex:0 0 auto; padding:2px;' class='align-middle uuid-link' href='/"+textvalue+"'>link</a>";
+  else tpl += "<a style='flex:0 0 auto; padding:2px;' class='align-middle uuid-link' ></a>";
+  tpl += "</div>";
+  return tpl;
+  // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
 }
 
 ComponentUUID.prototype.attach = function(element) 

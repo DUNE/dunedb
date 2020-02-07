@@ -20,11 +20,46 @@
       "input": true
     },
     {
+      "label": "Effective Date of this change",
+      "tableView": false,
+      "datePicker": {
+        "disableWeekends": false,
+        "disableWeekdays": false
+      },
+      "validate": {
+        "unique": false,
+        "multiple": false
+      },
+      "key": "effectiveDate",
+      "type": "datetime",
+      "input": true,
+      "suffix": "<i ref=\"icon\" class=\"fa fa-calendar\" style=\"\"></i>",
+      "widget": {
+        "type": "calendar",
+        "displayInTimezone": "viewer",
+        "language": "en",
+        "useLocaleSettings": false,
+        "allowInput": true,
+        "mode": "single",
+        "enableTime": true,
+        "noCalendar": false,
+        "format": "yyyy-MM-dd hh:mm a",
+        "hourIncrement": 1,
+        "minuteIncrement": 1,
+        "time_24hr": false,
+        "minDate": null,
+        "disableWeekends": false,
+        "disableWeekdays": false,
+        "maxDate": null
+      }
+    },
+    {
       "label": "Name",
       "placeholder": "example: apa 10",
       "description": "Human readable and searchable identifier or nickname",
       "spellcheck": true,
       "tableView": true,
+      "calculateValue": "value= data.boardSerialNumber || apaSerialNumber",
       "validate": {
         "unique": false,
         "multiple": false
@@ -45,12 +80,20 @@
             "value": "APA"
           },
           {
-            "label": "Board",
-            "value": "Board"
+            "label": "Geometry Board",
+            "value": "Geometry Board"
           },
           {
-            "label": "Screw",
-            "value": "Screw"
+            "label": "CR Board",
+            "value": "CR Board"
+          },
+          {
+            "label": "FE Motherboard",
+            "value": "FE Motherboard"
+          },
+          {
+            "label": "ASIC",
+            "value": "ASIC"
           }
         ]
       },
@@ -62,6 +105,9 @@
       },
       "key": "type",
       "type": "select",
+      "indexeddb": {
+        "filter": {}
+      },
       "input": true
     },
     {
@@ -83,95 +129,38 @@
       },
       "components": [
         {
-          "label": "APA Number",
-          "mask": false,
-          "spellcheck": true,
-          "tableView": false,
-          "delimiter": false,
-          "requireDecimal": false,
-          "inputFormat": "plain",
-          "validate": {
-            "required": true,
-            "unique": false,
-            "multiple": false
-          },
-          "key": "apaNumber",
-          "type": "number",
-          "input": true
-        }
-      ],
-      "path": "panel"
-    },
-    {
-      "title": "Board Information",
-      "collapsible": false,
-      "tableView": false,
-      "key": "boardInformation",
-      "conditional": {
-        "show": true,
-        "when": "type",
-        "eq": "Board"
-      },
-      "type": "panel",
-      "label": "Board Information",
-      "input": false,
-      "validate": {
-        "unique": false,
-        "multiple": false
-      },
-      "components": [
-        {
-          "label": "Board Number",
-          "mask": false,
-          "spellcheck": true,
-          "tableView": false,
-          "delimiter": false,
-          "requireDecimal": false,
-          "inputFormat": "plain",
-          "validate": {
-            "required": true,
-            "unique": false,
-            "multiple": false
-          },
-          "key": "boardNumber",
-          "type": "number",
-          "input": true
-        }
-      ],
-      "path": "boardInformation"
-    },
-    {
-      "label": "Subcomponents",
-      "disableAddingRemovingRows": false,
-      "reorder": false,
-      "addAnotherPosition": "bottom",
-      "defaultOpen": false,
-      "layoutFixed": false,
-      "enableRowGroups": false,
-      "tableView": false,
-      "validate": {
-        "unique": false,
-        "multiple": false
-      },
-      "key": "subcomponents",
-      "type": "datagrid",
-      "input": true,
-      "components": [
-        {
-          "label": "position",
-          "placeholder": "e.g. Slot 1",
+          "label": "APA Serial Number",
+          "placeholder": "APA-SIT-POS-XXX",
           "spellcheck": true,
           "tableView": true,
           "validate": {
+            "required": true,
             "unique": false,
             "multiple": false
           },
-          "key": "position",
+          "key": "apaSerialNumber",
           "type": "textfield",
           "input": true
         },
         {
-          "label": "Component UUID",
+          "label": "Frame",
+          "placeholder": "frame number (integer)",
+          "mask": false,
+          "spellcheck": true,
+          "tableView": false,
+          "delimiter": false,
+          "requireDecimal": false,
+          "inputFormat": "plain",
+          "validate": {
+            "unique": false,
+            "multiple": false
+          },
+          "key": "frame",
+          "type": "number",
+          "input": true
+        },
+        {
+          "label": "APA Frame UUID",
           "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
           "description": "Database UUID. Found on QR code.",
           "inputMask": "********-****-****-****-************",
@@ -186,12 +175,134 @@
             "multiple": false
           },
           "errorLabel": "Not a UUID",
-          "key": "sub_uuid",
+          "key": "apaFrameUuid",
           "type": "ComponentUUID",
+          "input": true
+        },
+        {
+          "label": "Wire Lot #",
+          "spellcheck": true,
+          "tableView": true,
+          "validate": {
+            "unique": false,
+            "multiple": false
+          },
+          "key": "wireLot",
+          "type": "textfield",
+          "input": true
+        },
+        {
+          "label": "Notes",
+          "autoExpand": false,
+          "spellcheck": true,
+          "tableView": true,
+          "validate": {
+            "unique": false,
+            "multiple": false
+          },
+          "key": "notes",
+          "type": "textarea",
+          "input": true
+        },
+        {
+          "label": "Geometry Boards",
+          "disableAddingRemovingRows": false,
+          "reorder": false,
+          "addAnotherPosition": "bottom",
+          "defaultOpen": false,
+          "layoutFixed": false,
+          "enableRowGroups": false,
+          "tableView": false,
+          "defaultValue": [
+            {}
+          ],
+          "validate": {
+            "unique": false,
+            "multiple": false
+          },
+          "key": "geometryBoards",
+          "type": "datagrid",
+          "input": true,
+          "components": [
+            {
+              "label": "Board Position",
+              "placeholder": "(integer)",
+              "mask": false,
+              "spellcheck": true,
+              "tableView": false,
+              "delimiter": false,
+              "requireDecimal": false,
+              "inputFormat": "plain",
+              "validate": {
+                "unique": false,
+                "multiple": false
+              },
+              "key": "boardPosition",
+              "type": "number",
+              "input": true
+            },
+            {
+              "label": "Component UUID",
+              "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
+              "description": "Database UUID. Found on QR code.",
+              "inputMask": "********-****-****-****-************",
+              "customClass": ".component-uuid-formio",
+              "spellcheck": true,
+              "tableView": true,
+              "validateOn": "blur",
+              "validate": {
+                "pattern": "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
+                "customMessage": "Needs to be hexadecimal in 8-4-4-4-12 layout",
+                "unique": false,
+                "multiple": false
+              },
+              "errorLabel": "Not a UUID",
+              "key": "componentUuid",
+              "tags": [
+                "componentUuid"
+              ],
+              "type": "ComponentUUID",
+              "input": true
+            }
+          ],
+          "path": "geometryBoards"
+        }
+      ],
+      "path": "panel"
+    },
+    {
+      "title": "Board Information",
+      "collapsible": false,
+      "tableView": false,
+      "key": "boardInformation",
+      "conditional": {
+        "show": true,
+        "when": "type",
+        "eq": "Geometry Board"
+      },
+      "type": "panel",
+      "label": "Board Information",
+      "input": false,
+      "validate": {
+        "unique": false,
+        "multiple": false
+      },
+      "components": [
+        {
+          "label": "Board Serial Number",
+          "placeholder": "BRD-SIT-XXXX",
+          "spellcheck": true,
+          "tableView": true,
+          "validate": {
+            "unique": false,
+            "multiple": false
+          },
+          "key": "boardSerialNumber",
+          "type": "textfield",
           "input": true
         }
       ],
-      "path": "subcomponents"
+      "path": "boardInformation"
     },
     {
       "type": "button",
