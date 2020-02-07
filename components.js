@@ -1,9 +1,10 @@
 const express = require('express');
 
-var database = require('./database.js');
+var database = require('./database.js');  // Exports global 'db' variable
 var permissions = require('./permissions.js');
 var MUUID = require('uuid-mongodb');
 const { Binary } = require('mongodb');
+var forms = require("./forms.js");
 
 var router = express.Router();
 
@@ -39,13 +40,13 @@ async function getComponents()
       item = await items.next()
       if(!item) break;
       item.componentUuid = MUUID.from(item.componentUuid).toString();
-      console.log("item",item);
+      // console.log("item",item);
 
       var type = item.type || "unknown";
       out[type] = out[type] || [];
       out[type].push(item);
     }
-    console.log("getComponents",out);
+    // console.log("getComponents",out);
     return out;
 
   } catch(err) {
@@ -86,7 +87,7 @@ async function saveComponent(data,req)
     delete data.submit;
     if(old) delete old.submit;
 
-    data.effectiveDate = new Date(data.effectiveDate) || new Date(); // Get into native format.
+    data.effectiveDate = data.effectiveDate ? new Date(data.effectiveDate) : new Date();
     var diff = null;
     if(old) diff = jsondiffpatch.diff(old, data);
 
@@ -94,7 +95,7 @@ async function saveComponent(data,req)
     data.submit = {
       insertDate: new Date(),
       ip: req.ip,
-      user: req.user,
+      user: ((res.locals||{}).user||{}).email || "unknown",
       version: ( ((old||{}).submit||{}).version || 0 ) + 1,
       diff_from: (old||{})._id,
       diff: diff,
@@ -260,4 +261,7 @@ router.post('/json/component/'+uuid_regex, permissions.middlewareCheckDataEditPr
     res.status(400).json({error:"Unknown failure: "+err})
   }
 });
+
+
+
 

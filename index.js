@@ -16,10 +16,11 @@ var jsondiffpatch = require('jsondiffpatch');
 
 // mine
 var config = require('./configuration.js');
-var database = require('./database.js'); // defines global.db, used below
+var database = require('./database.js'); // Exports global 'db' variable
 var components = require('./components.js');
 var permissions = require('./permissions.js');
-
+var forms = require('./forms.js');
+var utils = require('./utils.js');
 
 const logRequestStart = (req,res,next) => {
     console.log(`${req.method} ${req.originalUrl}`)
@@ -171,240 +172,18 @@ app.get('/api/private', checkJwt, function(req, res) {
 
 // routes in other files
 app.use(components.router);
-
-// Get current form
-
-async function getForm(form_id,collection) {
-	console.log("getForm",...arguments);
-	collection = collection || "testForms";
-	try{
-		console.log(chalk.blue("Requesting schema for",collection,form_id));
-		var col  = db.collection(collection);
-		var rec = await col.findOne({form_id:form_id, current:true});
-		// console.log(chalk.green(JSON.stringify(rec,null,4)));
-    if(rec) {
-      console.log(chalk.blue("Found it"));
-    }
-    return rec;
-	} catch(err) {
-		console.error(err);
-
-		return null; 
-	}
-}
+app.use(forms.router);
+app.use(require('./routes/formRoutes.js').router);
+app.use(require('./routes/componentRoutes.js').router);
 
 
-
-/////////////////////////////
-// New component, old component
-
-// Note that none of this works because formio doesn't actually post a form. Instead, it requires me to do an ajax.
-
-
-app.get("/NewComponent",
-	permissions.middlewareCheckDataViewPrivs,
-	// middlewareCheckDataEntryPrivs,
-	 async function(req,res){
-  var form = await getForm("componentForm","componentForm");
-  // roll a new UUID.
-  var componentUuid = uuidv4()
-  res.render("component_edit.pug",{
-  	schema: form.schema,
-  	componentUuid:componentUuid,
-  	component: {componentUuid:componentUuid},
-  	canEdit: permissions.hasDataEntryPrivs(),
-    tests:[],
-    performed: [],
-  });
-});
-
-
-// Pull up an existing component for editing or just viewing.
-
-var uuid_regex = ':uuid([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})';
-var short_uuid_regex = ':shortuuid([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{21,22})';
-async function get_component(req,res) {
-  // deal with shortened form or full-form
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  console.log(get_component,componentUuid,req.params);
-
-  // get form and data in one go
-  let [form, component, tests] = await Promise.all([
-  	  getForm("componentForm","componentForm"),
-      components.retrieveComponent(componentUuid),
-      getListOfTests(),
-  	]);
-
-  for(test of tests) {
-    console.log('checking for performed',test.form_id);
-    var p = await db.collection("form_"+test.form_id).find({"data.componentUuid":componentUuid}).project({form_id:1, form_title:1, timestamp:1, user:1}).toArray();
-    test.performed = p || [];
-  }
-  console.dir(tests);
-  // equal:
-  // var component = await components.findOne({componentUuid:req.params.uuid});
-  // var form = await getForm("componentForm","componentForm");
-  console.log("component")
-  console.log(component);
-  if(!component) return res.status(400).send("No such component ID.");
-  res.render("component.pug",{
-  	schema: form.schema,
-  	componentUuid:componentUuid,
-  	component: component,
-  	canEdit: permissions.hasDataEditPrivs(),
-    tests: tests,
-  });
-}
-app.get('/'+uuid_regex, permissions.middlewareCheckDataViewPrivs, get_component);
-app.get('/'+short_uuid_regex, permissions.middlewareCheckDataViewPrivs, get_component);
-
-async function edit_component(req,res) {
-  // deal with shortened form or full-form
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  console.log(get_component,componentUuid,req.params);
-
-  // get form and data in one go
-  let [form, component, tests] = await Promise.all([
-      getForm("componentForm","componentForm"),
-      components.retrieveComponent(componentUuid),
-      getListOfTests(),
-    ]);
-
-  var performed={};
-  for(test of tests) {
-    console.log('checking for performed',test.form_id);
-    var p = await db.collection("form_"+test.form_id).find({"data.componentUuid":componentUuid}).project({form_id:1,  timestamp:1, user:1}).toArray();
-    if(p.length>0) { 
-       for(item of p) { item.form_title = test.form_title };
-       performed[test.form_id] = p;
-       console.dir(p);
-    }
-  }
-  // equal:
-  // var component = await components.findOne({componentUuid:req.params.uuid});
-  // var form = await getForm("componentForm","componentForm");
-  console.log("component")
-  console.log(component);
-  if(!component) return res.status(400).send("No such component ID.");
-  res.render("component_edit.pug",{
-    schema: form.schema,
-    componentUuid:componentUuid,
-    component: component,
-    canEdit: permissions.hasDataEditPrivs(),
-    tests: tests,
-    performed: performed,
-  });
-}
-
-app.get('/'+uuid_regex+'/edit', permissions.middlewareCheckDataEditPrivs, edit_component);
-app.get('/'+short_uuid_regex+'/edit', permissions.middlewareCheckDataEditPrivs, edit_component);
-
-
-async function component_label(req,res,next) {
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  component = components.retrieveComponent(componentUuid);
-  if(!component) return res.status(404).send("No such component exists yet in database");
-  console.log({component: component});
-  res.render('label.pug',{component: component});
-}
-app.get('/'+uuid_regex+'/label', permissions.middlewareCheckDataViewPrivs, component_label);
-app.get('/'+short_uuid_regex+'/label', permissions.middlewareCheckDataViewPrivs, component_label);
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////
-// Editing and creating forms
-
-
-
-// Create a new test form
-var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
-app.get("/NewTestForm/:form_id", permissions.middlewareCheckFormEditPrivs, async function(req,res){
-  var rec = await getForm(req.params.form_id);
-  
-  if(!rec) {
-    var forms = db.collection("testForms");
-    // console.log('updateRes',updateRes);
-      var rec = {form_id: req.params.form_id,
-                schema: default_form_schema
-               }; 
-      delete rec._id;
-      rec.revised = new Date;  
-      rec.current = true;
-      rec.version = 0;
-      rec.revised_by = ((res.locals||{}).user||{}).email || "unknown";
-      console.log("inserting",rec);
-      await forms.insertOne(rec);
-  }
-
-  res.redirect("/EditTestForm/"+req.params.form_id);
-});
-
-// Edit existing test form
-app.get("/EditTestForm/:form_id?", permissions.middlewareCheckFormEditPrivs, async function(req,res){
-  // var rec = await getForm(req.params.form_id);
-  // if(!rec) return res.status(400).send("No such form exists");
-  res.render('EditTestForm.pug',{collection:"testForms",form_id:req.params.form_id});
-});
-
-// Edit component form.
-app.get("/EditComponentForm", permissions.middlewareCheckFormEditPrivs, async function(req,res){
-  res.render('EditComponentForm.pug',{collection:"componentForm",form_id:"componentForm"});
-});
-
-
-// API/Backend: Get a form schema
-app.get('/json/:collection(testForms|componentForm)/:form_id', async function(req,res,next){
-  var rec = await getForm(req.params.form_id, req.params.collection);
-  // if(!rec) return res.status(404).send("No such form exists");
-  if(!rec) { res.status(400).json({error:"no such form "+req.params.form_id}); return next(); };
-  console.log(rec);
-  res.json(rec);
-});
-
-
-// API/Backend:  Change the form schema.
-app.post('/json/:collection(testForms|componentform)/:form_id', permissions.middlewareCheckFormEditPrivs, async function(req,res,next){
-  console.log(chalk.blue("Schema submission","/json/testForms"));
-  console.log(req.body); 
-
-  var form_id = req.params.form_id; 
-
-  // Note this is OK because req.params.collection options are specified in the method regex
-  var old = await getForm(form_id,req.params.collection);
-  var forms = db.collection(req.params.collection);
-  var updateRes = await forms.updateMany({form_id:form_id, current:true}, {$set: {current: false}});
-
-  // console.log('updateRes',updateRes);
-  var new_record = {...req.body}; // shallow clone
-  new_record.form_id = form_id;
-  delete new_record._id;
-  new_record.revised = new Date;
-  new_record.current = true;
-  new_record.version = (old.version || 0) + 1;
-
-  console.log("inserting",new_record);
-  await forms.insertOne(new_record);
-
-
-    // Get it from the DB afresh.
-  var rec = await getForm(form_id,req.params.collection);
-  res.json(rec);
-});
 
 
 
 // view test data.
 
 async function seeTestData(req,res,next) {
-  var form = await getForm(req.params.form_id,);
+  var form = await retrieveForm(req.params.form_id,);
   if(!form) return res.status(400).send("No such test form");  
   var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
   var col = db.collection(form_name);
@@ -414,21 +193,21 @@ async function seeTestData(req,res,next) {
 };
 
 app.get("/test/:form_id/:record_id", seeTestData);
-app.get("/"+ uuid_regex + "/test/:form_id/:record_id", seeTestData);
+app.get("/"+ utils.uuid_regex + "/test/:form_id/:record_id", seeTestData);
 
 
 // Run a new test, but no UUID specified
 
 app.get("/test/:form_id",permissions.middlewareCheckDataEntryPrivs,async function(req,res,next){
-  var form = await getForm(req.params.form_id,);
+  var form = await retrieveForm(req.params.form_id,);
   res.render('test_without_uuid.pug',{form_id:req.params.form_id,form:form});
 })
 
 /// Run an new test
 
-app.get("/"+uuid_regex+"/test/:form_id", async function(req,res,next) {
+app.get("/"+utils.uuid_regex+"/test/:form_id", async function(req,res,next) {
     console.log("run a new test");
-    var form = await getForm(req.params.form_id,);
+    var form = await retrieveForm(req.params.form_id,);
     if(!form) return res.status(400).send("No such test form");
     res.render('test.pug',{form_id:req.params.form_id, form:form, data:{data:{componentUuid: req.params.uuid}}})
 });
@@ -530,28 +309,14 @@ app.use('/retrievefile',express.static(__dirname+"/files"));
 
 
 
-async function getListOfTests(collection)
-{
-	console.log("getListOfTests");
-	var collectionName = collection || "testForms";
-	try{
-		var col  = db.collection(collectionName);
-		var tests = await col.find({current:true}).project({form_id:1, form_title:1}).toArray();
-    console.log("getListOfTests",tests);
-		return tests;
-	} catch(err) {
-		console.error(err);
 
-		return []; 
-	}
-}
 
 
 
 app.get('/', async function(req, res, next) {
 	res.render('admin.pug',
 	{
-		tests: await getListOfTests(),
+		tests: await forms.getListOfForms(),
 		all_components: await components.getComponents(),
 	});
 });
