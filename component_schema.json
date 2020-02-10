@@ -3,6 +3,7 @@
     {
       "label": "Component UUID",
       "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
+      "tooltip": "Database component UUID. Found on QR code.",
       "inputMask": "********-****-****-****-************",
       "spellcheck": false,
       "disabled": true,
@@ -192,19 +193,6 @@
           "input": true
         },
         {
-          "label": "Notes",
-          "autoExpand": false,
-          "spellcheck": true,
-          "tableView": true,
-          "validate": {
-            "unique": false,
-            "multiple": false
-          },
-          "key": "notes",
-          "type": "textarea",
-          "input": true
-        },
-        {
           "label": "Geometry Boards",
           "disableAddingRemovingRows": false,
           "reorder": false,
@@ -303,6 +291,20 @@
         }
       ],
       "path": "boardInformation"
+    },
+    {
+      "label": "Notes",
+      "tooltip": "Notes",
+      "autoExpand": false,
+      "spellcheck": true,
+      "tableView": true,
+      "validate": {
+        "unique": false,
+        "multiple": false
+      },
+      "key": "notes",
+      "type": "textarea",
+      "input": true
     },
     {
       "type": "button",
