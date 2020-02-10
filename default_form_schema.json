@@ -3,7 +3,7 @@
     {
       "label": "Component UUID",
       "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
-      "description": "Database UUID. Found on QR code.",
+      "tooltip": "Database component UUID. Found on QR code.",
       "inputMask": "********-****-****-****-************",
       "customClass": ".component-uuid-formio",
       "spellcheck": false,

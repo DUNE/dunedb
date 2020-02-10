@@ -1,9 +1,9 @@
 const chalk = require('chalk');
 const express = require('express');
 
-var components = require('../components.js');
+var Components = require('../Components.js');
+var Forms = require('../Forms.js');
 var permissions = require('../permissions.js');
-var Forms = require('../forms.js');
 var database = require('../database.js')
 
 var router = express.Router();

@@ -1,10 +1,12 @@
 const express = require('express');
 
+var MUUID = require('uuid-mongodb');
+var jsondiffpatch = require('jsondiffpatch');
+var chalk = require('chalk');
+const { Binary } = require('mongodb');
+
 var database = require('./database.js');  // Exports global 'db' variable
 var permissions = require('./permissions.js');
-var MUUID = require('uuid-mongodb');
-const { Binary } = require('mongodb');
-var forms = require("./forms.js");
 
 var router = express.Router();
 
@@ -66,7 +68,10 @@ async function retrieveComponent(componentUuid,onDate,rollbackDate) {
   if(rollbackDate) query["submit.insertDate"] = {$lt: rollbackDate};  // rollback to things inserted before this time
   if(onDate) query.effectiveDate = {$lt: onDate}; // rollback to things that happened before this time
   console.log("retrieveComponent",...arguments,query);
-  var res = await db.collection('components').find(query).sort({effectiveDate:-1}).limit(1).toArray();
+  var resall =  await db.collection('components').find(query).toArray();
+  console.log(chalk.red('------finding component------'),query);
+  console.dir(resall);
+  var res = await db.collection('components').find(query).sort({effectiveDate:-1,"submit.version":-1}).limit(1).toArray();
   console.log("res",res);
   if(res.length<1) return null;
   res[0].componentUuid = MUUID.from(res[0].componentUuid).toString();

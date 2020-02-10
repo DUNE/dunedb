@@ -11,11 +11,12 @@
 
 // Formio.Components.components.file.builderInfo.schema=Formio.Components.components.file.schema();
 var TextFieldComponent = Formio.Components.components.textfield;
+var BaseComponent = Formio.Components.components.textfield;
 
 function ComponentUUID(component, options, data) {
   // This is a normal text field...
   acuuid = this;
-  TextFieldComponent.prototype.constructor.call(this, component, options, data);
+  BaseComponent.prototype.constructor.call(this, component, options, data);
 
   // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
   // Note that options.hooks is completely undocumented, but messing with Element.js hook() let 
@@ -40,14 +41,14 @@ function ComponentUUID(component, options, data) {
 
 var acuuid = null;
 // Perform typical ES5 inheritance
-ComponentUUID.prototype = Object.create(TextFieldComponent.prototype);
+ComponentUUID.prototype = Object.create(BaseComponent.prototype);
 ComponentUUID.prototype.constructor = ComponentUUID;
 
 ComponentUUID.schema = function() {
   return TextFieldComponent.schema({
       "label": "Component UUID",
       "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
-      "description": "Database UUID. Found on QR code.",
+      "tooltip": "Database component UUID. Found on QR code.",
       "inputMask": "********-****-****-****-************",
       "validateOn": "blur",
       "validate": {
@@ -77,7 +78,7 @@ ComponentUUID.prototype.renderElement = function(value,index)
 {
   console.log('renderElement',this,value,index);
   var textvalue = value;
-  if(typeof value === "object") {
+  if(value && typeof value === "object") {
     textvalue = value.uuidstr;
   }
 
@@ -97,7 +98,7 @@ ComponentUUID.prototype.attach = function(element)
   /// Called after rendering, just as the component is being inserted into the DOM.
   /// .. just like a text area...
   TextFieldComponent.prototype.attach.call(this,element);
-  // console.log('my attach',this,this.refs.input,element)
+  // console.log('my attach',this,this.refs.input,element,$(this.refs.input[0]).val());
  
  // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
  
@@ -111,24 +112,22 @@ ComponentUUID.prototype.attach = function(element)
     // console.log("selected",item)
     component.setValue(item.val);
   });
+
 }
 
-ComponentUUID.setValue = function(value)
+ComponentUUID.prototype.setValue = function(value,flags)
 {
-  console.log(setValue,this);
-  var textvalue = value;
-  if(typeof value === "object") {
-    textvalue = value.uuidstr;
-  }
-  $('a',this.element).attr('href','/'+textvalue).text(textvalue);
-  return TextFieldComponent.prototype.setValue.call(this,textvalue);
+  console.log('setValue',this,value,flags);
+  console.log($('a',this.element),$('a',this.element).prop('href'));
+  if(this.element)
+    $('a',this.element).prop('href','/'+value).text('link');
+  return BaseComponent.prototype.setValue.call(this,...arguments);
 }
 
-ComponentUUID.getValue = function()
+ComponentUUID.prototype.getValue = function()
 {
-  console.log(getValue,this);
-  textvalue = TextFieldComponent.prototype.getValue.call(this);
-  return {uuidstr: textvalue};
+  console.log('getValue',this);
+  return TextFieldComponent.prototype.getValue.call(this);
 }
 
 

@@ -2,33 +2,43 @@ extend default
 
 
 block vars
-  - var page_title=form_id;
+  - var page_title=formrec.form_title || form_id;
 
 block extrascripts
   script(type='text/javascript').
     // I could do this by API query of the server, but this works for now.
-    var formrec=!{JSON.stringify(form||{}, null ,4)}; 
-    var submission=!{JSON.stringify(submission||{}, null ,4)}; 
+    var formrec=!{JSON.stringify(formrec||{}, null ,4)}; 
+    var testdata=!{JSON.stringify(testdata||{}, null ,4)}; 
 
   script(type='text/javascript').
 
+    // take the 'submit' button out.
+    for(var i = 0; i<  formrec.schema.components.length; i++) {
+      var c = formrec.schema.components[i];
+      if(c.type=='button' && c.label=='Submit') formrec.schema.components.splice(i,1);
+    }
     window.onload = async function() {
       form = await Formio.createForm(document.getElementById('builtform'),formrec.schema,
         {
-          readOnly:true,
-          renderMode: 'html'
+          readOnly:true
+          //- renderMode: 'html'
         });
       form.nosubmit = true;
-      form.submission = {data: submission};
+      form.submission = testdata;
 
       
 
     }
 
 block content
-  h2=form_id
+  h2=formrec.form_title || formrec.form_id
+  if testdata 
+    p Test performed: 
+        span=moment(testdata.timestamp).format('MMM DD YYYY HH:MM')
+    if user && testdata.user
+      p Performed by:
+        span=testdata.user
 
-  .container
-    .row
-      #builtform
+
+  #builtform
 

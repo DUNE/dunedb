@@ -8,7 +8,7 @@ block extrascripts
   script(type='text/javascript').
     // I could do this by API query of the server, but this works for now.
     var formrec=!{JSON.stringify(form||{}, null ,4)}; 
-    var submission=!{JSON.stringify((data||{}).data||{}, null ,4)}; 
+    var testdata=!{JSON.stringify((testdata||{}), null ,4)}; 
     var retrieved=!{retrieved||false};
 
   script(type='text/javascript').
@@ -67,20 +67,14 @@ block extrascripts
                   //- });
       //- form.url="https://nowhere.com";
       console.log(form);
-      form.submission = {data: submission};
+      form.submission = {data: testdata.data};
       if(!retrieved) 
               form.on('submit',SubmitData);
 
     }
 
 block content
-  h2=form_id
-  if data 
-    p Test performed: 
-        span=moment(data.timestamp).format('MMM DD YYYY HH:MM')
-    if user
-      p Performed by:
-        span=(data.user||{}).displayName  +" ("+(((data.user||{}).emails||[])[0]||{}).value+")"
-
+  h2=form.form_title
+  
   #builtform
 

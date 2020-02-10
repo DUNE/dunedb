@@ -8,6 +8,7 @@ const chalk = require('chalk');
 const uuidv4 = require('uuid/v4');
 const shortuuid = require('short-uuid')();
 const MUUID = require('uuid-mongodb');  // Addon for storing UUIDs as binary for faster lookup
+const ObjectID = require('mongodb').ObjectID;
 
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
@@ -17,9 +18,9 @@ var jsondiffpatch = require('jsondiffpatch');
 // mine
 var config = require('./configuration.js');
 var database = require('./database.js'); // Exports global 'db' variable
-var components = require('./components.js');
+var Components = require('./Components.js');
+var Forms = require('./Forms.js');
 var permissions = require('./permissions.js');
-var forms = require('./forms.js');
 var utils = require('./utils.js');
 
 const logRequestStart = (req,res,next) => {
@@ -171,8 +172,8 @@ app.get('/api/private', checkJwt, function(req, res) {
 
 
 // routes in other files
-app.use(components.router);
-app.use(forms.router);
+app.use(Components.router);
+app.use(Forms.router);
 app.use(require('./routes/formRoutes.js').router);
 app.use(require('./routes/componentRoutes.js').router);
 
@@ -183,13 +184,13 @@ app.use(require('./routes/componentRoutes.js').router);
 // view test data.
 
 async function seeTestData(req,res,next) {
-  var form = await retrieveForm(req.params.form_id,);
-  if(!form) return res.status(400).send("No such test form");  
+  var formrec = await Forms.retrieveForm(req.params.form_id,);
+  if(!formrec) return res.status(400).send("No such test form");  
   var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
   var col = db.collection(form_name);
   var data = await col.findOne({_id:ObjectID(req.params.record_id)});
   console.log("viewtest",req.params.record_id,ObjectID(req.params.record_id),data);
-  res.render('viewTest.pug',{form_id:req.params.form_id, form:form, data:data, retrieved:true})
+  res.render('viewTest.pug',{form_id:req.params.form_id, formrec:formrec, testdata:data, retrieved:true})
 };
 
 app.get("/test/:form_id/:record_id", seeTestData);
@@ -199,17 +200,19 @@ app.get("/"+ utils.uuid_regex + "/test/:form_id/:record_id", seeTestData);
 // Run a new test, but no UUID specified
 
 app.get("/test/:form_id",permissions.middlewareCheckDataEntryPrivs,async function(req,res,next){
-  var form = await retrieveForm(req.params.form_id,);
+  var form = await Forms.retrieveForm(req.params.form_id,);
   res.render('test_without_uuid.pug',{form_id:req.params.form_id,form:form});
 })
 
 /// Run an new test
 
 app.get("/"+utils.uuid_regex+"/test/:form_id", async function(req,res,next) {
+  try{
     console.log("run a new test");
-    var form = await retrieveForm(req.params.form_id,);
+    var form = await Forms.retrieveForm(req.params.form_id,);
     if(!form) return res.status(400).send("No such test form");
-    res.render('test.pug',{form_id:req.params.form_id, form:form, data:{data:{componentUuid: req.params.uuid}}})
+    res.render('test.pug',{form_id:req.params.form_id, form:form, testdata:{data:{componentUuid: req.params.uuid}}})
+  } catch(err) { console.error(err); next(); }
 });
 
 
@@ -316,8 +319,8 @@ app.use('/retrievefile',express.static(__dirname+"/files"));
 app.get('/', async function(req, res, next) {
 	res.render('admin.pug',
 	{
-		tests: await forms.getListOfForms(),
-		all_components: await components.getComponents(),
+		tests: await Forms.getListOfForms(),
+		all_components: await Components.getComponents(),
 	});
 });
 

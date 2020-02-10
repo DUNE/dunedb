@@ -2,10 +2,12 @@
 const chalk = require('chalk');
 const express = require('express');
 const shortuuid = require('short-uuid')();
+const MUUID = require('uuid-mongodb');
+const moment = require('moment');
 
-var components = require('../components.js');
+var Components = require('../Components.js');
 var permissions = require('../permissions.js');
-var forms = require('../forms.js');
+var Forms = require('../Forms.js');
 var database = require('../database.js');
 var utils = require("../utils.js");
 
@@ -25,9 +27,9 @@ async function get_component(req,res) {
 
   // get form and data in one go
   let [form, component, tests] = await Promise.all([
-      forms.retrieveForm("componentForm","componentForm"),
-      components.retrieveComponent(componentUuid),
-      forms.getListOfForms(),
+      Forms.retrieveForm("componentForm","componentForm"),
+      Components.retrieveComponent(componentUuid),
+      Forms.getListOfForms(),
     ]);
 
   for(test of tests) {
@@ -37,8 +39,8 @@ async function get_component(req,res) {
   }
   console.dir(tests);
   // equal:
-  // var component = await components.findOne({componentUuid:req.params.uuid});
-  // var form = await forms.retrieveForm("componentForm","componentForm");
+  // var component = await Components.findOne({componentUuid:req.params.uuid});
+  // var form = await Forms.retrieveForm("componentForm","componentForm");
   console.log("component")
   console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
@@ -59,35 +61,28 @@ async function edit_component(req,res) {
   console.log(get_component,componentUuid,req.params);
 
   // get form and data in one go
-  let [form, component, tests] = await Promise.all([
-      forms.retrieveForm("componentForm","componentForm"),
-      retrieveComponent(componentUuid),
-      getListOfTests(),
+  let [form, component] = await Promise.all([
+      Forms.retrieveForm("componentForm","componentForm"),
+      Components.retrieveComponent(componentUuid),
     ]);
 
   var performed={};
-  for(test of tests) {
-    console.log('checking for performed',test.form_id);
-    var p = await db.collection("form_"+test.form_id).find({"data.componentUuid":componentUuid}).project({form_id:1,  timestamp:1, user:1}).toArray();
-    if(p.length>0) { 
-       for(item of p) { item.form_title = test.form_title };
-       performed[test.form_id] = p;
-       console.dir(p);
-    }
-  }
+
   // equal:
-  // var component = await components.findOne({componentUuid:req.params.uuid});
-  // var form = await forms.retrieveForm("componentForm","componentForm");
+  // var component = await Components.findOne({componentUuid:req.params.uuid});
+  // var form = await Forms.retrieveForm("componentForm","componentForm");
   console.log("component")
   console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
+
+  // Change the default effectivedate to now
+  component.effectiveDate = moment();
+
   res.render("component_edit.pug",{
     schema: form.schema,
     componentUuid:componentUuid,
     component: component,
     canEdit: permissions.hasDataEditPrivs(),
-    tests: tests,
-    performed: performed,
   });
 }
 
@@ -97,7 +92,7 @@ router.get('/'+utils.short_uuid_regex+'/edit', permissions.middlewareCheckDataEd
 
 async function component_label(req,res,next) {
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  component = retrieveComponent(componentUuid);
+  component = Components.retrieveComponent(componentUuid);
   if(!component) return res.status(404).send("No such component exists yet in database");
   console.log({component: component});
   res.render('label.pug',{component: component});
@@ -116,9 +111,10 @@ router.get("/NewComponent",
   permissions.middlewareCheckDataViewPrivs,
   // middlewareCheckDataEntryPrivs,
    async function(req,res){
-  var form = await forms.retrieveForm("componentForm","componentForm");
+  var form = await Forms.retrieveForm("componentForm","componentForm");
   // roll a new UUID.
-  var componentUuid = uuidv4()
+
+  var componentUuid = MUUID.v1().toString();
   res.render("component_edit.pug",{
     schema: form.schema,
     componentUuid:componentUuid,
