@@ -2,7 +2,7 @@ const express = require('express');
 
 var database = require('./database.js');
 var MUUID = require('uuid-mongodb');
-var componentslib = require('./components.js');
+var componentslib = require('./Components.js');
 var config = require('./config.js');
 
 function pickRandom(arr)

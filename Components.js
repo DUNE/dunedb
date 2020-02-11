@@ -78,7 +78,7 @@ async function retrieveComponent(componentUuid,onDate,rollbackDate) {
   return res[0];
 }
 
-async function saveComponent(data,req)
+async function saveComponent(data,req,user)
 {
     var componentUuid = data.componentUuid;
     if(!componentUuid) throw "No componentUuid specified in saveComponent()";
@@ -100,7 +100,7 @@ async function saveComponent(data,req)
     data.submit = {
       insertDate: new Date(),
       ip: req.ip,
-      user: ((res.locals||{}).user||{}).email || "unknown",
+      user: user,
       version: ( ((old||{}).submit||{}).version || 0 ) + 1,
       diff_from: (old||{})._id,
       diff: diff,
@@ -209,62 +209,13 @@ router.post('/json/component/'+uuid_regex, permissions.middlewareCheckDataEditPr
 
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
   var data = req.body.data;
-
-  if(!data.componentUuid) return res.status(400).json({error:"No uuid specified"});
-  if(componentUuid != data.componentUuid) return res.status(400).json({error:"Form does not match url"});
   try {
-
-    // metadata.
-    var old = await retrieveComponent(componentUuid);
-    console.log("submit component",data);
-    console.log("old one:",old);
-    // Add stuff to the record.
-
-    // First, diff it with the old one.  Ignore submit subdocument
-    delete data.submit;
-    if(old) delete old.submit;
-
-    data.effectiveDate = new Date(data.effectiveDate) || new Date(); // Get into native format.
-    var diff = null;
-    if(old) diff = jsondiffpatch.diff(old, data);
-
-    // Add new bookkeeping fields
-    data.submit = {
-      insertDate: new Date(),
-      ip: req.ip,
-      user: req.user,
-      version: ( ((old||{}).submit||{}).version || 0 ) + 1,
-      diff_from: (old||{})._id,
-      diff: diff,
-    }
-
-    // Edited units will still have the _id and other stuff floating around..
-    delete data._id;
-
-    // Change to BSON uuid.
-    data.componentUuid = MUUID.from(data.componentUuid);
-
-    var components = db.collection("components");
-    if(!old) {
-      // No conflict. Is this user allowed to enter data?
-      if(permissions.hasDataEntryPrivs(req)) {
-        await components.insertOne(data); // fixme TRANSACTION LOG wutg req.body.metadata
-        console.log("inserted",data);
-      }
-      else return res.status(400).json({error:"You don't have data entry priviledges."});
-    } else {
-      console.log('existing record');
-      if(permissions.hasDataEditPrivs(req)) {
-        await components.insertOne(data); // fixme TRANSACTION LOG wutg req.body.metadata
-      } else {
-       return res.status(400).json({error:"Component UUID "+componentUuid+" is already in database and you don't have edit priviledges."});
-      }
-    }
+    data = saveComponent(data,req,(res.locals.user||{})); // FIXME use email or something.
     return res.json(data);
-
   } catch(err) {
-    res.status(400).json({error:"Unknown failure: "+err})
+    res.status(400).json({error:"Save failure "+err})
   }
+  
 });
 
 
