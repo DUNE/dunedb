@@ -1,5 +1,7 @@
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
+const Grid = require('mongodb').Grid;
+
 const config = require('./configuration.js');
 
 
@@ -85,7 +87,6 @@ async function log_to_db(msg)
 	let col_log = db.collection("log");
 	await col_log.insertOne({time:Date.now(),msg:msg});
 }
-
 
 global.db = (global.db ? global.db : {});
 

@@ -176,6 +176,7 @@ app.use(Components.router);
 app.use(Forms.router);
 app.use(require('./routes/formRoutes.js').router);
 app.use(require('./routes/componentRoutes.js').router);
+app.use('/file',require('./routes/files.js').router);
 
 
 
@@ -276,38 +277,6 @@ app.post("/json/reteive/:form_id", retrieve_test_data);
 // Same thing as above, but this time we use jwt for authentication:
 app.post("/api/submit/:form_id", checkJwt, submit_test_data);
 app.get("/api/get/:form_id/:record_id", checkJwt, retrieve_test_data);
-
-
-
-
-/// submit file data
-var file_upload_middleware = require('express-fileupload')();
-app.post("/savefile",permissions.middlewareCheckDataViewPrivs,file_upload_middleware,async function(req, res,next){
-    console.log('/savefile',req.files);
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).send('No files were uploaded.');
-    }
-
-    for(var key in req.files) {
-      var fileinfo = req.files[key];
-      var outfile = __dirname+"/files/"+fileinfo.name; // Fixme better sorting, collisions
-      fileinfo.mv(outfile,function(err){
-        if (err) return res.status(500).send(err);
-
-         res.json({
-          url: config.my_url+'/retrievefile/'+fileinfo.name,
-          name: fileinfo.name,
-          size: fileinfo.size
-         });
-      });
-
-    }
-})
-
-/// file retrieval
-app.use('/retrievefile',express.static(__dirname+"/files"));
-
-
 
 
 

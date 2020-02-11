@@ -35,6 +35,8 @@ async function get_component(req,res) {
   for(test of tests) {
     console.log('checking for performed',test.form_id);
     var p = await db.collection("form_"+test.form_id).find({"data.componentUuid":componentUuid}).project({form_id:1, form_title:1, timestamp:1, user:1}).toArray();
+    console.log("peformed of type",test.form_id,":");
+    console.dir(p);
     test.performed = p || [];
   }
   console.dir(tests);
