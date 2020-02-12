@@ -15,7 +15,7 @@ Formio.Components.components.file.schema = function(...extend) {
       fileMaxSize: '1GB',
       uploadOnly: false,
       storage:"url",
-      url:"/savefile",
+      url:"/file/gridfs",
 
     };
   };
