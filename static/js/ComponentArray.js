@@ -60,17 +60,17 @@ ArrayComponent.prototype.renderElement = function(value,index)
   tpl += TextFieldComponent.prototype.renderElement.call(this,textvalue,index);
   gArrayComponentId++;
   tpl += `<button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#componentArrayCollapse${gArrayComponentId}" aria-expanded="false" aria-controls="collapseExample">Show Info</button>`
-  tpl += `<div class="collapse show" id="componentArrayCollapse${gArrayComponentId}">`;
-  tpl += '<div class="d-flex flex-row">';
+  tpl += `<div class="collapse" id="componentArrayCollapse${gArrayComponentId}">`;
+  tpl += '<div class="d-sm-flex flex-row">';
   tpl += '<div class="p-2">';
-  tpl += `<div>Data length: <span class=' arrayComponentLength'>${arr.length}</span></div>`;
+  tpl += `<div>Data length: <span class='arrayComponentLength'>${arr.length}</span></div>`;
   tpl += `<div>Min: <span class='arrayComponentMin'>${value.min.toFixed(2)}</span></div>`;
   tpl += `<div>Max: <span class='arrayComponentMax'>${value.max.toFixed(2)}</span></div>`;
   tpl += `<div>Mean: <span class='arrayComponentMean'></span></div>`;
   tpl += `<div>RMS: <span class='arrayComponentRMS'></span></div>`;
   tpl += "</div>"
-  tpl += `<div class='p-2 arrayComponentGraph' style='height:200px; width: 240px;'></div>`;
-  tpl += `<div class='p-2 arrayComponentHistogram' style='height:200px; width: 240px;'></div>`;
+  tpl += `<div class='flex-grow-1 p-2 arrayComponentGraph' style='height:200px; width: 240px;'></div>`;
+  tpl += `<div class='flex-grow-1 p-2 arrayComponentHistogram' style='height:200px; width: 240px;'></div>`;
 
   tpl += '</div>'
   tpl += '</div>'
@@ -109,7 +109,7 @@ ArrayComponent.prototype.updateExtras = function(value)
 {
   console.log('updateExtras',value);
   var len = ((value||{}).data||[]).length;
-  $("span.arrayComponentLength",this.element).text();
+  $("span.arrayComponentLength",this.element).text(len);
   $("span.arrayComponentMin",this.element).text((value||{}).min.toFixed(2));
   $("span.arrayComponentMax",this.element).text((value||{}).max.toFixed(2));
 
@@ -154,6 +154,17 @@ ArrayComponent.prototype.attach = function(element)
   this.LizardGraph = new HistCanvas($("div.arrayComponentGraph",this.element),
       {margin_left: 40});
   this.LizardHistogram = new HistCanvas($("div.arrayComponentHistogram",this.element),{margin_left: 40});
+
+  var self= this;
+  $('.collapse',this.element).on('shown.bs.collapse', function () {
+    // unhiding
+    console.log("unhiding")
+    self.LizardGraph.Resize();
+    self.LizardGraph.Draw();
+    self.LizardHistogram.Resize();
+    self.LizardHistogram.Draw();
+
+  });
 }
 
 ArrayComponent.prototype.setValue = function(value,flags)

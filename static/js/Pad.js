@@ -190,7 +190,11 @@ function Pad( element, options )
    
   // Bind resizing to a sensible closure.
   var self = this;
-  $(this.element).resize(function(ev){
+  // $(this.element).resize(function(ev){
+  //                        self.Resize(); 
+  //                        self.Draw();
+  //                        });         
+  $(window).resize(function(ev){
                          self.Resize(); 
                          self.Draw();
                          });         
