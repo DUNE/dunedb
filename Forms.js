@@ -10,6 +10,7 @@ var router = express.Router();
 module.exports = {
   router,
   retrieveForm,
+  saveForm,
   getListOfForms,
 }
 
@@ -73,38 +74,41 @@ router.get('/json/:collection(testForms|componentForm)/:form_id', async function
   res.json(rec);
 });
 
+async function saveForm(form_id,record,collection,req,user)
+{
+  collection = collection || "testForms";
+  var old = await retrieveForm(form_id,collection);
+  var forms = db.collection(collection);
+  // console.log('updateRes',updateRes);
+  var new_record = {...record}; // shallow clone
+
+  new_record.submit = {
+        insertDate: new Date(),
+        ip: (req||{}).ip,
+        user: user,
+        diff_from: null,
+        diff: null,
+  }
+  new_record.version= ((old||{}).version || 0) + 1,
+  
+  new_record.form_id = form_id;
+  delete new_record._id;
+  new_record.effectiveDate = new_record.effectiveDate ? new Date(new_record.effectiveDate) : new Date();;
+  await forms.insertOne(new_record);
+  console.log('new form record',new_record);
+    // Get it from the DB afresh.
+  var rec = await retrieveForm(form_id,collection);
+  return rec;
+}
+
 
 // API/Backend:  Change the form schema.
 router.post('/json/:collection(testForms|componentform)/:form_id', permissions.middlewareCheckFormEditPrivs, async function(req,res,next){
   console.log(chalk.blue("Schema submission","/json/testForms"));
 
   var form_id = req.params.form_id; 
+  var inserted_record = saveForm(form_id, req.body, "testForms", req, req.ip, req.user);
 
-  // Note this is OK because req.params.collection options are specified in the method regex
-  var old = await retrieveForm(form_id,req.params.collection);
-  var forms = db.collection(req.params.collection);
-  var updateRes = await forms.updateMany({form_id:form_id, current:true}, {$set: {current: false}});
-
-  // console.log('updateRes',updateRes);
-  var new_record = {...req.body}; // shallow clone
-
-  new_record.submit = {
-        insertDate: new Date(),
-        ip: req.ip,
-        user: ((res.locals||{}).user||{}).email || "unknown",
-        diff_from: null,
-        diff: null,
-  }
-  new_record.version= (old.version || 0) + 1,
-
-  new_record.form_id = form_id;
-  delete new_record._id;
-  new_record.effectiveDate = new_record.effectiveDate ? new Date(new_record.effectiveDate) : new Date();;
-
-  await forms.insertOne(new_record);
-  console.log('new form record',new_record);
-    // Get it from the DB afresh.
-  var rec = await retrieveForm(form_id,req.params.collection);
-  res.json(rec);
+  res.json(inserted_record);
 });
 

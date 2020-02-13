@@ -86,18 +86,6 @@ passport.use(strategy);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// passport.serializeUser( (user, done) => {
-//   console.log('serializeUser',user);
-//   var sessionUser = { _id: user._id, name: user.name, email: user.email, roles: user.roles }
-//   done(null, sessionUser)
-// })
-
-// passport.deserializeUser( (sessionUser, done) => {
-//   // The sessionUser object is different from the user mongoose collection
-//   // it's actually req.session.passport.user and comes from the session collection
-//   done(null, sessionUser)
-// })
-
 // You can use this section to keep a smaller payload
 passport.serializeUser(function (user, done) {
   console.log('serializeUser',user);
@@ -135,26 +123,7 @@ app.get('/user', ensureAuthorized, function (req, res, next) {
 
 
 
-// machine-to-machine authorization:
-const jwt = require('express-jwt');
-const jwtAuthz = require('express-jwt-authz');
-const jwksRsa = require('jwks-rsa');
-const checkJwt = jwt({
-  // Dynamically provide a signing key
-  // based on the kid in the header and 
-  // the signing keys provided by the JWKS endpoint.
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: `https://dev-pserbfiw.auth0.com/.well-known/jwks.json`
-  }),
 
-  // Validate the audience and the issuer.
-  audience: 'https://dev-pserbfiw.auth0.com/api/v2/',
-  issuer: `https://dev-pserbfiw.auth0.com/`,
-  algorithms: ['RS256']
-});
 
 app.get('/api/public', function(req, res) {
   res.json({
@@ -163,7 +132,7 @@ app.get('/api/public', function(req, res) {
 });
 
 // This route needs authentication
-app.get('/api/private', checkJwt, function(req, res) {
+app.get('/api/private', permissions.checkJwt, function(req, res) {
   res.json({
     message: 'Hello from a private endpoint! You need to be authenticated to see this.'
   });
@@ -177,110 +146,7 @@ app.use(Forms.router);
 app.use(require('./routes/formRoutes.js').router);
 app.use(require('./routes/componentRoutes.js').router);
 app.use('/file',require('./routes/files.js').router);
-
-
-
-
-
-// view test data.
-
-async function seeTestData(req,res,next) {
-  var formrec = await Forms.retrieveForm(req.params.form_id,);
-  if(!formrec) return res.status(400).send("No such test form");  
-  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
-  var col = db.collection(form_name);
-  var data = await col.findOne({_id:ObjectID(req.params.record_id)});
-  console.log("viewtest",req.params.record_id,ObjectID(req.params.record_id),data);
-  res.render('viewTest.pug',{form_id:req.params.form_id, formrec:formrec, testdata:data, retrieved:true})
-};
-
-app.get("/test/:form_id/:record_id", seeTestData);
-app.get("/"+ utils.uuid_regex + "/test/:form_id/:record_id", seeTestData);
-
-
-// Run a new test, but no UUID specified
-
-app.get("/test/:form_id",permissions.middlewareCheckDataEntryPrivs,async function(req,res,next){
-  var form = await Forms.retrieveForm(req.params.form_id,);
-  res.render('test_without_uuid.pug',{form_id:req.params.form_id,form:form});
-})
-
-/// Run an new test
-
-app.get("/"+utils.uuid_regex+"/test/:form_id", async function(req,res,next) {
-  try{
-    console.log("run a new test");
-    var form = await Forms.retrieveForm(req.params.form_id,);
-    if(!form) return res.status(400).send("No such test form");
-    res.render('test.pug',{form_id:req.params.form_id, form:form, testdata:{data:{componentUuid: req.params.uuid}}})
-  } catch(err) { console.error(err); next(); }
-});
-
-
-/// submit test form data
-async function submit_test_data(req,res,next) {
-    console.log(chalk.blue("Form submission",req.params.form_id));
-  // var body = await parse.json(req);
-
-  console.log(req.body);
-  var data = req.body;
-  // metadata.
-  data.form_id = req.params.form_id;
-  data.timestamp=new Date();
-  data.ip = req.ip;
-  data.user = req.user;
-  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
-  var col = db.collection(form_name);
-  try {
-    var result = await col.insertOne(data);
-    console.log('result',result.ops);
-    res.json({_id: result.ops[0]._id});
-  }
-  catch(err) {
-    console.error("error submitting form /submit/"+req.params.form_id);
-    console.error(err);
-    res.status(400).json({error:err});
-  } 
-}
-
-
-
-
-async function retrieve_test_data(req,res,next) {
-  console.log(chalk.blue("Form submission",req.params.form_id));
-  // var body = await parse.json(req);
-
-  console.log(req.body);
-  var data = req.body;
-  // metadata.
-  data.form_id = req.params.form_id;
-  data.timestamp=new Date();
-  data.ip = req.ip;
-  data.user = req.user;
-  var form_name = 'form_'+req.params.form_id.replace(/[^\w]/g,'');
-  var col = db.collection(form_name);
-  try {
-    var result = await col.insertOne(data);
-    console.log('result',result.ops);
-    res.json({_id: result.ops[0]._id});
-  }
-  catch(err) {
-    console.error("error submitting form /submit/"+req.params.form_id);
-    console.error(err);
-    res.status(400).json({error:err});
-  } 
-}
-
-app.post("/json/submit/:form_id", submit_test_data);
-app.post("/json/reteive/:form_id", retrieve_test_data);
-
-// Same thing as above, but this time we use jwt for authentication:
-app.post("/api/submit/:form_id", checkJwt, submit_test_data);
-app.get("/api/get/:form_id/:record_id", checkJwt, retrieve_test_data);
-
-
-
-
+app.use(require("./routes/testRoutes.js").router);
 
 
 

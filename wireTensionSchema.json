@@ -1,0 +1,250 @@
+{
+  "components": [
+    {
+      "label": "Component UUID",
+      "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
+      "tooltip": "Database component UUID. Found on QR code.",
+      "inputMask": "********-****-****-****-************",
+      "customClass": ".component-uuid-formio",
+      "spellcheck": false,
+      "disabled": true,
+      "tableView": false,
+      "validateOn": "blur",
+      "validate": {
+        "pattern": "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
+        "customMessage": "Needs to be hexadecimal in 8-4-4-4-12 layout",
+        "unique": false,
+        "multiple": false
+      },
+      "errorLabel": "Not a UUID",
+      "key": "componentUuid",
+      "type": "ComponentUUID",
+      "input": true
+    },
+    {
+      "label": "Table",
+      "cellAlignment": "left",
+      "tableView": false,
+      "key": "table",
+      "type": "table",
+      "numRows": 2,
+      "input": false,
+      "rows": [
+        [
+          {
+            "components": [
+              {
+                "label": "Site",
+                "widget": "choicesjs",
+                "tableView": true,
+                "data": {
+                  "values": [
+                    {
+                      "label": "PSL",
+                      "value": "PSL"
+                    },
+                    {
+                      "label": "Chicago",
+                      "value": "CHI"
+                    },
+                    {
+                      "label": "Wisconsin",
+                      "value": "WIS"
+                    },
+                    {
+                      "label": "Yale",
+                      "value": "YAL"
+                    }
+                  ]
+                },
+                "selectThreshold": 0.3,
+                "validate": {
+                  "required": true,
+                  "unique": false,
+                  "multiple": false
+                },
+                "key": "site",
+                "type": "select",
+                "indexeddb": {
+                  "filter": {}
+                },
+                "input": true
+              }
+            ]
+          },
+          {
+            "components": [
+              {
+                "label": "Side",
+                "widget": "choicesjs",
+                "tableView": true,
+                "data": {
+                  "values": [
+                    {
+                      "label": "Side A",
+                      "value": "A"
+                    },
+                    {
+                      "label": "Side B",
+                      "value": "B"
+                    }
+                  ]
+                },
+                "selectThreshold": 0.3,
+                "validate": {
+                  "required": true,
+                  "unique": false,
+                  "multiple": false
+                },
+                "key": "side",
+                "type": "select",
+                "indexeddb": {
+                  "filter": {}
+                },
+                "input": true
+              }
+            ]
+          },
+          {
+            "components": [
+              {
+                "label": "Wire Segment Number",
+                "mask": false,
+                "spellcheck": true,
+                "tableView": false,
+                "delimiter": false,
+                "requireDecimal": false,
+                "inputFormat": "plain",
+                "validate": {
+                  "required": true,
+                  "unique": false,
+                  "multiple": false
+                },
+                "key": "wireSegmentNumber",
+                "type": "number",
+                "input": true
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "components": [
+              {
+                "label": "User",
+                "placeholder": "Person who did the measurement",
+                "spellcheck": true,
+                "tableView": true,
+                "validate": {
+                  "required": true,
+                  "unique": false,
+                  "multiple": false
+                },
+                "key": "user",
+                "type": "textfield",
+                "input": true
+              }
+            ]
+          },
+          {
+            "components": [
+              {
+                "label": "Measurement Date",
+                "tableView": false,
+                "datePicker": {
+                  "disableWeekends": false,
+                  "disableWeekdays": false
+                },
+                "defaultDate": "moment()",
+                "validate": {
+                  "unique": false,
+                  "multiple": false
+                },
+                "key": "measurementDate",
+                "type": "datetime",
+                "input": true,
+                "suffix": "<i ref=\"icon\" class=\"fa fa-calendar\" style=\"\"></i>",
+                "widget": {
+                  "type": "calendar",
+                  "displayInTimezone": "viewer",
+                  "language": "en",
+                  "useLocaleSettings": false,
+                  "allowInput": true,
+                  "mode": "single",
+                  "enableTime": true,
+                  "noCalendar": false,
+                  "format": "yyyy-MM-dd hh:mm a",
+                  "hourIncrement": 1,
+                  "minuteIncrement": 1,
+                  "time_24hr": false,
+                  "minDate": null,
+                  "disableWeekends": false,
+                  "disableWeekdays": false,
+                  "maxDate": null
+                }
+              }
+            ]
+          },
+          {
+            "components": [
+              {
+                "label": "Measurement Version",
+                "spellcheck": true,
+                "tableView": true,
+                "validate": {
+                  "unique": false,
+                  "multiple": false
+                },
+                "key": "measurementVersion",
+                "type": "textfield",
+                "input": true,
+                "defaultValue": "v1"
+              }
+            ]
+          }
+        ]
+      ],
+      "path": "table"
+    },
+    {
+      "label": "Array Data",
+      "placeholder": "paste comma-delimted values here",
+      "customClass": ".component-array-formio",
+      "spellcheck": true,
+      "tableView": true,
+      "validate": {
+        "unique": false,
+        "multiple": false
+      },
+      "errorLabel": "Does not parse",
+      "key": "arrayData",
+      "type": "ArrayComponent",
+      "input": true
+    },
+    {
+      "label": "Notes",
+      "autoExpand": false,
+      "spellcheck": true,
+      "tableView": true,
+      "validate": {
+        "unique": false,
+        "multiple": false
+      },
+      "key": "notes",
+      "type": "textarea",
+      "input": true
+    },
+    {
+      "type": "button",
+      "label": "Submit",
+      "key": "submit",
+      "disableOnInvalid": true,
+      "input": true,
+      "tableView": false,
+      "validate": {
+        "unique": false,
+        "multiple": false
+      }
+    }
+  ]
+}

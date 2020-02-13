@@ -1,16 +1,8 @@
+const jwt = require('express-jwt');
+const jwtAuthz = require('express-jwt-authz');
+const jwksRsa = require('jwks-rsa');
 
 
-module.exports = 
-{
-	hasFormEditPrivs,
-	hasDataEditPrivs,
-	hasDataEntryPrivs,
-	hasDataViewPrivs,
-	middlewareCheckFormEditPrivs,
-	middlewareCheckDataEditPrivs,
-	middlewareCheckDataEntryPrivs,
-	middlewareCheckDataViewPrivs
-}
 
 
 // route middleware to make sure a user is logged in
@@ -60,4 +52,36 @@ function middlewareCheckDataViewPrivs(req,res,next)
 {
 	if(hasDataViewPrivs(req)) return next();
 	else return res.status(300).send("User does not have Data View priviledges");
+}
+
+
+// machine-to-machine authorization:
+const checkJwt = jwt({
+  // Dynamically provide a signing key
+  // based on the kid in the header and 
+  // the signing keys provided by the JWKS endpoint.
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://dev-pserbfiw.auth0.com/.well-known/jwks.json`
+  }),
+
+  // Validate the audience and the issuer.
+  audience: 'https://dev-pserbfiw.auth0.com/api/v2/',
+  issuer: `https://dev-pserbfiw.auth0.com/`,
+  algorithms: ['RS256']
+});
+
+module.exports = 
+{
+	hasFormEditPrivs,
+	hasDataEditPrivs,
+	hasDataEntryPrivs,
+	hasDataViewPrivs,
+	middlewareCheckFormEditPrivs,
+	middlewareCheckDataEditPrivs,
+	middlewareCheckDataEntryPrivs,
+	middlewareCheckDataViewPrivs,
+	checkJwt
 }

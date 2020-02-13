@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "auth0": "^2.22.0",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.4.1",
     "bootstrap-autocomplete": "git+https://github.com/xcash/bootstrap-autocomplete.git",
+    "busboy": "^0.3.1",
     "chalk": "^3.0.0",
     "co-body": "^6.0.0",
     "connect-mongo": "^3.2.0",

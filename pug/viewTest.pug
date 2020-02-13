@@ -1,5 +1,6 @@
 extend default
 
+include common.pug
 
 block vars
   - var page_title=formrec.form_title || form_id;
@@ -37,8 +38,8 @@ block content
         span=moment(testdata.timestamp).format('MMM DD YYYY HH:MM')
     if user && testdata.user
       p Performed by:
-        span=testdata.user
+        +short_user(user)
 
-
+  a(href=`/json/retrieve/${testdata.form_id}/${testdata._id}`) JSON data
   #builtform
 

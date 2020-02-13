@@ -19,20 +19,22 @@ module.exports = {
 var uuid_regex = ':uuid([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})';
 var short_uuid_regex = ':shortuuid([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{21,22})';
 
-async function getComponents()
+async function getComponents(type)
 {
   console.log("getComponents");
   try{
+
+    var aggregation_stages = [];
+    if(type) aggregation_stages.push( { $match: {type: type} }          );
+    aggregation_stages.push(          { $sort:{  effectiveDate : -1 } } );
+    aggregation_stages.push(          { $group: {_id: { componentUuid : "$componentUuid" },
+                                                       componentUuid: { "$first":  "$componentUuid" },
+                                                       type: { "$first":  "$type" },
+                                                       name: { "$first":  "$name" }
+                                      } } );
     // var items = db.collection("components").find({}).project({componentUuid:1, type:1, name:1});
-    var items = db.collection("components").aggregate([
-      { $sort:{  effectiveDate : -1 } },
-      { $group: {_id: { componentUuid : "$componentUuid" },
-                 componentUuid: { "$first":  "$componentUuid" },
-                 type: { "$first":  "$type" },
-                 name: { "$first":  "$name" }
-                }
-      }
-    ]);
+    var items = db.collection("components").aggregate(aggregation_stages);
+
 
     // sort by type.
     var out = {};

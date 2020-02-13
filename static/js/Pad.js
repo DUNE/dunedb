@@ -502,7 +502,7 @@ Pad.prototype.DrawFrame = function()
       this.ctx.restore();
     }
     
-    if(this.ylabel ) {
+    if(this.ylabel) {
       this.ctx.save();
       this.ctx.translate(0,this.margin_top);      
       this.ctx.rotate(-90*3.1416/180);

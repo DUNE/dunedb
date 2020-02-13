@@ -1,6 +1,8 @@
 
 extend default
 
+include common.pug
+
 mixin label-link
   a(href="/"+componentUuid+"/label") Printable labels for this component
 
@@ -119,7 +121,7 @@ block content
               each test,index in form.performed
                 li 
                   -var parenthetical= " (on "+ moment(test.timestamp).format('MMM DD YYYY');
-                  -if(test.user) { parenthetical+=" by " + test.user.nickname|| test.user.displayName || test.user.emails[0] };
+                  -if(test.user) { parenthetical+=" by " + user_shortname(test.user) }
                   -parenthetical+=")";
                   a(href='/test/'+test.form_id+"/"+test._id)=(form.form_title||test.form_name)+parenthetical
         

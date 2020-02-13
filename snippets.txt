@@ -1,0 +1,7 @@
+const MongoClient = require('mongodb').MongoClient;
+const ObjectID = require('mongodb').ObjectID;
+const MUUID = require('uuid-mongodb');
+
+var config = require('./configuration.js');
+mongo_client = new MongoClient.connect(config.mongo_uri, {useNewUrlParser:true, useUnifiedTopology: true, 
+connectTimeoutMS: 100, socketTimeoutMS: 100});

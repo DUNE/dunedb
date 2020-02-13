@@ -45,3 +45,13 @@ mixin NewTestForm
 mixin uuid_autocomplete
     select.form-control.component-uuid-autocomplete.go-to-component(autocomplete="off" placeholder='type to search...')
 
+block pugscripts
+  - function user_email(user) { return ((user.emails||[])[0]||{}).value || "" };
+  - function user_shortname(user) { return user.nickname|| user.displayName || user_email(user) };
+
+
+mixin short_user(user)
+  if (!user)
+    span anonymous
+  else
+    a(href='mailto:'+user_email(user))=user.displayName||user.nickname||user_email(user)

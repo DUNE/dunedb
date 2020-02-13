@@ -35,7 +35,7 @@ router.get("/NewTestForm/:form_id", permissions.middlewareCheckFormEditPrivs, as
       rec.submit = {
         insertDate: new Date(),
         ip: req.ip,
-        user: ((res.locals||{}).user||{}).email || "unknown",
+        user: req.user,
         version: 0,
         diff_from: null,
         diff: null,
@@ -43,8 +43,6 @@ router.get("/NewTestForm/:form_id", permissions.middlewareCheckFormEditPrivs, as
 
       delete rec._id;
       rec.effectiveDate = new Date(0);
-      rec.version = 0;
-      rec.revised_by = ((res.locals||{}).user||{}).email || "unknown";
       console.log("inserting",rec);
       await forms.insertOne(rec);
   }
