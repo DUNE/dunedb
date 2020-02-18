@@ -93,7 +93,7 @@ router.post("/gridfs",permissions.middlewareCheckDataEntryPrivs,
   });
 
 
-
+// Retrieve a file.
 router.get('/gridfs/:objectid', function(req,res,next){
   const bucket = new mongo.GridFSBucket(db);
   bucket.openDownloadStream(mongo.ObjectID(req.params.objectid))
@@ -107,6 +107,20 @@ router.get('/gridfs/:objectid', function(req,res,next){
 
 });
 
+// delete a file, 
+// called when user pushes the 'x' button next to a falsely-uploaded file.
+router.delete('/gridfs/:objectid', permissions.middlewareCheckDataEntryPrivs, async function(req,res,next){
+  console.log("deleting",req.params.objectid);
+  const bucket = new mongo.GridFSBucket(db);
+  try {
+    await bucket.delete(mongo.ObjectID(req.params.objectid));
+    return res.status(200);
+  } catch(err) {
+    console.error(err);
+    return res.status(400).json({"error":err})
+  }
+
+});
 
 
 

@@ -79,6 +79,7 @@ var strategy = new Auth0Strategy(
     // accessToken is the token to call Auth0 API (not needed in the most cases)
     // extraParams.id_token has the JSON Web Token
     // profile has all the information from the user
+    console.log("auth0 strategy callback",...arguments);
     return done(null, profile);
   }
 );
@@ -118,6 +119,36 @@ app.get('/user', ensureAuthorized, function (req, res, next) {
   res.render('user.pug', {
     userProfile: JSON.stringify(userProfile, null, 2),
     title: 'Profile page'
+  });
+});
+
+
+// does not work.
+// I don't know how to get permissions.
+
+// const jwt = require('express-jwt');
+// const jwtAuthz = require('express-jwt-authz');
+// const checkScopes = jwtAuthz([ 'edit:forms' ]);
+
+var jwt = require('express-jwt');
+var jwks = require('jwks-rsa');
+var jwtCheck = jwt({
+      secret: jwks.expressJwtSecret({
+          cache: true,
+          rateLimit: true,
+          jwksRequestsPerMinute: 5,
+          jwksUri: 'https://dev-pserbfiw.auth0.com/.well-known/jwks.json'
+    }),
+    audience: 'https://sietch.xyz/api',
+    issuer: 'https://dev-pserbfiw.auth0.com/',
+    algorithms: ['RS256']
+});
+
+app.get('/prot', jwtCheck, function (req, res, next) {
+  const { _raw, _json, ...userProfile } = req.user;
+  res.render('user.pug', {
+    userProfile: JSON.stringify(userProfile, null, 2),
+    title: 'Protected page'
   });
 });
 

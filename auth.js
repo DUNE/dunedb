@@ -11,7 +11,8 @@ var config = require('./configuration.js');
 
 // Perform the login, after login Auth0 will redirect to callback
 router.get('/login', passport.authenticate('auth0', {
-  scope: 'openid email profile'
+  scope: 'openid email profile',
+  audience: 'https://sietch.xyz/api'
 }), function (req, res) {
   res.redirect('/');
 });
@@ -20,7 +21,7 @@ router.get('/login', passport.authenticate('auth0', {
 router.get('/callback', function (req, res, next) {
   passport.authenticate('auth0', function (err, user, info) {
     if (err) { return next(err); }
-    if (!user) { return res.redirect('/login'); }
+    if (!user) { return res.send("no user???"); /*res.redirect('/login');*/}
     req.logIn(user, function (err) {
       if (err) { return next(err); }
       const returnTo = req.session.returnTo;

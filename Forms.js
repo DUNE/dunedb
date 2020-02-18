@@ -107,8 +107,9 @@ router.post('/json/:collection(testForms|componentform)/:form_id', permissions.m
   console.log(chalk.blue("Schema submission","/json/testForms"));
 
   var form_id = req.params.form_id; 
-  var inserted_record = saveForm(form_id, req.body, "testForms", req, req.ip, req.user);
-
-  res.json(inserted_record);
+  try{
+	  var inserted_record = await saveForm(form_id, req.body, "testForms", req, req.ip, req.user);
+	  res.json(inserted_record);
+  } catch(err) { res.status(400).json({error:err}) }
 });
 

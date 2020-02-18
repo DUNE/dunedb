@@ -68,9 +68,13 @@ const checkJwt = jwt({
   }),
 
   // Validate the audience and the issuer.
-  audience: 'https://dev-pserbfiw.auth0.com/api/v2/',
-  issuer: `https://dev-pserbfiw.auth0.com/`,
-  algorithms: ['RS256']
+  // audience: 'https://dev-pserbfiw.auth0.com/api/v2/',
+  // issuer: `https://dev-pserbfiw.auth0.com/`,
+  // algorithms: ['RS256']
+    audience: 'https://sietch.xyz/api',
+    issuer: 'https://dev-pserbfiw.auth0.com/',
+    algorithms: ['RS256']
+
 });
 
 module.exports = 

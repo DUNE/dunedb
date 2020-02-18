@@ -65,7 +65,7 @@ CustomGeoTagComponent.builderInfo = {
  *  Tell the renderer how to render this component.
  */
 CustomGeoTagComponent.prototype.render = function(element) {
-  console.log("rendering",this,element);
+  // console.log("rendering",this,element);
   var tpl = '';
   tpl += this.renderTemplate('label', {
     label: this.labelInfo,
@@ -98,7 +98,7 @@ CustomGeoTagComponent.prototype.render = function(element) {
   tpl += "<div class='GeoTagTxt'>";
   tpl += "</div>";
   tpl += "</fieldset>";
-  console.log("template is",tpl);
+  // console.log("template is",tpl);
   return Formio.Components.components.component.prototype.render.call(this,tpl);
 
 };
@@ -119,13 +119,13 @@ CustomGeoTagComponent.prototype.attach = function(element)
   });
 
   // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
-  console.log('attach',this,element);
+  // console.log('attach',this,element);
 }
 
 CustomGeoTagComponent.prototype.setToCurrentLocation = function()
 {
   this.geotag = JSON.parse(localStorage.getItem('cached-geolocation'));
-  console.log("Do eeeeeet!",this.geotag );
+  // console.log("Do eeeeeet!",this.geotag );
   // InputComponent.prototype.updateValue.call(this, this.geotag);
   this.setValue(this.geotag);
   InputComponent.prototype.updateValue.call(this, this.geotag);
@@ -146,7 +146,7 @@ CustomGeoTagComponent.prototype.setToCurrentLocation = function()
  * @return {Array}
  */
 CustomGeoTagComponent.prototype.getValue = function() {
-  console.log("getValue",this);
+  // console.log("getValue",this);
   return this.geotag;
 };
 

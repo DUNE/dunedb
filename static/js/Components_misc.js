@@ -19,3 +19,14 @@ Formio.Components.components.file.schema = function(...extend) {
 
     };
   };
+
+
+Formio.prototype.deleteFile = function(fileinfo) {
+  if(fileinfo.storage=="url" && fileinfo.url) {
+    $.ajax({type: "DELETE",
+            url: fileinfo.url,
+            success: function(msg) { console.log("File deleted"); }
+    });
+  }
+  console.log(fileinfo);
+}
