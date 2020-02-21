@@ -61,60 +61,12 @@ app.use(session({
 }));
 
 
-// Configure Passport.
+// Configure passport and other authentication measures.
+require('./auth.js')(app); 
 
-var passport = require('passport');
-var Auth0Strategy = require('passport-auth0');
 
-// Configure Passport to use Auth0
-var strategy = new Auth0Strategy(
-  {
-    domain:       config.auth0_domain,
-    clientID:     config.auth0_client_id,
-    clientSecret: config.auth0_client_secret,
-    callbackURL:
-      config.auth0_callback_url || 'http://localhost:12313/callback'
-  },
-  function (accessToken, refreshToken, extraParams, profile, done) {
-    // accessToken is the token to call Auth0 API (not needed in the most cases)
-    // extraParams.id_token has the JSON Web Token
-    // profile has all the information from the user
-    console.log("auth0 strategy callback",...arguments);
-    return done(null, profile);
-  }
-);
-passport.use(strategy);
-app.use(passport.initialize());
-app.use(passport.session());
 
-// You can use this section to keep a smaller payload
-passport.serializeUser(function (user, done) {
-  console.log('serializeUser',user);
-  done(null, user);
-});
-
-passport.deserializeUser(function (user, done) {
-  done(null, user);
-});
-
-// make the req.user object available to the pug templates! Cool!
-app.use(function (req, res, next) {
-    res.locals.user = req.user;
-    next();
-});
-
-// ensure authorized: 
-function ensureAuthorized (req, res, next) {
-    if (req.user) { return next(); }
-    req.session.returnTo = req.originalUrl;
-    res.redirect('/login');
-};
-
-// authentication routes
-var authRouter = require('./auth');
-app.use('/',authRouter);
-
-app.get('/user', ensureAuthorized, function (req, res, next) {
+app.get('/user', permissions.ensureAuthenticated, function (req, res, next) {
   const { _raw, _json, ...userProfile } = req.user;
   res.render('user.pug', {
     userProfile: JSON.stringify(userProfile, null, 2),
@@ -123,28 +75,7 @@ app.get('/user', ensureAuthorized, function (req, res, next) {
 });
 
 
-// does not work.
-// I don't know how to get permissions.
-
-// const jwt = require('express-jwt');
-// const jwtAuthz = require('express-jwt-authz');
-// const checkScopes = jwtAuthz([ 'edit:forms' ]);
-
-var jwt = require('express-jwt');
-var jwks = require('jwks-rsa');
-var jwtCheck = jwt({
-      secret: jwks.expressJwtSecret({
-          cache: true,
-          rateLimit: true,
-          jwksRequestsPerMinute: 5,
-          jwksUri: 'https://dev-pserbfiw.auth0.com/.well-known/jwks.json'
-    }),
-    audience: 'https://sietch.xyz/api',
-    issuer: 'https://dev-pserbfiw.auth0.com/',
-    algorithms: ['RS256']
-});
-
-app.get('/prot', jwtCheck, function (req, res, next) {
+app.get('/api/test/prot',  function (req, res, next) {
   const { _raw, _json, ...userProfile } = req.user;
   res.render('user.pug', {
     userProfile: JSON.stringify(userProfile, null, 2),
@@ -156,29 +87,33 @@ app.get('/prot', jwtCheck, function (req, res, next) {
 
 
 
-app.get('/api/public', function(req, res) {
+app.get('/public', function(req, res) {
   res.json({
     message: 'Hello from a public endpoint! You don\'t need to be authenticated to see this.'
   });
 });
 
 // This route needs authentication
-app.get('/api/private', permissions.checkJwt, function(req, res) {
+app.get('/api/private', permissions.checkAuthenticatedJson, function(req, res) {
   res.json({
-    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
+    message: 'Hello from a private endpoint! You need to be authenticated to see this.',
+    user: req.user
   });
 });
 
 
 
 // routes in other files
-app.use(Components.router);
-app.use(Forms.router);
-app.use(require('./routes/formRoutes.js').router);
-app.use(require('./routes/componentRoutes.js').router);
-app.use('/file',require('./routes/files.js').router);
-app.use(require("./routes/testRoutes.js").router);
+app.use(require('./routes/formRoutes.js'));
+app.use(require('./routes/componentRoutes.js'));
+app.use(require("./routes/testRoutes.js"));
 
+app.use('/file',require('./routes/files.js'));
+app.use('/autocomplete',require("./routes/autocomplete.js"));
+
+// Two names for api
+app.use('/json',require("./routes/api.js"));
+app.use('/api',require("./routes/api.js"));
 
 
 

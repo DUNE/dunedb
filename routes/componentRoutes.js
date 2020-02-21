@@ -13,9 +13,7 @@ var utils = require("../utils.js");
 
 var router = express.Router();
 
-module.exports = {
-  router,
-}
+module.exports = router;
 
 // Pull up an existing component for editing or just viewing.
 console.log('regex',utils.uuid_regex);
@@ -50,12 +48,12 @@ async function get_component(req,res) {
     schema: form.schema,
     componentUuid:componentUuid,
     component: component,
-    canEdit: permissions.hasDataEditPrivs(),
+    canEdit: permissions.hasPermission("components:edit"),
     tests: tests,
   });
 }
-router.get('/'+utils.uuid_regex, permissions.middlewareCheckDataViewPrivs, get_component);
-router.get('/'+utils.short_uuregex, permissions.middlewareCheckDataViewPrivs, get_component);
+router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
+router.get('/'+utils.short_uuregex, permissions.checkPermission("components:view"), get_component);
 
 async function edit_component(req,res) {
   // deal with shortened form or full-form
@@ -84,12 +82,12 @@ async function edit_component(req,res) {
     schema: form.schema,
     componentUuid:componentUuid,
     component: component,
-    canEdit: permissions.hasDataEditPrivs(),
+    canEdit: permissions.hasPermission("components:edit"),
   });
 }
 
-router.get('/'+utils.uuid_regex+'/edit', permissions.middlewareCheckDataEditPrivs, edit_component);
-router.get('/'+utils.short_uuid_regex+'/edit', permissions.middlewareCheckDataEditPrivs, edit_component);
+router.get('/'+utils.uuid_regex+'/edit', permissions.checkPermission("components:edit"), edit_component);
+router.get('/'+utils.short_uuid_regex+'/edit', permissions.checkPermission("components:edit"), edit_component);
 
 
 async function component_label(req,res,next) {
@@ -99,8 +97,8 @@ async function component_label(req,res,next) {
   console.log({component: component});
   res.render('label.pug',{component: component});
 }
-router.get('/'+utils.uuid_regex+'/label', permissions.middlewareCheckDataViewPrivs, component_label);
-router.get('/'+utils.short_uuid_regex+'/label', permissions.middlewareCheckDataViewPrivs, component_label);
+router.get('/'+utils.uuid_regex+'/label', permissions.checkPermission("components:view"), component_label);
+router.get('/'+utils.short_uuid_regex+'/label', permissions.checkPermission("components:view"), component_label);
 
 
 
@@ -109,8 +107,7 @@ router.get('/'+utils.short_uuid_regex+'/label', permissions.middlewareCheckDataV
 // Create a new component
 
 
-router.get("/NewComponent",
-  permissions.middlewareCheckDataViewPrivs,
+router.get("/NewComponent", permissions.checkPermission("components:create"),
   // middlewareCheckDataEntryPrivs,
    async function(req,res){
   var form = await Forms.retrieveForm("componentForm","componentForm");
@@ -121,7 +118,7 @@ router.get("/NewComponent",
     schema: form.schema,
     componentUuid:componentUuid,
     component: {componentUuid:componentUuid},
-    canEdit: permissions.hasDataEntryPrivs(),
+    canEdit: permissions.hasPermission("components:edit"),
     tests:[],
     performed: [],
   });

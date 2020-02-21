@@ -17,8 +17,17 @@ var defaults = {
   // Authentication information so people can log in through auth0
   // Available on auth0 dashboard
   auth0_client_id: "XXxxXX",
-  auth0_domain:   "dev-xxxxxxxx.auth0.com",
   auth0_client_secret: "XXxxxXXX",
+  auth0_domain:   "dev-pserbfiw.auth0.com",
+  // Our Auth0 API knows about permission types.
+  auth0_api_audience: 'https://sietch.xyz/api',  
+
+  // machine-to-machine jwt authentication:
+  auth0_jwksUri: `https://dev-pserbfiw.auth0.com/.well-known/jwks.json`,
+  auth0_jwks_issuer: 'https://dev-pserbfiw.auth0.com/',
+
+  // Permissions for people who haven't logged in
+  default_permissions: ['components:view', 'tests:view', 'forms:view'],
 }
 
 var config;

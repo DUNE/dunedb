@@ -9,9 +9,7 @@ var database = require('../database.js')
 var router = express.Router();
 
 
-module.exports = {
-  router,
-}
+module.exports = router;
 
 //////////////////////////////////////////////////////////////////////////
 // Editing and creating forms
@@ -21,7 +19,7 @@ console.log("forms",Forms);
 // Create a new test form
 var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
 
-router.get("/NewTestForm/:form_id", permissions.middlewareCheckFormEditPrivs, async function(req,res){
+router.get("/NewTestForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
   console.log("forms",Forms);
   var rec = await Forms.retrieveForm(req.params.form_id);
   
@@ -51,12 +49,12 @@ router.get("/NewTestForm/:form_id", permissions.middlewareCheckFormEditPrivs, as
 });
 
 // Edit existing test form
-router.get("/EditTestForm/:form_id?", permissions.middlewareCheckFormEditPrivs, async function(req,res){
+router.get("/EditTestForm/:form_id?", permissions.checkPermission("forms:edit"), async function(req,res){
   res.render('EditTestForm.pug',{collection:"testForms",form_id:req.params.form_id});
 });
 
 // Edit component form.
-router.get("/EditComponentForm", permissions.middlewareCheckFormEditPrivs, async function(req,res){
+router.get("/EditComponentForm", permissions.checkPermission("forms:edit"), async function(req,res){
   res.render('EditComponentForm.pug',{collection:"componentForm",form_id:"componentForm"});
 });
 

@@ -101,7 +101,7 @@ block extrascripts
                         "unique": false,
                         "multiple": false
                       },
-                      "key": "revised",
+                      "key": "effectiveDate",
                       "type": "datetime",
                       "input": true,
                       "suffix": "<i ref=\"icon\" class=\"fa fa-calendar\" style=\"\"></i>",
@@ -227,6 +227,7 @@ block extrascripts
       function schemaRecordChange(formdata) {
           console.log("schemaRecordChange",formdata);
           gformdata = formdata;
+          metaform.submission.data.revised_by = ((formdata.submit||{}).user||{}).displayName;
           metaform.submission = {data: formdata};
           builder = new Formio.FormBuilder(
               $('.formbuilder_area').get(0), // html element

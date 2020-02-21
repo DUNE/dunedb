@@ -8,16 +8,13 @@ const { Binary } = require('mongodb');
 var database = require('./database.js');  // Exports global 'db' variable
 var permissions = require('./permissions.js');
 
-var router = express.Router();
 
 module.exports = {
-  router,
   getComponents,
   retrieveComponent,
-  saveComponent
+  saveComponent,
+  findUuidStartsWith,
 }
-var uuid_regex = ':uuid([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})';
-var short_uuid_regex = ':shortuuid([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{21,22})';
 
 async function getComponents(type)
 {
@@ -117,11 +114,11 @@ async function saveComponent(data,req,user)
     var components = db.collection("components");
     if(!old) {
       // No conflict. Is this user allowed to enter data?
-      if(!permissions.hasDataEntryPrivs(req))  throw "You don't have data entry priviledges.";
+      if(!permissions.hasPermission(req,'components:create'))  throw "You don't have data entry priviledges.";
       await components.insertOne(data); // fixme TRANSACTION LOG wutg req.body.metadata
     } else {
       console.log('existing record');
-      if(!permissions.hasDataEditPrivs(req)) throw "Component UUID "+componentUuid+" is already in database and you don't have edit priviledges.";
+      if(!permissions.hasPermission(req,'components:edit')) throw "Component UUID "+componentUuid+" is already in database and you don't have edit priviledges.";
       await components.insertOne(data); // fixme TRANSACTION LOG wutg req.body.metadata
     }
     return data;
@@ -131,14 +128,15 @@ async function saveComponent(data,req,user)
 
 
 
-// Autocomplete Route
-
-router.get("/autocomplete/uuid",async function(req,res,next) {
-  var q = req.query.q.replace(/[_-]/g,''); // Remove _ and - 
-  console.log("query",q);
-
+// for the Autocomplete Route
+async function findUuidStartsWith(uuid_string)
+{
   // binary version.
-  // pad with zeroes and FS.
+
+  // sanitize string of all extra characters.
+  var q = uuid_string.replace(/[_-]/g,'');
+
+  // pad with zeroes and "F"s.
   var qlow = q.padEnd(32,'0');
   var qhigh = q.padEnd(32,'F');
   console.log(qlow,qhigh);
@@ -158,20 +156,7 @@ router.get("/autocomplete/uuid",async function(req,res,next) {
     m.text = m.val + ' ' +m.name;
   }
   console.log(matches);
-  return res.json(matches)
-
-
-  var matches = await db.collection("components")
-    .find({componentUuid:{$regex: regex}})
-    .project({"componentUuid":1,name:1})
-    .toArray();
-  for(m of matches) {
-    m.val = m.componentUuid;
-    m.text = m.val + ' ' +m.name;
-  }
-  console.log(matches);
-  return res.json(matches)
-
+  return matches;
 
   // text version.
 
@@ -186,39 +171,9 @@ router.get("/autocomplete/uuid",async function(req,res,next) {
   // }
   // console.log(matches);
   // return res.json(matches)
-})
-
-// JSON Routes
+}
 
 
-// Pull component data as json doc.
-
-router.get('/json/component/'+uuid_regex, permissions.middlewareCheckDataViewPrivs, async function(req,res){
-  console.log("/json/component/"+req.params.uuid)
-  if(!req.params.uuid) return res.status(400).json({error:"No uuid specified"});
-  // fresh retrival
-  var component= await retrieveComponent(req.params.uuid);
-  if(!component)  return res.status(400).json({error:"UUID not found"});
-  console.log(component);
-  res.json(component);
-});
-
-
-
-// Post component changes.
-
-router.post('/json/component/'+uuid_regex, permissions.middlewareCheckDataEditPrivs, async function(req,res,next){
-
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  var data = req.body.data;
-  try {
-    data = saveComponent(data,req,(res.locals.user||{})); // FIXME use email or something.
-    return res.json(data);
-  } catch(err) {
-    res.status(400).json({error:"Save failure "+err})
-  }
-  
-});
 
 
 

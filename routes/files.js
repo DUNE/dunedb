@@ -10,15 +10,13 @@ const Busboy = require('busboy');
 var router = express.Router();
 
 
-module.exports = {
-  router,
-}
+module.exports = router;
 // These routes are obsolete, but leaving them here for future reference.
 
 
 // Save files to disk:
 var file_upload_middleware = require('express-fileupload')();
-router.post("/disk",permissions.middlewareCheckDataViewPrivs,file_upload_middleware,async function(req, res,next){
+router.post("/disk",permissions.checkPermission("tests:view"),file_upload_middleware,async function(req, res,next){
     console.log('/disk',req.files);
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).send('No files were uploaded.');
@@ -46,7 +44,7 @@ router.use('/disk',express.static(__dirname+"/files"));
 
 
 
-router.post("/gridfs",permissions.middlewareCheckDataEntryPrivs,
+router.post("/gridfs",permissions.checkPermission("tests:submit"),
   async function(req, res,next){
     console.log("/file/gridfs");
     var bucket = new mongo.GridFSBucket(db);
@@ -109,7 +107,7 @@ router.get('/gridfs/:objectid', function(req,res,next){
 
 // delete a file, 
 // called when user pushes the 'x' button next to a falsely-uploaded file.
-router.delete('/gridfs/:objectid', permissions.middlewareCheckDataEntryPrivs, async function(req,res,next){
+router.delete('/gridfs/:objectid', permissions.checkPermission("tests:submit"), async function(req,res,next){
   console.log("deleting",req.params.objectid);
   const bucket = new mongo.GridFSBucket(db);
   try {

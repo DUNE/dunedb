@@ -7,6 +7,10 @@ var util = require('util');
 var url = require('url');
 var querystring = require('querystring');
 var config = require('./configuration.js');
+var Auth0Strategy = require('passport-auth0');
+var jsonwebtoken = require('jsonwebtoken');
+var jwt = require('express-jwt');
+var jwks = require('jwks-rsa');
 
 
 // Perform the login, after login Auth0 will redirect to callback
@@ -54,4 +58,58 @@ router.get('/logout', (req, res) => {
   res.redirect(logoutURL);
 });
 
-module.exports = router;
+
+
+
+module.exports = function(app) {
+
+    // Configure Passport.
+
+    // Configure Passport to use Auth0
+    var strategy = new Auth0Strategy(
+      {
+        domain:       config.auth0_domain,
+        clientID:     config.auth0_client_id,
+        clientSecret: config.auth0_client_secret,
+        callbackURL:
+          config.auth0_callback_url || 'http://localhost:12313/callback'
+      },
+      function (accessToken, refreshToken, extraParams, profile, done) {
+        // accessToken is the token to call Auth0 API (not needed in the most cases)
+        // extraParams.id_token has the JSON Web Token
+        // profile has all the information from the user
+
+        // decode the access token (does not verify)
+        var decoded = jsonwebtoken.decode(accessToken);
+        profile.permissions = decoded.permissions;
+        console.log(decoded,profile);
+        // console.log("auth0 strategy callback",...arguments);
+        return done(null, profile);
+      }
+    );
+    passport.use(strategy);
+    app.use(passport.initialize());
+    app.use(passport.session());
+
+    // You can use this section to keep a smaller payload
+    passport.serializeUser(function (user, done) {
+      console.log('serializeUser',user);
+      done(null, user);
+    });
+
+    passport.deserializeUser(function (user, done) {
+      done(null, user);
+    });
+
+    // make the req.user object available to the pug templates! Cool!
+    app.use(function (req, res, next) {
+        res.locals.user = req.user;
+        next();
+    });
+
+ 
+    // Configure
+
+    // authentication routes
+    app.use('/',router);
+};
