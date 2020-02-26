@@ -30,6 +30,7 @@ async function getComponents(type)
                                                        name: { "$first":  "$name" }
                                       } } );
     // var items = db.collection("components").find({}).project({componentUuid:1, type:1, name:1});
+    // console.dir(aggregation_stages);
     var items = db.collection("components").aggregate(aggregation_stages);
 
 
@@ -41,6 +42,7 @@ async function getComponents(type)
       item = await items.next()
       if(!item) break;
       item.componentUuid = MUUID.from(item.componentUuid).toString();
+      delete item._id;
       // console.log("item",item);
 
       var type = item.type || "unknown";

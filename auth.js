@@ -101,14 +101,34 @@ module.exports = function(app) {
       done(null, user);
     });
 
-    // make the req.user object available to the pug templates! Cool!
+
+    // Machine-to-machine authentication
+    var jwtCheck = jwt({
+      secret: jwks.expressJwtSecret({
+          cache: true,
+          rateLimit: true,
+          jwksRequestsPerMinute: 5,
+          jwksUri: 'https://' + config.auth0_domain + '/.well-known/jwks.json'
+    }),
+    audience: 'https://sietch.xyz/api',
+    issuer: 'https://' + config.auth0_domain + '/',
+    algorithms: ['RS256'],
+    credentialsRequired: false,
+    });
+
+    app.use('/api',jwtCheck);
+
+
     app.use(function (req, res, next) {
+        // If the user is from a jwt token, add more information...
+        // FIXME
+        
+        // make the req.user object available to the pug templates! Cool!
         res.locals.user = req.user;
         next();
     });
 
  
-    // Configure
 
     // authentication routes
     app.use('/',router);

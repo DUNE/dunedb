@@ -29,13 +29,40 @@ router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('com
     var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
     var data = req.body.data;
     try {
-      data = Components.saveComponent(data,req,(res.locals.user||{})); // FIXME use email or something.
+      data = Components.saveComponent(data,req,(req.user||{})); 
       return res.json(data);
     } catch(err) {
       res.status(400).json({error:"Save failure "+err})
     }  
   }
 );
+
+
+// Component searching:
+// router.get('/components/all', permissions.checkPermissionJson('components:view'), 
+//   async function(req,res,next){
+//     // FIXME, add search terms
+//     try {
+//       var data = await Components.getComponents();
+//       return res.json(data);
+//     } catch(err) {
+//       res.status(400).json({error:err})
+//     }  
+//   }
+// );
+
+router.get('/components/:type', permissions.checkPermissionJson('components:view'), 
+  async function(req,res,next){
+    // FIXME, add search terms
+    try {
+      var data = await Components.getComponents(req.params.type);
+      return res.json(data);
+    } catch(err) {
+      res.status(400).json({error:err})
+    }  
+  }
+);
+
 
 ////////////////////////////////////////////////////////
 // Forms
@@ -80,7 +107,7 @@ router.post("/submit/:form_id", permissions.checkPermissionJson('tests:submit'),
     // var body = await parse.json(req);
     var id = null;
     try {
-      id = Tests.saveTestData(req.params.form_id, req.body, req.ip, req.user);
+      id = await Tests.saveTestData(req.params.form_id, req.body, req.ip, req.user);
       res.json({_id: id});
     } catch(err) {
       console.error("error submitting form /submit/"+req.params.form_id);

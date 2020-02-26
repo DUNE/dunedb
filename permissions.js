@@ -41,6 +41,9 @@ function checkPermissionJson(scope_required) {
 		var user = req.user || {};
 		var scopes = default_permissions.concat(user.permissions || user.scopes || []);
 		if(scopes.includes(scope_required)) return next();
+		console.log("Check Permission Failed")
+		console.log(user)
+		console.log(scope_required,scopes)
 		return res.status(400).json({error:"Insufficient privileges. Need "+scope_required+"; have "+scopes.join(',')})
 	}
 }
