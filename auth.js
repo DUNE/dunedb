@@ -60,7 +60,6 @@ router.get('/logout', (req, res) => {
 
 
 
-
 module.exports = function(app) {
 
     // Configure Passport.
