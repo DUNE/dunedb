@@ -18,6 +18,7 @@ const default_permissions = config.default_permissions || ['components:view', 't
 
 function hasPermission(req,scope_required)
 {
+  if(req.user && config.all_users_have_all_permissions) return true;
 	var user = req.user || {};
 	var scopes = default_permissions.concat(user.permissions || user.scopes || []);
 	return scopes.includes(scope_required);
@@ -27,6 +28,7 @@ function hasPermission(req,scope_required)
 function checkPermission(scope_required) {
 	return function(req,res,next)
 	{
+    if(req.user && config.all_users_have_all_permissions) return next();
 		var user = req.user || {};
 		var scopes = default_permissions.concat(user.permissions || user.scopes || []);
 		if(scopes.includes(scope_required)) return next();
@@ -38,6 +40,8 @@ function checkPermission(scope_required) {
 function checkPermissionJson(scope_required) {
 	return function(req,res,next)
 	{
+    if(req.user && config.all_users_have_all_permissions) return next();
+
 		var user = req.user || {};
 		var scopes = default_permissions.concat(user.permissions || user.scopes || []);
 		if(scopes.includes(scope_required)) return next();

@@ -11,9 +11,9 @@ function pickRandom(arr)
   return arr[i];
 }
 
-var napa = 2;
+var napa = 10;
 
-var nboards = 10;
+var nboards = 100;
 
 var components = [];
 
