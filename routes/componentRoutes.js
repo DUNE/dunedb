@@ -55,6 +55,43 @@ async function get_component(req,res) {
 router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
 router.get('/'+utils.short_uuregex, permissions.checkPermission("components:view"), get_component);
 
+
+
+router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("components:view"),
+  async function(req,res) {
+  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+  console.log(get_component,componentUuid,req.params);
+
+  var effectiveDate = null;
+  if(req.query.effectiveDate) {
+    effectiveDate = new Date(parseInt(req.query.effectiveDate));
+    console.log("Trying effective date",effectiveDate)
+  }
+
+  var effectiveDates = await Components.retrieveComponentChangeDates(componentUuid);
+
+  // get form and data in one go
+  let [form, component] = await Promise.all([
+      Forms.retrieveForm("componentForm","componentForm"),
+      Components.retrieveComponent(componentUuid,effectiveDate),
+    ]);
+
+  // equal:
+  // var component = await Components.findOne({componentUuid:req.params.uuid});
+  // var form = await Forms.retrieveForm("componentForm","componentForm");
+  console.log("component")
+  console.log(component);
+  if(!component) return res.status(400).send("No such component ID.");
+  res.render("component_history.pug",{
+    schema: form.schema,
+    effectiveDates: effectiveDates,
+    componentUuid:componentUuid,
+    component: component,
+    canEdit: permissions.hasPermission("components:edit"),
+  });
+  }
+)
+
 async function edit_component(req,res) {
   // deal with shortened form or full-form
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);

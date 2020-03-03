@@ -12,6 +12,7 @@ var permissions = require('./permissions.js');
 module.exports = {
   getComponents,
   retrieveComponent,
+  retrieveComponentChangeDates,
   saveComponent,
   findUuidStartsWith,
 }
@@ -66,17 +67,28 @@ async function retrieveComponent(componentUuid,onDate,rollbackDate) {
   // rollbackdate and onDate must be in native Date() format or null
 
   var query = {componentUuid:MUUID.from(componentUuid)}; // binary form.
-  if(rollbackDate) query["submit.insertDate"] = {$lt: rollbackDate};  // rollback to things inserted before this time
-  if(onDate) query.effectiveDate = {$lt: onDate}; // rollback to things that happened before this time
+  if(rollbackDate) query["submit.insertDate"] = {$lte: rollbackDate};  // rollback to things inserted before this time
+  if(onDate) query.effectiveDate = {$lte: onDate}; // rollback to things that happened before this time
   console.log("retrieveComponent",...arguments,query);
-  var resall =  await db.collection('components').find(query).toArray();
-  console.log(chalk.red('------finding component------'),query);
-  console.dir(resall);
+  // var resall =  await db.collection('components').find(query).toArray();
+  // console.log(chalk.red('------finding component------'),query);
+  // console.dir(resall);
   var res = await db.collection('components').find(query).sort({effectiveDate:-1,"submit.version":-1}).limit(1).toArray();
   console.log("res",res);
   if(res.length<1) return null;
   res[0].componentUuid = MUUID.from(res[0].componentUuid).toString();
   return res[0];
+}
+
+async function retrieveComponentChangeDates(componentUuid,rollbackDate) {
+  // Find the right component
+  // rollbackdate and onDate must be in native Date() format or null
+  var query = {componentUuid:MUUID.from(componentUuid)}; // binary form.
+  if(rollbackDate) query["submit.insertDate"] = {$lt: rollbackDate};  // rollback to things inserted before this time
+  var resall =  await db.collection('components').find(query).project({effectiveDate:1}).sort({effectiveDate:-1}).toArray();
+  console.log(chalk.red('------finding component versions------'),query);
+  console.dir(resall);
+  return resall;
 }
 
 async function saveComponent(data,req,user)
