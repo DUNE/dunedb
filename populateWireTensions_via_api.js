@@ -30,7 +30,7 @@ function SietchConnect()
   this.api = async function(method,route,data) {
     var req = {
         method: method,
-        url: 'http://localhost:12313/api' + route,
+        url: 'http://sietch.xyz/api' + route,
         headers: { 
           authorization: 'Bearer ' + this.token, 
           'content-type': 'application/json' },

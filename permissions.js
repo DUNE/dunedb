@@ -72,53 +72,6 @@ function ensureAuthenticated (req, res, next) {
 };
 
 
-function hasFormEditPrivs(req)
-{
-	return checkPermissions("edit:forms")
-}
-	
-function hasDataEditPrivs(req)
-{
-	return checkPermissions("edit:")
-}
-
-function hasDataEntryPrivs(req)
-{
-	return true;
-}
-
-function hasDataViewPrivs(req)
-{
-	return true;
-}
-
-
-
-function middlewareCheckFormEditPrivs(req,res,next) 
-{
-	if(hasFormEditPrivs(req)) return next();
-	else return res.status(300).send("User does not have Form Edit priviledges");
-}
-
-function middlewareCheckDataEditPrivs(req,res,next) 
-{
-	if(hasDataEditPrivs(req)) return next();
-	else return res.status(300).send("User does not have Data Edit priviledges");
-}
-
-function middlewareCheckDataEntryPrivs(req,res,next) 
-{
-	if(hasDataEntryPrivs(req)) return next();
-	else return res.status(300).send("User does not have Data Entry priviledges");
-}
-
-function middlewareCheckDataViewPrivs(req,res,next) 
-{
-	if(hasDataViewPrivs(req)) return next();
-	else return res.status(300).send("User does not have Data View priviledges");
-}
-
-
 
 
 
@@ -131,12 +84,4 @@ module.exports =
 	checkAuthenticated,
 	checkAuthenticatedJson,
 
-	// hasFormEditPrivs,
-	// hasDataEditPrivs, 
-	// hasDataEntryPrivs,
-	// hasDataViewPrivs,
-	// middlewareCheckFormEditPrivs,
-	// middlewareCheckDataEditPrivs,
-	// middlewareCheckDataEntryPrivs,
-	// middlewareCheckDataViewPrivs,
 }
