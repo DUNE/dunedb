@@ -85,7 +85,7 @@ async function retrieveComponentChangeDates(componentUuid,rollbackDate) {
   // rollbackdate and onDate must be in native Date() format or null
   var query = {componentUuid:MUUID.from(componentUuid)}; // binary form.
   if(rollbackDate) query["submit.insertDate"] = {$lt: rollbackDate};  // rollback to things inserted before this time
-  var resall =  await db.collection('components').find(query).project({effectiveDate:1}).sort({effectiveDate:-1}).toArray();
+  var resall =  await db.collection('components').find(query).project({effectiveDate:1,"submit.user":1}).sort({effectiveDate:-1}).toArray();
   console.log(chalk.red('------finding component versions------'),query);
   console.dir(resall);
   return resall;

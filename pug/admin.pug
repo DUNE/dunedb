@@ -50,6 +50,29 @@ block content
                     li
                         a(href='/EditTestForm/'+test.form_id)="Edit "+test.form_title
 
+
+        .col-md-6
+            .border.rounded.m-3
+                h2 Workflows
+
+                .border.border-primary.p-3.m-2
+                  h4 Run a workflow:
+                  ul#workflows
+                    each workflow in workflows
+                      li
+                        a(href='/job/'+workflow.form_id)="Run "+workflow.form_title
+
+                .border.border-danger.p-3.m-2
+                  p.h4
+                    +NewWorkflowForm
+
+                  h4 Edit an existing workflow:
+                  ul#editJobs
+                  each workflow in workflows
+                    li
+                        a(href='/EditWorkflowForm/'+workflow.form_id)="Edit "+workflow.form_title
+
+
     .row.border-top.my-3
 
     .row

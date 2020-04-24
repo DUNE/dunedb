@@ -4,6 +4,8 @@ const permissions = require('../permissions.js');
 const config = require('../configuration.js');
 const mongo = require('mongodb');
 const Busboy = require('busboy');
+const moment = require('moment');
+// var database = require('./database.js'); // Exports global 'db' variable
 
 /// submit file data0
 
@@ -93,34 +95,54 @@ router.post("/gridfs",permissions.checkPermission("tests:submit"),
 
 // Retrieve a file.
 router.get('/gridfs/:objectid', function(req,res,next){
-  const bucket = new mongo.GridFSBucket(db);
-  bucket.openDownloadStream(mongo.ObjectID(req.params.objectid))
-  .on('file',function(obj){
-      res.set('Content-Disposition', `attachment; filename=${obj.filename}`);
-      if(obj.contentType)      res.set('Content-Type', obj.contentType);
-      else                     res.set('Content-Type', 'application/octet-stream');
-    console.log("gridfs found file",obj);
-  })
-  .pipe(res);
+  try {
+    db.collection('file_activity').updateOne({_id:req.params.objectid},
+                                        {$set: {last_retrieval: new Date()}},
+                                        {upsert:true});
 
+    const bucket = new mongo.GridFSBucket(db);
+    bucket.openDownloadStream(mongo.ObjectID(req.params.objectid))
+    .on('file',function(obj){
+        res.set('Content-Disposition', `attachment; filename=${obj.filename}`);
+        if(obj.contentType)      res.set('Content-Type', obj.contentType);
+        else                     res.set('Content-Type', 'application/octet-stream');
+        console.log("gridfs found file",obj);
+    })
+    .on('error',function(err){
+      console.error("Error retrieving file /gridfs/"+req.params.objectid);
+      console.error(err);
+      res.status(400).json({error:err})
+
+    })
+    .pipe(res);
+  } catch(err) {
+    res.status(400).json({error:err})
+  }
 });
 
 // delete a file, 
 // called when user pushes the 'x' button next to a falsely-uploaded file.
+// router.delete('/gridfs/:objectid', permissions.checkPermission("tests:submit"), async function(req,res,next){
+//   console.log("deleting",req.params.objectid);
+//   const bucket = new mongo.GridFSBucket(db);
+//   try {
+//     await bucket.delete(mongo.ObjectID(req.params.objectid));
+//     return res.status(200);
+//   } catch(err) {
+//     console.error(err);
+//     return res.status(400).json({"error":err})
+//   }
+
+// });
+
+// Instead of the above, mark a file for possible deletion
 router.delete('/gridfs/:objectid', permissions.checkPermission("tests:submit"), async function(req,res,next){
-  console.log("deleting",req.params.objectid);
-  const bucket = new mongo.GridFSBucket(db);
-  try {
-    await bucket.delete(mongo.ObjectID(req.params.objectid));
-    return res.status(200);
-  } catch(err) {
-    console.error(err);
-    return res.status(400).json({"error":err})
-  }
-
+  console.log("marking for deletion:",req.params.objectid);
+  await db.collection('file_activity').updateOne({_id:req.params.objectid},
+                                        {$set: {delete_requested: new Date()}},
+                                        {upsert:true});
+  return res.status(200);
 });
-
-
 
 
 

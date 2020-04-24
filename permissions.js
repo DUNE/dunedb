@@ -2,7 +2,9 @@
 var config = require('./configuration.js');
 
 
-const default_permissions = config.default_permissions || ['components:view', 'tests:view', 'forms:view']
+const default_permissions 	   = config.default_permissions || ['components:view', 'tests:view', 'forms:view']
+const default_user_permissions = config.default_user_permissions || [ 
+															    'components:edit', 'tests:edit', 'forms:edit']
 
 // route middleware to make sure a user is logged in
 // Now I know how to use these:
@@ -16,23 +18,29 @@ const default_permissions = config.default_permissions || ['components:view', 't
 
 // NB In API,  RBAC on, add permissions to access token, allow skipping user consent,
 
+function userScopes(req) 
+{
+  var scopes = default_permissions;
+  if(req.user) {
+  	scopes = scopes.concat(default_user_permissions);
+  	scopes = scopes.concat(req.user.permissions || req.user.scopes || []);
+  }
+  return scopes;  
+}
+
 function hasPermission(req,scope_required)
 {
   if(req.user && config.all_users_have_all_permissions) return true;
-	var user = req.user || {};
-	var scopes = default_permissions.concat(user.permissions || user.scopes || []);
-	return scopes.includes(scope_required);
+  var scopes = userScopes(req);
+  return scopes.includes(scope_required);
 }
 
 // Middleware to check a scope
 function checkPermission(scope_required) {
 	return function(req,res,next)
 	{
-    if(req.user && config.all_users_have_all_permissions) return next();
-		var user = req.user || {};
-		var scopes = default_permissions.concat(user.permissions || user.scopes || []);
-		if(scopes.includes(scope_required)) return next();
-		return res.status(400).render('permissionsError.pug',{scope_required:scope_required,user_scopes:scopes})
+    	if(hasPermission(req,scope_required)) return next();
+		return res.status(400).render('permissionsError.pug',{scope_required:scope_required,user_scopes:userScopes(req)})
 	}
 }
 
@@ -40,15 +48,11 @@ function checkPermission(scope_required) {
 function checkPermissionJson(scope_required) {
 	return function(req,res,next)
 	{
-    if(req.user && config.all_users_have_all_permissions) return next();
-
-		var user = req.user || {};
-		var scopes = default_permissions.concat(user.permissions || user.scopes || []);
-		if(scopes.includes(scope_required)) return next();
+    	if(hasPermission(req,scope_required)) return next();
 		console.log("Check Permission Failed")
 		console.log(user)
 		console.log(scope_required,scopes)
-		return res.status(400).json({error:"Insufficient privileges. Need "+scope_required+"; have "+scopes.join(',')})
+		return res.status(400).json({error:"Insufficient privileges. Need "+scope_required+"; have "+userScopes(req).join(',')})
 	}
 }
 

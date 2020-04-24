@@ -68,7 +68,7 @@ router.get('/components/:type', permissions.checkPermissionJson('components:view
 // Forms
 
 // API/Backend: Get a form schema
-router.get('/:collection(testForms|componentForm)/:form_id', permissions.checkPermissionJson('forms:view'), 
+router.get('/:collection(testForms|componentForm|jobForms)/:form_id', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
     var rec = await Forms.retrieveForm(req.params.form_id, req.params.collection);
     // if(!rec) return res.status(404).send("No such form exists");
@@ -80,13 +80,13 @@ router.get('/:collection(testForms|componentForm)/:form_id', permissions.checkPe
 
 
 // API/Backend:  Change the form schema.
-router.post('/:collection(testForms|componentform)/:form_id', permissions.checkPermissionJson('forms:edit'), 
+router.post('/:collection(testForms|componentform|jobForms)/:form_id', permissions.checkPermissionJson('forms:edit'), 
   async function(req,res,next){
-    console.log(chalk.blue("Schema submission","/json/testForms"));
+    console.log(chalk.blue("Schema submission","/json/"+req.params.collection));
 
     var form_id = req.params.form_id; 
     try{
-      var inserted_record = await Forms.saveForm(form_id, req.body, "testForms", req.ip, req.user);
+      var inserted_record = await Forms.saveForm(form_id, req.body, req.params.collection, req.ip, req.user);
       res.json(inserted_record);
     } catch(err) { 
       console.error(err);

@@ -19,7 +19,7 @@ var jsondiffpatch = require('jsondiffpatch');
 var config = require('./configuration.js');
 var database = require('./database.js'); // Exports global 'db' variable
 var Components = require('./Components.js');
-var Forms = require('./Forms.js');
+var Forms     = require('./Forms.js');
 var permissions = require('./permissions.js');
 var utils = require('./utils.js');
 
@@ -107,6 +107,8 @@ app.get('/api/private', permissions.checkAuthenticatedJson, function(req, res) {
 app.use(require('./routes/formRoutes.js'));
 app.use(require('./routes/componentRoutes.js'));
 app.use(require("./routes/testRoutes.js"));
+app.use(require("./routes/workflowRoutes.js"));
+app.use(require("./routes/jobRoutes.js"));
 
 app.use('/file',require('./routes/files.js'));
 app.use('/autocomplete',require("./routes/autocomplete.js"));
@@ -121,6 +123,7 @@ app.get('/', async function(req, res, next) {
 	res.render('admin.pug',
 	{
 		tests: await Forms.getListOfForms(),
+    workflows: await Forms.getListOfForms("jobForms"),
 		all_components: await Components.getComponents(),
 	});
 });

@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const express = require('express');
 
 var Components = require('../Components.js');
-var Forms = require('../Forms.js');
+var forms = require('../Forms.js');
 var permissions = require('../permissions.js');
 var database = require('../database.js')
 
@@ -14,17 +14,16 @@ module.exports = router;
 //////////////////////////////////////////////////////////////////////////
 // Editing and creating forms
 
-console.log("forms",Forms);
+// console.log("forms",Workflows);
 
-// Create a new test form
+// Create a new job form
 var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
 
-router.get("/NewTestForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
-  console.log("forms",Forms);
-  var rec = await Forms.retrieveForm(req.params.form_id);
+router.get("/NewWorkflowForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
+  var rec = await Forms.retrieveWorkflow(req.params.form_id);
   
   if(!rec) {
-      var forms = db.collection("testForms");
+      var forms = db.collection("jobForms");
       // console.log('updateRes',updateRes)
 
       var rec = {form_id: req.params.form_id,
@@ -45,14 +44,12 @@ router.get("/NewTestForm/:form_id", permissions.checkPermission("forms:edit"), a
       await forms.insertOne(rec);
   }
 
-  res.redirect("/EditTestForm/"+req.params.form_id);
+  res.redirect("/EditWorkflowForm/"+req.params.form_id);
 });
 
-// Edit existing test form
-router.get("/EditTestForm/:form_id?", permissions.checkPermission("forms:edit"), async function(req,res){
-  res.render('EditTestForm.pug',{collection:"testForms",form_id:req.params.form_id});
+// Edit existing job form
+router.get("/EditWorkflowForm/:form_id?", permissions.checkPermission("forms:edit"), async function(req,res){
+  res.render('EditWorkflowForm.pug',{collection:"jobForms",form_id:req.params.form_id});
 });
-
-
 
 

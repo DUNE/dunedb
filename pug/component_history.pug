@@ -37,7 +37,7 @@ block extrascripts
       var diffs = (component.submit||{}).diff || {};
       for(var key in diffs) {
         var formComponent = FormioUtils.getComponent(form.components,key);
-        if(formComponent) formComponent.setCustomValidity("changed from "+diffs[key][0]);
+        if(formComponent) formComponent.setCustomValidity("PREVIOUS: "+diffs[key][0]);
       }
       
 
@@ -56,7 +56,7 @@ block content
       ul
         each o in effectiveDates
           li 
-            a(href='?effectiveDate='+(new Date(o.effectiveDate)).getTime()) #{moment(o.effectiveDate).format('MMM D YYYY h:m a')}
+            a(href='?effectiveDate='+(new Date(o.effectiveDate)).getTime()) #{moment(o.effectiveDate).format('MMM D YYYY h:m a')} #{user_shortname((o.submit||{}).user||{})}
     .row
         h2#name.col-md-8=((component||{}).type)?((component||{}).type+": "+(component||{}).name):"New Component"
     .row

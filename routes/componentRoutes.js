@@ -162,4 +162,10 @@ router.get("/NewComponent", permissions.checkPermission("components:create"),
 });
 
 
+// Edit component form.
+router.get("/EditComponentForm", permissions.checkPermission("forms:edit"), async function(req,res){
+  res.render('EditComponentForm.pug',{collection:"componentForm",form_id:"componentForm"});
+});
+
+
 
