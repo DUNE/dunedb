@@ -1,0 +1,36 @@
+notes - apa db meeting mar 3 2020
+
+PSL people (Pam, Mary. Jason)
+
+Protodune:
+did not serialize the boards
+
+made 4 apas
+
+EDMS - board locations
+
+Travellers - 
+	Any info that's gathered on the APA goes in
+	Epoxy process at end of each layer after winding, soldering. Epoxy the boards on.
+	There is an Access DB for protodune data
+	Protodune travellers: https://edms.cern.ch/ui/#!master/navigator/document?D:100325759:100325759:subDocs
+
+Tension data is in excel file
+Protodune tension data exists.. somewhere
+
+Data not in traveller:
+	Continuity
+	leakage current
+	... because it's a pass/fail test. Just had pass/fail stamp.
+
+	Frame data:
+		Flatness data
+		Survey at end of assembly
+		At very end we do laser scan to get wire spacing between layers
+
+
+
+Adam has stuff for protodune - 
+
+Gwen mouster - travellers
+

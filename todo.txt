@@ -1,0 +1,15 @@
+To Do list: 
+- Try visual workflow.
+	Third kind of data
+		ComponentForm
+			Components
+		TestForms
+			Tests
+		Workflow
+			Job - one execuation of a workflow - should be saveable and resumable
+
+- Fix Machine-to-machine so it doesn't use Auth0 in any way.
+- Get Access Database access from Jason Laffin; copy it to some other DB format and begin transcribing into a Sietch Form.
+
+
+- EDMS access

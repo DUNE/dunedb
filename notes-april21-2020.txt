@@ -1,0 +1,20 @@
+Adam lister
+jason laffin
+brian rebel
+sebestian prince
+Mary severson
+gwenn (uk?)
+
+Sebestian - relevant QA/QC data in production
+
+PSA folks - experience with protodune
+
+Gwenn: where are we with VKS?
+- They haven't tried it yet
+
+Jason - not many changes to the proceedure!
+
+[[ Maybe I SHOULD try to build a visual workflow system.
+
+Sebestian - protodune experience: slides
+

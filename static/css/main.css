@@ -1,3 +1,14 @@
 .workstep-img {
 	max-height: 90vh;
 }
+
+/* collapsible chevron */
+.foldable-heading {
+	cursor: pointer;
+}
+.foldable-heading .chevron:after {
+    content: "\f078";   
+}
+.foldable-heading.collapsed .chevron:after {
+    content: "\f054"; 
+}  
