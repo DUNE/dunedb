@@ -45,33 +45,50 @@ SpecNumberComponent.builderInfo = {
   schema: SpecNumberComponent.schema()
 };
 
-
+SpecNumberComponent.prototype.showNominal = function()
+{
+  var nominal = "";
+  if('specification_nominal' in this.component)  
+    nominal = "Nominal "+ this.component.specification_nominal;
+  if(('specification_nominal' in this.component) && ('specification_tolerance' in this.component)) {
+    nominal += "&plusmn;"+this.component.specification_tolerance;
+  }
+  if('specification_minimum' in this.component) nominal += " min "+this.component.specification_minimum;
+  if('specification_maximum' in this.component) nominal += " max "+this.component.specification_maximum;
+  if(this.component.units) nominal += " " + this.component.units;
+  this.specification_label.html(nominal).removeClass('warning');
+}
 
 SpecNumberComponent.prototype.checkValue = function(val)
 {
-  var warning = "";
+  this.showNominal();
+
+  var warning = null;
   if(('specification_nominal' in this.component) && ('specification_tolerance' in this.component)) {
     if((val - this.component.specification_nominal) > this.component.specification_tolerance) 
-      warning = "Above tolerance  ("+this.component.specification_nominal+"&plusmn;"+this.component.specification_tolerance+")";
+      warning = "Above tolerance." ;
 
     if((val - this.component.specification_nominal) < -this.component.specification_tolerance) 
-      warning = "Below tolerance  ("+this.component.specification_nominal+"&plusmn;"+this.component.specification_tolerance+")";
+      warning = "Below tolerance.";
   }
 
-  if(('specification_minimum' in this.component) && (val < this.component.specification_minimum))
-    warning = "Below minimum specification ("+this.component.specification_minimum+")";
+  if('specification_minimum' in this.component) {
+    if(val < this.component.specification_minimum)
+      warning = "Below minimum specification. ";
+  }
 
-  if(('specification_maximum' in this.component) && (val > this.component.specification_maximum))
-    warning = "Above maximum specification ("+this.component.specification_maximum+")";
-
-  this.specification_warning.html(warning);
+  if('specification_maximum' in this.component) {
+    if (val > this.component.specification_maximum)
+      warning = "Above maximum specification. ";
+  }
+  if(warning) this.specification_label.prepend("<span class='specification-warning'>"+warning+"</span>");
 }
 
 SpecNumberComponent.prototype.renderElement = function(value,index) 
 {
   var tpl = '';
   tpl += NumberComponent.prototype.renderElement.call(this,value,index);
-  tpl += "<div><em class='specification-warning'></em></div>";
+  tpl += "<div class='specification-label'></div>";
 
   return tpl;
 
@@ -82,7 +99,8 @@ SpecNumberComponent.prototype.attach = function(element)
   /// Called after rendering, just as the component is being inserted into the DOM.
   /// .. just like a text area...
   NumberComponent.prototype.attach.call(this,element);
-  this.specification_warning = $(".specification-warning",this.element);
+  this.specification_label = $(".specification-label",this.element);
+  this.showNominal();
 }
 
 
@@ -109,11 +127,11 @@ SpecNumberComponent.editForm = function(a,b,c)
     var datatab = tabs.components.find(obj => {return obj.key=='data'});
 
     // Remove 'multiple components'. I could probably make it work.. but nah
-    datatab.components.splice(datatab.components.findIndex(obj=>{return obj.key = "multiple"}),1,[]);
+    datatab.components.splice(datatab.components.findIndex(obj=>{return obj.key = "multiple"}),1);
     var displaytab = tabs.components.find(obj => {return obj.key=='display'});
 
 
-    datatab.components.splice(0,0,
+    datatab.components.splice(1,0,
       {
         "input": true,
         "key": "specification_nominal",
@@ -126,7 +144,6 @@ SpecNumberComponent.editForm = function(a,b,c)
         "input": true,
         "key": "specification_tolerance",
         "label": "Tolerance",
-        "placeholder": "Tolerance (plus or minus) ",
         "tooltip": "This is the tolerance, plus or minus, around the main value. If outside this range, a warning will show.",
         "type": "number",
       },
@@ -134,7 +151,6 @@ SpecNumberComponent.editForm = function(a,b,c)
         "input": true,
         "key": "specification_minimum",
         "label": "Minimum Specification",
-        "placeholder": "min",
         "tooltip": "If less than this value, a warning will show.",
         "type": "number",
       },      
@@ -142,9 +158,15 @@ SpecNumberComponent.editForm = function(a,b,c)
         "input": true,
         "key": "specification_maximum",
         "label": "Maximum Specification",
-        "placeholder": "max",
         "tooltip": "If greater than than this value, a warning will show.",
         "type": "number",
+      },
+      {
+        "input": true,
+        "key": "units",
+        "label": "Units",
+        "tooltip": "Optional units to show",
+        "type": "textfield",
       }
   );
 

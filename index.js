@@ -36,6 +36,17 @@ app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding
 // app.use(bodyParser.urlencoded({ limit:'1000kb', extended : true }));
 app.use(bodyParser.json({ limit:'1000kb'}));
 app.use(morgan('tiny'));
+
+// CSS precompiler. needs to come before /static call
+var compileSass = require('express-compile-sass');
+app.use('/css',compileSass({
+    root: __dirname+'/scss',
+    sourceMap: true, // Includes Base64 encoded source maps in output css
+    sourceComments: true, // Includes source comments in output css
+    watchFiles: true, // Watches sass files and updates mtime on main files for each change
+    logToConsole: false // If true, will log to console.error on errors
+}));
+app.use('/css',express.static(__dirname + '/scss'));
 app.use(express.static(__dirname + '/static'));
 let moment = require('moment');
 app.use(function(req,res,next){ res.locals.moment = moment; next(); }); // moment.js in pug

@@ -1,0 +1,24 @@
+/* 1. import only the necessary Bootstrap files */
+@import "../node_modules/bootstrap/scss/bootstrap.scss"; 
+
+/* 2. begin customization ---- */
+// (variable changes as before here...)
+/* --- end customization ------ */
+/* 3. import Bootstrap to set the changes! */
+// @import "bootstrap";
+/* 4. add @mixin or @extend customizations here */
+/* create new custom classes from existing classes */
+.specification-label {
+    @extend .text-right;
+    @extend .font-italic;
+    @extend .small;
+    color: #777;
+    .specification-warning {
+    	color: red;
+    }
+}
+
+/* use @mixins */
+.btn-custom {
+  @include button-variant(red, white, red, red);
+}
