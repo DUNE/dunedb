@@ -12,10 +12,6 @@
 // Formio.Components.components.file.builderInfo.schema=Formio.Components.components.file.schema();
 var TextFieldComponent = Formio.Components.components.textfield;
 
-
-
-var TextFieldComponent = Formio.Components.components.textfield;
-
 class ArrayComponent extends TextFieldComponent{
 
 

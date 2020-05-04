@@ -1,6 +1,7 @@
 
 const permissions = require('../permissions.js');
 const Jobs = require('../Jobs.js');
+const Forms = require('../Forms.js');
 const express  = require("express");
 const utils = require("../utils.js");
 
@@ -24,21 +25,30 @@ router.get("/"+ utils.uuid_regex + "/job/:form_id/:record_id", permissions.check
 
 // Run a new job, but no UUID specified
 
-router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async function(req,res,next){
-  var workflow = await Forms.retrieveForm(req.params.form_id,);
-  res.render('job_without_uuid.pug',{form_id:req.params.form_id,workflow:workflow});
-})
-
 /// Run an new job
-
-router.get("/"+utils.uuid_regex+"/job/:form_id", permissions.checkPermission("jobs:submit"),
-async function(req,res,next) {
+router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async function(req,res,next){
   try{
     console.log("run a new job");
-    var workflow = await Forms.retrieveForm(req.params.workflow_id,'jobForms');
+    var workflow = await Forms.retrieveForm(req.params.form_id,'jobForms');
     if(!workflow) return res.status(400).send("No such job workflow");
-    res.render('job.pug',{form_id:req.params.form_id, workflow:workflow, jobdata:{data:{componentUuid: req.params.uuid}}})
+    res.render('job.pug',{form_id:req.params.form_id, form:workflow, jobdata:{data:{}}});
   } catch(err) { console.error(err); next(); }
 });
 
+// router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async function(req,res,next){
+//   var workflow = await Forms.retrieveForm(req.params.form_id,'jobForms');
+//   res.render('job_without_uuid.pug',{form_id:req.params.form_id,workflow:workflow});
+// })
+
+// /// Run an new job
+
+// router.get("/"+utils.uuid_regex+"/job/:form_id", permissions.checkPermission("jobs:submit"),
+// async function(req,res,next) {
+//   try{
+//     console.log("run a new job");
+//     var workflow = await Forms.retrieveForm(req.params.workflow_id,'jobForms');
+//     if(!workflow) return res.status(400).send("No such job workflow");
+//     res.render('job.pug',{form_id:req.params.form_id, workflow:workflow, jobdata:{data:{componentUuid: req.params.uuid}}})
+//   } catch(err) { console.error(err); next(); }
+// });
 
