@@ -1,81 +1,140 @@
 
 
-
-///
-/**
- * Get the input component class by referencing Formio.Components.components map.
- */
 var htmlComponent = Formio.Components.components.htmlelement;
 
-function WorkStepComponent(component, options, data) {
-  htmlComponent.prototype.constructor.call(this, component, options, data);
+
+class WorkStepComponent extends htmlComponent{
+
+  static schema(...extend) {
+    return super.schema({
+              type: 'WorkStepComponent',
+              label: "Work Step",
+              imgurl: "",
+              worktext: "",
+              imageUpload: [],
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Work Step',
+      group: 'custom',
+      icon: 'sort-numeric-asc',
+      weight: 70,
+      documentation: '#', 
+      schema: this.schema()
+    };
+  }
+
+
+  render(element) {
+    // console.log("rendering",this,element);
+    var tpl = '';
+    tpl += this.renderTemplate('label', {
+      label: this.labelInfo,
+      component: this.component,
+      element: element,
+      tooltip: this.interpolate(this.component.tooltip || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
+    });
+
+    console.log("trying to render ",this);
+    // var imgurl = (((this.component.imageUpload||{}).data||{}).url||null);
+    
+    tpl += "<div class='workstep-img'>";
+    var imgs = this.component.imageUpload || [];
+    for(var img of imgs) {
+      if(img.data && img.data.url) {
+        tpl += "<img src='" + img.data.url + "' class='img-fluid workstep-img'>";
+      }
+    }
+    if(this.component.imgurl && this.component.imgurl.length>0) {
+        tpl += "<img src='" + this.component.imgurl + "' class='img-fluid workstep-img'>";    
+    }
+
+    tpl += "</div>";
+    tpl += "<p>" + this.component.worktext + "</p>";
+    return Formio.Components.components.component.prototype.render.call(this,tpl);
+  };
+
+
+
 }
 
-// Perform typical ES5 inheritance
-WorkStepComponent.prototype = Object.create(htmlComponent.prototype);
-WorkStepComponent.prototype.constructor = WorkStepComponent;
+// ///
+// /**
+//  * Get the input component class by referencing Formio.Components.components map.
+//  */
+// var htmlComponent = Formio.Components.components.htmlelement;
 
-/**
- * Define what the default JSON schema for this component is. We will derive from the InputComponent
- * schema and provide our overrides to that.
- * @return {*}
- */
-WorkStepComponent.schema = function() {
-  return htmlComponent.schema({
-    type: 'WorkStepComponent',
-    label: "Work Step",
-    imgurl: "",
-    worktext: "",
-    imageUpload: [],
-  });
-};
+// function WorkStepComponent(component, options, data) {
+//   htmlComponent.prototype.constructor.call(this, component, options, data);
+// }
 
-/**
- * Register this component to the Form Builder by providing the "builderInfo" object.
- * 
- * @type {{title: string, group: string, icon: string, weight: number, documentation: string, schema: *}}
- */
-WorkStepComponent.builderInfo = {
-  title: 'Work Step',
-  group: 'custom',
-  icon: 'globe',
-  weight: 0,
-  documentation: '#', 
-  schema: WorkStepComponent.schema()
-};
+// // Perform typical ES5 inheritance
+// WorkStepComponent.prototype = Object.create(htmlComponent.prototype);
+// WorkStepComponent.prototype.constructor = WorkStepComponent;
 
-/**
- *  Tell the renderer how to render this component.
- */
-WorkStepComponent.prototype.render = function(element) {
-  // console.log("rendering",this,element);
-  var tpl = '';
-  tpl += this.renderTemplate('label', {
-    label: this.labelInfo,
-    component: this.component,
-    element: element,
-    tooltip: this.interpolate(this.component.tooltip || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
-  });
+// /**
+//  * Define what the default JSON schema for this component is. We will derive from the InputComponent
+//  * schema and provide our overrides to that.
+//  * @return {*}
+//  */
+// WorkStepComponent.schema = function() {
+//   return htmlComponent.schema({
+//     type: 'WorkStepComponent',
+//     label: "Work Step",
+//     imgurl: "",
+//     worktext: "",
+//     imageUpload: [],
+//   });
+// };
 
-  console.log("trying to render ",this);
-  // var imgurl = (((this.component.imageUpload||{}).data||{}).url||null);
+// /**
+//  * Register this component to the Form Builder by providing the "builderInfo" object.
+//  * 
+//  * @type {{title: string, group: string, icon: string, weight: number, documentation: string, schema: *}}
+//  */
+// WorkStepComponent.builderInfo = {
+//   title: 'Work Step',
+//   group: 'custom',
+//   icon: 'globe',
+//   weight: 0,
+//   documentation: '#', 
+//   schema: WorkStepComponent.schema()
+// };
+
+// /**
+//  *  Tell the renderer how to render this component.
+//  */
+// WorkStepComponent.prototype.render = function(element) {
+//   // console.log("rendering",this,element);
+//   var tpl = '';
+//   tpl += this.renderTemplate('label', {
+//     label: this.labelInfo,
+//     component: this.component,
+//     element: element,
+//     tooltip: this.interpolate(this.component.tooltip || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
+//   });
+
+//   console.log("trying to render ",this);
+//   // var imgurl = (((this.component.imageUpload||{}).data||{}).url||null);
   
-  tpl += "<div class='workstep-img'>";
-  var imgs = this.component.imageUpload || [];
-  for(img of imgs) {
-    if(img.data && img.data.url) {
-      tpl += "<img src='" + img.data.url + "' class='img-fluid workstep-img'>";
-    }
-  }
-  if(this.component.imgurl && this.component.imgurl.length>0) {
-      tpl += "<img src='" + this.component.imgurl + "' class='img-fluid workstep-img'>";    
-  }
+//   tpl += "<div class='workstep-img'>";
+//   var imgs = this.component.imageUpload || [];
+//   for(img of imgs) {
+//     if(img.data && img.data.url) {
+//       tpl += "<img src='" + img.data.url + "' class='img-fluid workstep-img'>";
+//     }
+//   }
+//   if(this.component.imgurl && this.component.imgurl.length>0) {
+//       tpl += "<img src='" + this.component.imgurl + "' class='img-fluid workstep-img'>";    
+//   }
 
-  tpl += "</div>";
-  tpl += "<p>" + this.component.worktext + "</p>";
-  return Formio.Components.components.component.prototype.render.call(this,tpl);
+//   tpl += "</div>";
+//   tpl += "<p>" + this.component.worktext + "</p>";
+//   return Formio.Components.components.component.prototype.render.call(this,tpl);
 
-};
+// };
 
 
 // Use the table component edit form.

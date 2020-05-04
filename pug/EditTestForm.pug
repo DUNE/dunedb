@@ -206,15 +206,18 @@ block extrascripts
 
   block workscripts
     script.
+      function updateSchemaField(schema)
+      {
+        $('#schema').val(JSON.stringify(schema,null,2));
+        var schema_blob = new Blob([JSON.stringify(schema,null,2)],{type: 'application/JSON'});
+        var schema_save_url = window.URL.createObjectURL(schema_blob);
+        $('#download_schema_link').attr('href',schema_save_url);
+      }
       function onBuild() {
         //- var schema_element = document.getElementById('schema');
 
         metaform.submission.data.schema = builder.instance.schema; // Copy it over.
-        $('#schema').val(JSON.stringify(builder.instance.schema,null,2));
-
-        var schema_blob = new Blob([JSON.stringify(metaform.submission.data,null,2)],{type: 'application/JSON'});
-        var schema_save_url = window.URL.createObjectURL(schema_blob);
-        $('#download_schema_link').attr('href',schema_save_url);
+        updateSchemaField(builder.instance.schema);
         console.log("onBuild",JSON.stringify(builder.instance.schema));
 
       };
@@ -228,6 +231,8 @@ block extrascripts
           // If no form title, autofill with the form ID
           if(!formdata.form_title || (formdata.form_title.length==0))
             formdata.form_title = formdata.form_id;
+          updateSchemaField(formdata.schema);
+
           builder = new Formio.FormBuilder(
               $('.formbuilder_area').get(0), // html element
               formdata.schema||{}, // starting schema
