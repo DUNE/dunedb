@@ -41,6 +41,32 @@ mixin NewTestForm
         }
     })
 
+mixin NewWorkflowForm
+  a.NewWorkflowForm(href='#', data-toggle="modal" data-target="#NewWorkflowFormModal") New Workflow Form
+  #NewWorkflowFormModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewWorkflowFormLabel' aria-hidden='true')
+    .modal-dialog(role="document")
+      .modal-content
+        .modal-header
+          h5#NewWorkflowFormLabel.modal-title New Workflow Form
+          button.close(type="button",data-dismiss="modal",aria-label="Close")
+            span(aria-hidden=true) &times;
+        .modal-body
+          div
+            | Enter the new form ID.
+            | Please use only alphanumerics and underscores
+            input.NewWorkflowFormModalName.form-control(type="text")
+        .modal-footer
+          button.btn.btn-secondary(type="button", data-dismiss="modal") Close
+          button.btn.btn-primary.NewWorkflowFormCreateButton(type="button") Create
+  script.
+    $('button.NewWorkflowFormCreateButton').click(function(){
+      window.location.href="/NewWorkflowForm/"+ $('button.NewWorkflowFormCreateButton').parents('.modal-content').find('input').val();
+    })
+    $('input.NewWorkflowFormModalName').on("keyup",function(e){
+      if(e.key=="Enter") {
+          window.location.href="/NewWorkflowForm/"+ $(this).val();
+        }
+    })
 
 mixin uuid_autocomplete
     select.form-control.component-uuid-autocomplete.go-to-component(autocomplete="off" placeholder='type to search...')

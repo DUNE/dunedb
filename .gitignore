@@ -1,4 +1,6 @@
+shib/
 sessions/
 node_modules
 config.js
 api_config.json
+api2_config.json

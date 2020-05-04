@@ -66,9 +66,9 @@ async function saveForm(form_id,record,collection,ip,user)
   new_record.submit_ip= ip;
   new_record.user= user;
   new_record.revised_by= (user||{}).displayName;
-  new_record.diff_from= old._id;
+  if(old) new_record.diff_from= old._id;
   new_record.diff = null;
-  new_record.diff= jsondiffpatch.diff(old.schema, new_record.schema);
+  if(old) new_record.diff= jsondiffpatch.diff(old.schema, new_record.schema);
   new_record.version= ((old||{}).version || 0) + 1,
   new_record.form_id = form_id;
   delete new_record._id;

@@ -15,21 +15,6 @@ block extrascripts
 
       var metaschema = {
         "components": [
-        
-          {
-            "label": "Commit Form",
-            "showValidations": false,
-            "theme": "info",
-            "disableOnInvalid": true,
-            "tableView": false,
-            "key": "submit",
-            "type": "button",
-            "input": true,
-            "validate": {
-              "unique": false,
-              "multiple": false
-            }
-          },
           {
             "label": "form_id",
             "key": "form_id",
@@ -156,6 +141,30 @@ block extrascripts
               },
 
           {
+            "label": "Applies to APAs",
+            "tableView": false,
+            "defaultValue": false,
+            "validate": {
+              "unique": false,
+              "multiple": false
+            },
+            "key": "for_apa",
+            "type": "checkbox",
+            "input": true
+          },
+          {
+            "label": "Applies to boards",
+            "tableView": false,
+            "validate": {
+              "unique": false,
+              "multiple": false
+            },
+            "key": "for_board",
+            "type": "checkbox",
+            "input": true,
+            "defaultValue": false
+          },
+          {
             "label": "formbuilder",
             "tag": "div",
             "className": "formbuilder_area",
@@ -206,20 +215,12 @@ block extrascripts
 
   block workscripts
     script.
-      function updateSchemaField(schema)
-      {
-        $('#schema').val(JSON.stringify(schema,null,2));
-        var schema_blob = new Blob([JSON.stringify(schema,null,2)],{type: 'application/JSON'});
-        var schema_save_url = window.URL.createObjectURL(schema_blob);
-        $('#download_schema_link').attr('href',schema_save_url);
-      }
       function onBuild() {
-        //- var schema_element = document.getElementById('schema');
+        var schema_element = document.getElementById('schema');
+        schema_element.innerHTML='';
+        schema_element.appendChild(document.createTextNode(JSON.stringify(builder.instance.schema,null,2)));
 
         metaform.submission.data.schema = builder.instance.schema; // Copy it over.
-        updateSchemaField(builder.instance.schema);
-        console.log("onBuild",JSON.stringify(builder.instance.schema));
-
       };
       var gformdata;
 
@@ -228,11 +229,6 @@ block extrascripts
           gformdata = formdata;
           metaform.submission.data.revised_by = ((formdata.submit||{}).user||{}).displayName;
           metaform.submission = {data: formdata};
-          // If no form title, autofill with the form ID
-          if(!formdata.form_title || (formdata.form_title.length==0))
-            formdata.form_title = formdata.form_id;
-          updateSchemaField(formdata.schema);
-
           builder = new Formio.FormBuilder(
               $('.formbuilder_area').get(0), // html element
               formdata.schema||{}, // starting schema
@@ -250,8 +246,8 @@ block extrascripts
                         components: {
                           ComponentUUID:true,
                           CustomGeoTagComponent: true,
-                          ArrayComponent: true,
-                          SpecNumberComponent: true,
+                          WorkStepComponent: true
+                          //- ArrayComponent: true
                         
                         }
                       }
@@ -263,8 +259,8 @@ block extrascripts
             builder.instance.on('saveComponent',onBuild);
             builder.instance.on('editComponent',onBuild);
           });
-          //- builder.setDisplay('wizard').then(onBuild);
-          onBuild();
+          builder.setDisplay('wizard').then(onBuild);
+          //- onBuild();
       }
 
       function SubmitData(submission) {
@@ -315,11 +311,6 @@ block extrascripts
           return false;
         });
 
-        $('#schema').change(function(){
-          builder.form = JSON.parse($('#schema').val());
-          console.log("updated schema json->builder")
-          //- builder.instance.redraw();
-        })
 
       };
 
@@ -332,13 +323,7 @@ block content
 
 
 
-  a#download_schema_link(download=form_id+".json", href="") Download Form Record JSON
 
-  .panel.panel-default
-  .foldable-heading.panel-heading.collapsed(data-toggle='collapse' data-target='#json-holder')
-    | Schema JSON (for debugging) 
-    i.chevron.fa.fa-fw
-  div#json-holder.collapse
-    textarea#schema.form-control(rows=20)
-
+  p JSON dump of form (for debugging):
+  pre#schema
 

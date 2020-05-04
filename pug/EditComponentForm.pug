@@ -6,6 +6,21 @@ block metaschema
     script(type='text/javascript').
       var metaschema = {
         "components": [
+                  {
+            "label": "Commit Form",
+            "showValidations": false,
+            "theme": "info",
+            "disableOnInvalid": true,
+            "tableView": false,
+            "key": "submit",
+            "type": "button",
+            "input": true,
+            "validate": {
+              "unique": false,
+              "multiple": false
+            }
+          },
+
           {
             "label": "form_id",
             "key": "form_id",
