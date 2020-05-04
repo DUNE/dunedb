@@ -260,11 +260,12 @@ block extrascripts
           );
           $('input#commit-schema').val(JSON.stringify(schema));
             builder.instance.ready.then(function(){
+            if(builder_wizard) builder.setDisplay('wizard').then(onBuild);
+            else onBuild();
+
             builder.instance.on('saveComponent',onBuild);
             builder.instance.on('editComponent',onBuild);
           });
-          //- builder.setDisplay('wizard').then(onBuild);
-          onBuild();
       }
 
       function SubmitData(submission) {

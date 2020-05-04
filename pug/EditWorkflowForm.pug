@@ -1,17 +1,10 @@
-extend default
+extend EditTestForm
 
-block extrascripts
-  style.
-      .formbuilder_area { border: 5px solid red; border-radius: 10px; padding:5px;}
 
-  script(type='text/javascript').
-      //- var record=!{JSON.stringify(rec, null ,4)};
-      var form_id = "!{form_id}";
-      var collection = "!{collection}";
-      
+block metaschema
 
-  block metaschema
     script(type='text/javascript').
+      var builder_wizard = true;
 
       var metaschema = {
         "components": [
@@ -212,118 +205,4 @@ block extrascripts
           }
         ]
       };
-
-  block workscripts
-    script.
-      function onBuild() {
-        var schema_element = document.getElementById('schema');
-        schema_element.innerHTML='';
-        schema_element.appendChild(document.createTextNode(JSON.stringify(builder.instance.schema,null,2)));
-
-        metaform.submission.data.schema = builder.instance.schema; // Copy it over.
-      };
-      var gformdata;
-
-      function schemaRecordChange(formdata) {
-          console.log("schemaRecordChange",formdata);
-          gformdata = formdata;
-          metaform.submission.data.revised_by = ((formdata.submit||{}).user||{}).displayName;
-          metaform.submission = {data: formdata};
-          builder = new Formio.FormBuilder(
-              $('.formbuilder_area').get(0), // html element
-              formdata.schema||{}, // starting schema
-              {
-                   builder: {
-                      //- basic: true,
-                      //- advanced: true,
-                      //- data: true,
-                      //- layout: true,
-
-                      custom: {
-                        title: 'Custom',
-                        default: false,
-                        weight: 10,
-                        components: {
-                          ComponentUUID:true,
-                          CustomGeoTagComponent: true,
-                          WorkStepComponent: true
-                          //- ArrayComponent: true
-                        
-                        }
-                      }
-                  }
-              }
-          );
-          $('input#commit-schema').val(JSON.stringify(schema));
-            builder.instance.ready.then(function(){
-            builder.instance.on('saveComponent',onBuild);
-            builder.instance.on('editComponent',onBuild);
-          });
-          builder.setDisplay('wizard').then(onBuild);
-          //- onBuild();
-      }
-
-      function SubmitData(submission) {
-        console.log("submitting data",submission);
-        $.post({
-            contentType: 'application/json',
-            url:  "/json/"+collection+"/"+form_id,
-            data: JSON.stringify(submission.data),
-            success: schemaRecordChange
-        }).fail(function(res,statusCode,statusMsg) {
-          // On failure, add a failure message
-          if(res.responseText && res.responseText.length>0) metaform.setAlert("danger",res.responseText);
-          else                                              metaform.setAlert("danger",statusMsg + " ("+statusCode+")");
-          //- alert("posting failed");
-          console.log("posting fail",res,statusCode,statusMsg);
-        });
-
-      };
-
-
-      window.onload = async function() {
-        //- console.log("schema",record.schema);
-        // First, modify the metaschema based on the component type list
-
-        // Create the metaform
-        metaform = await Formio.createForm(document.getElementById('metaform'),metaschema);
-        console.log("metaform built",metaform);
-        metaform.on('submit',SubmitData);
-   
-        $.get('/json/'+collection+'/'+form_id,schemaRecordChange).fail(function(){
-              $('#builder').html("No such form exists.")
-          });
-
-   
-        // validate on client side.
-        $('#commit').on('click',function(event){
-          if($('input#form_id').val().length<1) {alert("Need to enter a form ID"); return false;}
-          if($('input#form_title').val().length<1) {alert("Need to enter a form title"); return false;}
-
-          var data = $( '#metaform'  ).serialize();
-          $.post({
-            url: '/json/'+collection+'/'+form_id,
-            data: data,
-            success: schemaRecordChange
-          }).fail(function(j,textStatus,errorThrown){
-              $('#builder').html("something went wrong,could not post: "+textStatus);
-          });
-          return false;
-        });
-
-
-      };
-
-
-
-
-block content
-  h2=form_id
-  div#metaform
-
-
-
-
-  p JSON dump of form (for debugging):
-  pre#schema
 

@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const express = require('express');
 
 var Components = require('../Components.js');
-var forms = require('../Forms.js');
+var Forms = require('../Forms.js');
 var permissions = require('../permissions.js');
 var database = require('../database.js')
 
@@ -20,7 +20,7 @@ module.exports = router;
 var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
 
 router.get("/NewWorkflowForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
-  var rec = await Forms.retrieveWorkflow(req.params.form_id);
+  var rec = await Forms.retrieveForm(req.params.form_id,"jobForms");
   
   if(!rec) {
       var forms = db.collection("jobForms");
