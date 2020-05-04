@@ -28,7 +28,7 @@ SpecNumberComponent.schema = function() {
       // "specification_tolerance":1e99,
       // "specification_minimum": -1e99,
       // "specification_maximum": 1e99,
-      "label": "NumberPlusOrMinus",
+      "label": "SpecNumberComponent",
       "key": "specvalue",
       "type": "SpecNumberComponent",
       "input": true  
@@ -37,9 +37,9 @@ SpecNumberComponent.schema = function() {
   return s;
 };
 SpecNumberComponent.builderInfo = {
-  title: 'SpecNumberComponent',
+  title: 'Number with tolerance',
   group: 'custom',
-  icon: 'chart-bar',
+  icon: '&plusmn;',
   weight: 72,
   documentation: '#', 
   schema: SpecNumberComponent.schema()

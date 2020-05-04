@@ -40,7 +40,7 @@ ArrayComponent.schema = function() {
 ArrayComponent.builderInfo = {
   title: 'ArrayComponent',
   group: 'custom',
-  icon: 'chart-bar',
+  icon: 'chart-bar fas',
   weight: 72,
   documentation: '#', 
   schema: ArrayComponent.schema()
