@@ -319,6 +319,8 @@ block extrascripts
 
         $('#schema').change(function(){
           builder.form = JSON.parse($('#schema').val());
+          metaform.submission.data.schema = builder.instance.schema; // Copy it over.
+
           console.log("updated schema json->builder")
           //- builder.instance.redraw();
         })
