@@ -12,7 +12,7 @@ module.exports = router;
 // HTML/Pug routes:
 
 async function seeJobData(req,res,next) {
-  var workflowrec = await Forms.retrieveForm(req.params.form_id,'jobForms');
+  var workflowrec = await Forms.retrieveForm('jobForms',req.params.form_id);
   if(!workflowrec) return res.status(400).send("No such job workflow");  
   var data = await Jobs.getJobData(req.params.form_id, req.params.record_id);
   if(!data) res.status(404).render("No such job recorded.");
@@ -29,7 +29,7 @@ router.get("/"+ utils.uuid_regex + "/job/:form_id/:record_id", permissions.check
 router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async function(req,res,next){
   try{
     console.log("run a new job");
-    var workflow = await Forms.retrieveForm(req.params.form_id,'jobForms');
+    var workflow = await Forms.retrieveForm('jobForms',req.params.form_id);
     if(!workflow) return res.status(400).send("No such job workflow");
     res.render('job.pug',{form_id:req.params.form_id, form:workflow, jobdata:{data:{}}});
   } catch(err) { console.error(err); next(); }

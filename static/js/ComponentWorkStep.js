@@ -30,12 +30,12 @@ class WorkStepComponent extends htmlComponent{
   render(element) {
     // console.log("rendering",this,element);
     var tpl = '';
-    tpl += this.renderTemplate('label', {
-      label: this.labelInfo,
-      component: this.component,
-      element: element,
-      tooltip: this.interpolate(this.component.tooltip || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
-    });
+    // tpl += this.renderTemplate('label', {
+    //   label: this.labelInfo,
+    //   component: this.component,
+    //   element: element,
+    //   tooltip: this.interpolate(this.component.tooltip || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
+    // });
 
     console.log("trying to render ",this);
     // var imgurl = (((this.component.imageUpload||{}).data||{}).url||null);
@@ -52,7 +52,8 @@ class WorkStepComponent extends htmlComponent{
     }
 
     tpl += "</div>";
-    tpl += "<p>" + this.component.worktext + "</p>";
+    tpl += "<div class='workstep-text'>"+this.component.worktext+"</div>";
+    console.log("tpl",tpl);
     return Formio.Components.components.component.prototype.render.call(this,tpl);
   };
 
@@ -146,18 +147,18 @@ WorkStepComponent.editForm = function(a,b,c)
     var tabs = form.components.find(obj => { return obj.type === "tabs" });
     var displaytab = tabs.components.find(obj => {return obj.key=='display'});
     displaytab.components = [
-    {
-        "input": true,
-        "key": "label",
-        "label": "Label",
-        "placeholder": "Field Label",
-        "tooltip": "The label for this field that will appear next to it.",
-        "type": "textfield",
-        "validate": {
-            "required": true
-        },
-        "weight": 0
-    },
+    // {
+    //     "input": true,
+    //     "key": "label",
+    //     "label": "Label",
+    //     "placeholder": "Field Label",
+    //     "tooltip": "The label for this field that will appear next to it.",
+    //     "type": "textfield",
+    //     "validate": {
+    //         "required": true
+    //     },
+    //     "weight": 0
+    // },
 
      {
           "label": "Images",
@@ -223,15 +224,14 @@ WorkStepComponent.editForm = function(a,b,c)
     //     "weight": 50
     // },
     {
-        "as": "html",
-        "defaultValue": "<div class=\"well\">Content</div>",
-        "editor": "ace",
+        "type": "textarea",
+        "label": "Instructions",
+        "wysiwyg": true,
+        "key": "content",
         "input": true,
         "key": "worktext",
         "label": "Text Description",
         "rows": 10,
-        "tooltip": "The content of this HTML element.",
-        "type": "textarea",
         "weight": 80
     },
     {
