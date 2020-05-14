@@ -111,20 +111,22 @@ block content
         +label-link
         p Run a test on this component:
           ul#tests
-            each test in tests
+            each form in forms
               li
-                a(href='/'+componentUuid+'/test/'+test.form_id)=test.form_title
+                a(href='/'+componentUuid+'/test/'+form.form_id)=form.form_title
     .row
       .column
         h4 Tests Performed
-          each form,index in tests
+          each form,index in forms
             p=form.form_title
           
             ul.testsPerformed
+            -console.log("testsPerformed XXXX",form)
               each test,index in form.performed
                 li 
-                  -var parenthetical= " (on "+ moment(test.timestamp).format('MMM DD YYYY');
+                  -console.log("DDDD ",test)
+                  -var parenthetical= " (on "+ moment(test.insertDate).format('MMM DD YYYY');
                   -if(test.user) { parenthetical+=" by " + user_shortname(test.user) }
                   -parenthetical+=")";
-                  a(href='/test/'+test.form_id+"/"+test._id)=(form.form_title||test.form_name)+parenthetical
+                  a(href='/test/'+form.form_id+"/"+test._id)=(form.form_title||form.form_id)+parenthetical
         

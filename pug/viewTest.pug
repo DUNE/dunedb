@@ -34,12 +34,40 @@ block extrascripts
 block content
   h2=formrec.form_title || formrec.form_id
   if testdata 
-    p Test performed: 
-        span=moment(testdata.timestamp).format('MMM DD YYYY HH:MM')
-    if user && testdata.user
-      p Performed by:
-        +short_user(user)
+    p Submitted: 
+      span=moment(testdata.timestamp).format('MMM DD YYYY HH:MM')
+      if user && testdata.user
+          |
+          |
+          span by:
+          |
+          |
+          +short_user(user)
+    
 
-  a(href=`/json/retrieve/${testdata.form_id}/${testdata._id}`) JSON data
+  hr
   #builtform
+
+  hr
+  if testdata.form
+    div Data entered in form version #{testdata.form.version}
+      if(testdata.form.version == formrec.version) 
+        | 
+        span (Shown)
+      else
+        | 
+        a(href="?version="+testdata.form.version) See this version
+    div View with form version:
+      each v in versions
+        a(href='?version='+v)=v
+        |
+        |
+  p
+
+  p
+    a(href=`/json/retrieve/${testdata.form_id}/${testdata._id}`) View JSON data
+  p
+    a(download=form_id+".json", href=`/json/retrieve/${testdata.form_id}/${testdata._id}`) Download JSON data
+
+  
 

@@ -7,7 +7,7 @@ block vars
 block extrascripts
   script(type='text/javascript').
     // I could do this by API query of the server, but this works for now.
-    var formrec=!{JSON.stringify(form||{}, null ,4)}; 
+    var formrec=!{ JSON.stringify(form||{}, null ,4) }; 
     var testdata=!{JSON.stringify((testdata||{}), null ,4)}; 
     var retrieved=!{retrieved||false};
 
@@ -17,22 +17,45 @@ block extrascripts
 
     function SubmitData(submission) {
       // actually the 'submit' function
-      console.log("submitting data",submission, JSON.stringify(submission));
+      var draft = submission.state !== "submitted";
+      if(!draft) {
+            console.log("SubmitData",...arguments);
+      } else {
+            console.log("SubmitData AS DRAFT",...arguments);
+      }
+
       function postSuccess(retval) {
-          if((retval.error)) form.setAlert("warning",retval.error);
           console.log(retval);
-          form.emit('submitDone', retval.submission);
-           console.log("success retval",retval);
+          if((retval.error)) {
+            form.setAlert("warning",retval.error);
+            form.emit('submitError');
+          }
+          if(!draft) { 
+            form.emit('submitDone');
+          } else {
+
+            // Formio doesn't actually have a way of doing this...
+            var saveButtons = FormioUtils.searchComponents(form.components,{type:'button',"component.action":'saveState'});
+            for(button of saveButtons) {
+              button.loading = false;
+              $(button.refs.buttonMessage).text("Draft saved").show().delay(2000).fadeOut(500);
+            }
+
+            //- form.emit("submitDone",submission);
+          }
       }
       function postFail(res,statusCode,statusMsg){
           // On failure, add a failure message
           if(res.responseText && res.responseText.length>0) form.setAlert("danger",res.responseText);
           else                                              form.setAlert("danger",statusMsg + " ("+statusCode+")");
           //- alert("posting failed");
+          form.emit('submitError');
           console.log("posting fail",res,statusCode,statusMsg);
 
-      };
-      console.log(submission);
+      }; 
+      // Include relevant information about the form, for later retrieval
+
+      console.log("submitting data",submission, JSON.stringify(submission));
       $.ajax(
         { contentType: "application/json",
           method: "post",
@@ -68,6 +91,15 @@ block extrascripts
       //- form.url="https://nowhere.com";
       console.log(form);
       form.submission = {data: testdata.data};
+      // Relevant data on this version of the schema that we're using to submit the data.
+      form.submission.form = {
+        _id: formrec._id,
+        form_id: formrec.form_id,
+        version: formrec.version,
+        form_title: formrec.form_title,
+        effectiveDate: formrec.effectiveDate,
+        insertDate: formrec.insertDate
+      }
       if(!retrieved) 
               form.on('submit',SubmitData);
 

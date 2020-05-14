@@ -44,7 +44,8 @@
     "session-file-store": "^1.4.0",
     "short-uuid": "^3.1.1",
     "uuid": "^3.4.0",
-    "uuid-mongodb": "^2.1.2"
+    "uuid-mongodb": "^2.1.2",
+    "xlsx": "^0.16.0"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0"

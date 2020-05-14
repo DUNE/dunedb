@@ -1,11 +1,8 @@
 
 
 ///
-/// Custom component for lists of numbers.
-///
-/// Basically sets some good defaults for what a UUID should look like
-///
-/// To do: add default validation technique.
+/// Custom component a number with a range of nominal values that shows a warning if out of
+/// specification, but does not throw a form error.
 ///
 
 var NumberComponent = Formio.Components.components.number;

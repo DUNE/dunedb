@@ -49,7 +49,7 @@ class ComponentUUID extends TextFieldComponent{
   }
 
   renderElement(value,index)  {
-    console.log('renderElement',this,value,index);
+    // console.log('renderElement',this,value,index);
     var textvalue = value;
     if(value && typeof value === "object") {
       textvalue = value.uuidstr;
@@ -89,8 +89,8 @@ class ComponentUUID extends TextFieldComponent{
 
   setValueAt(index,value,flags)
   {
-    console.log('setValue',this,value,flags);
-    console.log($('a',this.element),$('a',this.element).prop('href'));
+    // console.log('setValue',this,value,flags);
+    // console.log($('a',this.element),$('a',this.element).prop('href'));
     if(this.element)
       $('a',this.element).prop('href','/'+value).text('link');
     return super.setValueAt(...arguments);
@@ -98,7 +98,7 @@ class ComponentUUID extends TextFieldComponent{
 
   getValueAt(index)
   {
-    console.log('getValue',this);
+    // console.log('getValue',this);
     return super.getValueAt(index);
   }
 

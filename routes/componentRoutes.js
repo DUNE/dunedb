@@ -8,6 +8,7 @@ const moment = require('moment');
 var Components = require('../Components.js');
 var permissions = require('../permissions.js');
 var Forms = require('../Forms.js');
+var Tests = require('../Tests.js')
 var database = require('../database.js');
 var utils = require("../utils.js");
 
@@ -24,20 +25,21 @@ async function get_component(req,res) {
   console.log(get_component,componentUuid,req.params);
 
   // get form and data in one go
-  let [form, component, tests] = await Promise.all([
+  let [componentform, component, forms] = await Promise.all([
       Forms.retrieveForm("componentForm","componentForm"),
       Components.retrieveComponent(componentUuid),
       Forms.getListOfForms(),
     ]);
 
-  for(test of tests) {
-    console.log('checking for performed',test.form_id);
-    var p = await db.collection("form_"+test.form_id).find({"data.componentUuid":componentUuid}).project({form_id:1, form_title:1, timestamp:1, user:1}).toArray();
-    console.log("peformed of type",test.form_id,":");
-    console.dir(p);
-    test.performed = p || [];
+  for(form of forms) {
+    console.log('checking for performed',form.form_id);
+    var p = await Tests.listComponentTests(form.form_id,componentUuid);  
+    // var p = await db.collection("form_"+test.form_id).find({"data.componentUuid":componentUuid}).project({form_id:1, form_title:1, insertDate:1, user:1}).toArray();
+    // console.log("peformed of type",test.form_id,":");
+    // console.dir(p);
+    form.performed = p || [];
   }
-  console.dir(tests);
+  console.dir(forms);
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
   // var form = await Forms.retrieveForm("componentForm","componentForm");
@@ -45,11 +47,11 @@ async function get_component(req,res) {
   console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
   res.render("component.pug",{
-    schema: form.schema,
+    schema: componentform.schema,
     componentUuid:componentUuid,
     component: component,
     canEdit: permissions.hasPermission("components:edit"),
-    tests: tests,
+    forms: forms,
   });
 }
 router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);

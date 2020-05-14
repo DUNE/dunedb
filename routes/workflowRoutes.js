@@ -20,7 +20,7 @@ module.exports = router;
 var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
 
 router.get("/NewWorkflowForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
-  var rec = await Forms.retrieveForm(req.params.form_id,"jobForms");
+  var rec = await Forms.retrieveForm("jobForms",req.params.form_id);
   
   if(!rec) {
       var forms = db.collection("jobForms");

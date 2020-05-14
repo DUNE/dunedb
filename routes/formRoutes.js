@@ -21,7 +21,7 @@ var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_sc
 
 router.get("/NewTestForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
   console.log("forms",Forms);
-  var rec = await Forms.retrieveForm(req.params.form_id);
+  var rec = await Forms.retrieveForm("testForms",req.params.form_id);
   
   if(!rec) {
       var forms = db.collection("testForms");

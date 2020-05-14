@@ -70,7 +70,7 @@ router.get('/components/:type', permissions.checkPermissionJson('components:view
 // API/Backend: Get a form schema
 router.get('/:collection(testForms|componentForm|jobForms)/:form_id', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
-    var rec = await Forms.retrieveForm(req.params.form_id, req.params.collection);
+    var rec = await Forms.retrieveForm(req.params.collection,req.params.form_id);
     // if(!rec) return res.status(404).send("No such form exists");
     if(!rec) { res.status(400).json({error:"no such form "+req.params.form_id}); return next(); };
     console.log(rec);

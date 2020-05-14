@@ -36,9 +36,9 @@ block content
                 .border.border-primary.p-3.m-2
                   h4 Run a test:
                   ul#tests
-                    each test in tests
+                    each form in tests
                       li
-                        a(href='/test/'+test.form_id)="Run "+test.form_title
+                        a(href='/test/'+form.form_id)="Run "+form.form_title
 
                 .border.border-danger.p-3.m-2
                   p.h4
@@ -46,9 +46,9 @@ block content
 
                   h4 Edit an existing test form:
                   ul#editTests
-                  each test in tests
+                  each form in tests
                     li
-                        a(href='/EditTestForm/'+test.form_id)="Edit "+test.form_title
+                        a(href='/EditTestForm/'+form.form_id)="Edit "+(form.form_title || form.form_id)
 
 
         .col-md-6
@@ -60,7 +60,7 @@ block content
                   ul#workflows
                     each workflow in workflows
                       li
-                        a(href='/job/'+workflow.form_id)="Run "+workflow.form_title
+                        a(href='/job/'+workflow.form_id)="Run "+(workflow.form_title||workflow.form_id)
 
                 .border.border-danger.p-3.m-2
                   p.h4
@@ -70,7 +70,7 @@ block content
                   ul#editJobs
                   each workflow in workflows
                     li
-                        a(href='/EditWorkflowForm/'+workflow.form_id)="Edit "+workflow.form_title
+                        a(href='/EditWorkflowForm/'+workflow.form_id)="Edit "+(workflow.form_title||workflow.form_id)
 
 
     .row.border-top.my-3
