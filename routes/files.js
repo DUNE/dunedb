@@ -6,7 +6,7 @@ const mongo = require('mongodb');
 const Busboy = require('busboy');
 const moment = require('moment');
 // var database = require('./database.js'); // Exports global 'db' variable
-
+let sharp = require('sharp'); // image resizing library and crap
 /// submit file data0
 
 var router = express.Router();
@@ -95,6 +95,7 @@ router.post("/gridfs",permissions.checkPermission("tests:submit"),
 
 // Retrieve a file.
 router.get('/gridfs/:objectid', function(req,res,next){
+  if(req.query.resize) return get_and_resize(req,res,next);
   try {
     db.collection('file_activity').updateOne({_id:req.params.objectid},
                                         {$set: {last_retrieval: new Date()}},
@@ -103,9 +104,10 @@ router.get('/gridfs/:objectid', function(req,res,next){
     const bucket = new mongo.GridFSBucket(db);
     bucket.openDownloadStream(mongo.ObjectID(req.params.objectid))
     .on('file',function(obj){
-        res.set('Content-Disposition', `attachment; filename=${obj.filename}`);
+        // res.set('Content-Disposition', `attachment; filename=${obj.filename}`);
         if(obj.contentType)      res.set('Content-Type', obj.contentType);
         else                     res.set('Content-Type', 'application/octet-stream');
+        res.set('Cache-Control','public, max-age=604800, immutable'); // Because we're using a unique ObjectiD as the key, URL is guarenteed unique. Always cache.
         console.log("gridfs found file",obj);
     })
     .on('error',function(err){
@@ -119,6 +121,38 @@ router.get('/gridfs/:objectid', function(req,res,next){
     res.status(400).json({error:err})
   }
 });
+
+// get and resize image/
+function get_and_resize(req,res,next)
+{
+  try{
+    console.log("resizing output image");
+    var transformer = sharp()
+                        .resize(parseInt(req.query.resize))
+                        .on('info',console.log);
+
+
+    const bucket = new mongo.GridFSBucket(db);
+    bucket.openDownloadStream(mongo.ObjectID(req.params.objectid))
+      .on('file',function(obj){
+          if(obj.contentType)      res.set('Content-Type', obj.contentType);
+          else                     res.set('Content-Type', 'application/octet-stream');
+          res.set('Cache-Control','public, max-age=604800, immutable'); // Because we're using a unique ObjectiD as the key, URL is guarenteed unique. Always cache.
+          console.log("gridfs found file",obj);
+      })
+      .on('error',function(err){
+        console.error("Error retrieving file /gridfs/"+req.params.objectid);
+        console.error(err);
+        res.status(400).json({error:err})
+
+      })
+      .pipe(transformer)
+      .pipe(res);
+  } catch(err) {
+    res.status(400).json({error:err})
+  }
+
+}
 
 // delete a file, 
 // called when user pushes the 'x' button next to a falsely-uploaded file.

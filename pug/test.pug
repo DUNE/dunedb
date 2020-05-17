@@ -9,11 +9,22 @@ block extrascripts
     // I could do this by API query of the server, but this works for now.
     var formrec=!{ JSON.stringify(form||{}, null ,4) }; 
     var testdata=!{JSON.stringify((testdata||{}), null ,4)}; 
-    var retrieved=!{retrieved||false};
+    var readOnly=!{retrieved||false};
 
   script(type='text/javascript').
 
     var form = null;
+    var lastDraftSave = new Date();
+
+    function MaybeSaveDraft() {
+      // time since last draft save
+      var seconds = Math.floor((new Date() - lastDraftSave) / 1000);
+      if(seconds>10) {
+        var submission = form.submission;
+        form.submission.state = "draft";
+        SubmitData(submission);
+      }
+    }
 
     function SubmitData(submission) {
       // actually the 'submit' function
@@ -25,23 +36,32 @@ block extrascripts
       }
 
       function postSuccess(retval) {
-          console.log(retval);
+          console.log('postSuccess',retval);
           if((retval.error)) {
             form.setAlert("warning",retval.error);
             form.emit('submitError');
           }
+
           if(!draft) { 
             form.emit('submitDone');
+            // go to completed form. Do not leave this page in browser history. 
+            window.location.replace('/test/'+formrec.form_id+"/"+retval._id);
           } else {
+            lastDraftSave = new Date();
 
             // Formio doesn't actually have a way of doing this...
             var saveButtons = FormioUtils.searchComponents(form.components,{type:'button',"component.action":'saveState'});
             for(button of saveButtons) {
-              button.loading = false;
-              $(button.refs.buttonMessage).text("Draft saved").show().delay(2000).fadeOut(500);
+                  button.loading = false;
+                  button.disabled = false;
+                  $(button.refs.buttonMessage).text("Draft saved").show().delay(2000).fadeOut(500);
             }
 
-            //- form.emit("submitDone",submission);
+            // also re-enable all submit buttons.
+            saveButtons = FormioUtils.searchComponents(form.components,{type:'button',"component.action":'submit'});
+            for(button of saveButtons) {
+              button.disabled = false;
+            }
           }
       }
       function postFail(res,statusCode,statusMsg){
@@ -74,19 +94,21 @@ block extrascripts
       console.log("schema",formrec.schema);
 
       // Remove submit button if it's read-only
-      if(retrieved)
-        for(var i=0; i<formrec.schema.components.length; i++) {
+      if(readOnly)
+        for(var i=formrec.schema.components.length-1; i<=0; i--) {
           var c = formrec.schema.components[i];
-          if(c.label=="Submit" && c.key=="submit") {
+          if(c.type=="button" && (c.action=="submit" ||c.action=="saveState")) {
             formrec.schema.components.splice(i,1);
-            break;
           }
         }
 
       form = await Formio.createForm(
                   document.getElementById('builtform'),
                   formrec.schema,
-                  { readOnly: retrieved});
+                  { readOnly: readOnly
+                    //- saveDraft: true,
+                    //- saveDraftThrottle: 1000
+                  });
                   //- });
       //- form.url="https://nowhere.com";
       console.log(form);
@@ -100,9 +122,10 @@ block extrascripts
         effectiveDate: formrec.effectiveDate,
         insertDate: formrec.insertDate
       }
-      if(!retrieved) 
-              form.on('submit',SubmitData);
-
+      if(!readOnly) {
+        form.on('submit',SubmitData);
+        form.on('change',MaybeSaveDraft);
+      }
     }
 
 block content

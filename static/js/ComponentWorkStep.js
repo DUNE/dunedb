@@ -44,7 +44,10 @@ class WorkStepComponent extends htmlComponent{
     var imgs = this.component.imageUpload || [];
     for(var img of imgs) {
       if(img.data && img.data.url) {
-        tpl += "<img src='" + img.data.url + "' class='img-fluid workstep-img'>";
+        // Coolness: dynamic resize.
+        tpl += `<a href='${img.data.url}' data-toggle='lightbox' data-type='image'>`
+        tpl += `<img src='${img.data.url}?resize=500' class='img-fluid workstep-img' \>`;
+        tpl += '</a>'
       }
     }
     if(this.component.imgurl && this.component.imgurl.length>0) {
