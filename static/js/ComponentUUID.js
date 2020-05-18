@@ -10,6 +10,112 @@
 
 var TextFieldComponent = Formio.Components.components.textfield;
 
+// Insert the a hidden div into the HTML.
+$(function(){
+  var modal =`<div class="modal fade" tabindex="-1" role="dialog" id="qrCameraModel" aria-labelledby="qrCameraModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="qrCameraModalLabel">Scan QR Code for UUID</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <canvas class="p-4" id="qrCameraCanvas" hidden="hidden" style='width:100%'></canvas>
+                        <video id="qrCameraVideo" hidden="hidden"></video>
+                        <div id="qrCameraLoadingMessage">&#xF3A5; Unable to access video stream (please make sure you have a webcam enabled)</div>
+                        <div id="qrCameraOutputMessage">No QR code detected</div>
+                        
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+  $('body').append(modal);
+});
+
+function runQrCameraModel(cb)
+{
+    // Show the modal.
+    $('#qrCameraModel').modal('show');
+    // see the jsqr demo
+    var video = document.getElementById("qrCameraVideo");
+    var canvasElement = document.getElementById("qrCameraCanvas");
+    var ctx = canvasElement.getContext("2d");
+    var loadingMessage = document.getElementById("qrCameraLoadingMessage");
+    var outputMessage = document.getElementById("qrCameraOutputMessage");
+    var outputData = document.getElementById("outputData");
+
+    function drawLine(begin, end, color) {
+      ctx.beginPath();
+      ctx.moveTo(begin.x, begin.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = color;
+      ctx.stroke();
+    }
+      // Use facingMode: environment to attemt to get the front camera on phones
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+      video.play();
+      requestAnimationFrame(tick);
+    });
+    var running = true;
+    // cancel button.
+
+    function stop() {
+      running = false;
+      const stream = video.srcObject;
+      if(stream){
+          const tracks = stream.getTracks() || [];
+          tracks.forEach(function(track) { track.stop(); });
+      }
+      video.srcObject = null;
+    };
+
+    $('#qrCameraModel button').click(stop);
+
+    function tick() {
+      loadingMessage.innerText = "⌛ Loading video..."
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        loadingMessage.hidden = true;
+        canvasElement.hidden = false;
+
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        ctx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        var imageData = ctx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        var code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        if (code) {
+          console.log("found QR code",code)
+          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+          $(outputMessage).text(code.data);
+          var match = code.data.match(".*/([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})");
+          if(match) {
+            uuid = match[1];
+            $(outputMessage).text(uuid);
+            running = false;
+            cb(uuid); // return the value.
+            stop();
+            $('#qrCameraModel').modal('hide');
+          }
+        }
+      }
+      if(running) requestAnimationFrame(tick);
+    }
+
+}
+
+
 class ComponentUUID extends TextFieldComponent{
 
 
@@ -31,6 +137,8 @@ class ComponentUUID extends TextFieldComponent{
       "key": "component_uuid",
       "type": "ComponentUUID",
       "input": true,
+      "showCamera": true,
+      "autocomplete": true
     }, ...extend);
   }
 
@@ -54,13 +162,16 @@ class ComponentUUID extends TextFieldComponent{
     if(value && typeof value === "object") {
       textvalue = value.uuidstr;
     }
+    textvalue = textvalue || '';
 
     var tpl = "<div style='display:flex'>"; 
     tpl += "<div style='flex:1 1 auto;'>";
     tpl += super.renderElement(textvalue,index);
     tpl += "</div>";
-    if(textvalue)   tpl += "<a style='flex:0 0 auto; padding:2px;' class='align-middle uuid-link' href='/"+textvalue+"'>link</a>";
-    else tpl += "<a style='flex:0 0 auto; padding:2px;' class='align-middle uuid-link' ></a>";
+    if(this.component.showCamera && !this.disabled)  {
+      tpl += `<button type="button" class="btn btn-secondary btn-sm runQrCameraModel"><i class="fa fa-camera" title="Get QR code with your camera"></i></button>`;
+    }
+    tpl += "<a style='flex:0 0 auto; padding:2px;' class='align-middle uuid-link' ></a>";
     tpl += "</div>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
@@ -72,19 +183,27 @@ class ComponentUUID extends TextFieldComponent{
     /// .. just like a text area...
     super.attach(element);
     // console.log('my attach',this,this.refs.input,element,$(this.refs.input[0]).val());
-   
+    
+    var self = this; // for binding below
+
    // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
-   
-    var component = this; // for binding below
-    $('input',element).autoComplete({
-      resolverSettings: {
-        minLength: 3,
-          url: '/autocomplete/uuid'
-      }
-    }).on('autocomplete.select', function (evt, item) {
-      // console.log("selected",item)
-      component.setValue(item.val);
-    });
+    if(this.component.showCamera) {
+      $('.runQrCameraModel',element).click(function(){
+        runQrCameraModel(function(uuid) {
+          self.setValueAt(0,uuid);
+        })
+      });
+    }
+    if(this.component.autocomplete) {
+      $('input',element).autoComplete({
+        resolverSettings: {
+          minLength: 3,
+            url: '/autocomplete/uuid'
+        }
+      }).on('autocomplete.select', function (evt, item) {
+        self.setValue(item.val);
+      });
+    }
   }
 
   setValueAt(index,value,flags)

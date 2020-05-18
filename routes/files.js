@@ -131,7 +131,11 @@ function get_and_resize(req,res,next)
                         .resize(parseInt(req.query.resize))
                         .on('info',console.log);
 
+    db.collection('file_activity').updateOne({_id:req.params.objectid},
+                                        {$set: {last_retrieval: new Date()}},
+                                        {upsert:true});
 
+ 
     const bucket = new mongo.GridFSBucket(db);
     bucket.openDownloadStream(mongo.ObjectID(req.params.objectid))
       .on('file',function(obj){
