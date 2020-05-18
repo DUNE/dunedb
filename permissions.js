@@ -2,9 +2,9 @@
 var config = require('./configuration.js');
 
 
-const default_permissions 	   = config.default_permissions || ['components:view', 'tests:view', 'forms:view'];
+const default_permissions 	   = config.default_permissions || ['components:view', 'tests:view', 'forms:view', 'jobs:view'];
 const default_user_permissions = config.default_user_permissions || [ 
-															    'components:create', 'components:edit', 'tests:edit', 'forms:edit', 'jobs:edit', 'jobs:submit'];
+															    'components:create', 'components:edit', 'tests:edit', 'tests:submit', 'jobs:view', 'forms:edit', 'jobs:edit', 'jobs:submit'];
 
 // route middleware to make sure a user is logged in
 // Now I know how to use these:

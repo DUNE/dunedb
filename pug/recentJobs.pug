@@ -1,0 +1,19 @@
+extend default
+include common.pug
+
+      
+block content
+  h2 Recently completed jobs:
+
+  table.table
+    each test in tests
+        tr
+            td 
+                a(href=`/job/${form_id}/${test._id}`) 
+                    =moment(test.insertDate).format()
+            td
+               +short_user(test.user)
+            td
+                a(href=`/json/retrieve/${form_id}/${test._id}`) JSON data
+
+

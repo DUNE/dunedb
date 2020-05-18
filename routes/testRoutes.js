@@ -12,16 +12,19 @@ module.exports = router;
 // HTML/Pug routes:
 
 async function seeTestData(req,res,next) {
-  var options = {};
-  if(req.query.version) options.version = parseInt(req.query.version);
-  // fixme rollback
-  var formrec = await Forms.retrieveForm('testForms',req.params.form_id,options);
-  var versions = await Forms.getFormVersions('testForms',req.params.form_id);
-  console.log('versions',versions);
-  if(!formrec) return res.status(400).send("No such test form");  
-  var data = await Tests.getTestData(req.params.form_id, req.params.record_id);
-  if(!data) res.status(404).render("No such test recorded.");
-  res.render('viewTest.pug',{form_id:req.params.form_id, formrec:formrec, testdata:data, versions: versions, retrieved:true})
+  try{
+    var options = {};
+    if(req.query.version) options.version = parseInt(req.query.version);
+    // fixme rollback
+    var formrec = await Forms.retrieveForm('testForms',req.params.form_id,options);
+    var versions = await Forms.getFormVersions('testForms',req.params.form_id);
+    console.log('versions',versions);
+    if(!formrec) return res.status(400).send("No such test form");  
+    var data = await Tests.getTestData(req.params.form_id, req.params.record_id);
+    if(!data) return res.status(404).render("No such test recorded.");
+    res.render('viewTest.pug',{form_id:req.params.form_id, formrec:formrec, testdata:data, versions: versions, retrieved:true})
+  } catch(err) { console.error(err); next(); }
+
 };
 
 router.get("/test/:form_id/:record_id", permissions.checkPermission("tests:view"), seeTestData);
@@ -49,4 +52,9 @@ async function(req,res,next) {
   } catch(err) { console.error(err); next(); }
 });
 
+router.get('/tests/:form_id', permissions.checkPermission("tests:view"), 
+  async function(req,res,next) {
+    var tests = await Tests.listRecentTests(req.params.form_id,(req.query||{}).N);
+    res.render('recentTests.pug',{form_id:req.params.form_id, tests: tests});
+  });
 

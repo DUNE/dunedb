@@ -70,6 +70,13 @@ block content
                     li
                         a(href='/EditWorkflowForm/'+workflow.form_id)="Edit "+(workflow.form_title||workflow.form_id)
 
+                .border.border-danger.p-3.m-2
+                  h4 View recent job results:
+                  ul#editJobs
+                  each workflow in workflows
+                    li
+                        a(href='/jobs/'+workflow.form_id)="Recent "+(workflow.form_title||workflow.form_id)
+
 
     .row.border-top.my-3
 

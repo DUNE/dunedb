@@ -1,0 +1,15 @@
+extend default
+include common.pug
+
+      
+block content
+  h2 Recently completed jobs:
+
+  ul
+    each test in tests
+      li
+        a(href=`/test/${form_id}/${test._id}`) 
+          =moment(test.insertDate).format()
+        | &nbsp
+        +short_user(test.user)
+

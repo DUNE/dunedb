@@ -6,6 +6,7 @@ module.exports = {
 	getTestData,
 	saveTestData,
   listComponentTests,
+  listRecentTests
 }
 
 
@@ -13,8 +14,8 @@ async function getTestData(form_id, record_id)
 {
   var form_name = 'form_'+form_id.replace(/[^\w]/g,'');
   var col = db.collection(form_name);
-  var data = await col.findOne({_id:ObjectID(record_id)});
-  console.log('getTestData',form_id, record_id, data);
+  var data = await col.findOne({_id: new ObjectID(record_id)});
+  console.log('getTestData',form_id, new ObjectID(record_id), data);
   return data;
 }
 
@@ -56,7 +57,7 @@ async function saveTestData(form_id, testdata, ip, user)
     console.log("moved testId",testdata.testId,"retval",retval);
   } else {
     testdata.testId = ObjectID();
-    testdata_id = ObjectID(testdata.testId);
+    testdata._id = ObjectID(testdata.testId);
   }
 
   // metadata.
@@ -69,6 +70,21 @@ async function saveTestData(form_id, testdata, ip, user)
   return result.ops[0]._id;
 }
 
+
+async function listRecentTests(form_id,N)
+{
+
+  N = N || 10;
+
+  var p = await db.collection("form_"+form_id)
+                    .find({state:'submitted'})
+                    .sort({ $natural: -1 })
+                    .limit(N)
+                    .project( {insertDate: 1, user:1} )
+                    .toArray();
+    console.log("listRecentTests",p)
+    return p;
+}
 
 
 async function listComponentTests(form_id,componentUuid)
