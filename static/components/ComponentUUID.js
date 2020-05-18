@@ -171,7 +171,7 @@ class ComponentUUID extends TextFieldComponent{
     if(this.component.showCamera && !this.disabled)  {
       tpl += `<button type="button" class="btn btn-secondary btn-sm runQrCameraModel"><i class="fa fa-camera" title="Get QR code with your camera"></i></button>`;
     }
-    tpl += "<a style='flex:0 0 auto; padding:2px;' class='align-middle uuid-link' ></a>";
+    tpl += "<a style='flex:0 0 auto; padding:5px;' class='align-middle uuid-link' ></a>";
     tpl += "</div>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;

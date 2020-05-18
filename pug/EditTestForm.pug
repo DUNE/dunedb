@@ -239,24 +239,118 @@ block extrascripts
               formdata.schema||{}, // starting schema
               {
                    builder: {
-                      //- basic: true,
-                      //- advanced: true,
-                      //- data: true,
-                      //- layout: true,
-
-                      custom: {
-                        title: 'Custom',
+                      dataentry: {
+                        title: 'Data entry',
+                        default: false,
+                        weight: 0, 
+                        components: { textfield: true, 
+                                      textarea: true, 
+                                      number:true, 
+                                      SpecNumberComponent: true,
+                                      ArrayComponent: true, }
+                      },
+                      dataentryLeft: {
+                        title: "Data / label left",
+                        default: false,
+                        weight:5,
+                        components: {
+                          textfield: { title:'Text field', icon:'align-right',schema: {type: 'textfield', labelPosition: 'left-right'} },
+                          specnumber:{ title:'Number (w spec)', icon:'align-right', schema: {type: 'SpecNumberComponent', labelPosition: 'left-right'} },
+                        }
+                      },
+                      enumerated: {
+                        title: 'Enumerations',
                         default: false,
                         weight: 10,
-                        components: {
-                          ComponentUUID:true,
-                          CustomGeoTagComponent: true,
-                          ArrayComponent: true,
-                          SpecNumberComponent: true,
-                          WorkStepComponent: true,
-                        
+                        components: { radio: true,
+                                      select: true,
+                                      selectboxes: true,
+                                      
+                                      }
+
+                      },
+                      specialized: {
+                        title: 'Specialized',
+                        weight: 20,
+                        components: { ComponentUUID:true,
+                                      url: true,
+                                      datetime: true,
+                                      file: {title: "File upload", icon: 'file', schema: {type: 'file', label: 'File Upload', key: 'files'}},
+                                      image: { title: "Image upload", icon: 'picture-o', schema: {type:'file', label: 'Picture upload', key:'picture', image: true}},
+                                      CustomGeoTagComponent: true,
+
+
+
+
                         }
-                      }
+                      },
+                      mulitple:{
+                        title: 'Multiple',
+                        weight: 30,
+                        components: { datamap: true, 
+                                     datagrid: true,
+                                     editgrid: true,
+                                     tree:true,
+                                      }
+                      },
+                      layout: {
+                        title: "Layout",
+                        default: false,
+                        weight: 40,
+                        components: { 
+                          //- WorkStepComponent: true,
+                          htmlelement: { title:"HTML", icon:'code', weight: 1000, schema:{type: 'htmlelement'}},
+                          content: true,
+                          columns: true,
+                          fieldset: true,
+                          panel: true,
+                          table: true,
+                          tabs: true,
+                          well:true,
+                          container: true,
+                          DatabaseImage: true
+                        }
+                      },
+
+                      misc: {
+                        title: 'Little-used',
+                        default: false,
+                        weight: 1000,
+                        components: {
+                        hidden: true,
+                        tags: true,
+                        email: true,
+                        phoneNumber: true,
+                        address: true,
+                        day: true,
+                        time: true,
+                        signature: true
+                        //- currency: true,
+                          //- survey: true,
+                        //- password: true
+
+                        }
+                      },
+
+                      basic: false,
+                      advanced: false,
+                      data: false,
+                      //- layout: false,
+                      premium: false,
+
+                      //- custom: {
+                      //-   title: 'Custom',
+                      //-   default: false,
+                      //-   weight: 10,
+                      //-   components: {
+                      //-     ComponentUUID:true,
+                      //-     CustomGeoTagComponent: true,
+                      //-     ArrayComponent: true,
+                      //-     SpecNumberComponent: true,
+                      //-     WorkStepComponent: true,
+                        
+                      //-   }
+                      //- }
                   }
               }
           );
