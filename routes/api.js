@@ -1,10 +1,10 @@
 // Pull component data as json doc.
 const express = require("express");
-const Forms = require("../Forms.js");
-const Components = require("../Components.js");
-const Tests = require("../Tests.js");
-const utils = require("../utils.js");
-const permissions = require("../permissions.js");
+const Forms = require("../lib/Forms.js");
+const Components = require("../lib/Components.js");
+const Tests = require("../lib/Tests.js");
+const utils = require("../lib/utils.js");
+const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
 
 var router = express.Router();

@@ -1,9 +1,9 @@
 
-const permissions = require('../permissions.js');
-const Forms = require('../Forms.js');
-const Tests = require('../Tests.js');
+const permissions = require('../lib/permissions.js');
+const Forms = require('../lib/Forms.js');
+const Tests = require('../lib/Tests.js');
 const express  = require("express");
-const utils = require("../utils.js");
+const utils = require("../lib/utils.js");
 
 var router = express.Router();
 

@@ -1,5 +1,6 @@
+// Third-party libraries
 const express = require('express');
-var session = require('express-session');
+const session = require('express-session');
 
 const app = express()
 const pug = require('pug');
@@ -10,24 +11,27 @@ const shortuuid = require('short-uuid')();
 const MUUID = require('uuid-mongodb');  // Addon for storing UUIDs as binary for faster lookup
 const ObjectID = require('mongodb').ObjectID;
 
-var morgan = require('morgan');
-var bodyParser = require('body-parser');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const jsondiffpatch = require('jsondiffpatch');
 
-var jsondiffpatch = require('jsondiffpatch');
+// ------------- mine
 
-// mine
-var config = require('./configuration.js');
-var database = require('./database.js'); // Exports global 'db' variable
-var Components = require('./Components.js');
-var Forms     = require('./Forms.js');
-var permissions = require('./permissions.js');
-var utils = require('./utils.js');
+// Global configuration
+global.config = require('./configuration.js');  // must be first
+var database = require('./lib/database.js'); // Exports global 'db' variable
+var Components = require('./lib/Components.js');
+var Forms     = require('./lib/Forms.js');
+var permissions = require('./lib/permissions.js');
+var utils = require('./lib/utils.js');
 
 const logRequestStart = (req,res,next) => {
     console.log(`${req.method} ${req.originalUrl}`)
     next()
 }
 app.use(logRequestStart)
+
+
 
 app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding via apache
 // 
@@ -73,7 +77,7 @@ app.use(session({
 
 
 // Configure passport and other authentication measures.
-require('./auth.js')(app); 
+require('./lib/auth.js')(app); 
 
 
 

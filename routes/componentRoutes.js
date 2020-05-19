@@ -5,12 +5,11 @@ const shortuuid = require('short-uuid')();
 const MUUID = require('uuid-mongodb');
 const moment = require('moment');
 
-var Components = require('../Components.js');
-var permissions = require('../permissions.js');
-var Forms = require('../Forms.js');
-var Tests = require('../Tests.js')
-var database = require('../database.js');
-var utils = require("../utils.js");
+var Components = require('../lib/Components.js');
+var permissions = require('../lib/permissions.js');
+var Forms = require('../lib/Forms.js');
+var Tests = require('../lib/Tests.js')
+var utils = require("../lib/utils.js");
 
 var router = express.Router();
 
