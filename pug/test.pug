@@ -10,6 +10,7 @@ block extrascripts
     var formrec=!{ JSON.stringify(form||{}, null ,4) }; 
     var testdata=!{JSON.stringify((testdata||{}), null ,4)}; 
     var readOnly=!{retrieved||false};
+    var route_on_submit = "!{route_on_submit || '/test'}";
 
   script(type='text/javascript').
 
@@ -45,7 +46,7 @@ block extrascripts
           if(!draft) { 
             form.emit('submitDone');
             // go to completed form. Do not leave this page in browser history. 
-            window.location.replace('/test/'+formrec.form_id+"/"+retval._id);
+            window.location.replace(route_on_submit+'/'+formrec.form_id+"/"+retval._id);
           } else {
             lastDraftSave = new Date();
 

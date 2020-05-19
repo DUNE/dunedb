@@ -31,7 +31,6 @@ async function seeTestData(req,res,next) {
 
 router.get("/job/:form_id/:record_id", permissions.checkPermission("tests:view"), seeTestData);
 
-// Run a new job, but no UUID specified
 
 /// Run an new job
 router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async function(req,res,next){
@@ -39,7 +38,7 @@ router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async func
     console.log("run a new job");
     var workflow = await Forms.retrieveForm('jobForms',req.params.form_id);
     if(!workflow) return res.status(400).send("No such job workflow");
-    res.render('job.pug',{form_id:req.params.form_id, form:workflow, jobdata:{data:{}}});
+    res.render('test.pug',{form_id:req.params.form_id, form:workflow, jobdata:{data:{}}, route_on_submit: '/job' });
   } catch(err) { console.error(err); next(); }
 });
 
