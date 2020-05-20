@@ -117,16 +117,12 @@ block content
     .row
       .column
         h4 Tests Performed
-          each form,index in forms
-            p=form.form_title
-          
             ul.testsPerformed
-            -console.log("testsPerformed XXXX",form)
-              each test,index in form.performed
+              each test in tests
                 li 
                   -console.log("DDDD ",test)
                   -var parenthetical= " (on "+ moment(test.insertDate).format('MMM DD YYYY');
                   -if(test.user) { parenthetical+=" by " + user_shortname(test.user) }
                   -parenthetical+=")";
-                  a(href='/test/'+form.form_id+"/"+test._id)=(form.form_title||form.form_id)+parenthetical
+                  a(href='/test/'+test._id)=((test.form||{}).form_title||test.form_id)+parenthetical
         

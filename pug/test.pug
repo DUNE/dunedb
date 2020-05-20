@@ -30,6 +30,18 @@ block extrascripts
     function SubmitData(submission) {
       // actually the 'submit' function
       var draft = submission.state !== "submitted";
+      
+      // Include relevant information about the form, for later retrieval
+      submission.form = {
+        _id: formrec._id,
+        form_id: formrec.form_id,
+        version: formrec.version,
+        form_title: formrec.form_title,
+        effectiveDate: formrec.effectiveDate,
+        insertDate: formrec.insertDate
+      }
+      submission.form_id = formrec.form_id; // MUST be in submission.
+
       if(!draft) {
             console.log("SubmitData",...arguments);
       } else {
@@ -46,8 +58,10 @@ block extrascripts
           if(!draft) { 
             form.emit('submitDone');
             // go to completed form. Do not leave this page in browser history. 
-            window.location.replace(route_on_submit+'/'+formrec.form_id+"/"+retval._id);
+            window.location.replace(route_on_submit+'/'+retval._id);
           } else {
+            // Update the draftid.
+            form.submission._id = retval._id;
             lastDraftSave = new Date();
 
             // Formio doesn't actually have a way of doing this...
@@ -74,13 +88,12 @@ block extrascripts
           console.log("posting fail",res,statusCode,statusMsg);
 
       }; 
-      // Include relevant information about the form, for later retrieval
 
       console.log("submitting data",submission, JSON.stringify(submission));
       $.ajax(
         { contentType: "application/json",
           method: "post",
-          url: "/json/submit/"+formrec.form_id,
+          url: "/json/test",
           data: JSON.stringify(submission),
           dataType: "json",
           success: postSuccess
@@ -114,15 +127,7 @@ block extrascripts
       //- form.url="https://nowhere.com";
       console.log(form);
       form.submission = {data: testdata.data};
-      // Relevant data on this version of the schema that we're using to submit the data.
-      form.submission.form = {
-        _id: formrec._id,
-        form_id: formrec.form_id,
-        version: formrec.version,
-        form_title: formrec.form_title,
-        effectiveDate: formrec.effectiveDate,
-        insertDate: formrec.insertDate
-      }
+
       if(!readOnly) {
         form.on('submit',SubmitData);
         form.on('change',MaybeSaveDraft);

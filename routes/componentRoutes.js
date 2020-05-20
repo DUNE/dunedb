@@ -24,26 +24,22 @@ async function get_component(req,res) {
   console.log(get_component,componentUuid,req.params);
 
   // get form and data in one go
-  let [componentform, component, forms] = await Promise.all([
+  let [componentform, component, forms, tests] = await Promise.all([
       Forms.retrieveForm("componentForm","componentForm"),
       Components.retrieveComponent(componentUuid),
       Forms.getListOfForms(),
+      Tests.listComponentTests(componentUuid)
     ]);
 
-  for(form of forms) {
-    console.log('checking for performed',form.form_id);
-    var p = await Tests.listComponentTests(form.form_id,componentUuid);  
-    // var p = await db.collection("form_"+test.form_id).find({"data.componentUuid":componentUuid}).project({form_id:1, form_title:1, insertDate:1, user:1}).toArray();
-    // console.log("peformed of type",test.form_id,":");
-    // console.dir(p);
-    form.performed = p || [];
-  }
+
   console.dir(forms);
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
   // var form = await Forms.retrieveForm("componentForm","componentForm");
   console.log("component")
   console.log(component);
+  console.log("tests");
+  console.log(tests);
   if(!component) return res.status(400).send("No such component ID.");
   res.render("component.pug",{
     schema: componentform.schema,
@@ -51,6 +47,7 @@ async function get_component(req,res) {
     component: component,
     canEdit: permissions.hasPermission("components:edit"),
     forms: forms,
+    tests: tests
   });
 }
 router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);

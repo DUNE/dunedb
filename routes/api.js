@@ -6,9 +6,12 @@ const Tests = require("../lib/Tests.js");
 const utils = require("../lib/utils.js");
 const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
+const pretty = require('express-prettify');
 
 var router = express.Router();
 module.exports = router;
+
+router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer json.
 
 router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
   async function(req,res){
@@ -58,7 +61,7 @@ router.get('/components/:type', permissions.checkPermissionJson('components:view
       var data = await Components.getComponents(req.params.type);
       return res.json(data);
     } catch(err) {
-      res.status(400).json({error:err})
+      res.status(400).json({error:err.toString()})
     }  
   }
 );
@@ -90,7 +93,7 @@ router.post('/:collection(testForms|componentform|jobForms)/:form_id', permissio
       res.json(inserted_record);
     } catch(err) { 
       console.error(err);
-      res.status(400).json({error:err}) 
+      res.status(400).json({error:err.toString()}) 
     }
   }
 );
@@ -101,33 +104,33 @@ router.post('/:collection(testForms|componentform|jobForms)/:form_id', permissio
 
 /// submit test form data
 
-router.post("/submit/:form_id", permissions.checkPermissionJson('tests:submit'), 
+router.post("/test/", permissions.checkPermissionJson('tests:submit'), 
   async function submit_test_data(req,res,next) {
     console.log(chalk.blue("Form submission",req.params.form_id));
     // var body = await parse.json(req);
     var id = null;
     try {
-      id = await Tests.saveTestData(req.params.form_id, req.body, req.ip, req.user);
+      if(!req.body.form_id) throw("No form_id specified. Invalid submission.")
+      id = await Tests.saveTestData(req.body, req.ip, req.user);
       res.json({_id: id});
     } catch(err) {
-      console.error("error submitting form /submit/"+req.params.form_id);
+      console.error("error submitting form /test/"+req.params.form_id);
       console.error(err);
-      res.status(400).json({error:err});
+      res.status(400).json({error:err.toString()});
     } 
   }
 );
 
 
-
-
-// One route for users, one route for the JWT authorized machine-to-machine API
-router.get("/retrieve/:form_id/:record_id",  permissions.checkPermissionJson('tests:view'), 
+router.get("/test/:record_id",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
-    console.log(req.params.form_id, req.params.record_id)
-      return res.json(await Tests.getTestData(req.params.form_id, req.params.record_id));
+    console.log("retrieve test data",req.params);
+    var record = await Tests.getTestData(req.params.record_id);
+    return res.json(record,null,2);
   } catch(err) {
-      res.status(400).json({error:err});
+    console.log(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
   }
 });
 
