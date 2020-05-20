@@ -3,23 +3,21 @@
 var htmlComponent = Formio.Components.components.htmlelement;
 
 
-class DatabaseImage extends htmlComponent{
+class DatabaseFile extends htmlComponent{
 
   static schema(...extend) {
     return super.schema({
-              type: 'DatabaseImage',
-              label: "Image",
-              imgurl: "",
-              width: null,
-              imageUpload: []
+              type: 'DatabaseFile',
+              label: "File",
+              files: []
     }, ...extend);
   }
 
   static get builderInfo() {
     return {
-      title: 'Image',
+      title: 'File Download',
       group: 'custom',
-      icon: 'picture-o',
+      icon: 'file',
       weight: 5,
       schema: this.schema()
     };
@@ -29,19 +27,13 @@ class DatabaseImage extends htmlComponent{
   render(element) {
     // console.log("rendering",this,element);
     var tpl = '';
-
-    var querystring = ''
-    if(this.component.width) querystring='?resize='+parseInt(this.component.width);
     
-    tpl += "<div class='database-imgs'>";
-    var imgs = this.component.imageUpload || [];
-    for(var img of imgs) {
-      if(img.data && img.data.url) {
+    tpl += "<div class='database-imgs' style='min-height: 1em;'>";
+    var files = this.component.files || [];
+    for(var file of files) {
+      if(file.data && file.data.url) {
         // Coolness: dynamic resize.
-
-        tpl += `<a href='${img.data.url}' data-toggle='lightbox' data-type='image' style='min-height: 1em;'>`
-        tpl += `<img src='${img.data.url}${querystring}' class='img-fluid workstep-img' \>`;
-        tpl += '</a>'
+        tpl += `<div>Download <a href='${file.data.url}' download>${file.name||'file'}</a></div>`
       }
     }
     tpl += "</div>";
@@ -54,7 +46,7 @@ class DatabaseImage extends htmlComponent{
 
 
 // Use the table component edit form.
-DatabaseImage.editForm = function(a,b,c)
+DatabaseFile.editForm = function(a,b,c)
 {
     var form = htmlComponent.editForm(a,b,c);
     console.log("editform");
@@ -76,16 +68,16 @@ DatabaseImage.editForm = function(a,b,c)
     // },
 
      {
-          "label": "Images",
+          "label": "Files",
           "labelPosition": "top",
-          "tooltip": "Drag an image here to show it in the workflow step.  To replace an image, drag the new one here, and then press the (x) button next to the old one to remove it. M",
+          "tooltip": "Drag an file here to show it as a download link.  To remoe, click the (x) button next to a file. Multiple files allowed.",
           "hidden": false,
           "hideLabel": false,
           "autofocus": false,
           "disabled": false,
           "tableView": false,
           "modalEdit": false,
-          "image": true,
+          "image": false,
           "webcam": false,
           "fileTypes": [
             {
@@ -108,7 +100,7 @@ DatabaseImage.editForm = function(a,b,c)
             "json": "",
             "multiple": false
           },
-          "key": "imageUpload",
+          "key": "files",
           "properties": {},
           "conditional": {
             "show": "",
@@ -138,14 +130,7 @@ DatabaseImage.editForm = function(a,b,c)
     //     "type": "textfield",
     //     "weight": 50
     // },
-    {
-        input: true,
-        key: "width",
-        label: "Resolution (width)",
-        tooltip: "Width in pixels to rescale image to. Zero for full-size.",
-        type: 'number',
-
-    },
+   
     {
         "input": true,
         "key": "customClass",
@@ -161,5 +146,5 @@ DatabaseImage.editForm = function(a,b,c)
 
 
 // Register the component to the Formio.Components registry.
-Formio.Components.addComponent('DatabaseImage', DatabaseImage);
+Formio.Components.addComponent('DatabaseFile', DatabaseFile);
 
