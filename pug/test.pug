@@ -11,6 +11,7 @@ block extrascripts
     var testdata=!{JSON.stringify((testdata||{}), null ,4)}; 
     var readOnly=!{retrieved||false};
     var route_on_submit = "!{route_on_submit || '/test'}";
+    var submission_url = "!{submission_url || '/json/test'}"
 
   script(type='text/javascript').
 
@@ -93,7 +94,7 @@ block extrascripts
       $.ajax(
         { contentType: "application/json",
           method: "post",
-          url: "/json/test",
+          url: submission_url,
           data: JSON.stringify(submission),
           dataType: "json",
           success: postSuccess
@@ -102,6 +103,8 @@ block extrascripts
 
     };
 
+
+    // ----------- Setup
     window.onload = async function() {
 
 
@@ -126,7 +129,7 @@ block extrascripts
                   //- });
       //- form.url="https://nowhere.com";
       console.log(form);
-      form.submission = {data: testdata.data};
+      form.submission = Object.assign(form.submission, testdata);
 
       if(!readOnly) {
         form.on('submit',SubmitData);

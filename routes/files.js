@@ -96,7 +96,7 @@ router.post("/gridfs",permissions.checkPermission("tests:submit"),
 router.get('/gridfs/:objectid', function(req,res,next){
   if(req.query.resize) return get_and_resize(req,res,next);
   try {
-    db.collection('file_activity').updateOne({_id:req.params.objectid},
+    db.collection('fileActivity').updateOne({_id:req.params.objectid},
                                         {$set: {last_retrieval: new Date()}},
                                         {upsert:true});
 
@@ -130,7 +130,7 @@ function get_and_resize(req,res,next)
                         .resize(parseInt(req.query.resize))
                         .on('info',console.log);
 
-    db.collection('file_activity').updateOne({_id:req.params.objectid},
+    db.collection('fileActivity').updateOne({_id:req.params.objectid},
                                         {$set: {last_retrieval: new Date()}},
                                         {upsert:true});
 
@@ -175,7 +175,7 @@ function get_and_resize(req,res,next)
 // Instead of the above, mark a file for possible deletion
 router.delete('/gridfs/:objectid', permissions.checkPermission("tests:submit"), async function(req,res,next){
   console.log("marking for deletion:",req.params.objectid);
-  await db.collection('file_activity').updateOne({_id:req.params.objectid},
+  await db.collection('fileActivity').updateOne({_id:req.params.objectid},
                                         {$set: {delete_requested: new Date()}},
                                         {upsert:true});
   return res.status(200);

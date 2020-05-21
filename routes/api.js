@@ -3,6 +3,8 @@ const express = require("express");
 const Forms = require("../lib/Forms.js");
 const Components = require("../lib/Components.js");
 const Tests = require("../lib/Tests.js");
+const Jobs = require("../lib/Jobs.js");
+
 const utils = require("../lib/utils.js");
 const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
@@ -122,11 +124,47 @@ router.post("/test/", permissions.checkPermissionJson('tests:submit'),
 );
 
 
-router.get("/test/:record_id",  permissions.checkPermissionJson('tests:view'), 
+router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
     console.log("retrieve test data",req.params);
     var record = await Tests.getTestData(req.params.record_id);
+    return res.json(record,null,2);
+  } catch(err) {
+    console.log(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+});
+
+
+/////////////////////////////////////////////////////////////
+// Job data
+
+/// submit job form data
+
+router.post("/job", permissions.checkPermissionJson('jobs:submit'), 
+  async function submit_test_data(req,res,next) {
+    console.log(chalk.blue("Job submission",req.params.form_id));
+    // var body = await parse.json(req);
+    var id = null;
+    try {
+      if(!req.body.form_id) throw("No form_id specified. Invalid submission.")
+      id = await Jobs.saveJobData(req.body, req.ip, req.user);
+      res.json({_id: id});
+    } catch(err) {
+      console.error("error submitting form /test/");
+      console.error(err);
+      res.status(400).json({error:err.toString()});
+    } 
+  }
+);
+
+
+router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson('tests:view'), 
+  async function retrieve_test_data(req,res,next) {
+  try {
+    console.log("retrieve test data",req.params);
+    var record = await Jobs.getJobData(req.params.record_id);
     return res.json(record,null,2);
   } catch(err) {
     console.log(JSON.stringify(err.toString()));

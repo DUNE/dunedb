@@ -16,7 +16,7 @@ module.exports = router;
 console.log("forms",Forms);
 
 // Create a new test form
-var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
+var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
 
 router.get("/NewTestForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
   console.log("forms",Forms);

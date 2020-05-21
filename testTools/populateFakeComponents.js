@@ -1,9 +1,10 @@
 const express = require('express');
 
-var database = require('./database.js');
+global.config = require('../configuration.js');
+var database = require('../lib/database.js');
 var MUUID = require('uuid-mongodb');
-var componentslib = require('./Components.js');
-var config = require('./config.js');
+var uuid = require('uuid');
+var componentslib = require('../lib/Components.js');
 
 function pickRandom(arr)
 {
@@ -11,9 +12,9 @@ function pickRandom(arr)
   return arr[i];
 }
 
-var napa = 10;
+var napa = 3;
 
-var nboards = 100;
+var nboards = 10;
 
 var components = [];
 
@@ -22,11 +23,10 @@ var boards = [];
 
 for(var i=0;i<nboards;i++)
 {
-    var sites = ['WIS','CHI','PSL','YAL'];
-
+  var sites = ['WIS','CHI','PSL','YAL'];
+  var msecs = Date.now()+Math.floor(Math.random() * 0x100000); // Add up to 1 minute to time to randomize. 
   var board = {
-
-    componentUuid: MUUID.v1(),
+    componentUuid: MUUID.from(uuid.v1({msecs})),
     type: "Geometry Board",
     boardSerialNumber: "UGEO-"+pickRandom(sites)+"-"+Math.floor(Math.random()*10000),
   }
@@ -39,14 +39,16 @@ for(var i=0;i<nboards;i++)
 for(var i=0;i<napa; i++) {
   var sites = ['WIS','CHI','PSL','YAL'];
 
+  var msecs = Date.now()+Math.floor(Math.random() * 0x100000); // Add up to 17 minute to time to randomize. 
   var frame = {
-    componentUuid:  MUUID.v1(),
+    componentUuid:  MUUID.from(uuid.v1({msecs})),
     type: "Frame",
     name: "Frame "+ i
   }
   components.push(frame);
+  var msecs = Date.now()+Math.floor(Math.random() * 0x100000); // Add up to 17 minute to time to randomize. 
   var apa = {
-      componentUuid:  MUUID.v1(),
+      componentUuid:  MUUID.from(uuid.v1({msecs})),
       type: "APA",    
       apaSerialNumber: "APA-"+pickRandom(sites)+"-"+Math.floor(Math.random()*10000),
       frame: i,
@@ -65,7 +67,7 @@ for(var i=0;i<napa; i++) {
 (async function(){
   try{
     await database.attach_to_database()
-    db.dropDatabase();
+    // db.dropDatabase();
     for(c of components) {
       await componentslib.saveComponent(c,{user:"populateFakeComponents",ip:"::1"});
     }

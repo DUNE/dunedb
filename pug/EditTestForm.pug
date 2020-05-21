@@ -240,10 +240,13 @@ block extrascripts
               {
                    builder: {
                       dataentry: {
+
                         title: 'Data entry',
                         default: true,
                         weight: 0, 
-                        components: { textfield: true, 
+                        components: {                           
+                                      AnnotatedImageUpload: true,
+                                      textfield: true, 
                                       textarea: true, 
                                       number:true, 
                                       SpecNumberComponent: true,
@@ -254,8 +257,8 @@ block extrascripts
                         default: false,
                         weight:5,
                         components: {
-                          textfield: { title:'Text field', icon:'align-right',schema: {type: 'textfield', labelPosition: 'left-right'} },
-                          specnumber:{ title:'Number (w spec)', icon:'align-right', schema: {type: 'SpecNumberComponent', labelPosition: 'left-right'} },
+                          textfield_left: { title:'Text field', icon:'align-right',schema: {type: 'textfield', labelPosition: 'left-right'} },
+                          specnumber_left:{ title:'Number (w spec)', icon:'align-right', schema: {type: 'SpecNumberComponent', labelPosition: 'left-right'} },
                         }
                       },
                       enumerated: {
@@ -325,7 +328,9 @@ block extrascripts
                         address: true,
                         day: true,
                         time: true,
-                        signature: true
+                        signature: true,
+                        button: true,
+                        saveDraftButton: {title: 'Save Draft button', icon: 'button', weight: 1000, schema:{type:'button', action:"saveState", state: 'draft', theme: 'secondary', key:'saveAsDraft', label:'Save Draft'}}
                         //- currency: true,
                           //- survey: true,
                         //- password: true

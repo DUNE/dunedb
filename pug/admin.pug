@@ -34,6 +34,25 @@ block content
                 h2 Tests
 
                 .border.border-primary.p-3.m-2
+                  if user_drafts
+                    h4 Your drafts:
+                    if (user_drafts.length==0)
+                      p (None)
+                    else
+                      ul#drafts
+                        each draft in user_drafts
+                          li
+                            a(href='/test/draft/'+draft._id)
+                              span=draft.form_title || draft.form_id
+                            |
+                            |
+                            span=moment(draft.insertDate).format()
+                            |
+                            |
+                            a(href='/test/deleteDraft/'+draft._id) delete
+
+
+                .border.border-primary.p-3.m-2
                   h4 Run a test:
                   ul#tests
                     each form in tests

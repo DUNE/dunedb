@@ -18,7 +18,7 @@ class DatabaseFile extends htmlComponent{
       title: 'File Download',
       group: 'custom',
       icon: 'file',
-      weight: 5,
+      weight: 100,
       schema: this.schema()
     };
   }

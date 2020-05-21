@@ -148,7 +148,7 @@ router.get("/NewComponent", permissions.checkPermission("components:create"),
   var form = await Forms.retrieveForm("componentForm","componentForm");
   // roll a new UUID.
 
-  var componentUuid = MUUID.v1().toString();
+  var componentUuid = Components.newUuid().toString();
   res.render("component_edit.pug",{
     schema: form.schema,
     componentUuid:componentUuid,

@@ -16,7 +16,7 @@ module.exports = router;
 // console.log("forms",Workflows);
 
 // Create a new job form
-var default_form_schema = JSON.parse(require('fs').readFileSync('default_form_schema.json'));
+var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
 
 router.get("/NewWorkflowForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
   var rec = await Forms.retrieveForm("jobForms",req.params.form_id);

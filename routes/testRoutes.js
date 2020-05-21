@@ -11,7 +11,7 @@ module.exports = router;
 
 // HTML/Pug routes:
 
-router.get("/test/:record_id", permissions.checkPermission("tests:view"), 
+router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
     try{
       var options = {};
@@ -52,6 +52,43 @@ async function(req,res,next) {
   } catch(err) { console.error(err); next(); }
 });
 
+
+router.get("/test/draft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:submit"),
+async function(req,res,next) {
+  try{
+    console.log("resume draft",req.params.record_id);
+    // get the draft.
+    var testdata = await Tests.getTestData(req.params.record_id);
+    if(!testdata) next();
+    if(testdata.state != "draft") return res.status(400).send("Data is not a draft");
+    console.log(testdata);
+    if(!testdata.form_id) return res.status(400).send("Can't find test data");
+
+    var form = await Forms.retrieveForm('testForms',testdata.form_id);
+    if(!form) return res.status(400).send("No such test form");
+    delete form.diff;
+    delete form.user;
+    res.render('test.pug',{form_id: testdata.form_id, form:form, testdata:testdata})
+  } catch(err) { console.error(err); next(); }
+});
+
+router.get("/test/deleteDraft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:submit"),
+async function(req,res,next) {
+  try{
+    console.log("resume draft",req.params.record_id);
+    // get the draft.
+    var testdata = await Tests.getTestData(req.params.record_id);
+    if(!testdata) next();
+    if(testdata.state != "draft") return res.status(400).send("Data is not a draft");
+    if(testdata.user.user_id != req.user.user_id) return res.status(400).send("You are not the draft owner");
+
+    await Tests.deleteDraft(req.params.record_id);
+    var backURL=req.header('Referer') || '/';
+    res.redirect(backURL);
+  } catch(err) { console.error(err); next(); }
+});
+
+// Lists recent tests of a specific kind
 router.get('/tests/:form_id', permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
     var tests = await Tests.listRecentTests(req.params.form_id,(req.query||{}).N);
