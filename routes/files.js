@@ -37,13 +37,83 @@ router.post("/disk",permissions.checkPermission("tests:view"),file_upload_middle
       });
 
     }
-})
+});
 
 // /// file retrieval
 router.use('/disk',express.static(__dirname+"/files"));
 
 
+//https://stackoverflow.com/questions/10623798/how-do-i-read-the-contents-of-a-node-js-stream-into-a-string-variable
+function streamToString (stream) {
+  const chunks = []
+  return new Promise((resolve, reject) => {
+    stream.on('data', chunk => chunks.push(chunk))
+    stream.on('error', reject)
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+  });
+}
 
+
+// save a file sent as a base64 string.
+// ?filename=blah will set filename to blah.png
+router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
+  async function(req, res,next){
+    try{
+      console.log("/file/gridfsBase64 data");
+   
+      // This version uses the bodyParser to get a JSON string. But it intrerpreter limits, 
+      // and is usless overhead anyay.
+      //   if(req.body.dataURI) {
+      //     dataURI = req.body.dataURI;
+
+
+      // the data will come in via req which is a readable stream.
+      var dataURI = await streamToString(req);
+    
+      if (!/data:image\//.test(dataURI)) {
+        console.log('ImageDataURI :: Error :: It seems that it is not an Image Data URI. Couldn\'t match "data:image\/"');
+        return null;
+      }
+
+      let regExMatches = dataURI.match('data:image/(.*);base64,(.*)');
+      var imageType= regExMatches[1]; // eg '.png'
+
+      var dataBuffer= Buffer.from(regExMatches[2], 'base64');
+      var filename = req.query.filename || 'datauri_'+(new Date()).toISOString();
+      filename = filename+imageType;
+
+      // We can save the buffer to file to test this;
+      // const fs = require('fs');
+      // fs.writeFile('filename',dataBuffer,(err) => {
+      //   if (err) throw err; console.log('The file has been saved!'); });
+
+      var bucket = new mongo.GridFSBucket(db);
+      bucket.openUploadStream(filename,{contentType:"image/"+imageType})
+        .on('finish',function(gridfs_record){
+            console.log("upload to mongo finished");
+            console.dir(gridfs_record);
+            var url = config.my_url + req.baseUrl;
+            if (url.substr(-1) != '/') url += '/'; // ensure trailing slash
+            url+="gridfs/";
+            var response = {
+              url: url+gridfs_record._id.toString(),
+             name: gridfs_record._id.toString(),
+             size: gridfs_record.length
+            };
+            console.log("responding to uploader with:",response);
+            res.json(response);
+          })
+        .end(dataBuffer);
+
+    } catch(err) {
+      console.error(err);
+      res.status(400).json({error:err});
+    }
+
+});
+
+
+// Save a file.
 
 router.post("/gridfs",permissions.checkPermission("tests:submit"),
   async function(req, res,next){

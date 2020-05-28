@@ -34,6 +34,10 @@ block content
                 h2 Tests
 
                 .border.border-primary.p-3.m-2
+                  h4 
+                    a(href='/tests') View recent tests
+
+                .border.border-primary.p-3.m-2
                   if user_drafts
                     h4 Your drafts:
                     if (user_drafts.length==0)
@@ -89,12 +93,9 @@ block content
                     li
                         a(href='/EditWorkflowForm/'+workflow.form_id)="Edit "+(workflow.form_title||workflow.form_id)
 
-                .border.border-danger.p-3.m-2
-                  h4 View recent job results:
-                  ul#editJobs
-                  each workflow in workflows
-                    li
-                        a(href='/jobs/'+workflow.form_id)="Recent "+(workflow.form_title||workflow.form_id)
+                .border.border-primary.p-3.m-2
+                  h4 
+                    a(href='/jobs') View recent jobs
 
 
     .row.border-top.my-3

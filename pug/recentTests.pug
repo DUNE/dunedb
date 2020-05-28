@@ -3,13 +3,19 @@ include common.pug
 
       
 block content
-  h2 Recently completed jobs:
+  h2 Recently completed tests:
 
-  ul
+  table.table
     each test in tests
-      li
-        a(href=`/test/${form_id}/${test._id}`) 
-          =moment(test.insertDate).format()
-        | &nbsp
-        +short_user(test.user)
+        tr
+            td 
+                a(href=`/test/${test._id}`) #{test.form_id}
+            
+            td #{moment(test.insertDate).format()} (#{moment(test.insertDate).fromNow()})
+
+            td
+               +short_user(test.user)
+            td
+                a(href=`/json/test/${test._id}?pretty`) JSON data
+
 

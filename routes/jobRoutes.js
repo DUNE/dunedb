@@ -50,12 +50,17 @@ router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async func
   } catch(err) { console.error(err); next(); }
 });
 
-router.get('/jobs/:form_id', permissions.checkPermission("tests:view"), 
+router.get('/jobs/:form_id', permissions.checkPermission("jobs:view"), 
   async function(req,res,next) {
-    var tests = await Tests.listRecentTests(req.params.form_id,(req.query||{}).N);
+    var tests = await Jobs.listRecentJobs(req.params.form_id,(req.query||{}).N);
     res.render('recentJobs.pug',{form_id:req.params.form_id, tests: tests});
   });
 
+router.get('/jobs/', permissions.checkPermission("jobs:view"), 
+  async function(req,res,next) {
+    var tests = await Jobs.listRecentJobs(null,(req.query||{}).N);
+    res.render('recentJobs.pug',{ tests: tests});
+  });
 
 
 

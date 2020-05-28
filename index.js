@@ -149,6 +149,20 @@ app.get('/', async function(req, res, next) {
 });
 
 
+// for testing or other stuff.
+var sanitize = require("sanitize-filename");
+const path = require('path');
+const fs = require('fs');
+app.get('/simple/:pagename', function (req, res, next) {
+  var pugfile = sanitize(req.params.pagename);
+  var pathname = path.join('./pug/simple',pugfile+".pug");
+  console.error("Got request for ",req.params.pagename,pathname)
+  if (fs.existsSync(pathname)) 
+    res.render('simple/'+pugfile+".pug", { pagename: pugfile })
+  else
+    next();
+})
+
 
 
 

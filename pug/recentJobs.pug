@@ -9,11 +9,13 @@ block content
     each test in tests
         tr
             td 
-                a(href=`/job/${test._id}`) 
-                    =moment(test.insertDate).format()
+                a(href=`/job/${test._id}`) #{(test.form||{}).form_title||test.form_id}
+            
+            td #{moment(test.insertDate).format()} (#{moment(test.insertDate).fromNow()})
+
             td
                +short_user(test.user)
             td
-                a(href=`/json/job/${test._id}`) JSON data
+                a(href=`/json/job/${test._id}?pretty`) JSON data
 
 

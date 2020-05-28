@@ -95,3 +95,9 @@ router.get('/tests/:form_id', permissions.checkPermission("tests:view"),
     res.render('recentTests.pug',{form_id:req.params.form_id, tests: tests});
   });
 
+// Lists recent tests of a specific kind
+router.get('/tests', permissions.checkPermission("tests:view"), 
+  async function(req,res,next) {
+    var tests = await Tests.listRecentTests(null,(req.query||{}).N);
+    res.render('recentTests.pug',{ tests: tests});
+  });

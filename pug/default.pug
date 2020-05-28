@@ -30,7 +30,11 @@ html
 
 
     link(rel='icon' type='image/png' href='/images/Otterbein.png')
-    // Main CSS sheet for basic layout, custom mods.
+
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.3/fabric.min.js')
+    script(src='/js/fabric-history.js')
+    script(src='/js/AnnotationCanvas.js')
+
 
     script(type="text/javascript", src="/ext/qrcodegen.js")
     script(type="text/javascript", src="/short-uuid.min.js")
@@ -54,6 +58,7 @@ html
     script(src='/js/ColorScale.js')
 
     link(rel='stylesheet', href='/css/main.css', type='text/css', media='all')
+    link(rel='stylesheet', href='/css/AnnotationCanvas.css', type='text/css', media='all')
     style.
       li.nav-item img { height: 40px;}
 
