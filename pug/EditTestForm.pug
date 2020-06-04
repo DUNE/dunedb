@@ -245,7 +245,6 @@ block extrascripts
                         default: true,
                         weight: 0, 
                         components: {                           
-                                      AnnotatedImageUpload: true,
                                       textfield: true, 
                                       textarea: true, 
                                       number:true, 
@@ -279,6 +278,7 @@ block extrascripts
                                       url: true,
                                       datetime: true,
                                       file: {title: "File upload", icon: 'file', schema: {type: 'file', label: 'File Upload', key: 'files'}},
+                                      ImageAnnotator: true,
                                       image: { title: "Image upload", icon: 'picture-o', schema: {type:'file', label: 'Picture upload', key:'picture', image: true}},
                                       CustomGeoTagComponent: true,
 
@@ -313,6 +313,7 @@ block extrascripts
                           container: true,
                           DatabaseImage: true,
                           DatabaseFile: true,
+                          AnnotatedImage: true
                         }
                       },
 

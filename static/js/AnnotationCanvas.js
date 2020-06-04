@@ -21,6 +21,7 @@ class AnnotationCanvas
     // img_url: url to base image, will rescale canvas to these dimensions.
 
     options = options||{};
+    this.options = options;
     // Top element should be sized already.
     this.top_element = top_element;
     $(this.top_element).empty();
@@ -60,7 +61,10 @@ class AnnotationCanvas
       .then(()=>{
         console.log('done loading things',this);
       })
-      .then(()=>{this.setup()})
+      .then(()=>{
+        this.populate();
+        this.setup();
+      })
       .catch(console.error);
   }
 
@@ -88,8 +92,8 @@ class AnnotationCanvas
         <div id='circle' class='dragthing rounded-sm'><img src='/annotation/circle.svg'/></div>
         <div id='rect'   class='dragthing rounded-sm'><img src='/annotation/rect.svg'/></div>
         <div id='text'   class='dragthing rounded-sm'><img src='/annotation/text.svg'/></div>
-        <span>Fill</span>
         <div class='palette fill'>
+          <span>Fill</span>
           <span class='palette-box' data-color="#000000"></span>
           <span class='palette-box' data-color="#575757"></span>
           <span class='palette-box' data-color="#ad2323"></span>
@@ -108,8 +112,8 @@ class AnnotationCanvas
           <span class='palette-box' data-color="#ffffff"></span>
           <span class='palette-box' data-color=""></span>
         </div>
-        <span>Line</span>
         <div class='palette stroke'>
+         <span>Line</span>
           <span class='palette-box' data-color="#000000"></span>
           <span class='palette-box' data-color="#575757"></span>
           <span class='palette-box' data-color="#ad2323"></span>
@@ -257,6 +261,13 @@ class AnnotationCanvas
     });
   }
 
+  populate() {
+    if(this.options.annotation) {
+      this.canvas.loadFromJSON(this.options.annotation);
+    } else {
+      this.canvas.add(this.image);
+    }
+  }
   setup() {
     console.log(this);
     this.canvas.renderAll();

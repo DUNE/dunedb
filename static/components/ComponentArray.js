@@ -101,7 +101,7 @@ class ArrayComponent extends TextFieldComponent{
     val.data = val.data || [];
     val.min = val.min || 0;
     val.max = val.max || 0;
-    var len = val.length;
+    var len = val.data.length;
     console.log('updateExtras',value,val);
     $("span.arrayComponentLength",this.element).text(len);
     $("span.arrayComponentMin",this.element).text(val.min.toFixed(2));
@@ -114,13 +114,13 @@ class ArrayComponent extends TextFieldComponent{
     graph.data = [...val.data];
     graph.min_content = val.min;
     graph.max_content = val.max;
-    var blackscale = new ColorScaleIndexed(0);  
+    var blackscale = new ColorScaleIndexed(1);  
     this.LizardGraph.SetHist(graph,blackscale);
     this.LizardGraph.ylabel = "Value";
     this.LizardGraph.xlabel = "Element";
     this.LizardGraph.ResetDefaultRange();
     this.LizardGraph.Draw();
-
+    console.log('graph',graph);
     //histogram
     var hist = new Histogram(100,val.min,val.max);
     for(var x of val.data) { hist.Fill(x);}
