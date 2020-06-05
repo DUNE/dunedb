@@ -11,6 +11,8 @@ var defaults = {
   mongo_db : "sietch_dev",	     // db name in mongo
   my_url : "http://sietch.xyz/", // url of this instance
   http_server_port: 12313, // port we're running on
+  https_server_port: 12314, // port we're running on
+
   localsecret: "this is a very well-kept secret", // for various local salting
 
 

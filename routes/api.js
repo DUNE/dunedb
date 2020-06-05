@@ -4,7 +4,6 @@ const Forms = require("../lib/Forms.js");
 const Components = require("../lib/Components.js");
 const Tests = require("../lib/Tests.js");
 const Jobs = require("../lib/Jobs.js");
-
 const utils = require("../lib/utils.js");
 const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");

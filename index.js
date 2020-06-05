@@ -2,7 +2,10 @@
 const express = require('express');
 const session = require('express-session');
 
-const app = express()
+const app = express();
+var http = require('http');
+var https = require('https');
+
 const pug = require('pug');
 const chalk = require('chalk');
 
@@ -168,7 +171,15 @@ app.get('/simple/:pagename', function (req, res, next) {
 
 async function run(){
   // db.collection("components"); // testing to see if DB is live...
-	app.listen(config.http_server_port, () => console.log(`Example app listening on port ${config.http_server_port}!`))	
+	// app.listen(config.http_server_port, () => console.log(`Example app listening on port ${config.http_server_port}!`))	
+  var httpServer = http.createServer(app);
+  httpServer.listen(config.http_server_port, () => console.log(`Example app listening on port ${config.http_server_port}!`))  
+
+  // var httpsServer = https.createServer(app);
+  // console.log(config.https_server_port);
+  // httpsServer.listen(config.https_server_port, () => console.log(`Example app listening on https port ${config.https_server_port}!`))  
+
+
 }
 
 database.attach_to_database()
