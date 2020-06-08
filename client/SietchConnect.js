@@ -1,5 +1,3 @@
-const express = require('express');
-
 var request = require('request');
 var util    = require('util');
 
@@ -14,6 +12,7 @@ function SietchConnect(config)
   };
 
   this.connect = async function() {
+    console.log("Connecting..",this.request_params);
     var response = await util.promisify(request)(this.request_params);
     // console.log(response);
     if(response.statusCode != 200) throw new Error('Error in connect(). Response code '+response.statusCode+'\n'+ response.body);
