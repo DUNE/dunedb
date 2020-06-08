@@ -1,0 +1,9 @@
+{
+"url": "http://localhost:12313",
+"host": "localhost",
+"port": 12313,
+"client_credentials": {
+  "user_id": "m2m9fe996973ff972f6",
+  "secret": "secretfb4674eb4004654fa164dbdb0c925a428141741944a2e238e774b4f6a8ab0a459301c30bb6d56ec740ef7cc65246222c754bd14a23ad4b75d03fee268b54d601"
+  }
+}

@@ -14,6 +14,13 @@ module.exports = router;
 
 router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer json.
 
+
+router.get('/generateComponentUuid', permissions.checkPermissionJson('components:edit'), 
+  async function(req,res){
+    res.json(Components.newUuid().toString());
+  }
+);
+
 router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
   async function(req,res){
     // fresh retrival
@@ -33,7 +40,7 @@ router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('com
     var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
     var data = req.body.data;
     try {
-      data = Components.saveComponent(data,req,(req.user||{})); 
+      data = await Components.saveComponent(data,req,(req.user||{})); 
       return res.json(data);
     } catch(err) {
       res.status(400).json({error:"Save failure "+err})
