@@ -161,6 +161,15 @@ block extrascripts
 
         metaform.submission.data.schema = builder.instance.schema; // Copy it over.
         updateSchemaField(builder.instance.schema);
+        $('#trialform').empty();
+
+        // Create a trial form
+        trialform = new Formio.createForm(document.getElementById('trialform'),builder.instance.form).then(function(form) {
+          form.on('change', function() {
+            $('#trialdata').html(JSON.stringify(form.submission, null, 2))
+          });
+        })
+
         console.log("onBuild",JSON.stringify(builder.instance.schema));
 
       };
@@ -190,6 +199,8 @@ block extrascripts
               if(builder_wizard) builder.setDisplay('wizard').then(onBuild);
               else onBuild();
 
+
+              builder.instance.on('change',onBuild);
               builder.instance.on('saveComponent',onBuild);
               builder.instance.on('editComponent',onBuild);
             });
@@ -300,3 +311,10 @@ block content
 
 
 
+  hr
+  h2 Trial Form
+  div.row
+    div.col-6
+      div#trialform
+    div.col
+      pre#trialdata
