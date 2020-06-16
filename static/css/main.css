@@ -12,3 +12,7 @@
 .foldable-heading.collapsed .chevron:after {
     content: "\f054"; 
 }  
+
+.datagrid-table td {
+	min-width: 6em;
+}
