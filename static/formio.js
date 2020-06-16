@@ -1,1 +1,1 @@
-/Users/tagg/formio.js/dist
+../node_modules/formiojs/dist
