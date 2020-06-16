@@ -21,37 +21,9 @@ block extrascripts
  
   block workscripts
     script.
-      function updateSchemaField(schema)
-      {
-        $('#schema').val(JSON.stringify(schema,null,2));
-        var schema_blob = new Blob([JSON.stringify(schema,null,2)],{type: 'application/JSON'});
-        var schema_save_url = window.URL.createObjectURL(schema_blob);
-        $('#download_schema_link').attr('href',schema_save_url);
-      }
-      function onBuild() {
-        //- var schema_element = document.getElementById('schema');
+      var builder = null;
 
-        metaform.submission.data.schema = builder.instance.schema; // Copy it over.
-        updateSchemaField(builder.instance.schema);
-        console.log("onBuild",JSON.stringify(builder.instance.schema));
-
-      };
-      var gformdata;
-
-      function schemaRecordChange(formdata) {
-          console.log("schemaRecordChange",formdata);
-          gformdata = formdata;
-          metaform.submission.data.revised_by = ((formdata.submit||{}).user||{}).displayName;
-          metaform.submission = {data: formdata};
-          // If no form title, autofill with the form ID
-          if(!formdata.form_title || (formdata.form_title.length==0))
-            formdata.form_title = formdata.form_id;
-          updateSchemaField(formdata.schema);
-
-          builder = new Formio.FormBuilder(
-              $('.formbuilder_area').get(0), // html element
-              formdata.schema||{}, // starting schema
-              {
+      var builder_config =  {
                    builder: {
                       dataentry: {
 
@@ -175,16 +147,53 @@ block extrascripts
                       //-   }
                       //- }
                   }
-              }
-          );
-          $('input#commit-schema').val(JSON.stringify(schema));
-            builder.instance.ready.then(function(){
-            if(builder_wizard) builder.setDisplay('wizard').then(onBuild);
-            else onBuild();
+              };
 
-            builder.instance.on('saveComponent',onBuild);
-            builder.instance.on('editComponent',onBuild);
-          });
+      function updateSchemaField(schema)
+      {
+        $('#schema').val(JSON.stringify(schema,null,2));
+        var schema_blob = new Blob([JSON.stringify(schema,null,2)],{type: 'application/JSON'});
+        var schema_save_url = window.URL.createObjectURL(schema_blob);
+        $('#download_schema_link').attr('href',schema_save_url);
+      }
+      function onBuild() {
+        //- var schema_element = document.getElementById('schema');
+
+        metaform.submission.data.schema = builder.instance.schema; // Copy it over.
+        updateSchemaField(builder.instance.schema);
+        console.log("onBuild",JSON.stringify(builder.instance.schema));
+
+      };
+      var gformdata;
+
+      function schemaRecordChange(formdata) {
+          console.log("schemaRecordChange",formdata);
+          gformdata = formdata;
+          metaform.submission.data.revised_by = ((formdata.submit||{}).user||{}).displayName;
+          metaform.submission = {data: formdata};
+          // If no form title, autofill with the form ID
+          if(!formdata.form_title || (formdata.form_title.length==0))
+            formdata.form_title = formdata.form_id;
+          updateSchemaField(formdata.schema);
+
+          if(builder) {
+            builder.setForm(formdata.schema);
+          } else {
+            builder = new Formio.FormBuilder(
+              $('.formbuilder_area').get(0), // html element
+              formdata.schema||{}, // starting schema
+              builder_config);
+
+            $('input#commit-schema').val(JSON.stringify(schema));
+            
+            builder.instance.ready.then(function(){
+              if(builder_wizard) builder.setDisplay('wizard').then(onBuild);
+              else onBuild();
+
+              builder.instance.on('saveComponent',onBuild);
+              builder.instance.on('editComponent',onBuild);
+            });
+        }
       }
 
       function SubmitData(submission) {
