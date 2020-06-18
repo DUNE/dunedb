@@ -18,7 +18,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const jsondiffpatch = require('jsondiffpatch');
 
-// ------------- mine
+
 
 // Global configuration
 global.config = require('./configuration.js');  // must be first
@@ -56,7 +56,13 @@ app.use('/css',compileSass({
     logToConsole: false // If true, will log to console.error on errors
 }));
 app.use('/css',express.static(__dirname + '/scss'));
+
+// local overrides for testing.
+app.use(express.static(__dirname + '/local/static'));
+
 app.use(express.static(__dirname + '/static'));
+
+
 let moment = require('moment');
 app.use(function(req,res,next){ res.locals.moment = moment; next(); }); // moment.js in pug
 
