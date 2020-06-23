@@ -30,7 +30,7 @@ class ArrayComponent extends TextFieldComponent{
 
   static get builderInfo() {
     return {
-      title: 'ArrayComponent',
+      title: 'Array of numbers',
       group: 'custom',
       icon: 'bar-chart',
       weight: 72,

@@ -11,33 +11,31 @@ html
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     //- link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css')
-    link(rel='stylesheet' href='/css/custom.scss')
-
-    link(rel='stylesheet' href='/formio.js/formio.full.min.css')
-    script(src='/jquery/jquery.min.js')
-    script(src='/bootstrap/js/bootstrap.min.js')
-    script(src="/bootstrap-autocomplete.min.js")
-
-    //- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    script(src='/formio.js/formio.full.js')
-    //- script(src='//unpkg.com/formiojs@latest/dist/formio.full.js')
-    script(src='//cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js')
-    script.
-      $(document).on('click', '[data-toggle="lightbox"]', function(event) {event.preventDefault();$(this).ekkoLightbox({alwaysShowClose: true});});
-    script(src="//unpkg.com/markerjs")
-
-    script(type='text/javascript',src='/jsQR.js')
-
-
     link(rel='icon' type='image/png' href='/images/Otterbein.png')
 
-    script(src='https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.3/fabric.min.js')
-    script(src='/js/fabric-history.js')
-    script(src='/js/AnnotationCanvas.js')
+    link(rel='stylesheet' href='/css/custom.scss')
+    link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
 
+    script(src='/dist/jquery/jquery.min.js')
+    script(src='/dist/bootstrap/js/bootstrap.min.js')
+    script(src="/dist/bootstrap-autocomplete/latest/bootstrap-autocomplete.min.js")
+    script(src='/dist/formiojs/formio.full.js')
+    script(src="/dist/short-uuid/short-uuid.min.js")
+    script(src='/dist/deepmerge/umd.js')
+    script(src='/dist/ekko-lightbox/ekko-lightbox.min.js')
+
+    //- Used to pop open a small image to full-screen
+    script.
+      $(document).on('click', '[data-toggle="lightbox"]', function(event) {event.preventDefault();$(this).ekkoLightbox({alwaysShowClose: true});});
+
+    //- QR codes, FIXME replace with an npm package?
+    script(src='/dist/jsqr/jsQR.js') 
+    script(src="/ext/qrcodegen.js")
+
+    script(src='/dist/fabric/fabric.min.js')
+    script(src='/dist/fabric-history/index.min.js')
 
     script(type="text/javascript", src="/ext/qrcodegen.js")
-    script(type="text/javascript", src="/short-uuid.min.js")
     script(type="text/javascript", src="/js/generate_qr_code.js")
     script(src='/components/ComponentGeoTag.js')
     script(src='/components/ComponentUUID.js')
@@ -47,6 +45,8 @@ html
     script(src='/components/Components_misc.js')
     script(src='/components/DatabaseImage.js')
     script(src='/components/DatabaseFile.js')
+
+    script(src='/js/AnnotationCanvas.js')
     script(src='/components/ImageAnnotator.js')
     script(src='/components/AnnotatedImage.js')
     script(src='/components/BetterDataGrid.js')

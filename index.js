@@ -17,7 +17,7 @@ const ObjectID = require('mongodb').ObjectID;
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const jsondiffpatch = require('jsondiffpatch');
-
+const glob = require('glob');
 
 
 // Global configuration
@@ -45,6 +45,23 @@ app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding
 // app.use(bodyParser.urlencoded({ limit:'1000kb', extended : true }));
 app.use(bodyParser.json({ limit:'1000kb'}));
 app.use(morgan('tiny'));
+
+// Static routes to installed modules.
+// Any installed module with a dist/ directory gets that directory exposed
+// on the route /dist/<module>/
+  // list all modules:
+glob(__dirname+'/node_modules/*/dist',
+  function(err,matches) {
+    if(err) throw new Error(err);
+    for(var path of matches) {
+      var modname = /\/node_modules\/([^\/]*)\/dist/.exec(path)[1];
+      console.log('modname',modname,path);
+      app.use('/dist/'+modname,express.static(path));
+    }
+  });
+// add a couple explicitly.
+app.use('/dist/fabric-history',express.static(__dirname+'/node_modules/fabric-history/src'));
+
 
 // CSS precompiler. needs to come before /static call
 var compileSass = require('express-compile-sass');

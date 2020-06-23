@@ -23,6 +23,7 @@ block extrascripts
     script.
       var builder = null;
 
+      var comps = Formio.Components.components;
       var builder_config =  {
                    builder: {
                       dataentry: {
@@ -42,8 +43,10 @@ block extrascripts
                         default: false,
                         weight:5,
                         components: {
-                          textfield_left: { title:'Text field', icon:'align-right',schema: {type: 'textfield', labelPosition: 'left-right'} },
-                          specnumber_left:{ title:'Number (w spec)', icon:'align-right', schema: {type: 'SpecNumberComponent', labelPosition: 'left-right'} },
+                          textfield_left: deepmerge(comps.textfield.builderInfo,{schema:{labelPosition:'left-right'}}),
+                          //{ title:'Text field', icon:'align-right',schema: {type: 'textfield', labelPosition: 'left-right'} },
+                          specnumber_left:deepmerge(SpecNumberComponent.builderInfo,{schema:{labelPosition:'left-right'}}),
+                          //{ title:'Number (w spec)', icon:'align-right', schema: {type: 'SpecNumberComponent', labelPosition: 'left-right'} },
                         }
                       },
                       enumerated: {
@@ -63,9 +66,11 @@ block extrascripts
                         components: { ComponentUUID:true,
                                       url: true,
                                       datetime: true,
+                                      file: comps.file.builderInfo,
+
                                       file: {title: "File upload", icon: 'file', schema: {type: 'file', label: 'File Upload', key: 'files'}},
                                       ImageAnnotator: true,
-                                      image: { title: "Image upload", icon: 'picture-o', schema: {type:'file', label: 'Picture upload', key:'picture', image: true}},
+                                      image: deepmerge(comps.file.builderInfo,{title: "Image upload", icon: 'picture-o', schema: {label: 'Picture upload', key:'picture', image: true}}),
                                       CustomGeoTagComponent: true,
 
 
@@ -77,12 +82,12 @@ block extrascripts
                         title: 'Multiple',
                         weight: 30,
                         components: { 
-                                      BetterDataGrid: true,
-                                      datamap: true, 
-                                     datagrid: true,
-                                     editgrid: true,
-                                     tree:true,
-                                      }
+                                    BetterDataGrid: true,
+                                    datamap: true, 
+                                    datagrid: true,
+                                    editgrid: true,
+                                    tree:true,
+                                    }
                       },
                       layout: {
                         title: "Layout",

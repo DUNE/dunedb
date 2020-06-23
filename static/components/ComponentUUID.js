@@ -144,7 +144,7 @@ class ComponentUUID extends TextFieldComponent{
 
   static get builderInfo() {
     return {
-      title: 'ComponentUUID',
+      title: 'Component UUID',
       group: 'custom',
       icon: 'qrcode',
       weight: 71,

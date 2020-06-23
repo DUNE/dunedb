@@ -1,44 +1,50 @@
 
 
 
-class BetterDataGrid extends  Formio.Components.components.datagrid
+class BetterDataGrid extends Formio.Components.components.datagrid
 {
 
   static schema(...extend) {
     return super.schema({
-              type: 'BeterDataGrid',
-              label: "BetterDataGrid",
+              type: 'BetterDataGrid',
+              label: "BETTER Data Grid",
     }, ...extend);
   }
 
   static get builderInfo() {
     return {
-      title: 'Beter Data Grid',
+      title: 'Better Data Grid',
       icon: 'th',
       group: 'data',
       documentation: 'http://help.form.io/userguide/#datagrid',
       weight: 30,
-      schema: Formio.Components.components.datagrid.schema()
+      schema: BetterDataGrid.schema()
      };
   }
 
- 
- attach(element)
- {
-    console.log("BetterDataGrid attach")
+  constructor(...args) {
+    super(...args);
+    this.type = 'BetterDataGrid';
+  }
+  
+  attach(element)
+  {
+    console.log("BetterDataGrid attach",this)
     // post-hoc some stuff:
+    $('.formio-component-BetterDataGrid',element).addClass('formio-component-datagrid');
     var superattach = super.attach(element);
-    var tbody = this.refs[`${this.datagridKey}-tbody`];
-    var trows = this.refs[`${this.datagridKey}-row`];
-    var parent_tabindex = this.component.tabindex || 1;
-    // tabindex will got down columns, not across rows.
-    for(var tr of trows) {
-      $('input',tr).each(function(index){
+    console.log('element',element);
+    // var tbody = this.refs[`${this.datagridKey}-tbody`];
+    // var trows = this.refs[`${this.datagridKey}-row`];
+    // var parent_tabindex = this.component.tabindex || 1;
+    // // tabindex will got down columns, not across rows.
+    // for(var tr of trows) {
+    //   $('input',tr).each(function(index){
 
-        $(this).prop('tabindex',parent_tabindex+index);
-      });
-    }
-    $(tbody).css('overflow-x','scroll');
+    //     $(this).prop('tabindex',parent_tabindex+index);
+    //   });
+    // }
+    // $(tbody).css('overflow-x','scroll');
     return superattach;
  }
 
