@@ -116,7 +116,7 @@ router.get('/:collection(testForms|componentForm|jobForms)/:form_id', permission
 //     components:[...]
 //  }
 // }
-router.post('/:collection(testForms|componentform|jobForms)/:form_id', permissions.checkPermissionJson('forms:edit'), 
+router.post('/:collection(testForms|componentForm|jobForms)/:form_id', permissions.checkPermissionJson('forms:edit'), 
   async function(req,res,next){
     console.log(chalk.blue("Schema submission","/json/"+req.params.collection));
 

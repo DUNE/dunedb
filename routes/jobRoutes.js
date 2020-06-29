@@ -36,7 +36,39 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("test
 
 });
 
+router.get("/job/draft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
+async function(req,res,next) {
+  try{
+    console.log("resume draft",req.params.record_id);
+    // get the draft.
+    var jobdata = await Jobs.getJobData(req.params.record_id);
+    if(!jobdata) next();
+    if(jobdata.state != "draft") return res.status(400).send("Data is not a draft");
+    console.log(jobdata);
+    if(!jobdata.form_id) return res.status(400).send("Can't find test data");
 
+    var form = await Forms.retrieveForm('jobForms',jobdata.form_id);
+    if(!form) return res.status(400).send("No such test form");
+    res.render('test.pug',{form_id: jobdata.form_id, form:form, testdata:jobdata, route_on_submit:'/job', submission_url:'/json/job'})
+  } catch(err) { console.error(err); next(); }
+});
+
+
+router.get("/job/deleteDraft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
+async function(req,res,next) {
+  try{
+    console.log("resume draft",req.params.record_id);
+    // get the draft.
+    var testdata = await Jobs.getJobData(req.params.record_id);
+    if(!testdata) next();
+    if(testdata.state != "draft") return res.status(400).send("Data is not a draft");
+    if(testdata.user.user_id != req.user.user_id) return res.status(400).send("You are not the draft owner");
+
+    await Jobs.deleteDraft(req.params.record_id);
+    var backURL=req.header('Referer') || '/';
+    res.redirect(backURL);
+  } catch(err) { console.error(err); next(); }
+});
 
 /// Run an new job
 router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async function(req,res,next){

@@ -26,6 +26,7 @@ var database = require('./lib/database.js'); // Exports global 'db' variable
 var Components = require('./lib/Components.js');
 var Forms     = require('./lib/Forms.js');
 var Tests     = require('./lib/Tests.js');
+var Jobs     = require('./lib/Jobs.js');
 
 var permissions = require('./lib/permissions.js');
 var utils = require('./lib/utils.js');
@@ -164,13 +165,17 @@ app.use('/api',require("./routes/api.js"));
 
 app.get('/', async function(req, res, next) {
   var user_drafts = null;
-  if(req.user && req.user.user_id) user_drafts=await Tests.listUserDrafts(req.user.user_id);
+  var job_drafts = null;
+  var test_drafts = null;
+  if(req.user && req.user.user_id) test_drafts=await Tests.listUserDrafts(req.user.user_id);
+  if(req.user && req.user.user_id) job_drafts=await Jobs.listUserDrafts(req.user.user_id);
 	res.render('admin.pug',
 	{
 		tests: await Forms.getListOfForms(),
     workflows: await Forms.getListOfForms("jobForms"),
 		all_components: await Components.getComponents(),
-    user_drafts: user_drafts,
+    test_drafts,
+    job_drafts
 	});
 });
 

@@ -1,0 +1,198 @@
+# Internal Mongo Schemas
+
+
+## Schema version 4
+
+Here I wanted more consistency between different records. 
+
+block: insertion.  All records should have this!.
+```
+{
+	  insertDate: <date>,   	// Timestamp written to database
+    ip: <string>					// ip address of creator client
+    user: <user>					// trimmed user record (see below)
+}
+```
+
+block: validity.   All records that evolve (components, forms) should have this.
+```
+{
+	startDate: <Date>       // Date this version becomes active
+  version: <integer>	    // version number for validity; later numbers are more correct
+  changedFrom: <ObjectId> // Row number of the last version of this form. SHOULD be version-1...
+}
+```
+
+sub-block: user
+```
+{
+  displayName: <String>,         // Printable name
+  user_id:   <string>,           // auth0 user_id 
+  emails: [ <string>, ...]       // email list
+}
+```
+
+All records should contain:
+```
+  _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
+  recordType: <string>,  // component, form, test, job
+```
+
+Common Required fields:
+```
+    componentUuid: <BSON object>,  // UUID of component, binary form.
+    form_id: <string>,             // id of form used 
+    data: {}                       // for tests and jobs and components
+    metadata: {}                   // reserved for formio stuff
+    schema: {}                     // for forms
+}
+```
+
+### Component
+```
+{
+  // supplied by API:
+  _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
+  recordType: "component",  // component, form, test, job
+  insertion: <insertion block>
+  type: <string>   // set to data.type if
+
+  // supplied by caller:
+
+  componentUuid,              // component uuid
+  validity: <validity block>  // If version not set, auto-set
+  data: {
+    type: <string>  // component type
+  }
+
+}
+```
+
+### Form
+```
+{
+  // supplied by API:
+  _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
+  recordType: "form",  // component, form, test, job
+  collection: <string>, // which form collection this comes from.
+  insertion: <insertion block>
+
+  // Supplied by caller:
+  validity: <validity block
+  form_id: <string>   //  identifier for this form type
+  form_name: <string> //  Name of this form
+  schema: {
+    components:[...]
+  }
+}
+```
+
+### Test / Job
+```
+{
+  // supplied by API:
+  _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
+  recordType: <string>   //  "test" or "job" respectively
+  insertion: <insertion block>
+
+  // supplied by caller:
+
+  componentUuid,  // BSON component UUID. Required for 'test', should not be there for 'job'
+  form_id: <string>, 
+  form_name: <string>,
+  form_record_id: <ObjectId>,  // objectID of the form record used.
+  state: <string>         // Required. "submitted" for final data, "draft" for a draft verison.
+                          // Also reserved: 'trash'
+  data: { ...  }      // actual test data. (Also contains uuid?)
+  metadata: { ... }   // optional, Formio stuff.
+}
+```
+
+
+
+
+
+
+
+## Schema version 3
+### Components
+
+```
+{
+	_id: ObjectId(),   		// Autoallocated by Mongo at write time
+	recordType: 'component', // required
+	effectiveDate: <date>  // Validity date start
+	submit: {
+	  insertDate: <date>,   	// Timestamp written to database
+      ip: <string>					// ip address of creator client
+      user: {}					// trimmed user record (see below)
+      version: <integer>	    // version number for validity; later numbers are more correct
+      diff_from: <objectId>     // row _id number of the last version
+	}
+	componentUuid: <Binary UUID blob>
+	<any other fields>
+}
+```
+
+### Forms
+The same format is used for the `componentForm`, `testForms`, and `jobForms` collections
+```
+{
+	_id: <ObjectId>,        // Document ID autoallocated by Mongo at write 
+	recordType: 'form',
+	collection: <string>   // Name of mongodb collection this record is put in.
+	form_id:  <string>   // Identifier for this form type 
+	insertDate: <date> // time record was inserted
+	submit_ip:  <string> // ip address of creator
+	user:  {}			// trimmed user record.
+	revised_by: <string> // display name of above  FIX
+	diff_from: <ObjectID> // last version
+	version: <integer>  // version number
+	effectiveDate: <Date> // when to start using this form in anger
+	schema: {             // this is the Formio form record used to describe data entry
+		components: [...]
+	}
+	metadata: {}         // junk created by Formio
+}
+```
+
+### Tests
+```
+{
+  _id: <ObjectId>         // ObjectId assigned by mongo, at time of first draft-save
+                           // For strict time ordering, use insertDate below.
+  form_id:  <string>       // name of the form>   REQUIRED
+  form: {              
+     _id:                  // Record of form used to generate this test
+     form_id:              // form_id of that form
+     form_title:           // Title of that form
+     version:              // version used
+     effectiveDate:        // effectiveDate of that form version
+     insertDate:           // insertDate of that form version.
+  }
+  
+
+  data: {                  // The actual data payload.
+         componentUuid: <string>  // --> REQUIRED for test, not for jobs
+                                  //matches [  A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}
+         <any other data>
+        }
+  metadata: {}            // Formio junk. Probably useless.
+  state: <string>         // Required. "submitted" for final data, "draft" for a draft verison.
+                          // Also reserved: 'trash'
+  
+  insertDate: <Date>   // timestamp of submission recieved by DB
+  user: {}             // trimmed user object
+}
+```
+
+## Common subrecords
+
+Trimmed User Record:
+```
+{ 
+	user_id: <string>, // the auth0 id, unless it starts with 'm2m' for a machine user
+	displayName: <string>,  // What to display
+	emails: [ <string>, ... ] // array of email addresses, usually only first one used.
+}
+```
