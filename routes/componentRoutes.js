@@ -8,7 +8,7 @@ const moment = require('moment');
 var Components = require('../lib/Components.js');
 var permissions = require('../lib/permissions.js');
 var Forms = require('../lib/Forms.js');
-var Tests = require('../lib/Tests.js')
+var Tests = require('../lib/Tests.js')('test');
 var utils = require("../lib/utils.js");
 
 var router = express.Router();

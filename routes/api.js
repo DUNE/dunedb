@@ -2,8 +2,9 @@
 const express = require("express");
 const Forms = require("../lib/Forms.js");
 const Components = require("../lib/Components.js");
-const Tests = require("../lib/Tests.js");
-const Jobs = require("../lib/Jobs.js");
+const Tests = require("../lib/Tests.js")('test');
+const Jobs = require("../lib/Tests.js")('job');
+// const Jobs = require("../lib/Jobs.js");
 const utils = require("../lib/utils.js");
 const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
@@ -131,15 +132,14 @@ router.post('/:collection(testForms|componentForm|jobForms)/:formId', permission
 /// submit test form data
 router.post("/test/", permissions.checkPermissionJson('tests:submit'), 
   async function submit_test_data(req,res,next) {
-    console.log(chalk.blue("Form submission",req.params.form_id));
+    console.log(chalk.blue("Form submission",req.params.formId));
     // var body = await parse.json(req);
-    var id = null;
     try {
       console.log("Submission to /test/",JSON.stringify(req.body,null,2));
-      outrec = await Tests.save(req.body, req);
+      var outrec = await Tests.save(req.body, req);
       res.json({_id: outrec._id});
     } catch(err) {
-      console.error("error submitting form /test/"+req.params.form_id);
+      console.error("error submitting form /test/"+req.params.formId);
       console.error(err);
       res.status(400).json({error:err.toString()});
     } 
@@ -167,13 +167,11 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson
 // Same as test, but no componentUuid required.
 router.post("/job", permissions.checkPermissionJson('jobs:submit'), 
   async function submit_test_data(req,res,next) {
-    console.log(chalk.blue("Job submission",req.params.form_id));
+    console.log(chalk.blue("Job submission",req.params.formId));
     // var body = await parse.json(req);
-    var id = null;
     try {
-      if(!req.body.form_id) throw("No form_id specified. Invalid submission.")
-      id = await Jobs.saveJobData(req.body, req);
-      res.json({_id: id});
+      var outrec  = await Jobs.save(req.body, req);
+      res.json({_id: outrec._id});
     } catch(err) {
       console.error("error submitting form /test/");
       console.error(err);
@@ -187,7 +185,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
   async function retrieve_test_data(req,res,next) {
   try {
     console.log("retrieve test data",req.params);
-    var record = await Jobs.getJobData(req.params.record_id);
+    var record = await Jobs.retrieve(req.params.record_id);
     return res.json(record,null,2);
   } catch(err) {
     console.log(JSON.stringify(err.toString()));

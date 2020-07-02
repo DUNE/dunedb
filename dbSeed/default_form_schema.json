@@ -1,17 +1,4 @@
 {
   "components": [
-
-    {
-      "type": "button",
-      "label": "Submit",
-      "key": "submit",
-      "disableOnInvalid": true,
-      "input": true,
-      "tableView": false,
-      "validate": {
-        "unique": false,
-        "multiple": false
-      }
-    }
   ]
 }

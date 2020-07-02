@@ -4,7 +4,6 @@ const Forms = require('../lib/Forms.js');
 const Tests = require('../lib/Tests.js');
 const express  = require("express");
 const utils = require("../lib/utils.js");
-const moment = require("moment");
 
 var router = express.Router();
 
@@ -12,6 +11,7 @@ module.exports = router;
 
 // HTML/Pug routes:
 
+// look at a test result.
 router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
     try{
@@ -47,16 +47,15 @@ async function(req,res,next) {
   try{
     console.log("run a new test");
     // only look for test version that's current now.
-    var options = {onDate: moment()};
+    var options = {onDate: new Date()};
     var form = await Forms.retrieve('testForms',req.params.formId,options);
     if(!form) return res.status(400).send("No such test form");
-    delete form.diff;
-    delete form.user;
     res.render('test.pug',{formId:req.params.formId, form:form, componentUuid: req.params.uuid})
   } catch(err) { console.error(err); next(); }
 });
 
 
+// Resume editing a draft
 router.get("/test/draft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:submit"),
 async function(req,res,next) {
   try{
@@ -82,7 +81,6 @@ async function(req,res,next) {
     var testdata = await Tests.retrieve(req.params.record_id);
     if(!testdata) next();
     if(testdata.state != "draft") return res.status(400).send("Data is not a draft");
-    console.log(testdata,req.user);
     if(testdata.insertion.user.user_id != req.user.user_id) return res.status(400).send("You are not the draft owner");
 
     await Tests.deleteDraft(req.params.record_id);
@@ -94,13 +92,13 @@ async function(req,res,next) {
 // Lists recent tests of a specific kind
 router.get('/tests/:formId', permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
-    var tests = await Tests.listRecentTests(req.params.formId,(req.query||{}).N);
+    var tests = await Tests.listRecent(req.params.formId,(req.query||{}).N);
     res.render('recentTests.pug',{formId:req.params.formId, tests: tests});
   });
 
 // Lists recent tests of a specific kind
 router.get('/tests', permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
-    var tests = await Tests.listRecentTests(null,(req.query||{}).N);
+    var tests = await Tests.listRecent(null,(req.query||{}).N);
     res.render('recentTests.pug',{ tests: tests});
   });

@@ -1,9 +1,7 @@
 
 const permissions = require('../lib/permissions.js');
-// const Jobs = require('../lib/Jobs.js');
 const Forms = require('../lib/Forms.js');
-const Jobs = require('../lib/Jobs.js');
-
+const Jobs = require('../lib/Tests.js')('job');
 const express  = require("express");
 const utils = require("../lib/utils.js");
 
@@ -13,43 +11,57 @@ module.exports = router;
 
 // HTML/Pug routes:
 
+// look at a job result
 router.get("/job/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:view"),
  async function(req,res,next) {
     try{
       var options = {};
-      var data = await Jobs.getJobData(req.params.record_id);
+      var data = await Jobs.retrieve(req.params.record_id);
       if(!data) return res.status(404).send("No such job recorded.");
-      var form_id = data.form_id;
-      if(!form_id) throw("Test has no form_id");
+      var formId = data.formId;
+      if(!formId) throw("Job has no formId");
 
       if(req.query.version) options.version = parseInt(req.query.version);
       // fixme rollback
-      var formrec = await Forms.retrieveForm('jobForms',form_id,options);
-      var versions = await Forms.getFormVersions('jobForms',form_id);
+      var formrec = await Forms.retrieve('jobForms',formId,options);
+      var versions = await Forms.getFormVersions('jobForms',formId);
       console.log('versions',versions);
       if(!formrec) return res.status(400).send("No such job form");  
-      res.render('viewTest.pug',{form_id:req.params.form_id, formrec:formrec, testdata:data, versions: versions, retrieved:true})
+      res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, testdata:data, versions: versions, retrieved:true})
     } 
     catch(err) { 
       console.error(err); next(); 
     }
 
 });
+/// Run an new job
+router.get("/job/:formId",permissions.checkPermission("jobs:submit"),async function(req,res,next){
+  try{
+    console.log("run a new job");
+    var options = {onDate: new Date()};
+    var workflow = await Forms.retrieve('jobForms',req.params.formId,options);
+    if(!workflow) return res.status(400).send("No such job workflow");
+    res.render('test.pug',{formId:req.params.formId, form:workflow, 
+                          route_on_submit: '/job',
+                          submission_url: '/json/job'});
+  } catch(err) { console.error(err); next(); }
+});
 
+// Resume editing a draft
 router.get("/job/draft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
 async function(req,res,next) {
   try{
     console.log("resume draft",req.params.record_id);
     // get the draft.
-    var jobdata = await Jobs.getJobData(req.params.record_id);
+    var jobdata = await Jobs.retrieve(req.params.record_id);
     if(!jobdata) next();
     if(jobdata.state != "draft") return res.status(400).send("Data is not a draft");
     console.log(jobdata);
-    if(!jobdata.form_id) return res.status(400).send("Can't find test data");
+    if(!jobdata.formId) return res.status(400).send("Can't find test data");
 
-    var form = await Forms.retrieveForm('jobForms',jobdata.form_id);
+    var form = await Forms.retrieve('jobForms',jobdata.formId);
     if(!form) return res.status(400).send("No such test form");
-    res.render('test.pug',{form_id: jobdata.form_id, form:form, testdata:jobdata, route_on_submit:'/job', submission_url:'/json/job'})
+    res.render('test.pug',{formId: jobdata.formId, form:form, testdata:jobdata, route_on_submit:'/job', submission_url:'/json/job'})
   } catch(err) { console.error(err); next(); }
 });
 
@@ -57,12 +69,12 @@ async function(req,res,next) {
 router.get("/job/deleteDraft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
 async function(req,res,next) {
   try{
-    console.log("resume draft",req.params.record_id);
+    console.log("delete draft",req.params.record_id);
     // get the draft.
-    var testdata = await Jobs.getJobData(req.params.record_id);
+    var testdata = await Jobs.retrieve(req.params.record_id);
     if(!testdata) next();
     if(testdata.state != "draft") return res.status(400).send("Data is not a draft");
-    if(testdata.user.user_id != req.user.user_id) return res.status(400).send("You are not the draft owner");
+    if(testdata.insertion.user.user_id != req.user.user_id) return res.status(400).send("You are not the draft owner");
 
     await Jobs.deleteDraft(req.params.record_id);
     var backURL=req.header('Referer') || '/';
@@ -70,27 +82,17 @@ async function(req,res,next) {
   } catch(err) { console.error(err); next(); }
 });
 
-/// Run an new job
-router.get("/job/:form_id",permissions.checkPermission("jobs:submit"),async function(req,res,next){
-  try{
-    console.log("run a new job");
-    var workflow = await Forms.retrieveForm('jobForms',req.params.form_id);
-    if(!workflow) return res.status(400).send("No such job workflow");
-    res.render('test.pug',{form_id:req.params.form_id, form:workflow, jobdata:{data:{}}, 
-                          route_on_submit: '/job',
-                          submission_url: '/json/job'});
-  } catch(err) { console.error(err); next(); }
-});
 
-router.get('/jobs/:form_id', permissions.checkPermission("jobs:view"), 
+
+router.get('/jobs/:formId', permissions.checkPermission("jobs:view"), 
   async function(req,res,next) {
-    var tests = await Jobs.listRecentJobs(req.params.form_id,(req.query||{}).N);
-    res.render('recentJobs.pug',{form_id:req.params.form_id, tests: tests});
+    var tests = await Jobs.listRecent(req.params.formId,(req.query||{}).N);
+    res.render('recentJobs.pug',{formId:req.params.formId, tests: tests});
   });
 
 router.get('/jobs/', permissions.checkPermission("jobs:view"), 
   async function(req,res,next) {
-    var tests = await Jobs.listRecentJobs(null,(req.query||{}).N);
+    var tests = await Jobs.listRecent(null,(req.query||{}).N);
     res.render('recentJobs.pug',{ tests: tests});
   });
 

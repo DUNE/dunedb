@@ -124,7 +124,8 @@ block extrascripts
       form = await Formio.createForm(
                   document.getElementById('builtform'),
                   formrec.schema,
-                  { readOnly: readOnly
+                  { readOnly: readOnly,
+                    buttonSettings: {showCancel: false, showSubmit: false}
                     //- saveDraft: true,
                     //- saveDraftThrottle: 1000
                   });

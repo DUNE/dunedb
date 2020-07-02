@@ -18,37 +18,27 @@ module.exports = router;
 // Create a new job form
 var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
 
-router.get("/NewWorkflowForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
-  var rec = await Forms.retrieveForm("jobForms",req.params.form_id);
+router.get("/NewWorkflowForm/:formId", permissions.checkPermission("forms:edit"), async function(req,res){
+  var rec = await Forms.retrieve("jobForms",req.params.formId);
   
   if(!rec) {
       var forms = db.collection("jobForms");
       // console.log('updateRes',updateRes)
 
-      var rec = {form_id: req.params.form_id,
-                schema: default_form_schema
+      var rec = {formId: req.params.formId,
+                 formName: req.params.formId,
+                 schema: default_form_schema
                }; 
-      rec.submit = {
-        insertDate: new Date(),
-        ip: req.ip,
-        user: req.user,
-        version: 0,
-        diff_from: null,
-        diff: null,
-      }
 
-      delete rec._id;
-      rec.effectiveDate = new Date(0);
-      console.log("inserting",rec);
-      await forms.insertOne(rec);
+      Forms.save(rec,req);
   }
 
-  res.redirect("/EditWorkflowForm/"+req.params.form_id);
+  res.redirect("/EditWorkflowForm/"+req.params.formId);
 });
 
 // Edit existing job form
-router.get("/EditWorkflowForm/:form_id?", permissions.checkPermission("forms:edit"), async function(req,res){
-  res.render('EditWorkflowForm.pug',{collection:"jobForms",form_id:req.params.form_id});
+router.get("/EditWorkflowForm/:formId?", permissions.checkPermission("forms:edit"), async function(req,res){
+  res.render('EditWorkflowForm.pug',{collection:"jobForms",formId:req.params.formId});
 });
 
 

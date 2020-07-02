@@ -25,8 +25,8 @@ global.config = require('./configuration.js');  // must be first
 var database = require('./lib/database.js'); // Exports global 'db' variable
 var Components = require('./lib/Components.js');
 var Forms     = require('./lib/Forms.js');
-var Tests     = require('./lib/Tests.js');
-var Jobs     = require('./lib/Jobs.js');
+var Tests     = require('./lib/Tests.js')('test');
+var Jobs     = require('./lib/Tests.js')('job');
 
 var permissions = require('./lib/permissions.js');
 var utils = require('./lib/utils.js');
