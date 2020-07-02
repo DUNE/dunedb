@@ -1,26 +1,6 @@
 {
   "components": [
-    {
-      "label": "Component UUID",
-      "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
-      "tooltip": "Database component UUID. Found on QR code.",
-      "inputMask": "********-****-****-****-************",
-      "customClass": ".component-uuid-formio",
-      "spellcheck": false,
-      "disabled": true,
-      "tableView": false,
-      "validateOn": "blur",
-      "validate": {
-        "pattern": "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
-        "customMessage": "Needs to be hexadecimal in 8-4-4-4-12 layout",
-        "unique": false,
-        "multiple": false
-      },
-      "errorLabel": "Not a UUID",
-      "key": "componentUuid",
-      "type": "ComponentUUID",
-      "input": true
-    },
+
     {
       "type": "button",
       "label": "Submit",

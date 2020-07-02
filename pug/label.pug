@@ -10,8 +10,9 @@ block vars
 
 block extrascripts
   script.
+     
       $(function(){
-        DrawQRCode($('.qr-code canvas'),'http://sietch.xyz/!{component.componentUuid}','!{component.name}');
+        DrawQRCode($('.qr-code canvas'),'!{base_url}/!{component.componentUuid}','!{component.name}');
       });
       
   style(type='text/css').

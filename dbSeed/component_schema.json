@@ -5,15 +5,6 @@
   "schema": {
   "components": [
     {
-      "label": "Component UUID",
-      "spellcheck": false,
-      "disabled": true,
-      "tableView": false,
-      "key": "componentUuid",
-      "type": "ComponentUUID",
-      "input": true
-    },
-    {
       "label": "Effective Date of this change",
       "tableView": false,
       "datePicker": {

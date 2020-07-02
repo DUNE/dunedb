@@ -2,7 +2,7 @@ extend default
 
 
 block vars
-  - var page_title=form_id;
+  - var page_title=formId;
 
 block extrascripts
   script(type='text/javascript',src='/jsQR.js')
@@ -14,7 +14,7 @@ block extrascripts
     $(function(){
       $('.component-uuid-autocomplete.go-test-uuid').on('autocomplete.select', function (evt, item) {
         console.log("selected go to",item)
-        window.location.href = "/"+item.val+"/test/!{form_id}";
+        window.location.href = "/"+item.val+"/test/!{formId}";
       });
 
 
@@ -78,7 +78,7 @@ block extrascripts
                 console.log("autocomplete success",result);
                 if(result && result.length>0) {
                    console.log("jumping")
-                   window.location.assign( "/"+uuid+"/test/!{form_id}" );
+                   window.location.assign( "/"+uuid+"/test/!{formId}" );
                    return;
                 } else{
                   $('#outputMessage').text("No match in DB for UUID "+uuid)
@@ -98,8 +98,8 @@ block extrascripts
 
 
 block content
-  h2=form_id
-  h3=workflow.form_title
+  h2=formId
+  h3=workflow.formName
   
 
   .container

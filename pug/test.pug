@@ -2,7 +2,7 @@ extend default
 
 
 block vars
-  - var page_title=form_id;
+  - var page_title=formId;
   - console.log('data in pug:',data)
 block extrascripts
   script(type='text/javascript').
@@ -12,6 +12,7 @@ block extrascripts
     var readOnly=!{retrieved||false};
     var route_on_submit = "!{route_on_submit || '/test'}";
     var submission_url = "!{submission_url || '/json/test'}"
+    var componentUuid = !{JSON.stringify(componentUuid||null)};
 
   script(type='text/javascript').
 
@@ -23,7 +24,7 @@ block extrascripts
       var seconds = Math.floor((new Date() - lastDraftSave) / 1000);
       if(seconds>10) {
         var submission = form.submission;
-        form.submission.state = "draft";
+        submission.state = "draft";
         SubmitData(submission);
       }
     }
@@ -33,15 +34,10 @@ block extrascripts
       var draft = submission.state !== "submitted";
       
       // Include relevant information about the form, for later retrieval
-      submission.form = {
-        _id: formrec._id,
-        form_id: formrec.form_id,
-        version: formrec.version,
-        form_title: formrec.form_title,
-        effectiveDate: formrec.effectiveDate,
-        insertDate: formrec.insertDate
-      }
-      submission.form_id = formrec.form_id; // MUST be in submission.
+      submission.formId = formrec.formId; // MUST be in submission.
+      submission.formName = formrec.formName; // MUST be in submission.
+      submission.formObjectId = formrec._id; // MUST be in submission.
+      submission.componentUuid = componentUuid; // MUST be in submission.
 
       if(!draft) {
             console.log("SubmitData",...arguments);
@@ -110,14 +106,20 @@ block extrascripts
 
       console.log("schema",formrec.schema);
 
+      // Add draft and submit buttons.
+      var append_to = formrec.schema;
+      if(formrec.schema.display === 'wizard') append_to = formrec.schema.components[formrec.schema.components.length-1]; // last page.
+
+      // Add save-as-draft button.
+      if(!readOnly) {
+        append_to.components.push({type:'button', action:"saveState", state: 'draft', theme: 'secondary', key:'saveAsDraft', label:'Save Draft'});
+        
+        // add submit button
+        append_to.components.push({ type: "button",label: "Submit",key: "submit",disableOnInvalid: true,input: true,tableView: false
+        });
+      }
+
       // Remove submit button if it's read-only
-      if(readOnly)
-        for(var i=formrec.schema.components.length-1; i<=0; i--) {
-          var c = formrec.schema.components[i];
-          if(c.type=="button" && (c.action=="submit" ||c.action=="saveState")) {
-            formrec.schema.components.splice(i,1);
-          }
-        }
 
       form = await Formio.createForm(
                   document.getElementById('builtform'),
@@ -138,7 +140,7 @@ block extrascripts
     }
 
 block content
-  h2=form.form_title
+  h2=form.formName
   
   #builtform
 

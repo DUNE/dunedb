@@ -8,7 +8,7 @@ Here I wanted more consistency between different records.
 block: insertion.  All records should have this!.
 ```
 {
-	  insertDate: <date>,   	// Timestamp written to database
+    insertDate: <date>,   	// Timestamp written to database
     ip: <string>					// ip address of creator client
     user: <user>					// trimmed user record (see below)
 }
@@ -17,7 +17,7 @@ block: insertion.  All records should have this!.
 block: validity.   All records that evolve (components, forms) should have this.
 ```
 {
-	startDate: <Date>       // Date this version becomes active
+  startDate: <Date>       // Date this version becomes active
   version: <integer>	    // version number for validity; later numbers are more correct
   changedFrom: <ObjectId> // Row number of the last version of this form. SHOULD be version-1...
 }
@@ -40,8 +40,9 @@ All records should contain:
 
 Common Required fields:
 ```
+{
     componentUuid: <BSON object>,  // UUID of component, binary form.
-    form_id: <string>,             // id of form used 
+    formId: <string>,             // id of form used 
     data: {}                       // for tests and jobs and components
     metadata: {}                   // reserved for formio stuff
     schema: {}                     // for forms
@@ -56,17 +57,26 @@ Common Required fields:
   recordType: "component",  // component, form, test, job
   insertion: <insertion block>
   type: <string>   // set to data.type if
+  referencesComponents: [ <BSON Uuid>,... ]; // list of uuids in data given below.., found by deep searh
 
   // supplied by caller:
-
   componentUuid,              // component uuid
-  validity: <validity block>  // If version not set, auto-set
+  validity: <validity block>  // Fields are auto-set if empty.
   data: {
     type: <string>  // component type
   }
 
 }
 ```
+
+### Comonent relationships:
+```
+{
+  _id: <BSON Uuid>,
+  referredToBy: [<BSON Uuid>,... ]
+}
+```
+
 
 ### Form
 ```
@@ -78,9 +88,9 @@ Common Required fields:
   insertion: <insertion block>
 
   // Supplied by caller:
-  validity: <validity block
-  form_id: <string>   //  identifier for this form type
-  form_name: <string> //  Name of this form
+  validity: <validity block>
+  formId: <string>   //  identifier for this form type
+  formName: <string> //  Name of this form
   schema: {
     components:[...]
   }
@@ -97,10 +107,10 @@ Common Required fields:
 
   // supplied by caller:
 
-  componentUuid,  // BSON component UUID. Required for 'test', should not be there for 'job'
-  form_id: <string>, 
-  form_name: <string>,
-  form_record_id: <ObjectId>,  // objectID of the form record used.
+  componentUuid,  // BSON component UUID. Required for 'test', should not be there for 'job'. Provided via api route.
+  formId: <string>, 
+  formName: <string>,
+  formObjectId: <ObjectId>,  // objectID of the form record used.
   state: <string>         // Required. "submitted" for final data, "draft" for a draft verison.
                           // Also reserved: 'trash'
   data: { ...  }      // actual test data. (Also contains uuid?)

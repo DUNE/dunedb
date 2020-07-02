@@ -47,10 +47,10 @@ block content
                         each draft in test_drafts
                           li
                             a(href='/test/draft/'+draft._id)
-                              span=draft.form_title || draft.form_id
+                              span=draft.formName || draft.formId
                             |
                             |
-                            span=moment(draft.insertDate).format()
+                            span #{moment(draft.insertDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(draft.insertDate).fromNow()})
                             |
                             |
                             a(href='/test/deleteDraft/'+draft._id) delete
@@ -61,7 +61,7 @@ block content
                   ul#tests
                     each form in tests
                       li
-                        a(href='/test/'+form.form_id)="Run "+form.form_title
+                        a(href='/test/'+form.formId)="Run "+form.formName
 
                 .border.border-danger.p-3.m-2
                   p.h4
@@ -71,7 +71,7 @@ block content
                   ul#editTests
                   each form in tests
                     li
-                        a(href='/EditTestForm/'+form.form_id)="Edit "+(form.form_title || form.form_id)
+                        a(href='/EditTestForm/'+form.formId)="Edit "+(form.formName || form.formId)
 
             .border.rounded.m-3
                 h2 Workflows
@@ -81,7 +81,7 @@ block content
                   ul#workflows
                     each workflow in workflows
                       li
-                        a(href='/job/'+workflow.form_id)="Run "+(workflow.form_title||workflow.form_id)
+                        a(href='/job/'+workflow.formId)="Run "+(workflow.formName||workflow.formId)
 
                 .border.border-danger.p-3.m-2
                   p.h4
@@ -91,7 +91,7 @@ block content
                   ul#editJobs
                   each workflow in workflows
                     li
-                        a(href='/EditWorkflowForm/'+workflow.form_id)="Edit "+(workflow.form_title||workflow.form_id)
+                        a(href='/EditWorkflowForm/'+workflow.formId)="Edit "+(workflow.formName||workflow.formId)
 
                 if job_drafts
                   .border.border-primary.p-3.m-2
@@ -103,7 +103,7 @@ block content
                         each draft in job_drafts
                           li
                             a(href='/job/draft/'+draft._id)
-                              span=draft.form_title || draft.form_id
+                              span=draft.formName || draft.formId
                             |
                             |
                             span=moment(draft.insertDate).format()

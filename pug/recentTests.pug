@@ -9,7 +9,7 @@ block content
     each test in tests
         tr
             td 
-                a(href=`/test/${test._id}`) #{test.form_id}
+                a(href=`/test/${test._id}`) #{test.formId}
             
             td #{moment(test.insertDate).format()} (#{moment(test.insertDate).fromNow()})
 

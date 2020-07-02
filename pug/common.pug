@@ -73,11 +73,11 @@ mixin uuid_autocomplete
 
 block pugscripts
   - function user_email(user) { return ((user.emails||[])[0]||{}).value || "" };
-  - function user_shortname(user) { return user.nickname|| user.displayName || user_email(user) };
+  - function user_shortname(user) { return user.displayName || user_email(user) };
 
 
 mixin short_user(user)
   if (!user)
     span anonymous
   else
-    a(href='mailto:'+user_email(user))=user.displayName||user.nickname||user_email(user)
+    a(href='mailto:'+user_email(user))=user.displayName||user_email(user)

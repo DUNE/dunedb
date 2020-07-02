@@ -195,13 +195,15 @@ class ComponentUUID extends TextFieldComponent{
       });
     }
     if(this.component.autocomplete) {
-      $('input',element).autoComplete({
+      $(this.refs.input).autoComplete({
         resolverSettings: {
           minLength: 3,
             url: '/autocomplete/uuid'
         }
       }).on('autocomplete.select', function (evt, item) {
-        self.setValue(item.val);
+        $(this).val(item.val);
+        self.setValueAt(0,item.val);
+        self.checkData();
       });
     }
   }

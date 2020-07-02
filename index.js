@@ -60,8 +60,10 @@ glob(__dirname+'/node_modules/*/dist',
       app.use('/dist/'+modname,express.static(path));
     }
   });
-// add a couple explicitly.
+
+// add some static routes to libraries explicity..
 app.use('/dist/fabric-history',express.static(__dirname+'/node_modules/fabric-history/src'));
+app.use('/dist/moment',express.static(__dirname+'/node_modules/moment/min'));
 
 
 // CSS precompiler. needs to come before /static call
@@ -77,12 +79,17 @@ app.use('/css',express.static(__dirname + '/scss'));
 
 // local overrides for testing.
 app.use(express.static(__dirname + '/local/static'));
-
 app.use(express.static(__dirname + '/static'));
 
 
 let moment = require('moment');
-app.use(function(req,res,next){ res.locals.moment = moment; next(); }); // moment.js in pug
+
+// Add some functionality to ALL pug renders. 
+app.use(function(req,res,next){ 
+  res.locals.moment = moment; 
+  res.locals.base_url = global.config.my_url;
+  next(); 
+}); // moment.js in pug
 
 
 app.set('view options', { pretty: true });

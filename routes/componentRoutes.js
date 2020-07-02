@@ -25,7 +25,7 @@ async function get_component(req,res) {
 
   // get form and data in one go
   let [componentform, component, forms, tests] = await Promise.all([
-      Forms.retrieveForm("componentForm","componentForm"),
+      Forms.retrieve("componentForm","componentForm"),
       Components.retrieveComponent(componentUuid),
       Forms.getListOfForms(),
       Tests.listComponentTests(componentUuid)
@@ -35,11 +35,13 @@ async function get_component(req,res) {
   console.dir(forms);
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieveForm("componentForm","componentForm");
+  // var form = await Forms.retrieve("componentForm","componentForm");
   console.log("component")
   console.log(component);
   console.log("tests");
   console.log(tests);
+  console.log('componentForm');
+  console.log(componentform);
   if(!component) return res.status(400).send("No such component ID.");
   res.render("component.pug",{
     schema: componentform.schema,
@@ -60,29 +62,29 @@ router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("componen
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
   console.log(get_component,componentUuid,req.params);
 
-  var effectiveDate = null;
-  if(req.query.effectiveDate) {
-    effectiveDate = new Date(parseInt(req.query.effectiveDate));
-    console.log("Trying effective date",effectiveDate)
+  var date = null;
+  if(req.query.date) {
+    date = new Date(parseInt(req.query.date));
+    console.log("Trying effective date",date)
   }
 
-  var effectiveDates = await Components.retrieveComponentChangeDates(componentUuid);
+  var dates = await Components.retrieveComponentChangeDates(componentUuid);
 
   // get form and data in one go
   let [form, component] = await Promise.all([
-      Forms.retrieveForm("componentForm","componentForm"),
-      Components.retrieveComponent(componentUuid,effectiveDate),
+      Forms.retrieve("componentForm","componentForm"),
+      Components.retrieveComponent(componentUuid,date),
     ]);
 
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieveForm("componentForm","componentForm");
+  // var form = await Forms.retrieve("componentForm","componentForm");
   console.log("component")
   console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
   res.render("component_history.pug",{
     schema: form.schema,
-    effectiveDates: effectiveDates,
+    dates: dates,
     componentUuid:componentUuid,
     component: component,
     canEdit: permissions.hasPermission("components:edit"),
@@ -97,7 +99,7 @@ async function edit_component(req,res) {
 
   // get form and data in one go
   let [form, component] = await Promise.all([
-      Forms.retrieveForm("componentForm","componentForm"),
+      Forms.retrieve("componentForm","componentForm"),
       Components.retrieveComponent(componentUuid),
     ]);
 
@@ -105,7 +107,7 @@ async function edit_component(req,res) {
 
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieveForm("componentForm","componentForm");
+  // var form = await Forms.retrieve("componentForm","componentForm");
   console.log("component")
   console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
@@ -127,7 +129,7 @@ router.get('/'+utils.short_uuid_regex+'/edit', permissions.checkPermission("comp
 
 async function component_label(req,res,next) {
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  component = Components.retrieveComponent(componentUuid);
+  component = await Components.retrieveComponent(componentUuid);
   if(!component) return res.status(404).send("No such component exists yet in database");
   console.log({component: component});
   res.render('label.pug',{component: component});
@@ -136,23 +138,20 @@ router.get('/'+utils.uuid_regex+'/label', permissions.checkPermission("component
 router.get('/'+utils.short_uuid_regex+'/label', permissions.checkPermission("components:view"), component_label);
 
 
-
-
-
 // Create a new component
 
 
 router.get("/NewComponent", permissions.checkPermission("components:create"),
   // middlewareCheckDataEntryPrivs,
    async function(req,res){
-  var form = await Forms.retrieveForm("componentForm","componentForm");
+  var form = await Forms.retrieve("componentForm","componentForm");
   // roll a new UUID.
 
   var componentUuid = Components.newUuid().toString();
   res.render("component_edit.pug",{
     schema: form.schema,
     componentUuid:componentUuid,
-    component: {componentUuid:componentUuid},
+    component: {},
     canEdit: permissions.hasPermission("components:edit"),
     tests:[],
     performed: [],
@@ -162,7 +161,7 @@ router.get("/NewComponent", permissions.checkPermission("components:create"),
 
 // Edit component form.
 router.get("/EditComponentForm", permissions.checkPermission("forms:edit"), async function(req,res){
-  res.render('EditComponentForm.pug',{collection:"componentForm",form_id:"componentForm"});
+  res.render('EditComponentForm.pug',{collection:"componentForm",formId:"componentForm"});
 });
 
 

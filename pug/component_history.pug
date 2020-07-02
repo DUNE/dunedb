@@ -54,13 +54,13 @@ block content
   .container
     .row
       ul
-        each o in effectiveDates
+        each o in dates
           li 
-            a(href='?effectiveDate='+(new Date(o.effectiveDate)).getTime()) #{moment(o.effectiveDate).format('MMM D YYYY h:m a')} #{user_shortname((o.submit||{}).user||{})}
+            a(href='?date='+(new Date(o.validity.startDate)).getTime()) #{moment(o.validity.startDate).format('MMM D YYYY h:m a')} #{user_shortname((o.insertion||{}).user||{})} Ver #{(o.validity||{}).version}
     .row
         h2#name.col-md-8=((component||{}).type)?((component||{}).type+": "+(component||{}).name):"New Component"
     .row
-        h3#name.col-md-8 As of #{moment(component.effectiveDate).format('MMM D YYYY h:m a')} (#{moment(component.effectiveDate).fromNow()})
+        h3#name.col-md-8 As of #{moment(component.validity.startDate).format('MMM D YYYY h:m a')} (#{moment(component.validity.startDate).fromNow()})
     .row
       a(href='/json/component/'+componentUuid) Raw JSON Document
     .row

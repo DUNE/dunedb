@@ -2,7 +2,7 @@ extend default
 
 
 block vars
-  - var page_title=form_id;
+  - var page_title=formId;
 
 block extrascripts
   script(type='text/javascript').
@@ -12,7 +12,7 @@ block extrascripts
       function beforeSubmit(submission, next) {
         // actually the 'submit' function
         console.log(submission);
-        var posting = $.post('/submit/#{form_id}',submission);
+        var posting = $.post('/submit/#{formId}',submission);
         posting.done(function(a,b,c) {
           // POST operation completed but..
           console.log(a,b,c);
@@ -36,7 +36,7 @@ block extrascripts
       }
       
 block content
-  h2=form_id
+  h2=formId
 
   #builtform
 

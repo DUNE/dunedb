@@ -18,38 +18,28 @@ console.log("forms",Forms);
 // Create a new test form
 var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
 
-router.get("/NewTestForm/:form_id", permissions.checkPermission("forms:edit"), async function(req,res){
+router.get("/NewTestForm/:formId", permissions.checkPermission("forms:edit"), async function(req,res){
   console.log("forms",Forms);
-  var rec = await Forms.retrieveForm("testForms",req.params.form_id);
+  var rec = await Forms.retrieve("testForms",req.params.formId);
   
   if(!rec) {
       var forms = db.collection("testForms");
       // console.log('updateRes',updateRes)
 
-      var rec = {form_id: req.params.form_id,
-                schema: default_form_schema
+      var rec = {formId: req.params.formId,
+                 formName: req.params.formId,
+                 schema: default_form_schema
                }; 
-      rec.submit = {
-        insertDate: new Date(),
-        ip: req.ip,
-        user: req.user,
-        version: 0,
-        diff_from: null,
-        diff: null,
-      }
 
-      delete rec._id;
-      rec.effectiveDate = new Date(0);
-      console.log("inserting",rec);
-      await forms.insertOne(rec);
+      Forms.saveForm(rec,req);
   }
 
-  res.redirect("/EditTestForm/"+req.params.form_id);
+  res.redirect("/EditTestForm/"+req.params.formId);
 });
 
 // Edit existing test form
-router.get("/EditTestForm/:form_id?", permissions.checkPermission("forms:edit"), async function(req,res){
-  res.render('EditTestForm.pug',{collection:"testForms",form_id:req.params.form_id});
+router.get("/EditTestForm/:formId?", permissions.checkPermission("forms:edit"), async function(req,res){
+  res.render('EditTestForm.pug',{collection:"testForms",formId:req.params.formId});
 });
 
 

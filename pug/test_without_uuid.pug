@@ -2,7 +2,7 @@ extend default
 
 
 block vars
-  - var page_title=form_id;
+  - var page_title=formId;
 
 block extrascripts
 
@@ -36,7 +36,7 @@ block extrascripts
         if(form.isValid()) {
           var uuid = form.submission.data.componentUuid;
           if(uuid && uuid.length>10)
-            window.location.assign(`/${uuid}/test/!{form_id}`)
+            window.location.assign(`/${uuid}/test/!{formId}`)
         }
       });
 
@@ -44,7 +44,7 @@ block extrascripts
 
 
 block content
-  h2=(form.form_title || form_id)
+  h2=(form.formName || formId)
 
   p Every test must be perormed on a component. Enter the component UUID below.
 

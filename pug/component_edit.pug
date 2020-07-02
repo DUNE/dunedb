@@ -19,14 +19,21 @@ block extrascripts
   script(type='text/javascript').
 
       var form = null;
+      var metaform = null;
       function SubmitData(submission) {
         // actually the 'submit' function
-        console.log("submitting data",submission);
+        var record = {...submission};
+        // metadata:
+        record.componentUuid = componentUuid; 
+        // only set desired startdate.
+        record.validity = { startDate: metaform.submission.data.startDate };
+
+        console.log("submitting data",record);
         var posting =  $.ajax(
           { contentType: "application/json",
             method: "post",
             url: "/json/component/"+componentUuid,
-            data: JSON.stringify(submission),
+            data: JSON.stringify(record),
             dataType: "json",
           }
         );
@@ -36,20 +43,24 @@ block extrascripts
 
         posting.done(function(retval) {
           // POST operation completed but..
+          console.log('posting.done',retval);
           if((retval.error)) {
             form.setAlert("warning",c.error);
           form.emit('error', c.error);
           } else form.setAlert(false);
-          
-          if(retval.component) form.submission = {data: retval.component};
+          if(retval.data) form.submission = {data:retval.data};
           if(window.location.pathname.includes("NewComponent")) {
             // Change the URL to match th new component componentUuid, so we're now editing
-            history.replaceState(null, null, component.componentUuid+'/edit');
+            history.replaceState(null, null, retval.componentUuid+'/edit');
             $('#name').html(submission.name);
           }
-          console.log("success retval",retval);
-          form.emit('submitDone', retval.submission);
 
+          // jump to the view page on edit complete.
+          form.emit('submitDone', retval.submission);
+          console.log("success retval",retval);
+          if(retval.componentUuid)
+            window.location.assign('/'+retval.componentUuid)
+  
         });
         posting.fail(function(res,statusCode,statusMsg) {
           // On failure, add a failure message
@@ -66,16 +77,74 @@ block extrascripts
     window.onload = async function() {
       console.log("schema",schema);
 
-      form = await Formio.createForm(document.getElementById('builtform'),schema,
-      {
+      // add submit button to schema.
+      schema.components.push({      
+        type: "button",
+        label: "Submit",
+        key: "submit",
+        disableOnInvalid: true,
+        input: true,
+        tableView: false
       });
-      form.submission = {data: component||{componentUuid: componentUuid}};
+      form = await Formio.createForm(document.getElementById('builtform'),schema);
+      metaform = await Formio.createForm(document.getElementById('metaform'),
+      { components: [
+                        {
+                            "label": "These changes take effect on:",
+                            "tableView": false,
+                            "enableMinDateInput": false,
+                            "datePicker": {
+                                "disableWeekends": false,
+                                "disableWeekdays": false
+                            },
+                            "enableMaxDateInput": false,
+                            "key": "validity.startDate",
+                            "type": "datetime",
+                            "input": true,
+                            "widget": {
+                                "type": "calendar",
+                                "displayInTimezone": "viewer",
+                                "language": "en",
+                                "useLocaleSettings": false,
+                                "allowInput": true,
+                                "mode": "single",
+                                "enableTime": true,
+                                "noCalendar": false,
+                                "format": "yyyy-MM-dd hh:mm a",
+                                "hourIncrement": 1,
+                                "minuteIncrement": 1,
+                                "time_24hr": false,
+                                "minDate": null,
+                                "disableWeekends": false,
+                                "disableWeekdays": false,
+                                "maxDate": null
+                            },
+                            "hideOnChildrenHidden": false
+                        }
+      ] });
+      var metaformdata = {...component};
+      metaformdata.validity = metaformdata.validity||{};
+      if(metaformdata.validity.version>=0) metaformdata.validity.version+=1;
+
+      // If the start date is in the past, make the new start date 'now'
+      if(metaformdata.validity.startDate) {
+        if(moment(metaformdata.validity.startDate).isBefore(moment())) 
+          metaformdata.validity.startDate = moment().toISOString();
+      } else {
+        metaformdata.validity.startDate = moment().toISOString();
+      }
+
+      metaform.submission = {data: metaformdata};
+
+      metaform.nosubmit = true;
+
+      form.submission = {data: component.data};
       form.on('submit',SubmitData);
       form.nosubmit = true; // Use the beforeSubmit hook.
 
       // Change the url to match
 
-      DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+componentUuid);
+      DrawQRCode($('#qrcode-canvas').get(0),"!{base_url}/"+componentUuid);
 
       
 
@@ -91,10 +160,18 @@ block extrascripts
       height:auto
     }
 block content
-  .container
+  .container-fluid
     .row
-        h2#name.col-md-8=((component||{}).type)?((component||{}).type+": "+(component||{}).name):"New Component"
+      h2#name
+          =(component.data||{}).type?("Editing " + component.data.type + ": " + component.data.name):"New Component"
+    .row
+        | Component UUID: 
+        |
+        =component.componentUuid
     .row 
       +label-link
     .row
-      #builtform.col
+      #metaform
+    .row
+      #builtform
+

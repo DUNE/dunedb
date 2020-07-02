@@ -3,7 +3,7 @@ extend default
 include common.pug
 
 block vars
-  - var page_title=formrec.form_title || form_id;
+  - var page_title=formrec.formName || formId;
 
 block extrascripts
   script(type='text/javascript').
@@ -32,7 +32,7 @@ block extrascripts
     }
 
 block content
-  h2=formrec.form_title || formrec.form_id
+  h2=formrec.formName || formrec.formId
   if testdata 
     p Submitted: 
       span=moment(testdata.timestamp).format('MMM DD YYYY HH:MM')
