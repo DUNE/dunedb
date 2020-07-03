@@ -4,8 +4,24 @@
 ## Schema version 4
 
 Here I wanted more consistency between different records. 
+### Record layout
+This is the typical layout for any record. Not all records have all these fields.
+```
+{
+    _id: <ObjectId>,               // Always auto-set at creation time. 
+    recordType: <string>,          // e.g. component, form, test, job
+    collection: <string>,          // collection name
+    componentUuid: <BSON object>,  // UUID of component, binary form.
+    formId: <string>,              // id of form used 
+    data: {}                       // for tests and jobs and components
+    metadata: {}                   // reserved for formio stuff
+    schema: {}                     // for forms
+}
+```
 
-block: insertion.  All records should have this!.
+
+#### Common block: Insertion
+All records (forms, components, test, jobs) should have this block.
 ```
 {
     insertDate: <date>,   	// Timestamp written to database
@@ -14,42 +30,42 @@ block: insertion.  All records should have this!.
 }
 ```
 
-block: validity.   All records that evolve (components, forms) should have this.
+#### Common block: User
+Used in the Insertion block, above.
 ```
-{
-  startDate: <Date>       // Date this version becomes active
-  version: <integer>	    // version number for validity; later numbers are more correct
-  changedFrom: <ObjectId> // Row number of the last version of this form. SHOULD be version-1...
-}
-```
-
-sub-block: user
-```
-{
+insertion: {
   displayName: <String>,         // Printable name
   user_id:   <string>,           // auth0 user_id 
   emails: [ <string>, ...]       // email list
 }
 ```
 
-All records should contain:
+#### Common block: Validity
+All records that evolve (components, forms) should have this.
+```
+validity: {
+  startDate: <Date>       // Date this version becomes active
+  version: <integer>	    // version number for validity; later numbers are more correct
+  changedFrom: <ObjectId> // Row number of the last version of this form. SHOULD be version-1...
+}
+```
+
+#### Common elements to all records:
+All records in the datbase should have the following fields:
 ```
   _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
   recordType: <string>,  // component, form, test, job
 ```
 
-Common Required fields:
+(Because the `id` field is set by Mongo, it contains a timestamp. This timestamp should be the same as the insertion.startDate timestamp to within a second.)
+
+In addition, some will have this field:
 ```
-{
-    componentUuid: <BSON object>,  // UUID of component, binary form.
-    formId: <string>,             // id of form used 
-    data: {}                       // for tests and jobs and components
-    metadata: {}                   // reserved for formio stuff
-    schema: {}                     // for forms
-}
+  collection: <string> // the name of the Mongo collection this record is stored in
 ```
 
-### Component
+
+### Component Record
 ```
 {
   // supplied by API:
@@ -57,6 +73,7 @@ Common Required fields:
   recordType: "component",  // component, form, test, job
   insertion: <insertion block>
   type: <string>   // set to data.type if
+  state: "submitted"
   referencesComponents: [ <BSON Uuid>,... ]; // list of uuids in data given below.., found by deep searh
 
   // supplied by caller:
@@ -65,18 +82,10 @@ Common Required fields:
   data: {
     type: <string>  // component type
   }
+  metadata: {}
 
 }
 ```
-
-### Comonent relationships:
-```
-{
-  _id: <BSON Uuid>,
-  referredToBy: [<BSON Uuid>,... ]
-}
-```
-
 
 ### Form
 ```
@@ -97,6 +106,7 @@ Common Required fields:
 }
 ```
 
+
 ### Test / Job
 ```
 {
@@ -111,7 +121,7 @@ Common Required fields:
   formId: <string>, 
   formName: <string>,
   formObjectId: <ObjectId>,  // objectID of the form record used.
-  state: <string>         // Required. "submitted" for final data, "draft" for a draft verison.
+  state: <string>         // Required. "submitted" for final data, "draft" for a draft
                           // Also reserved: 'trash'
   data: { ...  }      // actual test data. (Also contains uuid?)
   metadata: { ... }   // optional, Formio stuff.
@@ -119,12 +129,21 @@ Common Required fields:
 ```
 
 
+### Comonent relationships:
+This collection is used to find connections between Components, and is reconstructed automatically by either map-reduce or on record insert.  This is not structured like the others, since it is basically a reconstructable index rather than storage.
+
+```
+{
+  _id: <BSON Uuid>,
+  referredToBy: [<BSON Uuid>,... ]
+}
+```
 
 
 
 
 
-## Schema version 3
+## OBSOLTE - Schema version 3
 ### Components
 
 ```

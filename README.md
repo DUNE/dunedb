@@ -3,9 +3,14 @@
 This project is the code that will be used to run the DUNE experiment APA construction database.
 
 
-## Machne-to-Machine interface
+## Machne-to-Machine (m2m) interface
 
-To submit a database record, use the `upload_to_db.py` script.  You will need a small configuration file `api_config.json` to make it work; talk to Nathaniel to get such an authentication file.
+To submit a database record, use the `client/upload_to_db2.py` script.  You will need a small configuration file `api_config2.json` to make it work; talk to Nathaniel to get such an authentication file.
+
+## API
+
+To use the m2m api, see [docs/api.md](docs/api.md)
+To see metadata schemas used, see [docs/schemas](docs/schemas)
 
 ## Getting Started
 
@@ -48,4 +53,4 @@ Talk to Nathaniel.  Join the `apa_db` channel on the DUNE Slack.
 
 ## Notes
 
-[Working notes](NOTES.md)
+[Working notes](docs/.md)

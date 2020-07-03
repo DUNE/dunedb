@@ -36,7 +36,7 @@ block extrascripts
       // Include relevant information about the form, for later retrieval
       submission.formId = formrec.formId; // MUST be in submission.
       submission.formName = formrec.formName; // MUST be in submission.
-      submission.formObjectId = formrec._id; // MUST be in submission.
+      submission.formObjectId = ObjectID(formrec._id); // MUST be in submission.
       submission.componentUuid = componentUuid; // MUST be in submission.
 
       if(!draft) {
@@ -53,7 +53,7 @@ block extrascripts
           }
 
           if(!draft) { 
-            //- form.emit('submitDone');
+            form.emit('submitDone');
             // go to completed form. Do not leave this page in browser history. 
             window.location.replace(route_on_submit+'/'+retval._id);
           } else {
