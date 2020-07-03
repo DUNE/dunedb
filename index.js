@@ -91,8 +91,6 @@ app.use(express.static(__dirname + '/local/static'));
 app.use(express.static(__dirname + '/static'));
 
 
-
-
 // Parse incoming JSON. Disallow things more than 10 MB
 app.use(bodyParser.json({ limit:'10000kb'}));
 
@@ -183,6 +181,21 @@ app.use('/autocomplete',require("./routes/autocomplete.js"));
 app.use('/json',require("./routes/api.js"));
 app.use('/api',require("./routes/api.js"));
 
+
+
+
+var showdown = require('showdown');
+showdown.setFlavor('github');
+
+var md_converter = new showdown.Converter();
+app.get("/docs/:file(*.md)",function(req,res,next){
+  console.log('markdown');
+  fs.readFile('./docs/'+req.params.file,"utf8",(err,data)=>{
+    if(err) return res.status(404).send("No such md file");
+    console.log(md_converter.makeHtml(data));
+    return res.render("md.pug",{md:md_converter.makeHtml(data)});
+  });
+});
 
 
 app.get('/', async function(req, res, next) {
