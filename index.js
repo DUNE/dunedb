@@ -14,7 +14,6 @@ const shortuuid = require('short-uuid')();
 const MUUID = require('uuid-mongodb');  // Addon for storing UUIDs as binary for faster lookup
 const ObjectID = require('mongodb').ObjectID;
 
-const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const jsondiffpatch = require('jsondiffpatch');
 const glob = require('glob');
@@ -31,21 +30,31 @@ var Jobs     = require('./lib/Tests.js')('job');
 var permissions = require('./lib/permissions.js');
 var utils = require('./lib/utils.js');
 
-const logRequestStart = (req,res,next) => {
-    console.log(`${req.method} ${req.originalUrl}`)
-    next()
+///
+/// Logging - comes before static routes so 'skip' can work correctly.
+///
+function skip(req,res){
+    // console.log("skip",req.path,req);
+    if(req.originalUrl.startsWith('/dist')) return true;
+    if(req.originalUrl.startsWith('/css')) return true;
+    if(req.originalUrl.startsWith('/js')) return true;
+    if(req.originalUrl.startsWith('/components')) return true;
+    if(req.originalUrl.startsWith('/images')) return true;
+    if(req.originalUrl.startsWith('/ext')) return true;
+    return false;
 }
-app.use(logRequestStart)
-
+const morgan = require('morgan');
+const logRequestStart = (req,res,next) => {
+    if(!skip(req,res))
+      console.log(`${req.method} ${req.originalUrl}`)
+    next();
+}
+app.use(logRequestStart);
+app.use(morgan('tiny',{skip:skip}));
 
 
 app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding via apache
-// 
 
-
-// app.use(bodyParser.urlencoded({ limit:'1000kb', extended : true }));
-app.use(bodyParser.json({ limit:'1000kb'}));
-app.use(morgan('tiny'));
 
 // Static routes to installed modules.
 // Any installed module with a dist/ directory gets that directory exposed
@@ -80,6 +89,12 @@ app.use('/css',express.static(__dirname + '/scss'));
 // local overrides for testing.
 app.use(express.static(__dirname + '/local/static'));
 app.use(express.static(__dirname + '/static'));
+
+
+
+
+// Parse incoming JSON. Disallow things more than 10 MB
+app.use(bodyParser.json({ limit:'10000kb'}));
 
 
 let moment = require('moment');

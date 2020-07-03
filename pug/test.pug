@@ -53,7 +53,7 @@ block extrascripts
           }
 
           if(!draft) { 
-            form.emit('submitDone');
+            //- form.emit('submitDone');
             // go to completed form. Do not leave this page in browser history. 
             window.location.replace(route_on_submit+'/'+retval._id);
           } else {

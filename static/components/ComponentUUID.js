@@ -115,6 +115,7 @@ function runQrCameraModel(cb)
 
 }
 
+var gUuidComponent = null;
 
 class ComponentUUID extends TextFieldComponent{
 
@@ -133,7 +134,7 @@ class ComponentUUID extends TextFieldComponent{
         "multiple": false
       },
       "customClass": ".component-uuid-formio",
-      "errorLabel": "Not a UUID",
+      // "errorLabel": "Not a UUID",
       "key": "component_uuid",
       "type": "ComponentUUID",
       "input": true,
@@ -157,6 +158,7 @@ class ComponentUUID extends TextFieldComponent{
   }
 
   renderElement(value,index)  {
+    gUuidComponent = this;
     // console.log('renderElement',this,value,index);
     var textvalue = value;
     if(value && typeof value === "object") {
@@ -171,7 +173,7 @@ class ComponentUUID extends TextFieldComponent{
     if(this.component.showCamera && !this.disabled)  {
       tpl += `<button type="button" class="btn btn-secondary btn-sm runQrCameraModel"><i class="fa fa-camera" title="Get QR code with your camera"></i></button>`;
     }
-    tpl += "<a style='flex:0 0 auto; padding:5px;' class='align-middle uuid-link' ></a>";
+    tpl += `<a href="${value}" style="flex:0 0 auto; padding:5px;" class="align-middle uuid-link" ></a>`;
     tpl += "</div>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
@@ -201,27 +203,43 @@ class ComponentUUID extends TextFieldComponent{
             url: '/autocomplete/uuid'
         }
       }).on('autocomplete.select', function (evt, item) {
+        console.log("autocomplete select",item.val,item.text);
         $(this).val(item.val);
-        self.setValueAt(0,item.val);
-        self.checkData();
+        self.setValue(item.val);
+        self.triggerChange({
+              modified: true,
+          });
+         console.log(self);
+        // $(this).trigger('blur');
       });
     }
   }
 
-  setValueAt(index,value,flags)
-  {
-    // console.log('setValue',this,value,flags);
-    // console.log($('a',this.element),$('a',this.element).prop('href'));
+ setValue(value, flags) {
+    flags = flags || {};
+    const changed = super.setValue.call(this, value, flags);
+
     if(this.element)
       $('a',this.element).prop('href','/'+value).text('link');
-    return super.setValueAt(...arguments);
+    // if (changed) {
+    //   this.redraw();
+    // }
+
+    return changed;
   }
 
-  getValueAt(index)
-  {
-    // console.log('getValue',this);
-    return super.getValueAt(index);
-  }
+  // setValueAt(index,value,flags)
+  // {
+  //   // console.log('setValue',this,value,flags);
+  //   // console.log($('a',this.element),$('a',this.element).prop('href'));
+  //   return super.setValueAt(...arguments);
+  // }
+
+  // getValueAt(index)
+  // {
+  //   // console.log('getValue',this);
+  //   return super.getValueAt(index);
+  // }
 
 
 }

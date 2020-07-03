@@ -22,15 +22,13 @@ router.get("/NewWorkflowForm/:formId", permissions.checkPermission("forms:edit")
   var rec = await Forms.retrieve("jobForms",req.params.formId);
   
   if(!rec) {
-      var forms = db.collection("jobForms");
-      // console.log('updateRes',updateRes)
 
       var rec = {formId: req.params.formId,
                  formName: req.params.formId,
                  schema: default_form_schema
                }; 
 
-      Forms.save(rec,req);
+      Forms.save(rec,'jobForms',req);
   }
 
   res.redirect("/EditWorkflowForm/"+req.params.formId);
@@ -38,7 +36,7 @@ router.get("/NewWorkflowForm/:formId", permissions.checkPermission("forms:edit")
 
 // Edit existing job form
 router.get("/EditWorkflowForm/:formId?", permissions.checkPermission("forms:edit"), async function(req,res){
-  res.render('EditWorkflowForm.pug',{collection:"jobForms",formId:req.params.formId});
+  res.render('EditTestForm.pug',{collection:"jobForms",formId:req.params.formId});
 });
 
 

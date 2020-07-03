@@ -1,7 +1,7 @@
 
 const permissions = require('../lib/permissions.js');
 const Forms = require('../lib/Forms.js');
-const Tests = require('../lib/Tests.js');
+const Tests = require('../lib/Tests.js')('test');
 const express  = require("express");
 const utils = require("../lib/utils.js");
 
@@ -35,13 +35,13 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tes
     }
 });
 
-// Run a new test, but no UUID specified
+// Run a test, but no UUID specified
 router.get("/test/:formId",permissions.checkPermission("tests:submit"),async function(req,res,next){
   var form = await Forms.retrieve('testForms',req.params.formId,);
   res.render('test_without_uuid.pug',{formId:req.params.formId,form:form});
 })
 
-/// Run an new test
+/// Run a test
 router.get("/"+utils.uuid_regex+"/test/:formId", permissions.checkPermission("tests:submit"),
 async function(req,res,next) {
   try{
