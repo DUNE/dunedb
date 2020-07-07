@@ -100,6 +100,7 @@ let moment = require('moment');
 // Add some functionality to ALL pug renders. 
 app.use(function(req,res,next){ 
   res.locals.moment = moment; 
+  res.locals.MUUID = MUUID;
   res.locals.base_url = global.config.my_url;
   next(); 
 }); // moment.js in pug
@@ -173,6 +174,7 @@ app.use(require('./routes/componentRoutes.js'));
 app.use(require("./routes/testRoutes.js"));
 app.use(require("./routes/workflowRoutes.js"));
 app.use(require("./routes/jobRoutes.js"));
+app.use(require("./routes/processRoutes.js"));
 
 app.use('/file',require('./routes/files.js'));
 app.use('/autocomplete',require("./routes/autocomplete.js"));
@@ -188,13 +190,20 @@ var showdown = require('showdown');
 showdown.setFlavor('github');
 
 var md_converter = new showdown.Converter();
-app.get("/docs/:file(*.md)",function(req,res,next){
+function serve_markdown_file(req,res,next)
+{
   console.log('markdown');
   fs.readFile('./docs/'+req.params.file,"utf8",(err,data)=>{
     if(err) return res.status(404).send("No such md file");
     console.log(md_converter.makeHtml(data));
     return res.render("md.pug",{md:md_converter.makeHtml(data)});
   });
+}
+
+app.get("/docs/:file(*.md)",serve_markdown_file);
+app.get("/docs",function(req,res,next){
+  req.params.file = 'index.md'; 
+  return serve_markdown_file(req,res,next);
 });
 
 

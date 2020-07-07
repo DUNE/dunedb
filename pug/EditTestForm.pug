@@ -209,7 +209,47 @@ block metaschema
             "multiple": false
           }
         },
-
+        {     
+            "title": "Post-entry processing",
+            "collapsible": true,
+            "tableView": false,
+            
+            "key": "postEntryProcessing",
+            "type": "panel",
+            "label": "Panel",
+            "input": false,
+            "components": [
+                 {
+                    "html": "<p>See notes at <a href=\"/docs/processing.md\">/docs/processing.md</a></p>",
+                    "label": "Process Notes",
+                    "refreshOnChange": false,
+                    "tableView": false,
+                    "key": "processNotes",
+                    "type": "content",
+                    "input": false
+                  },
+                  {
+                    "label": "Processes",
+                    "keyLabel": "Process ID",
+                    "addAnother": "Add a process",
+                    "hideLabel": true,
+                    "tableView": false,
+                    "key": "processes",
+                    "type": "datamap",
+                    "input": true,
+                    "valueComponent": {
+                      "input": true,
+                      "key": "key",
+                      "tableView": true,
+                      "label": "Algorithm",
+                      "rows": 10,
+                      "hideLabel": true,
+                      "type": "textarea"
+                    }
+                  },                 
+            ],
+            "collapsed": true
+        },
         {
           "label": "Commit Form",
           "showValidations": false,

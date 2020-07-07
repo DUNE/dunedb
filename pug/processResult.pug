@@ -1,0 +1,117 @@
+extend default
+
+include common.pug
+
+mixin jsonExpando(data)
+        - expando_num = expando_num || 0;
+        - expando_num++;
+        if(data)
+          .panel.panel-default
+          .foldable-heading.panel-heading.collapsed(data-toggle='collapse' data-target='#json-holder'+expando_num)
+            | Data
+            i.chevron.fa.fa-fw    
+          div.collapse(id="json-holder"+expando_num)
+              pre=JSON.stringify(data,null,2)
+
+
+block vars
+  - var page_title=processId || "Processing";
+
+block extrascripts
+  script(type='text/javascript').
+    // I could do this by API query of the server, but this works for now.
+    var formrec=!{JSON.stringify(formrec||{}, null ,4)}; 
+    var testdata=!{JSON.stringify(testdata||{}, null ,4)}; 
+
+  style.
+    table.created {
+
+    }
+
+block content
+  if(result.state=='failed')
+    h4.alert.alert-danger Failed!
+
+  else 
+    if(result.insertion)
+      dl.process
+        dt Process Record ID
+        dd=result._id
+        dt Input Record
+        dd
+          a(href='/'+result.input.recordType+"/"+result.input._id)
+            =result.input.recordType+' '+ result.input._id.toString()
+        dt was run by 
+        dd
+          +short_user(result.insertion.user)
+        dt on
+        dd
+          +dateFormat(result.insertion.insertDate)
+
+    //- If this is a provisional result:
+    if(result.allObjects) 
+      h4 Objects that will be created:
+      .container-fluid
+        table.created.table
+          each item in result.allObjects
+            tr.d-flex
+              td.col-2=item.recordType
+              if(item.recordType=='test')
+                td.col-2=item.formId
+                td.col-5
+                  +jsonExpando(item.data)
+
+              if(item.recordType=='component')
+                td.col-2
+                    | UUID&nbsp;
+                    = MUUID.from(item.componentUuid).toString().substring(0,9)
+                    |...
+
+                td.col-5
+                  +jsonExpando(item.data)
+
+              if(item.recordType=='form')
+                td.col-2
+                  span=item.formId
+                td.col-5
+                  +jsonExpando(item.schema)
+
+    else
+      //- This is a finished result.
+
+      h4 Created Objects:
+      table.created.table
+        each item in result.created
+          tr
+            td=item.recordType
+            if(item.recordType=='test')
+              td
+                a(href='/'+item.recordType+'/'+item._id)=item.formId
+
+            if(item.recordType=='component')
+              td
+                a(href='/'+item.componentUuid.toString())=item.componentUuid.toString().substring(0,8)+"..."
+
+            if(item.recordType=='form')
+              td
+                =item.formId
+                |
+                |
+                a(href='/EditTestForm/'+item.formId) Edit
+                |
+                |
+                a(href='/test/'+item.formId) Run
+
+
+
+  h4 Log
+  pre.log=result.log.join('\n')
+
+  if(dry_run && result.state!='failed') 
+    h4 Confirm
+    p If this report looks good, click here to execute.
+
+    a.btn.btn-warning(href="?commit=true") Process!
+  
+  h4 Algorithm
+  pre.algoritm=form.processes[result.process.processId]

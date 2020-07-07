@@ -53,6 +53,8 @@ block content
         h2#name.col-md-8
           =component.data.type?(component.data.type + ": " + component.data.name):"New Component"
     .row
+      dl
+        dt 
       .col-md-8   
         +label-link
     .row
@@ -78,10 +80,14 @@ block content
 
     .row
       #builtform.col-md-8
+      +createdFrom(component.createdFrom)
+
+    .row
       div#qr-code.col-md-4
         canvas#qrcode-canvas
         +label-link
-        p Run a test on this component:
+    .row
+        Run a test on this component:
           ul#tests
             each form in forms
               li
@@ -97,4 +103,4 @@ block content
                   -if(test.user) { parenthetical+=" by " + user_shortname(test.user) }
                   -parenthetical+=")";
                   a(href='/test/'+test._id)=((test.form||{}).formName||test.formId)+parenthetical
-        
+    i

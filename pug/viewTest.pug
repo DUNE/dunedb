@@ -35,23 +35,28 @@ block content
   h2=formrec.formName || formrec.formId
   if testdata 
     p Submitted: 
-      span=moment(testdata.timestamp).format('MMM DD YYYY HH:MM')
-      if user && testdata.user
+      +dateFormat(testdata.insertion.startTime)
+      if testdata.insertion.user
           |
           |
           span by:
           |
           |
-          +short_user(user)
-    
+          +short_user(testdata.insertion.user)
 
+    if(testdata.componentUuid)
+      p
+        -var uuid = MUUID.from(testdata.componentUuid);
+        a(href='/'+uuid.toString())=uuid.toString()
   hr
-  #builtform
+  #builtform  
+
+  +createdFrom(testdata.createdFrom)
 
   hr
   if testdata.form
     div Data entered in form version #{testdata.form.version}
-      if(testdata.form.version == formrec.version) 
+      if(testdata.formObjectId == formrec._id) 
         | 
         span (Shown)
       else
@@ -62,13 +67,31 @@ block content
         a(href='?version='+v)=v
         |
         |
-  - var path = (testdata.recordType=="job")?'/json/job':'/json/test';
-  p
 
+
+  if(processes && processes.length>0)
+    h4 Processed
+    for process of processes
+      p 
+        a(href='/processRecord/'+process._id.toString())=process.process.processId 
+        |
+        |
+        +dateFormat(process.insertion.insertDate)
+        |
+        |
+        +short_user(process.insertion.user)
+
+
+  p
+    if(user.permissions.includes('jobs:process'))
+      each process, processId in (formrec.processes || {})
+        a.btn.btn-warning(href='/process'+testdata.recordType+'/'+testdata._id+'/'+formrec._id+'/'+processId)
+          | Process #{processId}
+
+  -var path = (testdata.recordType=="job")?'/json/job':'/json/test';
   p
     a(href=`${path}/${testdata._id}?pretty`) View JSON data
   p
     a(download=testdata._id+".json", href=`${path}/${testdata._id}`) Download JSON data
 
   
-

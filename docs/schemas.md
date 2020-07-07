@@ -1,7 +1,7 @@
 # Internal Mongo Schemas
 
 
-## Schema version 4
+## Schema version 4.1
 
 Here I wanted more consistency between different records. 
 ### Record layout
@@ -50,6 +50,22 @@ validity: {
 }
 ```
 
+#### Common block: CreatedFrom:
+```
+{
+  createdFrom: // Exists only if this record was created by process
+    processRecordId:  <ObjectId> // Record ID 'processed' collection
+    id: <ObjectID>,              // The record (typically a job) that led to the creation of this object
+    recordType: <String>,        // usually a job
+    collection: <String>,        // usually 'jobs'
+    formId: <String>             // Name of the form that did this
+    formObjectId: <ObjectId>     // specific reference to the form that did this.
+    processId: <String>,         // Name of the process invoked.
+  }
+
+}
+```
+
 #### Common elements to all records:
 All records in the datbase should have the following fields:
 ```
@@ -58,6 +74,9 @@ All records in the datbase should have the following fields:
 ```
 
 (Because the `id` field is set by Mongo, it contains a timestamp. This timestamp should be the same as the insertion.startDate timestamp to within a second.)
+
+
+#### Common
 
 In addition, some will have this field:
 ```
@@ -71,10 +90,11 @@ In addition, some will have this field:
   // supplied by API:
   _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
   recordType: "component",  // component, form, test, job
-  insertion: <insertion block>
-  type: <string>   // set to data.type if
-  state: "submitted"
-  referencesComponents: [ <BSON Uuid>,... ]; // list of uuids in data given below.., found by deep searh
+  insertion: <insertion block>,
+  type: <string>,   // set to be the same as data.type on submit
+  state: "submitted",
+  referencesComponents: [ <BSON Uuid>,... ], // list of uuids in data given below.., found by deep searh
+  createdFrom: {},  //optional, see createdFrom block.
 
   // supplied by caller:
   componentUuid,              // component uuid
@@ -103,6 +123,10 @@ In addition, some will have this field:
   schema: {
     components:[...]
   }
+  processes: { // optional
+      <processId> : <algorithm,
+      ...
+  } 
 }
 ```
 
@@ -114,17 +138,40 @@ In addition, some will have this field:
   _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
   recordType: <string>   //  "test" or "job" respectively
   insertion: <insertion block>
+  createdFrom: {},  //optional, see createdFrom block.
+  }]
 
   // supplied by caller:
 
   componentUuid,  // BSON component UUID. Required for 'test', should not be there for 'job'. Provided via api route.
   formId: <string>, 
-  formName: <string>,
+  formName: <string>,        // OMIT???
   formObjectId: <ObjectId>,  // objectID of the form record used.
   state: <string>         // Required. "submitted" for final data, "draft" for a draft
                           // Also reserved: 'trash'
   data: { ...  }      // actual test data. (Also contains uuid?)
-  metadata: { ... }   // optional, Formio stuff.
+  metadata: { ... },   // optional, Formio stuff.
+  processed: [<objects>] // processes that have been applied to record
+}
+```
+
+
+### Process records
+Collection 'processed'.
+```
+{
+  _id: <ObjectId>
+  input: {                // Describes the original Job record that was procssed/
+    recordType: <String>,
+    collection: <String>,
+    _id: <ObjectId>
+  },
+  process: {
+    _id: <ObjectId>
+    formId: <String>
+    collection: <String>,
+    processId: <String>
+  }
 }
 ```
 
@@ -138,6 +185,34 @@ This collection is used to find connections between Components, and is reconstru
   referredToBy: [<BSON Uuid>,... ]
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

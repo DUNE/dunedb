@@ -35,8 +35,9 @@ block extrascripts
       form.on("change",function(){
         if(form.isValid()) {
           var uuid = form.submission.data.componentUuid;
-          if(uuid && uuid.length>10)
+          if(uuid && uuid.length>10){
             window.location.assign(`/${uuid}/test/!{formId}`)
+          }
         }
       });
 

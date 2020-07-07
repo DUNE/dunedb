@@ -1,7 +1,9 @@
+"use strict";
 
 const permissions = require('../lib/permissions.js');
 const Forms = require('../lib/Forms.js');
 const Tests = require('../lib/Tests.js')('test');
+const Processes = require('../lib/Processes.js');
 const express  = require("express");
 const utils = require("../lib/utils.js");
 
@@ -15,8 +17,14 @@ module.exports = router;
 router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
     try{
+      console.log("finding test ",req.params.record_id)
       var options = {};
-      var data = await Tests.retrieve(req.params.record_id);
+      // get stuff in one go
+      let [data,processes] = await Promise.all([
+          Tests.retrieve(req.params.record_id),
+          Processes.findInputRecord(req.params.record_id)
+        ]);
+
       if(!data) return res.status(404).render("No such test recorded.");
       var formId = data.formId;
       if(!formId) throw("Test has no formId");
@@ -28,7 +36,7 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tes
       var versions = await Forms.getFormVersions('testForms',formId);
       console.log('versions',versions);
       if(!formrec) return res.status(400).send("No such test form");  
-      res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, testdata:data, versions: versions, retrieved:true})
+      res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, testdata:data, processes: processes, versions: versions, retrieved:true})
     } 
     catch(err) { 
       console.error(err); next(); 

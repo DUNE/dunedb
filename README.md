@@ -46,6 +46,31 @@ Use `nodemon` for testing. Use `pm2` to keep a server alive.
 Talk to Nathaniel.  Join the `apa_db` channel on the DUNE Slack.
 
 
+## Code organization
+
+`index.js` is the launch point. (Also the home page. FIXME)
+
+`/pug` contains only Pug templates, which are used to render web pages.
+
+`/routes` contains the Express route functions, which in turn mostly call the Pug render routines.
+
+`/routes/api.js` has all the low-level API calls accessible, see [docs/api.md](docs/api.md)
+
+`/lib` has all the internals. Database should be accessed ONLY through functions in these source files.  It is FORBIDDEN to write to the database in any way other than these.
+
+`/static` contains files used by the front-end only.  All files in here are statically presented to the client under the root path.  (i.e. `./static/images/logo.png` is available to the browser as `/images/logo.png`)
+
+`/local` contains files used by the front-end, and will override or append to files in the `/static` area. This is indended for local overrides for debugging.
+
+`/client` contains example files showing how to use the API.js
+
+`/scss` contains SCSS files that are rendered into CSS files dynamicaly.
+
+`/dbTools` are some scripts used in development and for schema evolution
+
+`/dbSeed` are some JSON forms used to set up defaults in first-time intialization of the entire database 
+
+`/configuration.js` describes the default configuration.  Some elements will need overriding to work.  Overrides are to be put in `/config.js`  FIXME make a config directory
 ## Authors
 
 * **Nathaniel Tagg** - *Otterbein University* - http://neutrino.otterbein.edu

@@ -2,6 +2,7 @@
 const permissions = require('../lib/permissions.js');
 const Forms = require('../lib/Forms.js');
 const Jobs = require('../lib/Tests.js')('job');
+const Processes = require('../lib/Processes.js');
 const express  = require("express");
 const utils = require("../lib/utils.js");
 
@@ -16,7 +17,10 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("test
  async function(req,res,next) {
     try{
       var options = {};
-      var data = await Jobs.retrieve(req.params.record_id);
+      let [data,processes] = await Promise.all([
+          Jobs.retrieve(req.params.record_id),
+          Processes.findInputRecord(req.params.record_id)
+        ]);
       if(!data) return res.status(404).send("No such job recorded.");
       var formId = data.formId;
       if(!formId) throw("Job has no formId");
@@ -27,7 +31,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("test
       var versions = await Forms.getFormVersions('jobForms',formId);
       console.log('versions',versions);
       if(!formrec) return res.status(400).send("No such job form");  
-      res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, testdata:data, versions: versions, retrieved:true})
+      res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, processes: processes, testdata:data, versions: versions, retrieved:true})
     } 
     catch(err) { 
       console.error(err); next(); 
