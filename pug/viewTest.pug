@@ -90,7 +90,7 @@ block content
   p
     if(user.permissions.includes('jobs:process'))
       each process, processId in (formrec.processes || {})
-        a.btn.btn-warning(href='/process'+testdata.recordType+'/'+testdata._id+'/'+formrec._id+'/'+processId)
+        a.btn.btn-warning(href='/process'+testdata.recordType+'/'+testdata._id+'/'+formrec._id+'/'+encodeURIComponent(processId))
           | Process #{processId}
         |
         |
