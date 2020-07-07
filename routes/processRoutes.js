@@ -17,7 +17,7 @@ module.exports = router;
 // Editing and creating forms
 
 
-router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{24})/:processId(\\w+)", permissions.checkPermission("jobs:process"), async function(req,res){
+router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{24})/:processId", permissions.checkPermission("jobs:process"), async function(req,res){
   // var form = await Forms.retrieve("jobForms",null,{id:req.params.formRecordId});
   // var job = await Jobs.retrieve(req.params.jobRecordId);
 
@@ -82,8 +82,7 @@ router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{
 
 
 router.get("/processRecord/:processRecordId([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:view"), async function(req,res){
-    var processId = decodeURIComponent(req.params.processId);
-    var result = await Processes.retrieve(processId);
+    var result = await Processes.retrieve(req.params.processRecordId);
     console.log(result);
     if(!result) return res.status(400).send("No such process record in database.");
     let [form,job,pastProcesses] = await Promise.all([
