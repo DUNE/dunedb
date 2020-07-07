@@ -173,7 +173,7 @@ class ComponentUUID extends TextFieldComponent{
     if(this.component.showCamera && !this.disabled)  {
       tpl += `<button type="button" class="btn btn-secondary btn-sm runQrCameraModel"><i class="fa fa-camera" title="Get QR code with your camera"></i></button>`;
     }
-    tpl += `<a href="${value}" style="flex:0 0 auto; padding:5px;" class="align-middle uuid-link" ></a>`;
+    tpl += `<a href="${value}" style="flex:0 0 auto; padding:5px;" ref='linkToComponent' class="align-middle uuid-link" ></a>`;
     tpl += "</div>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
@@ -183,10 +183,12 @@ class ComponentUUID extends TextFieldComponent{
   {
     /// Called after rendering, just as the component is being inserted into the DOM.
     /// .. just like a text area...
-    super.attach(element);
+    var superattach = super.attach(element);
     // console.log('my attach',this,this.refs.input,element,$(this.refs.input[0]).val());
-    
+    this.loadRefs(element, {linkToComponent: 'single'});
+
     var self = this; // for binding below
+
 
    // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
     if(this.component.showCamera) {
@@ -203,24 +205,25 @@ class ComponentUUID extends TextFieldComponent{
             url: '/autocomplete/uuid'
         }
       }).on('autocomplete.select', function (evt, item) {
-        console.log("autocomplete select",item.val,item.text);
+        // console.log("autocomplete select",item.val,item.text);
         $(this).val(item.val);
         self.setValue(item.val);
         self.triggerChange({
               modified: true,
           });
-         console.log(self);
-        // $(this).trigger('blur');
+         // console.log(self);
       });
     }
+
+    return superattach;
   }
 
  setValue(value, flags) {
     flags = flags || {};
     const changed = super.setValue.call(this, value, flags);
 
-    if(this.element)
-      $('a',this.element).prop('href','/'+value).text('link');
+    if(this.refs.linkToComponent) $(this.refs.linkToComponent).prop('href','/'+value).text('link');
+
     // if (changed) {
     //   this.redraw();
     // }
