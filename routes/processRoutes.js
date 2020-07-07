@@ -2,7 +2,6 @@
 
 const chalk = require('chalk');
 const express = require('express');
-const {NodeVM} = require('vm2');
 
 var Components = require('../lib/Components.js');
 var Forms = require('../lib/Forms.js');
@@ -22,6 +21,7 @@ router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{
   // var form = await Forms.retrieve("jobForms",null,{id:req.params.formRecordId});
   // var job = await Jobs.retrieve(req.params.jobRecordId);
 
+  var processId = decodeURIComponent(req.params.processId);
   let [form,job,pastProcesses] = await Promise.all([
       Forms.retrieve("jobForms",null,{id:req.params.formRecordId}),
       Jobs.retrieve(req.params.jobRecordId),
@@ -32,8 +32,8 @@ router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{
   if(!job) return res.status(400).send("No such job"+req.params.jobRecordId);
   console.log(form);
   if(!form.processes) return res.status(400).send("No processes in that form");
-  var process_to_run = form.processes[req.params.processId];
-  if(!process_to_run) return res.status(400).send("No such algorithm "+req.params.processId);
+  var process_to_run = form.processes[processId];
+  if(!process_to_run) return res.status(400).send("No such algorithm "+processId);
 
 
   // How locking works:
@@ -51,7 +51,7 @@ router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{
   // If the user clicks the confirmation button, this script is called with
   // ?commit=true&override=true
   // which then allows the script to run again.
-  
+
 
   // Has this record already been processed?
   // var pastProcesses = findInputRecord(req.params.jobRecordId);
@@ -82,7 +82,8 @@ router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{
 
 
 router.get("/processRecord/:processRecordId([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:view"), async function(req,res){
-    var result = await Processes.retrieve(req.params.processRecordId);
+    var processId = decodeURIComponent(req.params.processId);
+    var result = await Processes.retrieve(processId);
     console.log(result);
     if(!result) return res.status(400).send("No such process record in database.");
     let [form,job,pastProcesses] = await Promise.all([
@@ -93,5 +94,7 @@ router.get("/processRecord/:processRecordId([A-Fa-f0-9]{24})", permissions.check
     res.render("processResult.pug",{result, form, job, pastProcesses});
 });
 
+
+// Could allow expert deletions?
 
 
