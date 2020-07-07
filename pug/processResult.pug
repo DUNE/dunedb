@@ -106,9 +106,14 @@ block content
 
 
   h4 Log
-  pre.log=result.log.join('\n')
 
-  if(conflict)
+  div.card
+    pre.card-body#log(style='max-height:20em;')=result.log.join('\n')
+    script.
+      var log = document.getElementById('log');
+      log.scrollTop = log.scrollHeight;
+
+  if(conflict && result.state!='failed')
     div.alert.alert-danger
       h3 Conflict Warning
       p This record has already been processed, or is being processed right now by another user.  To confirm that you want to run this process anyway, click below.

@@ -92,6 +92,8 @@ block content
       each process, processId in (formrec.processes || {})
         a.btn.btn-warning(href='/process'+testdata.recordType+'/'+testdata._id+'/'+formrec._id+'/'+processId)
           | Process #{processId}
+        |
+        |
 
   -var path = (testdata.recordType=="job")?'/json/job':'/json/test';
   p
