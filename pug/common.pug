@@ -18,7 +18,7 @@ mixin component-list(list)
                     a(href='/'+val.componentUuid)=val.name
 
 mixin NewTestForm
-  a.NewTestForm(href='#', data-toggle="modal" data-target="#NewTestFormModal") New Test Form
+  a.NewTestForm.btn.btn-outline-primary(href='#', data-toggle="modal" data-target="#NewTestFormModal") Create New Test Form
   #NewTestFormModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewTestFormLabel' aria-hidden='true')
     .modal-dialog(role="document")
       .modal-content
@@ -45,7 +45,7 @@ mixin NewTestForm
     })
 
 mixin NewWorkflowForm
-  a.NewWorkflowForm(href='#', data-toggle="modal" data-target="#NewWorkflowFormModal") New Workflow Form
+  a.NewWorkflowForm.btn.btn-outline-primary(href='#', data-toggle="modal" data-target="#NewWorkflowFormModal") Create New Workflow Form
   #NewWorkflowFormModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewWorkflowFormLabel' aria-hidden='true')
     .modal-dialog(role="document")
       .modal-content

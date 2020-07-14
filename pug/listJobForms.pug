@@ -20,4 +20,6 @@ block content
             td
               a(href='/EditWorkflowForm/'+form.formId).btn.btn-outline-warning Edit
 
-
+  if(user && user.permissions.includes("forms:edit"))
+    p.h5.mt-4
+     +NewWorkflowForm
