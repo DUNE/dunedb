@@ -1,16 +1,20 @@
 # Sietch
 
+[Github Repository](https://github.com/nathanieltagg/sietch)
+
 This project is the code that will be used to run the DUNE experiment APA construction database.
 
 
-## Machne-to-Machine (m2m) interface
+
+
+## Machine-to-Machine (m2m) interface
 
 To submit a database record, use the `client/upload_to_db2.py` script.  You will need a small configuration file `api_config2.json` to make it work; talk to Nathaniel to get such an authentication file.
 
 ## API
 
-To use the m2m api, see [docs/api.md](docs/api.md)
-To see metadata schemas used, see [docs/schemas](docs/schemas)
+To use the m2m api, see [docs/api.md](api.md)
+To see metadata schemas used, see [docs/schemas.md](schemas.md)
 
 ## Getting Started
 
@@ -54,7 +58,7 @@ Talk to Nathaniel.  Join the `apa_db` channel on the DUNE Slack.
 
 `/routes` contains the Express route functions, which in turn mostly call the Pug render routines.
 
-`/routes/api.js` has all the low-level API calls accessible, see [docs/api.md](docs/api.md)
+`/routes/api.js` has all the low-level API calls accessible, see [docs/api.md](api.md)
 
 `/lib` has all the internals. Database should be accessed ONLY through functions in these source files.  It is FORBIDDEN to write to the database in any way other than these.
 
@@ -78,4 +82,4 @@ Talk to Nathaniel.  Join the `apa_db` channel on the DUNE Slack.
 
 ## Notes
 
-[Working notes](docs/.md)
+[Working notes](.md)
