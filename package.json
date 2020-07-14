@@ -56,7 +56,8 @@
     "showdown": "^1.9.1",
     "uuid-mongodb": "^2.3.0",
     "vm2": "^3.9.2",
-    "xlsx": "^0.16.3"
+    "xlsx": "^0.16.3",
+    "yargs": "^15.4.1"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.13.1"
