@@ -16,3 +16,7 @@
 .datagrid-table td {
 	min-width: 6em;
 }
+
+.fixed-width-textarea {
+	font-family: 'Inconsolata', monospace;
+}

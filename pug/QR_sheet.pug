@@ -15,7 +15,9 @@ block extrascripts
   script.
      
       $(function(){
-        DrawQRCode($('.qr-code canvas'),'!{base_url}/!{component.componentUuid}','!{component.data.name}');
+        $('canvas').each(function(){
+          DrawQRCode($(this),$(this).data("text"),$(this).data("desc"));
+        });
       });
       
   style(type='text/css').
@@ -37,18 +39,12 @@ block extrascripts
 block allbody
   a(onclick="window.print(); return false;" href='#print') Print
     .container
-      .row
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")      
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
-      .row
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
-        div.col-sm-6.qr-code
-         canvas(height="700",width="700")
-      .row
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
+      -for(var i=0;i<components.length;i+=2) {
+        .row
+          -for(var j=i; j<i+2; j++) {
+            if(components[j])
+              div.col-sm-6.qr-code
+                canvas(height="700",width="700",data-text=base_url+"/"+components[j].componentUuid.toString(),data-desc=components[j].type+' '+components[j].name)
+          -}
+      
+      -}

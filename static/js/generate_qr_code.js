@@ -14,7 +14,7 @@ function DrawQRCode(canvases,text,desc){
 
 			var ctx = canvas.getContext("2d");
 			qr.drawCanvas(scale, border, canvas);
-			ctx.font = "16px Inconsolada";
+			ctx.font = "16px Inconsolata";
 			ctx.fillStyle = "black";
 			var width = canvas.width;
 			var height = canvas.height;

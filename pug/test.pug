@@ -19,11 +19,35 @@ block extrascripts
     var form = null;
     var lastDraftSave = new Date();
 
-    //- function LoadLastTest() {
-    //-   if(componentUuid) {
-    //-     // Retrieve the most recent test of this type for this component
-    //-   }
-    //- }
+    function LoadLastTest() {
+      if(componentUuid) {
+        // Retrieve the most recent test of this type for this component
+        $.ajax({ method: "get", url: '/json/tests/'+componentUuid, dataType:'json' })
+         .then(function(data) {
+          var best = null;
+          for(var oldtest of data) {
+            if(oldtest.formId == formrec.formId){
+              if(!best) best = oldtest;
+              else 
+                if(moment(oldtest.insertion.insertDate).isAfter(moment(best.insertion.insertDate))) best = form;
+            }
+          }
+          // Found a form which matches us.          
+          if(best) {
+            console.log("figured out best",best);
+            $.ajax({method:"GET", url:"/json/test/"+best._id,dataType:'json'})
+             .then(function(record) {
+              console.log("old record",record);
+              console.log("cur record",form.submission);
+              if(record.data) {
+                var new_data = {...record.data,...form.submission.data};
+                form.submission = {data: new_data};
+              }
+             })
+          }
+        });
+      }
+    }
 
     function MaybeSaveDraft() {
       // time since last draft save
@@ -144,6 +168,8 @@ block extrascripts
         form.on('submit',SubmitData);
         form.on('change',MaybeSaveDraft);
       }
+
+      $('#loadRecentTestData').on('click',LoadLastTest);
     }
 
 block content
@@ -151,3 +177,5 @@ block content
   
   #builtform
 
+  button.btn.btn-info.pull-right#loadRecentTestData 
+    small Load Recent Test Data

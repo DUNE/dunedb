@@ -93,6 +93,18 @@ router.get("/processRecord/:processRecordId([A-Fa-f0-9]{24})", permissions.check
     res.render("processResult.pug",{result, form, job, pastProcesses});
 });
 
+router.get("/processRecordQRs/:processRecordId([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:view"), async function(req,res){
+    var result = await Processes.retrieve(req.params.processRecordId);
+    var promises = [];
+    for(var thing of result.created) {
+      if(thing.recordType="component") {
+        promises.push(Components.retrieveComponent(thing.componentUuid));
+      }
+    }
+    var components = await Promise.all(promises);
+    res.render("QR_sheet.pug",{result, components});
+});
+
 
 // Could allow expert deletions?
 
