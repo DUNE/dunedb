@@ -125,15 +125,17 @@ body
                   //- a.d-flex.align-items-center.text-muted(href='#')
                   //-   span(data-feather='plus-circle')
                 ul.nav.flex-column.mb-2
+                  li.nav-item
+                    +navlink(href='/docs/README.md') README.md 
 
                   li.nav-item
-                    +navlink(href='/docs/api.md') API description. 
+                    +navlink(href='/docs/api.md') API
                   li.nav-item
-                    +navlink(href='/docs/schemas.md') Schema description. 
+                    +navlink(href='/docs/schemas.md') Schemas
                   li.nav-item
                     +navlink(href='/docs/notes.md') Working notes, TODO 
                   li.nav-item
-                    +navlink(href='/docs/Proposal notes.pdf') API description. 
+                    +navlink(href='/docs/Proposal notes.pdf') Original proposal 
 
         main.col-md-9.ml-sm-auto.col-lg-10.px-4(role='main')
           block content 
