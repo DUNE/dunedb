@@ -206,6 +206,8 @@ app.get("/docs",function(req,res,next){
   req.params.file = 'index.md'; 
   return serve_markdown_file(req,res,next);
 });
+app.use("/docs",express.static(__dirname + '/docs'));
+
 
 
 app.get('/', async function(req, res, next) {
