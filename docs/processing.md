@@ -18,7 +18,7 @@ This code must be written in plain JavaScript and can access only 3 external sym
 
 `function createTest(componentUuid,formId,data)` is a function that creates a new Test object, for the given component, formId and the data.  It returns the complete test record. 
 
-The code does not need to return anything.  The `console.log()` function is provided for creating log output an debugging.
+The code does not need to return anything.  The `console.log()` function is provided for creating log output an debugging. Logs will be saved in the resulting processing record.
 
 FIXME: create a node-based standalone testbed to help development.
 
@@ -57,4 +57,7 @@ test: { componentUuid: aaaa, formId: 'tubeTest', data:{passed: true} }
 test: { componentUuid: bbbb, formId: 'tubeTest', data:{passed: false} } 
 ```
 
+### Constraints
+For security reasons, only javascript builtin functions are allowed. Timeout functions, `async` functions, and `eval` should not work. 
+Scripts that take longer than 500 ms to process will be aborted.
 

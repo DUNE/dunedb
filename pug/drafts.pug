@@ -1,0 +1,49 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title="sietch admin";
+
+block content
+
+  
+                if test_drafts
+                  .border.border-primary.p-3.m-2
+                    h4 Your Test Drafts:
+                    if (test_drafts.length==0)
+                      p (None)
+                    else
+                      ul#drafts
+                        each draft in test_drafts
+                          li
+                            a(href='/test/draft/'+draft._id)
+                              span=draft.formName || draft.formId
+                            |
+                            |
+                            span #{moment(draft.insertDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(draft.insertDate).fromNow()})
+                            |
+                            |
+                            a(href='/test/deleteDraft/'+draft._id) delete
+
+
+
+                if job_drafts
+                  .border.border-primary.p-3.m-2
+                    h4 Your Job Drafts:
+                    if (job_drafts.length==0)
+                      p (None)
+                    else
+                      ul#drafts
+                        each draft in job_drafts
+                          li
+                            a(href='/job/draft/'+draft._id)
+                              span=draft.formName || draft.formId
+                            |
+                            |
+                            span=moment(draft.insertDate).format()
+                            |
+                            |
+                            a(href='/job/deleteDraft/'+draft._id) delete
+
+

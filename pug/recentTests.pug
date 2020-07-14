@@ -3,7 +3,13 @@ include common.pug
 
       
 block content
-  h2 Recently completed tests:
+  if(formId)
+    -var name = formId;
+    -if(tests && tests.length>0) name = tests[0].formName;
+    -console.log('????',tests[0])
+    h2 Recently completed #{name} tests
+  else
+    h2 Recently completed tests:
 
   table.table
     each test in tests

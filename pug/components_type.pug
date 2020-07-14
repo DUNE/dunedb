@@ -1,0 +1,17 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title="Component Types";
+
+block content
+  h1 Component Types
+
+  ul
+    each count,type in types
+      if(type && type!="null")
+        li
+          a(href='/components/type/'+encodeURIComponent(type)) #{type} (#{count})
+
+

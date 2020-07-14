@@ -40,3 +40,9 @@ router.get("/EditWorkflowForm/:formId?", permissions.checkPermission("forms:edit
 });
 
 
+// Lists kinds tests that can be performed
+router.get('/workflows', permissions.checkPermission("tests:view"), 
+  async function(req,res,next) {
+    var forms = await Forms.getListOfForms('jobForms');
+    res.render('listJobForms.pug',{ forms: forms});
+  });

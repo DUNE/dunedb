@@ -37,5 +37,12 @@ router.get("/EditTestForm/:formId?", permissions.checkPermission("forms:edit"), 
 });
 
 
+// Lists kinds tests that can be performed
+router.get('/testForms', permissions.checkPermission("tests:view"), 
+  async function(req,res,next) {
+    var forms = await Forms.getListOfForms('testForms');
+    res.render('listTestForms.pug',{ forms: forms});
+  });
+
 
 

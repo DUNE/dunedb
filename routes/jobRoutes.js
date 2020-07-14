@@ -2,6 +2,7 @@
 const permissions = require('../lib/permissions.js');
 const Forms = require('../lib/Forms.js');
 const Jobs = require('../lib/Tests.js')('job');
+const Tests = require('../lib/Tests.js')('test');
 const Processes = require('../lib/Processes.js');
 const express  = require("express");
 const utils = require("../lib/utils.js");
@@ -87,18 +88,22 @@ async function(req,res,next) {
 });
 
 
-
-router.get('/jobs/:formId', permissions.checkPermission("jobs:view"), 
+// Lists recent tests generally, or a specific formId
+router.get('/jobs/:formId?', permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
     var tests = await Jobs.listRecent(req.params.formId,(req.query||{}).N);
     res.render('recentJobs.pug',{formId:req.params.formId, tests: tests});
   });
 
-router.get('/jobs/', permissions.checkPermission("jobs:view"), 
-  async function(req,res,next) {
-    var tests = await Jobs.listRecent(null,(req.query||{}).N);
-    res.render('recentJobs.pug',{ tests: tests});
-  });
+
+router.get('/drafts',  permissions.checkPermission("tests:view"),
+  async function(req,res,next){
+  var job_drafts = null;
+  var test_drafts = null;
+  if(req.user && req.user.user_id) test_drafts=await Tests.listUserDrafts(req.user.user_id);
+  if(req.user && req.user.user_id) job_drafts=await Jobs.listUserDrafts(req.user.user_id);
+  res.render('drafts.pug',{test_drafts,job_drafts});
+  })
 
 
 

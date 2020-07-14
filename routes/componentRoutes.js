@@ -166,3 +166,26 @@ router.get("/EditComponentForm", permissions.checkPermission("forms:edit"), asyn
 
 
 
+
+
+// Fixme: add query parameters
+
+// List component types
+router.get('/components/type',permissions.checkPermission("components:view"),
+  async function(req,res,next) {
+
+        var types = await Components.getTypes();
+        res.render("components_type.pug",{types:types});
+
+  });
+
+// List components of a type
+router.get('/components/type/:type',permissions.checkPermission("components:view"),
+  async function(req,res,next) {
+
+        var components = await Components.listAllOfType(decodeURIComponent(req.params.type));
+        console.log(components);
+        res.render("components.pug",{components});
+
+  });
+

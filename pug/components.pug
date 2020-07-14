@@ -1,0 +1,20 @@
+extend default
+include common.pug
+
+
+block vars
+  - var page_title="Components";
+
+block content
+  /// List of components
+  
+  h1 Components
+
+  ul
+    each component in components
+       li
+          -var uuid=MUUID.from(component.componentUuid).toString();
+          a(href='/'+uuid) #{component.name} (#{uuid.substr(0,8)}...)
+          // MUUID.from(component.componentUuid).toString()
+
+

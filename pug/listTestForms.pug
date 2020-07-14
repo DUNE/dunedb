@@ -1,0 +1,23 @@
+extend default
+include common.pug
+
+      
+block content
+  h2 Tests
+
+  table.table-sm.table-hover
+    tbody
+      each form in forms
+        tr
+          td=(form.formName || form.formId)
+          if(user && user.permissions.includes("tests:submit"))
+            td
+              a(href='/test/'+form.formId).btn.btn-outline-primary Run
+          if(user && user.permissions.includes("tests:view"))
+            td
+              a(href='/tests/'+form.formId).btn.btn-outline-secondary Recent
+          if(user && user.permissions.includes("forms:edit"))
+            td
+              a(href='/EditTestForm/'+form.formId).btn.btn-outline-warning Edit
+
+

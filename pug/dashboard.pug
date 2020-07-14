@@ -1,0 +1,192 @@
+doctype html
+head
+
+    block pugscripts
+      
+    block vars
+      
+    title #{page_title || 'Sietch'}
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    //- link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css')
+    link(rel='icon' type='image/png' href='/images/Otterbein.png')
+
+    link(rel='stylesheet' href='/css/dashboard.css')
+    link(rel='stylesheet' href='/css/custom.scss')
+    link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
+
+mixin navlink
+  if(attributes.href == route)
+    a.nav-link.active&attributes(attributes)
+      block
+  else
+    a.nav-link&attributes(attributes)
+      block
+
+
+nav.navbar.navbar-dark.fixed-top.bg-dark.flex-md-nowrap.p-0.shadow
+  a.navbar-brand.col-sm-3.col-md-2.mr-0(href='/') Sietch 
+  //- input.form-control.form-control-dark(type='text' placeholder='Search' aria-label='Search')
+  if locals.user
+    .navbar-nav.px-3
+      .nav-item.text-nowrap
+        +navlink(href="/user") Profile
+    .navbar-nav.px-3
+      .nav-item.text-nowrap
+        +navlink(href="/logout") Log Out
+  else
+    .navbar-nav.px-3
+        .nav-item.text-nowrap
+          +navlink(href="/login") Log In / Sign Up
+
+.container-fluid
+  .row
+    nav.col-md-2.d-none.d-md-block.bg-light.sidebar
+      .sidebar-sticky
+        ul.nav.flex-column
+
+          li.nav-item
+            +navlink(href='/components/type')
+              i.fa.fa-puzzle-piece("aria-hidden"="true")
+              | Components
+
+            ul.nav.flex-column.ml-3.sub-bar
+                if(user && user.permissions.includes("components:create"))
+                  li.nav-item
+                    +navlink(href='/NewComponent')
+                      |      Register new
+                if(user && user.permissions.includes("forms:edit"))
+                  li.nav-item
+                    +navlink(href='/EditComponentForm')
+                      |      Edit form
+
+
+          li.nav-item
+            +navlink(href='/testForms')
+              i.fa.fa-flask("aria-hidden"="true")
+              | Tests
+
+            ul.nav.flex-column.ml-3.sub-bar
+                li.nav-item
+                  +navlink(href='/tests')
+                    |      Recent
+     
+
+
+          li.nav-item
+            +navlink(href='/workflows')
+              i.fa.fa-list-ol("aria-hidden"="true")
+              | Workflows
+           
+            ul.nav.flex-column.ml-3.sub-bar
+                li.nav-item
+                  +navlink(href='/jobs')
+                    |      Recent
+     
+
+
+          li.nav-item
+            +navlink(href='/drafts')
+              i.fa.fa-pencil("aria-hidden"="true")
+              | My Drafts
+
+          //- li.nav-item
+          //-   +navlink(href='#')
+          //-     | My recent submissions
+          //-     | mine/others
+
+
+        //- h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
+        //-   span Admin
+        //-   //- a.d-flex.align-items-center.text-muted(href='#')
+        //-   //-   span(data-feather='plus-circle')
+        //- ul.nav.flex-column.mb-2
+        //-   li.nav-item
+        //-     +navlink(href='#')
+        //-       span(data-feather='file-text')
+        //-       |                   Edit Component Forms
+        //-   li.nav-item
+        //-     +navlink(href='#')
+        //-       span(data-feather='file-text')
+        //-       |                   Edit Test Forms
+        //-   li.nav-item
+        //-     +navlink(href='#')
+        //-       span(data-feather='file-text')
+        //-       |                   Edit Workflow Forms
+
+        h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
+          span Documentation
+          //- a.d-flex.align-items-center.text-muted(href='#')
+          //-   span(data-feather='plus-circle')
+        ul.nav.flex-column.mb-2
+
+          li.nav-item
+            +navlink(href='/docs/api.md') API description. 
+          li.nav-item
+            +navlink(href='/docs/schemas.md') Schema description. 
+          li.nav-item
+            +navlink(href='/docs/notes.md') Working notes, TODO 
+          li.nav-item
+            +navlink(href='/docs/Proposal notes.pdf') API description. 
+
+    main.col-md-9.ml-sm-auto.col-lg-10.px-4(role='main')
+      block content 
+
+
+//
+  Bootstrap core JavaScript
+  ==================================================
+// Placed at the end of the document so the pages load faster
+
+script(src='/dist/jquery/jquery.min.js')
+script(src='/dist/bootstrap/js/bootstrap.min.js')
+script(src="/dist/bootstrap-autocomplete/latest/bootstrap-autocomplete.min.js")
+script(src='/dist/formiojs/formio.full.js')
+script(src="/dist/short-uuid/short-uuid.min.js")
+script(src='/dist/deepmerge/umd.js')
+script(src='/dist/moment/moment.min.js')
+script(src='/dist/ekko-lightbox/ekko-lightbox.min.js')
+
+//- Used to pop open a small image to full-screen
+script.
+  $(document).on('click', '[data-toggle="lightbox"]', function(event) {event.preventDefault();$(this).ekkoLightbox({alwaysShowClose: true});});
+
+//- QR codes, FIXME replace with an npm package?
+script(src='/dist/jsqr/jsQR.js') 
+script(src="/ext/qrcodegen.js")
+
+script(src='/dist/fabric/fabric.min.js')
+script(src='/dist/fabric-history/index.min.js')
+
+script(type="text/javascript", src="/ext/qrcodegen.js")
+script(type="text/javascript", src="/js/generate_qr_code.js")
+script(src='/components/ComponentGeoTag.js')
+script(src='/components/ComponentUUID.js')
+script(src='/components/ComponentWorkStep.js')
+script(src='/components/ComponentArray.js')
+script(src='/components/ComponentSpecNumber.js')
+script(src='/components/Components_misc.js')
+script(src='/components/DatabaseImage.js')
+script(src='/components/DatabaseFile.js')
+
+script(src='/js/AnnotationCanvas.js')
+script(src='/components/ImageAnnotator.js')
+script(src='/components/AnnotatedImage.js')
+script(src='/components/BetterDataGrid.js')
+
+
+script(src='/js/uuid_autocomplete.js')
+script(src='/js/ABoundObject.js')
+script(src='/js/Pad.js')
+script(src='/js/Histogram.js')
+script(src='/js/HistCanvas.js')
+script(src='/js/ColorScale.js')
+
+link(rel='stylesheet', href='/css/main.css', type='text/css', media='all')
+link(rel='stylesheet', href='/css/AnnotationCanvas.css', type='text/css', media='all')
+style.
+  li.nav-item img { height: 40px;}
+
+block extrascripts    

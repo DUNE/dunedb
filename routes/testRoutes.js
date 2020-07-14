@@ -97,16 +97,11 @@ async function(req,res,next) {
   } catch(err) { console.error(err); next(); }
 });
 
-// Lists recent tests of a specific kind
-router.get('/tests/:formId', permissions.checkPermission("tests:view"), 
+// Lists recent tests generally, or a specific formId
+router.get('/tests/:formId?', permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
     var tests = await Tests.listRecent(req.params.formId,(req.query||{}).N);
     res.render('recentTests.pug',{formId:req.params.formId, tests: tests});
   });
 
-// Lists recent tests of a specific kind
-router.get('/tests', permissions.checkPermission("tests:view"), 
-  async function(req,res,next) {
-    var tests = await Tests.listRecent(null,(req.query||{}).N);
-    res.render('recentTests.pug',{ tests: tests});
-  });
+

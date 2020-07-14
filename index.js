@@ -101,6 +101,7 @@ let moment = require('moment');
 app.use(function(req,res,next){ 
   res.locals.moment = moment; 
   res.locals.MUUID = MUUID;
+  res.locals.route = req.originalUrl;
   res.locals.base_url = global.config.my_url;
   next(); 
 }); // moment.js in pug
@@ -208,19 +209,21 @@ app.get("/docs",function(req,res,next){
 
 
 app.get('/', async function(req, res, next) {
-  var user_drafts = null;
-  var job_drafts = null;
-  var test_drafts = null;
-  if(req.user && req.user.user_id) test_drafts=await Tests.listUserDrafts(req.user.user_id);
-  if(req.user && req.user.user_id) job_drafts=await Jobs.listUserDrafts(req.user.user_id);
-	res.render('admin.pug',
-	{
-		tests: await Forms.getListOfForms(),
-    workflows: await Forms.getListOfForms("jobForms"),
-		all_components: await Components.getComponents(),
-    test_drafts,
-    job_drafts
-	});
+ //  var user_drafts = null;
+ //  var job_drafts = null;
+ //  var test_drafts = null;
+ //  if(req.user && req.user.user_id) test_drafts=await Tests.listUserDrafts(req.user.user_id);
+ //  if(req.user && req.user.user_id) job_drafts=await Jobs.listUserDrafts(req.user.user_id);
+	// res.render('admin.pug',
+	// {
+	// 	tests: await Forms.getListOfForms(),
+ //    workflows: await Forms.getListOfForms("jobForms"),
+	// 	all_components: await Components.getComponents(),
+ //    test_drafts,
+ //    job_drafts
+	// });
+
+  res.render('home.pug')
 });
 
 
