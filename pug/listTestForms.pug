@@ -7,18 +7,19 @@ block content
 
   table.table-sm.table-hover
     tbody
-      each form in forms
+      -console.log("ffffff",forms);
+      each formName,formId in forms
         tr
-          td=(form.formName || form.formId)
+          td=(formName || formId)
           if(user && user.permissions.includes("tests:submit"))
             td
-              a(href='/test/'+form.formId).btn.btn-outline-primary Run
+              a(href='/test/'+formId).btn.btn-outline-primary Run
           if(user && user.permissions.includes("tests:view"))
             td
-              a(href='/tests/'+form.formId).btn.btn-outline-secondary Recent
+              a(href='/tests/'+formId).btn.btn-outline-secondary Recent
           if(user && user.permissions.includes("forms:edit"))
             td
-              a(href='/EditTestForm/'+form.formId).btn.btn-outline-warning Edit
+              a(href='/EditTestForm/'+formId).btn.btn-outline-warning Edit
 
 
   if(user && user.permissions.includes("forms:edit"))

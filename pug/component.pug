@@ -48,7 +48,7 @@ block extrascripts
     }
 
 block content
-  .container
+  .container-fluid
     .row
         h2#name.col-md-8
           =component.data.type?(component.data.type + ": " + component.data.name):"New Component"
@@ -57,31 +57,23 @@ block content
         dt Component UUID
         dd
           a(href='/'+componentUuid)=componentUuid
+        dt Version  #{component.validity.version}
+        dd edited by !{' '}
+          +short_user(component.insertion.user)
+          | 
+          | 
+          | on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}
+        dd 
+          a(href='/'+componentUuid+'/history') History
+        dt Effective as of
+        dd #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()})
     .row
-      dl
-        dt 
-      .col-md-8   
         +label-link
     .row
-      .col-md-8
         a(href='/'+componentUuid+'/edit') Edit this component
     .row
-      .col-md-8
         a(href='/json/component/'+componentUuid) Raw JSON Document
-    .row
-      .col-md-8 
-        | Version #{component.validity.version}  &nbsp;
-        a(href='/'+componentUuid+'/history') History
-    .row 
-      .col-md-8  Effective as of #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()})
-    .row
-      .col-md-8
-        | This version edited by !{' '}
-        +short_user(component.insertion.user)
-        | 
-        | 
-        | on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}
-
+        
 
     .row
       #builtform.col-md-8
@@ -92,12 +84,6 @@ block content
         canvas#qrcode-canvas
         +label-link
     .row
-        Run a test on this component:
-          ul#tests
-            each form in forms
-              li
-                a(href='/'+componentUuid+'/test/'+form.formId)=form.formName
-    .row
       .column
         h4 Tests Performed
             ul.testsPerformed
@@ -106,6 +92,12 @@ block content
                   -var parenthetical= " (on "+ moment(test.insertion.insertDate).format('MMM DD YYYY');
                   -if(test.insertion.user) { parenthetical+=" by " + user_shortname(test.insertion.user) }
                   -parenthetical+=")";
-                  a(href='/test/'+test._id)=(test.formName||test.formId)
+                  a(href='/test/'+test._id)=(forms[test.formId]||test.formId)
                   =parenthetical
-    i
+    .row
+      h4 Run a test on this component:
+      ul#tests
+          each formName,formId in forms
+            li
+              a(href='/'+componentUuid+'/test/'+formId)=formName
+
