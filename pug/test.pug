@@ -19,6 +19,12 @@ block extrascripts
     var form = null;
     var lastDraftSave = new Date();
 
+    //- function LoadLastTest() {
+    //-   if(componentUuid) {
+    //-     // Retrieve the most recent test of this type for this component
+    //-   }
+    //- }
+
     function MaybeSaveDraft() {
       // time since last draft save
       var seconds = Math.floor((new Date() - lastDraftSave) / 1000);

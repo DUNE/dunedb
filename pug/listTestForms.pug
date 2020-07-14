@@ -21,3 +21,6 @@ block content
               a(href='/EditTestForm/'+form.formId).btn.btn-outline-warning Edit
 
 
+  if(user && user.permissions.includes("forms:edit"))
+    p.h5
+     +NewTestForm

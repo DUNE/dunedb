@@ -36,7 +36,7 @@ block extrascripts
 
         // Change the url to match
 
-        DrawQRCode($('#qrcode-canvas').get(0),base_url+componentUuid);      
+        DrawQRCode($('#qrcode-canvas').get(0),base_url+componentUuid,component.data.name);      
       }
 
   style.
@@ -52,6 +52,11 @@ block content
     .row
         h2#name.col-md-8
           =component.data.type?(component.data.type + ": " + component.data.name):"New Component"
+    .row 
+      dl
+        dt Component UUID
+        dd
+          a(href='/'+componentUuid)=componentUuid
     .row
       dl
         dt 
@@ -98,9 +103,9 @@ block content
             ul.testsPerformed
               each test in tests
                 li 
-                  -console.log("DDDD ",test)
-                  -var parenthetical= " (on "+ moment(test.insertDate).format('MMM DD YYYY');
-                  -if(test.user) { parenthetical+=" by " + user_shortname(test.user) }
+                  -var parenthetical= " (on "+ moment(test.insertion.insertDate).format('MMM DD YYYY');
+                  -if(test.insertion.user) { parenthetical+=" by " + user_shortname(test.insertion.user) }
                   -parenthetical+=")";
-                  a(href='/test/'+test._id)=((test.form||{}).formName||test.formId)+parenthetical
+                  a(href='/test/'+test._id)=(test.formName||test.formId)
+                  =parenthetical
     i

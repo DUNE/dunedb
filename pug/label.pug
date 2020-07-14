@@ -2,8 +2,11 @@
 extend default
 
 
-block navbar
-  a(onclick="window.print(); return false;" href='#print') Print
+//- block navbar
+//-   a(onclick="window.print(); return false;" href='#print') Print
+
+//- block sidebar
+
 
 block vars
    // -page_title=Label !{component.name};
@@ -12,7 +15,7 @@ block extrascripts
   script.
      
       $(function(){
-        DrawQRCode($('.qr-code canvas'),'!{base_url}/!{component.componentUuid}','!{component.name}');
+        DrawQRCode($('.qr-code canvas'),'!{base_url}/!{component.componentUuid}','!{component.data.name}');
       });
       
   style(type='text/css').
@@ -27,7 +30,8 @@ block extrascripts
       height:auto
     }
 
-block content
+block allbody
+  a(onclick="window.print(); return false;" href='#print') Print
   .container
     .row
       div.col-md-6.qr-code

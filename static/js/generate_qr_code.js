@@ -24,26 +24,29 @@ function DrawQRCode(canvases,text,desc){
 			ctx.save();
 			ctx.translate(-width/2,-height/2);
 			ctx.fillText(text,14,14);
-			// if(desc) ctx.fillText(desc,14,12);
+			if(desc) ctx.fillText(desc,14,14+16+1);
 			ctx.restore();
 
 			ctx.rotate(90*Math.PI/180.)
 			ctx.save();
 			ctx.translate(-width/2,-height/2);
 			ctx.fillText(text,14,14);
-			// if(desc) ctx.fillText(desc,14,12);
+			if(desc) ctx.fillText(desc,14,14+16+1);
 			ctx.restore();
 
 			ctx.rotate(90*Math.PI/180.)
 			ctx.save();
 			ctx.translate(-width/2,-height/2);
 			ctx.fillText(text,14,14);
+			if(desc) ctx.fillText(desc,14,14+16+1);
+
 			ctx.restore();
 
 			ctx.rotate(90*Math.PI/180.)
 			ctx.save();
 			ctx.translate(-width/2,-height/2);
 			ctx.fillText(text,14,14);
+			if(desc) ctx.fillText(desc,14,14+16+1);
 			ctx.restore();
 
 			ctx.restore();

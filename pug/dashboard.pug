@@ -17,6 +17,7 @@ head
     link(rel='stylesheet' href='/css/custom.scss')
     link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
 
+
 mixin navlink
   if(attributes.href == route)
     a.nav-link.active&attributes(attributes)
@@ -25,119 +26,122 @@ mixin navlink
     a.nav-link&attributes(attributes)
       block
 
+body
+  block allbody
+    block navbar
+      nav.navbar.navbar-dark.fixed-top.bg-dark.flex-md-nowrap.p-0.shadow
+        a.navbar-brand.col-sm-3.col-md-2.mr-0(href='/') Sietch 
+        //- input.form-control.form-control-dark(type='text' placeholder='Search' aria-label='Search')
+        if locals.user
+          .navbar-nav.px-3
+            .nav-item.text-nowrap
+              +navlink(href="/user") Profile
+          .navbar-nav.px-3
+            .nav-item.text-nowrap
+              +navlink(href="/logout") Log Out
+        else
+          .navbar-nav.px-3
+              .nav-item.text-nowrap
+                +navlink(href="/login") Log In / Sign Up
 
-nav.navbar.navbar-dark.fixed-top.bg-dark.flex-md-nowrap.p-0.shadow
-  a.navbar-brand.col-sm-3.col-md-2.mr-0(href='/') Sietch 
-  //- input.form-control.form-control-dark(type='text' placeholder='Search' aria-label='Search')
-  if locals.user
-    .navbar-nav.px-3
-      .nav-item.text-nowrap
-        +navlink(href="/user") Profile
-    .navbar-nav.px-3
-      .nav-item.text-nowrap
-        +navlink(href="/logout") Log Out
-  else
-    .navbar-nav.px-3
-        .nav-item.text-nowrap
-          +navlink(href="/login") Log In / Sign Up
+    .container-fluid
+      .row
+        block sidebar
+            nav.col-md-2.d-none.d-md-block.bg-light.sidebar
+              .sidebar-sticky
+                ul.nav.flex-column
 
-.container-fluid
-  .row
-    nav.col-md-2.d-none.d-md-block.bg-light.sidebar
-      .sidebar-sticky
-        ul.nav.flex-column
-
-          li.nav-item
-            +navlink(href='/components/type')
-              i.fa.fa-puzzle-piece("aria-hidden"="true")
-              | Components
-
-            ul.nav.flex-column.ml-3.sub-bar
-                if(user && user.permissions.includes("components:create"))
                   li.nav-item
-                    +navlink(href='/NewComponent')
-                      |      Register new
-                if(user && user.permissions.includes("forms:edit"))
+                    +navlink(href='/components/type')
+                      i.fa.fa-puzzle-piece("aria-hidden"="true")
+                      | Components
+
+                    ul.nav.flex-column.ml-3.sub-bar
+                        if(user && user.permissions.includes("components:create"))
+                          li.nav-item
+                            +navlink(href='/NewComponent')
+                              |      Register new
+                        if(user && user.permissions.includes("forms:edit"))
+                          li.nav-item
+                            +navlink(href='/EditComponentForm')
+                              |      Edit form
+
+
                   li.nav-item
-                    +navlink(href='/EditComponentForm')
-                      |      Edit form
+                    +navlink(href='/testForms')
+                      i.fa.fa-flask("aria-hidden"="true")
+                      | Tests
+
+                    ul.nav.flex-column.ml-3.sub-bar
+                        li.nav-item
+                          +navlink(href='/tests')
+                            |      Recent
+             
 
 
-          li.nav-item
-            +navlink(href='/testForms')
-              i.fa.fa-flask("aria-hidden"="true")
-              | Tests
-
-            ul.nav.flex-column.ml-3.sub-bar
-                li.nav-item
-                  +navlink(href='/tests')
-                    |      Recent
-     
-
-
-          li.nav-item
-            +navlink(href='/workflows')
-              i.fa.fa-list-ol("aria-hidden"="true")
-              | Workflows
-           
-            ul.nav.flex-column.ml-3.sub-bar
-                li.nav-item
-                  +navlink(href='/jobs')
-                    |      Recent
-     
+                  li.nav-item
+                    +navlink(href='/workflows')
+                      i.fa.fa-list-ol("aria-hidden"="true")
+                      | Workflows
+                   
+                    ul.nav.flex-column.ml-3.sub-bar
+                        li.nav-item
+                          +navlink(href='/jobs')
+                            |      Recent
+             
 
 
-          li.nav-item
-            +navlink(href='/drafts')
-              i.fa.fa-pencil("aria-hidden"="true")
-              | My Drafts
+                  li.nav-item
+                    +navlink(href='/drafts')
+                      i.fa.fa-pencil("aria-hidden"="true")
+                      | My Drafts
 
-          //- li.nav-item
-          //-   +navlink(href='#')
-          //-     | My recent submissions
-          //-     | mine/others
+                  //- li.nav-item
+                  //-   +navlink(href='#')
+                  //-     | My recent submissions
+                  //-     | mine/others
 
 
-        //- h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-        //-   span Admin
-        //-   //- a.d-flex.align-items-center.text-muted(href='#')
-        //-   //-   span(data-feather='plus-circle')
-        //- ul.nav.flex-column.mb-2
-        //-   li.nav-item
-        //-     +navlink(href='#')
-        //-       span(data-feather='file-text')
-        //-       |                   Edit Component Forms
-        //-   li.nav-item
-        //-     +navlink(href='#')
-        //-       span(data-feather='file-text')
-        //-       |                   Edit Test Forms
-        //-   li.nav-item
-        //-     +navlink(href='#')
-        //-       span(data-feather='file-text')
-        //-       |                   Edit Workflow Forms
+                //- h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
+                //-   span Admin
+                //-   //- a.d-flex.align-items-center.text-muted(href='#')
+                //-   //-   span(data-feather='plus-circle')
+                //- ul.nav.flex-column.mb-2
+                //-   li.nav-item
+                //-     +navlink(href='#')
+                //-       span(data-feather='file-text')
+                //-       |                   Edit Component Forms
+                //-   li.nav-item
+                //-     +navlink(href='#')
+                //-       span(data-feather='file-text')
+                //-       |                   Edit Test Forms
+                //-   li.nav-item
+                //-     +navlink(href='#')
+                //-       span(data-feather='file-text')
+                //-       |                   Edit Workflow Forms
 
-        h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-          span Documentation
-          //- a.d-flex.align-items-center.text-muted(href='#')
-          //-   span(data-feather='plus-circle')
-        ul.nav.flex-column.mb-2
+                h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
+                  span Documentation
+                  //- a.d-flex.align-items-center.text-muted(href='#')
+                  //-   span(data-feather='plus-circle')
+                ul.nav.flex-column.mb-2
 
-          li.nav-item
-            +navlink(href='/docs/api.md') API description. 
-          li.nav-item
-            +navlink(href='/docs/schemas.md') Schema description. 
-          li.nav-item
-            +navlink(href='/docs/notes.md') Working notes, TODO 
-          li.nav-item
-            +navlink(href='/docs/Proposal notes.pdf') API description. 
+                  li.nav-item
+                    +navlink(href='/docs/api.md') API description. 
+                  li.nav-item
+                    +navlink(href='/docs/schemas.md') Schema description. 
+                  li.nav-item
+                    +navlink(href='/docs/notes.md') Working notes, TODO 
+                  li.nav-item
+                    +navlink(href='/docs/Proposal notes.pdf') API description. 
 
-    main.col-md-9.ml-sm-auto.col-lg-10.px-4(role='main')
-      block content 
+        main.col-md-9.ml-sm-auto.col-lg-10.px-4(role='main')
+          block content 
 
 
 //
-  Bootstrap core JavaScript
-  ==================================================
+// Bootstrap core JavaScript
+// ==================================================
 // Placed at the end of the document so the pages load faster
 
 script(src='/dist/jquery/jquery.min.js')

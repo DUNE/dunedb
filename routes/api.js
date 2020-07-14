@@ -147,6 +147,8 @@ router.post("/test/", permissions.checkPermissionJson('tests:submit'),
 );
 
 
+// Get a specific test
+
 router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
@@ -156,6 +158,18 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson
   } catch(err) {
     console.log(JSON.stringify(err.toString()));
       res.status(400).json({error:err.toString()});
+  }
+});
+
+// Get list of tests done on a specific component
+
+router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:view'), 
+  async function (req,res,next) {
+  try {
+    return res.json(await Tests.listComponentTests(req.params.uuid));
+  } catch(err) {
+    console.log(JSON.stringify(err.toString()));
+    res.status(400).json({error:err.toString()});
   }
 });
 
