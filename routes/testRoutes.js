@@ -2,6 +2,7 @@
 
 const permissions = require('../lib/permissions.js');
 const Forms = require('../lib/Forms.js');
+const Components = require('../lib/Components.js');
 const Tests = require('../lib/Tests.js')('test');
 const Processes = require('../lib/Processes.js');
 const express  = require("express");
@@ -20,13 +21,15 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tes
       console.log("finding test ",req.params.record_id)
       var options = {};
       // get stuff in one go
-      let [data,processes] = await Promise.all([
+      let [test,processes] = await Promise.all([
           Tests.retrieve(req.params.record_id),
-          Processes.findInputRecord(req.params.record_id)
+          Processes.findInputRecord(req.params.record_id),
         ]);
 
-      if(!data) return res.status(404).render("No such test recorded.");
-      var formId = data.formId;
+      var component = await Components.retrieveComponent(test.componentUuid);
+
+      if(!test) return res.status(404).render("No such test recorded.");
+      var formId = test.formId;
       if(!formId) throw("Test has no formId");
 
       if(req.query.version) options.version = parseInt(req.query.version);
@@ -36,11 +39,9 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tes
       var versions = await Forms.getFormVersions('testForms',formId);
       console.log('versions',versions);
       if(!formrec) return res.status(400).send("No such test form");  
-      res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, testdata:data, processes: processes, versions: versions, retrieved:true})
-    } 
-    catch(err) { 
-      console.error(err); next(); 
-    }
+      res.render('viewTest.pug',{formId:req.params.formId, formrec, testdata:test, processes, versions, component, retrieved:true})
+  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+
 });
 
 // Run a test, but no UUID specified
@@ -59,7 +60,7 @@ async function(req,res,next) {
     var form = await Forms.retrieve('testForms',req.params.formId,options);
     if(!form) return res.status(400).send("No such test form");
     res.render('test.pug',{formId:req.params.formId, form:form, componentUuid: req.params.uuid})
-  } catch(err) { console.error(err); next(); }
+  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
 });
 
 
@@ -78,7 +79,7 @@ async function(req,res,next) {
     var form = await Forms.retrieve('testForms',testdata.formId);
     if(!form) return res.status(400).send("No such test form");
     res.render('test.pug',{formId: testdata.formId, form:form, componentUuid: testdata.componentUuid, testdata:testdata})
-  } catch(err) { console.error(err); next(); }
+  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
 });
 
 router.get("/test/deleteDraft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:submit"),
@@ -94,7 +95,7 @@ async function(req,res,next) {
     await Tests.deleteDraft(req.params.record_id);
     var backURL=req.header('Referer') || '/';
     res.redirect(backURL);
-  } catch(err) { console.error(err); next(); }
+  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
 });
 
 // Lists recent tests generally, or a specific formId
@@ -103,5 +104,16 @@ router.get('/tests/:formId?', permissions.checkPermission("tests:view"),
     var tests = await Tests.listRecent(req.params.formId,(req.query||{}).N);
     res.render('recentTests.pug',{formId:req.params.formId, tests: tests});
   });
+
+router.get('/test/copyAsDraft/:record_id([A-Fa-f0-9]{24})',permissions.checkPermission("tests:submit"),
+  async function(req,res,next) {
+    try{
+      var newdraft = await Tests.copyToDraft(req.params.record_id,req);
+      console.log("Made copy ",newdraft);
+      if(newdraft) res.redirect("/test/draft/"+newdraft._id.toString())
+
+    } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+
+})
 
 

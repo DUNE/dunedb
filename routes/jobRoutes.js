@@ -95,6 +95,19 @@ router.get('/jobs/:formId?', permissions.checkPermission("tests:view"),
     res.render('recentJobs.pug',{formId:req.params.formId, tests: tests});
   });
 
+router.get('/job/copyAsDraft/:record_id([A-Fa-f0-9]{24})',permissions.checkPermission("tests:submit"),
+  async function(req,res,next) {
+    try{
+      var newdraft = await Jobs.copyToDraft(req.params.record_id,req);
+      console.log("Made copy ",newdraft);
+      if(newdraft) res.redirect("/job/draft/"+newdraft._id.toString())
+
+    } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+
+})
+
+
+// Common
 
 router.get('/drafts',  permissions.checkPermission("tests:view"),
   async function(req,res,next){
@@ -104,6 +117,5 @@ router.get('/drafts',  permissions.checkPermission("tests:view"),
   if(req.user && req.user.user_id) job_drafts=await Jobs.listUserDrafts(req.user.user_id);
   res.render('drafts.pug',{test_drafts,job_drafts});
   })
-
 
 

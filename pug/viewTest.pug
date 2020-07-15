@@ -33,21 +33,29 @@ block extrascripts
 
 block content
   h2=formrec.formName || formrec.formId
-  if testdata 
-    p Submitted: 
+  dl
+    if testdata 
+    dt Submitted: 
+    dd
       +dateFormat(testdata.insertion.startTime)
       if testdata.insertion.user
           |
           |
-          span by:
+          | by
           |
           |
           +short_user(testdata.insertion.user)
 
     if(testdata.componentUuid)
-      p
-        -var uuid = MUUID.from(testdata.componentUuid);
+      -var uuid = MUUID.from(testdata.componentUuid);
+      dt Run on component 
         a(href='/'+uuid.toString())=uuid.toString()
+      dd 
+        if(component)
+          | #{component.data.name} (#{component.type})
+        else
+          span.alert.alert-danger Component info not available
+        
   hr
   #builtform  
 
@@ -100,5 +108,6 @@ block content
     a(href=`${path}/${testdata._id}?pretty`) View JSON data
   p
     a(download=testdata._id+".json", href=`${path}/${testdata._id}`) Download JSON data
-
+  p
+    a.btn.btn-info.pull-right(href=`/${testdata.recordType}/copyAsDraft/`+testdata._id) Create Copy As New Draft
   
