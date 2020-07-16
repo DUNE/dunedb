@@ -59,7 +59,7 @@ async function(req,res,next) {
     var options = {onDate: new Date()};
     var form = await Forms.retrieve('testForms',req.params.formId,options);
     if(!form) return res.status(400).send("No such test form");
-    res.render('test.pug',{formId:req.params.formId, form:form, componentUuid: req.params.uuid})
+    res.render('test.pug',{formId:req.params.formId, form, componentUuid: req.params.uuid})
   } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
 });
 

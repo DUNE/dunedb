@@ -11,6 +11,7 @@ block extrascripts
       //- var record=!{JSON.stringify(rec, null ,4)};
       var formId = "!{formId}";
       var collection = "!{collection}";
+      var componentTypes = !{JSON.stringify(componentTypes) || "null"} ;
       
 
   block metaschema
@@ -22,6 +23,7 @@ block extrascripts
   block workscripts
     script.
       var builder = null;
+      var trialform = null;
 
       var comps = Formio.Components.components;
       var builder_config =  {
@@ -170,8 +172,9 @@ block extrascripts
         $('#trialform').empty();
 
         // Create a trial form
-        trialform = new Formio.createForm(document.getElementById('trialform'),builder.instance.form).then(function(form) {
-          form.on('change', function() {
+        new Formio.createForm(document.getElementById('trialform'),builder.instance.form).then(function(form) {
+          trialform = form;
+          trialform.on('change', function() {
             $('#trialdata').html(JSON.stringify(form.submission, null, 2))
           });
         })
@@ -241,9 +244,23 @@ block extrascripts
       };
 
 
+      function findComponent(components,key) {
+        for(var c of components) {
+          if(c.key === key) return c;
+          if(c.components) {
+            var ff = findComponent(c.components,key);
+            if(ff) return ff;
+          }
+        }
+      }
       $(function(){
         //- console.log("schema",record.schema);
         // First, modify the metaschema based on the component type list
+        //- var omponentTypesComponent = Formio
+        var componentTypes_component = findComponent(metaschema.components,"componentTypes");
+        if(componentTypes_component && componentTypes) {
+          for(var t of componentTypes) componentTypes_component.data.values.push({label:t.type,value:t.type});
+        }
 
         // Create the metaform
         Formio.createForm(document.getElementById('metaform'),metaschema).

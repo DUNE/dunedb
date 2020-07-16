@@ -9,9 +9,9 @@ block content
   h1 Component Types
 
   ul
-    each count,type in types
-      if(type && type!="null")
+    each ob in types
+      if(ob.type && ob.type!="null")
         li
-          a(href='/components/type/'+encodeURIComponent(type)) #{type} (#{count})
+          a(href='/components/type/'+encodeURIComponent(ob.type)) #{ob.type} (#{ob.count})
 
 

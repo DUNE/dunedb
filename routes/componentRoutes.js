@@ -31,17 +31,13 @@ async function get_component(req,res) {
       Tests.listComponentTests(componentUuid)
     ]);
 
-
   console.dir(forms);
-  // equal:
-  // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieve("componentForm","componentForm");
-  console.log("component")
-  console.log(component);
-  console.log("tests");
-  console.log(tests);
-  console.log('componentForm');
-  console.log(componentform);
+  // console.log("component")
+  // console.log(component);
+  // console.log("tests");
+  // console.log(tests);
+  // console.log('componentForm');
+  // console.log(componentform);
   if(!component) return res.status(400).send("No such component ID.");
   res.render("component.pug",{
     schema: componentform.schema,
@@ -141,29 +137,37 @@ router.get('/'+utils.short_uuid_regex+'/label', permissions.checkPermission("com
 // Create a new component
 
 
-router.get("/NewComponent", permissions.checkPermission("components:create"),
+router.get("/NewComponent/:type", permissions.checkPermission("components:create"),
   // middlewareCheckDataEntryPrivs,
    async function(req,res){
-  var form = await Forms.retrieve("componentForm","componentForm");
-  // roll a new UUID.
+    var type = decodeURIComponent(req.params.type);
+    var form = await Forms.retrieve("componentForm",type);
+    if(!form) res.status(400).send("No such type ",type)
+    // roll a new UUID.
 
-  var componentUuid = Components.newUuid().toString();
-  res.render("component_edit.pug",{
-    schema: form.schema,
-    componentUuid:componentUuid,
-    component: {},
-    canEdit: permissions.hasPermission("components:edit"),
-    tests:[],
-    performed: [],
-  });
+    var componentUuid = Components.newUuid();
+    res.render("component_edit.pug",{
+      schema: form.schema,
+      componentUuid:componentUuid,
+      component: { type: type, componentUuid: componentUuid },
+      canEdit: permissions.hasPermission("components:edit"),
+      tests:[],
+      performed: [],
+    });
 });
 
 
-// Edit component form.
-router.get("/EditComponentForm", permissions.checkPermission("forms:edit"), async function(req,res){
-  res.render('EditComponentForm.pug',{collection:"componentForm",formId:"componentForm"});
+// Edit component forms
+router.get("/EditComponentForm/:type", permissions.checkPermission("forms:edit"), async function(req,res){
+  var type = decodeURIComponent(req.params.type);
+  res.render('EditComponentForm.pug',{collection:"componentForm",formId:type});
 });
 
+router.get("/NewComponentType/:type", permissions.checkPermission("forms:edit"), async function(req,res){
+  var type = decodeURIComponent(req.params.type);
+  var form = await Forms.retrieve("componentForm",);
+  res.render('EditComponentForm.pug',{collection:"componentForm",formId:type});
+});
 
 
 
@@ -175,7 +179,8 @@ router.get('/components/type',permissions.checkPermission("components:view"),
   async function(req,res,next) {
 
         var types = await Components.getTypes();
-        res.render("components_type.pug",{types:types});
+        var sorted = types.sort((a,b)=>(''+a.type).localeCompare(b.type));
+        res.render("components_type.pug",{types:sorted});
 
   });
 

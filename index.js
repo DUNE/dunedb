@@ -26,6 +26,7 @@ var Components = require('./lib/Components.js');
 var Forms     = require('./lib/Forms.js');
 var Tests     = require('./lib/Tests.js')('test');
 var Jobs     = require('./lib/Tests.js')('job');
+var Cache    = require('./lib/Cache.js');
 
 var permissions = require('./lib/permissions.js');
 var utils = require('./lib/utils.js');
@@ -63,11 +64,14 @@ app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding
 glob(__dirname+'/node_modules/*/dist',
   function(err,matches) {
     if(err) throw new Error(err);
+    var list = [];
     for(var path of matches) {
       var modname = /\/node_modules\/([^\/]*)\/dist/.exec(path)[1];
-      console.log('modname',modname,path);
+      list.push(modname);
+      // console.log('modname',modname,path);
       app.use('/dist/'+modname,express.static(path));
     }
+    console.log("Added /dist/ paths on modules",list.join(' '))
   });
 
 // add some static routes to libraries explicity..
@@ -249,6 +253,7 @@ app.get('/simple/:pagename', function (req, res, next) {
 async function run(){
   // db.collection("components"); // testing to see if DB is live...
 	// app.listen(config.http_server_port, () => console.log(`Example app listening on port ${config.http_server_port}!`))	
+  Cache.regenerateAll();
   var httpServer = http.createServer(app);
   httpServer.listen(config.http_server_port, () => console.log(`Example app listening on port ${config.http_server_port}!`))  
 

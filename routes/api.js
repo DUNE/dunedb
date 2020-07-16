@@ -89,6 +89,17 @@ router.get('/components', permissions.checkPermissionJson('components:view'),
   }
 );
 
+router.get('/componentTypes', permissions.checkPermissionJson('components:view'), 
+  async function(req,res,next){
+    // FIXME, add search terms
+    try {
+      var data = await Components.getTypes(req.query.type);
+      return res.json(data);
+    } catch(err) {
+      res.status(400).json({error:err.toString()})
+    }  
+  }
+);
 
 ////////////////////////////////////////////////////////
 // Forms
@@ -98,6 +109,8 @@ router.get('/components', permissions.checkPermissionJson('components:view'),
 
 router.get('/:collection(testForms|componentForm|jobForms)/:formId', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
+    if(collection == 'componentForm') Cache.invalidate('componentTypes');  
+
     var rec = await Forms.retrieve(req.params.collection,req.params.formId);
     // if(!rec) return res.status(404).send("No such form exists");
     if(!rec) { res.status(400).json({error:"no such form "+req.params.formId}); return next(); };
