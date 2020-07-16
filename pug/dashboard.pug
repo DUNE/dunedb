@@ -18,6 +18,9 @@ head
     link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
     link(href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet")
 
+    // jquery early, since it's used in lots of scripts
+    script(src='/dist/jquery/jquery.min.js')
+
 
 mixin navlink
   if(attributes.href == route)
@@ -57,15 +60,15 @@ body
                       i.fa.fa-puzzle-piece("aria-hidden"="true")
                       | Components
 
-                    ul.nav.flex-column.ml-3.sub-bar
-                        if(user && user.permissions.includes("components:create"))
-                          li.nav-item
-                            +navlink(href='/NewComponent')
-                              |      Register new
-                        if(user && user.permissions.includes("forms:edit"))
-                          li.nav-item
-                            +navlink(href='/EditComponentForm')
-                              |      Edit form
+                    //- ul.nav.flex-column.ml-3.sub-bar
+                    //-     if(user && user.permissions.includes("components:create"))
+                    //-       li.nav-item
+                    //-         +navlink(href='/NewComponent')
+                    //-           |      Register new
+                    //-     if(user && user.permissions.includes("forms:edit"))
+                    //-       li.nav-item
+                    //-         +navlink(href='/EditComponentForm')
+                    //-           |      Edit form
 
 
                   li.nav-item
@@ -127,16 +130,10 @@ body
                   //-   span(data-feather='plus-circle')
                 ul.nav.flex-column.mb-2
                   li.nav-item
-                    +navlink(href='/docs/README.md') README.md 
-
+                    +navlink(href='/docs/') All Documentation
                   li.nav-item
-                    +navlink(href='/docs/api.md') API
-                  li.nav-item
-                    +navlink(href='/docs/schemas.md') Schemas
-                  li.nav-item
-                    +navlink(href='/docs/notes.md') Working notes, TODO 
-                  li.nav-item
-                    +navlink(href='/docs/Proposal notes.pdf') Original proposal 
+                    +navlink(href='/docs/README.md') README
+                    +navlink(href='/docs/notes.md') Working notes and To-Do list 
 
         main.col-md-9.ml-sm-auto.col-lg-10.px-4(role='main')
           block content 
@@ -147,7 +144,6 @@ body
 // ==================================================
 // Placed at the end of the document so the pages load faster
 
-script(src='/dist/jquery/jquery.min.js')
 script(src='/dist/bootstrap/js/bootstrap.min.js')
 script(src="/dist/bootstrap-autocomplete/latest/bootstrap-autocomplete.min.js")
 script(src='/dist/formiojs/formio.full.js')

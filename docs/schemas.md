@@ -1,7 +1,7 @@
 # Internal Mongo Schemas
 
 
-## Schema version 4.1
+## Schema version 4.2
 
 Here I wanted more consistency between different records. 
 ### Record layout
@@ -91,16 +91,16 @@ In addition, some will have this field:
   _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
   recordType: "component",  // component, form, test, job
   insertion: <insertion block>,
-  type: <string>,   // set to be the same as data.type on submit
   state: "submitted",
   referencesComponents: [ <BSON Uuid>,... ], // list of uuids in data given below.., found by deep searh
   createdFrom: {},  //optional, see createdFrom block.
 
   // supplied by caller:
+  type: <string>,   
   componentUuid,              // component uuid
   validity: <validity block>  // Fields are auto-set if empty.
   data: {
-    type: <string>  // component type
+    name: <string>  // user-readable name
   }
   metadata: {}
 

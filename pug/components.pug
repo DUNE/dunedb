@@ -8,13 +8,30 @@ block vars
 block content
   /// List of components
   
-  h1 Components
+  p.h3 Components
+    if(type)
+        |
+        | of type 
+        i #{type}
 
-  ul
+  table.table
+    thead
+      tr
+        th Name
+        th UUID
+        th Created
+        th Last Updated
+    tbody
     each component in components
-       li
-          -var uuid=MUUID.from(component.componentUuid).toString();
-          a(href='/'+uuid) #{component.name} (#{uuid.substr(0,8)}...)
-          // MUUID.from(component.componentUuid).toString()
+      -var uuid=MUUID.from(component.componentUuid).toString();
+      tr
+        td
+          a(href='/'+uuid) #{component.name} 
+        td
+          a(href='/'+uuid)  #{uuid.substr(0,8)}...
+        td
+          +dateFormat(component.created)
+        td
+          +dateFormat(component.last_edited)
 
 

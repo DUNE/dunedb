@@ -11,7 +11,7 @@ block extrascripts
       //- var record=!{JSON.stringify(rec, null ,4)};
       var formId = "!{formId}";
       var collection = "!{collection}";
-      var componentTypes = !{JSON.stringify(componentTypes) || "null"} ;
+      //- var componentTypes = !{JSON.stringify(componentTypes) || "null"} ;
       
 
   block metaschema
@@ -324,6 +324,8 @@ block extrascripts
 
 
 block content
+  block content_header
+    
   div#metaform
 
   div.row

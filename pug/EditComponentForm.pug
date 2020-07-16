@@ -1,7 +1,11 @@
 extend EditTestForm
 
+block content_header
+    p.h2 Type: #{formId}
 
 block metaschema
+    var builder_wizard = false
+
 
     script(type='text/javascript').
       var builder_wizard = false;

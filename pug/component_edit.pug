@@ -25,6 +25,7 @@ block extrascripts
         var record = {...submission};
         // metadata:
         record.componentUuid = componentUuid; 
+        record.type = component.type;
         // only set desired startdate.
         record.validity = { startDate: metaform.submission.data.startDate };
 

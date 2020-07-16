@@ -5,6 +5,7 @@ const Components = require("../lib/Components.js");
 const Tests = require("../lib/Tests.js")('test');
 const Jobs = require("../lib/Tests.js")('job');
 // const Jobs = require("../lib/Jobs.js");
+const Cache = require("../lib/Cache.js");
 const utils = require("../lib/utils.js");
 const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
@@ -109,7 +110,7 @@ router.get('/componentTypes', permissions.checkPermissionJson('components:view')
 
 router.get('/:collection(testForms|componentForm|jobForms)/:formId', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
-    if(collection == 'componentForm') Cache.invalidate('componentTypes');  
+    if(req.params.collection == 'componentForm') Cache.invalidate('componentTypes');  
 
     var rec = await Forms.retrieve(req.params.collection,req.params.formId);
     // if(!rec) return res.status(404).send("No such form exists");
