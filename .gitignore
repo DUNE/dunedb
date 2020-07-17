@@ -5,3 +5,5 @@ config.js
 api_config.json
 api2_config.json
 local/
+config*.js
+sietch_dev
