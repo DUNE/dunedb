@@ -1,0 +1,60 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title="Component Types";
+
+block content
+  h1 Component Types
+
+  table.table
+    thead
+      tr
+        th Type
+        th Count
+    tbody
+      each ob in types
+        if(ob.type && ob.type!="null")
+          tr
+            td
+              a(href='/components/type/'+encodeURIComponent(ob.type)) #{ob.type}
+
+            td=ob.count
+
+            if(user && user.permissions.includes("components:create"))
+              td
+                a(href='/NewComponent/'+ob.type).btn.btn-outline-info Register a new component
+
+            if(user && user.permissions.includes("forms:edit"))
+              td
+                a(href='/EditComponentForm/'+ob.type).btn.btn-outline-warning Edit Component Form
+
+
+  if(user && user.permissions.includes("forms:edit"))
+    a.NewComponentType.btn.btn-outline-primary(href='#', data-toggle="modal" data-target="#NewComponentTypeModal") Create New Component Type
+    #NewComponentTypeModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewComponentTypeLabel' aria-hidden='true')
+      .modal-dialog(role="document")
+        .modal-content
+          .modal-header
+            h5#NewComponentTypeLabel.modal-title New Component Type
+            button.close(type="button",data-dismiss="modal",aria-label="Close")
+              span(aria-hidden=true) &times;
+          .modal-body
+            div
+              | Enter the form type.
+              | Brevity is preferred; spaces are allowed but awkward.
+              input.NewComponentTypeName.form-control(type="text")
+          .modal-footer
+            button.btn.btn-secondary(type="button", data-dismiss="modal") Close
+            button.btn.btn-primary.NewComponentTypeButton(type="button") Create
+    script.
+      $('button.NewComponentTypeButton').click(function(){
+        window.location.href="/NewComponentType/"+ $('button.NewComponentTypeButton').parents('.modal-content').find('input').val();
+      })
+      $('input.NewComponentTypeName').on("keyup",function(e){
+        if(e.key=="Enter") {
+            window.location.href="/NewComponentType/"+ $(this).val();
+          }
+      })
+
