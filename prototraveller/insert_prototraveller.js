@@ -2,7 +2,7 @@
 var sietchConnect  = require("../client/SietchConnect.js");
 var fs = require('fs');
 var moment = require('moment');
-
+var automaticallyCreateSchema = require('../lib/automaticallyCreateSchema.js');
 var sietch = new sietchConnect();
 
 // common form components
@@ -125,8 +125,12 @@ sietch.connect().then(async ()=>{
 	for(filename of filenames) {
 		var data = JSON.parse(fs.readFileSync(filename));
 		console.log("filename",filename);
-		var form_id = 'prototype_apa_' + filename.match(/.*tbl(.*)\.json/)[1];
-		console.log(form_id);
+		var formId = 'prototype_apa_' + filename.match(/.*tbl(.*)\.json/)[1];
+
+		console.log(formId);
+
+    // run the automagic.
+
 		// get list of all fields.
 		var fields = {};
 		for(var record of data) {
@@ -186,7 +190,9 @@ sietch.connect().then(async ()=>{
 		for(var record of data) {
 			record.componentUuid = uuids[record.APAID]; // Assign this uuid.
 			var submission = {data:record};
-			submission.form_id = form_id;
+			submission.formId = form_id;
+      submission.formName = form_id;
+      submission.state
 			var retval = await sietch.post('/test',submission);
 			console.log('inerted test record',retval);
 		}
