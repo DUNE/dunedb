@@ -3,23 +3,31 @@
 
 ## TODO
 # FIX:
-	- Dashboard sidebar is not visibile in mobile formats. Can be fixed with hide/show button, as shown in https://bootstrapious.com/p/bootstrap-sidebar
+- Dashboard sidebar is not visibile in mobile formats. Can be fixed with hide/show button, as shown in https://bootstrapious.com/p/bootstrap-sidebar
 
 # Feature:
-	- Add tags to test and workflows
-	- For tests, valid tags should include component types
+- Deal with user roles and permissions correctly
+  - Report Role to Sietch from auth0 https://auth0.com/docs/authorization/concepts/sample-use-cases-rules?_ga=2.145452535.2105996331.1595001080-1688616688.1591304607&_gac=1.263108222.1594311094.Cj0KCQjwgJv4BRCrARIsAB17JI6q7KpMqYfZ2tQnh6EW2IYa74vEqLLmu-J1dB883FMEoXahBU4mNHUaAs-4EALw_wcB#manage-delegated-administration-extension-roles-using-the-authorization-core-feature-set
+  - Check if no roles assigned, assign default user role using management API
+  - Use a generic password system to allow users to promote themselves into new roles.
+  
+
+
+# Feature:
+- Add tags to test and workflows
+- For tests, valid tags should include component types
 
 # Backend:
-	- Break the Component form into multiple subforms for convenience when editing. 
-	-  This will also make it easier to allow auto-generated schema for new component types.
-	- But this means I'll have to change schema so that data.type is no longer used, just a root-level type. This shouldn't be a problem; v4 schema already requires it.
+- Break the Component form into multiple subforms for convenience when editing. 
+-  This will also make it easier to allow auto-generated schema for new component types.
+- But this means I'll have to change schema so that data.type is no longer used, just a root-level type. This shouldn't be a problem; v4 schema already requires it.
 
 # Feature:
-	- Attempt Component form auto-creation (Do this after I've split the component forms)
+- Attempt Component form auto-creation (Do this after I've split the component forms)
 
 
 # Feature:
-	- Search for components
+- Search for components
 		- UI
 		- API
 

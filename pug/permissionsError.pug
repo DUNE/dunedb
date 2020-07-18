@@ -9,6 +9,14 @@ block content
 
   p You do not have permission to perform this action.
 
-  p Required permission: #{scope_required}
-  p Your permissions: #{user_scopes.join(', ')}
+  p Required permission: #{permission_required}
+
+  if(!user)
+    p You must 
+      |
+      |
+      a(href="/login") log in or sign up.
+  else
+    p Your roles: #{user.roles.join(', ')}
+    p Your permissions: #{user.permissions.join(', ')}
 
