@@ -32,7 +32,7 @@ function SietchConnect(config)
     if(data) req.body = JSON.stringify(data);
     console.log('posting',req.body);
     var response = await util.promisify(request)(req);
-    if(response.statusCode != 200) throw Error("API call failed: \n"+(response.body));
+    if(response.statusCode != 200) throw new Error("API call failed: \n"+(response.body));
     return JSON.parse(response.body);
   }
 

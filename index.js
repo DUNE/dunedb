@@ -180,6 +180,7 @@ app.use(require("./routes/testRoutes.js"));
 app.use(require("./routes/workflowRoutes.js"));
 app.use(require("./routes/jobRoutes.js"));
 app.use(require("./routes/processRoutes.js"));
+app.use(require("./routes/userRoutes.js"));
 
 app.use('/file',require('./routes/files.js'));
 app.use('/autocomplete',require("./routes/autocomplete.js"));

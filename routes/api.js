@@ -144,16 +144,16 @@ router.post('/:collection(testForms|componentForm|jobForms)/:formId', permission
 // Test data
 
 /// submit test form data
-router.post("/test/", permissions.checkPermissionJson('tests:submit'), 
+router.post("/test", permissions.checkPermissionJson('tests:submit'), 
   async function submit_test_data(req,res,next) {
     console.log(chalk.blue("Form submission",req.params.formId));
     // var body = await parse.json(req);
     try {
-      console.log("Submission to /test/",JSON.stringify(req.body,null,2));
+      console.log("Submission to /test",JSON.stringify(req.body,null,2));
       var outrec = await Tests.save(req.body, req);
       res.json({_id: outrec._id});
     } catch(err) {
-      console.error("error submitting form /test/"+req.params.formId);
+      console.error("error submitting form /test"+req.params.formId);
       console.error(err);
       res.status(400).json({error:err.toString()});
     } 

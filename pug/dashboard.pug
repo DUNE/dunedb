@@ -20,7 +20,21 @@ head
 
     // jquery early, since it's used in lots of scripts
     script(src='/dist/jquery/jquery.min.js')
+    script.
+      function executeASearch(term) {
+        console.log("Execute a Search:",term);
+        window.location.href = "/components/search?search="+encodeURIComponent(term);
+      };
 
+      $(function(){
+        $("#navbar-search")
+        .on('change',function(){
+          executeASearch($(this).val());
+        })
+        .on('keyup',function(){
+          if (event.key === "Enter") executeASearch($(this).val());
+        });
+      });
 
 mixin navlink
   if(attributes.href == route)
@@ -35,7 +49,7 @@ body
     block navbar
       nav.navbar.navbar-dark.fixed-top.bg-dark.flex-md-nowrap.p-0.shadow
         a.navbar-brand.col-sm-3.col-md-2.mr-0(href='/') Sietch 
-        //- input.form-control.form-control-dark(type='text' placeholder='Search' aria-label='Search')
+        input.form-control.form-control-dark#navbar-search(type='search' placeholder='Search for a component' aria-label='Search')
         if locals.user
           .navbar-nav.px-3
             .nav-item.text-nowrap
