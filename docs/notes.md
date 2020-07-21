@@ -5,6 +5,8 @@
 - provide Pam with some sample QR files for both high-res and low-res
 - about 1cm square
 
+- Nikola and Mark
+
 
 ## TODO
 # FIX:

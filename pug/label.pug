@@ -15,7 +15,7 @@ block extrascripts
   script.
      
       $(function(){
-        DrawQRCode($('.qr-code canvas'),'!{base_url}/!{component.componentUuid}','!{component.data.name}');
+        DrawQRCode($('.qr-code canvas'),'sietch.xyz/!{component.componentUuid}','!{component.data.name}');
       });
       
   style(type='text/css').
@@ -36,19 +36,19 @@ block extrascripts
 
 block allbody
   a(onclick="window.print(); return false;" href='#print') Print
-    .container
-      .row
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")      
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
-      .row
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
-        div.col-sm-6.qr-code
-         canvas(height="700",width="700")
-      .row
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
-        div.col-sm-6.qr-code
-          canvas(height="700",width="700")
+  .container
+    .row
+      div.col-sm-6.qr-code
+        canvas(height="700",width="700")      
+      div.col-sm-6.qr-code
+        canvas(height="700",width="700")
+    .row
+      div.col-sm-6.qr-code
+        canvas(height="700",width="700")
+      div.col-sm-6.qr-code
+       canvas(height="700",width="700")
+    .row
+      div.col-sm-6.qr-code
+        canvas(height="700",width="700")
+      div.col-sm-6.qr-code
+        canvas(height="700",width="700")
