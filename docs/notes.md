@@ -2,6 +2,11 @@
 
 
 ## TODO
+- provide Pam with some sample QR files for both high-res and low-res
+- about 1cm square
+
+
+## TODO
 # FIX:
 - Dashboard sidebar is not visibile in mobile formats. Can be fixed with hide/show button, as shown in https://bootstrapious.com/p/bootstrap-sidebar
 
