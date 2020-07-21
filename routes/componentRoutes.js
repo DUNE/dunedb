@@ -257,7 +257,25 @@ router.get('/components/type/:type',permissions.checkPermission("components:view
         var type = decodeURIComponent(req.params.type);
         var components = await Components.listAllOfType(type);
         console.log(components);
-        res.render("components.pug",{components,type});
+        res.render("components.pug",{components,title:"Components of type <"+type+">"});
 
   });
 
+// Search form.
+router.get('/components/search',permissions.checkPermission("components:view"),
+  async function(req,res,next) {
+    // Query is of:
+    // search=<full text search
+    // type=<exact match of type name>
+    // etc.
+
+    var match = {...req.query};
+    delete match.search;
+    var searchterms = null
+    if(req.query.search) searchterms = decodeURIComponent(req.query.search);
+    console.log("/components/search",searchterms,match);
+    var components = await Components.search(searchterms,match);
+    console.log(components);
+    res.render("components.pug",{components,title:"Search results"});
+
+  });

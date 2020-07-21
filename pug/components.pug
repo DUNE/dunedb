@@ -8,11 +8,7 @@ block vars
 block content
   /// List of components
   
-  p.h3 Components
-    if(type)
-        |
-        | of type 
-        i #{type}
+  p.h3=title||"Components"
 
   table.table
     thead
@@ -21,6 +17,7 @@ block content
         th UUID
         th Created
         th Last Updated
+
     tbody
     each component in components
       -var uuid=MUUID.from(component.componentUuid).toString();
@@ -33,5 +30,6 @@ block content
           +dateFormat(component.created)
         td
           +dateFormat(component.last_edited)
+
 
 
