@@ -1,27 +1,27 @@
 
 var gqr = null;
 
-function DrawQRCode(canvases,text,desc){
+// lowres = false means lots of error correction, 
+// lowres = true means low-res, easier to see
+function DrawQRCode(canvases,text,desc,lowres){
+  console.log("DrawQRCode",...arguments);
 	$(canvases).each(function(){
 			var canvas = this;
 			var segs = qrcodegen.QrSegment.makeSegments(text);
 
-			// var ecl = qrcodegen.QrCode.Ecc.HIGH;
-   //    var minVersion = 8; // 8; // Determines size, but adds correction bits.
+			var ecl = qrcodegen.QrCode.Ecc.HIGH;
+      var minVersion = 8; // 8; // Determines size, but adds correction bits.
 
-      var ecl = qrcodegen.QrCode.Ecc.LOW;
-			var minVersion = 1; // 8; // Determines size, but adds correction bits.
-
+     if(lowres){
+        ecl = qrcodegen.QrCode.Ecc.LOW;
+	  		minVersion = 1; // 8; // Determines size, but adds correction bits.
+      }
 			var qr = qrcodegen.QrCode.encodeSegments(segs, ecl, minVersion);
       gqr = qr;
 	    console.log(qr);
       var w = canvas.width;
       var scale = 12;//Math.Round(w/12*8);
       var border = 8; //w/12*4;
-
-      // draw to offscreen bitmap.
-      // var offscreen = document.createElement('canvas');
-      // qr.drawCanvas(scale,border,c)
 
   	// 	var scale = 8; // pixels per module
 			// var border = 8;//4; // modules
