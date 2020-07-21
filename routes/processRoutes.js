@@ -94,15 +94,34 @@ router.get("/processRecord/:processRecordId([A-Fa-f0-9]{24})", permissions.check
 });
 
 router.get("/processRecordQRs/:processRecordId([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:view"), async function(req,res){
+  try{
     var result = await Processes.retrieve(req.params.processRecordId);
+
     var promises = [];
     for(var thing of result.created) {
-      if(thing.recordType="component") {
+      if(thing.recordType=="component") {
         promises.push(Components.retrieveComponent(thing.componentUuid));
       }
     }
     var components = await Promise.all(promises);
     res.render("QR_sheet.pug",{result, components});
+  } catch(err) {
+    console.error(err);
+    return res.status(400).send(err.toString());
+  }
+    // console.log("process----");
+    // console.log(result);
+    // var components = [];
+    // for(var thing of result.created) {
+    //   if(thing.recordType==="component") 
+    //     try {
+    //       components.push(await Components.retrieveComponent(thing.componentUuid));
+    //     } catch(e) {
+
+    //         console.error(e);
+    //         return res.status(400).send("Could not look up "+thing.componentUuid);
+    //     }
+    // }
 });
 
 
