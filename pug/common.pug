@@ -96,3 +96,22 @@ mixin createdFrom(created_from)
           br
           a(href='/'+created_from.inputRecordType+'/'+created_from.inputRecordId.toString()) Input Record
 
+
+
+mixin qr-panel(text,desc)
+  div.qr&attributes(attributes)
+    .qr-label.qr-label-top
+      div=text
+      div=desc
+    .qr-label.qr-label-left
+      div=text
+      div=desc
+    .qr-label.qr-label-right
+      div=text
+      div=desc
+    .qr-label.qr-label-bottom
+      div=text
+      div=desc
+    .canvas-holder
+      canvas.qr-code(data-QR-text=text,data-QR-desc=desc)      
+      

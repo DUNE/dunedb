@@ -1,76 +1,68 @@
 
 extend default
 
-
-//- block navbar
-//-   a(onclick="window.print(); return false;" href='#print') Print
-
-//- block sidebar
-
+include common
 
 block vars
-   // -page_title=Label !{component.name};
+  - page_title="Label "+component.name;
 
 block extrascripts
-  script.
-     
-      $(function(){
-        function redraw(){
-          DrawQRCode($('.qr-code canvas'),'!{base_url}/!{component.componentUuid}','!{component.data.name}',
-                   !($('#lowRes').is(':checked')));
-        }
-        $('#lowRes').on('change',redraw);
-        redraw();
-      });
+  link(rel='stylesheet' href='/css/qr.css')
 
-
-
-      
-  style(type='text/css').
-    div.qr-code {
-      //- background-color: green;
-      //- border: 2px solid black;
-    }
-    div.qr-code canvas {
-      border: 8px solid green;
-      border-radius: 8px;
-      width:100%;
-      height:auto
-    }
-    article {
-     column-width: 16em;
-     column-gap: 1em;
-    }
-    .switchToggle input[type=checkbox]{height: 0; width: 0; visibility: hidden; position: absolute; }
-    .switchToggle label {cursor: pointer; text-indent: -9999px; width: 120px; max-width: 120px; height: 30px; background: #d1d1d1; display: block; border-radius: 100px; position: relative; }
-    .switchToggle label:after {content: ''; position: absolute; top: 2px; left: 2px; width: 26px; height: 26px; background: #fff; border-radius: 90px; transition: 0.3s; }
-    .switchToggle input:checked + label, .switchToggle input:checked + input + label  {background: #3e98d3; }
-    .switchToggle input + label:before, .switchToggle input + input + label:before {content: 'Small'; position: absolute; top: 5px; left: 35px; width: 90px; height: 26px; border-radius: 90px; transition: 0.3s; text-indent: 0; color: #fff; }
-    .switchToggle input:checked + label:before, .switchToggle input:checked + input + label:before {content: 'Error-safe'; position: absolute; top: 5px; left: 10px; width: 90px; height: 26px; border-radius: 90px; transition: 0.3s; text-indent: 0; color: #fff; }
-    .switchToggle input:checked + label:after, .switchToggle input:checked + input + label:after {left: calc(100% - 2px); transform: translateX(-100%); }
-    .switchToggle label:active:after {width: 60px; } 
-    .toggle-switchArea { margin: 10px 0 10px 0; }
-    .switchToggle { display: inline-block;}
 
 block allbody
-  div
+  div.noprint
     a(onclick="window.print(); return false;" href='#print') Print
     div.pull-right.switchToggle
-      input#lowRes(type="checkbox",checked="checked")
-      label.label-primary(for='lowRes')
-  .container(style='clear:both')
-    .row
-      div.col-sm-6.qr-code
-        canvas(height="700",width="700")      
-      div.col-sm-6.qr-code
-        canvas(height="700",width="700")
-    .row
-      div.col-sm-6.qr-code
-        canvas(height="700",width="700")
-      div.col-sm-6.qr-code
-       canvas(height="700",width="700")
-    .row
-      div.col-sm-6.qr-code
-        canvas(height="700",width="700")
-      div.col-sm-6.qr-code
-        canvas(height="700",width="700")
+      input#qr-error-safe(type="checkbox",checked="checked")
+      label.label-primary(for='qr-error-safe')
+  div(style='clear:both;')    
+  
+  .container
+    .row.qr-row
+      div.col-sm-6(style="border:1px solid #EEE")
+        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+      div.col-sm-6(style="border:1px solid #EEE")
+        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+    .row.qr-row
+      div.col-sm-6(style="border:1px solid #EEE")
+        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+      div.col-sm-6(style="border:1px solid #EEE")
+        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+    .row.qr-row
+      div.col-sm-6(style="border:1px solid #EEE")
+        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+      div.col-sm-6(style="border:1px solid #EEE")
+        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+
+
+    
+
+    //- div(style='width:1001px;display:flex;')
+    //-   div(style="width:500px;border:1px solid black;")
+    //-     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+    //-   div(style="width:500px;border:1px solid black;")
+    //-     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+
+    //- div(style='width:1001px;display:flex;')
+    //-   div(style="width:500px;border:1px solid black;")
+    //-     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+    //-   div(style="width:500px;border:1px solid black;")
+    //-     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+
+    //- div(style='width:1001px;display:flex;')
+    //-   div(style="width:500px;border:1px solid black;")
+    //-     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+    //-   div(style="width:500px;border:1px solid black;")
+    //-     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+    // .row
+    //   div.col-sm-6.qr-code
+    //     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+    //   div.col-sm-6.qr-code
+    //     +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+
+    // .row
+    //   div.col-sm-6.qr-code
+    //     canvas.qr-code(data-QR-text=base_url+'/'+component.componentUuid.toString(),data-QR-desc=component.data.name)      
+    //   div.col-sm-6.qr-code
+    //     canvas.qr-code(data-QR-text=base_url+'/'+component.componentUuid.toString(),data-QR-desc=component.data.name)      

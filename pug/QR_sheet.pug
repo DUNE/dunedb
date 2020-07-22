@@ -1,6 +1,6 @@
 
 extend default
-
+include common
 
 //- block navbar
 //-   a(onclick="window.print(); return false;" href='#print') Print
@@ -9,42 +9,23 @@ extend default
 
 
 block vars
-   // -page_title=Label !{component.name};
-
-block extrascripts
-  script.
-     
-      $(function(){
-        $('canvas').each(function(){
-          DrawQRCode($(this),$(this).data("text"),$(this).data("desc"));
-        });
-      });
-      
-  style(type='text/css').
-    div.qr-code {
-      //- background-color: green;
-      border: 2px solid black;
-    }
-    div.qr-code canvas {
-      border: 8px solid green;
-      border-radius: 8px;
-      width:100%;
-      height:auto
-    }
-    article {
-     column-width: 16em;
-     column-gap: 1em;
-    }
+  - var page_title="Contact sheet from processing";
 
 block allbody
-  a(onclick="window.print(); return false;" href='#print') Print
-    .container
-      -for(var i=0;i<components.length;i+=2) {
-        .row
-          -for(var j=i; j<i+2; j++) {
-            if(components[j])
-              div.col-sm-6.qr-code
-                canvas(height="700",width="700",data-text=base_url+"/"+components[j].componentUuid.toString(),data-desc=components[j].type+' '+components[j].name)
-          -}
-      
-      -}
+  div.noprint
+    a(onclick="window.print(); return false;" href='#print') Print
+    div.pull-right.switchToggle
+      input#qr-error-safe(type="checkbox",checked="checked")
+      label.label-primary(for='qr-error-safe')
+  div(style='clear:both;')    
+  
+  .container
+    -for(var i=0;i<components.length;i+=2) {
+      .row.qr-row
+        -for(var j=i; j<i+2; j++) {
+          if(components[j])
+            div.col-sm-6(style="border:1px solid #EEE")
+              +qr-panel(base_url+'/'+components[j].componentUuid.toString(),components[j].data.name)
+        -}
+    
+    -}

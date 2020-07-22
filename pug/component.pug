@@ -35,17 +35,8 @@ block extrascripts
         form.nosubmit = true; // Use the beforeSubmit hook.
 
         // Change the url to match
-
-        DrawQRCode($('#qrcode-canvas').get(0),base_url+componentUuid,component.data.name);      
       }
 
-  style.
-    div#qr-code canvas {
-      border: 8px solid green;
-      border-radius: 8px;
-      width:100%;
-      height:auto
-    }
 
 block content
   .container-fluid
@@ -81,8 +72,9 @@ block content
 
     .row
       div#qr-code.col-md-4
-        canvas#qrcode-canvas
-        +label-link
+        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+        
+      +label-link
     .row
       .column
         h4 Tests Performed
