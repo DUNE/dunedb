@@ -3,6 +3,7 @@ $(function(){
   $('#qr-error-safe').on("change",DrawQRCodes);
   ResizeQrText();
   $( window ).resize(ResizeQrText);
+
 })
  
 
