@@ -2,6 +2,10 @@
 mixin dateFormat(date)
     span.date(data-date=date)=moment(date).format('MMM DD YYYY h:mm a')
 
+mixin dateFormatAndAgo(date)
+    span.date(data-date=date)=moment(date).format('MMM DD YYYY h:mm a')
+      =" ("+moment(date).fromNow()+")"
+
 mixin find-a-component
     script(type='text/javascript' src='js/search')
     form#component-full-text-search(method="get",action='/component-search')
@@ -83,7 +87,8 @@ mixin short_user(user)
   if (!user)
     span anonymous
   else
-    a(href='mailto:'+user_email(user))=user.displayName||user_email(user)
+    //- a(href='mailto:'+user_email(user))=user.displayName||user_email(user)
+    a(href='/profile/'+encodeURIComponent(user.user_id))=user.displayName||user_email(user)
 
 
 

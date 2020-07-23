@@ -23,5 +23,12 @@ var manager = new ManagementClient({
 
 router.get('/profile/:userId',permissions.checkPermission("tests:view"),
   async function(req,res,next) {
-
+    var user_id = decodeURIComponent(req.params.userId);
+    console.log("looking up",user_id);
+    console.log(await manager.getUserRoles({id:user_id}))
+    var user = await manager.getUser({id:user_id});
+    if(Array.isArray(user)) return res.status(400).send("More than one user matched");
+    if(!user)return res.status(400).send("No user with that ID");
+   // console.log(user);
+   res.render("user.pug",{user});
 });

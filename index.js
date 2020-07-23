@@ -138,7 +138,7 @@ require('./lib/auth.js')(app);
 
 app.get('/user', permissions.ensureAuthenticated, function (req, res, next) {
   const { _raw, _json, ...userProfile } = req.user;
-  res.render('user.pug', {
+  res.render('current_user.pug', {
     userProfile: JSON.stringify(userProfile, null, 2),
     title: 'Profile page'
   });
@@ -180,7 +180,7 @@ app.use(require("./routes/testRoutes.js"));
 app.use(require("./routes/workflowRoutes.js"));
 app.use(require("./routes/jobRoutes.js"));
 app.use(require("./routes/processRoutes.js"));
-//app.use(require("./routes/userRoutes.js"));
+app.use(require("./routes/userRoutes.js"));
 
 app.use('/file',require('./routes/files.js'));
 app.use('/autocomplete',require("./routes/autocomplete.js"));

@@ -1,11 +1,6 @@
 # Notes
 
 
-## TODO
-- provide Pam with some sample QR files for both high-res and low-res
-- about 1cm square
-
-- Nikola and Mark
 
 
 ## TODO
@@ -29,18 +24,12 @@
 - Add tags to test and workflows
 - For tests, valid tags should include component types
 
-# Backend:
-- Break the Component form into multiple subforms for convenience when editing.  -> done
--  This will also make it easier to allow auto-generated schema for new component types.
-- But this means I'll have to change schema so that data.type is no longer used, just a root-level type. This shouldn't be a problem; v4 schema already requires it. ->done
 
-# Feature:
-- Attempt Component form auto-creation (Do this after I've split the component forms)
 
 
 # Feature:
 - Search for components
-		- UI
+		- UI  -first pass done
 		- API
 
 
@@ -76,10 +65,20 @@
 
 ## Some Finished to-do items:
 # Feature:
-	- Print out 'contact sheet' of QR codes for all the newly created ones in a Process 
+- Print out 'contact sheet' of QR codes for all the newly created ones in a Process 
 	DONE  July 14
+
 # Feature:
-	- Load last test's data into new test, to save time (button)
+- Load last test's data into new test, to save time (button)
 	DONE  July 14
+
 # Feature:
-	- Try to better translate Workflow Form components into output Test Form components when auto-generating the Tests DONE July 15
+- Try to better translate Workflow Form components into output Test Form components when auto-generating the Tests DONE July 15
+
+# Backend:
+- Break the Component form into multiple subforms for convenience when editing.  -> done
+-  This will also make it easier to allow auto-generated schema for new component types.
+- But this means I'll have to change schema so that data.type is no longer used, just a root-level type. This shouldn't be a problem; v4 schema already requires it. ->done
+
+# Feature:
+- Attempt Component form auto-creation (Do this after I've split the component forms) -> Done
