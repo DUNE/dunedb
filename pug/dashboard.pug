@@ -13,7 +13,7 @@ head
     //- link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css')
     link(rel='icon' type='image/png' href='/images/Otterbein.png')
 
-    link(rel='stylesheet' href='/css/dashboard.css')
+    link(rel='stylesheet' href='/css/dashboard-2.css')
     link(rel='stylesheet' href='/css/custom.scss')
     link(rel='stylesheet' href='/css/local.css')
     link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
@@ -35,6 +35,12 @@ head
         .on('keyup',function(){
           if (event.key === "Enter") executeASearch($(this).val());
         });
+
+
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar').toggle();
+        });
+
       });
 
 mixin navlink
@@ -48,7 +54,11 @@ mixin navlink
 body
   block allbody
     block navbar
-      nav.navbar.navbar-dark.fixed-top.bg-dark.flex-md-nowrap.p-0.shadow
+      nav.navbar.navbar-dark.bg-dark.flex-nowrap.p-0.shadow
+        button#sidebarCollapse.btn-btn-info(type="button")
+          i.fa.fa-align-left
+          //- span sidebar
+
         a.navbar-brand.col-sm-3.col-md-2.mr-0(href='/') Sietch 
         input.form-control.form-control-dark#navbar-search(type='search' placeholder='Search for a component' aria-label='Search')
         if locals.user
@@ -63,95 +73,70 @@ body
               .nav-item.text-nowrap
                 +navlink(href="/login") Log In / Sign Up
 
-    .container-fluid
-      .row
-        block sidebar
-            nav.col-md-2.d-none.d-md-block.bg-light.sidebar
-              .sidebar-sticky
-                ul.nav.flex-column
+    .wrapper
+      block sidebar
+        nav#sidebar.bg-light(class=(route==="/"?"sidebar-on-main-page":""))
+            ul.nav.flex-column
 
-                  li.nav-item
-                    +navlink(href='/components/type')
-                      i.fa.fa-puzzle-piece("aria-hidden"="true")
-                      | Components
+              li.nav-item
+                +navlink(href='/components/type')
+                  i.fa.fa-puzzle-piece("aria-hidden"="true")
+                  | Components
 
-                    //- ul.nav.flex-column.ml-3.sub-bar
-                    //-     if(user && user.permissions.includes("components:create"))
-                    //-       li.nav-item
-                    //-         +navlink(href='/NewComponent')
-                    //-           |      Register new
-                    //-     if(user && user.permissions.includes("forms:edit"))
-                    //-       li.nav-item
-                    //-         +navlink(href='/EditComponentForm')
-                    //-           |      Edit form
+                //- ul.nav.flex-column.ml-3.sub-bar
+                //-     if(user && user.permissions.includes("components:create"))
+                //-       li.nav-item
+                //-         +navlink(href='/NewComponent')
+                //-           |      Register new
+                //-     if(user && user.permissions.includes("forms:edit"))
+                //-       li.nav-item
+                //-         +navlink(href='/EditComponentForm')
+                //-           |      Edit form
 
 
-                  li.nav-item
-                    +navlink(href='/testForms')
-                      i.fa.fa-flask("aria-hidden"="true")
-                      | Tests
+              li.nav-item
+                +navlink(href='/testForms')
+                  i.fa.fa-flask("aria-hidden"="true")
+                  | Tests
 
-                    ul.nav.flex-column.ml-3.sub-bar
-                        li.nav-item
-                          +navlink(href='/tests')
-                            |      Recent
-             
-
-
-                  li.nav-item
-                    +navlink(href='/workflows')
-                      i.fa.fa-list-ol("aria-hidden"="true")
-                      | Workflows
-                   
-                    ul.nav.flex-column.ml-3.sub-bar
-                        li.nav-item
-                          +navlink(href='/jobs')
-                            |      Recent
-             
+                ul.nav.flex-column.ml-3.sub-bar
+                    li.nav-item
+                      +navlink(href='/tests')
+                        |      Recent
+         
 
 
-                  li.nav-item
-                    +navlink(href='/drafts')
-                      i.fa.fa-pencil("aria-hidden"="true")
-                      | My Drafts
+              li.nav-item
+                +navlink(href='/workflows')
+                  i.fa.fa-list-ol("aria-hidden"="true")
+                  | Workflows
+               
+                ul.nav.flex-column.ml-3.sub-bar
+                    li.nav-item
+                      +navlink(href='/jobs')
+                        |      Recent
+         
 
-                  //- li.nav-item
-                  //-   +navlink(href='#')
-                  //-     | My recent submissions
-                  //-     | mine/others
+
+              li.nav-item
+                +navlink(href='/drafts')
+                  i.fa.fa-pencil("aria-hidden"="true")
+                  | My Drafts
 
 
-                //- h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-                //-   span Admin
-                //-   //- a.d-flex.align-items-center.text-muted(href='#')
-                //-   //-   span(data-feather='plus-circle')
-                //- ul.nav.flex-column.mb-2
-                //-   li.nav-item
-                //-     +navlink(href='#')
-                //-       span(data-feather='file-text')
-                //-       |                   Edit Component Forms
-                //-   li.nav-item
-                //-     +navlink(href='#')
-                //-       span(data-feather='file-text')
-                //-       |                   Edit Test Forms
-                //-   li.nav-item
-                //-     +navlink(href='#')
-                //-       span(data-feather='file-text')
-                //-       |                   Edit Workflow Forms
+            h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
+              span Documentation
+              //- a.d-flex.align-items-center.text-muted(href='#')
+              //-   span(data-feather='plus-circle')
+            ul.nav.flex-column.mb-2
+              li.nav-item
+                +navlink(href='/docs/') All Documentation
+              li.nav-item
+                +navlink(href='/docs/README.md') README
+                +navlink(href='/docs/notes.md') Working notes and To-Do list 
 
-                h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-                  span Documentation
-                  //- a.d-flex.align-items-center.text-muted(href='#')
-                  //-   span(data-feather='plus-circle')
-                ul.nav.flex-column.mb-2
-                  li.nav-item
-                    +navlink(href='/docs/') All Documentation
-                  li.nav-item
-                    +navlink(href='/docs/README.md') README
-                    +navlink(href='/docs/notes.md') Working notes and To-Do list 
-
-        main.col-md-9.ml-sm-auto.col-lg-10.px-4(role='main')
-          block content 
+      #content
+            block content 
 
 
 //
