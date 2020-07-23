@@ -8,3 +8,5 @@ api2_config.json
 local/
 config*.js
 sietch_dev
+static/css/local.css
+pm2*.config.js
