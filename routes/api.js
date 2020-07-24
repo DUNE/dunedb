@@ -102,15 +102,27 @@ router.get('/componentTypes', permissions.checkPermissionJson('components:view')
   }
 );
 
+
+
 ////////////////////////////////////////////////////////
 // Forms
 
+// API/Backend: Get a list of form schema
+router.get('/:collection(testForms|componentForms|jobForms)', permissions.checkPermissionJson('forms:view'), 
+  async function(req,res,next){
+    try {
+      var list = await Forms.getListOfForms(req.params.collection)
+      res.json(list);
+    }catch(err) {
+      res.status(400).json({error:err.toString()})
+    } 
+  });
 
 // API/Backend: Get a form schema
 
-router.get('/:collection(testForms|componentForm|jobForms)/:formId', permissions.checkPermissionJson('forms:view'), 
+router.get('/:collection(testForms|componentForms|jobForms)/:formId', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
-    if(req.params.collection == 'componentForm') Cache.invalidate('componentTypes');  
+    if(req.params.collection == 'componentForms') Cache.invalidate('componentTypes');  
 
     var rec = await Forms.retrieve(req.params.collection,req.params.formId);
     // if(!rec) return res.status(404).send("No such form exists");
@@ -122,7 +134,7 @@ router.get('/:collection(testForms|componentForm|jobForms)/:formId', permissions
 
 
 // API/Backend: Update a form schema.
-router.post('/:collection(testForms|componentForm|jobForms)/:formId', permissions.checkPermissionJson('forms:edit'), 
+router.post('/:collection(testForms|componentForms|jobForms)/:formId', permissions.checkPermissionJson('forms:edit'), 
   async function(req,res,next){
     console.log(chalk.blue("Schema submission","/json/"+req.params.collection));
 
@@ -221,4 +233,39 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
   }
 });
 
+
+// searching via POST parameters
+router.post("/search/:recordType(component|job|test)/:formId",  permissions.checkPermissionJson('tests:view'), 
+  async function retrieve_test_data(req,res,next) {
+  try {
+    var formId = decodeURIComponent(req.params.formId);
+    console.log("search request",req.params,req.body);
+    var searchterms = null;
+    var matchobj = {...req.body};
+    if(req.query.search) searchterms = decodeURIComponent(req.query.search);
+
+    if(req.params.recordType === 'component') {
+      matchobj.type = decodeURIComponent(formId);
+      var result = await Components.search(searchterms,req.body);
+      console.log("result",result);
+      return res.json(result,null,2);
+    }
+    if(req.params.recordType === 'test') {
+      matchobj.formId = decodeURIComponent(formId);
+      var result = await Tests.search(searchterms,req.body);
+      console.log("result",result);
+      return res.json(result,null,2);
+    }
+    if(req.params.recordType === 'job') {
+      matchobj.formId = decodeURIComponent(formId);
+      var result = await Jobs.search(searchterms,req.body);
+      console.log("result",result);
+      return res.json(result,null,2);
+    }
+
+  } catch(err) {
+    console.log(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+});
 

@@ -10,6 +10,7 @@ body {
 }
 
 #sidebar {
+    flex:; 0 0 120px;
     min-width: 160px;
     max-width: 160px;
     min-height: 100vh;
@@ -52,6 +53,11 @@ body {
   text-transform: uppercase;
 }
 
+
+#content {
+  width:100%;
+  padding-left: 5px;
+}
 
 
 /* for small screens, flip this meaning, so it's invisible */

@@ -4,8 +4,10 @@
 
 
 ## TODO
-# FIX:
-- Dashboard sidebar is not visibile in mobile formats. Can be fixed with hide/show button, as shown in https://bootstrapious.com/p/bootstrap-sidebar
+# Feature: icons
+- Add an icon upload on each form page (comp,test,workfow)
+  - Sensible max size
+  - Keep a Cache of these files in memory, resizing to sensible if needed?  But then how to serve?
 
 # Features: searching
 - Look at full text search of components and workflows
@@ -74,6 +76,9 @@
 
 # Feature:
 - Try to better translate Workflow Form components into output Test Form components when auto-generating the Tests DONE July 15
+
+# FIX:
+- Dashboard sidebar is not visibile in mobile formats. Can be fixed with hide/show button, as shown in https://bootstrapious.com/p/bootstrap-sidebar -> DONE!  That site not useful, went with something more straightforward. July 23 20
 
 # Backend:
 - Break the Component form into multiple subforms for convenience when editing.  -> done

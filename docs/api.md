@@ -101,7 +101,7 @@ This retrieves the current Formio.js record that describes the schema (i.e. what
 
 There are three different collection accessible, e.g.
 ```
-  /api/componentForm/componentForm
+  /api/componentForms/component_type
   /api/testForms/test_one_id
   /api/jobForms/workflow_two_id
 ```
@@ -116,7 +116,7 @@ TODO: allow ondate, version, and rollback via query parameters
 
 Required permissions: "forms:edit"
 
-This creates a new form, or updates an existing one. The `collection` parameter must be one of `componentForm`, `testForms`, or `jobForms`.  The `test_id` parameter identifies the form.
+This creates a new form, or updates an existing one. The `collection` parameter must be one of `componentForms`, `testForms`, or `jobForms`.  The `test_id` parameter identifies the form.
 
 The record should exist as follows:
 ```

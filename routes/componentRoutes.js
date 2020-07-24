@@ -29,7 +29,7 @@ async function get_component(req,res) {
     if(!component) return res.status(400).send("No such component ID ",req.params.uuid);
     // get other data in one go
     let [componentform, forms, tests] = await Promise.all([
-        Forms.retrieve("componentForm",component.type),
+        Forms.retrieve("componentForms",component.type),
         Forms.getListOfForms(),
         Tests.listComponentTests(componentUuid)
       ]);
@@ -39,7 +39,7 @@ async function get_component(req,res) {
     // console.log(component);
     // console.log("tests");
     // console.log(tests);
-    // console.log('componentForm');
+    // console.log('componentForms');
     // console.log(componentform);
     res.render("component.pug",{
       schema: componentform.schema,
@@ -56,6 +56,8 @@ async function get_component(req,res) {
 }
 router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
 router.get('/'+utils.short_uuregex, permissions.checkPermission("components:view"), get_component);
+router.get('/component/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
+router.get('/component/'+utils.short_uuregex, permissions.checkPermission("components:view"), get_component);
 
 
 
@@ -74,13 +76,13 @@ router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("componen
 
   // get form and data in one go
   let [form, component] = await Promise.all([
-      Forms.retrieve("componentForm","componentForm"),
+      Forms.retrieve("componentForms","componentForms"),
       Components.retrieveComponent(componentUuid,date),
     ]);
 
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieve("componentForm","componentForm");
+  // var form = await Forms.retrieve("componentForms","componentForms");
   console.log("component")
   console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
@@ -100,13 +102,13 @@ async function edit_component(req,res) {
   console.log(get_component,componentUuid,req.params);
 
   var component = await Components.retrieveComponent(componentUuid);
-  var form =      await Forms.retrieve("componentForm",component.type);
+  var form =      await Forms.retrieve("componentForms",component.type);
 
   var performed={};
 
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieve("componentForm","componentForm");
+  // var form = await Forms.retrieve("componentForms","componentForms");
   console.log("component")
   console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
@@ -144,7 +146,7 @@ router.get("/NewComponent/:type", permissions.checkPermission("components:create
   // middlewareCheckDataEntryPrivs,
    async function(req,res){
     var type = decodeURIComponent(req.params.type);
-    var form = await Forms.retrieve("componentForm",type);
+    var form = await Forms.retrieve("componentForms",type);
     if(!form) res.status(400).send("No such type ",type)
     // roll a new UUID.
 
@@ -163,7 +165,7 @@ router.get("/NewComponent/:type", permissions.checkPermission("components:create
 // Edit component forms
 var automaticallyCreateSchema =  require('../lib/automaticallyCreateSchema.js');
 async function ensureTypeFormExists(type,req,res) {
-  var form = await Forms.retrieve("componentForm",type);
+  var form = await Forms.retrieve("componentForms",type);
   // if(form) return res.redirect("/EditComponentForm/:type");  // done!
 
 
@@ -204,7 +206,7 @@ async function ensureTypeFormExists(type,req,res) {
       console.log(chalk.red("Creating a new blank form"))
 
     }
-    await Forms.save(newform,"componentForm",req);
+    await Forms.save(newform,"componentForms",req);
   }
 }
 
@@ -212,7 +214,7 @@ async function ensureTypeFormExists(type,req,res) {
 router.get("/EditComponentForm/:type", permissions.checkPermission("forms:edit"), async function(req,res){
   var type = decodeURIComponent(req.params.type);
   await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
-  res.render('EditComponentForm.pug',{collection:"componentForm",formId:type});
+  res.render('EditComponentForm.pug',{collection:"componentForms",formId:type});
 });
 
 router.get("/NewComponentType/:type", permissions.checkPermission("forms:edit"), async function(req,res){
@@ -220,7 +222,7 @@ router.get("/NewComponentType/:type", permissions.checkPermission("forms:edit"),
     var type = decodeURIComponent(req.params.type);
     await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
 
-    res.render('EditComponentForm.pug',{collection:"componentForm",formId:type});
+    res.render('EditComponentForm.pug',{collection:"componentForms",formId:type});
   } catch (err) {
     console.log(err);
     res.status(400).send(err.toString());
@@ -239,7 +241,7 @@ router.get('/components/type',permissions.checkPermission("components:view"),
         var types = await Components.getTypes();
 
         // Add onto it any form types that exist, but haven't created objects yet.
-        var forms = {...await Forms.getListOfForms('componentForm')};
+        var forms = {...await Forms.getListOfForms('componentForms')};
         for(var existingType of types) {
           if(delete forms[existingType.type]);
         }
@@ -278,4 +280,10 @@ router.get('/components/search',permissions.checkPermission("components:view"),
     console.log(components);
     res.render("components.pug",{components,title:"Search results"});
 
-  });
+});
+
+//  FIXME WIP
+router.get('/search/:recordType?/:formId?',permissions.checkPermission("components:view"),
+ async function(req,res,next) {
+    res.render("searchForm.pug",{recordType:req.params.recordType,formId:decodeURIComponent(req.params.formId)});
+});

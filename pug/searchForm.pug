@@ -1,0 +1,31 @@
+extend default
+
+
+block vars
+  - var page_title=Search;
+
+block extrascripts
+  script(type='text/javascript',src='/js/search.js')
+  style.
+    .hidden{ display: none }
+ 
+
+block content
+
+  .container-fluid
+    .row
+      .col-md-6
+        p Select type of record
+         select.form-control#recordTypeSelect
+            option(value='')
+            option(value='component') Component
+            option(value='test')      Test
+            option(value='job')       Job/Workflow
+
+        p 
+          select.form-control.hidden#typeSelect
+        #builtform.hidden
+      .col-md-6
+        pre#dump
+        #results
+
