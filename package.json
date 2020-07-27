@@ -2,6 +2,7 @@
   "name": "sietch",
   "version": "1.0.0",
   "description": "Dune Database",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@formio/contrib": "git+https://github.com/nathanieltagg/sietch-formio-components.git",
+    "@jsonurl/jsonurl": "^1.0.1",
     "auth0": "^2.27.0",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.5.0",
