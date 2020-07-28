@@ -98,6 +98,7 @@ app.use(express.static(__dirname + '/static'));
 
 // Parse incoming JSON. Disallow things more than 10 MB
 app.use(bodyParser.json({ limit:'10000kb'}));
+app.use(bodyParser.urlencoded({ extended: true })); 
 
 
 let moment = require('moment');
@@ -109,6 +110,7 @@ app.use(function(req,res,next){
   res.locals.route = req.originalUrl;
   res.locals.base_url = global.config.my_url;
   res.locals.deployment = global.config.deployment;
+  res.locals.permissions = require("./lib/permissions.js");
   next(); 
 }); // moment.js in pug
 

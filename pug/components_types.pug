@@ -22,16 +22,16 @@ block content
 
             td=ob.count
 
-            if(user && user.permissions.includes("components:create"))
+            if(permissions.userHas(user,"components:create"))
               td
                 a(href='/NewComponent/'+ob.type).btn.btn-outline-info Register a new component
 
-            if(user && user.permissions.includes("forms:edit"))
+            if(permissions.userHas(user,"forms:edit"))
               td
                 a(href='/EditComponentForm/'+ob.type).btn.btn-outline-warning Edit Component Form
 
 
-  if(user && user.permissions.includes("forms:edit"))
+  if(permissions.userHas(user,"forms:edit"))
     a.NewComponentType.btn.btn-outline-primary(href='#', data-toggle="modal" data-target="#NewComponentTypeModal") Create New Component Type
     #NewComponentTypeModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewComponentTypeLabel' aria-hidden='true')
       .modal-dialog(role="document")

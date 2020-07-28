@@ -16,9 +16,8 @@
 ## TODO
 
 # Feature: tidy up production site
-- Remove 'toy' things.  
-
-- Add front page and css files that are specific to site, including link to dev site. Use a global variable available to pug and global.config. 
+- Remove 'toy' things.  -> Largely done. Some forms remain.
+- Add front page and css files that are specific to site, including link to dev site. Use a global variable available to pug and global.config.  ->Done.
 
 - Think about permissions for devsite being different - how? - change the permissions code to prefix 'dev:' to all permissons questions.  Grant `dev:*` to all user accounts
 
@@ -54,6 +53,7 @@
 # Feature:
 - Add tags to test and workflows
 - For tests, valid tags should include component types
+- Have a 'mothball' or 'trash' type so it doesn't show up.
 
 
 

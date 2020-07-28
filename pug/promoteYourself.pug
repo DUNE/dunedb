@@ -1,0 +1,37 @@
+extend default
+include common
+
+block vars
+  - var page_title="Promote yourself";
+
+    
+
+block content
+  h1.h1 Promote Yourself
+  .container-fluid
+    .row
+      .col
+        p This page allows you to grant yourself more access too Sietch.
+        p Talk to your supervisor to gain access.
+
+        if(deployment=="devsite")
+          p To become a full admin on this development server, use the DUNE DocDB username and password.
+        else
+          p Hints: tester access is the same as the generic DocDB DUNE username and password.
+          p Admin access password is granted by Nathaniel.
+
+        form(method="POST")
+          p
+            label(for="#user") User
+            input.form-control#user(name="user",type="text")
+
+          p 
+            label(for="#password") Password
+            input.form-control#password(name="password",type="password")
+
+          p 
+            input.btn.btn-info#submit(type="submit")
+
+        if(message)
+          .alert.alert-danger=message
+

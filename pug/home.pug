@@ -32,3 +32,10 @@ block content
       | .
 
 
+  if(user) 
+    p You are logged in as #{user.displayName} and have roles:
+      pre #{user.roles.join(', ')}
+    p If you know the right secrets, you can 
+      |
+      a(href="/promoteYourself") promote yourself
+      |.
