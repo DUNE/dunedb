@@ -77,6 +77,7 @@ glob(__dirname+'/node_modules/*/dist',
 // add some static routes to libraries explicity..
 app.use('/dist/fabric-history',express.static(__dirname+'/node_modules/fabric-history/src'));
 app.use('/dist/moment',express.static(__dirname+'/node_modules/moment/min'));
+app.use('/dist/jsonurl',express.static(__dirname+'/node_modules/@jsonurl/jsonurl/dist'));
 
 
 // CSS precompiler. needs to come before /static call
@@ -180,6 +181,8 @@ app.use(require("./routes/testRoutes.js"));
 app.use(require("./routes/workflowRoutes.js"));
 app.use(require("./routes/jobRoutes.js"));
 app.use(require("./routes/processRoutes.js"));
+app.use(require('./routes/searchRoutes.js'));
+
 app.use(require("./routes/userRoutes.js"));
 
 app.use('/file',require('./routes/files.js'));

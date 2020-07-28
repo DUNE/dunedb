@@ -5,13 +5,27 @@ block vars
   - var page_title=Search;
 
 block extrascripts
+  script.
+   var recordType, formId;
+  if recordType
+    script recordType = !{JSON.stringify(recordType)}
+  if formId
+    script formId = !{JSON.stringify(formId)}
+    
+  script(type='text/javascript',src='/dist/jsonurl/jsonurl.min.js')
   script(type='text/javascript',src='/js/search.js')
+
   style.
-    .hidden{ display: none }
- 
+    #builtform {
+      border: solid green 2px;
+      padding:5px;
+    } 
+    .hidden {
+      display:none;
+    }
 
 block content
-
+  h1.h1 Advanced Search
   .container-fluid
     .row
       .col-md-6
@@ -22,10 +36,38 @@ block content
             option(value='test')      Test
             option(value='job')       Job/Workflow
 
+        p Select type or form
+          select.form-control#typeSelect
+        
+        p
+          label(for='textSearchInput') Text search:
+          input.search-on-change.form-control#textSearchInput(type='text')
+
+        p Inserted or modified after
+          .input-group.set-up-datepicker
+            input.search-on-change.form-control#insertionAfter(type='text',placeholder="<Beginning of time>", data-input=1)
+            .input-group-append
+              a.input-group-text(data-toggle=1)
+                i.fa.fa-calendar
+              a.input-group-text(data-clear=1)
+                i.fa.fa-close
+
+        p Inserted or modified before
+          .input-group.set-up-datepicker
+            input.search-on-change.form-control#insertionBefore(type='text',placeholder="<End of time>", data-input=1)
+            .input-group-append
+              a.input-group-text(data-toggle=1)
+                i.fa.fa-calendar
+              a.input-group-text(data-clear=1)
+                i.fa.fa-close
+
+        p Specific data. Exact match only.
+          #builtform
+
         p 
-          select.form-control.hidden#typeSelect
-        #builtform.hidden
       .col-md-6
+        h3 Results
+        ul#results
+        pre#search-query
         pre#dump
-        #results
 

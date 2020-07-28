@@ -16,9 +16,9 @@ var manager = new ManagementClient({
   scope: 'read:users update:users'
 });
 
-(async function(){
-  console.log(await manager.getUsersByEmail('ntagg@otterbein.edu'))
-})();
+// (async function(){
+//   console.log(await manager.getUsersByEmail('ntagg@otterbein.edu'))
+// })();
 
 
 router.get('/profile/:userId',permissions.checkPermission("tests:view"),

@@ -263,27 +263,6 @@ router.get('/components/type/:type',permissions.checkPermission("components:view
 
   });
 
-// Search form.
-router.get('/components/search',permissions.checkPermission("components:view"),
-  async function(req,res,next) {
-    // Query is of:
-    // search=<full text search
-    // type=<exact match of type name>
-    // etc.
 
-    var match = {...req.query};
-    delete match.search;
-    var searchterms = null
-    if(req.query.search) searchterms = decodeURIComponent(req.query.search);
-    console.log("/components/search",searchterms,match);
-    var components = await Components.search(searchterms,match);
-    console.log(components);
-    res.render("components.pug",{components,title:"Search results"});
 
-});
 
-//  FIXME WIP
-router.get('/search/:recordType?/:formId?',permissions.checkPermission("components:view"),
- async function(req,res,next) {
-    res.render("searchForm.pug",{recordType:req.params.recordType,formId:decodeURIComponent(req.params.formId)});
-});

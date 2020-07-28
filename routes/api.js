@@ -235,30 +235,47 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 
 
 // searching via POST parameters
-router.post("/search/:recordType(component|job|test)/:formId",  permissions.checkPermissionJson('tests:view'), 
+// 
+// /search/<recordType>/<type>?search=<textsearch>&insertAfter=<date>&insertBefore=<date>
+router.post("/search/:recordType(component|job|test)/:formId?",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
-    var formId = decodeURIComponent(req.params.formId);
     console.log("search request",req.params,req.body);
     var searchterms = null;
     var matchobj = {...req.body};
-    if(req.query.search) searchterms = decodeURIComponent(req.query.search);
+    var formId = null;
+    if(req.params.formId) formId = decodeURIComponent(req.params.formId);
+
+    if(matchobj.search) {
+      searchterms = decodeURIComponent(matchobj.search);
+      delete matchobj.search;
+    }
+    if(matchobj.insertionAfter) {
+      matchobj["insertion.insertDate"] = {...matchobj["insertion.insertDate"],$gte: new Date(matchobj.insertionAfter)};
+      delete matchobj.insertionAfter;
+    }
+    if(matchobj.insertionBefore) {
+      matchobj["insertion.insertDate"] = {...matchobj["insertion.insertDate"],$lte: new Date(matchobj.insertionBefore)};
+      delete matchobj.insertionBefore;
+    }
+
 
     if(req.params.recordType === 'component') {
-      matchobj.type = decodeURIComponent(formId);
-      var result = await Components.search(searchterms,req.body);
+      if(formId) matchobj.type = formId;
+      var result = await Components.search(searchterms,matchobj);
       console.log("result",result);
       return res.json(result,null,2);
     }
     if(req.params.recordType === 'test') {
-      matchobj.formId = decodeURIComponent(formId);
-      var result = await Tests.search(searchterms,req.body);
+      if(formId) matchobj.formId = formId;
+      console.log("matchobj",matchobj);
+      var result = await Tests.search(searchterms,matchobj);
       console.log("result",result);
       return res.json(result,null,2);
     }
     if(req.params.recordType === 'job') {
-      matchobj.formId = decodeURIComponent(formId);
-      var result = await Jobs.search(searchterms,req.body);
+      ifmatchobj.formId = formId;
+      var result = await Jobs.search(searchterms,matchobj);
       console.log("result",result);
       return res.json(result,null,2);
     }
