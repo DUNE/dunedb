@@ -1,17 +1,46 @@
 # Notes
 
+### Updates July 28 2020
+
+- User permissions system now implemented correctly 
+  - New users are assigned a starting role automatically.  Currently, that role is "all access" but that is now easily changed.
+
+- Searching now implemented.  Full-text searching, along with form-based "Advanced" search page now active.  API for searching now available too.
+
+- Reworked generation of QR codes a bit for a cleaner result, to make it easier to get just the QR code for the cutter/printer devices. Eager to hear back what will work.
+
+- User information pages now available
 
 
 
 ## TODO
+
+# Feature: tidy up production site
+- Remove 'toy' things.  
+
+- Add front page and css files that are specific to site, including link to dev site. Use a global variable available to pug and global.config. 
+
+- Think about permissions for devsite being different - how? - change the permissions code to prefix 'dev:' to all permissons questions.  Grant `dev:*` to all user accounts
+
+
+
+# Feature: track component ownership chains up-and-down with graphical interface
+- First need a data source to mimic what I want
+- Then need to build map-reduce sets to allow fast lookup
+- Then need to build a gui
+
+# Feature: allow user to self-promote based on a collaboration secret
+- Also, send email
+
 # Feature: icons
 - Add an icon upload on each form page (comp,test,workfow)
   - Sensible max size
   - Keep a Cache of these files in memory, resizing to sensible if needed?  But then how to serve?
 
 # Features: searching
-- Look at full text search of components and workflows
-- Attempt to pull up a version of the form and allow partial entries with auto-lookup.
+- Look at full text search of components and workflows DONE July 27 v 4.4
+- Attempt to pull up a version of the form and allow partial entries with auto-lookup. DONE July 27 v 4.4
+- Document API
 
 # Features: authentication and authorization
 - Deal with user roles and permissions correctly

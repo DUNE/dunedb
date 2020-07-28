@@ -6,11 +6,29 @@ block vars
   - var page_title="Sietch Dashboard";
 
 block content
+  if deployment == "laptop"
+    .alert.alert-warning
+      p This is Sietch running on your laptop. 
+      p Hi, and welcome to the production team!  Great to have you!
+      p --Nathaniel ntagg@otterbein.edu
 
-    p Welcome to Sietch
+  if deployment == "devsite"
+    .alert.alert-danger
+      p This is the Sietch development site
 
-    p This is desgined as the APA production QA/QC/Hardware database.
+      p All users have complete access to everything.
 
-    p The menus on the left are used for finding components, tests done on components, or jobs done via workflows.
+      p Feel free to create component types, components, forms, and workflows freely.
+
+      p If you create any content on here you wish moved to the production site,
+        | talk to Nathaniel.  Otherwise, this is a free playground.
+
+    a(href='https://sietch.xyz') Production site link
+
+  if deployment == "production"
+    p.alert.alert-success This is the Sietch production APA database.
+    p If you want a playground to try things out, use the 
+      a(href="https:/dev.sietch.xyz") development site
+      | .
 
 

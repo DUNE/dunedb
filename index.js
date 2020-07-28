@@ -108,6 +108,7 @@ app.use(function(req,res,next){
   res.locals.MUUID = MUUID;
   res.locals.route = req.originalUrl;
   res.locals.base_url = global.config.my_url;
+  res.locals.deployment = global.config.deployment;
   next(); 
 }); // moment.js in pug
 

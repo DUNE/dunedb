@@ -15,7 +15,6 @@ head
 
     link(rel='stylesheet' href='/css/dashboard.css')
     link(rel='stylesheet' href='/css/custom.scss')
-    link(rel='stylesheet' href='/css/local.css')
     link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
     link(href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet")
 
@@ -51,7 +50,7 @@ mixin navlink
     a.nav-link&attributes(attributes)
       block
 
-body
+body(class="deployment-"+deployment)
   block allbody
     block navbar
       nav.navbar.navbar-dark.bg-dark.flex-nowrap.p-0.shadow
@@ -59,7 +58,13 @@ body
           i.fa.fa-align-left
           //- span sidebar
 
-        a.navbar-brand.col-sm-3.col-md-2.mr-0(href='/') Sietch 
+        a.navbar-brand.col-sm-3.col-md-2.mr-0#navbar-brand(href='/') 
+          if(deployment=='laptop')
+            | Laptop
+          else if(deployment=='devsite')
+            | SietchDev
+          else 
+            | Sietch            
         input.form-control.form-control-dark#navbar-search(type='search' placeholder='Search for a component' aria-label='Search')
         if locals.user
           .navbar-nav.px-3

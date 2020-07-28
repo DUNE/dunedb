@@ -7,13 +7,14 @@
 
 // conifig defaults:
 var defaults = {
+  deployment: 'laptop',  // laptop, devsite, or production. Passed to Pug to get templates right.
+  my_url : "http://localhost:12313/", // url of this instance
+  http_server_port: 12313, // port we're running on
+
   mongo_uri : "mongodb://localhost", // For authentication, use mongodb://user:pass@hostname
   mongo_db : "sietch_dev",	     // db name in mongo
   mongo_options: {useNewUrlParser:true, useUnifiedTopology: true, connectTimeoutMS: 100, socketTimeoutMS: 30000, reconnectTries: 30000},
-
-  my_url : "http://sietch.xyz/", // url of this instance
-  http_server_port: 12313, // port we're running on
-  https_server_port: 12314, // port we're running on
+  // https_server_port: 12314, // port we're running on
 
   localsecret: "this is a very well-kept secret", // for various local salting
 
@@ -33,6 +34,7 @@ var defaults = {
   // Permissions for people who haven't logged in
   default_permissions: ['components:view', 'tests:view', 'forms:view'],
 }
+
 
 var config;
 if(!config) config = require('deepmerge')(defaults,require('./config.js'));
