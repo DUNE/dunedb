@@ -13,7 +13,7 @@ block extrascripts
   script(type='text/javascript').
     var componentUuid = "!{componentUuid}";
     // I could do this by API query of the server, but this works for now.
-    var schema=!{JSON.stringify(schema||{})};
+    var schema=!{JSON.stringify(formrec.schema||{})};
     var component=!{JSON.stringify(component||{})};
     var base_url = "!{base_url}";
 
@@ -24,7 +24,6 @@ block extrascripts
       var shortuuid = window.ShortUUID();
 
       window.onload = async function() {
-        console.log("schema",schema);
 
         form = await Formio.createForm(document.getElementById('builtform'),schema,
         {
@@ -41,8 +40,10 @@ block extrascripts
 block content
   .container-fluid
     .row
+        if(formrec.icon && formrec.icon[0])
+          img.icon.pull-left(src=formrec.icon[0].url)
         h2#name.col-md-8
-          =component.data.type?(component.data.type + ": " + component.data.name):"New Component"
+          =component.type?(component.type + ": " + (component.data.name||"")):"New Component"
     .row 
       dl
         dt Component UUID

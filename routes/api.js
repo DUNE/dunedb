@@ -111,7 +111,7 @@ router.get('/componentTypes', permissions.checkPermissionJson('components:view')
 router.get('/:collection(testForms|componentForms|jobForms)', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
     try {
-      var list = await Forms.getListOfForms(req.params.collection)
+      var list = await Forms.list(req.params.collection)
       res.json(list);
     }catch(err) {
       res.status(400).json({error:err.toString()})

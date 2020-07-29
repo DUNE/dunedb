@@ -8,8 +8,11 @@ block content
   table.table
     each test in tests
         tr
+            td
+              if(test.info.icon)
+                img.icon(src=test.info.icon)
             td 
-                a(href=`/job/${test._id}`) #{(test.form||{}).formName||test.formId}
+              a(href=`/job/${test._id}`) #{(test.form||{}).formName||test.formId}
             
             td #{moment(test.insertDate).format()} (#{moment(test.insertDate).fromNow()})
 

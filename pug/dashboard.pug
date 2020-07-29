@@ -16,6 +16,9 @@ head
     link(rel='stylesheet' href='/css/dashboard.css')
     link(rel='stylesheet' href='/css/custom.scss')
     link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
+    link(rel='stylesheet', href='/css/main.css', type='text/css', media='all')
+    link(rel='stylesheet', href='/css/AnnotationCanvas.css', type='text/css', media='all')
+    link(rel='stylesheet' href='/css/qr.css')
     link(href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet")
 
     // jquery early, since it's used in lots of scripts
@@ -65,6 +68,8 @@ body(class="deployment-"+deployment)
             | SietchDev
           else 
             | Sietch            
+          div.pull-right(style="height:1em;display:inline-block")
+            img(src="/images/noun_cave_1842206.png",style="height:100%; width:auto;")
         input.form-control.form-control-dark#navbar-search(type='search' placeholder='Search for a component' aria-label='Search')
         if locals.user
           .navbar-nav.px-3
@@ -197,9 +202,6 @@ script(src='/js/Histogram.js')
 script(src='/js/HistCanvas.js')
 script(src='/js/ColorScale.js')
 
-link(rel='stylesheet', href='/css/main.css', type='text/css', media='all')
-link(rel='stylesheet', href='/css/AnnotationCanvas.css', type='text/css', media='all')
-link(rel='stylesheet' href='/css/qr.css')
 
 style.
   li.nav-item img { height: 40px;}

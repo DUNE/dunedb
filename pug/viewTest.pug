@@ -32,6 +32,8 @@ block extrascripts
     }
 
 block content
+  if(formrec.icon && formrec.icon[0])
+    img.icon.pull-left(src=formrec.icon[0].url)
   h2=formrec.formName || formrec.formId
   dl
     if testdata 

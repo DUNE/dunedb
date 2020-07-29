@@ -7,9 +7,11 @@ block content
 
   table.table-sm.table-hover
     tbody
-      each formName,formId in forms
+      each info,formId in forms
         tr
-          td=(formName || formId)
+          td
+            img.icon(src=info.icon)
+          td=(info.formName || formId)
           if(permissions.userHas(user,"jobs:submit"))
             td
               a(href='/job/'+formId).btn.btn-outline-primary Run

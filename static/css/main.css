@@ -23,3 +23,9 @@
 .fixed-width-textarea {
 	font-family: 'Inconsolata', monospace;
 }
+
+img.icon{
+  width: 50px;
+  max-height:50px;
+  height:auto;
+}

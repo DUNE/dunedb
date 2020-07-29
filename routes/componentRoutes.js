@@ -4,6 +4,7 @@ const express = require('express');
 const shortuuid = require('short-uuid')();
 const MUUID = require('uuid-mongodb');
 const moment = require('moment');
+const deepmerge = require('deepmerge');
 
 var Components = require('../lib/Components.js');
 var permissions = require('../lib/permissions.js');
@@ -42,7 +43,7 @@ async function get_component(req,res) {
     // console.log('componentForms');
     // console.log(componentform);
     res.render("component.pug",{
-      schema: componentform.schema,
+      formrec: componentform,
       componentUuid:componentUuid,
       component: component,
       canEdit: permissions.hasPermission("components:edit"),
@@ -241,15 +242,18 @@ router.get('/components/type',permissions.checkPermission("components:view"),
         var types = await Components.getTypes();
 
         // Add onto it any form types that exist, but haven't created objects yet.
-        var forms = {...await Forms.getListOfForms('componentForms')};
-        for(var existingType of types) {
-          if(delete forms[existingType.type]);
-        }
-        for(var type in forms) {
-          types.push({type: type, count: 0})
-        }
-        var sorted = types.sort((a,b)=>(''+a.type).localeCompare(b.type));
-        res.render("components_types.pug",{types:sorted});
+        var forms = await Forms.list('componentForms');
+
+        var componentTypes = deepmerge(types,forms);
+        // for(var existingType of types) {
+        //   if(delete forms[existingType.type]);
+        // }
+        // for(var type in forms) {
+        //   console.log('***',forms[type]);
+        //   types.push({type: type, count: 0, ...forms[type]})
+        // }
+        // var sorted = types.sort((a,b)=>(''+a.type).localeCompare(b.type));
+        res.render("components_types.pug",{componentTypes});
 
   });
 

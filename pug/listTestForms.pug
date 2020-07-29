@@ -8,9 +8,11 @@ block content
   table.table-sm.table-hover
     tbody
       -console.log("ffffff",forms);
-      each formName,formId in forms
+      each formId in Object.keys(forms).sort()
         tr
-          td=(formName || formId)
+          td
+            img.icon(src=forms[formId].icon)
+          td=(forms[formId].formName || formId)
           if(user && user.permissions.includes("tests:submit"))
             td
               a(href='/test/'+formId).btn.btn-outline-primary Run

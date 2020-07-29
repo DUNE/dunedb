@@ -14,6 +14,9 @@ block content
   table.table
     each test in tests
         tr
+            td
+              if(test.info.icon)
+                img.icon(src=test.info.icon)
             td 
                 a(href=`/test/${test._id}`) #{test.formId}
             
