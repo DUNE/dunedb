@@ -44,10 +44,10 @@ async function loadFormIds(recordType)
   var route = '/json/'+recordType+"Forms";
   var types = await $.get(route);
   console.log('got types of formId:',types);
-  var options = ["<option val='---none---'></option>"];
+  var options = ["<option val=''></option>"];
   for(var type in types){
     options.push(
-      `<option value="${type}">${types[type]}</option>`
+      `<option value="${type}">${types[type].formName}</option>`
     );
   }
   $('#builtform').empty().hide();
@@ -76,14 +76,15 @@ async function loadForm(recordType,formId,initializeFormData)
 function doFormChange(event)
 {
 
-  console.log('change',submission,event);
+  console.log('change',form||{}.submission,event);
   // debugger;
-  var submission = form.submission;
   // copy data into search record
   // Need to use mongo dot notation to get at subfields
 
   // FIXME add search terms for general word search, metadata search fields
-  var formParams = {data: form.submission.data};
+  var formParams = {};
+  if(form)
+    formParams.data= form.submission.data;
   var searchobj = removeEmpty(formParams);
   var searchrec = CopyToDot(searchobj);
 
@@ -112,7 +113,11 @@ function doFormChange(event)
 
   var recordType =  $('#recordTypeSelect').val();
   var formId = encodeURIComponent($('#typeSelect').val());
-  var url = `/json/search/${recordType}/${formId}`;
+  var url = `/json/search`;
+  if(recordType) {
+    url+="/"+recordType;
+    if(formId) url+="/"+formId;
+  }
   var ajaxQuery = {
     url: url,
     method: "POST",
@@ -132,9 +137,9 @@ function displayResults(result)
   $('#results').empty();
 
   for(var item of result) {
-    var h = `<li class="search-result">
+    var h = `<li class="search-result recordType-${item.recordType}">
               <a href="${item.route}">${item.name||item.formId}</a>
-              ${item.insertion.user.displayName} ${moment(item.insertion.insertDate).format()}
+              ${item.recordType} ${item.insertion.user.displayName} ${moment(item.insertion.insertDate).format()}
             </li>`;
     $('#results').append(h);
   }
@@ -148,46 +153,62 @@ var JSONURL = new JsonURL();
 
 $(function(){
   $(".set-up-datepicker").flatpickr({enableTime: true,wrap:true});
-  $(".search-on-change").on('change',doFormChange);
-
+  $(".search-on-change").on('change',doFormChange)
+                        .on('keyup',function(){
+                            if (event.key === "Enter") doFormChange()
+                            });
 
   $('#recordTypeSelect').on('change',async function(){
     recordType=$(this).val();
     loadFormIds(recordType);
     // Change the url.
-    history.replaceState(null,null,'/search/'+recordType)
+    if(recordType)
+      history.replaceState(null,null,'/search/'+recordType);
+    else
+      history.replaceState(null,null,'/search');
    });
 
   $('#typeSelect').on('change',async function(){ 
     console.log('typechange')
     // recordType =  $('#recordTypeSelect').val();
     formId = encodeURIComponent($('#typeSelect').val());
-    loadForm(recordType,formId);
-    history.replaceState(null,null,'/search/'+recordType+'/'+encodeURIComponent(formId));
+    if(formId) {
+      loadForm(recordType,formId);
+      history.replaceState(null,null,'/search/'+recordType+'/'+encodeURIComponent(formId))
+    } else {
+      form = null;
+       $('#builtform').empty().hide();
+      history.replaceState(null,null,'/search/'+recordType)
+    }
    });
 
   //Deal with initial route setting.
   // Run immedately as 
+  var querystr = window.location.search.substring(1); // remove '?'
+  console.log("querystr",querystr);
+  var searchObj = JSONURL.parse(decodeURIComponent(querystr));
+  if(searchObj) {
+    console.log("searchObj",searchObj);
+    $("#textSearchInput").val(searchObj.search);
+    $("#insertionAfter").val(searchObj.insertionAfter);
+    $("#insertionBefore").val(searchObj.insertionBefore);
+  }
   if(recordType) {
     $('#recordTypeSelect').val(recordType);
     loadFormIds(recordType).then(function(){
      console.log("recordtype change done?");
      if(formId){
         $('#typeSelect').val(formId);
-          var querystr = window.location.search.substring(1); // remove '?'
-          var searchObj = JSONURL.parse(decodeURIComponent(querystr));
-          $("#textSearchInput").val(searchObj.search);
-          $("#insertionAfter").val(searchObj.insertionAfter);
-          $("#insertionBefore").val(searchObj.insertionBefore);
           // Fixme: fill other search form parameters
 
           // Fixme: this somehow triggers everything TWICE. No idea why.
           loadForm(recordType,formId,searchObj).then(function(){
             console.log("done");
+            doFormChange();
             // fill out the form.
         })
-     }
+     } else doFormChange();
     })
-  }
-  
+  } else  doFormChange()
+ 
 });

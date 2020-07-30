@@ -7,21 +7,46 @@ block content
 
   table.table-sm.table-hover
     tbody
-      each info,formId in forms
-        tr
-          td
-            img.icon(src=info.icon)
-          td=(info.formName || formId)
-          if(permissions.userHas(user,"jobs:submit"))
+      each formId in Object.keys(forms).sort()
+        -var info = forms[formId];
+        // hide trash.
+        if(info.tags && !info.tags.includes("Trash")) 
+          tr
             td
-              a(href='/job/'+formId).btn.btn-outline-primary Run
-          if(permissions.userHas(user,"jobs:view"))
-            td
-              a(href='/jobs/'+formId).btn.btn-outline-secondary Recent
-          if(permissions.userHas(user,"forms:edit"))
-            td
-              a(href='/EditWorkflowForm/'+formId).btn.btn-outline-warning Edit
+              img.icon(src=info.icon)
+            td=(info.formName || formId)
+            if(permissions.userHas(user,"jobs:submit"))
+              td
+                a(href='/job/'+formId).btn.btn-outline-primary Run
+            if(permissions.userHas(user,"jobs:view"))
+              td
+                a(href='/jobs/'+formId).btn.btn-outline-secondary Recent
+            if(permissions.userHas(user,"forms:edit"))
+              td
+                a(href='/EditWorkflowForm/'+formId).btn.btn-outline-warning Edit
 
   if(permissions.userHas(user,"forms:edit"))
     p.h5.mt-4
      +NewWorkflowForm
+
+  if(permissions.userHas(user,"forms:edit"))
+    h5 Trashed workflows
+        table.table-sm.table-hover
+          tbody
+            each formId in Object.keys(forms).sort()
+              -var info = forms[formId];
+              // show only trash.
+              if(info.tags && info.tags.includes("Trash")) 
+                tr
+                  td
+                    img.icon(src=info.icon)
+                  td=(info.formName || formId)
+                  if(permissions.userHas(user,"jobs:submit"))
+                    td
+                      a(href='/job/'+formId).btn.btn-outline-primary Run
+                  if(permissions.userHas(user,"jobs:view"))
+                    td
+                      a(href='/jobs/'+formId).btn.btn-outline-secondary Recent
+                  if(permissions.userHas(user,"forms:edit"))
+                    td
+                      a(href='/EditWorkflowForm/'+formId).btn.btn-outline-warning Edit

@@ -39,58 +39,68 @@ block extrascripts
 
 block content
   .container-fluid
-    .row
-        if(formrec.icon && formrec.icon[0])
-          img.icon.pull-left(src=formrec.icon[0].url)
-        h2#name.col-md-8
-          =component.type?(component.type + ": " + (component.data.name||"")):"New Component"
-    .row 
-      dl
-        dt Component UUID
-        dd
-          a(href='/'+componentUuid)=componentUuid
-        dt Version  #{component.validity.version}
-        dd edited by !{' '}
-          +short_user(component.insertion.user)
-          | 
-          | 
-          | on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}
-        dd 
-          a(href='/'+componentUuid+'/history') History
-        dt Effective as of
-        dd #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()})
-    .row
-        +label-link
-    .row
+    if(formrec.icon && formrec.icon[0])
+      img.icon.pull-left(src=formrec.icon[0].url)
+    h2#name.col-md-8
+      =component.type + ": " + (component.data.name||component.componentUuid.substr(0,8))
+    div
         a(href='/'+componentUuid+'/edit') Edit this component
-    .row
-        a(href='/json/component/'+componentUuid) Raw JSON Document
+    dl
+      dt Component UUID
+      dd
+        a(href='/'+componentUuid)=componentUuid
+      dt Version  #{component.validity.version}
+      dd edited by !{' '}
+        +short_user(component.insertion.user)
+        | 
+        | 
+        | on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}
+      dd 
+        a(href='/'+componentUuid+'/history') History
+      dt Effective as of
+      dd #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()})
         
 
-    .row
-      #builtform.col-md-8
+    
+    #builtform.col-md-8
       +createdFrom(component.createdFrom)
 
     .row
+      .col
+        div
+            a(href='/json/component/'+componentUuid) Raw JSON Document
+
+        div
+          +label-link
+
       div#qr-code.col-md-4
-        +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+            +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
         
-      +label-link
+    hr
     .row
-      .column
-        h4 Tests Performed
+      .col-md-6
+        h4 Testing History:
+        if(!testsPerformed || testsPerformed.length==0)
+            p None
+        else
             ul.testsPerformed
               each test in tests
                 li 
                   -var parenthetical= " (on "+ moment(test.insertion.insertDate).format('MMM DD YYYY');
                   -if(test.insertion.user) { parenthetical+=" by " + user_shortname(test.insertion.user) }
                   -parenthetical+=")";
-                  a(href='/test/'+test._id)=(forms[test.formId]||test.formId)
+                  a(href='/test/'+test._id)=(forms[test.formId].formName||test.formId)
                   =parenthetical
-    .row
-      h4 Run a test on this component:
-      ul#tests
-          each formName,formId in forms
-            li
-              a(href='/'+componentUuid+'/test/'+formId)=formName
+      .col-md-6
+        h4 Run a test on this component
+        div
+          ul.list-group#tests
+              each info,formId in forms
+                // Check to see if tags on form match this component.
+                -console.log("INFO",info);
+                if(!info || !info.tags || info.tags.length==0 || (info.tags.includes(component.type)&& !info.tags.includes("Trash")) )
+                  li.list-group-item
+                    a(href='/'+componentUuid+'/test/'+formId)
+                      img.icon(src=info.icon)
+                      =info.formName
 

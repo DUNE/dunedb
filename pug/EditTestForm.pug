@@ -216,14 +216,40 @@ block metaschema
           {
           "components": [
             {
-            "label": "Tags",
-            "placeholder": "categories",
-            "tooltip": "Categories of forms or workflows this component relates to",
-            "tableView": false,
-            "storeas": "array",
-            "key": "tags",
-            "type": "tags",
-            "input": true,
+              "label": "Component Types",
+              "widget": "choicesjs",
+              //- "placeholder": "default: applies to all component types",
+              "tooltip": "Select the component types this form will apply to. Leave blank if unsure. Select 'Trash' to hide this form from user view.",
+              "description":"If left blank, this form applies to all components.",
+              "tableView": true,
+              "multiple": true,
+              "dataSrc": "url",
+              "data": {
+                "values": [
+                  {
+                    "label": "",
+                    "value": ""
+                  }
+                ],
+                "url": "/json/componentTypesTags",
+                "headers": [
+                  {
+                    "key": "",
+                    "value": ""
+                  }
+                ]
+              },
+              "valueProperty": "formId",
+              "template": "<span>{{ item.formId }}</span>",
+              "selectThreshold": 0.3,
+              "validate": {
+                "multiple": true
+              },
+              "key": "tags",
+              "type": "select",
+              "indexeddb": {
+                "filter": {}
+              }
             }
           ],
           "width": 6,

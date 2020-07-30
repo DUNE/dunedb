@@ -1,0 +1,16 @@
+html
+  head
+    style.
+      .icon {
+        width:50px;
+        padding: 5px;
+      }
+  body
+    h4 Icons
+    p These icons are all from 
+      a(href="https://thenounproject.com") the Noun Project.
+      |
+      | The easiest way to use these is to drag them to your desktop, then drag the desktop file back into the Sietch image chooser.
+    div(style="display:flex;flex-wrap: wrap;")
+      each icon in icons
+        img.icon(src=icon,draggable="true")

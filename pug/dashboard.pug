@@ -21,30 +21,9 @@ head
     link(rel='stylesheet' href='/css/qr.css')
     link(href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet")
 
-    // jquery early, since it's used in lots of scripts
+    // jquery early, since it's used in lots of scripts, possibly defined in body
     script(src='/dist/jquery/jquery.min.js')
-    script.
-      function executeASearch(term) {
-        console.log("Execute a Search:",term);
-        window.location.href = "/components/search?search="+encodeURIComponent(term);
-      };
-
-      $(function(){
-        $("#navbar-search")
-        .on('change',function(){
-          executeASearch($(this).val());
-        })
-        .on('keyup',function(){
-          if (event.key === "Enter") executeASearch($(this).val());
-        });
-
-
-        $('#sidebarCollapse').on('click', function () {
-            $('#sidebar').toggle();
-        });
-
-      });
-
+ 
 mixin navlink
   if(attributes.href == route)
     a.nav-link.active&attributes(attributes)
@@ -61,16 +40,16 @@ body(class="deployment-"+deployment)
           i.fa.fa-align-left
           //- span sidebar
 
-        a.navbar-brand.col-sm-3.col-md-2.mr-0#navbar-brand(href='/') 
+        a.navbar-brand.col-sm-3.col-md-2.mr-0.align-middle#navbar-brand(href='/') 
           if(deployment=='laptop')
             | Laptop
           else if(deployment=='devsite')
             | SietchDev
           else 
             | Sietch            
-          div.pull-right(style="height:1em;display:inline-block")
-            img(src="/images/noun_cave_1842206.png",style="height:100%; width:auto;")
-        input.form-control.form-control-dark#navbar-search(type='search' placeholder='Search for a component' aria-label='Search')
+          div.pull-right(style="height:2em;display:inline-block")
+            img(src="/images/noun_cave_1842206.svg",style="height:100%; width:auto;")
+        input.form-control.form-control-dark#navbar-search(type='search' placeholder='Search...' aria-label='Search')
         if locals.user
           .navbar-nav.px-3
             .nav-item.text-nowrap
@@ -159,9 +138,33 @@ body(class="deployment-"+deployment)
 // ==================================================
 // Placed at the end of the document so the pages load faster
 
+
+script.
+      function executeASearch(term) {
+        //- console.log("Execute a Search:",term);
+        window.location.href = `/search?`+JsonURL.stringify({search:term});
+      };
+
+      $(function(){
+        $("#navbar-search")
+        .on('change',function(){
+          executeASearch($(this).val());
+        })
+        .on('keyup',function(){
+          if (event.key === "Enter") executeASearch($(this).val());
+        });
+
+
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar').toggle();
+        });
+
+      });
 script(src='/dist/bootstrap/js/bootstrap.min.js')
 script(src="/dist/bootstrap-autocomplete/latest/bootstrap-autocomplete.min.js")
 script(src='/dist/formiojs/formio.full.js')
+script.
+  Formio.setBaseUrl(!{base_url});
 script(src="/dist/short-uuid/short-uuid.min.js")
 script(src='/dist/deepmerge/umd.js')
 script(src='/dist/moment/moment.min.js')
@@ -177,6 +180,7 @@ script(src="/ext/qrcodegen.js")
 
 script(src='/dist/fabric/fabric.min.js')
 script(src='/dist/fabric-history/index.min.js')
+script(type='text/javascript',src='/dist/jsonurl/jsonurl.min.js')
 
 script(type="text/javascript", src="/ext/qrcodegen.js")
 script(type="text/javascript", src="/js/generate_qr_code.js")

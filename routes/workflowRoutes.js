@@ -36,7 +36,7 @@ router.get("/NewWorkflowForm/:formId", permissions.checkPermission("forms:edit")
 
 // Edit existing job form
 router.get("/EditWorkflowForm/:formId?", permissions.checkPermission("forms:edit"), async function(req,res){
-  res.render('EditTestForm.pug',{collection:"jobForms",formId:req.params.formId});
+  res.render('EditWorkflowForm.pug',{collection:"jobForms",formId:req.params.formId});
 });
 
 

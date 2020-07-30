@@ -134,7 +134,6 @@ app.use(session({
 
 }));
 
-
 // Configure passport and other authentication measures.
 require('./lib/auth.js')(app); 
 
@@ -219,6 +218,14 @@ app.get("/docs",function(req,res,next){
 });
 app.use("/docs",express.static(__dirname + '/docs'));
 
+
+// icon contact sheet
+app.get("/icons",function(req,res,next){
+  fs.readdir("./static/icons",function(err,files){
+    var icons = files.filter(filename=>!filename.startsWith('.'));
+    res.render("icons.pug",{icons})
+  })
+})
 
 
 app.get('/', async function(req, res, next) {

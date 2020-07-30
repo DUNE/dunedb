@@ -52,7 +52,7 @@ block extrascripts
           if(retval.data) form.submission = {data:retval.data};
           if(window.location.pathname.includes("NewComponent")) {
             // Change the URL to match th new component componentUuid, so we're now editing
-            history.replaceState(null, null, retval.componentUuid+'/edit');
+            history.replaceState(null, null, "/"+retval.componentUuid+'/edit');
             $('#name').html(submission.name);
           }
 
@@ -60,7 +60,7 @@ block extrascripts
           form.emit('submitDone', retval.submission);
           console.log("success retval",retval);
           if(retval.componentUuid)
-            window.location.assign('/'+retval.componentUuid)
+            window.location.href = '/'+retval.componentUuid;
   
         });
         posting.fail(function(res,statusCode,statusMsg) {
@@ -87,6 +87,8 @@ block extrascripts
         input: true,
         tableView: false
       });
+      Formio.setBaseUrl(!{base_url});
+
       form = await Formio.createForm(document.getElementById('builtform'),schema);
       metaform = await Formio.createForm(document.getElementById('metaform'),
       { components: [
@@ -145,7 +147,7 @@ block extrascripts
 
       // Change the url to match
 
-      DrawQRCode($('#qrcode-canvas').get(0),"!{base_url}/"+componentUuid);
+      //- DrawQRCode($('#qrcode-canvas').get(0),"!{base_url}/"+componentUuid);
 
       
 
@@ -162,17 +164,13 @@ block extrascripts
     }
 block content
   .container-fluid
-    .row
       h2#name
-          =(component.data||{}).type?("Editing " + component.data.type + ": " + component.data.name):"New Component"
-    .row
-        | Component UUID: 
+          =(component.data)?("Editing " + component.type + ": " + (component.data.name||component.componentUuid.substr(0,8))):"New " + component.type
+      p Component UUID: 
         |
         =component.componentUuid
-    .row 
-      +label-link
-    .row
+      div 
+        +label-link
       #metaform
-    .row
       #builtform
 

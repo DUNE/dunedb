@@ -17,14 +17,15 @@ block content
     tbody
       -console.log(JSON.stringify(types,null,2));
       each type in Object.keys(componentTypes).sort()
-        if(type && type!="null")
+        -var info = componentTypes[type];
+        if(type && type!="null" && !(info.tags||[]).includes("Trash"))
           tr
             td
-              img.icon(src=componentTypes[type].icon)
+              img.icon(src=info.icon)
             td
               a(href='/components/type/'+encodeURIComponent(type)) #{type}
 
-            td=componentTypes[type].count
+            td=info.count
 
             if(permissions.userHas(user,"components:create"))
               td
@@ -61,4 +62,24 @@ block content
             window.location.href="/NewComponentType/"+ $(this).val();
           }
       })
+
+  if(permissions.userHas(user,"forms:edit"))
+     h5.mt-3 Trashed component forms:
+     table.table
+        tbody
+          -console.log(JSON.stringify(types,null,2));
+          each type in Object.keys(componentTypes).sort()
+            -var info = componentTypes[type];
+            if(info.tags||[]).includes("Trash")
+              tr
+                td
+                  img.icon(src=info.icon)
+                td
+                  a(href='/components/type/'+encodeURIComponent(type)) #{type}
+
+                td=info.count
+
+                if(permissions.userHas(user,"forms:edit"))
+                  td
+                    a(href='/EditComponentForm/'+type).btn.btn-outline-warning Edit Component Form
 

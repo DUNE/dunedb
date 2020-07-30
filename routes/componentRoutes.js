@@ -31,7 +31,7 @@ async function get_component(req,res) {
     // get other data in one go
     let [componentform, forms, tests] = await Promise.all([
         Forms.retrieve("componentForms",component.type),
-        Forms.getListOfForms(),
+        Forms.list(),
         Tests.listComponentTests(componentUuid)
       ]);
     if(!componentform) throw new Error("Component form for type \""+component.type+"\" does not exist");

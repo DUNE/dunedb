@@ -13,13 +13,19 @@ block content
        img(src=user.picture)
       h1=user.nickname || user.displayName || user.name || [user.given_name,user.family_name].join(' ') || user.email    
       dl
-        dt email
+        dt User ID
+        dd=user.user_id
+        dt Email
         dd
           a(href='mailto:'+user.email)=user.email
           |
           =(user.email_verified)?" (Verified)":""
-        dt Roles
-        dd=(user.app_metadata.roles || []).join(',')
+        if(roles)
+          dt Roles
+          dd=roles.map(role=>role.name).join(',')
+        if(permissions)
+          dt permissions
+          dd=permissions.map(r=>r.permission_name).join(', ')
         dt Account created
         dd
           +dateFormatAndAgo(user.created_at)
@@ -33,5 +39,9 @@ block content
           =user.last_ip
         dt Account type
         dd=(user.identities||[]).map(i=>i.provider).join(', ')
+        dt Login count
+        dd=logins_count
 
-        // pre=JSON.stringify(user,null,2)
+        pre=JSON.stringify(user,null,2)
+        pre=JSON.stringify(roles,null,2)
+        pre=JSON.stringify(permissions,null,2)

@@ -31,8 +31,17 @@ var defaults = {
   auth0_jwksUri: `https://dev-pserbfiw.auth0.com/.well-known/jwks.json`,
   auth0_jwks_issuer: 'https://dev-pserbfiw.auth0.com/',
 
-  // Permissions for people who haven't logged in
-  default_permissions: ['components:view', 'tests:view', 'forms:view'],
+
+  mail_config: {
+    host: "smtp.example.com",
+    secure: true, // true for 465, false for other ports
+    requireTLS: true,  // no cleartext
+    auth: {
+      user: "username",
+      pass: "mailpassword",
+    }    
+  },
+  admin_email: "nathaniel.tagg@gmail.com",
 }
 
 

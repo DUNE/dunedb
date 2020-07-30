@@ -3,7 +3,7 @@
 const chalk = require('chalk');
 const express = require('express');
 var ManagementClient = require('auth0').ManagementClient;
-
+const email = require("../lib/email.js");
 var permissions = require('../lib/permissions.js');
 var router = express.Router();
 
@@ -24,17 +24,21 @@ var manager = new ManagementClient({
 
 router.get('/profile/:userId?',permissions.checkPermission("components:view"),
   async function(req,res,next) {
-    var userId = req.user.user_id;
-    if(userId)
+    var user_id = req.user.user_id;
+    if(req.params.userId)
       user_id = decodeURIComponent(req.params.userId);
 
     console.log("looking up",user_id);
     console.log(await manager.getUserRoles({id:user_id}))
-    var user = await manager.getUser({id:user_id});
+    var [user,roles,permissions] = await Promise.all([
+        manager.getUser({id:user_id}),
+        manager.getUserRoles({id:user_id}),
+        manager.getUserPermissions({id:user_id}),
+      ]);
     if(Array.isArray(user)) return res.status(400).send("More than one user matched");
     if(!user)return res.status(400).send("No user with that ID");
    // console.log(user);
-   res.render("user.pug",{user});
+   res.render("user.pug",{user,roles,permissions});
 });
 
 // Self-promotion
@@ -60,9 +64,7 @@ router.post("/promoteYourself",
         && global.config.self_promotion[req.body.user]
         && global.config.self_promotion[req.body.user].password == req.body.password) {
           try{
-            var newroles = [...req.user.roles,...global.config.self_promotion[req.body.user].roles];
-            var result = await manager.assignRolestoUser({id:req.user.user_id},{roles:global.config.self_promotion[req.body.user].roles});
-
+            var result = await manager.assignRolestoUser({id:req.user.user_id},{roles:global.config.self_promotion[req.body.user].roles});            
             // get new user info
             var uroles = await manager.getUserRoles({id:req.user.user_id,per_page:100});
             // var upermissions = await manager.getUserPermissions({id:req.user.user_id,per_page:100});
@@ -70,7 +72,16 @@ router.post("/promoteYourself",
             // console.log(upermissions.map(i=>i.permission_name));
             // req.user.roles = uroles.map(i=>i.name);
             // req.user.permissions = upermissions.map(i=>i.permission_name);
-            res.render("promoteYourselfSuccess.pug",{roles:uroles.map(i=>i.name)});
+            var roles = uroles.map(i=>i.name);
+            // Tell the authorities.
+            email({
+              subject: "Sietch: "+ req.user.displayName+" self-promoted",
+              text: `${req.user.displayName} (${req.user.emails[0].value}) just self-promoted using username ${req.body.user}.\n\n`
+                  + `Their new roles are:\n`
+                  +   roles.join("\n")
+            })
+
+            res.render("promoteYourselfSuccess.pug",{roles});
           } catch(err) { console.log(err); console.log(err.stack)}
       } else {
           res.render("promoteYourself.pug",{message:"Invalid user/password. You are limited to 5 tries."});

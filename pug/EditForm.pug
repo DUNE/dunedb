@@ -254,6 +254,9 @@ block extrascripts
         }
       }
       $(function(){
+
+        Formio.setBaseUrl("!{base_url}");
+
         //- console.log("schema",record.schema);
         // First, modify the metaschema based on the component type list
         //- var omponentTypesComponent = Formio

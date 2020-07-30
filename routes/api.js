@@ -92,7 +92,7 @@ router.get('/components', permissions.checkPermissionJson('components:view'),
 
 router.get('/componentTypes', permissions.checkPermissionJson('components:view'), 
   async function(req,res,next){
-    // FIXME, add search terms
+    // FIXME, this is just extant types, does not include form info
     try {
       var data = await Components.getTypes(req.query.type);
       return res.json(data);
@@ -101,6 +101,23 @@ router.get('/componentTypes', permissions.checkPermissionJson('components:view')
     }  
   }
 );
+
+router.get('/componentTypesTags', permissions.checkPermissionJson('components:view'), 
+  async function(req,res,next){
+    // FIXME, add search terms
+    try {
+      var data = await Forms.list("componentForms");
+      var list=[{formId:"Trash"}];
+      for(key in data) {
+        list.push(data[key]);
+      }
+      return res.json(list);
+    } catch(err) {
+      res.status(400).json({error:err.toString()})
+    }  
+  }
+);
+
 
 
 
@@ -237,7 +254,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 // searching via POST parameters
 // 
 // /search/<recordType>/<type>?search=<textsearch>&insertAfter=<date>&insertBefore=<date>
-router.post("/search/:recordType(component|job|test)/:formId?",  permissions.checkPermissionJson('tests:view'), 
+router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
     console.log("search request",req.params,req.body);
@@ -259,29 +276,30 @@ router.post("/search/:recordType(component|job|test)/:formId?",  permissions.che
       delete matchobj.insertionBefore;
     }
 
+    if(Object.keys(matchobj).length<1 && !searchterms) throw new Error("No search parameter specified.")
 
-    if(req.params.recordType === 'component') {
+    var result = [];
+    if(!req.params.recordType || req.params.recordType === 'component') {
       if(formId) matchobj.type = formId;
-      var result = await Components.search(searchterms,matchobj);
+      result.push(...await Components.search(searchterms,matchobj));
       console.log("result",result);
-      return res.json(result,null,2);
     }
-    if(req.params.recordType === 'test') {
+    if(!req.params.recordType ||req.params.recordType === 'test') {
       if(formId) matchobj.formId = formId;
       console.log("matchobj",matchobj);
-      var result = await Tests.search(searchterms,matchobj);
+      result.push(...await Tests.search(searchterms,matchobj));
       console.log("result",result);
-      return res.json(result,null,2);
     }
-    if(req.params.recordType === 'job') {
-      ifmatchobj.formId = formId;
-      var result = await Jobs.search(searchterms,matchobj);
+    if(!req.params.recordType || req.params.recordType === 'job') {
+      if(formId) matchobj.formId = formId;
+      result.push(...await Jobs.search(searchterms,matchobj));
       console.log("result",result);
-      return res.json(result,null,2);
     }
+    return res.json(result);
+
 
   } catch(err) {
-    console.log(JSON.stringify(err.toString()));
+    console.log(err);
       res.status(400).json({error:err.toString()});
   }
 });
