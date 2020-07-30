@@ -48,16 +48,18 @@ router.get("/promoteYourself",
       res.render("promoteYourself.pug");
   });
 
-
-var rate_limiter = require("express-rate-limit")({
-  windowMs: 60 * 60 * 1000 * 24, // 1 day window
-  max: 5, // start blocking after 5 requests
-  message:
-    "Too many tries - you are blocked from trying again for 1 hour."
-});
+// rate limiting
+var limiter = require('express-limiter-mongo')(
+  {mongoUrl: global.config.mongo_uri,
+  lookup: ['connection.remoteAddress','headers.x-forwarded-for'],
+  total: 5,
+  expire: 1000 * 60 * 60,
+  onRateLimited: (req,res,next) => { res.status(429).send(`Too many tries. You are locked out for ${(res.get("Retry-After")/60.).toFixed()} minutes; try again then.`); },
+  }
+);
 router.post("/promoteYourself",
   permissions.checkPermission("components:view"),
-  rate_limiter,
+  limiter,
   async function(req,res,next) {
       console.log(req.body,global.config.self_promotion)
       if(global.config.self_promotion
@@ -84,6 +86,8 @@ router.post("/promoteYourself",
             res.render("promoteYourselfSuccess.pug",{roles});
           } catch(err) { console.log(err); console.log(err.stack)}
       } else {
-          res.render("promoteYourself.pug",{message:"Invalid user/password. You are limited to 5 tries."});
+          var remaining = res.get("X-RateLimit-Remaining");
+          var message = `Invalid user/password. You have ${remaining} tries remaining.`;
+          res.render("promoteYourself.pug",{message});
       }
   });

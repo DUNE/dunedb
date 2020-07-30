@@ -261,6 +261,8 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
     var searchterms = null;
     var matchobj = {...req.body};
     var formId = null;
+    var limit = req.query.limit;
+    var skip = req.query.skip;
     if(req.params.formId) formId = decodeURIComponent(req.params.formId);
 
     if(matchobj.search) {
@@ -281,18 +283,18 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
     var result = [];
     if(!req.params.recordType || req.params.recordType === 'component') {
       if(formId) matchobj.type = formId;
-      result.push(...await Components.search(searchterms,matchobj));
+      result.push(...await Components.search(searchterms,matchobj,limit,skip));
       console.log("result",result);
     }
     if(!req.params.recordType ||req.params.recordType === 'test') {
       if(formId) matchobj.formId = formId;
       console.log("matchobj",matchobj);
-      result.push(...await Tests.search(searchterms,matchobj));
+      result.push(...await Tests.search(searchterms,matchobj,limit,skip));
       console.log("result",result);
     }
     if(!req.params.recordType || req.params.recordType === 'job') {
       if(formId) matchobj.formId = formId;
-      result.push(...await Jobs.search(searchterms,matchobj));
+      result.push(...await Jobs.search(searchterms,matchobj,limit,skip));
       console.log("result",result);
     }
     return res.json(result);

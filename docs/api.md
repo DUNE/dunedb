@@ -163,13 +163,38 @@ Submits new test data. Format must be as follows:
 ``` 
 
 
-TODO: Allow searching via
+### Post /api/search
+Searching is allowed with URLs formatted as follows:
+``` 
+  /api/search
+  /api/search/<recordType>
+  /api/search/<recordType>/<formId>
 ```
-/api/components?<query>
-/api/forms?<query>
-/api/tests?<query>
-/api/jobs?<query>
+For example:
 ```
+  /api/search/tests
+  /api/search/components/SteelTube
+```
+
+The URL also accepts query parameters for limit and skip. Limit defaults to 100 entries from each record type. For example, this gives entries 40 through 60.
+```
+ /api/search/job/MyWorkflowForm?limit=20&skip=40
+```
+
+
+The posted search parameters must have an object with at least one element defined:
+```
+{
+  "search": "text search keywords",  // uses mongo text search
+  "insertionAfter": <Date>, //  Limit search to records inserted after timestamp
+  "insertionBefore": <Date>, //  Limit search to records inserted before timestamp
+  "data.thing": 123, // searches the 'thing' subfield of the data object for exact match to Value.
+  "data.thing2": "value2"
+  }
+}
+```
+
+In general, this will honor any mongo search parameterization.  
 
 
 

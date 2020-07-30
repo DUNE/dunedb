@@ -87,7 +87,6 @@ block extrascripts
         input: true,
         tableView: false
       });
-      Formio.setBaseUrl(!{base_url});
 
       form = await Formio.createForm(document.getElementById('builtform'),schema);
       metaform = await Formio.createForm(document.getElementById('metaform'),

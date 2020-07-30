@@ -1,32 +1,14 @@
 
 # TODO
 
-### Feature: tidy up production site
-- Remove 'toy' things.  -> Largely done. Some forms remain.
-- Add front page and css files that are specific to site, including link to dev site. Use a global variable available to pug and global.config.  ->Done.
-
-- Think about permissions for devsite being different - how? - change the permissions code to prefix 'dev:' to all permissons questions.  Grant `dev:*` to all user accounts  ->Done.
-
-
 
 ### Feature: track component ownership chains up-and-down with graphical interface
 - First need a data source to mimic what I want
 - Then need to build map-reduce sets to allow fast lookup
 - Then need to build a gui
 
-### Feature: allow user to self-promote based on a collaboration secret
-- Basic feature, works by config.js option. ->Done
-- Also, send email
 
-### Feature: icons
-- Add an icon upload on each form page (comp,test,workfow)
-  - Sensible max size
-  - Keep a Cache of these files in memory, resizing to sensible if needed?  But then how to serve?
 
-### Features: searching
-- Look at full text search of components and workflows DONE July 27 v 4.4
-- Attempt to pull up a version of the form and allow partial entries with auto-lookup. DONE July 27 v 4.4
-- Document API
 
 ### Features: authentication and authorization
 - Deal with user roles and permissions correctly
@@ -116,5 +98,25 @@
 ### Feature:
 - Attempt Component form auto-creation (Do this after I've split the component forms) -> Done
 
+### Feature: tidy up production site
+- Remove 'toy' things.  -> Largely done. Some forms remain.
+- Add front page and css files that are specific to site, including link to dev site. Use a global variable available to pug and global.config.  ->Done.
 
+- Think about permissions for devsite being different - how? - change the permissions code to prefix 'dev:' to all permissons questions.  Grant `dev:*` to all user accounts  ->Done.
+
+### Feature: allow user to self-promote based on a collaboration secret
+- Basic feature, works by config.js option. ->Done
+- Also, send email -> Done
+
+### Feature: icons
+- Add an icon upload on each form page (comp,test,workfow)
+  - Sensible max size -> Done
+  - Cache? No need - the files cache on browser quite well due to good work in the fileserver system. 
+
+
+### Features: searching
+- Look at full text search of components and workflows DONE July 27 v 4.4
+- Attempt to pull up a version of the form and allow partial entries with auto-lookup. DONE July 27 v 4.4
+- Rebuild simple search to do search all, allow all levels of searching - Done July 28
+- Document API -> Done
 

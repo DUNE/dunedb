@@ -39,3 +39,4 @@ Formio.prototype.deleteFile = function(fileinfo) {
   }
   console.log(fileinfo);
 }
+
