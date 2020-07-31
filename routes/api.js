@@ -19,9 +19,35 @@ router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer 
 
 // /generateComponentUuid
 // data format: none
-router.get('/generateComponentUuid', permissions.checkPermissionJson('components:edit'), 
+
+var QRCodeSVG = require('qrcode-svg');
+
+// /api/generateComponentUuid returns the UUID string
+// /api/generateComponentUuid/url returns URL+UUID
+// /api/generateComponentUuid/svg returns an SVG file that formats the URL+UUID
+// /api/generateComponentUuid/svg?ecl=L,M, or H turns down the error correction from Q
+
+router.get('/generateComponentUuid/:format(svg|url)?', permissions.checkPermissionJson('components:edit'), 
   async function(req,res){
-    res.json(Components.newUuid().toString());
+    var uuid = Components.newUuid();
+    if(req.params.format) {
+      if(req.params.format=="url") {
+        return res.json(config.my_url+"/"+uuid.toString());
+      }
+      if(req.params.format=="svg") {
+        var qr = new QRCodeSVG({
+          content:config.my_url+"/"+uuid.toString(),
+          padding: 0,
+          ecl: (['L','M',"H","Q"].includes(req.query.ecl))?req.query.ecl:"Q",
+          container: "svg-viewbox",
+          join: true
+        });
+        res.set('Content-Type', "image/svg+xml");
+        console.log(qr.svg());
+        return res.send(qr.svg());
+      }
+    }
+    res.json(uuid.toString());
   }
 );
 
@@ -125,11 +151,17 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|componentForms|jobForms)', permissions.checkPermissionJson('forms:view'), 
+router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
     try {
-      var list = await Forms.list(req.params.collection)
-      res.json(list);
+      var obj = await Forms.list(req.params.collection)
+      if(req.params.format=="list") {
+        var list = [];
+        for(key in obj) list.push(obj[key]);
+        return res.json(list);
+      }
+
+      return res.json(obj);
     }catch(err) {
       res.status(400).json({error:err.toString()})
     } 
@@ -261,7 +293,9 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
     var searchterms = null;
     var matchobj = {...req.body};
     var formId = null;
-    var limit = req.query.limit;
+    var limit, skip;
+    if(req.query.limit) limit = parseInt(req.query.limit);
+    if(req.query.skip) limit = parseInt(req.query.limit);
     var skip = req.query.skip;
     if(req.params.formId) formId = decodeURIComponent(req.params.formId);
 

@@ -29,3 +29,8 @@ img.icon{
   max-height:40px;
   height:auto;
 }
+
+img.small-icon {
+  height:1em;
+  width:auto;
+}

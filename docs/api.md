@@ -62,6 +62,19 @@ This call returns a JSON-formatted string giving a newly-generated UUID suitable
 
 Please ONLY use this call to generate new UUIDs; do not generate them on your own.
 
+More options:
+```
+/api/generateComponentUuid returns the UUID as a json string, e.g.
+  "e09f7620-d351-11ea-b1dc-0b7c5496a782"
+/api/generateComponentUuid/url returns URL+UUID:
+  "https://sietch.xyz/ee19a050-d351-11ea-b1dc-0b7c5496a782"
+
+/api/generateComponentUuid/svg returns an SVG file that formats the URL+UUID
+
+/api/generateComponentUuid/svg?ecl=L,M, or H turns down the error correction from Q
+```
+
+
 #### GET /api/component/123456789-abcd-1234-1234-123456789abc
 
 Required permissions: "components:view"
@@ -76,8 +89,8 @@ or "components:create" (which only allows new insertions)
 This sets the component to the new information provided. The body of the post should be formatted as follows:
 ```
 {
+  type: <string>,               // Component name, consistent with sietch records. New   types can be defined on the fly. 
   data: {
-    type: <string>,               // Component name, consistent with sietch records. New types can be defined on the fly. 
     ...component data
   },
   metadata: { ...optional, whatever you want...},

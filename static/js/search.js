@@ -131,14 +131,17 @@ function doFormChange(event)
 }
 
 
+var results = null;
 function displayResults(result)
 {
+  results = result; // for debugging.
   $('#dump').append(JSON.stringify(result,null,2));
   $('#results').empty();
-
+  if(result.length==0)
+    $('#results').append("<li>No results.</li>");
   for(var item of result) {
     var h = `<li class="search-result recordType-${item.recordType}">
-              <a href="${item.route}">${item.name||item.formId}</a>
+              <a href="${item.route}">${(item.type?item.type+":":"")}${item.name||item.formId}</a>
               ${item.recordType} ${item.insertion.user.displayName} ${moment(item.insertion.insertDate).format()}
             </li>`;
     $('#results').append(h);

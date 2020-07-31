@@ -11,11 +11,10 @@ block extrascripts
   script(type='text/javascript').
     var componentUuid = "!{componentUuid}";
     // I could do this by API query of the server, but this works for now.
-    var schema=!{JSON.stringify(schema||{})};
     var component=!{JSON.stringify(component||{})};
   
 
-
+ 
   script(type='text/javascript').
 
       var form = null;
@@ -75,24 +74,143 @@ block extrascripts
 
     var shortuuid = window.ShortUUID();
 
-    window.onload = async function() {
-      console.log("schema",schema);
+    function loadComponentForm(type,data) 
+    {
+      if(!type) console.error(loadComponentForm,"no type provided!");
+      $.get("/json/componentForms/"+type,)
+      .then(async function(formrec){
+        // add submit button to schema.
+        var schema = formrec.schema;
+        schema.components.push({      
+          type: "button",
+          label: "Submit",
+          key: "submit",
+          disableOnInvalid: true,
+          input: true,
+          tableView: false
+        });
 
-      // add submit button to schema.
-      schema.components.push({      
-        type: "button",
-        label: "Submit",
-        key: "submit",
-        disableOnInvalid: true,
-        input: true,
-        tableView: false
+        $('#builtform').empty();
+        form = await Formio.createForm(document.getElementById('builtform'),schema);
+
+        form.submission = {data: data};
+        form.nosubmit = true; // Submitdata is below
+        form.on('submit',SubmitData);
       });
+    };
 
-      form = await Formio.createForm(document.getElementById('builtform'),schema);
-      metaform = await Formio.createForm(document.getElementById('metaform'),
-      { components: [
+    function metaformChanged(data) {
+      // Called when something changes in the metaform.
+      //- console.log("metaformChanged",data);
+      if(((data.changed||{}).component||{}).key == "type") {
+        var type = data.changed.value;
+        console.log('reload for type',type);
+        // copy out any current changes to memory
+        component.type = type;
+        loadComponentForm(type,((form||{}).submission||{}).data || component.data);
+        searchForRecentSubmission();
+      }
+    }
+
+    function removeEmpty(inobj)
+    {
+      var obj = {...inobj};
+      Object.keys(obj).forEach(function(key) {
+        if (obj[key] && typeof obj[key] === 'object') { 
+          var subobj = removeEmpty(obj[key])
+          if(Object.keys(subobj).length == 0) delete obj[key];
+          else obj[key] = subobj;
+        }
+        else {
+          if (obj[key] == null) delete obj[key];
+          if (typeof obj[key] === 'string' && obj[key].length == 0) delete obj[key];
+        }
+      });
+      console.log("removeEmpty",inobj,obj);
+      return obj;
+    }
+
+    var recent = null;
+    function searchForRecentSubmission() {
+        $('#loadRecentData').hide();
+        $.post("/json/search/component/"+(component.type||"")+"?limit=1",
+               {
+                "insertion.user.user_id": "!{user.user_id}",
+               })
+         .then(function(recent_components) {
+          if(recent_components.length>0) {
+            var recent = recent_components.shift();
+            console.log("Got recent components",recent);
+            $('#loadRecentData').html(`Load data from last entry (${recent.type} / ${recent.name})`)
+            .show()
+            .data('recent-rec',recent);
+          }
+        });
+    }
+
+    function fillFromRecentSubission() {
+      var recent = $('#loadRecentData').data("recent-rec");
+      if(recent) {
+        $.get("/json"+recent.route).then(function(record){
+                if(!component.type) { 
+                    console.log("changing type and form data",record);
+                    metaform.submission = {data:{...metaform.submission.data,type:record.type}};
+
+                    loadComponentForm(record.type,record.data);
+                  } else {
+                    var current_data = removeEmpty({...form.submission.data})
+                    console.log("changing form data",current_data,record.data)
+                    // This SHOULD change only unchanged things. However, it appears that 
+                    // blank text boxes are evaluated to "" instead of being deleted.
+                    // FIXME: do this, but clean the record.data object of empty strings.
+                    form.submission = {data: {...record.data,...current_data}}
+                    //- form.submission = {data: {...form.submission.data}};
+                  }
+              })
+        }
+    }
+
+    $(async function() {
+      var metaform_schema = { components: [
+                        {
+                              "label": "Component Type",
+                              "labelPosition" : "left-right",
+                              "widget": "choicesjs",
+                              "tableView": true,
+                              "dataSrc": "url",
+                              "data": {
+                                "values": [
+                                  {
+                                    "label": "",
+                                    "value": ""
+                                  }
+                                ],
+                                "url": "/json/componentForms/list",
+                                "headers": [
+                                  {
+                                    "key": "",
+                                    "value": ""
+                                  }
+                                ]
+                              },
+                              "valueProperty": "formId",
+                              "template": "<span>{{ item.formName }}</span>",
+                              "selectThreshold": 0.3,
+                              "validate": {
+                                "required": true
+                              },
+                              "key": "type",
+                              "type": "select",
+                              "indexeddb": {
+                                "filter": {}
+                              },
+                              "selectValues": "results",
+                              "input": true,
+                              "disableLimit": false
+                        },
                         {
                             "label": "These changes take effect on:",
+                            "labelPosition" : "left-right",
                             "tableView": false,
                             "enableMinDateInput": false,
                             "datePicker": {
@@ -123,53 +241,49 @@ block extrascripts
                             },
                             "hideOnChildrenHidden": false
                         }
-      ] });
+      ] };
+
+
+      if(component.type) {        
+        console.log('loading type',component.type)
+        var type_select = FormioUtils.getComponent(metaform_schema.components,'type');
+        type_select.disabled= true;
+        type_select.type= "textfield";
+        loadComponentForm(component.type,component.data);
+      }
+      metaform = await Formio.createForm(document.getElementById('metaform'),metaform_schema);
+            
+
       var metaformdata = {...component};
       metaformdata.validity = metaformdata.validity||{};
       if(metaformdata.validity.version>=0) metaformdata.validity.version+=1;
 
-      // If the start date is in the past, make the new start date 'now'
-      if(metaformdata.validity.startDate) {
-        if(moment(metaformdata.validity.startDate).isBefore(moment())) 
-          metaformdata.validity.startDate = moment().toISOString();
-      } else {
-        metaformdata.validity.startDate = moment().toISOString();
-      }
-
+      // Make the new validity date 'now'
+      metaformdata.validity.startDate = moment().toISOString();
+ 
       metaform.submission = {data: metaformdata};
-
       metaform.nosubmit = true;
+      metaform.on("change",metaformChanged);      
 
-      form.submission = {data: component.data};
-      form.on('submit',SubmitData);
-      form.nosubmit = true; // Use the beforeSubmit hook.
+      // get a recent object that this user filled out.
+      // Do this only for new components:
+      if(Object.keys(component.data||{}).length==0) {
+        searchForRecentSubmission();
+        $("#loadRecentData").hide().on("click",fillFromRecentSubission);
+      }      
 
-      // Change the url to match
+      $('[data-toggle="popover"]').popover()
+    });
 
-      //- DrawQRCode($('#qrcode-canvas').get(0),"!{base_url}/"+componentUuid);
-
-      
-
-      }
-
-  style.
-    div#qr-code {
-    }
-    div#qr-code canvas {
-      border: 8px solid green;
-      border-radius: 8px;
-      width:100%;
-      height:auto
-    }
 block content
   .container-fluid
       h2#name
-          =(component.data)?("Editing " + component.type + ": " + (component.data.name||component.componentUuid.substr(0,8))):"New " + component.type
+          =(component.data)?("Editing " + component.type + ": " + (component.data.name||component.componentUuid.substr(0,8))):"New " + (component.type||"component")
       p Component UUID: 
         |
         =component.componentUuid
-      div 
-        +label-link
       #metaform
+      hr
+      button.btn.btn-warning.mb-2#loadRecentData(style="display:none", data-trigger="hover",data-toggle='popover',data-content="This button will load the content from the last component that you edited or created.")
       #builtform
 

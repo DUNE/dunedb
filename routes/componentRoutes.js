@@ -17,17 +17,17 @@ var router = express.Router();
 module.exports = router;
 
 // Pull up an existing component for editing or just viewing.
-console.log('regex',utils.uuid_regex);
-
 async function get_component(req,res) {
-
   try{
     // deal with shortened form or full-form
     var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
     console.log(get_component,componentUuid,req.params);
 
     var component = await Components.retrieveComponent(componentUuid);
-    if(!component) return res.status(400).send("No such component ID ",req.params.uuid);
+    if(!component) {
+      if(permissions.hasPermission(req,"components:create")) res.redirect("/"+componentUuid+"/edit");
+      return res.status(400).send("No such component ID "+req.params.uuid);
+    }
     // get other data in one go
     let [componentform, forms, tests] = await Promise.all([
         Forms.retrieve("componentForms",component.type),
@@ -46,7 +46,7 @@ async function get_component(req,res) {
       formrec: componentform,
       componentUuid:componentUuid,
       component: component,
-      canEdit: permissions.hasPermission("components:edit"),
+      canEdit: permissions.hasPermission(req,"components:edit"),
       forms: forms,
       tests: tests
     });
@@ -73,19 +73,16 @@ router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("componen
     console.log("Trying effective date",date)
   }
 
-  var dates = await Components.retrieveComponentChangeDates(componentUuid);
-
   // get form and data in one go
-  let [form, component] = await Promise.all([
+  let [form, component, dates] = await Promise.all([
       Forms.retrieve("componentForms","componentForms"),
       Components.retrieveComponent(componentUuid,date),
+      Components.retrieveComponentChangeDates(componentUuid)
     ]);
 
   // equal:
   // var component = await Components.findOne({componentUuid:req.params.uuid});
   // var form = await Forms.retrieve("componentForms","componentForms");
-  console.log("component")
-  console.log(component);
   if(!component) return res.status(400).send("No such component ID.");
   res.render("component_history.pug",{
     schema: form.schema,
@@ -103,25 +100,20 @@ async function edit_component(req,res) {
   console.log(get_component,componentUuid,req.params);
 
   var component = await Components.retrieveComponent(componentUuid);
-  var form =      await Forms.retrieve("componentForms",component.type);
+  if(!component || !component.type) {
+    // This component hasn't yet been registered. That's ok, it hasn't thrown an error,
+    // so the uuid is valid format, it just doesn't have a record attached.
+    // Return an editing form for a new component.
+    component = { componentUuid: componentUuid };
+    // return res.status(400).send("No such component ID.");
+  }
+  // Now done via ajax. Allows type change.
+  // var form =      await Forms.retrieve("componentForms",component.type);
 
-  var performed={};
-
-  // equal:
-  // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieve("componentForms","componentForms");
-  console.log("component")
-  console.log(component);
-  if(!component) return res.status(400).send("No such component ID.");
-
-  // Change the default effectivedate to now
-  component.effectiveDate = moment();
 
   res.render("component_edit.pug",{
-    schema: form.schema,
     componentUuid:componentUuid,
-    component: component,
-    canEdit: permissions.hasPermission("components:edit"),
+    component: component
   });
 }
 
@@ -269,4 +261,7 @@ router.get('/components/type/:type',permissions.checkPermission("components:view
 
 
 
+// Workflow: register new URLs, maybe many
+// router.get("")
+// 
 

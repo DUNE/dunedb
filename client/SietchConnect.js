@@ -17,6 +17,7 @@ function SietchConnect(config)
     // console.log(response);
     if(response.statusCode != 200) throw new Error('Error in connect(). Response code '+response.statusCode+'\n'+ response.body);
     this.token = response.body;
+    // console.log("got access token",this.token)
     return true;
   }
 
@@ -29,8 +30,10 @@ function SietchConnect(config)
           'content-type': 'application/json' },
       };
     // console.log("req",req);
-    if(data) req.body = JSON.stringify(data);
-    console.log('posting',req.body);
+    if(data) {
+      req.body = JSON.stringify(data);
+      // console.log('posting',req.body);
+    }
     var response = await util.promisify(request)(req);
     if(response.statusCode != 200) throw new Error("API call failed: \n"+(response.body));
     return JSON.parse(response.body);

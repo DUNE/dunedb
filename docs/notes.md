@@ -7,31 +7,15 @@
 - Then need to build map-reduce sets to allow fast lookup
 - Then need to build a gui
 
+### Feature
+- Organize views of component,test,job  by tags (somehow)
 
-
-
-### Features: authentication and authorization
-- Deal with user roles and permissions correctly
-  - DONE July 18 2020.  Users without any role get the 'user' role, which in development means all permissions.  Also, roles are now reported back to Sietch from auth0
-- Have info page for each user -> DONE July 28 
+### Fix:
 - Change m2m users: instead of storing in mongo, instead store in auth0.
   - The m2m creation script should do a createUser, with app_metadata including the secret
   - The m2m authorization script can then check with a getUser({username:"user","app_metadata.secret":"secret"});
-- Add timeout on m2m requests by ip to stop brute-force attacks
+  - Why? this allows consistency across deployments, means we have centralized user info
 
-### Feature:
-- Add tags to test and workflow -> Done
-- For tests, valid tags should include component types ->Done
-- Have a 'mothball' or 'trash' type so it doesn't show up. ->Done
-- Organize by tags - not done
-
-
-
-
-### Feature:
-- Search for components
-		- UI  -first pass done
-		- API
 
 
 # Updates - Meeting July 14 APA DB Group
@@ -119,4 +103,21 @@
 - Attempt to pull up a version of the form and allow partial entries with auto-lookup. DONE July 27 v 4.4
 - Rebuild simple search to do search all, allow all levels of searching - Done July 28
 - Document API -> Done
+
+### Features: authentication and authorization
+- Deal with user roles and permissions correctly
+  - DONE July 18 2020.  Users without any role get the 'user' role, which in development means all permissions.  Also, roles are now reported back to Sietch from auth0
+- Have info page for each user -> DONE July 28 
+- Add timeout on m2m requests by ip to stop brute-force attacks => Done July 29 2020
+
+### Feature:
+- Add tags to test and workflow -> Done
+- For tests, valid tags should include component types ->Done
+- Have a 'mothball' or 'trash' type so it doesn't show up. ->Done
+- Organize by tags - not done
+
+### Feature: Searching
+- Both simple and advanced search
+- API and API documentation
+- Done July 28 2020
 
