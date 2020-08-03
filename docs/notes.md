@@ -1,6 +1,11 @@
 
+
 # TODO
 
+### Feature: testing
+- Find a good test framework
+- Test API: insert/retrieve etc.
+- Test all endpoints don't throw errors for some basic queries
 
 ### Feature: track component ownership chains up-and-down with graphical interface
 - First need a data source to mimic what I want

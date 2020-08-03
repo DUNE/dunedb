@@ -289,7 +289,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
-    console.log("search request",req.params,req.body);
+    // console.log("search request",req.params,req.body);
     var searchterms = null;
     var matchobj = {...req.body};
     var formId = null;
@@ -318,18 +318,18 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
     if(!req.params.recordType || req.params.recordType === 'component') {
       if(formId) matchobj.type = formId;
       result.push(...await Components.search(searchterms,matchobj,limit,skip));
-      console.log("result",result);
+      // console.log("result",result);
     }
     if(!req.params.recordType ||req.params.recordType === 'test') {
       if(formId) matchobj.formId = formId;
-      console.log("matchobj",matchobj);
+      // console.log("matchobj",matchobj);
       result.push(...await Tests.search(searchterms,matchobj,limit,skip));
-      console.log("result",result);
+      // console.log("result",result);
     }
     if(!req.params.recordType || req.params.recordType === 'job') {
       if(formId) matchobj.formId = formId;
       result.push(...await Jobs.search(searchterms,matchobj,limit,skip));
-      console.log("result",result);
+      // console.log("result",result);
     }
     return res.json(result);
 
