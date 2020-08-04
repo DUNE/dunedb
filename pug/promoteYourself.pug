@@ -4,6 +4,16 @@ include common
 block vars
   - var page_title="Promote yourself";
 
+block extrascripts
+  script.
+    $(function(){
+      $('#user').on('keyup',function(){
+          if (event.key === "Enter") $('#password').focus();
+        });
+      $('#password').on('keyup',function(){
+          if (event.key === "Enter") $('#promotionForm').get(0).submit();
+        });
+    })
     
 
 block content
@@ -20,7 +30,7 @@ block content
           p Hints: tester access is the same as the generic DocDB DUNE username and password.
           p Admin access password is granted by Nathaniel.
 
-        form(method="POST")
+        form#promotionForm(method="POST")
           p
             label(for="#user") User
             input.form-control#user(name="user",type="text")
@@ -30,7 +40,7 @@ block content
             input.form-control#password(name="password",type="password")
 
           p 
-            input.btn.btn-info#submit(type="submit")
+            input.btn.btn-info#submitPromotion(type="submit")
 
         if(message)
           .alert.alert-danger=message
