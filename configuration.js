@@ -42,6 +42,7 @@ var defaults = {
       pass: "mailpassword",
     }    
   },
+  mail_from: "sietch@sietch.xyz",
   admin_email: "nathaniel.tagg@gmail.com",
 
   // used to encode JWT for m2m connections.
