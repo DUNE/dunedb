@@ -12,3 +12,4 @@ static/css/local.css
 pm2*.config.js
 *.log
 **/credentials*json
+test/cache

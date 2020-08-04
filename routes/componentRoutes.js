@@ -29,23 +29,26 @@ async function get_component(req,res) {
       return res.status(400).send("No such component ID "+req.params.uuid);
     }
     // get other data in one go
-    let [componentform, forms, tests] = await Promise.all([
+    let [formrec, forms, tests, relationships] = await Promise.all([
         Forms.retrieve("componentForms",component.type),
         Forms.list(),
-        Tests.listComponentTests(componentUuid)
+        Tests.listComponentTests(componentUuid),
+        Components.relationships(componentUuid),
       ]);
-    if(!componentform) throw new Error("Component form for type \""+component.type+"\" does not exist");
-    console.dir(forms);
+    if(!formrec) throw new Error("Component form for type \""+component.type+"\" does not exist");
+    // console.dir(forms);
     // console.log("component")
     // console.log(component);
     // console.log("tests");
     // console.log(tests);
     // console.log('componentForms');
     // console.log(componentform);
+    console.log(JSON.stringify(relationships,null,2));
     res.render("component.pug",{
-      formrec: componentform,
-      componentUuid:componentUuid,
-      component: component,
+      formrec,
+      componentUuid,
+      component,
+      relationships,
       canEdit: permissions.hasPermission(req,"components:edit"),
       forms: forms,
       tests: tests
@@ -253,7 +256,7 @@ router.get('/components/type',permissions.checkPermission("components:view"),
 router.get('/components/type/:type',permissions.checkPermission("components:view"),
   async function(req,res,next) {
         var type = decodeURIComponent(req.params.type);
-        var components = await Components.listAllOfType(type);
+        var components = await Components.listAllOfType(type,30);
         console.log(components);
         res.render("components.pug",{components,title:"Components of type <"+type+">"});
 

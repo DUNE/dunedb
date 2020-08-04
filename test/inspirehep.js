@@ -4,6 +4,8 @@
 var request = require('request');
 var util    = require('util');
 var SietchConnect = require('../client/SietchConnect.js');
+var fs = require('fs');
+var sanitize_filename = require("sanitize-filename");
 
 var arequest = util.promisify(request);
 var sietch = new SietchConnect(
@@ -22,6 +24,11 @@ function sleep(ms) {
 
 async function inspire(route)
 {
+  var cacheFileName = "./cache/" + sanitize_filename(route) + ".json";
+  if(fs.existsSync(cacheFileName)) {
+    var body = await fs.readFileSync(cacheFileName);
+    return JSON.parse(body);
+  }
   var now = new Date();
   if(now - delayTimer < 2100) {
     // need to wait.
@@ -30,8 +37,18 @@ async function inspire(route)
   }
   delayTimer = now;
   console.log("Querying",route);
-  var response = await arequest({method:"get", url:"https://inspirehep.net/api"+route});
-  return JSON.parse(response.body);
+  var response = {};
+  try {
+    response = await arequest({method:"get", url:"https://inspirehep.net/api"+route});
+    // cache it.
+    var obj = JSON.parse(response.body);
+    fs.writeFileSync(cacheFileName,response.body);
+    return obj;
+  } catch(e) {
+    console.log(e);
+    if(response.body) console.log(response.body);
+    throw e;
+  }
 }
 
 function clean_object(obj)
@@ -138,7 +155,9 @@ async function main()
 
           sietch.post(`/component/${author_uuid}`,sietch_author)
         }
-        sietch_paper.data.authors.push({componentUuid:author_uuid});
+        // push twice, just so I can see....
+        sietch_paper.data.authors.push({bai:bai,componentUuid:author_uuid});
+        sietch_paper.data.authors.push({bai:bai,componentUuid:author_uuid});
 
         // var need_to_do = true;
         // if(!people_to_do.includes(bai)) people_to_do.push(bai);

@@ -65,6 +65,14 @@ block content
     #builtform.col-md-8
       +createdFrom(component.createdFrom)
 
+    if((((relationships||{}).linkedFrom)||[]).length>0 )
+      .row
+        .col 
+          p Linked from
+          ul
+          each o in relationships.linkedFrom
+            li
+              a(href="/component/"+MUUID.from(o.componentUuid).toString())="/component/"+MUUID.from(o.componentUuid).toString()
     .row
       .col
         div
