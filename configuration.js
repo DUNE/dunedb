@@ -43,6 +43,11 @@ var defaults = {
     }    
   },
   admin_email: "nathaniel.tagg@gmail.com",
+
+  // used to encode JWT for m2m connections.
+  // generate with
+  // $ echo `openssl rand -base64 256`
+  m2m_secret='......'
 }
 
 
