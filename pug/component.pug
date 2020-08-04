@@ -72,7 +72,9 @@ block content
           ul
           each o in relationships.linkedFrom
             li
-              a(href="/component/"+MUUID.from(o.componentUuid).toString())="/component/"+MUUID.from(o.componentUuid).toString()
+              | #{o.type}:
+              a(href="/component/"+MUUID.from(o.componentUuid).toString()) #{o.name} 
+              | (#{o.path})
     .row
       .col
         div
