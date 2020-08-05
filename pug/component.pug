@@ -82,9 +82,6 @@ block content
 
         div
           +label-link
-
-      div#qr-code.col-md-4
-            +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
         
     hr
     .row
@@ -106,10 +103,28 @@ block content
         div
           ul.list-group#tests
               each info,formId in forms
-                // Check to see if tags on form match this component.
-                if(!info.tags || info.tags.length==0 || (info.tags.includes(component.type)&& !info.tags.includes("Trash")) )
+                // First, list specifically-matched ones:
+                if(((info||{}).tags||[]).includes(component.type)&& !info.tags.includes("Trash") )
                   li.list-group-item
                     a(href='/'+componentUuid+'/test/'+formId)
                       img.icon(src=info.icon)
                       =info.formName
+              each info,formId in forms
+                // Tests tagged as 'all'
+                if(((info||{}).tags||[]).includes("All")&& !info.tags.includes("Trash") )
+                  li.list-group-item
+                    a(href='/'+componentUuid+'/test/'+formId)
+                      img.icon(src=info.icon)
+                      =info.formName
+
+              each info,formId in forms
+                // Tests without tags
+                if(!info.tags || info.tags.length==0) 
+                  li.list-group-item
+                    a(href='/'+componentUuid+'/test/'+formId)
+                      img.icon(src=info.icon)
+                      =info.formName
+
+    div#qr-code.col-md-4
+            +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
 
