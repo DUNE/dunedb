@@ -72,6 +72,14 @@ body(class="deployment-"+deployment)
                   i.fa.fa-puzzle-piece("aria-hidden"="true")
                   | Components
 
+                ul.nav.flex-column.ml-3.sub-bar
+                    li.nav-item
+                      +navlink(href='/components/recent')
+                        |      Recent
+                    li.nav-item
+                      +navlink(href='/components/searchUuid')
+                        |      Find UUID
+
                 //- ul.nav.flex-column.ml-3.sub-bar
                 //-     if(user && user.permissions.includes("components:create"))
                 //-       li.nav-item

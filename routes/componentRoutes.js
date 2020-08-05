@@ -263,8 +263,20 @@ router.get('/components/type/:type',permissions.checkPermission("components:view
   });
 
 
+// List recently edited or created components
+router.get('/components/recent',permissions.checkPermission("components:view"),
+  async function(req,res,next) {
+        var type = decodeURIComponent(req.params.type);
+        var components = await Components.listAllOfType(null,30);
+        var forms = await Forms.list('componentForms');
+        console.log(components);
+        res.render("components.pug",{forms,components,title:"Redcently Edited Components",showType:true});
 
-// Workflow: register new URLs, maybe many
-// router.get("")
-// 
+  });
 
+// List recently edited or created components
+router.get('/components/searchUuid',permissions.checkPermission("components:view"),
+  async function(req,res,next) {
+        res.render("componentsByUuid.pug");
+
+  });

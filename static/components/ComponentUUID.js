@@ -173,7 +173,7 @@ class ComponentUUID extends TextFieldComponent{
     if(this.component.showCamera && !this.disabled)  {
       tpl += `<button type="button" class="btn btn-secondary btn-sm runQrCameraModel"><i class="fa fa-camera" title="Get QR code with your camera"></i></button>`;
     }
-    tpl += `<a href="${value}" style="flex:0 0 auto; padding:5px;" ref='linkToComponent' class="align-middle uuid-link" ></a>`;
+    tpl += `<a href="${value}" style="flex:0 0 auto; padding:5px;" ref='linkToComponent' class="hidden align-middle uuid-link" ></a>`;
     tpl += "</div>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
@@ -222,7 +222,9 @@ class ComponentUUID extends TextFieldComponent{
     flags = flags || {};
     const changed = super.setValue.call(this, value, flags);
 
-    if(this.refs.linkToComponent) $(this.refs.linkToComponent).prop('href','/'+value).text('link');
+    if(this.refs.linkToComponent && value) {
+      $(this.refs.linkToComponent).show().prop('href','/'+value).text('link');
+    }
 
     // if (changed) {
     //   this.redraw();

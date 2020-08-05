@@ -21,7 +21,14 @@ block content
     tbody
     each component in components
       -var uuid=MUUID.from(component.componentUuid).toString();
-      tr
+      tr          
+        if(showType)
+          td
+            if((forms[component.type]||{}).icon)
+              img.small-icon(src=forms[component.type].icon)
+
+          td #{component.type}
+
         td
           a(href='/'+uuid) #{component.name} 
         td
