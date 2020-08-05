@@ -20,6 +20,36 @@
     	color: red;
     }
 }
+/* uuid component */
+div.componentUuidComponent {
+  display:flex;
+
+  .main-input {
+    flex: 1 1 auto;
+  }
+  .runQrCameraModel {
+    @extend .btn;
+    @extend .btn-secondary ;
+    @extend .btn-sm;
+  }
+  .uuid-link {
+    display:none;
+    flex: 0 0 auto;
+    padding: 5px;
+    @extend .align-middle
+  }
+
+}
+
+.componentUuid-info {
+  @extend .float-right;
+  @extend .font-italic;
+  @extend .small;
+  color: #00F;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow:hidden;
+}
 
 /* use @mixins */
 .btn-custom {

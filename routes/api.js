@@ -64,6 +64,19 @@ router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('comp
   }
 );
 
+// GET /component/uuid
+// data format: none
+// retrieves component of given id, but lightweight
+router.get('/component/'+utils.uuid_regex+'/simple', permissions.checkPermissionJson('components:view'), 
+  async function(req,res){
+    // fresh retrival
+    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+    var component= await Components.retrieveComponent(componentUuid,null,null,
+      {type:1, "data.name":1, componentUuid:1, validity:1, insertion:1});
+    if(!component)  return res.status(400).json({error:"UUID not found"});
+    res.json(component);
+  }
+);
 
 
 // POST /component/uuid

@@ -258,7 +258,10 @@ router.get('/components/type/:type',permissions.checkPermission("components:view
         var type = decodeURIComponent(req.params.type);
         var components = await Components.listAllOfType(type,30);
         console.log(components);
-        res.render("components.pug",{components,title:"Components of type <"+type+">"});
+        res.render("components.pug",
+          {components,
+           title:"Components of type <"+type+">",
+           type});
 
   });
 

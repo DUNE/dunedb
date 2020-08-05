@@ -33,7 +33,10 @@ mixin NewTestForm
         .modal-body
           div
             | Enter the new form ID.
-            | Please use only alphanumerics and underscores
+            br
+            | This ID should have only underscores and alphanumerics.
+            br
+            | The human-readable name will be set on the next page.
             input.NewTestFormModalName.form-control(type="text")
         .modal-footer
           button.btn.btn-secondary(type="button", data-dismiss="modal") Close
@@ -60,7 +63,10 @@ mixin NewWorkflowForm
         .modal-body
           div
             | Enter the new form ID.
-            | Please use only alphanumerics and underscores
+            br
+            | This ID should have only underscores and alphanumerics.
+            br
+            | The human-readable name will be set on the next page.
             input.NewWorkflowFormModalName.form-control(type="text")
         .modal-footer
           button.btn.btn-secondary(type="button", data-dismiss="modal") Close

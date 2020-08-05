@@ -101,6 +101,10 @@ This sets the component to the new information provided. The body of the post sh
 }
 ```
 
+
+#### POST  /api/component/123456789-abcd-1234-1234-123456789abcd/simple
+As above, but only reports type, data.name, validity, and insertion. 
+
 ## API calls related to Forms
 
 A form describes a [Formio.js](https://github.com/formio/formio.js) schema allowing data entry or formatted data viewing.

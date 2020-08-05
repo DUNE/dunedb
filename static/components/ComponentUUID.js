@@ -126,7 +126,7 @@ class ComponentUUID extends TextFieldComponent{
       "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
       "tooltip": "Database component UUID. Found on QR code.",
       "inputMask": "********-****-****-****-************",
-      "validateOn": "blur",
+      "validateOn": "change",
       "validate": {
         "pattern": "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
         "customMessage": "Needs to be hexadecimal in 8-4-4-4-12 layout",
@@ -166,15 +166,16 @@ class ComponentUUID extends TextFieldComponent{
     }
     textvalue = textvalue || '';
 
-    var tpl = "<div style='display:flex'>"; 
-    tpl += "<div style='flex:1 1 auto;'>";
+    var tpl = "<div class='componentUuidComponent'>"; 
+    tpl += "<div class='main-input'>";
     tpl += super.renderElement(textvalue,index);
     tpl += "</div>";
     if(this.component.showCamera && !this.disabled)  {
-      tpl += `<button type="button" class="btn btn-secondary btn-sm runQrCameraModel"><i class="fa fa-camera" title="Get QR code with your camera"></i></button>`;
+      tpl += `<button type="button" class="runQrCameraModel"><i class="fa fa-camera" title="Get QR code with your camera"></i></button>`;
     }
-    tpl += `<a href="${value}" style="flex:0 0 auto; padding:5px;" ref='linkToComponent' class="hidden align-middle uuid-link" ></a>`;
+    // tpl += `<a href="${value}" ref='linkToComponent' class="uuid-link" ></a>`;
     tpl += "</div>";
+    tpl += "<a ref='compUuidInfo' class='componentUuid-info'></div>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
   }
@@ -185,45 +186,63 @@ class ComponentUUID extends TextFieldComponent{
     /// .. just like a text area...
     var superattach = super.attach(element);
     // console.log('my attach',this,this.refs.input,element,$(this.refs.input[0]).val());
-    this.loadRefs(element, {linkToComponent: 'single'});
+    this.loadRefs(element, {//linkToComponent: 'single',
+                            compUuidInfo: 'multiple',
+                           });
 
     var self = this; // for binding below
 
 
    // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
     if(this.component.showCamera) {
-      $('.runQrCameraModel',element).click(function(){
-        runQrCameraModel(function(uuid) {
-          self.setValueAt(0,uuid);
-        })
+      $('.runQrCameraModel',element).each(function(index){
+        // set up for each button
+        $(this).click(function(){
+            runQrCameraModel(function(uuid) {
+            self.setValueAt(index,uuid);
+          })
+        });
       });
     }
+    console.log("refs.input",this.refs.input);
     if(this.component.autocomplete) {
-      $(this.refs.input).autoComplete({
-        resolverSettings: {
-          minLength: 3,
-            url: '/autocomplete/uuid'
-        }
-      }).on('autocomplete.select', function (evt, item) {
-        // console.log("autocomplete select",item.val,item.text);
-        $(this).val(item.val);
-        self.setValue(item.val);
-        self.triggerChange({
-              modified: true,
-          });
+      $(this.refs.input).each(function(index) {
+        $(this).autoComplete({
+          resolverSettings: {
+            minLength: 3,
+              url: '/autocomplete/uuid'
+          }
+        }).on('autocomplete.select', function (evt, item) {
+          // console.log("autocomplete select",item.val,item.text);
+          $(this).val(item.val);
+          console.log('setting index',index,item.val,this);
+          self.setValueAt(index,item.val);
+          // $(this).blur();
+          self.updateValue();
+          // self.triggerChange({
+          //       modified: true,
+          //   });
          // console.log(self);
-      });
+        });
+      })
     }
 
     return superattach;
   }
 
- setValue(value, flags) {
-    flags = flags || {};
-    const changed = super.setValue.call(this, value, flags);
+ setValueAt(index, value,flags) {
+    // flags = flags || {};
+    const changed = super.setValueAt.call(this, index, value);
 
-    if(this.refs.linkToComponent && value) {
-      $(this.refs.linkToComponent).show().prop('href','/'+value).text('link');
+    // if(this.refs.linkToComponent && value && value.length==36) {
+    //   $(this.refs.linkToComponent).show().prop('href','/'+value).text('link');
+    // }
+    if(this.refs.compUuidInfo && value && value.length==36) {
+      var info_target = $(this.refs.compUuidInfo[index]);
+      info_target.show().prop('href','/'+value).text('link');
+      $.get('/json/component/'+value).then(function(component){
+        info_target.text(component.type +": "+ component.data.name);
+      })
     }
 
     // if (changed) {
