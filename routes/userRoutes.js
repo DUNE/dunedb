@@ -58,7 +58,7 @@ var limiter = require('express-limiter-mongo')(
   }
 );
 router.post("/promoteYourself",
-  permissions.checkPermission("components:view"),
+  // permissions.checkPermission("components:view"),
   limiter,
   async function(req,res,next) {
       console.log(req.body,global.config.self_promotion)
