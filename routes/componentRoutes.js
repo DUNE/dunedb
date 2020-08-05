@@ -39,7 +39,7 @@ async function get_component(req,res) {
     // console.dir(forms);
     // console.log("component")
     // console.log(component);
-    // console.log("tests");
+    console.log("tests",tests);
     // console.log(tests);
     // console.log('componentForms');
     // console.log(componentform);
@@ -49,9 +49,9 @@ async function get_component(req,res) {
       componentUuid,
       component,
       relationships,
+      forms,
+      tests,
       canEdit: permissions.hasPermission(req,"components:edit"),
-      forms: forms,
-      tests: tests
     });
   } catch (err) {
     console.error(err);
