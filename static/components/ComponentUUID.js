@@ -175,7 +175,7 @@ class ComponentUUID extends TextFieldComponent{
     }
     // tpl += `<a href="${value}" ref='linkToComponent' class="uuid-link" ></a>`;
     tpl += "</div>";
-    tpl += "<a ref='compUuidInfo' class='componentUuid-info'></div>";
+    tpl += "<a ref='compUuidInfo' class='componentUuid-info'></a>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
   }
