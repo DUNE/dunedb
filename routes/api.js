@@ -1,4 +1,5 @@
 // Pull component data as json doc.
+"use strict";
 const express = require("express");
 const Forms = require("../lib/Forms.js");
 const Components = require("../lib/Components.js");
@@ -10,6 +11,7 @@ const utils = require("../lib/utils.js");
 const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
 const pretty = require('express-prettify');
+var MUUID = require('uuid-mongodb');
 
 var router = express.Router();
 module.exports = router;
@@ -64,8 +66,8 @@ router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('comp
   }
 );
 
-// GET /component/uuid
-// data format: none
+// GET /component/uuid/simple
+// data format: component, but only small projection.
 // retrieves component of given id, but lightweight
 router.get('/component/'+utils.uuid_regex+'/simple', permissions.checkPermissionJson('components:view'), 
   async function(req,res){
@@ -75,6 +77,23 @@ router.get('/component/'+utils.uuid_regex+'/simple', permissions.checkPermission
       {type:1, "data.name":1, componentUuid:1, validity:1, insertion:1});
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);
+  }
+);
+
+router.get('/component/'+utils.uuid_regex+'/relationships', permissions.checkPermissionJson('components:view'), 
+  async function(req,res){
+    // fresh retrival
+    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+    var relationships = await Components.relationships(componentUuid);
+    if(!relationships)  return res.status(400).json({error:"UUID not found"});
+    for(var elem of relationships.linkedFrom) {
+      elem.componentUuid = MUUID.from(elem.componentUuid).toString();
+    }
+    for(var elem of relationships.linkedTo) {
+      elem.componentUuid = MUUID.from(elem.componentUuid).toString();
+    }
+    console.log("relationships",relationships);
+    res.json(relationships);
   }
 );
 
