@@ -19,6 +19,7 @@ import json
 # import urllib.request
 from six.moves.urllib.request import urlopen
 from six.moves.urllib.request import Request
+from six.moves.urllib.error import HTTPError
 
 class SietchConnect:
   def __init__(self, credentials_file="sietch.creds"):
@@ -61,7 +62,7 @@ class SietchConnect:
     req = Request(url,data=encoded_data,headers=headers)
     try:
       response = urlopen(req)
-    except urllib.error.HTTPError as err:
+    except HTTPError as err:
       try:
         r = err.read()
         sietchResp = json.loads(r)

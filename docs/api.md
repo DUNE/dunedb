@@ -170,12 +170,15 @@ Required permissions: "tests:submit" or "jobs:submit" respectively
 Submits new test data. Format must be as follows:
 ```
 {
-  formId: <string>,     // The ID of the form corresponding to this 
-  formName: <string>,   // The name of the form, should match as above.
-  formObjectId: <hex string>, // The ObjectID of the _id of the form object used to create this test data.
   componentUuid: "123456789-abcd-1234-1234-123456789abcd", // Component UUID of the tested component. Omit for a Job record.
-  data: {...},    // form data
-  metadata: {...} // optional
+  formId: <string>,     // The ID of the form corresponding to this 
+
+  formName: <string>,   // Optional. If not set, current (latest) form name is used.
+  formObjectId: <hex string>, // Optional. The ObjectID of the _id of the form object used to create this test data. If not, the current (latest) version of the form is used
+
+  data: {...},    // required: form data
+
+  metadata: {...} // optional.  Can contain things like user script version.
 }
 ``` 
 
