@@ -11,17 +11,21 @@
 # New method:
 # Send a big auth token to Sietch
 # Seitch replies with a
+from __future__ import print_function    # (at top of module)
 
 import json
-import random
-import timeit
-import urllib.request
+# import random
+# import timeit
+# import urllib.request
+from six.moves.urllib.request import urlopen
+from six.moves.urllib.request import Request
 
 class SietchConnect:
   def __init__(self, credentials_file="sietch.creds"):
     with open(credentials_file) as json_file:
       self.config = json.load(json_file)
-    print(self.config)
+    
+    # print(self.config)
 
     self.connect()
     # 
@@ -38,10 +42,11 @@ class SietchConnect:
     url = self.config['url'] + "/machineAuthenticate"
     headers = { 'Content-Type': 'application/json'}
     data = json.dumps(self.config["client_credentials"]).encode("utf-8")
-    req = urllib.request.Request(url,data,headers)
-    response = urllib.request.urlopen(req)
-    if(response.status!=200):
-      raise Exception("Could not authenticate against Sietch server "+response.status)
+    req = Request(url,data,headers)
+    try:
+      response = urlopen(req)
+    except Exception as e:
+      raise Exception("Could not authenticate against Sietch server")
     self.access_token = response.read().decode("utf-8")
     print("Connected!")
 
@@ -53,9 +58,9 @@ class SietchConnect:
     encoded_data = None
     if(data is not None):
       encoded_data = json.dumps(data).encode("utf-8")
-    req = urllib.request.Request(url,data=encoded_data,headers=headers)
+    req = Request(url,data=encoded_data,headers=headers)
     try:
-      response = urllib.request.urlopen(req)
+      response = urlopen(req)
     except urllib.error.HTTPError as err:
       try:
         r = err.read()
