@@ -50,6 +50,9 @@ function DrawQRCodes(){
 
       var ecl = qrcodegen.QrCode.Ecc.HIGH;
       var minVersion = 8; // 8; // Determines size, but adds correction bits.
+      if(short) {
+        minVersion = 1; // not quite so many bits.
+      }
      if(lowres){
         ecl = qrcodegen.QrCode.Ecc.LOW;
         minVersion = 1; // 8; // Determines size, but adds correction bits.
