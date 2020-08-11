@@ -59,7 +59,7 @@ router.get('/generateComponentUuid/:format(svg|url)?', permissions.checkPermissi
 router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
   async function(req,res){
     // fresh retrival
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+    var componentUuid = req.params.uuid;
     var component= await Components.retrieveComponent(componentUuid);
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);
@@ -71,7 +71,7 @@ router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('comp
 // As above.
 router.get('/'+utils.short_uuid_regex, permissions.checkPermissionJson('components:view'), 
   async function(req,res){
-    var componentUuid = shortuuid.toUUID(req.params.shortuuid)
+    var componentUuid = utils.unshortenUuid(req.params.shortuuid);
     var component= await Components.retrieveComponent(componentUuid);
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);
