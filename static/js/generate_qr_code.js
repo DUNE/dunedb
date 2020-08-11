@@ -16,7 +16,8 @@ function ResizeQrText() {
 function DrawQRCodes(){
   // lowres = false means lots of error correction, 
   // lowres = true means low-res, easier to see
-  var lowres = ! $('#qr-error-safe').is(":checked");
+  var lowres = $('#qr-error-safe').is(":not(:checked)");
+  var short = true;
   canvases = $("canvas.qr-code");
 
   // newer version: no text in canvas, use CSS to do that instead.
@@ -25,6 +26,24 @@ function DrawQRCodes(){
       var canvas = this;
       var text = $(canvas).data('qr-text');
       var desc = $(canvas).data('qr-desc');
+
+      // if using short code, then reformat the text for the QR.
+      if(short) {
+        var regex_match = text.match(/(([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}))/);
+        if(regex_match && regex_match[0]) {
+          var uuid = regex_match[0];
+          // this uses base58 encoding, which usually will yield 21 to 22 characters.
+          var short_uuid = ShortUUID().fromUUID(uuid);
+          // pad the short code to 22 characters, to ensure matching.
+          var padded = short_uuid.padEnd(22,'-'); 
+          text = text.substr(0,regex_match.index) + short_uuid + text.substr(regex_match.index+regex_match[0].length);
+
+        } else {
+          // Whaaaaat?
+          console.error('couldnt find the UUID')
+        }
+
+      }
       console.log("Drawing QR code",text,desc,lowres);
 
       var segs = qrcodegen.QrSegment.makeSegments(text);

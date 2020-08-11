@@ -1,7 +1,6 @@
 // pug routes
 const chalk = require('chalk');
 const express = require('express');
-const shortuuid = require('short-uuid')();
 const MUUID = require('uuid-mongodb');
 const moment = require('moment');
 

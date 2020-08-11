@@ -20,7 +20,7 @@ module.exports = router;
 async function get_component(req,res) {
   try{
     // deal with shortened form or full-form
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+    var componentUuid = req.params.uuid;
     console.log(get_component,componentUuid,req.params);
 
     var component = await Components.retrieveComponent(componentUuid);
@@ -59,9 +59,12 @@ async function get_component(req,res) {
   }
 }
 router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
-router.get('/'+utils.short_uuregex, permissions.checkPermission("components:view"), get_component);
 router.get('/component/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
-router.get('/component/'+utils.short_uuregex, permissions.checkPermission("components:view"), get_component);
+
+// allow short UUIDs
+router.get('/'+utils.short_uuid_regex,function(req,res,next) {
+  res.redirect('/component/'+utils.unshortenUuid(req.params.shortuuid));
+});
 
 
 

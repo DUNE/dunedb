@@ -66,6 +66,31 @@ router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('comp
   }
 );
 
+
+// GET /<shortuuid>
+// As above.
+router.get('/'+utils.short_uuid_regex, permissions.checkPermissionJson('components:view'), 
+  async function(req,res){
+    var componentUuid = shortuuid.toUUID(req.params.shortuuid)
+    var component= await Components.retrieveComponent(componentUuid);
+    if(!component)  return res.status(400).json({error:"UUID not found"});
+    res.json(component);
+  }
+);
+
+
+// GET /<componentUuid>
+// As above.
+router.get('/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
+  async function(req,res){
+    var componentUuid = shortuuid.toUUID(req.params.shortuuid)
+    var component= await Components.retrieveComponent(componentUuid);
+    if(!component)  return res.status(400).json({error:"UUID not found"});
+    res.json(component);
+  }
+);
+
+
 // GET /component/uuid/simple
 // data format: component, but only small projection.
 // retrieves component of given id, but lightweight
