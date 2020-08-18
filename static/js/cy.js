@@ -31,7 +31,8 @@ async function getRel(cy,uuid) {
   var col =  cy.collection();
   col = col.union(cy.add(toAdd));
   var layout = cy.layout(layoutOpts);
-  layout.run(col);
+  // layout.run(col);
+  layout.run();
   // layout.run()
   // col.layout(layoutOpts).run();
   // layout.run(col);
@@ -53,7 +54,7 @@ $(function(){
   //   for(var )
   // }
 
-  layoutOpts= {name:"cose"};
+  layoutOpts= {name:"cose", animate: "end"};
 
   cy = cytoscape({
     container: document.getElementById('cy'),

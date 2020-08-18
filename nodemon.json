@@ -1,4 +1,4 @@
 {
-	"ignore": "node_modules/**,test/*",
+	"ignore": ["node_modules/**" , "test/*" , "static/**"],
 	"ext": "js,json"
 }

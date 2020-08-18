@@ -4,7 +4,7 @@ extend default
 include common
 
 block vars
-  - page_title="Label "+component.name;
+  - page_title="Label for "+(component.data.name||component.type||component.componentUuid);
 
 block extrascripts
   link(rel='stylesheet' href='/css/qr.css')

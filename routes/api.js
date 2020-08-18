@@ -111,11 +111,13 @@ router.get('/component/'+utils.uuid_regex+'/relationships', permissions.checkPer
     var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
     var relationships = await Components.relationships(componentUuid);
     if(!relationships)  return res.status(400).json({error:"UUID not found"});
-    for(var elem of relationships.linkedFrom) {
-      elem.componentUuid = MUUID.from(elem.componentUuid).toString();
+    for(var i in relationships.linkedFrom) {
+      var list = relationships.linkedFrom[i];
+      for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
     }
-    for(var elem of relationships.linkedTo) {
-      elem.componentUuid = MUUID.from(elem.componentUuid).toString();
+    for(var i in relationships.linkedTo) {
+      var list = relationships.linkedTo[i];
+      for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
     }
     console.log("relationships",relationships);
     res.json(relationships);
