@@ -50,7 +50,7 @@ $(async function(){
   (function()
     {
     console.log("data.nodes",data.nodes);
-    links2 = data.links.map(d => Object.create(d)); // list of empty object, same length as data.links
+    links2 = data.links.map(d => Object.create(d)); // list of empty object, but with prototype (default) values of data.links.
     nodes2 = data.nodes.map(d => Object.create(d)); // ditto nodes.
     const simulation = d3.forceSimulation(nodes2)
         .force("link", d3.forceLink(links2).id(d => d.id))

@@ -107,20 +107,25 @@ router.get('/component/'+utils.uuid_regex+'/simple', permissions.checkPermission
 
 router.get('/component/'+utils.uuid_regex+'/relationships', permissions.checkPermissionJson('components:view'), 
   async function(req,res){
+  try{
     // fresh retrival
     var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
     var relationships = await Components.relationships(componentUuid);
     if(!relationships)  return res.status(400).json({error:"UUID not found"});
-    for(var i in relationships.linkedFrom) {
-      var list = relationships.linkedFrom[i];
-      for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
-    }
-    for(var i in relationships.linkedTo) {
-      var list = relationships.linkedTo[i];
-      for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
-    }
-    console.log("relationships",relationships);
+    // for(var i in relationships.linkedFrom) {
+    //   var list = relationships.linkedFrom[i];
+    //   for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
+    // }
+    // for(var i in relationships.linkedTo) {
+    //   var list = relationships.linkedTo[i];
+    //   for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
+    // }
+    // console.log("relationships",relationships);
     res.json(relationships);
+  } catch(err) {
+      console.error(err);
+      res.status(400).json({error:"Save failure "+err.toString()})
+    }  
   }
 );
 
