@@ -145,7 +145,7 @@ router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('com
     record.componentUuid = componentUuid; // Ensure that record is keyed with URL route
     try {
       console.log("saving component",record);
-      data = await Components.saveComponent(record,req);
+      var data = await Components.saveComponent(record,req);
       return res.json(data);
     } catch(err) {
       console.error(err);
