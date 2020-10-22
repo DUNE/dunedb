@@ -10,6 +10,7 @@ var defaults = {
   deployment: 'laptop',  // laptop, devsite, or production. Passed to Pug to get templates right.
   my_url : "http://localhost:12313/", // url of this instance
   http_server_port: 12313, // port we're running on
+  trust_proxy: true,
 
   // must include DB name.
   mongo_uri : "mongodb://localhost/sietch_dev", 

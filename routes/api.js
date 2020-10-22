@@ -194,11 +194,11 @@ router.get('/componentTypes', permissions.checkPermissionJson('components:view')
 
 router.get('/componentTypesTags', permissions.checkPermissionJson('components:view'), 
   async function(req,res,next){
-    // FIXME, add search terms
+    console.log("Type tags",)
     try {
       var data = await Forms.list("componentForms");
       var list=[{formId:"Trash"}];
-      for(key in data) {
+      for(var key in data) {
         list.push(data[key]);
       }
       return res.json(list);
