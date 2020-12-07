@@ -123,8 +123,11 @@ app.set('views','pug');
 const MongoStore = require('connect-mongo')(session);
 app.use(session({
           store: new MongoStore({
-                  url: 'mongodb://localhost/sessions2',
-                  mongoOptions: {} // See below for details
+                  url: config.mongo_uri,
+                  dbName: config.mongo_db,
+                  collection:"sessionStore",
+                  // url: 'mongodb://localhost/sessions2',
+                  // mongoOptions: {} // See below for details
                   }),
           secret: config.localsecret, // session secret
           resave: false,
