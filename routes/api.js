@@ -145,7 +145,7 @@ router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('com
     record.componentUuid = componentUuid; // Ensure that record is keyed with URL route
     try {
       console.log("saving component",record);
-      data = await Components.saveComponent(record,req);
+      var data = await Components.saveComponent(record,req);
       return res.json(data);
     } catch(err) {
       console.error(err);
@@ -194,11 +194,11 @@ router.get('/componentTypes', permissions.checkPermissionJson('components:view')
 
 router.get('/componentTypesTags', permissions.checkPermissionJson('components:view'), 
   async function(req,res,next){
-    // FIXME, add search terms
+    console.log("Type tags",)
     try {
       var data = await Forms.list("componentForms");
       var list=[{formId:"Trash"}];
-      for(key in data) {
+      for(var key in data) {
         list.push(data[key]);
       }
       return res.json(list);

@@ -16,18 +16,18 @@ block content
             td
               img.icon(src=info.icon)
             td=(info.formName || formId)
-            if(user && user.permissions.includes("tests:submit"))
+            if(permissions.userHas(user,"tests:submit"))
               td
                 a(href='/test/'+formId).btn.btn-outline-primary Run
-            if(user && user.permissions.includes("tests:view"))
+            if(permissions.userHas(user,"tests:view"))
               td
                 a(href='/tests/'+formId).btn.btn-outline-secondary Recent
-            if(user && user.permissions.includes("forms:edit"))
+            if(permissions.userHas(user,"forms:edit"))
               td
                 a(href='/EditTestForm/'+formId).btn.btn-outline-warning Edit
 
 
-  if(user && user.permissions.includes("forms:edit"))
+  if(permissions.userHas(user,"forms:edit"))
     p.h5.mt-4
      +NewTestForm
 
@@ -43,12 +43,12 @@ block content
                   td
                     img.icon(src=info.icon)
                   td=(info.formName || formId)
-                  if(permissions.userHas(user,"jobs:submit"))
+                  if(permissions.userHas(user,"tests:submit"))
                     td
                       a(href='/job/'+formId).btn.btn-outline-primary Run
-                  if(permissions.userHas(user,"jobs:view"))
+                  if(permissions.userHas(user,"tests:view"))
                     td
                       a(href='/jobs/'+formId).btn.btn-outline-secondary Recent
                   if(permissions.userHas(user,"forms:edit"))
                     td
-                      a(href='/EditWorkflowForm/'+formId).btn.btn-outline-warning Edit
+                      a(href='/EditTestForm/'+formId).btn.btn-outline-warning Edit
