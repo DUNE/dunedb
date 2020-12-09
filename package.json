@@ -70,6 +70,7 @@
     "short-uuid": "^3.1.1",
     "showdown": "^1.9.1",
     "ts-tracking-number": "^1.0.10",
+    "uuid": "^8.3.2",
     "uuid-mongodb": "^2.3.0",
     "vm2": "^3.9.2",
     "xlsx": "^0.16.4",

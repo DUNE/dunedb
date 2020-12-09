@@ -12,12 +12,12 @@ var defaults = {
   http_server_port: 12313, // port we're running on
   trust_proxy: true,
 
+  mongo_connection: [
+    "mongodb://localhost", 
+    {useNewUrlParser:true, useUnifiedTopology: true, connectTimeoutMS: 100, socketTimeoutMS: 30000, reconnectTries: 30000},
+  ],
   // must include DB name.
-  mongo_uri : "mongodb://localhost/sietch_dev", 
-  // For authentication, use mongodb://user:pass@hostname
-  mongo_options: {useNewUrlParser:true, useUnifiedTopology: true, connectTimeoutMS: 100, socketTimeoutMS: 30000, reconnectTries: 30000},
-  // https_server_port: 12314, // port we're running on
-
+  mongo_db: "sietch_dev",
   localsecret: "this is a very well-kept secret", // for various local salting
 
 
