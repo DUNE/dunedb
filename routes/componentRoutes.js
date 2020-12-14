@@ -23,7 +23,7 @@ async function get_component(req,res) {
     var componentUuid = req.params.uuid;
     console.log(get_component,componentUuid,req.params);
 
-    var component = await Components.retrieveComponent(componentUuid);
+    var component = await Components.retrieve(componentUuid);
     if(!component) {
       if(permissions.hasPermission(req,"components:create")) res.redirect("/"+componentUuid+"/edit");
       return res.status(400).send("No such component ID "+req.params.uuid);
@@ -82,7 +82,7 @@ router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("componen
   // get form and data in one go
   let [form, component, dates] = await Promise.all([
       Forms.retrieve("componentForms","componentForms"),
-      Components.retrieveComponent(componentUuid,date),
+      Components.retrieve(componentUuid,date),
       Components.retrieveComponentChangeDates(componentUuid)
     ]);
 
@@ -105,7 +105,7 @@ async function edit_component(req,res) {
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
   console.log(get_component,componentUuid,req.params);
 
-  var component = await Components.retrieveComponent(componentUuid);
+  var component = await Components.retrieve(componentUuid);
   if(!component || !component.type) {
     // This component hasn't yet been registered. That's ok, it hasn't thrown an error,
     // so the uuid is valid format, it just doesn't have a record attached.
@@ -129,7 +129,7 @@ router.get('/'+utils.short_uuid_regex+'/edit', permissions.checkPermission("comp
 
 async function component_label(req,res,next) {
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  component = await Components.retrieveComponent(componentUuid);
+  component = await Components.retrieve(componentUuid);
   if(!component) return res.status(404).send("No such component exists yet in database");
   console.log({component: component});
   res.render('label.pug',{component: component});
@@ -176,12 +176,12 @@ async function ensureTypeFormExists(type,req,res) {
     };
 
     // Do any components exist for this type? if not, let's do automagic!
-    var exists = await Components.getComponents(type);
+    var exists = await Components.list({type:type},{limit:1});
     console.log(chalk.red('exists'),exists);
     if(exists && exists[type] && exists[type].length>0) {
         var records = [];
         for(var c of exists[type]) {
-          records.push(await Components.retrieveComponent(c.componentUuid));
+          records.push(await Components.retrieve(c.componentUuid));
         }
         var auto = automaticallyCreateSchema(records);
         newform.schema = auto;
@@ -259,7 +259,7 @@ router.get('/components/type',permissions.checkPermission("components:view"),
 router.get('/components/type/:type',permissions.checkPermission("components:view"),
   async function(req,res,next) {
         var type = decodeURIComponent(req.params.type);
-        var components = await Components.listAllOfType(type,30);
+        var components = await Components.list({type:type},{limit:30});
         console.log(components);
         res.render("components.pug",
           {components,
@@ -273,7 +273,7 @@ router.get('/components/type/:type',permissions.checkPermission("components:view
 router.get('/components/recent',permissions.checkPermission("components:view"),
   async function(req,res,next) {
         var type = decodeURIComponent(req.params.type);
-        var components = await Components.listAllOfType(null,30);
+        var components = await Components.list(null,{limit:30});
         var forms = await Forms.list('componentForms');
         console.log(components);
         res.render("components.pug",{forms,components,title:"Redcently Edited Components",showType:true});

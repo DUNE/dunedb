@@ -35,9 +35,9 @@ class CustomGeoTagComponent extends Formio.Components.components.input{
       documentation: '#', 
       schema: this.schema()
     };
-  }
+  };
 
-  render = function(element) {
+  render(element) {
     // console.log("rendering",this,element);
     var tpl = '';
     tpl += this.renderTemplate('label', {

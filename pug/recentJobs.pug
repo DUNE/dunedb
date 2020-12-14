@@ -6,19 +6,26 @@ block content
   h2 Recently completed jobs:
 
   table.table
-    each test in tests
+    each job in jobs
         tr
+            -console.log(job)
+            -var info = formInfo[job.formId];
             td
-              if(test.info.icon)
-                img.icon(src=test.info.icon)
+              if(info)
+                img.icon(src=info.icon)
             td 
-              a(href=`/job/${test._id}`) #{(test.form||{}).formName||test.formId}
+              a(href=`/job/${job.jobId}`) #{(job.form||{}).formName||job.formId}
+
+            td 
+              a(href=`/job/edit/${job.jobId}`) Edit
             
-            td #{moment(test.insertDate).format()} (#{moment(test.insertDate).fromNow()})
+            td #{moment(job.last_edited).format()} (#{moment(job.last_edited).fromNow()})
+
+            td=job.state
 
             td
-               +short_user(test.user)
+               +short_user(job.user)
             td
-                a(href=`/json/job/${test._id}?pretty`) JSON data
+                a(href=`/json/job/${job.jobId}?pretty`) JSON data
 
 

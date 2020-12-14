@@ -5,7 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -73,10 +73,13 @@
     "uuid": "^8.3.2",
     "uuid-mongodb": "^2.3.0",
     "vm2": "^3.9.2",
+    "why-is-node-running": "^2.2.0",
     "xlsx": "^0.16.4",
     "yargs": "^15.4.1"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.14.0"
+    "@fortawesome/fontawesome-free": "^5.14.0",
+    "jest": "^26.6.3",
+    "supertest": "^6.0.1"
   }
 }

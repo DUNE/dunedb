@@ -1,7 +1,7 @@
 # Internal Mongo Schemas
 
 
-## Schema version 4.2
+## Schema version 5
 
 Here I wanted more consistency between different records. 
 ### Record layout
@@ -33,7 +33,7 @@ All records (forms, components, test, jobs) should have this block.
 #### Common block: User
 Used in the Insertion block, above.
 ```
-insertion: {
+user: {
   displayName: <String>,         // Printable name
   user_id:   <string>,           // auth0 user_id 
   emails: [ <string>, ...]       // email list
@@ -46,7 +46,7 @@ All records that evolve (components, forms) should have this.
 validity: {
   startDate: <Date>       // Date this version becomes active
   version: <integer>	    // version number for validity; later numbers are more correct
-  changedFrom: <ObjectId> // Row number of the last version of this form. SHOULD be version-1...
+  ancestor_id: <ObjectId> // _id  of the version edited to create this one. 
 }
 ```
 

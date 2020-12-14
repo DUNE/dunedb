@@ -60,23 +60,40 @@ router.get("/promoteYourself",
 //   }
 // );
 
-var limiter = require('express-bouncer')(500,10*60*1000,3);
+// var limiter = require('express-bouncer')(500,10*60*1000,3);
 
-limiter.blocked = function(req,res,next,remaining) {
-  res.status(429);
-  res.send("Too many requests have been made, " +
-    "please wait " + Math.floor(remaining / 1000) + " seconds");
-};
+// limiter.blocked = function(req,res,next,remaining) {
+//   res.status(429);
+//   res.send("Too many requests have been made, " +
+//     "please wait " + Math.floor(remaining / 1000) + " seconds");
+// };
 
 router.post("/promoteYourself",
-  limiter.block,
-  // permissions.checkPermission("components:view"),
+  permissions.ensureAuthenticated, // you can only promote if you're logged in.
   // limiter,
   async function(req,res,next) {
+
+      // Limit retry rate.
+      console.log(req.session.self_promotion_tries.join(','));
+      req.session.self_promotion_tries =  req.session.self_promotion_tries || [];
+      var now = Date.now();
+      var n = req.session.self_promotion_tries.length;
+      if(n > 2) {
+        var waituntil = req.session.self_promotion_tries[n-1] + 10*60*1000; // 10 min
+        if( now > waituntil) {
+          req.session.self_promotion_tries= [];
+        } else {
+          return res.send("Too many tries have been made. You must wait 10 minutes before retrying.");
+        }
+      } else {
+        req.session.self_promotion_tries.push(now);
+      }
+
+
       console.log(req.body,global.config.self_promotion);
       // console.log("headers",req.headers);
       console.log("ip",req.ip);
-      console.log("limiter",limiter);
+      // console.log("limiter",limiter);
       if(global.config.self_promotion
         && global.config.self_promotion[req.body.user]
         && global.config.self_promotion[req.body.user].password == req.body.password) {

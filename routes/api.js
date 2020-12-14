@@ -60,7 +60,7 @@ router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('comp
   async function(req,res){
     // fresh retrival
     var componentUuid = req.params.uuid;
-    var component= await Components.retrieveComponent(componentUuid);
+    var component= await Components.retrieve(componentUuid);
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);
   }
@@ -72,7 +72,7 @@ router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('comp
 router.get('/'+utils.short_uuid_regex, permissions.checkPermissionJson('components:view'), 
   async function(req,res){
     var componentUuid = utils.unshortenUuid(req.params.shortuuid);
-    var component= await Components.retrieveComponent(componentUuid);
+    var component= await Components.retrieve(componentUuid);
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);
   }
@@ -84,7 +84,7 @@ router.get('/'+utils.short_uuid_regex, permissions.checkPermissionJson('componen
 router.get('/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
   async function(req,res){
     var componentUuid = shortuuid.toUUID(req.params.shortuuid)
-    var component= await Components.retrieveComponent(componentUuid);
+    var component= await Components.retrieve(componentUuid);
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);
   }
@@ -98,7 +98,7 @@ router.get('/component/'+utils.uuid_regex+'/simple', permissions.checkPermission
   async function(req,res){
     // fresh retrival
     var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-    var component= await Components.retrieveComponent(componentUuid,null,null,
+    var component= await Components.retrieve(componentUuid,null,null,
       {type:1, "data.name":1, componentUuid:1, validity:1, insertion:1});
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);
@@ -145,7 +145,7 @@ router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('com
     record.componentUuid = componentUuid; // Ensure that record is keyed with URL route
     try {
       console.log("saving component",record);
-      var data = await Components.saveComponent(record,req);
+      var data = await Components.save(record,req);
       return res.json(data);
     } catch(err) {
       console.error(err);
@@ -155,24 +155,12 @@ router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('com
 );
 
 
-// Component searching:
-// router.get('/components/all', permissions.checkPermissionJson('components:view'), 
-//   async function(req,res,next){
-//     // FIXME, add search terms
-//     try {
-//       var data = await Components.getComponents();
-//       return res.json(data);
-//     } catch(err) {
-//       res.status(400).json({error:err})
-//     }  
-//   }
-// );
-
-router.get('/components', permissions.checkPermissionJson('components:view'), 
+router.get('/components/:type', permissions.checkPermissionJson('components:view'), 
   async function(req,res,next){
     // FIXME, add search terms
     try {
-      var data = await Components.getComponents(req.query.type);
+      var type = decodeURIComponent(req.params.type);
+      var data = await Components.list({type:type});
       return res.json(data);
     } catch(err) {
       res.status(400).json({error:err.toString()})
