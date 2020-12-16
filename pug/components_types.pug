@@ -15,7 +15,7 @@ block content
         th Type
         th Count
     tbody
-      -console.log(JSON.stringify(types,null,2));
+      //-console.log(JSON.stringify(types,null,2));
       each type in Object.keys(componentTypes).sort()
         -var info = componentTypes[type];
         if(type && type!="null" && !(info.tags||[]).includes("Trash"))

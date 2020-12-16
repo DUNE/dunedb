@@ -30,7 +30,7 @@ router.get("/job/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:v
       // fixme rollback
       var formrec = await Forms.retrieve('jobForms',formId,options);
       var versions = await Forms.getFormVersions('jobForms',formId);
-      console.log('versions',versions);
+      // console.log('versions',versions);
       if(!formrec) return res.status(400).send("No such job form");  
       res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, processes: processes, testdata:data, versions: versions, retrieved:true})
     } 
@@ -43,7 +43,7 @@ router.get("/job/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:v
 /// Run an new job
 router.get("/job/:formId",permissions.checkPermission("jobs:submit"),async function(req,res,next){
   try{
-    console.log("run a new job");
+    // console.log("run a new job");
     var options = {onDate: new Date()};
     var workflow = await Forms.retrieve('jobForms',req.params.formId,options);
     if(!workflow) return res.status(400).send("No such job workflow");
@@ -57,12 +57,12 @@ router.get("/job/:formId",permissions.checkPermission("jobs:submit"),async funct
 router.get("/job/edit/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
 async function(req,res,next) {
   try{
-    console.log("edit job",req.params.job_id);
+    // console.log("edit job",req.params.job_id);
     // get the draft.
     var jobdata = await Jobs.retrieve(req.params.job_id);
     if(!jobdata) next();
     // if(jobdata.state != "draft") return res.status(400).send("Data is not a draft");
-    console.log(jobdata);
+    // console.log(jobdata);
     if(!jobdata.formId) return res.status(400).send("Can't find test data");
 
     var form = await Forms.retrieve('jobForms',jobdata.formId);
@@ -100,7 +100,7 @@ router.get('/jobs/:formId?', permissions.checkPermission("tests:view"),
 
     var match = (req.params.formId) ? {formId:req.params.formId} : {};
     var jobs = await Jobs.list(match,opts);
-    console.log(jobs);
+    // console.log(jobs);
     res.render('recentJobs.pug',{formId:req.params.formId, jobs: jobs, formInfo: formInfo});
   });
 
@@ -108,7 +108,7 @@ router.get('/job/copyAsDraft/:job_id([A-Fa-f0-9]{24})',permissions.checkPermissi
   async function(req,res,next) {
     try{
       var newdraft = await Jobs.copyToDraft(req.params.job_id,req);
-      console.log("Made copy ",newdraft);
+      // console.log("Made copy ",newdraft);
       if(newdraft) res.redirect("/job/draft/"+newdraft.jobId.toString())
 
     } catch(err) {  console.error(err); res.status(400).send(err.toString()); }

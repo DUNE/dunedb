@@ -14,7 +14,7 @@ var defaults = {
 
   mongo_connection: [
     "mongodb://localhost", 
-    {useNewUrlParser:true, useUnifiedTopology: true, connectTimeoutMS: 100, socketTimeoutMS: 30000, reconnectTries: 30000},
+    {useNewUrlParser:true, useUnifiedTopology: true, connectTimeoutMS: 100, socketTimeoutMS: 30000},
   ],
   // must include DB name.
   mongo_db: "sietch_dev",

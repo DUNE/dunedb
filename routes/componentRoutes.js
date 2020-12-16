@@ -21,7 +21,7 @@ async function get_component(req,res) {
   try{
     // deal with shortened form or full-form
     var componentUuid = req.params.uuid;
-    console.log(get_component,componentUuid,req.params);
+    // console.log(get_component,componentUuid,req.params);
 
     var component = await Components.retrieve(componentUuid);
     if(!component) {
@@ -39,11 +39,11 @@ async function get_component(req,res) {
     // console.dir(forms);
     // console.log("component")
     // console.log(component);
-    console.log("tests",tests);
+    // console.log("tests",tests);
     // console.log(tests);
     // console.log('componentForms');
     // console.log(componentform);
-    console.log(JSON.stringify(relationships,null,2));
+    // console.log(JSON.stringify(relationships,null,2));
     res.render("component.pug",{
       formrec,
       componentUuid,
@@ -71,12 +71,12 @@ router.get('/'+utils.short_uuid_regex,function(req,res,next) {
 router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("components:view"),
   async function(req,res) {
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  console.log(get_component,componentUuid,req.params);
+  // console.log(get_component,componentUuid,req.params);
 
   var date = null;
   if(req.query.date) {
     date = new Date(parseInt(req.query.date));
-    console.log("Trying effective date",date)
+    // console.log("Trying effective date",date)
   }
 
   // get form and data in one go
@@ -103,7 +103,7 @@ router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("componen
 async function edit_component(req,res) {
   // deal with shortened form or full-form
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  console.log(get_component,componentUuid,req.params);
+  // console.log(get_component,componentUuid,req.params);
 
   var component = await Components.retrieve(componentUuid);
   if(!component || !component.type) {
@@ -131,7 +131,7 @@ async function component_label(req,res,next) {
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
   component = await Components.retrieve(componentUuid);
   if(!component) return res.status(404).send("No such component exists yet in database");
-  console.log({component: component});
+  // console.log({component: component});
   res.render('label.pug',{component: component});
 }
 router.get('/'+utils.uuid_regex+'/label', permissions.checkPermission("components:view"), component_label);
@@ -144,20 +144,25 @@ router.get('/'+utils.short_uuid_regex+'/label', permissions.checkPermission("com
 router.get("/NewComponent/:type", permissions.checkPermission("components:create"),
   // middlewareCheckDataEntryPrivs,
    async function(req,res){
-    var type = decodeURIComponent(req.params.type);
-    var form = await Forms.retrieve("componentForms",type);
-    if(!form) res.status(400).send("No such type ",type)
-    // roll a new UUID.
+    try{
+      var type = decodeURIComponent(req.params.type);
+      var form = await Forms.retrieve("componentForms",type);
+      if(!form) return res.status(400).send("No such type "+type);
+      // roll a new UUID.
 
-    var componentUuid = Components.newUuid();
-    res.render("component_edit.pug",{
-      schema: form.schema,
-      componentUuid:componentUuid,
-      component: { type: type, componentUuid: componentUuid },
-      canEdit: permissions.hasPermission("components:edit"),
-      tests:[],
-      performed: [],
-    });
+      var componentUuid = Components.newUuid();
+      res.render("component_edit.pug",{
+        schema: form.schema,
+        componentUuid:componentUuid,
+        component: { type: type, componentUuid: componentUuid },
+        canEdit: permissions.hasPermission("components:edit"),
+        tests:[],
+        performed: [],
+      });
+    } catch(err) {
+      console.log(err);
+      res.status(400).send(err.toString());
+    }
 });
 
 
@@ -212,14 +217,14 @@ async function ensureTypeFormExists(type,req,res) {
 
 router.get("/EditComponentForm/:type", permissions.checkPermission("forms:edit"), async function(req,res){
   var type = decodeURIComponent(req.params.type);
-  await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
+  // await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
   res.render('EditComponentForm.pug',{collection:"componentForms",formId:type});
 });
 
 router.get("/NewComponentType/:type", permissions.checkPermission("forms:edit"), async function(req,res){
   try{
     var type = decodeURIComponent(req.params.type);
-    await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
+    // await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
 
     res.render('EditComponentForm.pug',{collection:"componentForms",formId:type});
   } catch (err) {
@@ -260,7 +265,8 @@ router.get('/components/type/:type',permissions.checkPermission("components:view
   async function(req,res,next) {
         var type = decodeURIComponent(req.params.type);
         var components = await Components.list({type:type},{limit:30});
-        console.log(components);
+
+        // console.log(components);
         res.render("components.pug",
           {components,
            title:"Components of type <"+type+">",
@@ -275,7 +281,7 @@ router.get('/components/recent',permissions.checkPermission("components:view"),
         var type = decodeURIComponent(req.params.type);
         var components = await Components.list(null,{limit:30});
         var forms = await Forms.list('componentForms');
-        console.log(components);
+        // console.log(components);
         res.render("components.pug",{forms,components,title:"Redcently Edited Components",showType:true});
 
   });

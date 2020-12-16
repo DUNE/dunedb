@@ -4,7 +4,7 @@ const express = require("express");
 const Forms = require("../lib/Forms.js");
 const Components = require("../lib/Components.js");
 const Tests = require("../lib/Tests.js")('test');
-const Jobs = require("../lib/Tests.js")('job');
+const Jobs = require("../lib/jobs.js")('job');
 // const Jobs = require("../lib/Jobs.js");
 const Cache = require("../lib/Cache.js");
 const utils = require("../lib/utils.js");
@@ -312,7 +312,7 @@ router.post("/job", permissions.checkPermissionJson('jobs:submit'),
     // var body = await parse.json(req);
     try {
       var outrec  = await Jobs.save(req.body, req);
-      res.json({_id: outrec._id});
+      res.json({jobId: outrec.jobId});
     } catch(err) {
       console.error("error submitting form /test/");
       console.error(err);

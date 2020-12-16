@@ -12,7 +12,9 @@ block extrascripts
   if formId
     script formId = !{JSON.stringify(formId)}
     
+  link(rel='stylesheet' href='/dist/flatpickr/flatpickr.min.css')
   script(type='text/javascript',src='/js/search.js')
+  script(type='text/javascript',src='/dist/flatpickr/flatpickr.min.js')
 
   style.
     #builtform {
@@ -30,7 +32,7 @@ block content
       .col-md-6
         p Select type of record
          select.form-control#recordTypeSelect
-            option(value='')
+            option(value='')          &lt;any&gt;
             option(value='component') Component
             option(value='test')      Test
             option(value='job')       Job/Workflow
@@ -60,8 +62,9 @@ block content
               a.input-group-text(data-clear=1)
                 i.fa.fa-close
 
-        p Specific data. Exact match only.
-          #builtform
+        #specific-data-form.hidden
+          p Specific data. Exact match only.
+            #builtform
 
         p 
       .col-md-6

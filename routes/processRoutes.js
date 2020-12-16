@@ -100,7 +100,7 @@ router.get("/processRecordQRs/:processRecordId([A-Fa-f0-9]{24})", permissions.ch
     var promises = [];
     for(var thing of result.created) {
       if(thing.recordType=="component") {
-        promises.push(Components.retrieveComponent(thing.componentUuid));
+        promises.push(Components.retrieve(thing.componentUuid));
       }
     }
     var components = await Promise.all(promises);
@@ -115,7 +115,7 @@ router.get("/processRecordQRs/:processRecordId([A-Fa-f0-9]{24})", permissions.ch
     // for(var thing of result.created) {
     //   if(thing.recordType==="component") 
     //     try {
-    //       components.push(await Components.retrieveComponent(thing.componentUuid));
+    //       components.push(await Components.retrieve(thing.componentUuid));
     //     } catch(e) {
 
     //         console.error(e);

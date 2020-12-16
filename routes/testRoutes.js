@@ -26,7 +26,7 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tes
           Processes.findInputRecord(req.params.record_id),
         ]);
 
-      var component = await Components.retrieveComponent(test.componentUuid);
+      var component = await Components.retrieve(test.componentUuid);
 
       if(!test) return res.status(404).render("No such test recorded.");
       var formId = test.formId;

@@ -28,8 +28,8 @@ router.get('/profile/:userId?',permissions.checkPermission("components:view"),
     if(req.params.userId)
       user_id = decodeURIComponent(req.params.userId);
 
-    console.log("looking up",user_id);
-    console.log(await manager.getUserRoles({id:user_id}))
+    // console.log("looking up",user_id);
+    // console.log(await manager.getUserRoles({id:user_id}))
     var [user,roles,permissions] = await Promise.all([
         manager.getUser({id:user_id}),
         manager.getUserRoles({id:user_id}),
@@ -74,7 +74,7 @@ router.post("/promoteYourself",
   async function(req,res,next) {
 
       // Limit retry rate.
-      console.log(req.session.self_promotion_tries.join(','));
+      // console.log(req.session.self_promotion_tries.join(','));
       req.session.self_promotion_tries =  req.session.self_promotion_tries || [];
       var now = Date.now();
       var n = req.session.self_promotion_tries.length;
@@ -90,7 +90,7 @@ router.post("/promoteYourself",
       }
 
 
-      console.log(req.body,global.config.self_promotion);
+      // console.log(req.body,global.config.self_promotion);
       // console.log("headers",req.headers);
       console.log("ip",req.ip);
       // console.log("limiter",limiter);

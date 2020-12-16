@@ -1,5 +1,5 @@
 var form;
-var formrec;
+var formrec; 
 var searchrec;
 
 
@@ -44,12 +44,13 @@ async function loadFormIds(recordType)
   var route = '/json/'+recordType+"Forms";
   var types = await $.get(route);
   console.log('got types of formId:',types);
-  var options = ["<option val=''></option>"];
+  var options = ["<option value=''>&lt;any&gt;</option>"];
   for(var type in types){
     options.push(
       `<option value="${type}">${types[type].formName}</option>`
     );
   }
+  $('#specific-data-form').hide();
   $('#builtform').empty().hide();
   $('#typeSelect').empty().append(options.join()).show();
 }
@@ -59,7 +60,9 @@ async function loadFormIds(recordType)
 async function loadForm(recordType,formId,initializeFormData)
 {
   console.log('loadForm()',recordType,formId)
+  if(formId.length==0) return   $('#specific-data-form').hide();
   formrec = await $.get(`/json/${recordType}Forms/${formId}`);
+  $('#specific-data-form').show();
   $('#builtform').empty().show();
   form = await Formio.createForm(
                document.getElementById('builtform'),
@@ -111,8 +114,8 @@ function doFormChange(event)
 
   // put it in the query string. $.param(searchrec);
 
-  var recordType =  $('#recordTypeSelect').val();
-  var formId = encodeURIComponent($('#typeSelect').val());
+  var recordType =  $('#recordTypeSelect option').filter(':selected').val();
+  var formId = encodeURIComponent($('#typeSelect option').filter(":selected").val());
   var url = `/json/search`;
   if(recordType) {
     url+="/"+recordType;
@@ -162,7 +165,7 @@ $(function(){
                             });
 
   $('#recordTypeSelect').on('change',async function(){
-    recordType=$(this).val();
+    recordType=$("#recordTypeSelect option").filter(":selected").val();
     loadFormIds(recordType);
     // Change the url.
     if(recordType)
@@ -174,19 +177,22 @@ $(function(){
   $('#typeSelect').on('change',async function(){ 
     console.log('typechange')
     // recordType =  $('#recordTypeSelect').val();
-    formId = encodeURIComponent($('#typeSelect').val());
+    formId = encodeURIComponent($('#typeSelect option').filter(":selected").val());
     if(formId) {
       loadForm(recordType,formId);
       history.replaceState(null,null,'/search/'+recordType+'/'+encodeURIComponent(formId))
     } else {
       form = null;
        $('#builtform').empty().hide();
-      history.replaceState(null,null,'/search/'+recordType)
+       $('#specific-data-form').hide();
+       history.replaceState(null,null,'/search/'+recordType)
     }
    });
 
   //Deal with initial route setting.
   // Run immedately as 
+    console.log("search.js - ()");
+
   var querystr = window.location.search.substring(1); // remove '?'
   console.log("querystr",querystr);
   var searchObj = JSONURL.parse(decodeURIComponent(querystr));
@@ -197,11 +203,11 @@ $(function(){
     $("#insertionBefore").val(searchObj.insertionBefore);
   }
   if(recordType) {
-    $('#recordTypeSelect').val(recordType);
+    $('#recordTypeSelect option').filter(":selected").val(recordType);
     loadFormIds(recordType).then(function(){
      console.log("recordtype change done?");
      if(formId){
-        $('#typeSelect').val(formId);
+        $('#typeSelect option').filter(":selected").val(formId);
           // Fixme: fill other search form parameters
 
           // Fixme: this somehow triggers everything TWICE. No idea why.
