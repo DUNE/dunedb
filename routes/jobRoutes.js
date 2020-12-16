@@ -109,7 +109,7 @@ router.get('/job/copyAsDraft/:job_id([A-Fa-f0-9]{24})',permissions.checkPermissi
     try{
       var newdraft = await Jobs.copyToDraft(req.params.job_id,req);
       // console.log("Made copy ",newdraft);
-      if(newdraft) res.redirect("/job/draft/"+newdraft.jobId.toString())
+      if(newdraft) res.redirect("/job/edit/"+newdraft.jobId.toString())
 
     } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
 

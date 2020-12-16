@@ -83,16 +83,15 @@ router.post("/promoteYourself",
         if( now > waituntil) {
           req.session.self_promotion_tries= [];
         } else {
-          return res.send("Too many tries have been made. You must wait 10 minutes before retrying.");
+          return res.status(403).send("Too many tries have been made. You must wait 10 minutes before retrying.");
         }
       } else {
         req.session.self_promotion_tries.push(now);
       }
 
-
       // console.log(req.body,global.config.self_promotion);
       // console.log("headers",req.headers);
-      console.log("ip",req.ip);
+      console.log("PromoteYourself attempt: ip",req.ip, "tries", n);
       // console.log("limiter",limiter);
       if(global.config.self_promotion
         && global.config.self_promotion[req.body.user]
@@ -118,7 +117,6 @@ router.post("/promoteYourself",
             res.render("promoteYourselfSuccess.pug",{roles});
           } catch(err) { console.log(err); console.log(err.stack)}
       } else {
-          var remaining = res.get("X-RateLimit-Remaining");
           var message = `Invalid user/password. You are permitted only 3 tries before being locked out for 10 minutes.`;
           res.render("promoteYourself.pug",{message});
       }

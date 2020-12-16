@@ -1,6 +1,8 @@
 global.config = require("../configuration.js");
 const request = require('supertest');
 const express = require('express');
+const session = require('supertest-session');
+const fs = require("fs");
 
 const App= require("../lib/app.js");
 const database = require("../lib/database.js");
@@ -45,6 +47,7 @@ var user =  {
         };
 
 var uuid, testId, jobId;
+var draftTestId;
 
 beforeAll(async () => {
   // console.log("beforeAll");
@@ -298,9 +301,31 @@ describe("private routes",function() {
           expect(r.body).toBeDefined();
           expect(r.body._id).toBeDefined();
           testId = r.body._id;
-
-        })
+        });
     });
+
+    // Test data as draft
+     test('POST /json/test',()=>{
+      return request(appAuthorized)
+        .post('/json/test')
+        .send({
+          formId: 'test'+suffix,
+          componentUuid: uuid,
+          data: {
+            name: "DRAFT Dummy Test Object by JEST",
+            dummyVal: 999,
+          },
+          state: "draft",
+          metadata: { deleteme: true },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(r=>{
+          expect(r.body).toBeDefined();
+          expect(r.body._id).toBeDefined();
+          draftTestId = r.body._id;
+        })
+      });
 
 
     // Job data
@@ -477,7 +502,7 @@ describe("private routes",function() {
   });
 
 
-  describe("ComponentForm",()=>{
+  describe("componentRoutes",()=>{
 
     test("EditComponentForm",()=>{
       return request(appAuthorized)
@@ -496,10 +521,11 @@ describe("private routes",function() {
         .expect(new RegExp('cform'+suffix));
     });
 
-
-  }) // Component Form
-
-  describe("Component",()=>{
+    test("NewComponentType",()=>{
+      return request(appAuthorized)
+        .get('/NewComponentType/cform+'+suffix)
+        .expect(200);
+    })
 
     test("List Recent of Type",()=>{
       return request(appAuthorized).get('/components/type/cform'+suffix).expect(200);
@@ -510,105 +536,173 @@ describe("private routes",function() {
         .get('/NewComponent/cform'+suffix)
         .expect(200);
     })
-
     test("Recent Components",()=>{
       return request(appAuthorized)
         .get('/components/recent')
         .expect(200);
     })
 
-    // Fails!  Something to do with automatic parsing from processes.
-    // test("NewComponent wrong type",()=>{
-    //   return request(appAuthorized)
-    //     .get('/NewComponent/nonexistent'+suffix)
-    //     .expect(400);
-    // })
-
+    test("Recent Components of type",()=>{
+      return request(appAuthorized)
+      .get('/components/type/cform'+suffix)
+      .expect(200)
+      .expect(new RegExp('cform'+suffix));
+    });
   });
 
-  // create new component form with distintive FormId via api
-  // create new component  via api
-  // get component via api
-  // view component in page
-  // check component shows up in lists
 
-  // create new testform via api
-  // create new test component made above
-  // retrive test via api
-  // view test via page
-  // check test shows up in component list
+  describe("testRoutes",()=>{
+   test("/test/<record_id>",()=>{
+      return request(appAuthorized)
+      .get('/test/'+testId)
+      .expect(200)
+      .expect(new RegExp('JEST'));
+    });
 
-  // create new workflow form via api
-  // create new job from workflow
-  // retrive via api
-  // view with page
-  // check it shows up in recent list
+   test("/test/<form_id>",()=>{
+      return request(appAuthorized)
+      .get('/test/test'+suffix)
+      .expect(200)
+      .expect(new RegExp('test'+suffix));
+    });
+
+   test("/test/<form_id>",()=>{
+      return request(appAuthorized)
+      .get('/test/test'+suffix)
+      .expect(200)
+      .expect(new RegExp('test'+suffix));
+    });
+
+   test("/tests/<formId>",()=>{
+      return request(appAuthorized)
+        .get('/tests/test'+suffix)
+        .expect(200);
+   })
+
+   test("/test/copyAsDraft/<recordId>",()=>{
+      return request(appAuthorized)
+        .get('/test/copyAsDraft/'+testId)
+        .expect(302); // redirected successfully to the new one
+   })
+
+   test("/test/draft/<record_id>",()=>{
+      return request(appAuthorized)
+      .get('/test/draft/'+draftTestId)
+      .expect(200)
+      .expect(new RegExp('test'+suffix));
+    });
+
+   test("/test/deleteDraft/<record_id>",()=>{
+      return request(appAuthorized)
+      .get('/test/deleteDraft/'+draftTestId)
+      .expect(302); // redirect back 
+    });
+  });
+
+  describe("jobRoutes",()=>{
+
+   test("/job/<jobId>",()=>{
+      return request(appAuthorized)
+      .get('/job/'+jobId)
+      .expect(200)
+      .expect(new RegExp('JEST'));
+    });
+
+   test("/job/<formId>",()=>{
+      return request(appAuthorized)
+      .get('/job/job'+suffix)
+      .expect(200);
+    });
+
+   test("/job/edit/<jobId>",()=>{
+      return request(appAuthorized)
+      .get('/job/edit/'+jobId)
+      .expect(200);
+    });
+
+   test("/jobs/<formId>",()=>{
+      return request(appAuthorized)
+      .get('/jobs/job'+suffix)
+      .expect(200)
+      .expect(new RegExp('job'+suffix));
+    });
+   test("/job/copyAsDraft/<jobId>",()=>{
+      return request(appAuthorized)
+      .get('/job/copyAsDraft/'+jobId)
+      .expect(302);
+    });
+   test("/drafts",()=>{
+      return request(appAuthorized)
+      .get('/drafts')
+      .expect(200);
+    });
+
+
+ });
+
+  describe("userRoutes",()=>{
+
+    test("/profile",()=>{
+      return request(appAuthorized)
+      .get('/profile')
+      .expect(200);
+    });
+    test("/profile/<userId>",()=>{
+      return request(appAuthorized)
+      .get('/profile/'+user.user_id)
+      .expect(200);
+    });
+    test("/promoteYourself",()=>{
+      return request(appAuthorized)
+      .get('/promoteYourself')
+      .expect(200);
+    });
+    test("/promoteYourself limits rate",async ()=>{
+      var userSession = session(appAuthorized);
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"});
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"});
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"})
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"})
+      .expect(403);
+    });
+
+
+ });
+
+  describe("file routes",()=>{
+    var fileurl;
+    test("POST file to /gridfs ",(done)=>{
+      
+        // fs.readFile("static/images/Otterbein.png",
+          // function(buffer){
+            request(appAuthorized)
+              .post("/file/gridfs")
+              // .attach('name', buffer, {filename:'myTestFile.png', contentType:"image/png"})
+              .attach('name', "static/images/Otterbein.png")
+              .expect('Content-Type', /json/)
+              .expect(200)
+              .then(r=>{
+                // console.log("search result:",r.body);
+                expect(r.body).toBeTruthy();
+                var url = r.body.url;
+                fileurl = '/' + url.split('/').splice(3).join('/')
+                // console.log("fileurl",url, fileurl);
+                done();
+              });
+          // });
+
+
+    });
+    test("GET file from gridfs",()=>{
+        return request(appAuthorized)
+          .get(fileurl)
+          .expect(200);
+
+    });
+  })
+  describe("done",()=>{
+    test("done",()=>{})
+  });
 
 });
 
-  // delete the component form
-  // delete the component
-  // delete the test form
-  // delete the test
-  // delete the workfow form
-  // delete the job
-
-
-
-// (async function () {
-// const browser = new Browser();
-// try {
-//   var res = await browser.visit('/');
-//   console.log(res);
-//   res = await browser.visit('/bad');
-//   console.log(res);
-// } catch (err) {
-//   console.log("CAUGHT",err);
-// }
-// })();
-
-
-
-
-
-// test('adds 1 + 2 to equal 3', () => {
-//   expect(sum(1, 2)).toBe(3);
-// });
-
-
-
-
-
-
-// const Browser = require('zombie');
-
-// // We're going to make requests to http://example.com/signup
-// // Which will be routed to our test server localhost:3000
-// Browser.localhost('example.com', 3000);
-
-// describe('User visits signup page', function() {
-
-//   const browser = new Browser();
-
-//   before(function(done) {
-//     browser.visit('/signup', done);
-//   });
-
-//   describe('submits form', function() {
-
-//     before(function(done) {
-//       browser
-//         .fill('email',    'zombie@underworld.dead')
-//         .fill('password', 'eat-the-living')
-//         .pressButton('Sign Me Up!', done);
-//     });
-
-//     it('should be successful', function() {
-//       browser.assert.success();
-//     });
-
-//     it('should see welcome page', function() {
-//       browser.assert.text('title', 'Welcome To Brains Depot');
-//     });
-//   });
-// });

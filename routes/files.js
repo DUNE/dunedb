@@ -125,7 +125,7 @@ router.post("/gridfs",permissions.checkPermission("tests:submit"),
     var busboy = new Busboy({ headers: req.headers });
     busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
       console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
-      file.pipe(bucket.openUploadStream(filename,{contentType:mimetype}))
+      file.pipe(bucket.openUploadStream(filename,{contentType:mimetype||"application/octet-stream"}))
       .on('error',function(err) {
             return res.status(500).json({error:"bucket.pipe: "+err});
             })
