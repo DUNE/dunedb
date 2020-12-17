@@ -18,27 +18,63 @@ router.get("/job/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:v
  async function(req,res,next) {
     try{
       var options = {};
-      let [data,processes] = await Promise.all([
+      let [job,processes] = await Promise.all([
           Jobs.retrieve(req.params.job_id),
           Processes.findInputRecord(req.params.job_id)
         ]);
-      if(!data) return res.status(404).send("No such job recorded.");
-      var formId = data.formId;
+      if(!job) return res.status(404).send("No such job recorded.");
+      var formId = job.formId;
       if(!formId) throw new Error("Job has no formId");
 
-      if(req.query.version) options.version = parseInt(req.query.version);
+      if(req.query.formVersion) options.version = parseInt(req.query.formVersion);
       // fixme rollback
       var formrec = await Forms.retrieve('jobForms',formId,options);
-      var versions = await Forms.getFormVersions('jobForms',formId);
+      var formversions = await Forms.getFormVersions('jobForms',formId);
       // console.log('versions',versions);
       if(!formrec) return res.status(400).send("No such job form");  
-      res.render('viewTest.pug',{formId:req.params.formId, formrec:formrec, processes: processes, testdata:data, versions: versions, retrieved:true})
+      res.render('viewJob.pug',{formId:req.params.formId, formrec,  processes, job, formversions, retrieved:true})
+    } 
+    catch(err) { 
+      console.error("error in router function",err); //next(); 
+    }
+
+});
+
+
+// look at a job result
+router.get("/job/:jobId([A-Fa-f0-9]{24})/history", permissions.checkPermission("tests:view"),
+ async function(req,res,next) {
+    // console.log("job/<>/history");
+
+    try{
+        var query = {jobId: req.params.jobId};
+        if(req.query.version) query["validity.version"] = parseInt(req.query.version);
+
+        var options = {};
+        let [job,processes,versions] = await Promise.all([
+            Jobs.retrieve(query),
+            Processes.findInputRecord(req.params.job_id),
+            Jobs.versions(req.params.jobId),
+          ]);
+        if(!job) return res.status(404).send("No such job recorded.");
+        var formId = job.formId;
+        if(!formId) throw new Error("Job has no formId");
+
+        if(req.query.formVersion) options.version = parseInt(req.query.formVersion);
+        // fixme rollback
+        var formrec = await Forms.retrieve('jobForms',formId,options);
+        var formVersions = await Forms.getFormVersions('jobForms',formId);
+        // console.log('versions',versions);
+        if(!formrec) return res.status(400).send("No such job form");  
+        res.render('viewJobHistory.pug',{formId:req.params.formId, formrec, processes, job, versions, formVersions, retrieved:true})
     } 
     catch(err) { 
       console.error("error in router function",err); next(); 
     }
 
 });
+
+
 
 /// Run an new job
 router.get("/job/:formId",permissions.checkPermission("jobs:submit"),async function(req,res,next){
@@ -59,15 +95,15 @@ async function(req,res,next) {
   try{
     // console.log("edit job",req.params.job_id);
     // get the draft.
-    var jobdata = await Jobs.retrieve(req.params.job_id);
-    if(!jobdata) next();
-    // if(jobdata.state != "draft") return res.status(400).send("Data is not a draft");
-    // console.log(jobdata);
-    if(!jobdata.formId) return res.status(400).send("Can't find test data");
+    var job = await Jobs.retrieve(req.params.job_id);
+    if(!job) next();
+    // if(job.state != "draft") return res.status(400).send("Data is not a draft");
+    // console.log(job);
+    if(!job.formId) return res.status(400).send("Can't find test data");
 
-    var form = await Forms.retrieve('jobForms',jobdata.formId);
+    var form = await Forms.retrieve('jobForms',job.formId);
     if(!form) return res.status(400).send("No such test form");
-    res.render('test.pug',{formId: jobdata.formId, form:form, testdata:jobdata, route_on_submit:'/job', submission_url:'/json/job'})
+    res.render('test.pug',{formId: job.formId, form:form, testdata:job, route_on_submit:'/job', submission_url:'/json/job'})
   } catch(err) { console.error(err); next(); }
 });
 

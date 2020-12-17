@@ -28,9 +28,6 @@ block extrascripts
       form.submission = {data: component||{componentUuid: componentUuid}};
       form.nosubmit = true; // Use the beforeSubmit hook.
 
-      // Change the url to match
-      //- DrawQRCode($('#qrcode-canvas').get(0),'http://sietch.xyz/'+componentUuid);
-
       // Now, update the components to match changes.
       FormioUtils.eachComponent(form.components, function(c){c.setCustomValidity(null)}); // reset all.
 
@@ -61,7 +58,8 @@ block content
         h2#name.col-md-8=((component||{}).type)?((component||{}).type+": "+(component||{}).name):"New Component"
     .row
         h3#name.col-md-8 As of #{moment(component.validity.startDate).format('MMM D YYYY h:m a')} (#{moment(component.validity.startDate).fromNow()})
-    .row
-      a(href='/json/component/'+componentUuid) Raw JSON Document
+    // FIXME: this would give only the current data, not the version being looked at
+    // .row
+    //   a(href='/json/component/'+componentUuid) Raw JSON Document
     .row
       #builtform.col-md-8

@@ -1,5 +1,8 @@
+//-
+//- Run a test or a workflow job.
+//-
+  
 extend default
-
 
 block vars
   - var page_title=formId;
@@ -85,10 +88,10 @@ block extrascripts
           if(!draft) { 
             form.emit('submitDone');
             // go to completed form. Do not leave this page in browser history. 
-            window.location.replace(route_on_submit+'/'+retval._id);
+            window.location.replace(route_on_submit+'/'+retval);
           } else {
             // Update the draftid.
-            form.submission._id = retval._id;
+            form.submission._id = retval;
             lastDraftSave = new Date();
 
             // Formio doesn't actually have a way of doing this...

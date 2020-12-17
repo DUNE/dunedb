@@ -17,19 +17,19 @@ module.exports = router;
 // Editing and creating forms
 
 
-router.get("/processjob/:jobRecordId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{24})/:processId", permissions.checkPermission("jobs:process"), async function(req,res){
+router.get("/processjob/:jobId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{24})/:processId", permissions.checkPermission("jobs:process"), async function(req,res){
   // var form = await Forms.retrieve("jobForms",null,{id:req.params.formRecordId});
   // var job = await Jobs.retrieve(req.params.jobRecordId);
 
   var processId = decodeURIComponent(req.params.processId);
   let [form,job,pastProcesses] = await Promise.all([
       Forms.retrieve("jobForms",null,{id:req.params.formRecordId}),
-      Jobs.retrieve(req.params.jobRecordId),
+      Jobs.retrieve(req.params.jobId),
       Processes.findInputRecord(req.params.jobRecordId),
   ]);
 
   if(!form) return res.status(400).send("No such form "+req.params.formRecordId);
-  if(!job) return res.status(400).send("No such job"+req.params.jobRecordId);
+  if(!job) return res.status(400).send("No such job"+req.params.jobId);
   console.log(form);
   if(!form.processes) return res.status(400).send("No processes in that form");
   var process_to_run = form.processes[processId];
@@ -87,7 +87,7 @@ router.get("/processRecord/:processRecordId([A-Fa-f0-9]{24})", permissions.check
     if(!result) return res.status(400).send("No such process record in database.");
     let [form,job,pastProcesses] = await Promise.all([
       Forms.retrieve(result.process.collection,result.process.formId,{id:result.process._id}),
-      Jobs.retrieve(result.input._id),
+      Jobs.retrieve(result.input.jobId),
       Processes.findInputRecord(result.input._id)
     ]); 
     res.render("processResult.pug",{result, form, job, pastProcesses});

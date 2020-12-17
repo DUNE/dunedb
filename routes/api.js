@@ -264,7 +264,7 @@ router.post("/test", permissions.checkPermissionJson('tests:submit'),
     try {
       console.log("Submission to /test",JSON.stringify(req.body,null,2));
       var outrec = await Tests.save(req.body, req);
-      res.json({_id: outrec._id});
+      res.json(outrec._id);
     } catch(err) {
       console.error("error submitting form /test"+req.params.formId);
       console.error(err);
@@ -312,7 +312,7 @@ router.post("/job", permissions.checkPermissionJson('jobs:submit'),
     // var body = await parse.json(req);
     try {
       var outrec  = await Jobs.save(req.body, req);
-      res.json({jobId: outrec.jobId});
+      res.json(outrec.jobId);
     } catch(err) {
       console.error("error submitting form /test/");
       console.error(err);

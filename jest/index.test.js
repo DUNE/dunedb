@@ -73,7 +73,7 @@ afterAll( async () => {
     await db.collection("jobForms").deleteMany({formId:"job"+suffix});
     await db.collection("components").deleteMany({type:"cform"+suffix});
     await db.collection("tests").deleteMany({formId:"test"+suffix});
-    await db.collection("jobs").deleteMany({formId:"jobs"+suffix});
+    await db.collection("jobs").deleteMany({formId:"job"+suffix});
 
   await database.shutdown(true);
   console.log("shutdown");
@@ -298,14 +298,14 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(r=>{
+          console.log('/json/test',r.body);
           expect(r.body).toBeDefined();
-          expect(r.body._id).toBeDefined();
-          testId = r.body._id;
+          testId = r.body;
         });
     });
 
     // Test data as draft
-     test('POST /json/test',()=>{
+     test('POST /json/test draft',()=>{
       return request(appAuthorized)
         .post('/json/test')
         .send({
@@ -321,9 +321,9 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(r=>{
+          console.log('/json/test',r.body);
           expect(r.body).toBeDefined();
-          expect(r.body._id).toBeDefined();
-          draftTestId = r.body._id;
+          draftTestId = r.body;
         })
       });
 
@@ -345,8 +345,7 @@ describe("private routes",function() {
         .then(r=>{
           console.log("json/job",r.body);
           expect(r.body).toBeDefined();
-          expect(r.body.jobId).toBeDefined();
-          jobId = r.body.jobId;
+          jobId = r.body;
 
         })
     });
