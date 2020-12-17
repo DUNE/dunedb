@@ -619,6 +619,12 @@ describe("private routes",function() {
       .expect(200);
     });
 
+   test("/job/<jobId>/history",()=>{
+      return request(appAuthorized)
+      .get('/job/'+jobId+"/history")
+      .expect(200);
+    });
+   
    test("/jobs/<formId>",()=>{
       return request(appAuthorized)
       .get('/jobs/job'+suffix)

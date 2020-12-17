@@ -82,7 +82,7 @@ router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("componen
   // get form and data in one go
   let [form, component, dates] = await Promise.all([
       Forms.retrieve("componentForms","componentForms"),
-      Components.retrieve(componentUuid,date),
+      Components.retrieve({componentUuid,"insertion.insertDate":{$lte:date}}),
       Components.retrieveComponentChangeDates(componentUuid)
     ]);
 
