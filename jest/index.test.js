@@ -74,12 +74,9 @@ afterAll( async () => {
     await db.collection("components").deleteMany({type:"cform"+suffix});
     await db.collection("tests").deleteMany({formId:"test"+suffix});
     await db.collection("jobs").deleteMany({formId:"job"+suffix});
-
-  await database.shutdown(true);
-  console.log("shutdown");
-
-  // FIXME express-bouncer being run in userRoutes is keeping things alive..!
+    await database.shutdown(true);
 } );
+
 // inject a custom user authorization here.
 describe("public functions",function() {
   test('route /',function(done) {
