@@ -1,0 +1,38 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title=tag;
+
+block content
+  if(componentForms)
+   if(permissions.userHas(user,"components:create"))
+    p Components:
+    each form in componentForms
+      p 
+        a(href='/NewComponent/'+form.formId).btn.btn-outline-info 
+          if(form.icon) 
+            img.icon(src=form.icon)
+          span Register a new #{form.formName}
+    
+  if(testForms)
+    p Tests:
+    each form in testForms
+      p
+        a(href='/test/'+form.formId).btn.btn-outline-primary 
+          if(form.icon) 
+            img.icon(src=form.icon)
+          span Run #{form.formName}
+
+  if(jobForms)
+    p Workflows:
+    each form in jobForms
+      p
+
+        a(href='/job/'+form.formId).btn.btn-outline-primary 
+          if(form.icon) 
+              img.icon(src=form.icon)
+          span Run #{form.formName}
+
+

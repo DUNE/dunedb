@@ -120,6 +120,8 @@ In addition, some will have this field:
   validity: <validity block>
   formId: <string>   //  identifier for this form type
   formName: <string> //  Name of this form
+  tags: <array of string> // Category tags.  "Trash" = don't show this entry to users
+  componentType: <string> // Applies to Test forms only; limits which Components have this as a test option.
   schema: {
     components:[...]
   }

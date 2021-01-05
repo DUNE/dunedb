@@ -39,3 +39,12 @@ block content
       |
       a(href="/promoteYourself") promote yourself
       |.
+
+  if(recentComponents)
+      p Recently visited components:
+        ul
+        each c in recentComponents
+          li
+            a(href='/'+c.componentUuid) #{c.componentUuid} &nbsp; &nbsp; #{c.name} [#{c.type}]
+
+

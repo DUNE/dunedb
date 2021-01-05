@@ -16,6 +16,21 @@ var router = express.Router();
 
 module.exports = router;
 
+function setRecent(req,type,item)
+{
+  // list is set with most recent first.
+  if(!req.session) return;
+  // req.session.recent = {};
+  req.session.recent = req.session.recent || {};
+  req.session.recent[type] = req.session.recent[type] || [];
+  var list = req.session.recent[type];
+  var i = list.indexOf(item);
+  if(i>-1) list.splice(i,1);
+  list.unshift(item);
+  // console.log("list",list);
+  console.log(chalk.blue("recent:",JSON.stringify((req.session||{}).recent)));
+}
+
 // Pull up an existing component for editing or just viewing.
 async function get_component(req,res) {
   try{
@@ -44,6 +59,10 @@ async function get_component(req,res) {
     // console.log('componentForms');
     // console.log(componentform);
     // console.log(JSON.stringify(relationships,null,2));
+
+    setRecent(req,'componentUuid',componentUuid);
+
+
     res.render("component.pug",{
       formrec,
       componentUuid,
@@ -53,11 +72,13 @@ async function get_component(req,res) {
       tests,
       canEdit: permissions.hasPermission(req,"components:edit"),
     });
+
   } catch (err) {
     console.error(err);
     res.status(400).send(err.toString())
   }
 }
+
 router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
 router.get('/component/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
 

@@ -1,0 +1,124 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title=formrec.formName || formId;
+
+block extrascripts
+  script(type='text/javascript').
+    // I could do this by API query of the server, but this works for now.
+    var formrec=!{JSON.stringify(formrec||{}, null ,4)}; 
+    var job=!{JSON.stringify(job||{}, null ,4)}; 
+
+  script(type='text/javascript').
+
+    // take the 'submit' button out.
+    window.onload = async function() {
+      form = await Formio.createForm(document.getElementById('builtform'),formrec.schema,
+        {
+          readOnly:true
+          //- renderMode: 'html'
+        });
+      form.nosubmit = true;
+      form.submission = job;
+
+      
+
+    }
+
+block content
+  if(formrec.icon && formrec.icon[0])
+    img.icon.pull-left(src=formrec.icon[0].url)
+  h2=formrec.formName || formrec.formId
+  dl
+    if job 
+    dt Submitted: 
+    dd
+      +dateFormat(job.insertion.startTime)
+      if job.insertion.user
+          |
+          |
+          | by
+          |
+          |
+          +short_user(job.insertion.user)
+
+    if(job.componentUuid)
+      -var uuid = MUUID.from(job.componentUuid);
+      dt Run on component 
+        a(href='/'+uuid.toString())=uuid.toString()
+      dd 
+        if(component)
+          | #{component.data.name} (#{component.type})
+        else
+          span.alert.alert-danger Component info not available
+        
+  hr
+  #builtform  
+
+  +createdFrom(job.createdFrom)
+
+  hr
+  if job.form
+    div Data entered in form version #{job.form.version}
+      if(job.formObjectId == formrec._id) 
+        | 
+        span (Shown)
+      else
+        | 
+        a(href="?version="+job.form.version) See this version
+    div View with form version:
+      each v in formVersions
+        a(href='?formVersion='+v)=v
+        |
+        |
+
+
+  if(processes && processes.length>0)
+    h4 Processed
+    for process of processes
+      p 
+        a(href='/processRecord/'+process._id.toString())=process.process.processId 
+        |
+        |
+        +dateFormat(process.insertion.insertDate)
+        |
+        |
+        +short_user(process.insertion.user)
+        |
+        |
+        =process.state
+        | - 
+        | #{process.created.length} objects created
+
+
+  p
+    if(permissions.userHas(user,'jobs:process'))
+      each process, processId in (formrec.processes || {})
+        a.btn.btn-warning(href='/process'+job.recordType+'/'+job.jobId+'/'+formrec._id+'/'+encodeURIComponent(processId))
+          | Process: #{processId}
+        |
+        |
+
+  p
+      if(permissions.userHas(user,'jobs:edit') || (permissions.userHas(user,'jobs:submit')&& job.state == 'draft'))
+        a.btn.btn-warning
+        each process, processId in (formrec.processes || {})
+          a.btn.btn-warning(href='/process'+job.recordType+'/'+job.jobId+'/'+formrec._id+'/'+encodeURIComponent(processId))
+            | Process: #{processId}
+          |
+          |
+
+  -var path = (job.recordType=="job")?'/json/job':'/json/test';
+
+  p  
+    a(href='/job/'+job.jobId+'/history') History
+
+  p
+    a(href=`${path}/${job.jobId}?pretty`) View JSON data
+  p
+    a(download=job.jobId+".json", href=`${path}/${job.jobId}`) Download JSON data
+  p
+    a.btn.btn-info.pull-right(href=`/${job.recordType}/copyAsDraft/`+job.jobId) Create Copy As New Draft
+
