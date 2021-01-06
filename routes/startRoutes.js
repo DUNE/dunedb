@@ -30,8 +30,9 @@ router.get('/', async function(req, res, next) {
     }
 
   }
-  console.log(JSON.stringify(recentComponents))
-  res.render('home.pug',{recentComponents});
+  var tags = await Forms.tags();
+  console.log(JSON.stringify(recentComponents),tags)
+  res.render('home.pug',{tags,recentComponents});
 });
 
 

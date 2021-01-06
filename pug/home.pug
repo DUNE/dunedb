@@ -47,4 +47,9 @@ block content
           li
             a(href='/'+c.componentUuid) #{c.componentUuid} &nbsp; &nbsp; #{c.name} [#{c.type}]
 
-
+  if(tags && tags.length>0)
+      p Tags:
+        ul
+          each t in tags
+            li
+              a(href='/category/'+t)=t
