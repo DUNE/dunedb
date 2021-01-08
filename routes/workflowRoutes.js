@@ -13,7 +13,7 @@ module.exports = router;
 //////////////////////////////////////////////////////////////////////////
 // Editing and creating forms
 
-// console.log("forms",Workflows);
+// logger.info("forms",Workflows);
 
 // Create a new job form
 var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));

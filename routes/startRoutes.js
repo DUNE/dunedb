@@ -12,13 +12,13 @@ module.exports = router;
 
 
 // (async function(){
-//   console.log(await manager.getUsersByEmail('ntagg@otterbein.edu'))
+//   logger.info(await manager.getUsersByEmail('ntagg@otterbein.edu'))
 // })();
 
 router.get('/', async function(req, res, next) {
   var recentComponents = [];
   if(((req.session||{}).recent||{}).componentUuid) {
-    // console.log(chalk.blue("recent:",req.session.recent.componentUuid));
+    // logger.info(chalk.blue("recent:",req.session.recent.componentUuid));
     var list = await Components.list({componentUuid:{$in:req.session.recent.componentUuid}});
 
     //order the list.
@@ -31,7 +31,7 @@ router.get('/', async function(req, res, next) {
 
   }
   var tags = await Forms.tags();
-  console.log(JSON.stringify(recentComponents),tags)
+  logger.info(JSON.stringify(recentComponents),tags)
   res.render('home.pug',{tags,recentComponents});
 });
 
@@ -41,10 +41,10 @@ router.get('/category/:tag', async function(req, res, next) {
   function filterTag(tag,menu) {
     var retval = {};
     var got = false;
-    console.log('filterTag',tag,menu)
+    logger.info('filterTag',tag,menu)
     for(var key in menu) {
       var form = menu[key];
-      console.log(form);
+      logger.info(form);
       if((form.tags || []).includes(tag) && !form.tags.includes("Trash")) {
         retval[key] = form;
         got = true;
@@ -57,9 +57,9 @@ router.get('/category/:tag', async function(req, res, next) {
   var componentForms = filterTag(req.params.tag, await Forms.list("componentForms") );
   var testForms = filterTag(req.params.tag, await Forms.list("testForms") );
   var jobForms = filterTag(req.params.tag, await Forms.list("jobForms") );
-  console.log("components:",Object.keys(componentForms||{}))
-  console.log("tests:",Object.keys(testForms||{}))
-  console.log("jobs:",Object.keys(jobForms||{}))
+  logger.info("components:",Object.keys(componentForms||{}))
+  logger.info("tests:",Object.keys(testForms||{}))
+  logger.info("jobs:",Object.keys(jobForms||{}))
   res.render('category.pug',{tag:req.params.tag,componentForms,testForms,jobForms});
 
 });

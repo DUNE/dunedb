@@ -18,7 +18,7 @@ module.exports = router;
 router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:view"), 
   async function(req,res,next) {
     try{
-      console.log("finding test ",req.params.record_id)
+      logger.info("finding test ",req.params.record_id)
       var options = {};
       // get stuff in one go
       let [test,processes] = await Promise.all([
@@ -37,10 +37,10 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tes
       // fixme rollback
       var formrec = await Forms.retrieve('testForms',formId,options);
       var versions = await Forms.getFormVersions('testForms',formId);
-      console.log('versions',versions);
+      logger.info('versions',versions);
       if(!formrec) return res.status(400).send("No such test form");  
       res.render('viewTest.pug',{formId:req.params.formId, formrec, testdata:test, processes, versions, component, retrieved:true})
-  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+  } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 
 });
 
@@ -54,13 +54,13 @@ router.get("/test/:formId",permissions.checkPermission("tests:submit"),async fun
 router.get("/"+utils.uuid_regex+"/test/:formId", permissions.checkPermission("tests:submit"),
 async function(req,res,next) {
   try{
-    console.log("run a new test");
+    logger.info("run a new test");
     // only look for test version that's current now.
     var options = {onDate: new Date()};
     var form = await Forms.retrieve('testForms',req.params.formId,options);
     if(!form) return res.status(400).send("No such test form");
     res.render('test.pug',{formId:req.params.formId, form, componentUuid: req.params.uuid})
-  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+  } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 });
 
 
@@ -68,24 +68,24 @@ async function(req,res,next) {
 router.get("/test/draft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:submit"),
 async function(req,res,next) {
   try{
-    console.log("resume draft",req.params.record_id);
+    logger.info("resume draft",req.params.record_id);
     // get the draft.
     var testdata = await Tests.retrieve(req.params.record_id);
     if(!testdata) next();
     if(testdata.state != "draft") return res.status(400).send("Data is not a draft");
-    console.log(testdata);
+    logger.info(testdata);
     if(!testdata.formId) return res.status(400).send("Can't find test data");
 
     var form = await Forms.retrieve('testForms',testdata.formId);
     if(!form) return res.status(400).send("No such test form");
     res.render('test.pug',{formId: testdata.formId, form:form, componentUuid: testdata.componentUuid, testdata:testdata})
-  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+  } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 });
 
 router.get("/test/deleteDraft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:submit"),
 async function(req,res,next) {
   try{
-    console.log("delete draft",req.params.record_id);
+    logger.info("delete draft",req.params.record_id);
     // get the draft.
     var testdata = await Tests.retrieve(req.params.record_id);
     if(!testdata) next();
@@ -95,7 +95,7 @@ async function(req,res,next) {
     await Tests.deleteDraft(req.params.record_id);
     var backURL=req.header('Referer') || '/';
     res.redirect(backURL);
-  } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+  } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 });
 
 // Lists recent tests generally, or a specific formId
@@ -109,10 +109,10 @@ router.get('/test/copyAsDraft/:record_id([A-Fa-f0-9]{24})',permissions.checkPerm
   async function(req,res,next) {
     try{
       var newdraft = await Tests.copyToDraft(req.params.record_id,req);
-      console.log("Made copy ",newdraft);
+      logger.info("Made copy ",newdraft);
       if(newdraft) res.redirect("/test/draft/"+newdraft._id.toString())
 
-    } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+    } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 
 })
 

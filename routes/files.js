@@ -18,7 +18,7 @@ module.exports = router;
 // Save files to disk:
 var file_upload_middleware = require('express-fileupload')();
 router.post("/disk",permissions.checkPermission("tests:view"),file_upload_middleware,async function(req, res,next){
-    console.log('/disk',req.files);
+    logger.info('/disk',req.files);
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).send('No files were uploaded.');
     }
@@ -59,7 +59,7 @@ function streamToString (stream) {
 router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
   async function(req, res,next){
     try{
-      console.log("/file/gridfsBase64 data");
+      logger.info("/file/gridfsBase64 data");
    
       // This version uses the bodyParser to get a JSON string. But it intrerpreter limits, 
       // and is usless overhead anyay.
@@ -71,7 +71,7 @@ router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
       var dataURI = await streamToString(req);
     
       if (!/data:image\//.test(dataURI)) {
-        console.log('ImageDataURI :: Error :: It seems that it is not an Image Data URI. Couldn\'t match "data:image\/"');
+        logger.info('ImageDataURI :: Error :: It seems that it is not an Image Data URI. Couldn\'t match "data:image\/"');
         return null;
       }
 
@@ -85,12 +85,12 @@ router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
       // We can save the buffer to file to test this;
       // const fs = require('fs');
       // fs.writeFile('filename',dataBuffer,(err) => {
-      //   if (err) throw err; console.log('The file has been saved!'); });
+      //   if (err) throw err; logger.info('The file has been saved!'); });
 
       var bucket = new mongo.GridFSBucket(db);
       bucket.openUploadStream(filename,{contentType:"image/"+imageType})
         .on('finish',function(gridfs_record){
-            console.log("upload to mongo finished");
+            logger.info("upload to mongo finished");
             console.dir(gridfs_record);
             var url = config.my_url + req.baseUrl;
             if (url.substr(-1) != '/') url += '/'; // ensure trailing slash
@@ -100,13 +100,13 @@ router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
              name: gridfs_record._id.toString(),
              size: gridfs_record.length
             };
-            console.log("responding to uploader with:",response);
+            logger.info("responding to uploader with:",response);
             res.json(response);
           })
         .end(dataBuffer);
 
     } catch(err) {
-      console.error(err);
+      logger.error(err);
       res.status(400).json({error:err});
     }
 
@@ -117,20 +117,20 @@ router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
 
 router.post("/gridfs",permissions.checkPermission("tests:submit"),
   async function(req, res,next){
-    console.log("/file/gridfs");
+    logger.info("/file/gridfs");
     var bucket = new mongo.GridFSBucket(db);
 
 
     // looking at https://github.com/richardgirges/express-fileupload/blob/master/lib/processMultipart.js
     var busboy = new Busboy({ headers: req.headers });
     busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-      console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+      logger.info('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
       file.pipe(bucket.openUploadStream(filename,{contentType:mimetype||"application/octet-stream"}))
       .on('error',function(err) {
             return res.status(500).json({error:"bucket.pipe: "+err});
             })
           .on('finish',function(gridfs_record){
-            console.log("upload to mongo finished");
+            logger.info("upload to mongo finished");
             console.dir(gridfs_record);
             var url = config.my_url + req.baseUrl;
             if (url.substr(-1) != '/') url += '/'; // ensure trailing slash
@@ -140,21 +140,21 @@ router.post("/gridfs",permissions.checkPermission("tests:submit"),
              name: gridfs_record._id.toString(),
              size: gridfs_record.length
             };
-            console.log("responding to uploader with:",response);
+            logger.info("responding to uploader with:",response);
             res.json(response);
           });
       // file.on('data', function(data) {
-      //   console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+      //   logger.info('File [' + fieldname + '] got ' + data.length + ' bytes');
       // });
       file.on('end', function() {
-        console.log('File [' + fieldname + '] Finished');
+        logger.info('File [' + fieldname + '] Finished');
       });
     });
     // busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
-    //   console.log('Field [' + fieldname + ']: value: ' + inspect(val));
+    //   logger.info('Field [' + fieldname + ']: value: ' + inspect(val));
     // });
     // busboy.on('finish', function() {
-    //   console.log('Done parsing form!');
+    //   logger.info('Done parsing form!');
     //   res.writeHead(303, { Connection: 'close', Location: '/' });
     //   res.end();
     // });
@@ -177,11 +177,11 @@ router.get('/gridfs/:objectid', function(req,res,next){
         if(obj.contentType)      res.set('Content-Type', obj.contentType);
         else                     res.set('Content-Type', 'application/octet-stream');
         res.set('Cache-Control','public, max-age=604800, immutable'); // Because we're using a unique ObjectiD as the key, URL is guarenteed unique. Always cache.
-        console.log("gridfs found file",obj);
+        logger.info("gridfs found file",obj);
     })
     .on('error',function(err){
-      console.error("Error retrieving file /gridfs/"+req.params.objectid);
-      console.error(err);
+      logger.error("Error retrieving file /gridfs/"+req.params.objectid);
+      logger.error(err);
       res.status(400).json({error:err})
 
     })
@@ -195,10 +195,10 @@ router.get('/gridfs/:objectid', function(req,res,next){
 function get_and_resize(req,res,next)
 {
   try{
-    console.log("resizing output image");
+    logger.info("resizing output image");
     var transformer = sharp()
                         .resize(parseInt(req.query.resize))
-                        .on('info',console.log);
+                        .on('info',logger.info);
 
     db.collection('fileActivity').updateOne({_id:req.params.objectid},
                                         {$set: {last_retrieval: new Date()}},
@@ -211,11 +211,11 @@ function get_and_resize(req,res,next)
           if(obj.contentType)      res.set('Content-Type', obj.contentType);
           else                     res.set('Content-Type', 'application/octet-stream');
           res.set('Cache-Control','public, max-age=604800, immutable'); // Because we're using a unique ObjectiD as the key, URL is guarenteed unique. Always cache.
-          console.log("gridfs found file",obj);
+          logger.info("gridfs found file",obj);
       })
       .on('error',function(err){
-        console.error("Error retrieving file /gridfs/"+req.params.objectid);
-        console.error(err);
+        logger.error("Error retrieving file /gridfs/"+req.params.objectid);
+        logger.error(err);
         res.status(400).json({error:err})
 
       })
@@ -230,13 +230,13 @@ function get_and_resize(req,res,next)
 // delete a file, 
 // called when user pushes the 'x' button next to a falsely-uploaded file.
 // router.delete('/gridfs/:objectid', permissions.checkPermission("tests:submit"), async function(req,res,next){
-//   console.log("deleting",req.params.objectid);
+//   logger.info("deleting",req.params.objectid);
 //   const bucket = new mongo.GridFSBucket(db);
 //   try {
 //     await bucket.delete(mongo.ObjectID(req.params.objectid));
 //     return res.status(200);
 //   } catch(err) {
-//     console.error(err);
+//     logger.error(err);
 //     return res.status(400).json({"error":err})
 //   }
 
@@ -244,7 +244,7 @@ function get_and_resize(req,res,next)
 
 // Instead of the above, mark a file for possible deletion
 router.delete('/gridfs/:objectid', permissions.checkPermission("tests:submit"), async function(req,res,next){
-  console.log("marking for deletion:",req.params.objectid);
+  logger.info("marking for deletion:",req.params.objectid);
   await db.collection('fileActivity').updateOne({_id:req.params.objectid},
                                         {$set: {delete_requested: new Date()}},
                                         {upsert:true});

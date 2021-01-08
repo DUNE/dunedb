@@ -30,12 +30,12 @@ router.get("/job/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:v
       // fixme rollback
       var formrec = await Forms.retrieve('jobForms',formId,options);
       var formversions = await Forms.getFormVersions('jobForms',formId);
-      // console.log('versions',versions);
+      // logger.info('versions',versions);
       if(!formrec) return res.status(400).send("No such job form");  
       res.render('viewJob.pug',{formId:req.params.formId, formrec,  processes, job, formversions, retrieved:true})
     } 
     catch(err) { 
-      console.error("error in router function",err); //next(); 
+      logger.error("error in router function",err); //next(); 
     }
 
 });
@@ -44,7 +44,7 @@ router.get("/job/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:v
 // look at a job result
 router.get("/job/:jobId([A-Fa-f0-9]{24})/history", permissions.checkPermission("tests:view"),
  async function(req,res,next) {
-    // console.log("job/<>/history");
+    // logger.info("job/<>/history");
 
     try{
         var query = {jobId: req.params.jobId};
@@ -64,12 +64,12 @@ router.get("/job/:jobId([A-Fa-f0-9]{24})/history", permissions.checkPermission("
         // fixme rollback
         var formrec = await Forms.retrieve('jobForms',formId,options);
         var formVersions = await Forms.getFormVersions('jobForms',formId);
-        // console.log('versions',versions);
+        // logger.info('versions',versions);
         if(!formrec) return res.status(400).send("No such job form");  
         res.render('viewJobHistory.pug',{formId:req.params.formId, formrec, processes, job, versions, formVersions, retrieved:true})
     } 
     catch(err) { 
-      console.error("error in router function",err); next(); 
+      logger.error("error in router function",err); next(); 
     }
 
 });
@@ -79,39 +79,39 @@ router.get("/job/:jobId([A-Fa-f0-9]{24})/history", permissions.checkPermission("
 /// Run an new job
 router.get("/job/:formId",permissions.checkPermission("jobs:submit"),async function(req,res,next){
   try{
-    // console.log("run a new job");
+    // logger.info("run a new job");
     var options = {onDate: new Date()};
     var workflow = await Forms.retrieve('jobForms',req.params.formId,options);
     if(!workflow) return res.status(400).send("No such job workflow");
     res.render('test.pug',{formId:req.params.formId, form:workflow, 
                           route_on_submit: '/job',
                           submission_url: '/json/job'});
-  } catch(err) { console.error(err); next(); }
+  } catch(err) { logger.error(err); next(); }
 });
 
 
 router.get("/job/edit/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
 async function(req,res,next) {
   try{
-    // console.log("edit job",req.params.job_id);
+    // logger.info("edit job",req.params.job_id);
     // get the draft.
     var job = await Jobs.retrieve(req.params.job_id);
     if(!job) next();
     // if(job.state != "draft") return res.status(400).send("Data is not a draft");
-    // console.log(job);
+    // logger.info(job);
     if(!job.formId) return res.status(400).send("Can't find test data");
 
     var form = await Forms.retrieve('jobForms',job.formId);
     if(!form) return res.status(400).send("No such test form");
     res.render('test.pug',{formId: job.formId, form:form, testdata:job, route_on_submit:'/job', submission_url:'/json/job'})
-  } catch(err) { console.error(err); next(); }
+  } catch(err) { logger.error(err); next(); }
 });
 
 
 // router.get("/job/deleteDraft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
 // async function(req,res,next) {
 //   try{
-//     console.log("delete draft",req.params.record_id);
+//     logger.info("delete draft",req.params.record_id);
 //     // get the draft.
 //     var testdata = await Jobs.retrieve(req.params.record_id);
 //     if(!testdata) next();
@@ -121,7 +121,7 @@ async function(req,res,next) {
 //     await Jobs.deleteDraft(req.params.record_id);
 //     var backURL=req.header('Referer') || '/';
 //     res.redirect(backURL);
-//   } catch(err) { console.error(err); next(); }
+//   } catch(err) { logger.error(err); next(); }
 // });
 
 
@@ -136,7 +136,7 @@ router.get('/jobs/:formId?', permissions.checkPermission("tests:view"),
 
     var match = (req.params.formId) ? {formId:req.params.formId} : {};
     var jobs = await Jobs.list(match,opts);
-    // console.log(jobs);
+    // logger.info(jobs);
     res.render('recentJobs.pug',{formId:req.params.formId, jobs: jobs, formInfo: formInfo});
   });
 
@@ -144,10 +144,10 @@ router.get('/job/copyAsDraft/:job_id([A-Fa-f0-9]{24})',permissions.checkPermissi
   async function(req,res,next) {
     try{
       var newdraft = await Jobs.copyToDraft(req.params.job_id,req);
-      // console.log("Made copy ",newdraft);
+      // logger.info("Made copy ",newdraft);
       if(newdraft) res.redirect("/job/edit/"+newdraft.jobId.toString())
 
-    } catch(err) {  console.error(err); res.status(400).send(err.toString()); }
+    } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 
 })
 

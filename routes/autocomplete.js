@@ -11,7 +11,7 @@ module.exports = router;
 router.get("/uuid",async function(req,res,next) {
   // this functionality is put into Components, in case we change abstraction again.
   var matches = await Components.findUuidStartsWith(req.query.q);
-  console.log('autocomplete matches',matches);
+  logger.info('autocomplete matches',matches);
   return res.json(matches);
 
 })

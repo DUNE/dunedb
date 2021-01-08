@@ -15,6 +15,6 @@ router.get('/search/:recordType?/:formId?',permissions.checkPermission("componen
  async function(req,res,next) {
     var recordType = req.params.recordType;
     var formId = req.params.formId?decodeURIComponent(req.params.formId):null;
-    console.log("/search ", recordType,formId)
+    logger.info("/search ", recordType,formId)
     res.render("searchForm.pug",{recordType,formId});
 });
