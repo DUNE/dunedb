@@ -1,9 +1,0 @@
-- More thorough testing suite that works on /lib/*.js calls
-- Think more about logging
-  - Logins
-  - promoteYourself
-  - errors encountered
-  etc
-
-
-- EDMS access

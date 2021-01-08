@@ -96,5 +96,9 @@
       "*.test.js"
     ],
     "ext": "js,json,pug"
+  },
+  "jest" : {
+      "coverageProvider": "v8",
+      "testEnvironment": "node"
   }
 }
