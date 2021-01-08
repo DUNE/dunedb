@@ -6,7 +6,8 @@
 // This code will only be run by first require-er.
 
 // conifig defaults:
-var defaults = {
+
+module.exports = {
   deployment: 'laptop',  // laptop, devsite, or production. Passed to Pug to get templates right.
   my_url : "http://localhost:12313/", // url of this instance
   http_server_port: 12313, // port we're running on
@@ -51,11 +52,3 @@ var defaults = {
   // $ echo `openssl rand -base64 256`
   m2m_secret: '......',
 }
-
-
-var config;
-if(!config) config = require('deepmerge')(defaults,require('./config.js'));
-// console.log("config:",config);
-
-
-module.exports = config;

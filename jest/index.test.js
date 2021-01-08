@@ -1,4 +1,4 @@
-global.config = require("../configuration.js");
+global.config = require("../lib/configuration.js");
 const request = require('supertest');
 const express = require('express');
 const session = require('supertest-session');

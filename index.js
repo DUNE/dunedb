@@ -1,6 +1,4 @@
-// const whyohwhy = require('why-is-node-running') // should be your first require
-
-global.config = require('./configuration.js');  // must be first
+require("./lib/configuration.js")
 var database = require('./lib/database.js'); // Exports global 'db' variable
 var App = require("./lib/app.js")
 
