@@ -91,7 +91,7 @@ router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
       bucket.openUploadStream(filename,{contentType:"image/"+imageType})
         .on('finish',function(gridfs_record){
             logger.info("upload to mongo finished");
-            console.dir(gridfs_record);
+            logger.info(gridfs_record);
             var url = config.my_url + req.baseUrl;
             if (url.substr(-1) != '/') url += '/'; // ensure trailing slash
             url+="gridfs/";
@@ -131,7 +131,7 @@ router.post("/gridfs",permissions.checkPermission("tests:submit"),
             })
           .on('finish',function(gridfs_record){
             logger.info("upload to mongo finished");
-            console.dir(gridfs_record);
+            logger.info(gridfs_record);
             var url = config.my_url + req.baseUrl;
             if (url.substr(-1) != '/') url += '/'; // ensure trailing slash
             url+="gridfs/";

@@ -51,7 +51,7 @@ async function get_component(req,res) {
         Components.relationships(componentUuid),
       ]);
     if(!formrec) throw new Error("Component form for type \""+component.type+"\" does not exist");
-    // console.dir(forms);
+    // logger.info(forms);
     // logger.info("component")
     // logger.info(component);
     // logger.info("tests",tests);

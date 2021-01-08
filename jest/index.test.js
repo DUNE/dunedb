@@ -50,7 +50,15 @@ var uuid, testId, jobId;
 var draftTestId;
 
 beforeAll(async () => {
-  // console.log("beforeAll");
+  var pino_opts = {
+    customLevels: {
+        http: 29
+    },
+    level: 'error', 
+  };
+global.logger = require("pino")(pino_opts);
+
+  // logger.info("beforeAll");
   await database.attach_to_database()
 
   await App.create_app(appPublic);
@@ -63,7 +71,7 @@ beforeAll(async () => {
   await App.setup_routes(appAuthorized);
 
 
-  // console.log("done initializing");
+  // logger.info("done initializing");
   }
 );
 
@@ -224,7 +232,7 @@ describe("private routes",function() {
         .expect(200)
         .then(response=>{
           uuid = response.body;
-          console.log("GOT UUID",uuid);
+          logger.info("GOT UUID",uuid);
         })
     });
 
@@ -295,7 +303,7 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(r=>{
-          console.log('/json/test',r.body);
+          logger.info('/json/test',r.body);
           expect(r.body).toBeDefined();
           testId = r.body;
         });
@@ -318,7 +326,7 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(r=>{
-          console.log('/json/test',r.body);
+          logger.info('/json/test',r.body);
           expect(r.body).toBeDefined();
           draftTestId = r.body;
         })
@@ -340,7 +348,7 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         // .expect(200)
         .then(r=>{
-          console.log("json/job",r.body);
+          logger.info("json/job",r.body);
           expect(r.body).toBeDefined();
           jobId = r.body;
 
@@ -371,7 +379,7 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(r=>{
-          console.log(r.body);
+          logger.info(r.body);
           expect(r.body).toBeDefined();
           expect(r.body.length).toBeDefined();
           expect(r.body.pop().componentUuid).toBe(uuid);
@@ -384,7 +392,7 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(r=>{
-          console.log(r.body);
+          logger.info(r.body);
           expect(r.body).toBeDefined();
           expect(r.body['cform'+suffix]).toBeDefined();
         });
@@ -396,7 +404,7 @@ describe("private routes",function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(r=>{
-          console.log('componentTypesTags',r.body);
+          logger.info('componentTypesTags',r.body);
           expect(r.body['cform'+suffix]).toBeDefined();
         });
     });
@@ -452,7 +460,7 @@ describe("private routes",function() {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(r=>{
-            // console.log("autocomplete",r.body);
+            // logger.info("autocomplete",r.body);
             expect(r.body.length).toBeGreaterThan(0);
           });
     });
@@ -466,7 +474,7 @@ describe("private routes",function() {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(r=>{
-            // console.log("search result:",r.body);
+            // logger.info("search result:",r.body);
             expect(r.body.length).toBeGreaterThan(0);
           });
     });
@@ -478,7 +486,7 @@ describe("private routes",function() {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(r=>{
-            // console.log("search result:",r.body);
+            // logger.info("search result:",r.body);
             expect(r.body.length).toBeGreaterThan(0);
           });
     });
@@ -491,7 +499,7 @@ describe("private routes",function() {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(r=>{
-            // console.log("search result:",r.body);
+            // logger.info("search result:",r.body);
             expect(r.body.length).toBeGreaterThan(0);
           });
     });
@@ -684,11 +692,11 @@ describe("private routes",function() {
               .expect('Content-Type', /json/)
               .expect(200)
               .then(r=>{
-                // console.log("search result:",r.body);
+                // logger.info("search result:",r.body);
                 expect(r.body).toBeTruthy();
                 var url = r.body.url;
                 fileurl = '/' + url.split('/').splice(3).join('/')
-                // console.log("fileurl",url, fileurl);
+                // logger.info("fileurl",url, fileurl);
                 done();
               });
           // });
