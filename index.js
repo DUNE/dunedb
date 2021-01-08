@@ -12,7 +12,7 @@ global.BaseDir = __dirname;
 // logging.
 var pino = require("pino");
 var pino_opts = {};
-if(process.env.ENV_NODE!='production') {
+if(process.env.ENV_NODE!='production') { // never use this when running under pm2
     pino_opts.prettyPrint = {
         // messageFormat: "{levelLabel} {request.url} {msg}"
         ignore:'pid,hostname',
