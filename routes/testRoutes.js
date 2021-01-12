@@ -63,6 +63,18 @@ async function(req,res,next) {
   } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 });
 
+/// Run a multitest
+router.get("/multitest/:formId", permissions.checkPermission("tests:submit"),
+async function(req,res,next) {
+  try{
+    logger.info("run a multitest session");
+    var options = {onDate: new Date()};
+    var form = await Forms.retrieve('testForms',req.params.formId,options);
+    if(!form) return res.status(400).send("No such test form");
+    res.render('run_multi_test.pug',{formId:req.params.formId, form})
+  } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
+});
+
 
 // Resume editing a draft
 router.get("/test/draft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:submit"),

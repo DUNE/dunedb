@@ -1,0 +1,90 @@
+//-
+//- Run a test or a workflow job.
+//-
+  
+extend default
+
+block vars
+  - var page_title=formId;
+block extrascripts
+  script(type='text/javascript').
+    // I could do this by API query of the server, but this works for now.
+    var formrec=!{ JSON.stringify(form||{}, null ,4) }; 
+    var testdata=!{JSON.stringify((testdata||{}), null ,4)}; 
+    var readOnly=!{retrieved||false};
+    var route_on_submit = "!{route_on_submit || '/test'}";
+    var submission_url = "!{submission_url || '/json/test'}"
+    var componentUuid = !{JSON.stringify(componentUuid||null)};
+  script(type='text/javascript' src='/js/run_multi_test.js')
+
+  style.
+    #testpanels {
+      overflow-x: scroll;
+      background-color: red;
+        white-space: nowrap;
+
+    }
+    .testform-panel {
+      display: inline-block;
+      width: 600px;
+      min-height: 100px;
+
+      border: 1px solid black;
+      margin: 2px;
+      background-color: white;
+            vertical-align:top;
+
+    }
+
+    #add-one-panel {
+      display: inline-block;
+      width: auto;
+      height: 100%
+    }
+    #add-one-sub {
+      min-height: 100px;
+      align-items: center;
+      justify-content: center;
+      display:flex
+    }
+
+
+
+block allbody
+  h2 MultiTest: #{form.formName}
+
+  button.btn.btn-primary#add-an-entry Add another component to test
+  
+  #testpanels
+
+  button.btn.btn-primary#add-an-entry Add another component to test
+
+
+  #uuidModalCenter.modal.fade(tabindex='-1' role='dialog' aria-labelledby='uuidModalCenterTitle' aria-hidden='true')
+    .modal-dialog.modal-dialog-centered(role='document')
+      .modal-content
+        .modal-header
+          h5#uuidModalLongTitle.modal-title Modal title
+          button.close(type='button' data-dismiss='modal' aria-label='Close')
+            span(aria-hidden='true') &times;
+        .modal-body
+          p Every test must be perormed on a component. Enter the component UUID below.
+
+          p This form has auto-complete - just start typing a component UUID to get started.
+
+          #uuid-form
+
+        .modal-footer
+          button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+
+
+
+  template#form-panel-template
+    .testform-panel.rounded
+      .componentInfo
+        img.float-left.icon
+        h5.uuid &nbsp;
+        h6.name &nbsp;
+      .builtform
+      .submitbutton
+

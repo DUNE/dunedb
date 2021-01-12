@@ -6,11 +6,12 @@ const MUUID = require('uuid-mongodb');
 const moment = require('moment');
 const deepmerge = require('deepmerge');
 
-var Components = require('../lib/Components.js');
-var permissions = require('../lib/permissions.js');
-var Forms = require('../lib/Forms.js');
-var Tests = require('../lib/Tests.js')('test');
-var utils = require("../lib/utils.js");
+const Components = require('../lib/Components.js');
+const ComponentTypes = require('../lib/ComponentTypes.js');
+const permissions = require('../lib/permissions.js');
+const Forms = require('../lib/Forms.js');
+const Tests = require('../lib/Tests.js')('test');
+const utils = require("../lib/utils.js");
 
 var router = express.Router();
 
@@ -245,7 +246,7 @@ router.get("/EditComponentForm/:type", permissions.checkPermission("forms:edit")
 router.get("/NewComponentType/:type", permissions.checkPermission("forms:edit"), async function(req,res){
   try{
     var type = decodeURIComponent(req.params.type);
-    // await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
+    await ensureTypeFormExists(type,req,res); // Needed when creating a new form.
 
     res.render('EditComponentForm.pug',{collection:"componentForms",formId:type});
   } catch (err) {
@@ -263,6 +264,8 @@ router.get("/NewComponentType/:type", permissions.checkPermission("forms:edit"),
 router.get('/components/type',permissions.checkPermission("components:view"),
   async function(req,res,next) {
         // These are the components that already exist.
+        var componentTypes =  await ComponentTypes.list();
+
         var types = await Components.getTypes();
 
         // Add onto it any form types that exist, but haven't created objects yet.

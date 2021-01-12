@@ -5,6 +5,7 @@ const Forms = require("../lib/Forms.js");
 const Components = require("../lib/Components.js");
 const Tests = require("../lib/Tests.js")('test');
 const Jobs = require("../lib/Jobs.js")('job');
+const ComponentTypes = require("../lib/ComponentTypes.js");
 // const Jobs = require("../lib/Jobs.js");
 const Cache = require("../lib/Cache.js");
 const utils = require("../lib/utils.js");
@@ -12,6 +13,7 @@ const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
 const pretty = require('express-prettify');
 var MUUID = require('uuid-mongodb');
+const deepmerge = require('deepmerge');
 
 var router = express.Router();
 module.exports = router;
@@ -168,12 +170,24 @@ router.get('/components/:type', permissions.checkPermissionJson('components:view
   }
 );
 
-router.get('/componentTypes', permissions.checkPermissionJson('components:view'), 
+
+Cache.add('componentTypes',
+    async function(){
+      logger.info("regenerating componentTypes");
+      var types = await Components.getTypes();
+      var forms = await Forms.list('componentForms');
+      var componentTypes = deepmerge(types,forms);
+      return componentTypes;
+  },
+  ['componentCountsByType','formlist_componentForms'] // invalidate if these are invalidated
+);
+
+router.get('/componentTypes/:type?', permissions.checkPermissionJson('components:view'), 
   async function(req,res,next){
-    // FIXME, this is just extant types, does not include form info
     try {
-      var data = await Components.getTypes(req.query.type);
-      return res.json(data);
+      var componentTypes =  await ComponentTypes.list();
+      if(req.params.type) return res.json(componentTypes[decodeURIComponent(req.params.type)]);
+      return res.json(componentTypes);
     } catch(err) {
       res.status(400).json({error:err.toString()})
     }  

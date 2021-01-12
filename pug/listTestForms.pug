@@ -15,15 +15,27 @@ block content
             td
               img.icon(src=info.icon)
             td=(info.formName || formId)
-            if(permissions.userHas(user,"tests:submit"))
-              td
-                a(href='/test/'+formId).btn.btn-outline-primary Run
             if(permissions.userHas(user,"tests:view"))
               td
-                a(href='/tests/'+formId).btn.btn-outline-secondary Recent
+                a(href='/tests/'+formId).btn.btn-outline-secondary 
+                  img.small-icon(src='/images/checklist_icon.svg') 
+                  | &nbsp; Recent
+            if(permissions.userHas(user,"tests:submit"))
+              td
+                a(href='/test/'+formId).btn.btn-outline-primary 
+                  img.small-icon(src='/images/run_icon.svg') 
+                  | &nbsp; Run
+
+            if(permissions.userHas(user,"tests:submit"))
+              td
+                a(href='/multitest/'+formId).btn.btn-outline-primary 
+                  img.small-icon(src='/images/run_multiple_icon.svg')                   
+                  | &nbsp; Run On Multiple Components
             if(permissions.userHas(user,"forms:edit"))
               td
-                a(href='/EditTestForm/'+formId).btn.btn-outline-warning Edit
+                a(href='/EditTestForm/'+formId).btn.btn-outline-warning 
+                  img.small-icon(src='/images/edit_icon.svg')                   
+                  | &nbsp; Edit
 
 
   if(permissions.userHas(user,"forms:edit"))
