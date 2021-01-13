@@ -40,6 +40,7 @@ block content
       a(href="/promoteYourself") promote yourself
       |.
 
+
   if(recentComponents)
       p Recently visited components:
         ul
@@ -53,3 +54,8 @@ block content
           each t in tags
             li
               a(href='/category/'+t)=t
+  hr
+  p Git branch: #{git_branch}
+  p Recent commits:
+    pre=git_log
+
