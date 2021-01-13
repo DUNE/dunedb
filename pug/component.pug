@@ -104,14 +104,14 @@ block content
           ul.list-group#tests
               each info,formId in forms
                 // First, list specifically-matched ones:
-                if(((info||{}).tags||[]).includes(component.type)&& !info.tags.includes("Trash") )
+                if(((info||{}).componentTypes||[]).includes(component.type)&& !info.tags.includes("Trash") )
                   li.list-group-item
                     a(href='/'+componentUuid+'/test/'+formId)
                       img.icon(src=info.icon)
                       =info.formName
               each info,formId in forms
                 // Tests tagged as 'all'
-                if(((info||{}).tags||[]).includes("All")&& !info.tags.includes("Trash") )
+                if(((info||{}).componentTypes||[]).includes("All")&& !info.tags.includes("Trash") )
                   li.list-group-item
                     a(href='/'+componentUuid+'/test/'+formId)
                       img.icon(src=info.icon)

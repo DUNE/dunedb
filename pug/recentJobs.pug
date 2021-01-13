@@ -8,7 +8,6 @@ block content
   table.table
     each job in jobs
         tr
-            -console.log(job)
             -var info = formInfo[job.formId];
             td
               if(info)

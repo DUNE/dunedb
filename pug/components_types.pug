@@ -15,7 +15,6 @@ block content
         th Type
         th Count
     tbody
-      //-console.log(JSON.stringify(types,null,2));
       each type in Object.keys(componentTypes).sort()
         -var info = componentTypes[type];
         if(type && type!="null" && !(info.tags||[]).includes("Trash"))
@@ -67,7 +66,6 @@ block content
      h5.mt-3 Trashed component forms:
      table.table
         tbody
-          -console.log(JSON.stringify(types,null,2));
           each type in Object.keys(componentTypes).sort()
             -var info = componentTypes[type];
             if(info.tags||[]).includes("Trash")

@@ -18,7 +18,7 @@ var manager = new ManagementClient({
 
 
 // (async function(){
-//   console.log(await manager.getUsersByEmail('ntagg@otterbein.edu'))
+//   logger.info(await manager.getUsersByEmail('ntagg@otterbein.edu'))
 // })();
 
 
@@ -28,8 +28,8 @@ router.get('/profile/:userId?',permissions.checkPermission("components:view"),
     if(req.params.userId)
       user_id = decodeURIComponent(req.params.userId);
 
-    // console.log("looking up",user_id);
-    // console.log(await manager.getUserRoles({id:user_id}))
+    // logger.info("looking up",user_id);
+    // logger.info(await manager.getUserRoles({id:user_id}))
     var [user,roles,permissions] = await Promise.all([
         manager.getUser({id:user_id}),
         manager.getUserRoles({id:user_id}),
@@ -37,7 +37,7 @@ router.get('/profile/:userId?',permissions.checkPermission("components:view"),
       ]);
     if(Array.isArray(user)) return res.status(400).send("More than one user matched");
     if(!user)return res.status(400).send("No user with that ID");
-   // console.log(user);
+   // logger.info(user);
    res.render("user.pug",{user,roles,permissions});
 });
 
@@ -74,7 +74,7 @@ router.post("/promoteYourself",
   async function(req,res,next) {
 
       // Limit retry rate.
-      // console.log(req.session.self_promotion_tries.join(','));
+      // logger.info(req.session.self_promotion_tries.join(','));
       req.session.self_promotion_tries =  req.session.self_promotion_tries || [];
       var now = Date.now();
       var n = req.session.self_promotion_tries.length;
@@ -89,10 +89,10 @@ router.post("/promoteYourself",
         req.session.self_promotion_tries.push(now);
       }
 
-      // console.log(req.body,global.config.self_promotion);
-      // console.log("headers",req.headers);
-      console.log("PromoteYourself attempt: ip",req.ip, "tries", n);
-      // console.log("limiter",limiter);
+      // logger.info(req.body,global.config.self_promotion);
+      // logger.info("headers",req.headers);
+      logger.info("PromoteYourself attempt: ip",req.ip, "tries", n);
+      // logger.info("limiter",limiter);
       if(global.config.self_promotion
         && global.config.self_promotion[req.body.user]
         && global.config.self_promotion[req.body.user].password == req.body.password) {
@@ -101,8 +101,8 @@ router.post("/promoteYourself",
             // get new user info
             var uroles = await manager.getUserRoles({id:req.user.user_id,per_page:100});
             // var upermissions = await manager.getUserPermissions({id:req.user.user_id,per_page:100});
-            // console.log(uroles.map(i=>i.name));
-            // console.log(upermissions.map(i=>i.permission_name));
+            // logger.info(uroles.map(i=>i.name));
+            // logger.info(upermissions.map(i=>i.permission_name));
             // req.user.roles = uroles.map(i=>i.name);
             // req.user.permissions = upermissions.map(i=>i.permission_name);
             var roles = uroles.map(i=>i.name);
@@ -115,7 +115,7 @@ router.post("/promoteYourself",
             })
             limiter.reset(req);
             res.render("promoteYourselfSuccess.pug",{roles});
-          } catch(err) { console.log(err); console.log(err.stack)}
+          } catch(err) { logger.info(err); logger.info(err.stack)}
       } else {
           var message = `Invalid user/password. You are permitted only 3 tries before being locked out for 10 minutes.`;
           res.render("promoteYourself.pug",{message});

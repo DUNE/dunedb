@@ -4,7 +4,8 @@ const express = require("express");
 const Forms = require("../lib/Forms.js");
 const Components = require("../lib/Components.js");
 const Tests = require("../lib/Tests.js")('test');
-const Jobs = require("../lib/jobs.js")('job');
+const Jobs = require("../lib/Jobs.js")('job');
+const ComponentTypes = require("../lib/ComponentTypes.js");
 // const Jobs = require("../lib/Jobs.js");
 const Cache = require("../lib/Cache.js");
 const utils = require("../lib/utils.js");
@@ -12,6 +13,7 @@ const permissions = require("../lib/permissions.js");
 const chalk = require("chalk");
 const pretty = require('express-prettify');
 var MUUID = require('uuid-mongodb');
+const deepmerge = require('deepmerge');
 
 var router = express.Router();
 module.exports = router;
@@ -45,7 +47,7 @@ router.get('/generateComponentUuid/:format(svg|url)?', permissions.checkPermissi
           join: true
         });
         res.set('Content-Type', "image/svg+xml");
-        console.log(qr.svg());
+        logger.info(qr.svg());
         return res.send(qr.svg());
       }
     }
@@ -120,10 +122,10 @@ router.get('/component/'+utils.uuid_regex+'/relationships', permissions.checkPer
     //   var list = relationships.linkedTo[i];
     //   for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
     // }
-    // console.log("relationships",relationships);
+    // logger.info("relationships",relationships);
     res.json(relationships);
   } catch(err) {
-      console.error(err);
+      logger.error(err);
       res.status(400).json({error:"Save failure "+err.toString()})
     }  
   }
@@ -144,11 +146,11 @@ router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('com
     var record = req.body;
     record.componentUuid = componentUuid; // Ensure that record is keyed with URL route
     try {
-      console.log("saving component",record);
+      logger.info("saving component",record);
       var data = await Components.save(record,req);
       return res.json(data);
     } catch(err) {
-      console.error(err);
+      logger.error(err);
       res.status(400).json({error:"Save failure "+err.toString()})
     }  
   }
@@ -168,12 +170,24 @@ router.get('/components/:type', permissions.checkPermissionJson('components:view
   }
 );
 
-router.get('/componentTypes', permissions.checkPermissionJson('components:view'), 
+
+Cache.add('componentTypes',
+    async function(){
+      logger.info("regenerating componentTypes");
+      var types = await Components.getTypes();
+      var forms = await Forms.list('componentForms');
+      var componentTypes = deepmerge(types,forms);
+      return componentTypes;
+  },
+  ['componentCountsByType','formlist_componentForms'] // invalidate if these are invalidated
+);
+
+router.get('/componentTypes/:type?', permissions.checkPermissionJson('components:view'), 
   async function(req,res,next){
-    // FIXME, this is just extant types, does not include form info
     try {
-      var data = await Components.getTypes(req.query.type);
-      return res.json(data);
+      var componentTypes =  await ComponentTypes.list();
+      if(req.params.type) return res.json(componentTypes[decodeURIComponent(req.params.type)]);
+      return res.json(componentTypes);
     } catch(err) {
       res.status(400).json({error:err.toString()})
     }  
@@ -182,7 +196,7 @@ router.get('/componentTypes', permissions.checkPermissionJson('components:view')
 
 router.get('/componentTypesTags', permissions.checkPermissionJson('components:view'), 
   async function(req,res,next){
-    console.log("Type tags",)
+    logger.info("Type tags",)
     try {
       var data = await Forms.list("componentForms");
       var list=[{formId:"Trash"}];
@@ -228,7 +242,7 @@ router.get('/:collection(testForms|componentForms|jobForms)/:formId', permission
     var rec = await Forms.retrieve(req.params.collection,req.params.formId);
     // if(!rec) return res.status(404).send("No such form exists");
     if(!rec) { res.status(400).json({error:"no such form "+req.params.formId}); return next(); };
-    console.log(rec);
+    logger.info(rec);
     res.json(rec);
   }
 );
@@ -237,7 +251,7 @@ router.get('/:collection(testForms|componentForms|jobForms)/:formId', permission
 // API/Backend: Update a form schema.
 router.post('/:collection(testForms|componentForms|jobForms)/:formId', permissions.checkPermissionJson('forms:edit'), 
   async function(req,res,next){
-    console.log(chalk.blue("Schema submission","/json/"+req.params.collection));
+    logger.info(chalk.blue("Schema submission","/json/"+req.params.collection));
 
     var formId = req.params.formId;
     var input = req.body;
@@ -246,7 +260,7 @@ router.post('/:collection(testForms|componentForms|jobForms)/:formId', permissio
       var inserted_record = await Forms.save(req.body, req.params.collection, req);
       res.json(inserted_record);
     } catch(err) { 
-      console.error(err);
+      logger.error(err);
       res.status(400).json({error:err.toString()}) 
     }
   }
@@ -259,15 +273,15 @@ router.post('/:collection(testForms|componentForms|jobForms)/:formId', permissio
 /// submit test form data
 router.post("/test", permissions.checkPermissionJson('tests:submit'), 
   async function submit_test_data(req,res,next) {
-    console.log(chalk.blue("Form submission",req.params.formId));
+    logger.info(chalk.blue("Form submission",req.params.formId));
     // var body = await parse.json(req);
     try {
-      console.log("Submission to /test",JSON.stringify(req.body,null,2));
+      logger.info("Submission to /test",JSON.stringify(req.body,null,2));
       var outrec = await Tests.save(req.body, req);
       res.json(outrec._id);
     } catch(err) {
-      console.error("error submitting form /test"+req.params.formId);
-      console.error(err);
+      logger.error("error submitting form /test"+req.params.formId);
+      logger.error(err);
       res.status(400).json({error:err.toString()});
     } 
   }
@@ -279,11 +293,11 @@ router.post("/test", permissions.checkPermissionJson('tests:submit'),
 router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
-    console.log("retrieve test data",req.params);
+    logger.info("retrieve test data",req.params);
     var record = await Tests.retrieve(req.params.record_id);
     return res.json(record,null,2);
   } catch(err) {
-    console.log(JSON.stringify(err.toString()));
+    logger.info(JSON.stringify(err.toString()));
       res.status(400).json({error:err.toString()});
   }
 });
@@ -295,7 +309,7 @@ router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:v
   try {
     return res.json(await Tests.listComponentTests(req.params.uuid));
   } catch(err) {
-    console.log(JSON.stringify(err.toString()));
+    logger.info(JSON.stringify(err.toString()));
     res.status(400).json({error:err.toString()});
   }
 });
@@ -308,14 +322,14 @@ router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:v
 // Same as test, but no componentUuid required.
 router.post("/job", permissions.checkPermissionJson('jobs:submit'), 
   async function submit_test_data(req,res,next) {
-    console.log(chalk.blue("Job submission",req.params.formId));
+    logger.info(chalk.blue("Job submission",req.params.formId));
     // var body = await parse.json(req);
     try {
       var outrec  = await Jobs.save(req.body, req);
       res.json(outrec.jobId);
     } catch(err) {
-      console.error("error submitting form /test/");
-      console.error(err);
+      logger.error("error submitting form /test/");
+      logger.error(err);
       res.status(400).json({error:err.toString()});
     } 
   }
@@ -325,11 +339,11 @@ router.post("/job", permissions.checkPermissionJson('jobs:submit'),
 router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
-    console.log("retrieve test data",req.params);
+    logger.info("retrieve test data",req.params);
     var record = await Jobs.retrieve(req.params.record_id);
     return res.json(record,null,2);
   } catch(err) {
-    console.log(JSON.stringify(err.toString()));
+    logger.info(JSON.stringify(err.toString()));
       res.status(400).json({error:err.toString()});
   }
 });
@@ -341,7 +355,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
-    // console.log("search request",req.params,req.body);
+    // logger.info("search request",req.params,req.body);
     var searchterms = null;
     var matchobj = {...req.body};
     var formId = null;
@@ -370,24 +384,24 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
     if(!req.params.recordType || req.params.recordType === 'component') {
       if(formId) matchobj.type = formId;
       result.push(...await Components.search(searchterms,matchobj,limit,skip));
-      // console.log("result",result);
+      // logger.info("result",result);
     }
     if(!req.params.recordType ||req.params.recordType === 'test') {
       if(formId) matchobj.formId = formId;
-      // console.log("matchobj",matchobj);
+      // logger.info("matchobj",matchobj);
       result.push(...await Tests.search(searchterms,matchobj,limit,skip));
-      // console.log("result",result);
+      // logger.info("result",result);
     }
     if(!req.params.recordType || req.params.recordType === 'job') {
       if(formId) matchobj.formId = formId;
       result.push(...await Jobs.search(searchterms,matchobj,limit,skip));
-      // console.log("result",result);
+      // logger.info("result",result);
     }
     return res.json(result);
 
 
   } catch(err) {
-    console.log(err);
+    logger.info(err);
       res.status(400).json({error:err.toString()});
   }
 });

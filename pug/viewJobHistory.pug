@@ -1,0 +1,63 @@
+
+extend default
+
+include common.pug
+
+block vars
+  - var page_title=job.formId + job.jobId;
+
+block extrascripts
+  script(type='text/javascript').
+    // I could do this by API query of the server, but this works for now.
+    var schema=!{JSON.stringify(formrec.schema||{})};
+    var job=!{JSON.stringify(job||{})};
+
+
+  script(type='text/javascript').
+
+    var form = null;
+    window.onload = async function() {
+      console.log("schema",schema);
+
+      form = await Formio.createForm(document.getElementById('builtform'),schema,
+      {
+          readOnly: true,
+          //- renderMode: 'html'
+      });
+      form.submission = job;
+      form.nosubmit = true; // Use the beforeSubmit hook.
+
+      // Now, update the components to match changes.
+      FormioUtils.eachComponent(form.components, function(c){c.setCustomValidity(null)}); // reset all.
+
+      //- var diffs = (component.submit||{}).diff || {};
+      //- for(var key in diffs) {
+      //-   var formComponent = FormioUtils.getComponent(form.components,key);
+      //-   if(formComponent) formComponent.setCustomValidity("PREVIOUS: "+diffs[key][0]);
+      //- }
+      
+
+    }
+
+  style.
+    div#qr-code canvas {
+      border: 8px solid green;
+      border-radius: 8px;
+      width:100%;
+      height:auto
+    }
+block content
+  .container
+    .row
+      ul
+        each o in versions
+          li 
+            a(href='?version='+(o.validity.version)) #{moment(o.insertion.insertionDate).format('MMM D YYYY h:m a')} #{user_shortname((o.insertion||{}).user||{})} Ver #{(o.validity||{}).version} #{o.state}
+    .row
+        h2#name.col-md-8=job.formid
+
+    .row
+        h3#name.col-md-8 As of #{moment(job.insertion.insertionDate).format('MMM D YYYY h:m a')} (#{moment(job.insertion.insertionDate).fromNow()})
+
+    .row
+      #builtform.col-md-8

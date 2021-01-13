@@ -7,7 +7,7 @@
 // you're free to modify and use it as you like.
 //
 
-///
+/// 
 /// Boilerplate:  Javascript utilities for MINERvA event display, codenamed "Arachne"
 /// Nathaniel Tagg  - NTagg@otterbein.edu - June 2009
 ///
