@@ -7,13 +7,19 @@ var permissions = require('../lib/permissions.js');
 const Components = require("../lib/Components.js");
 const Forms = require("../lib/Forms.js");
 var router = express.Router();
-
+const child_process = require("child_process");
 module.exports = router;
 
 
 // (async function(){
 //   logger.info(await manager.getUsersByEmail('ntagg@otterbein.edu'))
 // })();
+
+// git info. Get at runtime.
+var git_branch, git_log;
+child_process.exec('git branch --show-current', (error, stdout, stderr) => { git_branch = stdout.trim() });
+child_process.exec('git log -n 10 --date=short --pretty=format:"%ad %h %s"', (err,stdout,stderr) => {git_log = stdout;} );
+
 
 router.get('/', async function(req, res, next) {
   var recentComponents = [];
@@ -32,7 +38,7 @@ router.get('/', async function(req, res, next) {
   }
   var tags = await Forms.tags();
   logger.info(JSON.stringify(recentComponents),tags)
-  res.render('home.pug',{tags,recentComponents});
+  res.render('home.pug',{tags,recentComponents,git_branch,git_log});
 });
 
 
