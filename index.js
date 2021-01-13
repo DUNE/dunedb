@@ -1,8 +1,30 @@
-require("./lib/configuration.js")
-var database = require('./lib/database.js'); // Exports global 'db' variable
-var App = require("./lib/app.js")
+'use strict';
 
-const http = require('http');
+// All code uses two important globals: 'global.config' and 'global.db' 
+// I know that's not best practice, but it is by far the most elegant solution.
+
+// Set up configuruation.
+// Be default, we use the files config/defaults.js and config/config.js
+// However, if we're deploying in the cloud, we might want a special config file
+// All options to sietch should be given via this config file!
+ 
+
+require("./lib/configuration.js"); // exports the global 'config' variable.
+
+//Check for override.
+var argv = require('yargs')(process.argv.slice(2))
+            .usage("Usage: $0 --config [path to config file] --loglevel [debug/http/info/warn/error]")
+            .argv;
+
+if(config in argv) {
+    var cmdline_config = require(argv.config);
+    global.config = require('deepmerge')(global.config,require(cmdline_config));
+}
+
+
+const database = require('./lib/database.js'); // Exports global 'db' variable
+var App = require("./lib/app.js"); 
+var http = require('http'); // to run the server
 // var https = require('https');
 
 global.BaseDir = __dirname;
@@ -13,34 +35,27 @@ var pino_opts = {
     customLevels: {
         http: 29
     },
-    // level: 'http',  // change to 'info' if you don't want the play-by-play of method calls
-    level: 'info',  // change to 'info' if you don't want the play-by-play of method calls
-
 };
 
 if(process.env.NODE_ENV=='production') { 
-    pino_opts.base = {deployment: config.deployment, hostname:require('os').hostname()}
+    pino_opts.base = {level:'http', deployment: config.deployment, hostname:require('os').hostname()}
 } else {
     // never use this when running under pm2
     pino_opts.prettyPrint = {
         // messageFormat: "{levelLabel} {request.url} {msg}"
         ignore:'pid,hostname',
-        translateTime: "SYS:HH:mm:ss"
+        translateTime: "SYS:HH:mm:ss",
+        level: 'info'
     }
-
 }
+
+// override with config or command line.
+if(global.config.pino_opts) pino_opts = require('deepmerge')(global.config.pino_opts);
+if(argv.loglevel) pino_opts.level = argv.loglevel;
 
 global.logger = require("pino")(pino_opts);
 
-logger.info("Starting up in mode: ",(process.env.NODE_ENV)||'development'," deployment:",config.deployment)
-
-// log.info('hi');
-// log.warn({lang: 'fr'}, 'au revoir');
-// var a = {a:1,b:2,thing:"blah"};
-// log.info('thing',a)
-// log.info(a);
-
-// process.exit(1);
+logger.info("Starting up in mode: "+((process.env.NODE_ENV)||'development') + " deployment: "+config.deployment)
 
 
 database.attach_to_database()
@@ -50,14 +65,12 @@ database.attach_to_database()
     var httpServer = http.createServer(app);
     httpServer.listen(config.http_server_port, () => logger.info(`listening on port ${config.http_server_port}!`))  
 
-    // var httpsServer = https.createServer(app);
-    // console.log(config.https_server_port);
-    // httpsServer.listen(config.https_server_port, () => console.log(`Example app listening on https port ${config.https_server_port}!`))  
+    // This sets up an encrypted port. However, common deployment is
+    // to run this through an Apache or Nginx proxy which handles encryption - this app
+    // only talks on a local port to the main software.  
+
 
   })
 
-// setTimeout(function () {
-//   whyohwhy() // logs out active handles that are keeping node running
-// }, 3000)
 
 
