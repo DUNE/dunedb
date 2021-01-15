@@ -41,12 +41,12 @@ if(process.env.NODE_ENV=='production') {
     pino_opts.base = {level:'http', deployment: config.deployment, hostname:require('os').hostname()}
 } else {
     // never use this when running under pm2
-    pino_opts.prettyPrint = {
-        // messageFormat: "{levelLabel} {request.url} {msg}"
-        ignore:'pid,hostname',
-        translateTime: "SYS:HH:mm:ss",
-        level: 'info'
-    }
+    // pino_opts.prettyPrint = {
+    //     // messageFormat: "{levelLabel} {request.url} {msg}"
+    //     ignore:'pid,hostname',
+    //     translateTime: "SYS:HH:mm:ss",
+    //     level: 'info'
+    // }
 }
 
 // override with config or command line.

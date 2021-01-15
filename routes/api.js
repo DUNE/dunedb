@@ -302,6 +302,22 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson
   }
 });
 
+
+// Get summary data for specific test
+router.get("/test/:record_id([A-Fa-f0-9]{24})/info",  permissions.checkPermissionJson('tests:view'), 
+  async function retrieve_test_data(req,res,next) {
+  try {
+    var test = await Tests.retrieve(req.params.record_id, {_id:1, componentUuid:1, formId: 1, insertion: 1});
+    var forminfo = {};
+    if(test) forminfo = (await Forms.list("testForms"))[test.formId];
+    var record = {...forminfo,...test};
+    return res.json(record,null,2);
+  } catch(err) {
+    logger.info(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+});
+
 // Get list of tests done on a specific component
 
 router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:view'), 

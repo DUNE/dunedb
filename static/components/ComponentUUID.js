@@ -175,7 +175,7 @@ class ComponentUUID extends TextFieldComponent{
     }
     // tpl += `<a href="${value}" ref='linkToComponent' class="uuid-link" ></a>`;
     tpl += "</div>";
-    tpl += "<a ref='compUuidInfo' class='componentUuid-info'></a>";
+    tpl += "<a target='_blank' ref='compUuidInfo' class='componentUuid-info'></a>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
   }
@@ -240,7 +240,7 @@ class ComponentUUID extends TextFieldComponent{
     if(this.refs.compUuidInfo && value && value.length==36) {
       var info_target = $(this.refs.compUuidInfo[index]);
       info_target.show().prop('href','/'+value).text('link');
-      $.get('/json/component/'+value).then(function(component){
+      $.get('/json/component/'+value+"/simple").then(function(component){
         info_target.text(component.type +": "+ component.data.name);
       })
     }

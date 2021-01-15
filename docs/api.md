@@ -162,6 +162,10 @@ The number here is the 24-character hex code representation of the ObjectID of a
 
 Returns the test record.
 
+### GET /api/test/123456780abcdef12345678/info
+Return basic insertion and ID info, plus form info, on that specific test.
+
+
 
 ### Post /api/test (or /api/job)
 
@@ -181,6 +185,15 @@ Submits new test data. Format must be as follows:
   metadata: {...} // optional.  Can contain things like user script version.
 }
 ``` 
+
+## API Calls for auto-complete
+
+### /autocomplete/uuid?q="f123"
+Find some matches for that particular starting sequence of a component UUID
+
+### /autocomplete/testId?q="0abc"
+Find some matches for that particular starting sequence for a Test id.
+
 
 
 ### Post /api/search
@@ -215,6 +228,8 @@ The posted search parameters must have an object with at least one element defin
 ```
 
 In general, this will honor any mongo search parameterization.  
+
+
 
 
 
