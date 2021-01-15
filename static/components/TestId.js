@@ -20,7 +20,7 @@ class TestIdComponent extends TextFieldComponent{
       "label": "Test ID",
       "placeholder": "Example: 507f191e810c19729de860ea",
       "tooltip": "ID number of a unique test in the Sietch database",
-      "inputMask": "************************",
+      // "inputMask": "************************",
       "validateOn": "change",
       "validate": {
         "pattern": "^$|([0-9a-fA-F]{24})",
@@ -34,6 +34,7 @@ class TestIdComponent extends TextFieldComponent{
       "type": "TestIdComponent",
       "input": true,
       "autocomplete": "/autocomplete/testId", // set to null to cancel
+      "formId": "", // Set to restrict autocomplete text to this type.
     }, ...extend);
   }
 
@@ -86,12 +87,29 @@ class TestIdComponent extends TextFieldComponent{
 
     console.log("refs.input",this.refs.input);
     if(this.component.autocomplete && this.component.autocomplete.length>0) {
+      var url = this.component.autocomplete;
+      var query = {};
+      if(this.component.formId) query.formId = this.component.formId;
+
       $(this.refs.input).each(function(index) {
         $(this).autoComplete({
-          resolverSettings: {
-            minLength: 3,
-              url: String(self.component.autocomplete)
-          }
+              resolver: 'custom',
+              events: {
+                  search: function (qry, callback) {
+                      // let's do a custom ajax call
+                      $.ajax(
+                          url,
+                          {
+                              data: {...query,'q': qry}
+                          }
+                      ).done(callback);
+                  }
+              },
+
+              resolverSettings: {
+                minLength: 2,
+                // url: String(self.component.autocomplete)
+              }
         }).on('autocomplete.select', function (evt, item) {
           // console.log("autocomplete select",item.val,item.text);
           $(this).val(item.val);
@@ -128,8 +146,38 @@ class TestIdComponent extends TextFieldComponent{
 
 }
 
-TestIdComponent.editForm = TextFieldComponent.editForm;
+// TestIdComponent.editForm = TextFieldComponent.editForm;
+TestIdComponent.editForm = function(a,b,c)
+{
+    var form = TextFieldComponent.editForm(a,b,c);
+    var tabs = form.components.find(obj => { return obj.type === "tabs" });
+    var datatab = tabs.components.find(obj => {return obj.key=='data'});
 
+    // Remove 'multiple components'. I could probably make it work.. but nah
+    datatab.components.splice(datatab.components.findIndex(obj=>{return obj.key = "multiple"}),1);
+    var displaytab = tabs.components.find(obj => {return obj.key=='display'});
+
+
+    datatab.components.splice(1,0,
+      {
+        "input": true,
+        "key": "autocomplete",
+        "label": "Autocomplete URL",
+        "tooltip": "Blank for no autocomplete",
+        "type": "textfield",
+      },
+      {
+        "input": true,
+        "key": "formId",
+        "label": "formId",
+        "tooltip": "Restrict autocomplete results to this form type",
+        "type": "textfield",
+      }
+  );
+
+
+    return form;
+}
 Formio.Components.addComponent('TestIdComponent', TestIdComponent);
 
 
