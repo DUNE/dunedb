@@ -85,7 +85,6 @@ class TestIdComponent extends TextFieldComponent{
     var self = this; // for binding below
 
 
-    console.log("refs.input",this.refs.input);
     if(this.component.autocomplete && this.component.autocomplete.length>0) {
       var url = this.component.autocomplete;
       var query = {};

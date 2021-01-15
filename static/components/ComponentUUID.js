@@ -139,7 +139,8 @@ class ComponentUUID extends TextFieldComponent{
       "type": "ComponentUUID",
       "input": true,
       "showCamera": true,
-      "autocomplete": true
+      "autocomplete": true,
+      "autocomplete_type": null // Component type to restrict to used when autocompleteing
     }, ...extend);
   }
 
@@ -204,25 +205,37 @@ class ComponentUUID extends TextFieldComponent{
         });
       });
     }
-    console.log("refs.input",this.refs.input);
-    if(this.component.autocomplete) {
+
+    if(this.component.autocomplete ) {
+      var url = this.component.autocomplete;
+      var query = {};
+      if(this.component.autocomplete_type) query.type = this.component.autocomplete_type;
+
       $(this.refs.input).each(function(index) {
         $(this).autoComplete({
-          resolverSettings: {
-            minLength: 3,
-              url: '/autocomplete/uuid'
-          }
+              resolver: 'custom',
+              events: {
+                  search: function (qry, callback) {
+                      // let's do a custom ajax call
+                      $.ajax(
+                          '/autocomplete/uuid',
+                          {
+                              data: {...query,'q': qry}
+                          }
+                      ).done(callback);
+                  }
+              },
+
+              resolverSettings: {
+                minLength: 2,
+                // url: String(self.component.autocomplete)
+              }
         }).on('autocomplete.select', function (evt, item) {
           // console.log("autocomplete select",item.val,item.text);
           $(this).val(item.val);
           console.log('setting index',index,item.val,this);
           self.setValueAt(index,item.val);
-          // $(this).blur();
           self.updateValue();
-          // self.triggerChange({
-          //       modified: true,
-          //   });
-         // console.log(self);
         });
       })
     }
@@ -268,8 +281,30 @@ class ComponentUUID extends TextFieldComponent{
 
 }
 
-ComponentUUID.editForm = TextFieldComponent.editForm;
+// ComponentUUID.editForm = TextFieldComponent.editForm;
+ComponentUUID.editForm = function(a,b,c)
+{
+    var form = TextFieldComponent.editForm(a,b,c);
+    var tabs = form.components.find(obj => { return obj.type === "tabs" });
+    var datatab = tabs.components.find(obj => {return obj.key=='data'});
 
+    // Remove 'multiple components'. I could probably make it work.. but nah
+    datatab.components.splice(datatab.components.findIndex(obj=>{return obj.key = "multiple"}),1);
+    var displaytab = tabs.components.find(obj => {return obj.key=='display'});
+
+    datatab.components.splice(1,0,
+      {
+        "input": true,
+        "key": "autocomplete_type",
+        "label": "Restrict Autocomplete to type",
+        "tooltip": "Restrict autocomplete results to this form type",
+        "type": "textfield",
+      }
+  );
+
+
+    return form;
+}
 Formio.Components.addComponent('ComponentUUID', ComponentUUID);
 
 
