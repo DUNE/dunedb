@@ -11,7 +11,9 @@ module.exports = router;
 
 router.get("/uuid",async function(req,res,next) {
   // this functionality is put into Components, in case we change abstraction again.
-  var matches = await Components.findUuidStartsWith(req.query.q,req.query.type,8);
+  var types = null;
+  if(req.query.type) types = req.query.type.split(',');
+  var matches = await Components.findUuidStartsWith(req.query.q,types,8);
   if(matches instanceof Error) return res.json([]);
 
   for(var m of matches) {

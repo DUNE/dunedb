@@ -146,6 +146,11 @@ async function makeUuidForm() {
         },
       ]}
 
+  var types = formrec.componentTypes || [];
+  if(types.length>0) {
+    schema.components[0].autocomplete_types = types.join(',');
+  }
+
   uuidform = await Formio.createForm(
           document.getElementById('uuid-form'),
           schema,
