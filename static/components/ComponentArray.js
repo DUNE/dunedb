@@ -24,7 +24,7 @@ class ArrayComponent extends TextFieldComponent{
       "key": "array",
       "type": "ArrayComponent",
       "input": true  ,
-      "defaultValue": {data:[],min:0,max:0,non_numeric:false}
+      "defaultValue": []
     }, ...extend);
   }
 
@@ -43,8 +43,7 @@ class ArrayComponent extends TextFieldComponent{
   {
     console.log('renderElement',this,value,index);
     if(!value) value = this.parseText('');
-    var textvalue = value.data.join(',');
-    var arr = (value||{}).data ||[];
+    var textvalue = value.join(',');
     // tpl += "<input ref='input' type='text'>";
     var tpl = '';
     tpl += super.renderElement(textvalue,index);
@@ -53,9 +52,9 @@ class ArrayComponent extends TextFieldComponent{
     tpl += `<div class="collapse" id="componentArrayCollapse${gArrayComponentId}">`;
     tpl += '<div class="d-sm-flex flex-row">';
     tpl += '<div class="p-2">';
-    tpl += `<div>Data length: <span class='arrayComponentLength'>${arr.length}</span></div>`;
-    tpl += `<div>Min: <span class='arrayComponentMin'>${value.min.toFixed(2)}</span></div>`;
-    tpl += `<div>Max: <span class='arrayComponentMax'>${value.max.toFixed(2)}</span></div>`;
+    tpl += `<div>Data length: <span class='arrayComponentLength'></span></div>`;
+    tpl += `<div>Min: <span class='arrayComponentMin'></span></div>`;
+    tpl += `<div>Max: <span class='arrayComponentMax'></span></div>`;
     tpl += `<div>Mean: <span class='arrayComponentMean'></span></div>`;
     tpl += `<div>RMS: <span class='arrayComponentRMS'></span></div>`;
     tpl += "</div>"
@@ -72,11 +71,18 @@ class ArrayComponent extends TextFieldComponent{
 
   parseText(text) {
     text = text || "";
-    if(text.length==0) { return {data:[], min:0, max:0, non_numeric: 0}; };
     var arr = text.split(',');
+    console.log("parseText",arr)
+    return arr;
+  }
+
+  updateExtras(value) {
+    // Normalize the input value.
+    var arr = value || [];
     var min = 1e99;//Number.MAX_VALUE;
     var max = -1e99;//Number.MIN_VALUE;
     var non_numeric = 0;
+    if(arr.length<1) { min=0; max=0; }
     for(var i=0;i<arr.length;i++) {
       if(isNaN(arr[i])) non_numeric++;
       else {
@@ -86,34 +92,19 @@ class ArrayComponent extends TextFieldComponent{
         arr[i] = x;
       }
     }
-    return {
-      data: arr,
-      min: min,
-      max: max,
-      non_numeric: non_numeric
-    };
-
-  }
-
-  updateExtras(value) {
-    // Normalize the input value.
-    var val = Object.assign({},value);
-    val.data = val.data || [];
-    val.min = val.min || 0;
-    val.max = val.max || 0;
-    var len = val.data.length;
-    console.log('updateExtras',value,val);
+    var len = arr.length;
+    console.log('updateExtras',arr,min,max,non_numeric);
     $("span.arrayComponentLength",this.element).text(len);
-    $("span.arrayComponentMin",this.element).text(val.min.toFixed(2));
-    $("span.arrayComponentMax",this.element).text(val.max.toFixed(2));
+    $("span.arrayComponentMin",this.element).text(min.toFixed(2));
+    $("span.arrayComponentMax",this.element).text(max.toFixed(2));
 
     // Stats.
 
     // Graph.
     var graph = new Histogram(len,0,len);
-    graph.data = [...val.data];
-    graph.min_content = val.min;
-    graph.max_content = val.max;
+    graph.data = arr;
+    graph.min_content = min;
+    graph.max_content = max;
     var blackscale = new ColorScaleIndexed(1);  
     this.LizardGraph.SetHist(graph,blackscale);
     this.LizardGraph.ylabel = "Value";
@@ -122,11 +113,11 @@ class ArrayComponent extends TextFieldComponent{
     this.LizardGraph.Draw();
     console.log('graph',graph);
     //histogram
-    var hist = new Histogram(100,val.min,val.max);
-    for(var x of val.data) { hist.Fill(x);}
+    var hist = new Histogram(Math.round(len/10)+10,min,max);
+    for(var x of arr) { hist.Fill(x);}
     var colorscale = new ColorScaler("BrownPurplePalette");
-    colorscale.min = val.min;
-    colorscale.max = val.max;
+    colorscale.min = min;
+    colorscale.max = max;
     this.LizardHistogram.xlabel = "Value";
     this.LizardHistogram.ylabel = "Counts";
     this.LizardHistogram.SetHist(hist,colorscale);
@@ -163,7 +154,7 @@ class ArrayComponent extends TextFieldComponent{
   {
     console.log('setValue',this,value,flags);
 
-    var arr = (value||{}).data ||[];
+    var arr = value ||[];
     var textvalue = arr.join(',');
     this.updateExtras(value);
     return super.setValueAt(index,textvalue,flags);
