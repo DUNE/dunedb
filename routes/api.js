@@ -223,7 +223,8 @@ router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)
       var obj = await Forms.list(req.params.collection)
       if(req.params.format=="list") {
         var list = [];
-        for(key in obj) list.push(obj[key]);
+        console.log(obj);
+        for(var key in obj) list.push(obj[key]);
         return res.json(list);
       }
 

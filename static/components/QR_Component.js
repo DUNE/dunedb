@@ -39,6 +39,10 @@ $(function(){
 
 function runQrCameraModel(cb)
 {
+    // cb is a callback that uses the QR code we find. 
+    // It returns 'true' if that data is ok, or 'false' if that data does not match
+    // expectations.
+
     // Show the modal.
     $('#qrCameraModel').modal('show');
     // see the jsqr demo
@@ -98,16 +102,17 @@ function runQrCameraModel(cb)
           drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
           drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
           drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
-          $(outputMessage).text(code.data);
-          var match = code.data.match(".*/([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})");
-          if(match) {
-            uuid = match[1];
-            $(outputMessage).text(uuid);
-            running = false;
-            cb(uuid); // return the value.
+          // $(outputMessage).text(code.data);
+          // var match = code.data.match(match_regex);//(".*/([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})");
+
+          // Ask callback if this input is OK.
+          if(cb(code.data)) {
             stop();
             $('#qrCameraModel').modal('hide');
+          } else {
+            (outputMessage).text("QR code: \""+code.data+"\" does not match expected format");
           }
+ 
         }
       }
       if(running) requestAnimationFrame(tick);
@@ -115,47 +120,35 @@ function runQrCameraModel(cb)
 
 }
 
-var gUuidComponent = null;
 
-class ComponentUUID extends TextFieldComponent{
+class QR_Component extends TextFieldComponent{
 
 
   static schema(...extend) {
     return TextFieldComponent.schema({
-      "label": "Component UUID",
-      "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
-      "tooltip": "Database component UUID. Found on QR code.",
-      "inputMask": "********-****-****-****-************",
+      "label": "QR Text",
       "validateOn": "change",
-      "validate": {
-        "pattern": "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
-        "customMessage": "Needs to be hexadecimal in 8-4-4-4-12 layout",
-        "unique": false,
-        "multiple": false
-      },
       "customClass": ".component-uuid-formio",
       // "errorLabel": "Not a UUID",
-      "key": "component_uuid",
-      "type": "ComponentUUID",
+      "key": "qrCode",
+      "type": "qrCode",
       "input": true,
       "showCamera": true,
-      "autocomplete": true,
-      "autocomplete_type": null // Component type to restrict to used when autocompleteing
     }, ...extend);
   }
 
   static get builderInfo() {
     return {
-      title: 'Component UUID',
+      title: 'Generic QR Code',
       group: 'custom',
       icon: 'qrcode',
       weight: 71,
       documentation: '#', 
-      schema: ComponentUUID.schema()
+      schema: QR_Component.schema()
      };
   }
   get defaultSchema() {
-    return ComponentUUID.schema();
+    return QR_Component.schema();
   }
 
   renderElement(value,index)  {
@@ -194,95 +187,44 @@ class ComponentUUID extends TextFieldComponent{
     var self = this; // for binding below
 
 
-   // Except that after inserting into the DOM, we want to instantiate the autocomplete object.
     if(this.component.showCamera) {
       $('.runQrCameraModel',element).each(function(index){
         // set up for each button
         $(this).click(function(){
-            runQrCameraModel(function(uuid) {
-            self.setValueAt(index,uuid);
-          })
+            runQrCameraModel( self.cameraCallback.bind(self,index)
+              // self.component.cameraMatchRegex,
+              // function(uuid) {
+                
+              // }
+            );
         });
       });
     }
 
-    if(this.component.autocomplete ) {
-      var url = this.component.autocomplete;
-      var query = {};
-      if(this.component.autocomplete_type) query.type = this.component.autocomplete_type;
-
-      $(this.refs.input).each(function(index) {
-        $(this).autoComplete({
-              resolver: 'custom',
-              events: {
-                  search: function (qry, callback) {
-                      // let's do a custom ajax call
-                      $.ajax(
-                          '/autocomplete/uuid',
-                          {
-                              data: {...query,'q': qry}
-                          }
-                      ).done(callback);
-                  }
-              },
-
-              resolverSettings: {
-                minLength: 2,
-                // url: String(self.component.autocomplete)
-              }
-        }).on('autocomplete.select', function (evt, item) {
-          // console.log("autocomplete select",item.val,item.text);
-          $(this).val(item.val);
-          console.log('setting index',index,item.val,this);
-          self.setValueAt(index,item.val);
-          self.updateValue();
-        });
-      })
-    }
 
     return superattach;
   }
 
- setValueAt(index, value,flags) {
-    // flags = flags || {};
-    const changed = super.setValueAt.call(this, index, value);
-
-    // if(this.refs.linkToComponent && value && value.length==36) {
-    //   $(this.refs.linkToComponent).show().prop('href','/'+value).text('link');
-    // }
-    if(this.refs.compUuidInfo && value && value.length==36) {
-      var info_target = $(this.refs.compUuidInfo[index]);
-      info_target.show().prop('href','/'+value).text('link');
-      $.get('/json/component/'+value+"/simple").then(function(component){
-        info_target.text(component.type +": "+ component.data.name);
-      })
-    }
-
-    // if (changed) {
-    //   this.redraw();
-    // }
-
-    return changed;
+  cameraCallback(index,qrcode)
+  {
+    // accept anything
+    this.setValueAt(index,qrcode);
+    return true;
   }
 
-  // setValueAt(index,value,flags)
-  // {
-  //   // console.log('setValue',this,value,flags);
-  //   // console.log($('a',this.element),$('a',this.element).prop('href'));
-  //   return super.setValueAt(...arguments);
-  // }
+ // setValueAt(index, value,flags) {
 
-  // getValueAt(index)
-  // {
-  //   // console.log('getValue',this);
-  //   return super.getValueAt(index);
-  // }
+ //    const changed = super.setValueAt.call(this, index, value);
+
+
+ //    return changed;
+ //  }
 
 
 }
 
-// ComponentUUID.editForm = TextFieldComponent.editForm;
-ComponentUUID.editForm = function(a,b,c)
+// QR_Component.editForm = TextFieldComponent.editForm;
+QR_Component.editForm = function(a,b,c)
 {
     var form = TextFieldComponent.editForm(a,b,c);
     var tabs = form.components.find(obj => { return obj.type === "tabs" });
@@ -292,19 +234,11 @@ ComponentUUID.editForm = function(a,b,c)
     datatab.components.splice(datatab.components.findIndex(obj=>{return obj.key = "multiple"}),1);
     var displaytab = tabs.components.find(obj => {return obj.key=='display'});
 
-    datatab.components.splice(1,0,
-      {
-        "input": true,
-        "key": "autocomplete_type",
-        "label": "Restrict Autocomplete to type",
-        "tooltip": "Restrict autocomplete results to this form type",
-        "type": "textfield",
-      }
-  );
-
+    datatab.components.splice(1,0);
 
     return form;
 }
-Formio.Components.addComponent('ComponentUUID', ComponentUUID);
+
+Formio.Components.addComponent('qrCode', QR_Component);
 
 
