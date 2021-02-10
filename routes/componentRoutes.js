@@ -160,6 +160,23 @@ router.get('/'+utils.uuid_regex+'/label', permissions.checkPermission("component
 router.get('/'+utils.short_uuid_regex+'/label', permissions.checkPermission("components:view"), component_label);
 
 
+// Contact sheet of new unregistered components
+router.get("/NewComponentContactSheet/:type?",permissions.checkPermission("components:create"),
+  async function(req,res,next){
+    var components = [];
+    for(var i=0;i<15;i++) {
+      components.push(
+      {
+        componentUuid: Components.newUuid(),
+        data: {
+        // name: ""
+        },
+      })
+    }
+    res.render("contact_sheet.pug",{components});
+
+  }
+);
 // Create a new component
 
 
