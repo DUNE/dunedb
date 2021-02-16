@@ -24,7 +24,8 @@ class ArrayComponent extends TextFieldComponent{
       "key": "array",
       "type": "ArrayComponent",
       "input": true  ,
-      "defaultValue": []
+      "defaultValue": [],
+      "emptyValue": []
     }, ...extend);
   }
 
@@ -39,6 +40,9 @@ class ArrayComponent extends TextFieldComponent{
      };
   }
 
+  get emptyValue() {
+    return [];
+  }
   renderElement(value,index) 
   {
     console.log('renderElement',this,value,index);
@@ -154,7 +158,8 @@ class ArrayComponent extends TextFieldComponent{
   {
     console.log('setValue',this,value,flags);
 
-    var arr = value ||[];
+    var arr = value || [];
+    if(! Array.isArray(arr)) arr = [value];
     var textvalue = arr.join(',');
     this.updateExtras(value);
     return super.setValueAt(index,textvalue,flags);
