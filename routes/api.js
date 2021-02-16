@@ -277,9 +277,9 @@ router.post("/test", permissions.checkPermissionJson('tests:submit'),
     logger.info(chalk.blue("Form submission",req.params.formId));
     // var body = await parse.json(req);
     try {
-      logger.info("Submission to /test",JSON.stringify(req.body,null,2));
+      logger.info(req.body,"Submission to /test");
       var outrec = await Tests.save(req.body, req);
-      res.json(outrec._id);
+      res.json(outrec);
     } catch(err) {
       logger.error("error submitting form /test"+req.params.formId);
       logger.error(err);
