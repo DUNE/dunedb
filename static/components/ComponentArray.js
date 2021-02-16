@@ -42,6 +42,7 @@ class ArrayComponent extends TextFieldComponent{
   get emptyValue() {
     return [];
   }
+  
   renderElement(value,index) 
   {
     console.log('renderElement',this,value,index);
