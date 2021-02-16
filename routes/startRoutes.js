@@ -17,7 +17,8 @@ module.exports = router;
 
 // git info. Get at runtime.
 var git_branch, git_log;
-child_process.exec('git branch --show-current', (error, stdout, stderr) => { git_branch = stdout.trim() });
+//child_process.exec('git branch --show-current', (error, stdout, stderr) => { git_branch = stdout.trim() });
+child_process.exec('git rev-parse --abbrev-ref HEAD', (error, stdout, stderr) => { git_branch = stdout.trim() });
 child_process.exec('git log -n 10 --date=short --pretty=format:"%ad %h %s"', (err,stdout,stderr) => {git_log = stdout;} );
 
 
