@@ -62,6 +62,7 @@ block extrascripts
     }
 
     function SubmitData(submission) {
+      try{
       // actually the 'submit' function
       var draft = submission.state !== "submitted";
       
@@ -129,6 +130,10 @@ block extrascripts
         }
         ).fail(postFail);
 
+      } catch (e) {
+        console.error(e);
+        debugger;
+      }
     };
 
 

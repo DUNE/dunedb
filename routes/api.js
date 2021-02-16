@@ -223,7 +223,8 @@ router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)
       var obj = await Forms.list(req.params.collection)
       if(req.params.format=="list") {
         var list = [];
-        for(key in obj) list.push(obj[key]);
+        console.log(obj);
+        for(var key in obj) list.push(obj[key]);
         return res.json(list);
       }
 
@@ -276,9 +277,9 @@ router.post("/test", permissions.checkPermissionJson('tests:submit'),
     logger.info(chalk.blue("Form submission",req.params.formId));
     // var body = await parse.json(req);
     try {
-      logger.info("Submission to /test",JSON.stringify(req.body,null,2));
+      logger.info(req.body,"Submission to /test");
       var outrec = await Tests.save(req.body, req);
-      res.json(outrec._id);
+      res.json(outrec);
     } catch(err) {
       logger.error("error submitting form /test"+req.params.formId);
       logger.error(err);

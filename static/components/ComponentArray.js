@@ -24,7 +24,7 @@ class ArrayComponent extends TextFieldComponent{
       "key": "array",
       "type": "ArrayComponent",
       "input": true  ,
-      "defaultValue": []
+      "defaultValue": [],
     }, ...extend);
   }
 
@@ -39,6 +39,10 @@ class ArrayComponent extends TextFieldComponent{
      };
   }
 
+  get emptyValue() {
+    return [];
+  }
+  
   renderElement(value,index) 
   {
     console.log('renderElement',this,value,index);
@@ -150,14 +154,35 @@ class ArrayComponent extends TextFieldComponent{
     });
   }
 
-  setValueAt(index,value,flags)
+  setValue(value,flags)
   {
     console.log('setValue',this,value,flags);
 
-    var arr = value ||[];
+    var arr = value || [];
+    if(! Array.isArray(arr)) arr = [value];
     var textvalue = arr.join(',');
     this.updateExtras(value);
-    return super.setValueAt(index,textvalue,flags);
+
+    const input = this.performInputMapping(this.refs.input[0]);
+    input.value = value;
+
+
+    return super.setValue(value,flags);
+  }
+
+  setValueAt(index,value,flags)
+  {
+    // Don't do anything; it's called by Component.setValue, and we don't need it.
+
+
+    // console.log('setValueAt',this,value,flags);
+    // debugger;
+
+    // var arr = value || [];
+    // if(! Array.isArray(arr)) arr = [value];
+    // var textvalue = arr.join(',');
+    // this.updateExtras(value);
+    // return super.setValue(index,textvalue,flags);
   }
 
   getValueAt(index)
