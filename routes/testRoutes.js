@@ -122,7 +122,7 @@ router.get('/test/copyAsDraft/:record_id([A-Fa-f0-9]{24})',permissions.checkPerm
     try{
       var newdraft = await Tests.copyToDraft(req.params.record_id,req);
       logger.info("Made copy ",newdraft);
-      if(newdraft) res.redirect("/test/draft/"+newdraft._id.toString())
+      if(newdraft) res.redirect("/test/draft/"+newdraft.toString())
 
     } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 

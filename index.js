@@ -9,7 +9,7 @@
 // All options to sietch should be given via this config file!
  
 
-require("./lib/configuration.js"); // exports the global 'config' variable.
+var load_config = require("./lib/configuration.js"); // exports the global 'config' variable.
 
 //Check for override.
 var argv = require('yargs')(process.argv.slice(2))
@@ -17,9 +17,10 @@ var argv = require('yargs')(process.argv.slice(2))
             .argv;
 
 if(config in argv) {
-    var cmdline_config = require(argv.config);
-    global.config = require('deepmerge')(global.config,require(cmdline_config));
+    load_config(argv.config)
 }
+
+console.log("configured");
 
 
 const database = require('./lib/database.js'); // Exports global 'db' variable
@@ -63,12 +64,32 @@ database.attach_to_database()
     var app = await App.create_app();
     await App.setup_routes(app);
     var httpServer = http.createServer(app);
+
+
+    function closeGracefully() {
+      // see https://www.oesmith.co.uk/2012/01/08/graceful-shutdown-node-js-express.html
+      // Shut down gracefully!
+      logger.info("Closing on SIGTERM");
+      httpServer.close();
+    }
+    process.on('SIGINT', closeGracefully); 
+    process.on('SIGHUP', closeGracefully); 
+
+
+    httpServer.on('close', async function () {
+      // this runs after the above has completed. It allows us to close the database.
+      logger.info("Web server closed. Shutting down DB connection.");
+      await database.shutdown(true);
+      logger.info("Database shutdown complete.")
+
+      process._getActiveHandles();
+      process._getActiveRequests();
+      process.exit();
+    });
+
+
+
     httpServer.listen(config.http_server_port, () => logger.info(`listening on port ${config.http_server_port}!`))  
-
-    // This sets up an encrypted port. However, common deployment is
-    // to run this through an Apache or Nginx proxy which handles encryption - this app
-    // only talks on a local port to the main software.  
-
 
   })
 
