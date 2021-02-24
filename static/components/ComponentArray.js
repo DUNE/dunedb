@@ -12,6 +12,8 @@
 // Formio.Components.components.file.builderInfo.schema=Formio.Components.components.file.schema();
 var TextFieldComponent = Formio.Components.components.textfield;
 
+var gArrayComp;
+
 class ArrayComponent extends TextFieldComponent{
 
 
@@ -81,6 +83,7 @@ class ArrayComponent extends TextFieldComponent{
   }
 
   updateExtras(value) {
+    gArrayComp = this;
     // Normalize the input value.
     var arr = value || [];
     var min = 1e99;//Number.MAX_VALUE;
@@ -138,6 +141,7 @@ class ArrayComponent extends TextFieldComponent{
     /// Called after rendering, just as the component is being inserted into the DOM.
     /// .. just like a text area...
     super.attach(element);
+    console.log("attaching",this,element);
     this.LizardGraph = new HistCanvas($("div.arrayComponentGraph",this.element),
         {margin_left: 40});
     this.LizardHistogram = new HistCanvas($("div.arrayComponentHistogram",this.element),{margin_left: 40});
@@ -175,7 +179,7 @@ class ArrayComponent extends TextFieldComponent{
     // Don't do anything; it's called by Component.setValue, and we don't need it.
 
 
-    // console.log('setValueAt',this,value,flags);
+    console.log('setValueAt',this,index,value,flags);
     // debugger;
 
     // var arr = value || [];
