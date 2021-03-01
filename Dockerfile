@@ -35,6 +35,9 @@ FROM node:lts-alpine
 RUN apk add dumb-init
 RUN mkdir /etc/sietch.d
 ENV NODE_ENV production
+# for debugging:
+RUN apk add nano less
+RUN set -ex && apk --no-cache add sudo
 USER node
 WORKDIR /app
 COPY  --chown=node:node --from=buildimage /app/node_modules /app/node_modules
