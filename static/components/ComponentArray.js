@@ -54,6 +54,7 @@ class ArrayComponent extends TextFieldComponent{
     var tpl = '';
     tpl += super.renderElement(textvalue,index);
     gArrayComponentId++;
+    tpl += `<div class='array-component-readonly-text' ref='readonly_display'></div>`
     tpl += `<button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#componentArrayCollapse${gArrayComponentId}" aria-expanded="false" aria-controls="collapseExample">Show Info</button>`
     tpl += `<div class="collapse" id="componentArrayCollapse${gArrayComponentId}">`;
     tpl += '<div class="d-sm-flex flex-row">';
@@ -140,13 +141,34 @@ class ArrayComponent extends TextFieldComponent{
   attach(element)  {
     /// Called after rendering, just as the component is being inserted into the DOM.
     /// .. just like a text area...
+    this.loadRefs(element, {readonly_display: 'single'});
     super.attach(element);
     console.log("attaching",this,element);
     this.LizardGraph = new HistCanvas($("div.arrayComponentGraph",this.element),
         {margin_left: 40});
     this.LizardHistogram = new HistCanvas($("div.arrayComponentHistogram",this.element),{margin_left: 40});
 
+    var rodisp = this.refs.readonly_display;
+    this.LizardGraph.DoMouseClick = function(ev,u,v)
+    {
+      var index = parseInt(u);
+      var elem = rodisp.children[index];
+      if(elem) {
+        // $(rodisp).scrollTo($(elem));
+        var s = elem.offsetLeft-100;
+        rodisp.scrollLeft = s;
+        $(elem).stop().fadeOut(250).fadeIn(250);
+      }
+    }
+
     if(this.arrayValue) this.updateExtras(this.arrayValue);
+
+    if(this.disabled && this.arrayValue) {
+      $(this.refs.input[0]).hide();
+      var d = $(this.refs.readonly_display);
+      d.html(this.arrayValue.map(x=>"<span>"+x+"</span>").join(','));
+    }
+
     var self= this;
     $('.collapse',this.element).on('shown.bs.collapse', function () {
       // unhiding

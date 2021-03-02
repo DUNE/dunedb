@@ -98,7 +98,8 @@ function HistCanvas( element, options )
   $(this.element).bind('touchstart', function(ev)   { return self.DoTouch(ev); });
   $(this.element).bind('touchend',   function(ev)   { return self.DoTouch(ev); });
   $(this.element).bind('touchmove',  function(ev)   { return self.DoTouch(ev); });
-  $(this.element).unbind('click');
+  // $(this.element).unbind('click');
+  $(this.element).bind('click',function(ev) { return self.DoMouse(ev); });
   
   $(".reset-button"     ,$(this.element).parent(".portlet-content:first"))
     // .button({icons: {primary: 'ui-icon-seek-first'},text: false})          
@@ -517,7 +518,8 @@ HistCanvas.prototype.FastRangeChange = function()
 
 HistCanvas.prototype.DoMouseOverContent = function( u, v )
 {}
-
+HistCanvas.prototype.DoMouseClick = function( ev )
+{}
 HistCanvas.prototype.DoMouse = function( ev )
 {
   var x = ev.pageX;
@@ -528,6 +530,7 @@ HistCanvas.prototype.DoMouse = function( ev )
   
   var F = this.GetF(rely);
 
+  if(ev.type === 'click') return this.DoMouseClick(ev,this.GetU(relx),this.GetV(rely))
   if(ev.type === 'mousedown') {
     //logclear();
     //console.log("begin drag");
@@ -552,7 +555,7 @@ HistCanvas.prototype.DoMouse = function( ev )
       // console.log("scale",this.fDragStartT);
     } 
   } else {
-    // Either mousemove or mouseup.
+    // Either mousemove or mouseup 
     if(this.fIsBeingDragged !== true) {
       if(relx>this.origin_x && rely<this.origin_y
         && relx<this.width && rely> 0) this.DoMouseOverContent(this.GetU(relx),this.GetV(rely));

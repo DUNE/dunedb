@@ -55,3 +55,18 @@ div.componentUuidComponent {
 .btn-custom {
   @include button-variant(red, white, red, red);
 }
+
+/* array component */
+.array-component-readonly-text::-webkit-scrollbar {
+  display:none;
+}
+.array-component-readonly-text {
+  @extend .small;
+  width: 100%;
+  // max-width:400px;
+  white-space: nowrap;
+  overflow:scroll;
+  scrollbar-height: none;
+  -ms-overflow-style:none;
+
+}
