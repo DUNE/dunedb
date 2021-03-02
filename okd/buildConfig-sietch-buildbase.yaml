@@ -17,7 +17,7 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: sietch-buildbase:latest
+      name: sietch-build-master
   triggers:
   - type: ConfigChange
   - imageChange:
