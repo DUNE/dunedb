@@ -97,6 +97,12 @@ if __name__ == "__main__":
   print(resp)
 
   # Let's retrieve that data to see if it's all good
-  id = resp["_id"]
+  id = resp
   record = sietch.api("/test/"+id)
+  print(json.dumps(record,indent=2))
+
+  # search function
+  record = sietch.api("/search/test/",{
+    "formId": "thickness_measurment_type_123"
+    })
   print(json.dumps(record,indent=2))
