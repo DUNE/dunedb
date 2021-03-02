@@ -21,7 +21,7 @@ class ArrayComponent extends TextFieldComponent{
     return TextFieldComponent.schema({
       "label": "Array Data",
       "placeholder": "paste comma-delimted values here",
-      "customClass": ".component-array-formio",
+      "customClass": "component-array-sietch",
       "errorLabel": "Does not parse",
       "key": "array",
       "type": "ArrayComponent",
@@ -146,6 +146,7 @@ class ArrayComponent extends TextFieldComponent{
         {margin_left: 40});
     this.LizardHistogram = new HistCanvas($("div.arrayComponentHistogram",this.element),{margin_left: 40});
 
+    if(this.arrayValue) this.updateExtras(this.arrayValue);
     var self= this;
     $('.collapse',this.element).on('shown.bs.collapse', function () {
       // unhiding
@@ -164,12 +165,12 @@ class ArrayComponent extends TextFieldComponent{
 
     var arr = value || [];
     if(! Array.isArray(arr)) arr = [value];
-    var textvalue = arr.join(',');
-    this.updateExtras(value);
+    this.arrayValue = arr;
+    this.textValue = arr.join(',');
+    this.updateExtras(this.arrayValue);
 
     const input = this.performInputMapping(this.refs.input[0]);
-    input.value = value;
-
+    input.value = this.textValue;
 
     return super.setValue(value,flags);
   }
@@ -180,6 +181,7 @@ class ArrayComponent extends TextFieldComponent{
 
 
     console.log('setValueAt',this,index,value,flags);
+    console.log("this.value",this.value);
     // debugger;
 
     // var arr = value || [];
