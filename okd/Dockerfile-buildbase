@@ -1,0 +1,6 @@
+
+FROM node:lts-alpine
+# needed to run node-gyp for some modules
+RUN apk add --no-cache git make gcc g++ python pkgconfig pixman-dev cairo-dev pango-dev libjpeg-turbo-dev giflib-dev
+WORKDIR /app
+ENV NODE_ENV production

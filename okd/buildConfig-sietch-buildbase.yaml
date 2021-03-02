@@ -1,0 +1,24 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    build: sietch-buildbase
+  name: sietch-buildbase
+spec:
+  source:
+    type: Git
+    git:
+      ref: master
+      uri: https://github.com/nathanieltagg/sietch.git
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: okd/Dockerfile-buildbase
+  output:
+    to:
+      kind: ImageStreamTag
+      name: sietch-buildbase:latest
+  triggers:
+  - type: ConfigChange
+  - imageChange:
+      type: ImageChange
