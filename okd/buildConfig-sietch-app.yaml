@@ -1,0 +1,61 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: buildConfig-sietch-app
+objects:
+  - kind: BuildConfig
+    apiVersion: build.openshift.io/v1
+    metadata:
+      labels:
+        app: sietch
+        component: appimage
+      name: sietch-app-${RELEASE_BRANCH}
+    spec:
+      source:
+        # This stuff all gets put into a mystery folder somewhere, which then runs the docker build on the dockerfile below
+        git:
+          uri: https://github.com/nathanieltagg/sietch.git
+          ref: ${RELEASE_BRANCH}
+        images:
+          - from:
+              kind: ImageStreamTag
+              name: sietch-build:${RELEASE_BRANCH}
+            paths:
+            - destinationDir: "./"
+              sourcePath: /app/node_modules
+        contextDir: "./"
+        dockerfile: |-
+          FROM scratch
+          #RUN apk add dumb-init
+          #RUN mkdir /etc/sietch.d
+          ENV NODE_ENV production
+          # for debugging:
+          #RUN set -ex && apk --no-cache add sudo
+          USER node
+          WORKDIR /app
+          COPY . .
+          RUN ls /app
+          EXPOSE 12313
+          CMD ["node", "index.js"]
+      strategy:
+        type: Docker
+        dockerStrategy:
+          from: 
+            kind: ImageStreamTag
+            name: node:lts-alpine
+          contextDir: ./
+      output:
+        to:
+          kind: ImageStreamTag
+          name: sietch-app:${RELEASE_BRANCH}
+      triggers:
+      - type: ConfigChange
+      - imageChange:
+          type: ImageChange
+
+parameters:
+  - name: RELEASE_BRANCH
+    displayName: Which branch of the github directory I'm building from.
+    value: master
+    require: true
+message: "HI there"
