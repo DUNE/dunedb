@@ -12,6 +12,8 @@
 // Formio.Components.components.file.builderInfo.schema=Formio.Components.components.file.schema();
 var TextFieldComponent = Formio.Components.components.textfield;
 
+var gArrayComp;
+
 class ArrayComponent extends TextFieldComponent{
 
 
@@ -19,7 +21,7 @@ class ArrayComponent extends TextFieldComponent{
     return TextFieldComponent.schema({
       "label": "Array Data",
       "placeholder": "paste comma-delimted values here",
-      "customClass": ".component-array-formio",
+      "customClass": "component-array-sietch",
       "errorLabel": "Does not parse",
       "key": "array",
       "type": "ArrayComponent",
@@ -52,6 +54,7 @@ class ArrayComponent extends TextFieldComponent{
     var tpl = '';
     tpl += super.renderElement(textvalue,index);
     gArrayComponentId++;
+    tpl += `<div class='array-component-readonly-text' ref='readonly_display'></div>`
     tpl += `<button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#componentArrayCollapse${gArrayComponentId}" aria-expanded="false" aria-controls="collapseExample">Show Info</button>`
     tpl += `<div class="collapse" id="componentArrayCollapse${gArrayComponentId}">`;
     tpl += '<div class="d-sm-flex flex-row">';
@@ -81,6 +84,7 @@ class ArrayComponent extends TextFieldComponent{
   }
 
   updateExtras(value) {
+    gArrayComp = this;
     // Normalize the input value.
     var arr = value || [];
     var min = 1e99;//Number.MAX_VALUE;
@@ -137,10 +141,33 @@ class ArrayComponent extends TextFieldComponent{
   attach(element)  {
     /// Called after rendering, just as the component is being inserted into the DOM.
     /// .. just like a text area...
+    this.loadRefs(element, {readonly_display: 'single'});
     super.attach(element);
+    console.log("attaching",this,element);
     this.LizardGraph = new HistCanvas($("div.arrayComponentGraph",this.element),
         {margin_left: 40});
     this.LizardHistogram = new HistCanvas($("div.arrayComponentHistogram",this.element),{margin_left: 40});
+
+    var rodisp = this.refs.readonly_display;
+    this.LizardGraph.DoMouseClick = function(ev,u,v)
+    {
+      var index = parseInt(u);
+      var elem = rodisp.children[index];
+      if(elem) {
+        // $(rodisp).scrollTo($(elem));
+        var s = elem.offsetLeft-100;
+        rodisp.scrollLeft = s;
+        $(elem).stop().fadeOut(250).fadeIn(250);
+      }
+    }
+
+    if(this.arrayValue) this.updateExtras(this.arrayValue);
+
+    if(this.disabled && this.arrayValue) {
+      $(this.refs.input[0]).hide();
+      var d = $(this.refs.readonly_display);
+      d.html(this.arrayValue.map(x=>"<span>"+x+"</span>").join(','));
+    }
 
     var self= this;
     $('.collapse',this.element).on('shown.bs.collapse', function () {
@@ -160,12 +187,12 @@ class ArrayComponent extends TextFieldComponent{
 
     var arr = value || [];
     if(! Array.isArray(arr)) arr = [value];
-    var textvalue = arr.join(',');
-    this.updateExtras(value);
+    this.arrayValue = arr;
+    this.textValue = arr.join(',');
+    this.updateExtras(this.arrayValue);
 
     const input = this.performInputMapping(this.refs.input[0]);
-    input.value = value;
-
+    input.value = this.textValue;
 
     return super.setValue(value,flags);
   }
@@ -175,7 +202,8 @@ class ArrayComponent extends TextFieldComponent{
     // Don't do anything; it's called by Component.setValue, and we don't need it.
 
 
-    // console.log('setValueAt',this,value,flags);
+    console.log('setValueAt',this,index,value,flags);
+    console.log("this.value",this.value);
     // debugger;
 
     // var arr = value || [];

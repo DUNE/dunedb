@@ -113,7 +113,7 @@ router.post("/promoteYourself",
                   + `Their new roles are:\n`
                   +   roles.join("\n")
             })
-            limiter.reset(req);
+            // limiter.reset(req);
             res.render("promoteYourselfSuccess.pug",{roles});
           } catch(err) { logger.info(err); logger.info(err.stack)}
       } else {
