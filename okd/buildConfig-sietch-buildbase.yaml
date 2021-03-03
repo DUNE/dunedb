@@ -6,18 +6,19 @@ metadata:
   name: sietch-buildbase
 spec:
   source:
-    type: Git
-    git:
-      ref: master
-      uri: https://github.com/nathanieltagg/sietch.git
+    dockerfile: |-
+      FROM node:lts-alpine
+      # needed to run node-gyp for some modules
+      RUN apk add --no-cache git make gcc g++ python pkgconfig pixman-dev cairo-dev pango-dev libjpeg-turbo-dev giflib-dev
+      WORKDIR /app
+      ENV NODE_ENV production
   strategy:
     type: Docker
     dockerStrategy:
-      dockerfilePath: okd/Dockerfile-buildbase
   output:
     to:
       kind: ImageStreamTag
-      name: sietch-build-master
+      name: sietch-buildbase:latest
   triggers:
   - type: ConfigChange
   - imageChange:
