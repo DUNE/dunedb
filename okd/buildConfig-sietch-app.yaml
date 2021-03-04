@@ -30,11 +30,11 @@ objects:
           #RUN mkdir /etc/sietch.d
           ENV NODE_ENV production
           # for debugging:
-          #RUN set -ex && apk --no-cache add sudo
+          RUN set -ex && apk --no-cache add sudo
           USER node
           WORKDIR /app
           COPY . .
-          RUN ls /app
+          RUN ls -al /app
           EXPOSE 12313
           CMD ["node", "index.js"]
       strategy:
@@ -50,8 +50,8 @@ objects:
           name: sietch-app:${RELEASE_BRANCH}
       triggers:
       - type: ConfigChange
-      - imageChange:
-          type: ImageChange
+      - type: ImageChange
+        imageChange: {}
 
 parameters:
   - name: RELEASE_BRANCH
