@@ -1,0 +1,97 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: deploymentConfig-sietch-app
+objects:
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: sietch-${DEPLOYMENT}
+    spec:
+      replicas: 1
+      selector:
+        app: sietch-${DEPLOYMENT}
+        deploymentconfig: sietch-${DEPLOYMENT}
+      template: 
+        metadata:
+            labels:
+              app: sietch-${DEPLOYMENT}
+              deploymentconfig: sietch-${DEPLOYMENT}
+
+        spec:
+          containers:
+            - image: docker-registry.default.svc:5000/sietch/sietch-app:${RELEASE_BRANCH}
+              imagePullPolicy: Always
+              name: sietch-app-${RELEASE_BRANCH}
+              ports: 
+                - containerPort: 12313
+                  protocol: TCP
+              livenessProbe:
+                  failureThreshold: 3
+                  httpGet:
+                    path: /
+                    port: 12313
+                    scheme: HTTP
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  successThreshold: 1
+                  timeoutSeconds: 1
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /
+                  port: 12313
+                  scheme: HTTP
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              volumeMounts:
+                - mountPath: /etc/sietch.d/mongodb-config
+                  name: volume-mongod-cfg
+                  readOnly: true
+                - mountPath: /etc/sietch.d/main-config
+                  name: volume-main-cfg
+                - mountPath: /persistent
+                  name: volume-persistent
+          volumes:
+            - name: volume-mongod-cfg
+              secret:
+                defaultMode: 420
+                secretName: mongodb-config
+            - name: volume-main-cfg
+              secret:
+                defaultMode: 420
+                secretName: ${DEPLOYMENT}-config
+            - name: volume-persistent
+              persistentVolumeClaim:
+                claimName: sietch-persistent
+
+
+
+      triggers:
+      - type: ConfigChange 
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - sietch-app-${DEPLOYMENT}
+          from:
+            kind: ImageStreamTag
+            namespace: sietch
+            name: sietch-app:${RELEASE_BRANCH}
+        type: ImageChange  
+      strategy:
+        type: Rolling  
+
+
+parameters:
+  - name: RELEASE_BRANCH
+    displayName: Which branch of the github directory I'm building from.
+    value: master
+    require: true
+
+  - name: DEPLOYMENT
+    displayName: production, test, or dev
+    value: master
+    require: true

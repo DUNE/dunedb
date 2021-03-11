@@ -1,0 +1,75 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: buildConfig-generalpurpose
+objects:
+  # The image stream that this build will create
+  - kind: ImageStream
+    apiVersion: image.openshift.io/v1
+    metadata:
+      name: generalpurpose
+    spec:
+      lookupPolicy:
+      local: false
+
+  # need to do this instead:
+  # oc import-image docker.io/library/debian:stable --confirm --scheduled=true
+  # - kind: "ImageStream"
+  #   apiVersion: "v1"
+  #   metadata:
+  #     name: "debian"
+  #   spec:
+  #     lookupPolicy:
+  #       local: false
+  #     tags:
+  #     - annotations: null
+  #       from:
+  #         kind: DockerImage
+  #         name: docker.io/library/debian:stable
+  #       generation: 1
+  #       importPolicy:
+  #         scheduled: true
+  #       name: debian
+  #       referencePolicy:
+  #         type: Source
+
+  # The build in question.
+
+  - kind: BuildConfig
+    apiVersion: build.openshift.io/v1
+    metadata:
+      labels:
+        app: generalpuprose
+        component: appimage
+      name: generalpurpose
+    spec:
+      source:
+        dockerfile: |-
+            FROM scratch
+            RUN apt-get update
+            RUN apt-get install -y wget curl
+            RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+            RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add -
+            RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" |  tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+            RUN apt-get update
+            RUN apt-get install -y git nodejs mongodb-org make gcc g++ python
+            # COPY bin/ /usr/local/bin/
+            RUN wget -O /usr/local/bin/rmate https://raw.githubusercontent.com/jeremejevs/rmate/master/rmate
+            RUN chmod +x /usr/local/bin/rmate
+            RUN curl https://get.acme.sh | sh -s email=ntagg@otterbein.edu
+            WORKDIR /persistent
+            CMD ["/bin/bash"]
+      strategy:
+        type: Docker
+        dockerStrategy:
+          from: 
+            kind: ImageStreamTag
+            name: debian:stable
+          contextDir: ./
+      output:
+        to:
+          kind: ImageStreamTag
+          name: generalpurpose:latest
+      triggers:
+      - type: ConfigChange
+
