@@ -52,7 +52,12 @@ objects:
       - type: ConfigChange
       - type: ImageChange
         imageChange: {}
-
+      - type: "imageChange" 
+        imageChange:
+          from:
+            kind: "ImageStreamTag"
+            name: "sietch-build:${RELEASE_BRANCH}"
+        type: ImageChange
 parameters:
   - name: RELEASE_BRANCH
     displayName: Which branch of the github directory I'm building from.

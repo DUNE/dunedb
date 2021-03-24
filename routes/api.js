@@ -319,6 +319,23 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})/info",  permissions.checkPermissio
   }
 });
 
+// Get many specific tests
+router.post("/test/getBulk",  permissions.checkPermissionJson('tests:view'), 
+  async function(req,res,next) {
+
+  try {
+    if(!Array.isArray(req.body)) throw(new Error("/test/getBulk expects and array"))
+    var input = req.body;
+    console.log("/test/getBulk with ",req.body.length, " entries");
+    logger.info("retrieve test data",req.body);
+    var records = await Tests.retrieveBulk(req.body);
+    return res.json(records,null,2);
+  } catch(err) {
+    logger.info(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+});
+
 // Get list of tests done on a specific component
 
 router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:view'), 
@@ -330,6 +347,8 @@ router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:v
     res.status(400).json({error:err.toString()});
   }
 });
+
+
 
 
 /////////////////////////////////////////////////////////////
@@ -372,7 +391,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
-    // logger.info("search request",req.params,req.body);
+    logger.info("search request",req.params,req.body);
     var searchterms = null;
     var matchobj = {...req.body};
     var formId = null;
