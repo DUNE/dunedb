@@ -120,6 +120,7 @@ In addition, some will have this field:
   validity: <validity block>
   formId: <string>   //  identifier for this form type
   formName: <string> //  Name of this form
+  icon: <file reference>, // nice icon to display this thing with.
   tags: <array of string> // Category tags.  "Trash" = don't show this entry to users
   componentType: <string> // Applies to Test forms only; limits which Components have this as a test option.
   schema: {
@@ -148,6 +149,8 @@ In addition, some will have this field:
   componentUuid,  // BSON component UUID. Required for 'test', should not be there for 'job'. Provided via api route.
   formId: <string>, 
   formName: <string>,        // OMIT???
+  icon: <file reference>, // nice icon to display this thing with.
+  tags: <array of string> // Category tags.  "Trash" = don't show this entry to users
   formObjectId: <ObjectId>,  // objectID of the form record used.
   state: <string>         // Required. "submitted" for final data, "draft" for a draft
                           // Also reserved: 'trash'
@@ -189,116 +192,64 @@ This collection is used to find connections between Components, and is reconstru
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## OBSOLTE - Schema version 3
-### Components
+### Course:
+This represents a sequence of tasks that should be taken in terms of work proceedures.
+For example, an element might need to be entered in the DB, then located, then weighed, then tested for tension, then shipped.
 
 ```
 {
-	_id: ObjectId(),   		// Autoallocated by Mongo at write time
-	recordType: 'component', // required
-	effectiveDate: <date>  // Validity date start
-	submit: {
-	  insertDate: <date>,   	// Timestamp written to database
-      ip: <string>					// ip address of creator client
-      user: {}					// trimmed user record (see below)
-      version: <integer>	    // version number for validity; later numbers are more correct
-      diff_from: <objectId>     // row _id number of the last version
-	}
-	componentUuid: <Binary UUID blob>
-	<any other fields>
+  _id: <BSON Uuid>,      // specific object
+  recordType: "course",
+  courseId: <string>,      // unique name of this path
+  validity: <validity>,  // This is a versioned object
+  insertion: <insertion>,
+
+  name: <string>,    // user-readable name of this path (mutable)
+  icon: <file reference>, // nice icon to display this thing with.
+  tags: [ <string>,... ],  // Which tags to apply. Typically only one tag
+  path: <path>
+};
+```
+where 
+```
+<path> = {
+  [<step>,...]
 }
 ```
-
-### Forms
-The same format is used for the `componentForm`, `testForms`, and `jobForms` collections
+and 
 ```
-{
-	_id: <ObjectId>,        // Document ID autoallocated by Mongo at write 
-	recordType: 'form',
-	collection: <string>   // Name of mongodb collection this record is put in.
-	form_id:  <string>   // Identifier for this form type 
-	insertDate: <date> // time record was inserted
-	submit_ip:  <string> // ip address of creator
-	user:  {}			// trimmed user record.
-	revised_by: <string> // display name of above  FIX
-	diff_from: <ObjectID> // last version
-	version: <integer>  // version number
-	effectiveDate: <Date> // when to start using this form in anger
-	schema: {             // this is the Formio form record used to describe data entry
-		components: [...]
-	}
-	metadata: {}         // junk created by Formio
-}
-```
-
-### Tests
-```
-{
-  _id: <ObjectId>         // ObjectId assigned by mongo, at time of first draft-save
-                           // For strict time ordering, use insertDate below.
-  form_id:  <string>       // name of the form>   REQUIRED
-  form: {              
-     _id:                  // Record of form used to generate this test
-     form_id:              // form_id of that form
-     form_title:           // Title of that form
-     version:              // version used
-     effectiveDate:        // effectiveDate of that form version
-     insertDate:           // insertDate of that form version.
+  <step> = {
+    type: 'component|workflow|test|path', 
+    formId: <string>,
+    advice: <string> , // Mouse-over or other explanitory text
+    identifier: <string>, // dot-notation version of how to look up the object in question in the record. default
+    // to "componentUuid"
+    path : [<path>,...] // Only if 'path' is chosen as type. Sub paths that can be taken in parallel
   }
-  
-
-  data: {                  // The actual data payload.
-         componentUuid: <string>  // --> REQUIRED for test, not for jobs
-                                  //matches [  A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}
-         <any other data>
-        }
-  metadata: {}            // Formio junk. Probably useless.
-  state: <string>         // Required. "submitted" for final data, "draft" for a draft verison.
-                          // Also reserved: 'trash'
-  
-  insertDate: <Date>   // timestamp of submission recieved by DB
-  user: {}             // trimmed user object
-}
 ```
 
-## Common subrecords
 
-Trimmed User Record:
-```
-{ 
-	user_id: <string>, // the auth0 id, unless it starts with 'm2m' for a machine user
-	displayName: <string>,  // What to display
-	emails: [ <string>, ... ] // array of email addresses, usually only first one used.
-}
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

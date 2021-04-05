@@ -1,0 +1,13 @@
+extend default
+
+include common.pug
+include course-mixin.pug
+
+block vars
+  - var page_title=evalCourse.name;
+
+block content
+  h1 Course Name: #{evalCourse.name} 
+  +evaluated-course(evalCourse)
+
+
