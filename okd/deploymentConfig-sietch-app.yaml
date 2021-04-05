@@ -7,21 +7,25 @@ objects:
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
-      name: sietch-${DEPLOYMENT}
+      name: sietch-app-${DEPLOYMENT}
+      labels:
+        app: sietch-app-${DEPLOYMENT}
+      namespace: sietch
     spec:
       replicas: 1
       selector:
-        app: sietch-${DEPLOYMENT}
-        deploymentconfig: sietch-${DEPLOYMENT}
+        app: sietch-app-${DEPLOYMENT}
+        deploymentconfig: sietch-app-${DEPLOYMENT}
       template: 
         metadata:
             labels:
-              app: sietch-${DEPLOYMENT}
-              deploymentconfig: sietch-${DEPLOYMENT}
+              app: sietch-app-${DEPLOYMENT}
+              deploymentconfig: sietch-app-${DEPLOYMENT}
 
         spec:
           containers:
-            - image: docker-registry.default.svc:5000/sietch/sietch-app:${RELEASE_BRANCH}
+            - image: >-
+                docker-registry.default.svc:5000/sietch/sietch-app@sha256:b102f4d14182a86cde0803b5ef324a0839af53a69074444cf6a110c60e53c4bb
               imagePullPolicy: Always
               name: sietch-app-${RELEASE_BRANCH}
               ports: 
@@ -84,6 +88,41 @@ objects:
       strategy:
         type: Rolling  
 
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      labels:
+        app: sietch-app-${DEPLOYMENT}
+      name: sietch-app-${DEPLOYMENT}
+      namespace: sietch
+    spec:
+        ports:
+          - name: 12313-tcp
+            port: 12313
+            protocol: TCP
+            targetPort: 12313
+        selector:
+          deploymentconfig: sietch-app-${DEPLOYMENT}
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      labels:
+        app: sietch-app-${DEPLOYMENT}
+      name: ${DEPLOYMENT}-route
+      namespace: sietch
+    spec:
+      host: ${URL}
+      port:
+        targetPort: 12313-tcp
+      tls:
+        insecureEdgeTerminationPolicy: Allow
+        termination: edge
+      to:
+        kind: Service
+        name: sietch-app-${DEPLOYMENT}
+        weight: 100
+      wildcardPolicy: None
+
 
 parameters:
   - name: RELEASE_BRANCH
@@ -93,5 +132,9 @@ parameters:
 
   - name: DEPLOYMENT
     displayName: production, test, or dev
-    value: master
+    value: dev
+    require: true
+
+  - name: URL
+    displayName: Typically apa.dunedb.org or variants.
     require: true
