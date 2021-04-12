@@ -1,4 +1,4 @@
-var load_config = require("../lib/configuration.js"); // exports the global 'config' variable.const request = require('supertest');
+const Config = require("../lib/configuration.js");
 const request = require('supertest');
 const express = require('express');
 const session = require('supertest-session');
@@ -54,7 +54,7 @@ beforeAll(async () => {
     customLevels: {
         http: 29
     },
-    level: 'error', 
+    // level: 'error', 
   };
 global.logger = require("pino")(pino_opts);
 
@@ -332,6 +332,36 @@ describe("private routes",function() {
         })
       });
 
+    // get test data back.
+    test('GET /json/test/<id>',()=>{
+      return request(appAuthorized)
+        .get('/json/test/'+testId)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(r=>{
+          expect(r.body.formId).toBe('test'+suffix);
+          expect(r.body.data.name).toBe("Dummy Test Object by JEST");
+          expect(r.body.insertion).toBeTruthy();
+        })
+
+    });
+
+
+    // get test data back.
+    test('POST /json/test/getBulk',()=>{
+      return request(appAuthorized)
+        .post('/json/test/getBulk')
+        .send([testId])
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(r=>{
+          expect(r.body.length).toBeGreaterThan(0)
+          expect(r.body[0].formId).toBe('test'+suffix);
+          expect(r.body[0].data.name).toBe("Dummy Test Object by JEST");
+          expect(r.body[0].insertion).toBeTruthy();
+        })
+
+    });
 
     // Job data
      test('POST /json/job',()=>{
@@ -369,6 +399,8 @@ describe("private routes",function() {
         })
 
     });
+
+
 
 
     // Various listings
@@ -562,6 +594,7 @@ describe("private routes",function() {
       .expect(200)
       .expect(new RegExp('JEST'));
     });
+
 
    test("/test/<form_id>",()=>{
       return request(appAuthorized)
