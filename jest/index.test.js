@@ -1,4 +1,4 @@
-global.config = require("../lib/configuration.js");
+var load_config = require("../lib/configuration.js"); // exports the global 'config' variable.const request = require('supertest');
 const request = require('supertest');
 const express = require('express');
 const session = require('supertest-session');
@@ -688,7 +688,7 @@ describe("private routes",function() {
             request(appAuthorized)
               .post("/file/gridfs")
               // .attach('name', buffer, {filename:'myTestFile.png', contentType:"image/png"})
-              .attach('name', "static/images/Otterbein.png")
+              .attach('name', "static/images/browser_icon.png")
               .expect('Content-Type', /json/)
               .expect(200)
               .then(r=>{
@@ -696,7 +696,7 @@ describe("private routes",function() {
                 expect(r.body).toBeTruthy();
                 var url = r.body.url;
                 fileurl = '/' + url.split('/').splice(3).join('/')
-                // logger.info("fileurl",url, fileurl);
+                logger.info("fileurl",url, fileurl);
                 done();
               });
           // });
