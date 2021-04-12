@@ -55,7 +55,7 @@
     "jwks-rsa": "^1.12.1",
     "lodash": "^4.17.19",
     "moment": "^2.27.0",
-    "mongodb": "^3.5.9",
+    "mongodb": "^3.6.6",
     "morgan": "^1.10.0",
     "node-sass": "^4.14.1",
     "nodemailer": "^6.4.17",

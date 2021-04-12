@@ -6,6 +6,7 @@ const email = require("../lib/email.js");
 var permissions = require('../lib/permissions.js');
 const Components = require("../lib/Components.js");
 const Forms = require("../lib/Forms.js");
+const Courses = require("../lib/Courses.js");
 var router = express.Router();
 const child_process = require("child_process");
 module.exports = router;
@@ -37,7 +38,10 @@ router.get('/', async function(req, res, next) {
     }
 
   }
-  var tags = await Forms.tags();
+  console.log(await Forms.tags());
+  console.log(await Courses.tags());
+  var tags = {...await Forms.tags(), ...await Courses.tags()};
+
   logger.info(JSON.stringify(recentComponents),tags)
   res.render('home.pug',{tags,recentComponents,git_branch,git_log});
 });
@@ -61,6 +65,7 @@ router.get('/category/:tag', async function(req, res, next) {
     return retval;
   }
 
+  var courses = filterTag(req.params.tag, await Courses.list());
   var componentForms = filterTag(req.params.tag, await Forms.list("componentForms") );
   var testForms = filterTag(req.params.tag, await Forms.list("testForms") );
   var jobForms = filterTag(req.params.tag, await Forms.list("jobForms") );

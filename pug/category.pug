@@ -9,6 +9,15 @@ block content
   h1 Tag Category: #{tag}
   if(componentForms)
    if(permissions.userHas(user,"components:create"))
+    h3 Courses:
+    each course in courses
+      p 
+        a(href='/course/'+course.courseId).btn.btn-outline-info 
+          if(course.icon) 
+            img.icon(src=course.icon)
+          span #{course.name}
+
+
     h3 Register a new component:
     each form in componentForms
       p 
