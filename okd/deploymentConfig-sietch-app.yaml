@@ -52,10 +52,10 @@ objects:
                 successThreshold: 1
                 timeoutSeconds: 1
               volumeMounts:
-                - mountPath: /etc/sietch.d/mongodb-config
+                - mountPath: /etc/sietch.d/mongodb-config-${DEPLOYMENT}
                   name: volume-mongod-cfg
                   readOnly: true
-                - mountPath: /etc/sietch.d/main-config
+                - mountPath: /etc/sietch.d/main-config-${DEPLOYMENT}
                   name: volume-main-cfg
                 - mountPath: /persistent
                   name: volume-persistent
@@ -63,7 +63,7 @@ objects:
             - name: volume-mongod-cfg
               secret:
                 defaultMode: 420
-                secretName: mongodb-config
+                secretName: mongodb-config-${DEPLOYMENT}
             - name: volume-main-cfg
               secret:
                 defaultMode: 420
