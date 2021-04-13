@@ -1,0 +1,107 @@
+Installation notes for OKD/OpenShift cluster.
+
+This is a pretty complicated.
+
+I decided to run code on node:lts-alpine, which is a lightweight OS ideal for containerization, based upon node best practices article. 
+  Starting from the bottom up.
+Builds:
+ sietch-buildbase - start with node:lts-apline (used for node) and install tools required to run node-gyp. 
+                  - Will rebuild automagically if new release of base distro.
+
+ sietch-build-master     | These are builds that start with buildbase, and install required node modules 
+ sietch-build-production | using package.json, resulting in a node_module directory. Will rebuild if base changes
+                         | The first runs off master branch, the second off the production branch.
+                         | Manually rebuild this if the package list changes.
+
+ sietch-app-production   | These are the actual runable code. They are just copies from github, with node_modules
+ sietch-app-master       | from the sietch-build-* above.  Rebuild automagically if above rebuilds. Manually trigger
+                         | if code changes but not libraries
+
+ generalpurpose - attempt to get general series of tools available for DB accesss or to run acme.sh/certbot. 
+                   Not successful.  I think better is just to use a fermicloud instance.
+
+Services:
+  redis - Standalone redis server, standard template. Tells you the connection url/pw when created.
+  nginx - Standalone nginx server.  Not used yet, just there for trying things out.
+  sietch-app-production -  Runs off sietch-app-production image stream, connected to apa.dune-db.org 
+  sietch-app-dev        -  Runs off sietch-app-master image stream, connected to apa-dev.dunedb.org
+  sietch-app-test       -  Runs off sietch-app-master image stream, connected to apa-test.dunedb.org
+
+Resources: 
+- I have a persistent store available to the sietch installs, in case it was helpful for caching or for certbot. Not really used yet
+- I have a persistent store for redis
+- I have secrets:
+  mongodb-config-production (and -dev and -test) hold certs for authenticating against Natalia's mongo instances
+  production-config (and dev- and test-) hold the config.js files used to boot up Sietch.
+
+By default, sietch looks in local directories for default.js and config.js, then also looks in 
+    /etc/sietch.d/*/*config.js
+So, I put mount all secrets to /etc/sietch.d, changing which secret goes where.
+
+All secrets and certs on my laptop in ~/okd.
+
+
+Get an image stream started for the upstream node image:
+
+oc import-image node:lts-alpine --from=docker.io/library/node:lts-alpine --confirm --scheduled=true
+
+Set up my own streams
+
+oc create -f imageStream-sietch-buildbase.yaml
+oc create -f imageStream-sietch-build.yaml
+oc create -f imageStream-sietch-app.yaml
+
+Set up the base image 
+oc create -f buildconfig-sietch-basebuild.yaml
+
+Set up the intermediate images, which depend on the git repo:
+oc process -f buildConfig-sietch-build.yaml -p GITHUB_SECRET=XXXXXX -p RELEASE_BRANCH=production | oc create -f -
+
+oc process -f buildConfig-sietch-build.yaml -p GITHUB_SECRET=XXXXXX -p RELEASE_BRANCH=master | oc create -f -
+
+(or |oc release -f - if you're changing)
+
+
+oc delete secret mongodb-config
+oc delete secret mongodb-config-production
+oc delete secret mongodb-config-dev
+oc delete secret mongodb-config-test
+
+oc create secret generic mongodb-config-production --from-file=/Users/tagg/okd/mongodb-config-production
+oc create secret generic mongodb-config-dev --from-file=/Users/tagg/okd/mongodb-config-dev
+oc create secret generic mongodb-config-test --from-file=/Users/tagg/okd/mongodb-config-test
+
+oc delete secret production-config
+oc create secret generic production-config --from-file=/Users/tagg/okd/production-config
+
+oc delete secret test-config
+oc create secret generic test-config --from-file=/Users/tagg/okd/test-config
+
+oc delete secret dev-config
+oc create secret generic dev-config --from-file=/Users/tagg/okd/dev-config
+
+# use oc create -f - if running for the first time.
+oc process -f deploymentConfig-sietch-app.yaml -p DEPLOYMENT=test -p RELEASE_BRANCH=production -p URL=apa-test.dunedb.org | oc replace -f -
+
+oc process -f deploymentConfig-sietch-app.yaml -p DEPLOYMENT=dev -p RELEASE_BRANCH=master -p URL=apa-dev.dunedb.org | oc replace -f -
+
+oc process -f deploymentConfig-sietch-app.yaml -p DEPLOYMENT=production -p RELEASE_BRANCH=production -p URL=apa.dunedb.org | oc replace -f -
+
+
+Download backup file from ec2, then from okd/mongodb-config
+GODEBUG=x509ignoreCN=0 mongorestore --gzip --ssl --sslPEMKeyFile=client.pem --sslCAFile=root-ca.pem -d sietch_db   --uri="mongodb://dune-apa-dbdev01.fnal.gov:27019/test?authMechanism=MONGODB-X509&authSource=%24external&replicaSet=rs0" ../2021-03-03/sietch_dev
+
+Need to do:
+- Test image triggers
+- get a script to trigger rebuild, since webhooks seem off the table
+- compose and configure secrets and config
+- create all services, route
+- Add redis server?
+
+
+# general purpose:
+
+oc process -f buildConfig-generalpurpose.yaml| oc replace -f -
+# add the /persistent store.
+# start the pod, it fails, open the debug window
+.acme.sh/acme.sh --issue -d apa.dunedb.org -d apa-test.dunedb.org -d apa-dev.dunedb.org -w /persistent/static
