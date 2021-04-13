@@ -7,24 +7,25 @@ block vars
 
 block content
   h1 Tag Category: #{tag}
+    if(courses) 
+      h3 Courses:
+      each course in courses
+        p 
+          a(href='/course/'+course.courseId).btn.btn-outline-info 
+            if(course.icon) 
+              img.icon(src=course.icon)
+            span #{course.name}
+
+
   if(componentForms)
-   if(permissions.userHas(user,"components:create"))
-    h3 Courses:
-    each course in courses
-      p 
-        a(href='/course/'+course.courseId).btn.btn-outline-info 
-          if(course.icon) 
-            img.icon(src=course.icon)
-          span #{course.name}
-
-
-    h3 Register a new component:
-    each form in componentForms
-      p 
-        a(href='/NewComponent/'+form.formId).btn.btn-outline-info 
-          if(form.icon) 
-            img.icon(src=form.icon)
-          span #{form.formName}
+    if(permissions.userHas(user,"components:create"))
+      h3 Register a new component:
+      each form in componentForms
+        p 
+          a(href='/NewComponent/'+form.formId).btn.btn-outline-info 
+            if(form.icon) 
+              img.icon(src=form.icon)
+            span #{form.formName}
     
   if(testForms)
     h3 Run a test:

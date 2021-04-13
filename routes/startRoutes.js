@@ -38,11 +38,12 @@ router.get('/', async function(req, res, next) {
     }
 
   }
-  console.log(await Forms.tags());
-  console.log(await Courses.tags());
-  var tags = {...await Forms.tags(), ...await Courses.tags()};
+  console.log("form tags:",await Forms.tags());
+  console.log("course tags:",await Courses.tags());
+  var tags = [... new Set([...await Forms.tags(), ...await Courses.tags()])];
 
-  logger.info(JSON.stringify(recentComponents),tags)
+  logger.info(JSON.stringify(recentComponents));
+  logger.info("Tags: "+JSON.stringify(tags));
   res.render('home.pug',{tags,recentComponents,git_branch,git_log});
 });
 
@@ -52,7 +53,7 @@ router.get('/category/:tag', async function(req, res, next) {
   function filterTag(tag,menu) {
     var retval = {};
     var got = false;
-    logger.info('filterTag',tag,menu)
+    logger.info('filterTag %o %o',tag,menu)
     for(var key in menu) {
       var form = menu[key];
       logger.info(form);
@@ -61,7 +62,7 @@ router.get('/category/:tag', async function(req, res, next) {
         got = true;
       }
     }
-    // if(!got) return null;
+    if(!got) return null;
     return retval;
   }
 
@@ -69,10 +70,11 @@ router.get('/category/:tag', async function(req, res, next) {
   var componentForms = filterTag(req.params.tag, await Forms.list("componentForms") );
   var testForms = filterTag(req.params.tag, await Forms.list("testForms") );
   var jobForms = filterTag(req.params.tag, await Forms.list("jobForms") );
-  logger.info("components:",Object.keys(componentForms||{}))
-  logger.info("tests:",Object.keys(testForms||{}))
-  logger.info("jobs:",Object.keys(jobForms||{}))
-  res.render('category.pug',{tag:req.params.tag,componentForms,testForms,jobForms});
+  logger.info("courses: %o",Object.keys(courses||{}))
+  logger.info("components: %o",Object.keys(componentForms||{}))
+  logger.info("tests: %o",Object.keys(testForms||{}))
+  logger.info("jobs: %o",Object.keys(jobForms||{}))
+  res.render('category.pug',{tag:req.params.tag,courses,componentForms,testForms,jobForms});
 
 });
 
