@@ -187,6 +187,7 @@ router.get('/componentTypes/:type?', permissions.checkPermissionJson('components
   async function(req,res,next){
     try {
       var componentTypes =  await ComponentTypes.list();
+      // one type
       if(req.params.type) return res.json(componentTypes[decodeURIComponent(req.params.type)]);
       return res.json(componentTypes);
     } catch(err) {
@@ -218,8 +219,9 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:view'), 
+router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
+    if(req.params.collection == "workflowForms") req.params.collection = "jobForms";
     try {
       var obj = await Forms.list(req.params.collection)
       if(req.params.format=="list") {

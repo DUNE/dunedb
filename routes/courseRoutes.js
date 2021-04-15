@@ -2,6 +2,7 @@
 
 const permissions = require('../lib/permissions.js');
 const Courses = require('../lib/Courses.js');
+const Forms = require('../lib/Forms.js');
 const express  = require("express");
 const utils = require("../lib/utils.js");
 
@@ -9,7 +10,20 @@ var router = express.Router();
 
 module.exports = router;
 
-// HTML/Pug routes:
+//Edit a course
+router.get("/EditCourse/:courseId", permissions.checkPermission("tests:view"),
+ async function(req,res,next) {
+    try{
+      let courseId = req.params.courseId;
+      let course = await Courses.retrieve(courseId);
+      console.log("EditCourse",courseId,course);
+      res.render('EditCourse.pug',{courseId, course})
+    } 
+    catch(err) { 
+      logger.error("error in router function",err); //next(); 
+    }
+
+});
 
 // look at a course
 router.get("/course/:courseId", permissions.checkPermission("forms:view"), 
@@ -19,8 +33,12 @@ router.get("/course/:courseId", permissions.checkPermission("forms:view"),
       var options = {};
       // get stuff in one go
       var course = await Courses.retrieve(req.params.courseId);
+      // Get all related objects.
+      var components = await Courses.getRelatedComponents(course);
+      console.log("returned components",components)
+      var componentForms = await Forms.list("componentForms");
       if(!course) return res.status(404).render("No such course exists.");
-      res.render("course",{course});
+      res.render("course",{course,components,componentForms});
   } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 });
 

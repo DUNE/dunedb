@@ -1,10 +1,5 @@
 
 
-mixin showCourse(course)
-    pre
-      =JSON.stringify(course,null,2)
-
-
 mixin evaluated-course(course)
     h3=course.name
     table
@@ -63,9 +58,9 @@ mixin evaluated-course(course)
                   a(href='/job/'+step.formId).btn.btn-outline-danger
                         img.small-icon(src='/images/edit_icon.svg')
                         | &nbsp; Run
-            td=step.advice
-    pre
-      =JSON.stringify(course,null,2)
+            td !{step.advice}
+    // pre
+    //   =JSON.stringify(course,null,2)
 
  
 

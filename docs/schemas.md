@@ -219,7 +219,7 @@ where
 and 
 ```
   <step> = {
-    type: 'component|workflow|test|path', 
+    type: 'component|job|test|path', 
     formId: <string>,
     advice: <string> , // Mouse-over or other explanitory text
     identifier: <string>, // dot-notation version of how to look up the object in question in the record. default

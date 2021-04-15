@@ -8,6 +8,24 @@ block vars
 
 block content
   h1 Course Name: #{course.name} 
-  +showCourse(course)
+
+  h2 Components:
+  each list,type in components
+    h3
+      if((componentForms[type]||{}).icon)
+        img.small-icon(src=componentForms[type].icon)
+      =type
+    table
+        each component in list
+          -var uuid=MUUID.from(component.componentUuid).toString();
+          tr          
+            td
+              a(href='/course/'+course.courseId+"/"+uuid) #{component.name}   #{uuid.substr(0,8)}...
+            td
+              +dateFormat(component.last_edited)
+
+
+  pre
+    =JSON.stringify(course,null,2)
 
 
