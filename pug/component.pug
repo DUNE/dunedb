@@ -16,7 +16,12 @@ block extrascripts
     var schema=!{JSON.stringify(formrec.schema||{})};
     var component=!{JSON.stringify(component||{})};
     var base_url = "!{base_url}";
-
+  style.
+    @media print {
+      .run-a-test-menu {
+        display:none;
+      }
+    }
 
   script(type='text/javascript').
 
@@ -98,27 +103,27 @@ block content
                   -parenthetical+=")";
                   a(href='/test/'+test._id)=(forms[test.formId].formName||test.formId)
                   =parenthetical
-      .col-md-6
+      .col-md-6.run-a-test-menu
         h4 Run a test on this component
         div
           ul.list-group#tests
+              // First, list specifically-matched ones:
               each info,formId in forms
-                // First, list specifically-matched ones:
                 if(((info||{}).componentTypes||[]).includes(component.type)&& !info.tags.includes("Trash") )
                   li.list-group-item
                     a(href='/'+componentUuid+'/test/'+formId)
                       img.icon(src=info.icon)
                       =info.formName
+              // Tests tagged as 'all'
               each info,formId in forms
-                // Tests tagged as 'all'
                 if(((info||{}).componentTypes||[]).includes("All")&& !info.tags.includes("Trash") )
                   li.list-group-item
                     a(href='/'+componentUuid+'/test/'+formId)
                       img.icon(src=info.icon)
                       =info.formName
 
+              // Tests without tags
               each info,formId in forms
-                // Tests without tags
                 if(!info.tags || info.tags.length==0) 
                   li.list-group-item
                     a(href='/'+componentUuid+'/test/'+formId)
