@@ -393,7 +393,6 @@ block extrascripts
             schemaRecordChange(retval);
             form.emit('submitDone');
             // go to completed form. Do not leave this page in browser history. 
-            window.location.replace(route_on_submit+'/'+retval);
           } else {
             // Update the draftid.
             form.submission.data._id = retval;
@@ -445,7 +444,7 @@ block extrascripts
         console.log("schemaRecordChange",course);
         gcourse = course;
 
-        if(course.validity.version>=0) course.validity.version+=1;
+        if(((course||{}).validity)||{}.version>0) course.validity.version+=1;
 
         // If the start date is in the past, make the new start date 'now'
         if(course.validity && moment(course.validity.startDate).isBefore(moment())) 
