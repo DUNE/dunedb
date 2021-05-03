@@ -6,6 +6,7 @@ const Components = require("../lib/Components.js");
 const Tests = require("../lib/Tests.js")('test');
 const Jobs = require("../lib/Jobs.js")('job');
 const ComponentTypes = require("../lib/ComponentTypes.js");
+const Courses = require("../lib/Courses.js");
 // const Jobs = require("../lib/Jobs.js");
 const Cache = require("../lib/Cache.js");
 const utils = require("../lib/utils.js");
@@ -186,6 +187,7 @@ router.get('/componentTypes/:type?', permissions.checkPermissionJson('components
   async function(req,res,next){
     try {
       var componentTypes =  await ComponentTypes.list();
+      // one type
       if(req.params.type) return res.json(componentTypes[decodeURIComponent(req.params.type)]);
       return res.json(componentTypes);
     } catch(err) {
@@ -217,8 +219,9 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:view'), 
+router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:view'), 
   async function(req,res,next){
+    if(req.params.collection == "workflowForms") req.params.collection = "jobForms";
     try {
       var obj = await Forms.list(req.params.collection)
       if(req.params.format=="list") {
@@ -383,6 +386,45 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
       res.status(400).json({error:err.toString()});
   }
 });
+
+
+/// Courses
+router.get("/course/:courseId", permissions.checkPermissionJson('forms:view'),
+async function (req,res,next) {
+  try {
+    logger.info("retrieve course data",req.params);
+    var record = await Courses.retrieve(req.params.courseId);
+    return res.json(record,null,2);
+  } catch(err) {
+    logger.info(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+});
+
+router.post("/course/:courseId", permissions.checkPermissionJson('forms:edit'),
+async function (req,res,next) {
+  try {
+    logger.info("save course data",req.params);
+    var outrec  = await Courses.save(req.body, req);
+    if(req.body.courseId !== req.params.courseId) throw new Error("Mismatch between courseId in route and posted object");
+    return res.json(outrec,null,2);
+  } catch(err) {
+    logger.info(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+});
+
+router.get("/course/:courseId/"+utils.uuid_regex, permissions.checkPermissionJson("tests:view"),
+  async function(req, res, rext) {
+  try {
+
+    var outrec  = await Courses.evaluate(req.params.courseId, req.params.uuid);
+    return res.json(outrec);
+  } catch(err) {
+    logger.info(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+})
 
 
 // searching via POST parameters

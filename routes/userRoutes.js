@@ -78,7 +78,7 @@ router.post("/promoteYourself",
       req.session.self_promotion_tries =  req.session.self_promotion_tries || [];
       var now = Date.now();
       var n = req.session.self_promotion_tries.length;
-      if(n > 2) {
+      if(n > 4) {
         var waituntil = req.session.self_promotion_tries[n-1] + 10*60*1000; // 10 min
         if( now > waituntil) {
           req.session.self_promotion_tries= [];

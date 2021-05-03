@@ -1,0 +1,62 @@
+extend default
+
+include common.pug
+include course-mixin.pug
+
+block vars
+  - var page_title=course.name||"Course?";
+
+block content
+
+  h1 
+    if(course.icon && course.icon.length) 
+      img.small-icon(src=course.icon[0].url)
+    | #{course.name} 
+
+  p=course.description
+
+  h2 Components:
+  table
+    each c in components
+      -var uuid=MUUID.from(c.componentUuid).toString();
+      tr
+        td 
+          if((componentForms[c.type]||{}).icon)
+            img.small-icon(src=componentForms[c.type].icon)
+        td=c.type
+        td
+          a(href='/course/'+course.courseId+"/"+uuid) #{c.name}   
+        td 
+          a(href='/component/'+uuid) #{uuid.substr(0,8)}...
+        td(class='evaluation_summary',data-courseid=course.courseId,data-uuid=uuid)
+        td(class='next_step',data-uuid=uuid)
+            a(href='/course/'+course.courseId+"/next/"+uuid).btn.btn-outline-success 
+              span Next
+              span.fa.fa-arrow-right
+              span.next_step_text 
+
+
+
+  // pre
+  //   =JSON.stringify(course,null,2)
+
+  script.
+    $(function(){
+        // Lazy evaluation of all objects.
+        $(".evaluation_summary").each(function(){
+          var courseId = $(this).data('courseid');
+          var uuid = $(this).data("uuid");
+          var elem = this;
+          $.get(`/json/course/${courseId}/${uuid}`).then(function(data){
+            // Scan the evaluation to see how it scores.
+            console.log(data);
+            $(elem).text(data.score + " / "+data.score_denominator);
+            if(data.next_step && data.next_step.type){
+              $(elem).siblings("td.next_step").find(".next_step_text").text(data.next_step.type + ":" +data.next_step.formId );
+            } else {
+              $(elem).siblings("td.next_step").find("a").addClass("disabled").text("Complete")
+            }
+          })
+        })
+    })
+

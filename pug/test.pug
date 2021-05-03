@@ -1,5 +1,6 @@
 //-
-//- Run a test or a workflow job.
+//- Edit a Course.
+//- Notes: does not yet support paths-within-paths.
 //-
   
 extend default
@@ -180,6 +181,7 @@ block extrascripts
     }
 
 block content
+  p Component #{componentUuid} 
   h2=form.formName
   
   #builtform
