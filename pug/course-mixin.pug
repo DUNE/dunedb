@@ -3,7 +3,7 @@
 mixin evaluated-course(course)
     h3=course.name
     table
-      body
+      tbody
         each step of course.evaluation
           tr
             td
@@ -59,6 +59,11 @@ mixin evaluated-course(course)
                         img.small-icon(src='/images/edit_icon.svg')
                         | &nbsp; Run
             td !{step.advice}
+    
+    p
+      a(href='/course/'+course.courseId+"/next/"+componentUuid) Next Step
+    p
+      a(href='/course/'+course.courseId+"/next/"+componentUuid+"?firstUnfinished=1") Next Unfinished Step
     // pre
     //   =JSON.stringify(course,null,2)
 

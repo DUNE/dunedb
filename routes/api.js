@@ -414,6 +414,17 @@ async function (req,res,next) {
   }
 });
 
+router.get("/course/:courseId/"+utils.uuid_regex, permissions.checkPermissionJson("tests:view"),
+  async function(req, res, rext) {
+  try {
+
+    var outrec  = await Courses.evaluate(req.params.courseId, req.params.uuid);
+    return res.json(outrec);
+  } catch(err) {
+    logger.info(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+})
 
 
 // searching via POST parameters

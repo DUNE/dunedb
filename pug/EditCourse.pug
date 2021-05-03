@@ -190,7 +190,7 @@ block extrascripts
                   "value": ""
                 }
               ],
-              "fileMaxSize": "10KB",
+              "fileMaxSize": "50KB",
               "key": "icon",
               "type": "file",
               "imageSize": "50",
@@ -390,12 +390,14 @@ block extrascripts
           }
 
           if(!draft) { 
+            schemaRecordChange(retval);
             form.emit('submitDone');
             // go to completed form. Do not leave this page in browser history. 
             window.location.replace(route_on_submit+'/'+retval);
           } else {
             // Update the draftid.
             form.submission.data._id = retval;
+
             lastDraftSave = new Date();
 
             // Formio doesn't actually have a way of doing this...
@@ -439,6 +441,23 @@ block extrascripts
       }
     };
 
+    function schemaRecordChange(course) {
+        console.log("schemaRecordChange",course);
+        gcourse = course;
+
+        if(course.validity.version>=0) course.validity.version+=1;
+
+        // If the start date is in the past, make the new start date 'now'
+        if(course.validity && moment(course.validity.startDate).isBefore(moment())) 
+          course.validity.startDate = moment().toISOString();
+
+        // If no form title, autofill with the form ID
+        if(!course.name || (course.name.length==0))
+          course.name = course.courseId;
+
+        // set.
+        form.submission = {data: course};
+    }
 
     // ----------- Setup
     window.onload = async function() {
@@ -459,17 +478,9 @@ block extrascripts
         });
       }
 
+
       // Remove submit button if it's read-only
 
-      if(course.validity.version>=0) course.validity.version+=1;
-
-      // If the start date is in the past, make the new start date 'now'
-      if(course.validity && moment(course.validity.startDate).isBefore(moment())) 
-        course.validity.startDate = moment().toISOString();
-
-      // If no form title, autofill with the form ID
-      if(!course.name || (course.name.length==0))
-        course.name = courseId;
 
 
 
@@ -484,7 +495,8 @@ block extrascripts
                   //- });
       //- form.url="https://nowhere.com";
       console.log(form);
-      form.submission = Object.assign(form.submission, {data:course});
+
+      schemaRecordChange(course)
 
       if(!readOnly) {
         form.on('submit',SubmitData);

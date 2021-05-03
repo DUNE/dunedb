@@ -2,6 +2,7 @@
 
 const permissions = require('../lib/permissions.js');
 const Courses = require('../lib/Courses.js');
+const Components = require('../lib/Components.js');
 const Forms = require('../lib/Forms.js');
 const express  = require("express");
 const utils = require("../lib/utils.js");
@@ -10,12 +11,26 @@ var router = express.Router();
 
 module.exports = router;
 
+// List of courses
+router.get("/courses", permissions.checkPermission("tests:view"),
+ async function(req,res,next) {
+    try{
+      let courses = await Courses.list() ;
+      console.log("Courses",courses);
+      res.render('listCourses.pug',{courses})
+    } 
+    catch(err) { 
+      logger.error(err,"error in router function"); //next(); 
+    }
+
+});
+
 //Edit a course
 router.get("/EditCourse/:courseId", permissions.checkPermission("tests:view"),
  async function(req,res,next) {
     try{
       let courseId = req.params.courseId;
-      let course = await Courses.retrieve(courseId);
+      let course = await Courses.retrieve(courseId) || {};
       console.log("EditCourse",courseId,course);
       res.render('EditCourse.pug',{courseId, course})
     } 
@@ -33,9 +48,14 @@ router.get("/course/:courseId", permissions.checkPermission("forms:view"),
       var options = {};
       // get stuff in one go
       var course = await Courses.retrieve(req.params.courseId);
+      
       // Get all related objects.
-      var components = await Courses.getRelatedComponents(course);
-      console.log("returned components",components)
+      var comp_types = Courses.getComponentTypes(course);
+      console.log('comp_types',comp_types)
+      var components = await Components.list({"type":{"$in":comp_types}});
+      // var componentTypes = await Components.getComponentTypes();
+
+      // console.log("returned components",components)
       var componentForms = await Forms.list("componentForms");
       if(!course) return res.status(404).render("No such course exists.");
       res.render("course",{course,components,componentForms});
@@ -52,5 +72,31 @@ router.get("/course/:courseId/"+utils.uuid_regex,
     }
 );
 
+// redirect to the next step in a course.
+// Add ?firstUnfinished=1 to get the first undone step.
+router.get("/course/:courseId?/next/"+utils.uuid_regex+"?", 
+    permissions.checkPermission("components:view"),
+    async function(req,res,next) {
+
+      var next_step = await Courses.nextStep(req.params.uuid,req.params.courseId,req.query.firstUnfinished);
+      logger.info({next_step},"is the next step in object")
+      if(!next_step) {
+        return res.status(400).send(`Could not resolve request with course ${req.params.courseId} and component uuid ${req.params.uuid}`);
+      } 
+      if(next_step.done) {
+        return res.redirect("/course/"+req.params.courseId+"/"+req.params.uuid);
+      }
+      if(next_step.type == "component") {
+        return res.redirect("/NewComponent/"+next_step.formId);
+      }
+      if(next_step.type == "job") {
+        return res.redirect(`/job/${next_step.formId}`);
+      }
+      if(next_step.type == "test") {
+        return res.redirect(`/${req.params.uuid}/test/${next_step.formId}`);
+      }
+      return res.status(400).send("Could not figure out next step for object ${req.params.uuid}. The next step evaluated to ${JSON.stringify(next_step,null,2)");
+    }
+);
 
 
