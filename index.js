@@ -51,7 +51,7 @@ if(process.env.NODE_ENV=='production') {
 }
 
 // override with config or command line.
-if(global.config.pino_opts) pino_opts = require('deepmerge')(global.config.pino_opts);
+if(global.config.pino_opts) pino_opts = require('deepmerge')(pino_opts,global.config.pino_opts);
 if(argv.loglevel) pino_opts.level = argv.loglevel;
 
 global.logger = require("pino")(pino_opts);
