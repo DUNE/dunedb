@@ -18,6 +18,21 @@ body {
   h2#name {
     color: green;
   }
+ 
+
+  input.form-control::-webkit-input-placeholder {
+    opacity: 0;
+  } 
+  input.form-control::-moz-placeholder {
+      opacity: 0;
+  }
+  input.form-control::-ms-placeholder {
+      opacity: 0;
+  }
+  input.form-control::placeholder {
+           color: transparent;
+  }
+
 }
 
 .wrapper {
