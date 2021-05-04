@@ -50,9 +50,7 @@ router.get("/course/:courseId", permissions.checkPermission("forms:view"),
       var course = await Courses.retrieve(req.params.courseId);
       
       // Get all related objects.
-      var comp_types = Courses.getComponentTypes(course);
-      console.log('comp_types',comp_types)
-      var components = await Components.list({"type":{"$in":comp_types}});
+      var components = await Components.list({"type":course.componentType});
       // var componentTypes = await Components.getComponentTypes();
 
       // console.log("returned components",components)
