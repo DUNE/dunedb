@@ -81,14 +81,25 @@ router.get("/course/:courseId?/next/"+utils.uuid_regex+"?",
       if(!next_step) {
         return res.status(400).send(`Could not resolve request with course ${req.params.courseId} and component uuid ${req.params.uuid}`);
       } 
+
+      var hash = "";
+      if(next_step.identifier) {
+          var key = encodeURIComponent(next_step.identifier);
+          var val = encodeURIComponent(req.params.uuid);
+          hash = "#" + key + '=' + val;
+      }
+
+
+
       if(next_step.done) {
         return res.redirect("/course/"+req.params.courseId+"/"+req.params.uuid);
       }
       if(next_step.type == "component") {
         return res.redirect("/NewComponent/"+next_step.formId);
       }
+
       if(next_step.type == "job") {
-        return res.redirect(`/job/${next_step.formId}`);
+        return res.redirect(`/job/${next_step.formId}`+hash);
       }
       if(next_step.type == "test") {
         return res.redirect(`/${req.params.uuid}/test/${next_step.formId}`);

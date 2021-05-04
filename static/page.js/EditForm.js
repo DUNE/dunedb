@@ -234,8 +234,6 @@
       }
       $(function(){
 
-        Formio.setBaseUrl(baseUrl);
-
         //- console.log("schema",record.schema);
         // First, modify the metaschema based on the component type list
         //- var omponentTypesComponent = Formio
