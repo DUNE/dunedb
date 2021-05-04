@@ -151,7 +151,7 @@ body(class="deployment-"+deployment)
 // Placed at the end of the document so the pages load faster
 
 
-script.
+script(src="/page.js/dashboard.js").
       function executeASearch(term) {
         //- console.log("Execute a Search:",term);
         window.location.href = `/search?`+JsonURL.stringify({search:term});
@@ -171,7 +171,11 @@ script.
             $('#sidebar').toggle();
         });
 
+        $(document).on('click', '[data-toggle="lightbox"]', function(event) {event.preventDefault();$(this).ekkoLightbox({alwaysShowClose: true});});
+
       });
+
+
 script(src='/dist/bootstrap/js/bootstrap.bundle.min.js')
 script(src="/dist/bootstrap-autocomplete/latest/bootstrap-autocomplete.min.js")
 script(src='/dist/formiojs/formio.full.js')
@@ -184,8 +188,7 @@ script(src='/dist/ekko-lightbox/ekko-lightbox.min.js')
 
 //- Used to pop open a small image to full-screen
 script.
-  $(document).on('click', '[data-toggle="lightbox"]', function(event) {event.preventDefault();$(this).ekkoLightbox({alwaysShowClose: true});});
-
+ 
 //- QR codes, FIXME replace with an npm package?
 script(src='/dist/jsqr/jsQR.js') 
 script(src="/ext/qrcodegen.js")

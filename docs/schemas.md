@@ -207,7 +207,9 @@ For example, an element might need to be entered in the DB, then located, then w
   name: <string>,    // user-readable name of this path (mutable)
   icon: <file reference>, // nice icon to display this thing with.
   tags: [ <string>,... ],  // Which tags to apply. Typically only one tag
-  path: <path>
+  path: <path>,
+
+  componentType,  // Primary component type this course will track.
 };
 ```
 where 
@@ -219,12 +221,13 @@ where
 and 
 ```
   <step> = {
-    type: 'component|job|test|path', 
+    type: 'component|job|test', 
     formId: <string>,
     advice: <string> , // Mouse-over or other explanitory text
-    identifier: <string>, // dot-notation version of how to look up the object in question in the record. default
-    // to "componentUuid"
-    path : [<path>,...] // Only if 'path' is chosen as type. Sub paths that can be taken in parallel
+    identifier: <string>, // valid for component and job types.  
+                          // Dot-notation version of how to look up the object in question in the record. i.e. if 
+                          // Workflow has an apaId value that stores the UUID, this should be "data.uuid". Does
+                          // not yet support array values.
   }
 ```
 
