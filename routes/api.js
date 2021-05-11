@@ -86,7 +86,7 @@ router.get('/'+utils.short_uuid_regex, permissions.checkPermissionJson('componen
 // As above.
 router.get('/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
   async function(req,res){
-    var componentUuid = shortuuid.toUUID(req.params.shortuuid)
+    var componentUuid = req.params.uuid
     var component= await Components.retrieve(componentUuid);
     if(!component)  return res.status(400).json({error:"UUID not found"});
     res.json(component);

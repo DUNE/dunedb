@@ -49,6 +49,7 @@ class ArrayComponent extends TextFieldComponent{
   {
     console.log('renderElement',this,value,index);
     if(!value) value = this.parseText('');
+    if(value.data) value = value.data; // Backward comp
     var textvalue = value.join(',');
     // tpl += "<input ref='input' type='text'>";
     var tpl = '';
