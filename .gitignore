@@ -13,3 +13,4 @@ pm2*.config.js
 **/credentials*json
 testTools/insiprehep/cache/
 config/**
+.gitinfo

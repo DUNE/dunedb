@@ -26,8 +26,6 @@ objects:
         contextDir: "./"
         dockerfile: |-
           FROM scratch
-          #RUN apk add dumb-init
-          #RUN mkdir /etc/sietch.d
           ENV NODE_ENV production
           # for debugging:
           RUN set -ex && apk --no-cache add sudo

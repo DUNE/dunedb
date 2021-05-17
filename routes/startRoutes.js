@@ -7,20 +7,38 @@ var permissions = require('../lib/permissions.js');
 const Components = require("../lib/Components.js");
 const Forms = require("../lib/Forms.js");
 const Courses = require("../lib/Courses.js");
-var router = express.Router();
 const child_process = require("child_process");
-module.exports = router;
+const fs = require("fs");
 
+var router = express.Router();
+module.exports = router;
 
 // (async function(){
 //   logger.info(await manager.getUsersByEmail('ntagg@otterbein.edu'))
 // })();
 
 // git info. Get at runtime.
-var git_branch, git_log;
-//child_process.exec('git branch --show-current', (error, stdout, stderr) => { git_branch = stdout.trim() });
-child_process.exec('git rev-parse --abbrev-ref HEAD', (error, stdout, stderr) => { git_branch = stdout.trim() });
-child_process.exec('git log -n 10 --date=short --pretty=format:"%ad %h %s"', (err,stdout,stderr) => {git_log = stdout;} );
+var git_info = null;
+
+// This script should do nothing if there is no git context
+child_process.exec('.create_gitinfo.sh',function(error,out,err){
+
+  // Even if this script failed, there may be a .gitinfo file, perhaps provided by the packager.
+  fs.readFile(".gitinfo",'utf8',function(err,data){
+    if(err) return; // Use defaults.
+    git_info = {};
+    git_info.revision = data.match(/^Revision: (.+)/m)[1];
+    git_info.branch = data.match(/^Branch: (.+)/m)[1];
+    git_info.tags = data.match(/^Tags: (.+)/m)[1];
+    var git_log_index = data.match(/Recent commits:/).index;
+    git_info.log = data.substring(git_log_index);
+    // console.log("res:",git_log)
+  })
+})
+// var git_branch, git_log;
+// //child_process.exec('git branch --show-current', (error, stdout, stderr) => { git_branch = stdout.trim() });
+// child_process.exec('git rev-parse --abbrev-ref HEAD', (error, stdout, stderr) => { git_branch = stdout.trim() });
+// child_process.exec('git log -n 10 --date=short --pretty=format:"%ad %h %s"', (err,stdout,stderr) => {git_log = stdout;} );
 
 
 router.get('/', async function(req, res, next) {
@@ -44,7 +62,7 @@ router.get('/', async function(req, res, next) {
 
   logger.info(JSON.stringify(recentComponents));
   logger.info("Tags: "+JSON.stringify(tags));
-  res.render('home.pug',{tags,recentComponents,git_branch,git_log});
+  res.render('home.pug',{tags,recentComponents,git_info});
 });
 
 
