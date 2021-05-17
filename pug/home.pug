@@ -13,16 +13,16 @@ block content
   if deployment == "laptop"
     .alert.alert-warning
       p This is Sietch running on your laptop. 
-      p Hi, and welcome to the production team!  Great to have you!
-      p --Nathaniel ntagg@otterbein.edu
-
+        br
+        | Hi, and welcome to the production team! 
+        br
+        a(href='mailto=nathaniel.tagg@gmail.com') --Nathaniel 
+      
   if deployment == "devsite"
     .alert.alert-danger
       p This is the Sietch development site
-
-      p All users have complete access to everything.
-
-      p Feel free to create component types, components, forms, and workflows freely.
+        br
+        | Feel free to create component types, components, forms, and workflows freely.
 
       p If you create any content on here you wish moved to the production site,
         | talk to Nathaniel.  Otherwise, this is a free playground.
@@ -34,6 +34,28 @@ block content
     p If you want a playground to try things out, use the 
       a(href="https:/dev.sietch.xyz") development site
       | .
+
+  div.border-success.border.rounded
+    h3 Things I need feedback on:
+    ul
+      li Permissions and authentication. 
+        ul
+          li Currently, the system has combinations of tests/jobs/components/forms edit/view/create, however, it's not clear if this is the right arrangement; we may wish to simplify to view/edit/admin  where 'admin' is allowed to edit forms. 
+          li A major question is how we use the QR-scan feature. If you scan a QR code in your phone, should you get a login screen? Or is it OK to jump straight to the traveller?  I think it would be good not to have to log in to see basic stuff, but it may open all sorts of security issues: it may, for example, expose email or physical addresses.  Do we care?
+      li Courses
+        ul
+          li The course system is basically in place. Does it do what we want?
+          li How would we like it to look better
+      li Custom landing pages
+        ul
+          li Users should not all be confronted by the left-hand task bar. We could assign a custom role for each user and send them to a Course or a Tag screen instead.  Should we? 
+      li Builtin docs
+        ul
+          li Is it worthwhile building in a wiki, or a markdown editor for certain pages?
+      li Printing - what kinds of documents will be printed?
+    br
+    | --Nathaniel
+    
 
 
   if(tags && tags.length>0)
@@ -50,8 +72,9 @@ block content
       |
       a(href="/promoteYourself") promote yourself
       |.
-
-
+  else 
+    p You are not signed in
+    
   if(recentComponents)
       p Recently visited components:
         ul
@@ -59,7 +82,10 @@ block content
           li
             a(href='/'+c.componentUuid) #{c.componentUuid} &nbsp; &nbsp; #{c.name} [#{c.type}]
 
-  p Git branch: #{git_branch}
-  p Recent commits:
-    pre=git_log
+  if(git_info)
+    p Git revision: #{git_info.revision}
+    p Git branch: #{git_info.branch}
+    p Git tags: #{git_info.tags}
+    p Recent commits:
+      pre=git_info.log
 

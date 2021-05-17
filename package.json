@@ -39,6 +39,7 @@
     "express-limit": "^0.1.0",
     "express-limiter": "github:Fasal-Tech/express-limiter",
     "express-limiter-mongo": "^1.0.0",
+    "express-openid-connect": "^2.4.0",
     "express-prettify": "^0.1.1",
     "express-rate-limit": "^5.2.6",
     "express-session": "^1.17.1",

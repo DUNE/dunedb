@@ -58,18 +58,24 @@ class SietchConnect:
                 'authorization': 'Bearer ' + self.access_token }
     encoded_data = None
     if(data is not None):
-      encoded_data = json.dumps(data).encode("utf-8")
+      try:
+        encoded_data = json.dumps(data).encode("utf-8")
+      except:
+        raise Exception("Non-JSON response:",data)
     req = Request(url,data=encoded_data,headers=headers)
     try:
       response = urlopen(req)
     except HTTPError as err:
       try:
         r = err.read()
-        sietchResp = json.loads(r)
-        sietchError = sietchResp["error"]
+        sietchError = r
+        try:
+          sietchResp = json.loads(r)
+          sietchError = sietchResp["error"]
+        except: pass
       except:
         raise err
-      raise Exception("Sietch responded with: "+sietchError)
+      raise Exception("Sietch responded with: "+str(sietchError))
     payload = json.loads(response.read());
     return payload
 
