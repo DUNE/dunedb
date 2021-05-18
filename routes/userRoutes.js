@@ -11,7 +11,7 @@ module.exports = router;
 
 var manager = new ManagementClient({
   domain: config.auth0_domain,
-  clientId: auth0_api_clientId,
+  clientId: config.auth0_api_clientId,
   clientSecret: config.auth0_api_clientSecret,
   scope: 'read:users update:users'
 });
