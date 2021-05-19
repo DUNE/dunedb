@@ -2,18 +2,6 @@
 
 # TODO
 
-### Feature: testing
-- Find a good test framework
-- Test API: insert/retrieve etc.
-- Test all endpoints don't throw errors for some basic queries
-
-### Feature: track component ownership chains up-and-down with graphical interface
-- First need a data source to mimic what I want
-- Then need to build map-reduce sets to allow fast lookup
-- Then need to build a gui
-
-### Feature
-- Organize views of component,test,job  by tags (somehow)
 
 ### Fix:
 - Change m2m users: instead of storing in mongo, instead store in auth0.
