@@ -14,7 +14,9 @@ $(function(){
 
 
     $('#sidebarCollapse').on('click', function () {
-        $('#sidebar').toggle();
+        // $('#sidebar').toggle();
+       $('#sidebar').toggleClass("inactive");
+        // document.getElmentById("sidebar").classList.toggle("closed");
     });
 
     $(document).on('click', '[data-toggle="lightbox"]', function(event) {event.preventDefault();$(this).ekkoLightbox({alwaysShowClose: true});});

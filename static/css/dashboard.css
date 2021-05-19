@@ -38,6 +38,7 @@ body {
 .wrapper {
     display: flex;
     flex-wrap: wrap; /* For narrow screens*/
+    align-items: stretch;
 }
 
 #sidebar {
@@ -47,11 +48,15 @@ body {
     min-height: 100vh;
     font-size: .9em;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    transition: margin-left 0.3s;
+
 }
 
-#sidebar.active {
+#sidebar.inactive {
     /*margin-left: -160px;*/
-    display: none;
+    /*display: none;*/
+    margin-left: -160px;
+
 }
 
 #sidebar .nav-link {
@@ -89,6 +94,7 @@ body {
   flex: 999 1 0;
   min-width: 50%; /* wrap if we're too small*/
   padding-left: 5px;
+  padding-right: 5px;
 }
 
 

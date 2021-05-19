@@ -32,6 +32,8 @@ mixin navlink
     a.nav-link&attributes(attributes)
       block
 
+block layoutDefinitions
+  
 body(class="deployment-"+deployment)
   block allbody
     block navbar
@@ -63,8 +65,14 @@ body(class="deployment-"+deployment)
                 +navlink(href="/login") Log In / Sign Up
 
     .wrapper
+      //- To turn off the sidebar, use {sidebar:inactive} passed to pug.
+      //- or use:
+      //- block layoutDefinitions
+      //  - sidebar="inactive"
+
       block sidebar
-        nav#sidebar.bg-light(class=(route==="/"?"sidebar-on-main-page":""))
+        nav#sidebar.bg-light(class=sidebar)  
+
             ul.nav.flex-column
 
               li.nav-item
