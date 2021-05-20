@@ -9,18 +9,28 @@ var router = express.Router();
 
 module.exports = router;
 
+
 var manager = new ManagementClient({
+  // To ensure this works:
+  // Go to auth0 dsh: Applications / APIs  / Auth0ManagementAPI
+  // Tab:  Machine to Machine Applications
+  // Turn on the Sietch application to "Authorized"
+  // Use the pulldown-arrow on the right and authorize the scopes shown below.
+  // There is no issue using the same authentication clientId and clientSecret that we use
+  // for the main authentication.
+
   domain: config.auth0_domain,
-  clientId: config.auth0_api_clientId,
-  clientSecret: config.auth0_api_clientSecret,
-  scope: 'read:users update:users'
+  clientId: config.auth0_client_id,
+  clientSecret: config.auth0_client_secret,
+  scope: 'read:users update:users read:roles'
 });
 
 
-// (async function(){
-//   logger.info(await manager.getUsersByEmail('ntagg@otterbein.edu'))
-// })();
 
+(async function(){
+  // Test that it works on startup.
+  // logger.info(await manager.getUsersByEmail('ntagg@otterbein.edu'))
+})();
 
 router.get('/profile/:userId?',permissions.checkPermission("components:view"),
   async function(req,res,next) {

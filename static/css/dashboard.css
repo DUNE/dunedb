@@ -38,6 +38,7 @@ body {
 .wrapper {
     display: flex;
     flex-wrap: wrap; /* For narrow screens*/
+    align-items: stretch;
 }
 
 #sidebar {
@@ -47,15 +48,35 @@ body {
     min-height: 100vh;
     font-size: .9em;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    transition: all 0.3s;
 }
 
-#sidebar.active {
+.disable-animations, .disable-animations * {
+  /* CSS transitions */
+  -o-transition-property: none !important;
+  -moz-transition-property: none !important;
+  -webkit-transition-property: none !important;
+  transition-property: none !important;
+  /* CSS transforms */
+  -o-transform: none !important;
+  -moz-transform: none !important;
+  -webkit-transform: none !important;
+  transform: none !important;
+  /* CSS animations */
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -o-animation: none !important;
+  animation: none !important;
+}
+
+#sidebar.inactive {
     /*margin-left: -160px;*/
-    display: none;
+    /*display: none;*/
+    margin-left: -160px;
+
 }
 
 #sidebar .nav-link {
-
   font-weight: 500;
   color: #333;
 }
@@ -89,6 +110,7 @@ body {
   flex: 999 1 0;
   min-width: 50%; /* wrap if we're too small*/
   padding-left: 5px;
+  padding-right: 5px;
 }
 
 
@@ -102,19 +124,14 @@ body {
       min-width: auto;
       max-width: none;
       min-height: 0px;
-      display: none;
+      /*display: none;*/
   }
-  #sidebar.sidebar-on-main-page {
-      min-height: 0px;
-      display: block;
+  #sidebar.inactive {
+    margin-left: -1000px;
+    height:0px;
   }
-/*    #sidebar {
-        margin-left: -160px;
-    }
-    #sidebar.active {
-        margin-left: 0;
-    }
-*/
+
+  .navbar span.pagename { display:none; }
 }
 
 
@@ -166,6 +183,14 @@ body {
   background-color: rgba(0, 0, 0, .25);
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
 }
+
+body.deployment-laptop .navbar-brand img {
+  filter: invert(100%);
+}
+body.deployment-devsite .navbar-brand img {
+  filter: invert(100%);
+}
+
 
 .navbar .form-control {
   padding: .75rem 1rem;
