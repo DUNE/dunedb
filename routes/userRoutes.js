@@ -87,17 +87,17 @@ router.post("/promoteYourself",
       // logger.info(req.session.self_promotion_tries.join(','));
       req.session.self_promotion_tries =  req.session.self_promotion_tries || [];
       var now = Date.now();
+      req.session.self_promotion_tries.push(now);
+      var t_timeout = now -  10*60*1000; // 10 min ago
+      // Keep only entries in the last 10 minutes.
+      req.session.self_promotion_tries = req.session.self_promotion_tries.filter(
+        (t)=>t>t_timeout
+      );
+
       var n = req.session.self_promotion_tries.length;
-      if(n > 4) {
-        var waituntil = req.session.self_promotion_tries[n-1] + 10*60*1000; // 10 min
-        if( now > waituntil) {
-          req.session.self_promotion_tries= [];
-        } else {
+      if(n > 3) {
           return res.status(403).send("Too many tries have been made. You must wait 10 minutes before retrying.");
-        }
-      } else {
-        req.session.self_promotion_tries.push(now);
-      }
+      } 
 
       // logger.info(req.body,global.config.self_promotion);
       // logger.info("headers",req.headers);

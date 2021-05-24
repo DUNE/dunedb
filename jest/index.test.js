@@ -2,6 +2,7 @@ const Config = require("../lib/configuration.js");
 const request = require('supertest');
 const express = require('express');
 const session = require('supertest-session');
+const { getRoutes } = require('./getRoutes.js');
 const fs = require("fs");
 
 const App= require("../lib/app.js");
@@ -49,33 +50,79 @@ var user =  {
 var uuid, testId, jobId;
 var draftTestId;
 
+var routes_unfinished ={};
+
+function checkRouteOffChecklist(method,route) {
+  // console.log("checking off route",method,route);
+
+  routes_unfinished.all = routes_unfinished.all.filter(
+    function(entry){
+      // console.log("compare",entry,method,route);
+      if(method !== entry.method) return true;
+      if(entry.prefix && !route.startsWith(entry.prefix)) return true;
+      var trimmed = route.replace(entry.prefix,'');
+      var m = trimmed.match(entry.regexp);
+      if(m) {
+        // console.log("route",route," matched route ",entry.route,'match:',m);
+        return false;
+      }
+      return true;
+    }
+  );
+}
+
+function myrequest(app){
+  var r = request(app);
+  return new function() {
+    this.get = function(...args)  { checkRouteOffChecklist('get',args[0]); return r.get(...args); }
+    this.post = function(...args) { checkRouteOffChecklist('post',args[0]); return r.post(...args); }
+ }
+}
+
+pino = require("pino");
+
 beforeAll(async () => {
+  console.log("beforeAll");
   var pino_opts = {
     customLevels: {
         http: 29
     },
     // level: 'error', 
   };
-global.logger = require("pino")(pino_opts);
+  var dest = pino.destination("jest.log");
+  global.logger = pino(pino_opts, pino.destination('jest.log') );
 
-  // logger.info("beforeAll");
-  await database.attach_to_database()
+  logger.info("beforeAll");
+  await database.attach_to_database();
 
   await App.create_app(appPublic);
-  await App.setup_routes(appPublic);
 
   // user data is injected into the application stack first.
   // Putting it between these causes issues downstream.
   appAuthorized.use((req,res,next)=>{ req.user = user; next();});
   await App.create_app(appAuthorized);
-  await App.setup_routes(appAuthorized);
 
-
-  // logger.info("done initializing");
+  // Get a list of all routes that this application CAN use. 
+  // This is used to check that we are actually testing most of the routes.
+  routes_unfinished = getRoutes(appAuthorized);
+  // remove some.
+  routes_unfinished.all = routes_unfinished.all.filter(function(e){
+    if(e.route == "/login") return false;
+    if(e.route == "/logout") return false;
+    if(e.route == "/callback") return false;
+    if(e.route == "/machineAuthenticate") return false;
+    if(e.route.startsWith("/api")) return false;
+    return true;
+  })
+  console.log("found ",routes_unfinished.all.length," routes to check");
   }
 );
 
 afterAll( async () => {
+    var not_checked = [];
+    console.log(routes_unfinished.all.length," unchecked routes");
+    for(var entry of routes_unfinished.all) { not_checked.push(entry.route) }
+    console.log("Unchecked routes:\n",not_checked.join('\n'));
     await db.collection("componentForms").deleteMany({formId:"cform"+suffix});
     await db.collection("testForms").deleteMany({formId:"test"+suffix});
     await db.collection("jobForms").deleteMany({formId:"job"+suffix});
@@ -88,10 +135,10 @@ afterAll( async () => {
 // inject a custom user authorization here.
 describe("public functions",function() {
   test('route /',function(done) {
-    request(appPublic).get('/').expect(200,done);
+    myrequest(appPublic).get('/').expect(200,done);
   });
   test('route /components/type',function(done) {
-    request(appPublic).get('/components/type').expect(400,done);
+    myrequest(appPublic).get('/components/type').expect(400,done);
   });
 });
 
@@ -120,21 +167,21 @@ describe("private routes",function() {
 
 
   // test('route /',function(done) {
-  //   request(appAuthorized).get('/').expect(200,done);
+  //   myrequest(appAuthorized).get('/').expect(200,done);
   // });
   // test('route /components/type',function(done) {
-  //   request(appAuthorized).get('/components/type').expect(200,done);
+  //   myrequest(appAuthorized).get('/components/type').expect(200,done);
   // });
 
   // // describe("API/JSON routes")
 
   // describe("job routes",()=>{
-  //   test('route /workflows (job types)',function(done) { request(appAuthorized).get('/jobs/workflows').expect(200,done); });
+  //   test('route /workflows (job types)',function(done) { myrequest(appAuthorized).get('/jobs/workflows').expect(200,done); });
 
-  //   test('route /jobs (recent jobs)',function(done) { request(appAuthorized).get('/jobs').expect(200,done); });
-  //   test('route /jobs/4by4workflow (recent 4by4)',function(done) { request(appAuthorized).get('/jobs/4by4_workflow').expect(200,done); });
-  //   test('route /job/4by4workflow (run 4by4)',function(done) { request(appAuthorized).get('/job/4by4_workflow').expect(200,done); });
-  //   test('route /EditWorkflowForm/4by4_workflow',function(done) { request(appAuthorized).get('/EditWorkflowForm/4by4_workflow').expect(200,done); });
+  //   test('route /jobs (recent jobs)',function(done) { myrequest(appAuthorized).get('/jobs').expect(200,done); });
+  //   test('route /jobs/4by4workflow (recent 4by4)',function(done) { myrequest(appAuthorized).get('/jobs/4by4_workflow').expect(200,done); });
+  //   test('route /job/4by4workflow (run 4by4)',function(done) { myrequest(appAuthorized).get('/job/4by4_workflow').expect(200,done); });
+  //   test('route /EditWorkflowForm/4by4_workflow',function(done) { myrequest(appAuthorized).get('/EditWorkflowForm/4by4_workflow').expect(200,done); });
   // });
 
 
@@ -145,7 +192,7 @@ describe("private routes",function() {
   describe("API/JSON",()=>{
     test('POST /json/componentForms/<type>',function(done){
       expect.assertions(0);
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/componentForms/cform'+suffix)
         .send({
           formId: "cform"+suffix,
@@ -158,7 +205,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/componentForms/<type>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/componentForms/cform'+suffix)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -170,7 +217,7 @@ describe("private routes",function() {
     });
 
     test('POST /json/testForms/<type>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/testForms/test'+suffix)
         .send({
           formId: "test"+suffix,
@@ -186,7 +233,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/testForms/<type>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/testForms/test'+suffix)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -197,7 +244,7 @@ describe("private routes",function() {
     });
 
     test('POST /json/jobForms/<type>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/jobForms/job'+suffix)
         .send({
           formId: "job"+suffix,
@@ -213,7 +260,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/jobForms/<type>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/jobForms/job'+suffix)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -226,7 +273,7 @@ describe("private routes",function() {
 
     // insert some data
     test('GET /json/generateComponentUuid',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/generateComponentUuid')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -237,7 +284,7 @@ describe("private routes",function() {
     });
 
     test('POST /json/component/<uuid>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/component/'+uuid)
         .send({
           type: 'cform'+suffix,
@@ -253,7 +300,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/component/<uuid>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/component/'+uuid)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -266,7 +313,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/component/<uuid>/simple',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/component/'+uuid+"/simple")
         .expect('Content-Type', /json/)
         .expect(200)
@@ -280,7 +327,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/component/<uuid>/relationships',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/component/'+uuid+"/simple")
         .expect('Content-Type', /json/)
         .expect(200);
@@ -289,7 +336,7 @@ describe("private routes",function() {
 
     // Test data
      test('POST /json/test',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/test')
         .send({
           formId: 'test'+suffix,
@@ -311,7 +358,7 @@ describe("private routes",function() {
 
     // Test data as draft
      test('POST /json/test draft',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/test')
         .send({
           formId: 'test'+suffix,
@@ -334,7 +381,7 @@ describe("private routes",function() {
 
     // get test data back.
     test('GET /json/test/<id>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/test/'+testId)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -349,7 +396,7 @@ describe("private routes",function() {
 
     // get test data back.
     test('POST /json/test/getBulk',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/test/getBulk')
         .send([testId])
         .expect('Content-Type', /json/)
@@ -365,7 +412,7 @@ describe("private routes",function() {
 
     // Job data
      test('POST /json/job',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .post('/json/job')
         .send({
           formId: 'job'+suffix,
@@ -387,7 +434,7 @@ describe("private routes",function() {
 
     // get job data back.
     test('GET /json/job/<id>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/job/'+jobId)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -406,7 +453,7 @@ describe("private routes",function() {
     // Various listings
 
     test('GET /json/components/<type>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/components/'+'cform'+suffix)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -419,7 +466,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/componentTypes',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/componentTypes')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -431,7 +478,7 @@ describe("private routes",function() {
     });
 
     test('GET /json/componentTypesTags',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/componentTypes')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -443,7 +490,7 @@ describe("private routes",function() {
 
 
     test('GET /componentForms',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/componentForms')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -453,7 +500,7 @@ describe("private routes",function() {
     });
 
     test('GET /testForms',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/testForms')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -463,7 +510,7 @@ describe("private routes",function() {
     });
 
     test('GET /jobForms',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/jobForms')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -473,7 +520,7 @@ describe("private routes",function() {
     });
 
     test('GET /tests/<uuid>',()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/json/tests/'+uuid)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -487,7 +534,7 @@ describe("private routes",function() {
 
   describe("autocomplete",()=>{
     test('GET /autocomplete/uuid/...',()=>{
-        return request(appAuthorized)
+        return myrequest(appAuthorized)
           .get('/autocomplete/uuid?q='+uuid.substr(0,5))
           .expect('Content-Type', /json/)
           .expect(200)
@@ -500,7 +547,7 @@ describe("private routes",function() {
 
   describe("searching",()=>{
     test('POST /json/search/component',()=>{
-        return request(appAuthorized)
+        return myrequest(appAuthorized)
           .post('/json/search/component')
           .send({search:"JEST"})
           .expect('Content-Type', /json/)
@@ -512,7 +559,7 @@ describe("private routes",function() {
     });
 
     test('POST /json/search/test',()=>{
-        return request(appAuthorized)
+        return myrequest(appAuthorized)
           .post('/json/search/test')
           .send({search:"JEST"})
           .expect('Content-Type', /json/)
@@ -525,7 +572,7 @@ describe("private routes",function() {
 
 
     test('POST /json/search/job',()=>{
-        return request(appAuthorized)
+        return myrequest(appAuthorized)
           .post('/json/search/job')
           .send({search:"JEST"})
           .expect('Content-Type', /json/)
@@ -541,45 +588,45 @@ describe("private routes",function() {
   describe("componentRoutes",()=>{
 
     test("EditComponentForm",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/EditComponentForm/cform'+suffix)
         .expect(200);
     })
     test("EditComponentForm wrong type",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/EditComponentForm/nonexistent'+suffix)
         .expect(200);
     })
 
     test("List Types",()=>{
-      return request(appAuthorized).get('/components/type')
+      return myrequest(appAuthorized).get('/components/type')
         .expect(200)
         .expect(new RegExp('cform'+suffix));
     });
 
     test("NewComponentType",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/NewComponentType/cform+'+suffix)
         .expect(200);
     })
 
     test("List Recent of Type",()=>{
-      return request(appAuthorized).get('/components/type/cform'+suffix).expect(200);
+      return myrequest(appAuthorized).get('/components/type/cform'+suffix).expect(200);
     });
 
     test("NewComponent",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/NewComponent/cform'+suffix)
         .expect(200);
     })
     test("Recent Components",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/components/recent')
         .expect(200);
     })
 
     test("Recent Components of type",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/components/type/cform'+suffix)
       .expect(200)
       .expect(new RegExp('cform'+suffix));
@@ -589,7 +636,7 @@ describe("private routes",function() {
 
   describe("testRoutes",()=>{
    test("/test/<record_id>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/test/'+testId)
       .expect(200)
       .expect(new RegExp('JEST'));
@@ -597,40 +644,40 @@ describe("private routes",function() {
 
 
    test("/test/<form_id>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/test/test'+suffix)
       .expect(200)
       .expect(new RegExp('test'+suffix));
     });
 
    test("/test/<form_id>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/test/test'+suffix)
       .expect(200)
       .expect(new RegExp('test'+suffix));
     });
 
    test("/tests/<formId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/tests/test'+suffix)
         .expect(200);
    })
 
    test("/test/copyAsDraft/<recordId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
         .get('/test/copyAsDraft/'+testId)
         .expect(302); // redirected successfully to the new one
    })
 
    test("/test/draft/<record_id>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/test/draft/'+draftTestId)
       .expect(200)
       .expect(new RegExp('test'+suffix));
     });
 
    test("/test/deleteDraft/<record_id>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/test/deleteDraft/'+draftTestId)
       .expect(302); // redirect back 
     });
@@ -639,73 +686,95 @@ describe("private routes",function() {
   describe("jobRoutes",()=>{
 
    test("/job/<jobId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/job/'+jobId)
       .expect(200)
       .expect(new RegExp('JEST'));
     });
 
    test("/job/<formId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/job/job'+suffix)
       .expect(200);
     });
 
    test("/job/edit/<jobId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/job/edit/'+jobId)
       .expect(200);
     });
 
    test("/job/<jobId>/history",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/job/'+jobId+"/history")
       .expect(200);
     });
    
    test("/jobs/<formId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/jobs/job'+suffix)
       .expect(200)
       .expect(new RegExp('job'+suffix));
     });
    test("/job/copyAsDraft/<jobId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/job/copyAsDraft/'+jobId)
       .expect(302);
     });
    test("/drafts",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/drafts')
       .expect(200);
     });
 
 
  });
+  describe("categories and courses",()=>{
+
+    test("/category/:tag",()=>{
+      return myrequest(appAuthorized)
+      .get('/category/flute')
+      .expect(200);
+    });
+
+    test("/courses",()=>{
+      return myrequest(appAuthorized)
+      .get('/courses')
+      .expect(200);
+    });
+    test("/EditCourse/:courseId",()=>{
+      return myrequest(appAuthorized)
+      .get('/EditCourse/test-course')
+      .expect(200);
+    });
+    // FIXME  need more
+
+  });
 
   describe("userRoutes",()=>{
 
     test("/profile",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/profile')
       .expect(200);
     });
     test("/profile/<userId>",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/profile/'+user.user_id)
       .expect(200);
     });
     test("/promoteYourself",()=>{
-      return request(appAuthorized)
+      return myrequest(appAuthorized)
       .get('/promoteYourself')
       .expect(200);
     });
     test("/promoteYourself limits rate",async ()=>{
       var userSession = session(appAuthorized);
-      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"});
-      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"});
-      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"})
-      await userSession.post('/promoteYourself').send({user:"dummy",password:"dummy"})
+      checkRouteOffChecklist('post','/promoteYourself');
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"});
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"});
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"});
+      await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"})
       .expect(403);
     });
 
@@ -718,14 +787,14 @@ describe("private routes",function() {
       
         // fs.readFile("static/images/Otterbein.png",
           // function(buffer){
-            request(appAuthorized)
+            myrequest(appAuthorized)
               .post("/file/gridfs")
               // .attach('name', buffer, {filename:'myTestFile.png', contentType:"image/png"})
               .attach('name', "static/images/browser_icon.png")
               .expect('Content-Type', /json/)
               .expect(200)
               .then(r=>{
-                // logger.info("search result:",r.body);
+                logger.info("gridfs post result:",r.body);
                 expect(r.body).toBeTruthy();
                 var url = r.body.url;
                 fileurl = '/' + url.split('/').splice(3).join('/')
@@ -737,7 +806,7 @@ describe("private routes",function() {
 
     });
     test("GET file from gridfs",()=>{
-        return request(appAuthorized)
+        return myrequest(appAuthorized)
           .get(fileurl)
           .expect(200);
 

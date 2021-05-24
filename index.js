@@ -62,7 +62,7 @@ logger.info("Starting up in mode: "+((process.env.NODE_ENV)||'development') + " 
 database.attach_to_database()
   .then(async function run(){
     var app = await App.create_app();
-    await App.setup_routes(app);
+
     var httpServer = http.createServer(app);
 
 
