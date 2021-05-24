@@ -5,6 +5,7 @@ const express = require('express');
 const email = require("../lib/email.js");
 var permissions = require('../lib/permissions.js');
 const Components = require("../lib/Components.js");
+const Tags = require("../lib/Tags.js");
 const Forms = require("../lib/Forms.js");
 const Courses = require("../lib/Courses.js");
 const child_process = require("child_process");
@@ -42,6 +43,12 @@ child_process.exec('.create_gitinfo.sh',function(error,out,err){
 
 
 router.get('/', async function(req, res, next) {
+  if(!req.user) {
+    return next();
+  }
+  if(req.user.user_metadata.start_page) return res.redirect(req.user.user_metadata.start_page);
+
+  var tags = await Tags.get();
   var recentComponents = [];
   if(((req.session||{}).recent||{}).componentUuid) {
     // logger.info(chalk.blue("recent:",req.session.recent.componentUuid));
@@ -56,14 +63,16 @@ router.get('/', async function(req, res, next) {
     }
 
   }
-  console.log("form tags:",await Forms.tags());
-  console.log("course tags:",await Courses.tags());
-  var tags = [... new Set([...await Forms.tags(), ...await Courses.tags()])];
 
   logger.info(JSON.stringify(recentComponents));
   logger.info("Tags: "+JSON.stringify(tags));
   res.render('home.pug',{tags,recentComponents,git_info});
-});
+},
+// Fallback
+function(req, res, next) {
+  res.render('splash.pug');
+}
+);
 
 
 

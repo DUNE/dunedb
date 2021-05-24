@@ -27,10 +27,19 @@ var manager = new ManagementClient({
 
 
 
-(async function(){
-  // Test that it works on startup.
-  // logger.info(await manager.getUsersByEmail('ntagg@otterbein.edu'))
-})();
+
+// (async function(){
+//   // Test that it works on startup.
+//   var u = await manager.getUsersByEmail('ntagg@otterbein.edu');
+//   if(u.length==0) console.log("no results");
+//   u = u[0];
+//   console.log(u);
+//   var user_metadata = u.user_metadata || {};
+//   user_metadata.start_page = "/category/flute";
+//   var r = await manager.updateUserMetadata({id:u.user_id},user_metadata);
+//   console.log("updated user metadata");
+//   console.log(r);
+// })();
 
 router.get('/profile/:userId?',permissions.checkPermission("components:view"),
   async function(req,res,next) {
