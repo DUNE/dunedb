@@ -223,16 +223,16 @@ async function ensureTypeFormExists(type,req,res) {
     };
 
     // Do any components exist for this type? if not, let's do automagic!
-    var exists = await Components.list({type:type},{limit:1});
-    logger.info(chalk.red('exists'),exists);
-    if(exists && exists[type] && exists[type].length>0) {
+    var exists = await Components.list({type:type},{limit:20});
+    logger.info(exists,"exists");
+    if(exists && exists.length>0) {
         var records = [];
-        for(var c of exists[type]) {
+        for(var c of exists) {
           records.push(await Components.retrieve(c.componentUuid));
         }
         var auto = automaticallyCreateSchema(records);
         newform.schema = auto;
-      logger.info(chalk.red("Creating a new auto form"),auto)
+        logger.info(auto,"Creating a new auto form");
     } else {
       // Create a blank form.
       newform.schema = {
@@ -249,7 +249,7 @@ async function ensureTypeFormExists(type,req,res) {
           },
           ]
         }
-      logger.info(chalk.red("Creating a new blank form"))
+      logger.info("Creating a new blank form")
 
     }
     await Forms.save(newform,"componentForms",req);
