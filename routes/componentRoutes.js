@@ -51,7 +51,10 @@ async function get_component(req,res) {
         Tests.listComponentTests(componentUuid),
         Components.relationships(componentUuid),
       ]);
-    if(!formrec) throw new Error("Component form for type \""+component.type+"\" does not exist");
+    if(!formrec) {
+      // throw new Error("Component form for type \""+component.type+"\" does not exist");
+      return res.render("component_without_form.pug",{componentUuid,component,forms,tests});
+    } 
     // logger.info(forms);
     // logger.info("component")
     // logger.info(component);
@@ -254,9 +257,10 @@ async function ensureTypeFormExists(type,req,res) {
 }
 
 
-router.get("/EditComponentForm/:type", permissions.checkPermission("forms:edit"), async function(req,res){
+router.get("/EditComponentForm/:type/:auto(auto)?", permissions.checkPermission("forms:edit"), async function(req,res){
   var type = decodeURIComponent(req.params.type);
-  // await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
+  if(req.params.auto == "auto") 
+   await ensureTypeFormExists(type,req,res); // FIXME  - this shouldn't be here; keeping during transition to
   res.render('EditComponentForm.pug',{collection:"componentForms",formId:type});
 });
 
