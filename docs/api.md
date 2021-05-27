@@ -1,3 +1,30 @@
+- [Sietch API](#sietch-api)
+  * [Results](#results)
+  * [Validity](#validity)
+  * [API calls about Components](#api-calls-about-components)
+      - [GET /api/generateComponenentUuid](#get--api-generatecomponenentuuid)
+      - [GET /api/component/123456789-abcd-1234-1234-123456789abc](#get--api-component-123456789-abcd-1234-1234-123456789abc)
+      - [POST  /api/component/123456789-abcd-1234-1234-123456789abcd](#post---api-component-123456789-abcd-1234-1234-123456789abcd)
+      - [POST  /api/component/123456789-abcd-1234-1234-123456789abcd/simple](#post---api-component-123456789-abcd-1234-1234-123456789abcd-simple)
+  * [API calls related to Forms](#api-calls-related-to-forms)
+      - [GET `/api/<collection>/<test_id>`](#get---api--collection---test-id--)
+      - [POST `/api/<collection>/<test_id>`](#post---api--collection---test-id--)
+  * [API Calls related to Tests and Jobs](#api-calls-related-to-tests-and-jobs)
+      - [GET /api/test/123456780abcdef12345678 (or /api/job/:id)](#get--api-test-123456780abcdef12345678--or--api-job--id-)
+      - [GET /api/test/123456780abcdef12345678/info](#get--api-test-123456780abcdef12345678-info)
+      - [Post /api/test (or /api/job)](#post--api-test--or--api-job-)
+  * [API Calls for auto-complete](#api-calls-for-auto-complete)
+      - [/autocomplete/uuid?q="f123"](#-autocomplete-uuid-q--f123-)
+      - [/autocomplete/testId?q="0abc"](#-autocomplete-testid-q--0abc-)
+      - [Post /api/search](#post--api-search)
+  * [API Calls for User Management](#api-calls-for-user-management)
+      - [GET /api/roles](#get--api-roles)
+      - [GET /api/users](#get--api-users)
+      - [GET /api/user/user_id|12312313212312](#get--api-user-user-id-12312313212312)
+      - [POST /api/user/user_id|12312313212312](#post--api-user-user-id-12312313212312)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 # Sietch API
 
 (Sietch schema v4, July 2020)
@@ -110,7 +137,7 @@ As above, but only reports type, data.name, validity, and insertion.
 A form describes a [Formio.js](https://github.com/formio/formio.js) schema allowing data entry or formatted data viewing.
 
 
-#### GET /api/<collection>/<test_id>
+#### GET `/api/<collection>/<formId>`
 
 Required permissions: "forms:view"
 
@@ -129,7 +156,7 @@ This retrieves the most recent version of this form, as described in the [schema
 TODO: allow ondate, version, and rollback via query parameters
 
 
-#### POST /api/<collection>/<test_id>
+#### POST `/api/<collection>/<formId>`
 
 Required permissions: "forms:edit"
 
@@ -154,7 +181,7 @@ Tests and Jobs are forms filled out by people during workflow. The only differen
 For Jobs, use /api/job
 for tests, use /api/test
 
-### GET /api/test/123456780abcdef12345678 (or /api/job/:id)
+#### GET /api/test/123456780abcdef12345678 (or /api/job/:id)
 
 Required permissions: "tests:view"
 
@@ -162,12 +189,12 @@ The number here is the 24-character hex code representation of the ObjectID of a
 
 Returns the test record.
 
-### GET /api/test/123456780abcdef12345678/info
+#### GET /api/test/123456780abcdef12345678/info
 Return basic insertion and ID info, plus form info, on that specific test.
 
 
 
-### Post /api/test (or /api/job)
+#### Post /api/test (or /api/job)
 
 Required permissions: "tests:submit" or "jobs:submit" respectively
 
@@ -188,15 +215,15 @@ Submits new test data. Format must be as follows:
 
 ## API Calls for auto-complete
 
-### /autocomplete/uuid?q="f123"
+#### /autocomplete/uuid?q="f123"
 Find some matches for that particular starting sequence of a component UUID
 
-### /autocomplete/testId?q="0abc"
+#### /autocomplete/testId?q="0abc"
 Find some matches for that particular starting sequence for a Test id.
 
 
 
-### Post /api/search
+#### Post /api/search
 Searching is allowed with URLs formatted as follows:
 ``` 
   /api/search
@@ -229,6 +256,43 @@ The posted search parameters must have an object with at least one element defin
 
 In general, this will honor any mongo search parameterization.  
 
+
+
+## API Calls for User Management
+
+#### GET /api/roles
+
+Requires `users:view` permission. (Admin only)
+Lists all roles available
+
+#### GET /api/users
+Returns a list of all users. (Admin only)
+Can use query parameters:
+```
+  /api/users?per_page=10&page=3&q='name:jane*'
+```
+Returns email, name, permissions of all registered users.
+
+#### GET /api/user/user_id|12312313212312
+
+Requires `users:view` permission. (Admin only)
+OR can be accessed if you are logged in as the user being queried
+
+Returns all info on that user.  Personal information includes IP address, name, email, picture URL, roles, permissions, authentication methods.  
+
+#### POST /api/user/user_id|12312313212312
+
+Requires `users:edit` permission. (Admin only)
+OR some function accessable if you are logged in as that user.
+
+Can set fields:
+`'user_metadata','email','picture','family_name','given_name','name','nickname','phone_number'`
+
+Admin only can set roles with the `roleIds` parameter, using the auth0 role id strings.
+
+Admin only can set `user_metata` object fields.  Currently, the only field used is `start_page` to determine the landing page for that user.
+
+This is to be used mostly by managers to either promote users' permissions, to change email addresses (so that users can use the 'lost password' links by auth0), or set the starint page.
 
 
 
