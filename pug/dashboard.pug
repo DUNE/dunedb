@@ -57,7 +57,7 @@ body(class="deployment-"+deployment)
         if locals.user
           .navbar-nav.px-3
             .nav-item.text-nowrap
-              +navlink(href="/user") Profile
+              +navlink(href="/profile") Profile
           .navbar-nav.px-3
             .nav-item.text-nowrap
               +navlink(href="/logout") Log Out
@@ -134,7 +134,7 @@ body(class="deployment-"+deployment)
                   i.fa.fa-pencil("aria-hidden"="true")
                   | My Drafts
 
-              if(permissions.userHas(user,"users:view"))
+              if(permissions && permissions.userHas(user,"users:view"))
                 li.nav-item
                   +navlink(href='/users')
                     i.fa.fa-pencil("aria-hidden"="true")

@@ -37,7 +37,11 @@ var user =  {
            'dev:tests:view',
            'forms:view',
            'tests:submit',
-           'tests:view' ],
+           'tests:view' ,
+           'users:view',
+           'dev:users:view'
+           // 'users:edit'
+           ],
            roles:
          [ 'component editor',
            'dev-admin',
@@ -87,7 +91,7 @@ beforeAll(async () => {
     customLevels: {
         http: 29
     },
-    // level: 'error', 
+    level: 'http', 
   };
   var dest = pino.destination("jest.log");
   global.logger = pino(pino_opts, pino.destination('jest.log') );
@@ -758,11 +762,6 @@ describe("private routes",function() {
       .get('/profile')
       .expect(200);
     });
-    test("/profile/<userId>",()=>{
-      return myrequest(appAuthorized)
-      .get('/profile/'+user.user_id)
-      .expect(200);
-    });
     test("/promoteYourself",()=>{
       return myrequest(appAuthorized)
       .get('/promoteYourself')
@@ -778,7 +777,37 @@ describe("private routes",function() {
       .expect(403);
     });
 
-
+    test("/users",()=>{
+      return myrequest(appAuthorized)
+      .get('/users')
+      .expect(200);
+    });
+    test("/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d",()=>{
+      return myrequest(appAuthorized)
+      .get('/users')
+      .expect(200);
+    });
+    test("/json/roles",()=>{
+      return myrequest(appAuthorized)
+      .get('/json/roles')
+      .expect(200);
+    });
+    test("/json/users",()=>{
+      return myrequest(appAuthorized)
+      .get('/json/users')
+      .expect(200);
+    });
+    test("/json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d",()=>{
+      return myrequest(appAuthorized)
+      .get('/json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d')
+      .expect(200);
+    });
+    test("post /json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d",()=>{
+      return myrequest(appAuthorized)
+      .post('/json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d')
+      .send({user_metadata:{dummy:"dummy"}})
+      .expect(400);
+    });
  });
 
   describe("file routes",()=>{

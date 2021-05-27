@@ -41,24 +41,24 @@ var manager = new ManagementClient({
 //   console.log(r);
 // })();
 
-router.get('/profile/:userId?',permissions.checkPermission("components:view"),
-  async function(req,res,next) {
-    var user_id = req.user.user_id;
-    if(req.params.userId)
-      user_id = decodeURIComponent(req.params.userId);
+// router.get('/profile/:userId?',permissions.checkPermission("components:view"),
+//   async function(req,res,next) {
+//     var user_id = req.user.user_id;
+//     if(req.params.userId)
+//       user_id = decodeURIComponent(req.params.userId);
 
-    // logger.info("looking up",user_id);
-    // logger.info(await manager.getUserRoles({id:user_id}))
-    var [user,roles,permissions] = await Promise.all([
-        manager.getUser({id:user_id}),
-        manager.getUserRoles({id:user_id}),
-        manager.getUserPermissions({id:user_id}),
-      ]);
-    if(Array.isArray(user)) return res.status(400).send("More than one user matched");
-    if(!user)return res.status(400).send("No user with that ID");
-   // logger.info(user);
-   res.render("user.pug",{user,roles,permissions});
-});
+//     // logger.info("looking up",user_id);
+//     // logger.info(await manager.getUserRoles({id:user_id}))
+//     var [user,roles,user_permissions] = await Promise.all([
+//         manager.getUser({id:user_id}),
+//         manager.getUserRoles({id:user_id}),
+//         manager.getUserPermissions({id:user_id}),
+//       ]);
+//     if(Array.isArray(user)) return res.status(400).send("More than one user matched");
+//     if(!user)return res.status(400).send("No user with that ID");
+//    // logger.info(user);
+//    res.render("user.pug",{user,roles,user_permissions});
+// });
 
 // Self-promotion
 router.get("/promoteYourself",
@@ -142,16 +142,21 @@ router.post("/promoteYourself",
   });
 
 router.get("/users",permissions.checkPermissionJson('users:view'),
-  // limiter,
   async function(req,res,next) {
     res.render("users_list.pug");
   }
 );
 
 router.get("/user/:user_id?",
-  // limiter,
+  permissions.checkAuthenticated,
   async function(req,res,next) {
     res.render("user_edit.pug",{user_id:req.params.user_id});
   }
 );
 
+// alias for /user/:me
+router.get("/profile", permissions.checkAuthenticated,
+  async function(req,res,next) {
+    res.render("user_edit.pug",{user_id:req.user.user_id});
+  }
+);

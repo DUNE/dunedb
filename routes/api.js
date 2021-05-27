@@ -522,7 +522,9 @@ router.get("/users",  permissions.checkPermissionJson('users:view'),
       //   q: req.query.q
       // });
       // get list of all role types.
-      var all_roles = await manager.getRoles({per_page:100});
+      var p = req.query;
+      if(! p.per_page) p.per_page = 100;
+      var all_roles = await manager.getRoles(p);
       var promises = [];
       for(var role of all_roles) {
         promises.push(manager.getUsersInRole({id:role.id,per_page:100}))
