@@ -9,8 +9,14 @@ block content
 
   p You do not have permission to perform this action.
 
-  p Required permission: 
-    code #{required_permission}
+  if(required_permission)
+    p Required permission: 
+      code #{required_permission}
+
+  if(required_user)
+    p or required user:
+      code #{required_user}
+
 
   if(!user)
     p You must 
@@ -18,6 +24,9 @@ block content
       |
       a(href="/login") log in or sign up.
   else
+    p You are logged in as
+      code #{user.user_id}
+      code #{user.name}
     p Your roles: 
       code #{user.roles.join(', ')}
     p Your permissions: 

@@ -140,3 +140,18 @@ router.post("/promoteYourself",
           res.render("promoteYourself.pug",{message});
       }
   });
+
+router.get("/users",permissions.checkPermissionJson('users:view'),
+  // limiter,
+  async function(req,res,next) {
+    res.render("users_list.pug");
+  }
+);
+
+router.get("/user/:user_id?",
+  // limiter,
+  async function(req,res,next) {
+    res.render("user_edit.pug",{user_id:req.params.user_id});
+  }
+);
+

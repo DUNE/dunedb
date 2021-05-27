@@ -1,0 +1,104 @@
+
+extend default
+
+include common.pug
+
+mixin label-link
+  a(href="/"+componentUuid+"/label") Printable labels for this component
+
+block vars
+  - var page_title=(component||{}).name || componentUuid;
+
+block extrascripts
+
+block content
+  .container-fluid
+    h2#name.col-md-8
+      =component.type + ": " + (component.data.name||component.componentUuid.substr(0,8))
+    div.border.border-warning.rounded.p-1
+      h3 This component type has not been registered
+      p No form exists for this component type. 
+      if (permissions.userHas(user,'forms:edit')) 
+        a(href=`/EditComponentForm/${component.type}/auto`).btn.m-1.btn-warning Click here to automatically create a form based on existing component data
+        br
+        a(href=`/EditComponentForm/${component.type}`).m-1.btn.btn-warning Click here to build the form from scratch
+
+    dl
+      dt Component UUID
+      dd
+        a(href='/'+componentUuid)=componentUuid
+      dt Version  #{component.validity.version}
+      dd edited by !{' '}
+        +short_user(component.insertion.user)
+        | 
+        | 
+        | on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}
+      dd 
+        a(href='/'+componentUuid+'/history') History
+      dt Effective as of
+      dd #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()})
+
+    pre=JSON.stringify(component.data,null,2)        
+
+    if((((relationships||{}).linkedFrom)||[]).length>0 )
+      .row
+        .col 
+          p Linked from
+          each o in relationships.linkedFrom
+            li
+              | #{o.type}:
+              a(href="/component/"+MUUID.from(o.componentUuid).toString()) #{o.name} 
+              | (#{o.path})
+    .row
+      .col
+        div
+            a(href='/json/component/'+componentUuid) Raw JSON Document
+
+        div
+          +label-link
+        
+    hr
+    .row
+      .col-md-6
+        h4 Testing History:
+        if(!tests || tests.length==0)
+            p None
+        else
+            ul.testsPerformed
+              each test in tests
+                li 
+                  -var parenthetical= " (on "+ moment(test.insertion.insertDate).format('MMM DD YYYY');
+                  -if(test.insertion.user) { parenthetical+=" by " + user_shortname(test.insertion.user) }
+                  -parenthetical+=")";
+                  a(href='/test/'+test._id)=(forms[test.formId].formName||test.formId)
+                  =parenthetical
+      .col-md-6.run-a-test-menu
+        h4 Run a test on this component
+        div
+          ul.list-group#tests
+              // First, list specifically-matched ones:
+              each info,formId in forms
+                if(((info||{}).componentTypes||[]).includes(component.type)&& !info.tags.includes("Trash") )
+                  li.list-group-item
+                    a(href='/'+componentUuid+'/test/'+formId)
+                      img.icon(src=info.icon)
+                      =info.formName
+              // Tests tagged as 'all'
+              each info,formId in forms
+                if(((info||{}).componentTypes||[]).includes("All")&& !info.tags.includes("Trash") )
+                  li.list-group-item
+                    a(href='/'+componentUuid+'/test/'+formId)
+                      img.icon(src=info.icon)
+                      =info.formName
+
+              // Tests without tags
+              each info,formId in forms
+                if(!info.tags || info.tags.length==0) 
+                  li.list-group-item
+                    a(href='/'+componentUuid+'/test/'+formId)
+                      img.icon(src=info.icon)
+                      =info.formName
+
+    div#qr-code.col-md-4
+            +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
+
