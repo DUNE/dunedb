@@ -134,6 +134,12 @@ body(class="deployment-"+deployment)
                   i.fa.fa-pencil("aria-hidden"="true")
                   | My Drafts
 
+              if(permissions.userHas(user,"users:view"))
+                li.nav-item
+                  +navlink(href='/users')
+                    i.fa.fa-pencil("aria-hidden"="true")
+                    | Users
+
               li.nav-item
                 +navlink(href='/search')
                   i.fa.fa-search("aria-hidden"="true")
