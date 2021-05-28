@@ -2,12 +2,12 @@
 
 const chalk = require('chalk');
 const express = require('express');
-const email = require("../lib/email.js");
-var permissions = require('../lib/permissions.js');
-const Components = require("../lib/Components.js");
-const Tags = require("../lib/Tags.js");
-const Forms = require("../lib/Forms.js");
-const Courses = require("../lib/Courses.js");
+const email = require("lib/email.js");
+var permissions = require('lib/permissions.js');
+const Components = require("lib/Components.js");
+const Tags = require("lib/Tags.js");
+const Forms = require("lib/Forms.js");
+const Courses = require("lib/Courses.js");
 const child_process = require("child_process");
 const fs = require("fs");
 

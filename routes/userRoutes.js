@@ -3,8 +3,8 @@
 const chalk = require('chalk');
 const express = require('express');
 var ManagementClient = require('auth0').ManagementClient;
-const email = require("../lib/email.js");
-var permissions = require('../lib/permissions.js');
+const email = require("lib/email.js");
+var permissions = require('lib/permissions.js');
 var router = express.Router();
 
 module.exports = router;

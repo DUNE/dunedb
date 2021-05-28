@@ -1,6 +1,6 @@
 
 const express = require('express');
-const permissions = require('../lib/permissions.js');
+const permissions = require('lib/permissions.js');
 const mongo = require('mongodb');
 const Busboy = require('busboy');
 const moment = require('moment');

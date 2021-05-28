@@ -100,6 +100,10 @@
   },
   "jest": {
     "coverageProvider": "v8",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^lib\/(.*).js": "<rootDir>/lib/$1.js",
+      "^routes\/(.*).js": "<rootDir>/routes/$1.js"
+    }
   }
 }

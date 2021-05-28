@@ -6,12 +6,12 @@ const MUUID = require('uuid-mongodb');
 const moment = require('moment');
 const deepmerge = require('deepmerge');
 
-const Components = require('../lib/Components.js');
-const ComponentTypes = require('../lib/ComponentTypes.js');
-const permissions = require('../lib/permissions.js');
-const Forms = require('../lib/Forms.js');
-const Tests = require('../lib/Tests.js')('test');
-const utils = require("../lib/utils.js");
+const Components = require('lib/Components.js');
+const ComponentTypes = require('lib/ComponentTypes.js');
+const permissions = require('lib/permissions.js');
+const Forms = require('lib/Forms.js');
+const Tests = require('lib/Tests.js')('test');
+const utils = require("lib/utils.js");
 
 var router = express.Router();
 
@@ -209,7 +209,7 @@ router.get("/NewComponent/:type", permissions.checkPermission("components:create
 
 
 // Edit component forms
-var automaticallyCreateSchema =  require('../lib/automaticallyCreateSchema.js');
+var automaticallyCreateSchema =  require('lib/automaticallyCreateSchema.js');
 async function ensureTypeFormExists(type,req,res) {
   var form = await Forms.retrieve("componentForms",type);
   // if(form) return res.redirect("/EditComponentForm/:type");  // done!

@@ -1,11 +1,11 @@
 "use strict";
 
-const permissions = require('../lib/permissions.js');
-const Courses = require('../lib/Courses.js');
-const Components = require('../lib/Components.js');
-const Forms = require('../lib/Forms.js');
+const permissions = require('lib/permissions.js');
+const Courses = require('lib/Courses.js');
+const Components = require('lib/Components.js');
+const Forms = require('lib/Forms.js');
 const express  = require("express");
-const utils = require("../lib/utils.js");
+const utils = require("lib/utils.js");
 
 var router = express.Router();
 

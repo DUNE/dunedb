@@ -1,16 +1,16 @@
 // Pull component data as json doc.
 "use strict";
 const express = require("express");
-const Forms = require("../lib/Forms.js");
-const Components = require("../lib/Components.js");
-const Tests = require("../lib/Tests.js")('test');
-const Jobs = require("../lib/Jobs.js")('job');
-const ComponentTypes = require("../lib/ComponentTypes.js");
-const Courses = require("../lib/Courses.js");
-// const Jobs = require("../lib/Jobs.js");
-const Cache = require("../lib/Cache.js");
-const utils = require("../lib/utils.js");
-const permissions = require("../lib/permissions.js");
+const Forms = require("lib/Forms.js");
+const Components = require("lib/Components.js");
+const Tests = require("lib/Tests.js")('test');
+const Jobs = require("lib/Jobs.js")('job');
+const ComponentTypes = require("lib/ComponentTypes.js");
+const Courses = require("lib/Courses.js");
+// const Jobs = require("lib/Jobs.js");
+const Cache = require("lib/Cache.js");
+const utils = require("lib/utils.js");
+const permissions = require("lib/permissions.js");
 const chalk = require("chalk");
 const pretty = require('express-prettify');
 var MUUID = require('uuid-mongodb');

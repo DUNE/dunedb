@@ -18,6 +18,7 @@ const regexPrefixToString = (path) => {
 };
 
 const getRoutes = function (app) {
+    console.log("getRoutes");
     const routes = {
         all: [],
         get: [],

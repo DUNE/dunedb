@@ -3,12 +3,12 @@
 const chalk = require('chalk');
 const express = require('express');
 
-var Components = require('../lib/Components.js');
-var Forms = require('../lib/Forms.js');
-var Jobs = require('../lib/Tests.js')('job');
-var Components = require('../lib/Components.js');
-var permissions = require('../lib/permissions.js');
-var Processes = require("../lib/Processes.js");
+var Components = require('lib/Components.js');
+var Forms = require('lib/Forms.js');
+var Jobs = require('lib/Tests.js')('job');
+var Components = require('lib/Components.js');
+var permissions = require('lib/permissions.js');
+var Processes = require("lib/Processes.js");
 var router = express.Router();
 
 module.exports = router;
