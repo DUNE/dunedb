@@ -8,8 +8,9 @@
 // However, if we're deploying in the cloud, we might want a special config file
 // All options to sietch should be given via this config file!
  
+require('app-module-path').addPath(__dirname); // Set this as the base for all 'require' lines in future.
 
-var load_config = require("./lib/configuration.js"); // exports the global 'config' variable.
+var load_config = require("lib/configuration.js"); // exports the global 'config' variable.
 
 //Check for override.
 var argv = require('yargs')(process.argv.slice(2))
@@ -23,8 +24,8 @@ if(config in argv) {
 console.log("configured");
 
 
-const database = require('./lib/database.js'); // Exports global 'db' variable
-var App = require("./lib/app.js"); 
+const database = require('lib/database.js'); // Exports global 'db' variable
+var App = require("lib/app.js"); 
 var http = require('http'); // to run the server
 // var https = require('https');
 
