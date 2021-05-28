@@ -42,12 +42,8 @@ child_process.exec('.create_gitinfo.sh',function(error,out,err){
 // child_process.exec('git log -n 10 --date=short --pretty=format:"%ad %h %s"', (err,stdout,stderr) => {git_log = stdout;} );
 
 
-router.get('/', async function(req, res, next) {
-  if(!req.user) {
-    return next();
-  }
-  if(req.user.user_metadata && req.user.user_metadata.start_page) return res.redirect(req.user.user_metadata.start_page);
-
+// Default page.
+async function homePage(req,res,next) {
   var tags = await Tags.get();
   var recentComponents = [];
   if(((req.session||{}).recent||{}).componentUuid) {
@@ -61,12 +57,19 @@ router.get('/', async function(req, res, next) {
           list.find(element=>element.componentUuid ==u)
         );
     }
+ }
+ res.render('home.pug',{tags,recentComponents,git_info});
+}
 
+router.get('/home', permissions.ensureAuthenticated, homePage);
+
+
+router.get('/', async function(req, res, next) {
+  if(!req.user) {
+    return next();
   }
-
-  logger.info(JSON.stringify(recentComponents));
-  logger.info("Tags: "+JSON.stringify(tags));
-  res.render('home.pug',{tags,recentComponents,git_info});
+  if(req.user.user_metadata && req.user.user_metadata.start_page) return res.redirect(req.user.user_metadata.start_page);
+  return await homePage(req,res,next);
 },
 // Fallback
 function(req, res, next) {

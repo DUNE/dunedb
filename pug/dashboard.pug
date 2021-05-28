@@ -78,6 +78,11 @@ body(class="deployment-"+deployment)
             ul.nav.flex-column
 
               li.nav-item
+                +navlink(href='/home')
+                  i.fa.fa-home("aria-hidden"="true")
+                  | Home
+
+              li.nav-item
                 +navlink(href='/components/type')
                   i.fa.fa-puzzle-piece("aria-hidden"="true")
                   | Components
