@@ -46,7 +46,7 @@ router.get('/', async function(req, res, next) {
   if(!req.user) {
     return next();
   }
-  if(req.user.user_metadata.start_page) return res.redirect(req.user.user_metadata.start_page);
+  if(req.user.user_metadata && req.user.user_metadata.start_page) return res.redirect(req.user.user_metadata.start_page);
 
   var tags = await Tags.get();
   var recentComponents = [];

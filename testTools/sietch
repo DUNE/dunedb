@@ -1,0 +1,113 @@
+#!/usr/bin/env node --experimental-repl-await 
+
+///
+/// This is a nice little way to do stuff interactively to test database calls.
+///
+/// Run this as an exectuable, then do stuff like:
+///
+/// sietch> await db.collection("courses").find({}).toArray()
+///
+/// and it prints out the result!  Handy!
+
+
+const repl = require('repl');
+const configuration = require("../lib/configuration.js");
+const database = require("../lib/database.js");
+const App= require("../lib/app.js");
+const express = require('express');
+const request = require('supertest');
+const session = require('supertest-session');
+const chalk = require('chalk');
+
+var pino = require("pino");
+var pino_opts = {
+    customLevels: {
+        http: 29
+    },
+    level: 'http',
+  };
+global.logger = pino( pino_opts );
+
+var user =  {
+         displayName: 'Command Line User '+process.env.USER,
+         id: 'cmdline|'+process.env.USER,
+         user_id: 'cmdline|'+process.env.USER,
+         emails: [ { value:  process.env.USER+'@'+process.env.HOST} ],
+         nickname: process.env.USER,
+         permissions:
+         [ 'components:create',
+           'components:edit',
+           'components:view',
+           'dev:components:create',
+           'dev:components:edit',
+           'dev:components:view',
+           'dev:forms:edit',
+           'dev:forms:view',
+           'dev:jobs:process',
+           'dev:jobs:submit',
+           'dev:jobs:view',
+           'dev:tests:submit',
+           'dev:tests:view',
+           'forms:view',
+           'tests:submit',
+           'tests:view' ,
+           'users:view',
+           'dev:users:view',
+           'users:edit',
+           'dev:users:edit',
+           ],
+           roles:
+         [ 'component editor',
+           'dev-admin',
+           'dev component editor',
+           'dev tester',
+           'dev-user',
+           'admin',
+           'tester' ]
+        };
+
+database.attach_to_database().then(async ()=>{
+    var app = express();
+    app.use((req,res,next)=>{ req.user = user; next();});
+    await App.create_app(app);
+
+    console.log(chalk.red("Type javascript commands below.  db and session variables are available."));
+    console.log(chalk.red("Can also use libraries: Components, Forms, Tests, Jobs, ComponentTypes, Courses, Cache, Tags"));
+    console.log(chalk.red(`Database transactions will be marked with user_id`),chalk.bold(user.user_id));
+    console.log(chalk.red(`.exit or .q to quit`));
+
+    const loop = repl.start({
+        prompt: "sietch> ",
+        ignoreUndefined: true,
+        breakEvalOnSigint: true, // allow exiting with ctrl-C during evaluation
+    });
+    loop.setupHistory(process.env.HOME+"/.sietch_history",()=>{});
+    loop.context.db = db;
+    loop.context.app = app;
+    loop.context.session =  session(app);
+    loop.context.Components = require("../lib/components.js");
+    loop.context.Forms = require("../lib/Forms.js");
+    loop.context.Tests = require("../lib/Tests.js")('test');
+    loop.context.Jobs = require("../lib/Jobs.js")('job');
+    loop.context.ComponentTypes = require("../lib/ComponentTypes.js");
+    loop.context.Courses = require("../lib/Courses.js");
+    loop.context.Cache = require("../lib/Cache.js");
+    loop.context.Tags = require("../lib/Tags.js");
+
+    const teardown = (a) => {
+      if(a) console.log(a);
+      process.stdout.write(chalk.red("Closing down database..."));
+      database.shutdown(true).then(()=>{console.log("done"); process.exit();})
+    };
+
+    loop.defineCommand('q', {
+        help: 'Tear down and quit.',
+        action: teardown,
+    });
+    
+
+    loop.on('exit', teardown);
+    process.on("uncaughtException", teardown);
+    process.on("SIGINT", teardown);
+
+})

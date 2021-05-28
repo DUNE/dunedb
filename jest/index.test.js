@@ -16,11 +16,11 @@ var appAuthorized = express();
 var suffix = "-THIS-IS-AN-AUTOMATED-UNIT-TEST";
 
 var user =  {
-         displayName: 'ntagg@otterbein.edu',
-         id: 'auth0|5e4c0a06b6ef8d0e9ccffc5d',
-         user_id: 'auth0|5e4c0a06b6ef8d0e9ccffc5d',
-         emails: [ { value: 'ntagg@otterbein.edu' } ],
-         nickname: 'ntagg',
+         displayName: 'JEST '+process.env.USER,
+         id: 'jest|'+process.env.USER,
+         user_id: 'jest|'+process.env.USER,
+         emails: [ { value:  process.env.USER+'@'+process.env.HOST} ],
+         nickname: 'JEST',
          permissions:
          [ 'components:create',
            'components:edit',
