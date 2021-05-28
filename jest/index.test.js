@@ -69,7 +69,6 @@ function checkRouteOffChecklist(method,route) {
       var trimmed = route.replace(entry.prefix,'');
       var m = trimmed.match(entry.regexp);
       if(m) {
-        // console.log("route",route," matched route ",entry.route,'match:',m);
         return false;
       }
       return true;
@@ -131,11 +130,11 @@ beforeAll(async () => {
 });
 
 afterAll( async () => {
-    console.log("afterAll()");
+    // console.log("afterAll()");
     var not_checked = [];
-    console.log(routes_unfinished.all.length," unchecked routes");
     for(var entry of routes_unfinished.all) { not_checked.push(entry.route) }
-    console.log("Unchecked routes:\n",not_checked.join('\n'));
+    console.log(not_checked.length+" unchecked routes in unchecked.log");
+    require('fs').writeFileSync("unchecked.log",not_checked.join('\n'));
     await db.collection("componentForms").deleteMany({formId:"cform"+suffix});
     await db.collection("testForms").deleteMany({formId:"test"+suffix});
     await db.collection("jobForms").deleteMany({formId:"job"+suffix});

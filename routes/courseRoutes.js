@@ -16,7 +16,7 @@ router.get("/courses", permissions.checkPermission("tests:view"),
  async function(req,res,next) {
     try{
       let courses = await Courses.list() ;
-      console.log("Courses",courses);
+      // console.log("Courses",courses);
       res.render('listCourses.pug',{courses})
     } 
     catch(err) { 
@@ -31,7 +31,7 @@ router.get("/EditCourse/:courseId", permissions.checkPermission("tests:view"),
     try{
       let courseId = req.params.courseId;
       let course = await Courses.retrieve(courseId) || {};
-      console.log("EditCourse",courseId,course);
+      // console.log("EditCourse",courseId,course);
       res.render('EditCourse.pug',{courseId, course})
     } 
     catch(err) { 

@@ -8,12 +8,13 @@
 /// sietch> await db.collection("courses").find({}).toArray()
 ///
 /// and it prints out the result!  Handy!
-
-
+const Path = require("path");
+const basepath = Path.resolve(__dirname,"../");
+require('app-module-path').addPath(basepath);
 const repl = require('repl');
-const configuration = require("../lib/configuration.js");
-const database = require("../lib/database.js");
-const App= require("../lib/app.js");
+const configuration = require("lib/configuration.js");
+const database = require("lib/database.js");
+const App= require("lib/app.js");
 const express = require('express');
 const request = require('supertest');
 const session = require('supertest-session');
