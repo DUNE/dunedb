@@ -1,5 +1,5 @@
 // app-module-path doesn't work in this context...
-require('app-module-path').addPath('./');
+// require('app-module-path').addPath('./');
 const Config = require("../lib/configuration.js");
 const request = require('supertest');
 const express = require('express');
@@ -86,22 +86,23 @@ function myrequest(app){
 }
 
 pino = require("pino");
-
-beforeAll(async () => {
-  console.log("beforeAll");
   var pino_opts = {
     customLevels: {
         http: 29
     },
     level: 'http', 
   };
-  var dest = pino.destination("jest.log");
-  global.logger = pino(pino_opts, pino.destination('jest.log') );
+var dest = pino.destination("jest.log");
+global.logger = pino(pino_opts, pino.destination('jest.log') );
 
-  logger.info("beforeAll");
+
+beforeAll(async () => {
+  try{
+  console.log("beforeAll");
+  
   await database.attach_to_database();
-  logger.info("attached");
-
+  console.log("attached");
+ 
   await App.create_app(appPublic);
 
   // user data is injected into the application stack first.
@@ -114,18 +115,23 @@ beforeAll(async () => {
   routes_unfinished = getRoutes(appAuthorized);
   // remove some.
   routes_unfinished.all = routes_unfinished.all.filter(function(e){
-    if(e.route == "/login") return false;
-    if(e.route == "/logout") return false;
-    if(e.route == "/callback") return false;
-    if(e.route == "/machineAuthenticate") return false;
-    if(e.route.startsWith("/api")) return false;
-    return true;
-  })
-  console.log("found ",routes_unfinished.all.length," routes to check");
+      if(e.route == "/login") return false;
+      if(e.route == "/logout") return false;
+      if(e.route == "/callback") return false;
+      if(e.route == "/machineAuthenticate") return false;
+      if(e.route.startsWith("/api")) return false;
+      return true;
+    });
+   console.log("found ",routes_unfinished.all.length," routes to check");
+
+  } catch(err) {
+    console.log(err);
   }
-);
+
+});
 
 afterAll( async () => {
+    console.log("afterAll()");
     var not_checked = [];
     console.log(routes_unfinished.all.length," unchecked routes");
     for(var entry of routes_unfinished.all) { not_checked.push(entry.route) }
