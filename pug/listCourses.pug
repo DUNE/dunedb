@@ -14,7 +14,8 @@ block content
           tr
             td
               img.icon(src=info.icon)
-            td=(info.name || courseId)
+            td=(info.formName || info.name || courseId)
+            td (#{info.componentType})
             if(permissions.userHas(user,"tests:view"))
               td
                 a(href='/course/'+courseId).btn.btn-outline-primary View

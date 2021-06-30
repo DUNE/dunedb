@@ -389,6 +389,18 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 
 
 /// Courses
+router.get("/courses", permissions.checkPermissionJson('forms:view'),
+async function (req,res,next) {
+  try {
+    var record = await Courses.list();
+    return res.json(record,null,2);
+  } catch(err) {
+    logger.info(JSON.stringify(err.toString()));
+      res.status(400).json({error:err.toString()});
+  }
+});
+
+/// Courses
 router.get("/course/:courseId", permissions.checkPermissionJson('forms:view'),
 async function (req,res,next) {
   try {

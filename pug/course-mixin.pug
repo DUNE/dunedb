@@ -2,7 +2,16 @@
 
 mixin evaluated-course(course)
     h3=course.name
-    table
+    table.table.table-hover
+      thead
+        tr
+          th 
+          th Type
+          th Name
+          th OK?
+          th Completed
+          th Advice
+
       tbody
         each step of course.evaluation
           tr
@@ -11,7 +20,7 @@ mixin evaluated-course(course)
             td
               = step.type
             td
-              = (step.meta||{}).name || step.formId
+              = (step.meta||{}).formName || (step.meta||{}).name || step.formId
             td
               if step.result.length>0
                 i.fa.fa-check.text-success
