@@ -1,4 +1,8 @@
 // Pull component data as json doc.
+
+// FIXME: This could really be broken up into more readable chunks
+// Probably should be put into seperate files in routes/api/componentApi.js, etc
+// and loaded from this file.
 "use strict";
 const express = require("express");
 const Forms = require("lib/Forms.js");
@@ -13,6 +17,7 @@ const utils = require("lib/utils.js");
 const permissions = require("lib/permissions.js");
 const chalk = require("chalk");
 const pretty = require('express-prettify');
+
 var MUUID = require('uuid-mongodb');
 const deepmerge = require('deepmerge');
 
@@ -208,6 +213,7 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
       return res.json(list);
     } catch(err) {
       res.status(400).json({error:err.toString()})
+      logger.info({route:req.route.path},err.message);
     }  
   }
 );
@@ -264,7 +270,7 @@ router.post('/:collection(testForms|componentForms|jobForms)/:formId', permissio
       var inserted_record = await Forms.save(req.body, req.params.collection, req);
       res.json(inserted_record);
     } catch(err) { 
-      logger.error(err);
+      logger.info({route:req.route.path},err.message);
       res.status(400).json({error:err.toString()}) 
     }
   }
@@ -285,7 +291,6 @@ router.post("/test", permissions.checkPermissionJson('tests:submit'),
       res.json(outrec);
     } catch(err) {
       logger.error("error submitting form /test"+req.params.formId);
-      logger.error(err);
       res.status(400).json({error:err.toString()});
     } 
   }
@@ -301,8 +306,8 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson
     var record = await Tests.retrieve(req.params.record_id);
     return res.json(record,null,2);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 });
 
@@ -317,8 +322,8 @@ router.get("/test/:record_id([A-Fa-f0-9]{24})/info",  permissions.checkPermissio
     var record = {...forminfo,...test};
     return res.json(record,null,2);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 });
 
@@ -334,8 +339,8 @@ router.post("/test/getBulk",  permissions.checkPermissionJson('tests:view'),
     var records = await Tests.retrieveBulk(req.body);
     return res.json(records,null,2);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 });
 
@@ -346,7 +351,7 @@ router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:v
   try {
     return res.json(await Tests.listComponentTests(req.params.uuid));
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
+    logger.info({route:req.route.path},err.message);
     res.status(400).json({error:err.toString()});
   }
 });
@@ -367,8 +372,7 @@ router.post("/job", permissions.checkPermissionJson('jobs:submit'),
       var outrec  = await Jobs.save(req.body, req);
       res.json(outrec.jobId);
     } catch(err) {
-      logger.error("error submitting form /test/");
-      logger.error(err);
+      logger.info({route:req.route.path},err.message);
       res.status(400).json({error:err.toString()});
     } 
   }
@@ -382,7 +386,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
     var record = await Jobs.retrieve(req.params.record_id);
     return res.json(record,null,2);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
+      logger.info({route:req.route.path},err.message);
       res.status(400).json({error:err.toString()});
   }
 });
@@ -395,8 +399,8 @@ async function (req,res,next) {
     var record = await Courses.list();
     return res.json(record,null,2);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 });
 
@@ -408,8 +412,8 @@ async function (req,res,next) {
     var record = await Courses.retrieve(req.params.courseId);
     return res.json(record,null,2);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 });
 
@@ -421,8 +425,8 @@ async function (req,res,next) {
     if(req.body.courseId !== req.params.courseId) throw new Error("Mismatch between courseId in route and posted object");
     return res.json(outrec,null,2);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 });
 
@@ -433,8 +437,8 @@ router.get("/course/:courseId/"+utils.uuid_regex, permissions.checkPermissionJso
     var outrec  = await Courses.evaluate(req.params.courseId, req.params.uuid);
     return res.json(outrec);
   } catch(err) {
-    logger.info(JSON.stringify(err.toString()));
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 })
 
@@ -491,8 +495,8 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
 
 
   } catch(err) {
-    logger.info({route:req.route.path},err);;
-      res.status(400).json({error:err.toString()});
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
   }
 });
 
@@ -518,7 +522,7 @@ router.get("/roles",  permissions.checkPermissionJson('users:view'),
       try {
         return res.json(await manager.getRoles({per_page:100}));
       } catch(err) {
-        logger.info({route:req.route.path},err);;
+        logger.info({route:req.route.path},err.message);
         res.status(400).json({error:err.toString()});
       }
     }
@@ -555,7 +559,7 @@ router.get("/users",  permissions.checkPermissionJson('users:view'),
 
       res.json(Object.values(user_data));
     } catch(err) {
-      logger.info({route:req.route.path},err);;
+      logger.info({route:req.route.path},err.message);
       res.status(400).json({error:err.toString()});
     }
   }
@@ -585,7 +589,7 @@ router.get("/user/:user_id",  permissions.checkPermissionOrUserIdJson("users:vie
     try {
       res.json(await user_info(req.params.user_id));
     } catch(err) {
-      logger.info({route:req.route.path},err);
+      logger.info({route:req.route.path},err.message);
       res.status(400).json({error:err.toString()});
     }
   }
@@ -653,11 +657,16 @@ router.post("/user/:user_id", permissions.checkPermissionOrUserIdJson("users:edi
       res.json(await user_info(req.params.user_id));
 
     } catch(err) {
-      logger.info({route:req.route.path},err);;
+      logger.info({route:req.route.path},err.message);
       res.status(400).json({error:err.toString()});
     }
   }
 )
+
+
+/// Docs
+router.use(require('routes/api/docsApi.js'));
+
 
 
 

@@ -29,6 +29,8 @@
     "deepmerge": "^4.2.2",
     "delivery-tracker": "^2.5.7",
     "dotenv": "^8.2.0",
+    "easymde": "^2.15.0",
+    "editor.md": "^1.5.0",
     "ekko-lightbox": "^5.3.0",
     "express": "^4.17.1",
     "express-bouncer": "^0.2.0",
@@ -102,8 +104,8 @@
     "coverageProvider": "v8",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^lib\/(.*).js": "<rootDir>/lib/$1.js",
-      "^routes\/(.*).js": "<rootDir>/routes/$1.js"
+      "^lib/(.*).js": "<rootDir>/lib/$1.js",
+      "^routes/(.*).js": "<rootDir>/routes/$1.js"
     }
   }
 }

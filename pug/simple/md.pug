@@ -1,0 +1,48 @@
+html
+  head
+    script(src='/dist/jquery/jquery.min.js')
+    script(src='/dist/easymde/easymde.min.js')
+    link(rel='stylesheet' href='/dist/easymde/easymde.min.css')
+    script(src='/dist/bootstrap/js/bootstrap.bundle.min.js')
+    link(rel='stylesheet' href='/css/dashboard.css')
+    link(rel='stylesheet' href='/css/custom.scss')
+    link(rel='stylesheet' href='/dist/formiojs/formio.full.min.css')
+    link(rel='stylesheet', href='/css/main.css', type='text/css', media='all')
+    link(rel='stylesheet', href='/css/AnnotationCanvas.css', type='text/css', media='all')
+    link(rel='stylesheet' href='/css/qr.css')
+    <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+
+    script.
+ 
+ 
+      $(async function(){
+        var docId = window.location.pathname.match(/.*\/(.*)$/)[1];
+        console.log("docId",docId)
+        record = await $.get("/json/doc/"+docId+"?orDefault=true");
+        console.log("rec",record)
+        easyMDE = new EasyMDE({element: document.getElementById('markdownarea'),
+                                  initialValue: record.data});
+ 
+
+        async function saveDoc(){
+          record = record || {};
+          record.docId = docId;
+          record.data = easyMDE.value();
+          if(record.valdity && record.valdity.version) record.valdity.version+=1;
+          console.log("submitting",record);
+          record = await $.post("/json/doc/"+docId,record)
+                          .fail(function(a1,a2,a3) {
+                            console.log('fail',a1,a2,a3)
+                            $('#error').text('error');
+                          })
+        }
+
+        $("#save").on("click",saveDoc);
+      })
+
+  body
+
+    textarea#markdownarea Geting...
+    button.button.btn-outline-primary#save Save
+    span.error
