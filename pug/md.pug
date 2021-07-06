@@ -4,4 +4,10 @@ block extrascripts
   link(rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css')
 
 block content
+   
    article.markdown-body !{md}
+
+   if(editlink) 
+    a(href=editlink,style="position:absolute;bottom:2px;right:2px") Click here to edit
+   
+

@@ -1,0 +1,90 @@
+extend default
+
+include common
+
+block vars
+  - page_title="New Component Contact Sheet";
+
+block extrascripts
+    script(src='/dist/easymde/easymde.min.js')
+    link(rel='stylesheet' href='/dist/easymde/easymde.min.css')
+    <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+
+    style.
+      #wrapper { 
+        display: flex;
+        flex-direction:column;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: stretch;
+        align-content: stretch;
+      }
+      #markdownarea {
+        flex: 1 1 auto;
+        min-height: 50px;
+      }
+      button.save {
+        margin: 10px;
+      }
+
+
+    script.
+ 
+      var record;
+      var easyMDE;
+      var docId;
+      $(async function(){
+        docId = window.location.pathname.match(/.*\/(.*)\/edit$/)[1];
+        console.log("docId",docId)
+        easyMDE = new EasyMDE({element: document.getElementById('markdowneditor'),
+                               maxHeight:"450px"
+                               });
+        record = null;
+
+        function update() {
+          $('#docId').text(docId);
+          easyMDE.value(record.data);
+          if(record.insertion)
+            $('#last_edited').text(`${record.insertion.user.displayName} on ${record.insertion.insertDate}`)
+          if(record.validity)
+            $('#version').text(`${record.validity.version}`);
+        }
+
+
+
+        record = await $.get("/json/doc/"+docId+"?orDefault=true");
+        console.log("rec",record)
+        update(easyMDE,record) 
+
+        async function saveDoc(){
+          record = record || {};
+          record.docId = docId;
+          record.data = easyMDE.value();
+          delete record.validity;
+          console.log("submitting",record);
+          record = await $.post("/json/doc/"+docId,record)
+                          .fail(function(a1,a2,a3) {
+                            console.log('fail',a1,a2,a3)
+                            $('#error').text('error');
+                          })
+          update(easyMDE,record)
+        }
+
+        $(".save").on("click",saveDoc);
+      })
+
+block content
+    div.container#wrapper
+      div.top
+        h3#docId
+        button.button.btn-primary.float-right.save Save
+        div Last edited: 
+          span#last_edited
+        div Version:
+          span#version
+      div#markdownarea
+        textarea#markdowneditor Retrieving...
+      div.bottom
+        span.error
+        button.button.btn-primary.float-right.save Save

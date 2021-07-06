@@ -29,7 +29,7 @@ html
           record = record || {};
           record.docId = docId;
           record.data = easyMDE.value();
-          if(record.valdity && record.valdity.version) record.valdity.version+=1;
+          if(record.validity && record.validity.version) record.validity.version+=1;
           console.log("submitting",record);
           record = await $.post("/json/doc/"+docId,record)
                           .fail(function(a1,a2,a3) {

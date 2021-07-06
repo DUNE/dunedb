@@ -42,14 +42,13 @@ async function getDefaultMd()
 
 
 router.post("/doc/:docId",  permissions.checkPermissionJson("docs:edit"), async function(req,res,next) {
-  // try {
+  try {
     console.log("submit doc",req.body)
     res.json(await Docs.save(req.body,req));
-  // } catch(err) {
-  //   console.log(err);
-  //   logger.info({route:req.route.path},err.message);
-  //   res.status(400).json({error:err.toString()});
-  // }
+  } catch(err) {
+    logger.info({route:req.route.path},err.message);
+    res.status(400).json({error:err.toString()});
+  }
 });
 
 router.get("/docs",  permissions.checkPermissionJson("docs:view"), async function(req,res,next) {
@@ -61,11 +60,6 @@ router.get("/docs",  permissions.checkPermissionJson("docs:view"), async functio
   }
 });
 
-router.use(function (err, req, res, next) {
-    console.log("default error handler");
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
-})
 
 
 

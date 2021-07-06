@@ -1,8 +1,8 @@
-- [README](/docs/README.md)
-- [Database Schemas](/docs/schemas.md)
-- [API - accessing from automated scripts](/docs/api.md)
-- [Processing](/docs/processing.md)
-- [Notes and Nathaniel's to-do list](/docs/notes.md)
-- [Presentation to June 2020 DUNE Database meeting](/docs/Sietch%20-%20June%202020%20-%20Database%20meeting.pdf)
+This entry is not yet been written. Clicking 'Save' will create it.
 
+If you want to link to a specfic part of Sietch, you can do it like the following:
+[Link for creating a new Thing component](/NewComponent/Thing)
+[Link to the ApaChecklist course:](/course/ApaChecklist)
+[Link to another Doc:](/doc/DocName)
 
+Click the question mark for a markdown cheatsheet

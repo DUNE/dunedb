@@ -1,0 +1,49 @@
+extend default
+include common.pug
+
+
+block extrascripts
+  style.
+    #list {
+      display:flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+    }
+block vars
+  - var page_title="Documents";
+
+block content  
+  p.h3=title||"Documents"
+
+  div#list
+    each item in docslist
+      a(href="/doc/"+item.docId)=item.docId
+  p
+  if(permissions.userHas(user,"docs:create"))
+      p.h5.mt-4
+        a.NewDoc.btn.btn-outline-primary(href='#', data-toggle="modal" data-target="#NewDocModal") Create New Doc
+        #NewDocModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewDocLabel' aria-hidden='true')
+          .modal-dialog(role="document")
+            .modal-content
+              .modal-header
+                h5#NewDocLabel.modal-title New Doc
+                button.close(type="button",data-dismiss="modal",aria-label="Close")
+                  span(aria-hidden=true) &times;
+              .modal-body
+                div
+                  | Enter the new doc ID, which will be used in the URL.
+                  br
+                  | This ID should have only underscores and alphanumerics.
+                  input.NewDocName.form-control(type="text")
+              .modal-footer
+                button.btn.btn-secondary(type="button", data-dismiss="modal") Close
+                button.btn.btn-primary.NewDocCreateButton(type="button") Create
+        script.
+          $('button.NewDocCreateButton').click(function(){
+            window.location.href="/doc/"+ $('button.NewDocCreateButton').parents('.modal-content').find('input').val() + "/edit";
+          })
+          $('input.NewDocName').on("keyup",function(e){
+            if(e.key=="Enter") {
+                window.location.href="/doc/"+ $(this).val() + "/edit";
+              }
+          })
