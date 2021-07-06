@@ -151,16 +151,21 @@ body(class="deployment-"+deployment)
                   | Advanced Search
 
 
+
             h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-              span Documentation
-              //- a.d-flex.align-items-center.text-muted(href='#')
-              //-   span(data-feather='plus-circle')
+              span Wiki
             ul.nav.flex-column.mb-2
               li.nav-item
-                +navlink(href='/sietchDocs/') All Documentation
+                +navlink(href='/doc/start') Start page
               li.nav-item
-                +navlink(href='/sietchDocs/README.md') README
-                +navlink(href='/sietchDocs/notes.md') Working notes and To-Do list 
+                +navlink(href='/doc') All entries
+            
+            h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
+              span About
+            ul.nav.flex-column.mb-2
+              li.nav-item
+                  +navlink(href='/docs/') Sietch Documentation
+ 
 
       #content
             block content 
