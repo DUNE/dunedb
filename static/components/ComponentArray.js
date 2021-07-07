@@ -27,6 +27,9 @@ class ArrayComponent extends TextFieldComponent{
       "type": "ArrayComponent",
       "input": true  ,
       "defaultValue": [],
+      "specification_minimum": 3,
+      "specification_maximum": 12,
+      "units": "Value"
     }, ...extend);
   }
 
@@ -65,6 +68,9 @@ class ArrayComponent extends TextFieldComponent{
     tpl += `<div>Max: <span class='arrayComponentMax'></span></div>`;
     tpl += `<div>Mean: <span class='arrayComponentMean'></span></div>`;
     tpl += `<div>RMS: <span class='arrayComponentRMS'></span></div>`;
+    var bounds = this.getBounds();
+    if(!isNaN(bounds.hi)) tpl += `<div>Out-of-spec high: <span class='arrayComponentOobHi'>n/a</span></div>`;
+    if(!isNaN(bounds.lo)) tpl += `<div>Out-of-spec low: <span class='arrayComponentOobLo'>n/a</span></div>`;
     tpl += "</div>"
     tpl += `<div class='flex-grow-1 p-2 arrayComponentGraph' style='height:200px; width: 240px;'></div>`;
     tpl += `<div class='flex-grow-1 p-2 arrayComponentHistogram' style='height:200px; width: 240px;'></div>`;
@@ -84,6 +90,17 @@ class ArrayComponent extends TextFieldComponent{
     return arr;
   }
 
+  getBounds() {
+    var bounds = {lo:NaN, hi:NaN};
+    if(('specification_nominal' in this.component) && ('specification_tolerance' in this.component)) {
+      bounds.lo = this.component.specification_nominal - this.component.specification_tolerance;
+      bounds.hi = this.component.specification_nominal + this.component.specification_tolerance;
+    }
+    if('specification_minimum' in this.component) bounds.lo=this.component.specification_minimum;
+    if('specification_maximum' in this.component) bounds.hi=this.component.specification_maximum;
+    return bounds;
+  }
+
   updateExtras(value) {
     gArrayComp = this;
     // Normalize the input value.
@@ -92,13 +109,19 @@ class ArrayComponent extends TextFieldComponent{
     var max = -1e99;//Number.MIN_VALUE;
     var non_numeric = 0;
     if(arr.length<1) { min=0; max=0; }
+    // Out of bounds limits:
+    var bounds = this.getBounds();
+    var oobHi =0;
+    var oobLo =0;
     for(var i=0;i<arr.length;i++) {
-      if(isNaN(arr[i])) non_numeric++;
-      else {
-        var x = parseFloat(arr[i]);
+      var x = parseFloat(arr[i]);
+      if(isNaN(x)) non_numeric++;
+      else {        
         min = Math.min(min,x);
         max = Math.max(max,x);
-        arr[i] = x;
+        if(x>bounds.hi) oobHi++; // If bounds are NaN, tests always return false.
+        if(x<bounds.lo) oobLo++;
+        arr[i] = x;        
       }
     }
     var len = arr.length;
@@ -106,30 +129,30 @@ class ArrayComponent extends TextFieldComponent{
     $("span.arrayComponentLength",this.element).text(len);
     $("span.arrayComponentMin",this.element).text(min.toFixed(2));
     $("span.arrayComponentMax",this.element).text(max.toFixed(2));
-
-    // Stats.
+    $("span.arrayComponentOobHi",this.element).text(oobHi.toFixed(2));
+    $("span.arrayComponentOobLo",this.element).text(oobLo.toFixed(2));
 
     // Graph.
     var graph = new Histogram(len,0,len);
     graph.data = arr;
     graph.min_content = min;
     graph.max_content = max;
-    var blackscale = new ColorScaleIndexed(1);  
+    var blackscale = new ColorScaleRGB(50,50,100); 
+
     this.LizardGraph.SetHist(graph,blackscale);
-    this.LizardGraph.ylabel = "Value";
-    this.LizardGraph.xlabel = "Element";
     this.LizardGraph.ResetDefaultRange();
     this.LizardGraph.Draw();
     console.log('graph',graph);
     //histogram
     var hist = new Histogram(Math.round(len/10)+10,min,max);
     for(var x of arr) { hist.Fill(x);}
-    var colorscale = new ColorScaler("BrownPurplePalette");
+    var colorscale = new ColorScaleRGB(50,50,50);
     colorscale.min = min;
     colorscale.max = max;
-    this.LizardHistogram.xlabel = "Value";
-    this.LizardHistogram.ylabel = "Counts";
     this.LizardHistogram.SetHist(hist,colorscale);
+    this.LizardHistogram.SetMarkers([bounds.lo,bounds.hi]);
+    this.LizardHistogram.marker_color = "rgba(100,0,0,0.5)";
+
     this.LizardHistogram.Draw();
       // Stats.
 
@@ -147,8 +170,15 @@ class ArrayComponent extends TextFieldComponent{
     console.log("attaching",this,element);
     this.LizardGraph = new HistCanvas($("div.arrayComponentGraph",this.element),
         {margin_left: 40});
-    this.LizardHistogram = new HistCanvas($("div.arrayComponentHistogram",this.element),{margin_left: 40});
+    this.LizardGraph.default_options.doDots = true;
+    this.LizardGraph.default_options.doFill = false;
+    this.LizardGraph.ylabel = this.component.units || "Value";
+    this.LizardGraph.xlabel = "Element";
 
+    this.LizardHistogram = new HistCanvas($("div.arrayComponentHistogram",this.element),{margin_left: 40});
+    this.LizardHistogram.xlabel = this.component.units || "Value";
+    this.LizardHistogram.ylabel = "Counts";
+    
     var rodisp = this.refs.readonly_display;
     this.LizardGraph.DoMouseClick = function(ev,u,v)
     {
@@ -401,9 +431,59 @@ var gArrayComponentId=0;
 //   return value;
 // }
 
+ArrayComponent.editForm = function(a,b,c)
+{
+    var form = TextFieldComponent.editForm(a,b,c);
+    var tabs = form.components.find(obj => { return obj.type === "tabs" });
+    var datatab = tabs.components.find(obj => {return obj.key=='data'});
 
-ArrayComponent.editForm = TextFieldComponent.editForm;
+    // Remove 'multiple components'. I could probably make it work.. but nah
+    datatab.components.splice(datatab.components.findIndex(obj=>{return obj.key = "multiple"}),1);
+    var displaytab = tabs.components.find(obj => {return obj.key=='display'});
 
+
+    datatab.components.splice(1,0,
+      {
+        "input": true,
+        "key": "specification_nominal",
+        "label": "Nominal Value",
+        "placeholder": "Nominal value ",
+        "tooltip": "This is the nominal value each value should be close to",
+        "type": "number",
+      },
+      {
+        "input": true,
+        "key": "specification_tolerance",
+        "label": "Tolerance",
+        "tooltip": "This is the tolerance, plus or minus, around the nominal value. If outside this range, a warning will show.",
+        "type": "number",
+      },
+      {
+        "input": true,
+        "key": "specification_minimum",
+        "label": "Minimum Specification",
+        "tooltip": "If less than this value, a warning will show.",
+        "type": "number",
+      },      
+      {
+        "input": true,
+        "key": "specification_maximum",
+        "label": "Maximum Specification",
+        "tooltip": "If greater than than this value, a warning will show.",
+        "type": "number",
+      },
+      {
+        "input": true,
+        "key": "units",
+        "label": "Units",
+        "tooltip": "Units or description of value (put on vertical scale)",
+        "type": "textfield",
+      }
+  );
+
+
+    return form;
+}
 Formio.Components.addComponent('ArrayComponent', ArrayComponent);
 
 

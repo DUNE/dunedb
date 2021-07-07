@@ -133,7 +133,7 @@ HistCanvas.prototype.Draw = function()
   
   this.ctx.restore();
   if(this.adjunct_display) this.DrawAdjunct();
-  this.DrawMarker();
+  this.DrawMarkers();
 };
 
 HistCanvas.prototype.DrawRegions = function()
@@ -173,24 +173,26 @@ HistCanvas.prototype.DrawAdjunct = function()
 	}
 };
 
-HistCanvas.prototype.DrawMarker = function()
+HistCanvas.prototype.DrawMarkers = function()
 {
-  if(this.marker!==null) {
-    this.ctx.fillStyle = "rgba(0,0,0,1)";
-    var x1 = this.GetX(this.marker)-1;
-    var dx = 2;
-    var y1 = this.GetY(this.max_v);
-    var dy = (this.origin_y) - y1;
-    this.ctx.fillRect( x1, y1, dx, dy );    
+  if(this.markers){
+    this.ctx.save();
+    for(var marker of this.markers) {
+      this.ctx.fillStyle = this.marker_color || "rgba(0,0,0,1)";
+      var x1 = this.GetX(marker)-1;
+      var dx = 2;
+      var y1 = this.GetY(this.max_v);
+      var dy = (this.origin_y) - y1;
+      this.ctx.fillRect( x1, y1, dx, dy );    
+    }
+    this.ctx.restore();
   }
 };
 
-HistCanvas.prototype.SetMarker = function(t)
+HistCanvas.prototype.SetMarkers = function(array_of_markers)
 {
-  if(t !== this.marker) {
-    this.marker = t;
-    this.Draw();    
-  }
+  // Markers are of the form 
+  this.markers = array_of_markers;
 };
 
 HistCanvas.prototype.SetAdjunctData = function ( inAdjunct )
