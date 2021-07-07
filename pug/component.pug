@@ -46,10 +46,12 @@ block content
   .container-fluid
     if(formrec.icon && formrec.icon[0])
       img.icon.pull-left(src=formrec.icon[0].url)
-    h2#name.col-md-8
+    h2
       =component.type + ": " + (component.data.name||component.componentUuid.substr(0,8))
     div
         a(href='/'+componentUuid+'/edit') Edit this component
+    div
+        a(href='/traveller/'+componentUuid) Printable traveller
     dl
       dt Component UUID
       dd

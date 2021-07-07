@@ -1,7 +1,7 @@
 
 
-mixin evaluated-course(course)
-    h3=course.name
+mixin evaluated-course(course,interactive)
+    -if(interactive!==false) interactive = true;
     table.table.table-hover
       thead
         tr
@@ -29,11 +29,12 @@ mixin evaluated-course(course)
             if step.type == "component"
               td
                 if step.result.length>0                  
-                  a(href='/'+componentUuid).btn.btn-success View
+                  a(href='/'+componentUuid).btn.btn-success=moment(component.insertion.insertDate).format("MMM D YY")
                 else
-                  a(href='/'+componentUuid+"/edit").btn.btn--outline-danger
-                    img.small-icon(src='/images/edit_icon.svg')
-                    |  &nbsp; Create
+                  if interactive
+                    a(href='/'+componentUuid+"/edit").btn.btn--outline-danger
+                      img.small-icon(src='/images/edit_icon.svg')
+                      |  &nbsp; Create
 
 
             if step.type == "test"
@@ -44,35 +45,40 @@ mixin evaluated-course(course)
                     a(href='/test/'+test._id).btn.btn-success=moment(test.insertion.insertDate).format("MMM D YY")
                     | &nbsp;
 
-                  a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-success
-                        img.small-icon(src='/images/edit_icon.svg')
-                        | &nbsp; Run again 
+                  if interactive
+                    a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-success
+                          img.small-icon(src='/images/edit_icon.svg')
+                          | &nbsp; Run again 
                 else
-                  a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-danger
-                        img.small-icon(src='/images/edit_icon.svg')
-                        | &nbsp; Run
+                  if interactive
+                    a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-danger
+                          img.small-icon(src='/images/edit_icon.svg')
+                          | &nbsp; Run
 
             if step.type == "job"
               td
                 if step.result.length>0
 
                   for job,index in step.result
-                    a(href='/job/'+job.jobId).btn.btn-outline-success=moment(job.insertion.insertDate).format("MMM D YY")
+                    a(href='/job/'+job.jobId).btn.btn-success=moment(job.insertion.insertDate).format("MMM D YY")
                     | &nbsp;
 
-                  a(href='/job/'+step.formId).btn.btn-outline-success
-                        img.small-icon(src='/images/edit_icon.svg')
-                        | &nbsp; Run again
+                  if interactive
+                    a(href='/job/'+step.formId).btn.btn-outline-success
+                          img.small-icon(src='/images/edit_icon.svg')
+                          | &nbsp; Run again
                 else
-                  a(href='/job/'+step.formId).btn.btn-outline-danger
-                        img.small-icon(src='/images/edit_icon.svg')
-                        | &nbsp; Run
+                  if interactive
+                    a(href='/job/'+step.formId).btn.btn-outline-danger
+                          img.small-icon(src='/images/edit_icon.svg')
+                          | &nbsp; Run
             td !{step.advice}
     
-    p
-      a(href='/course/'+course.courseId+"/next/"+componentUuid) Next Step
-    p
-      a(href='/course/'+course.courseId+"/next/"+componentUuid+"?firstUnfinished=1") Next Unfinished Step
+    if(interactive)
+      p
+        a(href='/course/'+course.courseId+"/next/"+componentUuid) Next Step
+      p
+        a(href='/course/'+course.courseId+"/next/"+componentUuid+"?firstUnfinished=1") Next Unfinished Step
     // pre
     //   =JSON.stringify(course,null,2)
 
