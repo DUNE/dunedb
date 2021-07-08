@@ -160,3 +160,18 @@ router.get("/profile", permissions.checkAuthenticated,
     res.render("user_edit.pug",{user_id:req.user.user_id});
   }
 );
+
+const m2m = require("lib/m2m.js");
+
+router.get("/m2mUsers", permissions.checkPermission("users:view"),
+  async function(req,res,next) {
+    var users = await m2m.ListMachineUsers();
+    res.render("m2mUsers.pug",{users});
+  }
+);
+
+router.post("/m2mUsers", permissions.checkPermission("users:edit"),
+  async function(req,res,next) {
+    res.render("m2mUserCredentials.pug",{users:await m2m.AddMachineUser(req.body)});
+  }
+);

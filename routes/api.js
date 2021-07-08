@@ -663,6 +663,57 @@ router.post("/user/:user_id", permissions.checkPermissionOrUserIdJson("users:edi
   }
 )
 
+var m2m = require("lib/m2m.js")
+router.get("/m2mUsers", permissions.checkPermissionJson("users:edit"),
+  async (req,res,next) => {
+    try {
+      res.json(await m2m.ListMachineUsers());
+    } catch(err) {
+      logger.info({route:req.route.path},err.message);
+      res.status(400).json({error:err.toString()});
+    }
+  }
+)
+
+router.post("/m2mUser/delete", permissions.checkPermissionJson("users:edit"),
+  async (req,res,next) => {
+    try {
+      return res.json(await m2m.DeleteMachineUser(req.body.user_id));
+    } catch(err) {
+      logger.info({route:req.route.path},err.message);
+      res.status(400).json({error:err.toString()});
+    }
+  }
+);
+
+// Modify or add a machine user.
+router.post("/m2mUser", permissions.checkPermissionJson("users:edit"),
+  async (req,res,next) => {
+    try {
+  
+      var rec = await m2m.AddMachineUser(
+          {
+            user_id: req.body.user_id,
+            displayName: req.body.displayName,
+            email: req.body.email,
+            permissions: req.body.permissions
+          }
+        );
+      var output_record = { url: global.config.my_url, 
+                            client_credentials: {
+                              user_id: rec.user_id,
+                             secret:  rec.secret,
+                            }
+                          };
+      return res.json(output_record);
+
+    } catch(err) {
+      logger.info({route:req.route.path},err.message);
+      res.status(400).json({error:err.toString()});
+    }
+  }
+)
+
 
 /// Docs
 router.use(require('routes/api/docsApi.js'));

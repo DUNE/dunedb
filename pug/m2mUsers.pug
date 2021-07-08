@@ -1,0 +1,51 @@
+extend default
+
+include common.pug
+include course-mixin.pug
+
+block extrascripts
+  script(type='text/javascript',src='/page.js/m2mUsers.js')
+
+block vars
+  - var page_title="Users";
+
+block content
+
+  h1 Machine-to-Machine accounts
+
+  .container-fluid
+    .row
+      .col-md-6
+        p To add a new client, type the credentials below.
+        p To change a client, click the entry then modify and submit. THIS WILL CHANGE LOGIN CREDENTIALS.
+        p To remove a client, click the entry then the delete button.
+        p Note that every change will result in new authentication tokens being issued.
+
+        div#formio
+        button.btn.btn-outline-secondary#clearForm Clear Form
+        button.btn.btn-danger(disabled=true)#deleteButton Delete This User
+
+        #creds.border.rounded.border-success.hidden.m-5
+          p Success!
+          p You must copy these credentials to the user script. This is the only time these credentials will be shown!
+          pre(style="user-select:all")
+
+      .col-md-6
+        table#users_table.table
+          thead
+            tr
+              th Display Name
+                br
+                | User ID
+              th Email
+              th Permissions
+          tbody
+            each user in users
+              tr.user_row
+                td
+                    span.displayname #{user.user.displayName}
+                    br 
+                    span.user_id #{user.user_id}
+                td.email #{(user.user.emails||[]).join(',')}
+                td.permissions #{(user.user.permissions||[]).join(',')}
+

@@ -12,7 +12,7 @@
 /* 4. add @mixin or @extend customizations here */
 /* create new custom classes from existing classes */
 .specification-label {
-    @extend .text-end;
+    @extend .text-right;
     @extend .small;
     color: #777;
     .specification-warning {
@@ -41,7 +41,7 @@ div.componentUuidComponent {
 }
 
 .componentUuid-info {
-  @extend .text-end;
+  @extend .text-right;
   @extend .small;
   color: #00F;
   white-space: nowrap;
