@@ -29,15 +29,14 @@ router.get('/traveller/'+utils.uuid_regex, permissions.checkPermission("componen
         Components.retrieve(componentUuid),
         Tests.getRecentComponentTests(componentUuid),
       ]);
-    // console.log('recent tests',tests);
-    var records = [component,...tests];
 
 
     var courseId = await Courses.getCourseForComponentType(component.type);
+    var evaluatedCourse = null;
+    var jobs = [];
     console.log("courseId",courseId)
     if(courseId) {
-      var evaluatedCourse = await Courses.evaluate(courseId,componentUuid);
-      records.unshift(evaluatedCourse);
+      evaluatedCourse = await Courses.evaluate(courseId,componentUuid);
 
       var jobs = [];
       // look for relevant workflows.
@@ -50,11 +49,13 @@ router.get('/traveller/'+utils.uuid_regex, permissions.checkPermission("componen
       var jobPromises = [];
       console.log("jobs",jobs);
       for(var job of jobs) jobPromises.push(Jobs.retrieve(job.jobId))
-      var jobs = await Promise.all(jobPromises);
-      records.push(...jobs);
+      jobs = await Promise.all(jobPromises);
     }    
-
-    console.log(records);
+    var records = [component];
+    if(evaluatedCourse) records.push(evaluatedCourse);
+    records.push(...tests);
+    records.push(...jobs);
+    // console.log(records);
 
     res.render("traveller.pug",{component,componentUuid,records});
   })

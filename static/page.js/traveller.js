@@ -20,6 +20,13 @@ $(function(){
       console.log("got formrecord",schema_url,formRecord);
       // Update some things in the metadata.
       $(".formname",section).text(formRecord.formName);
+      if(formRecord.icon && formRecord.icon.length>0) {
+        $(".icon",section).attr('src',formRecord.icon[0].url);
+        if(recordType == 'component')
+        $(".component-icon").attr('src',formRecord.icon[0].url);
+
+      }
+
 
       Formio.createForm(builtform[0],formRecord.schema,
         {
@@ -30,7 +37,7 @@ $(function(){
           form.submission = record;
           form.nosubmit = true; // Use the beforeSubmit hook.
           pending = pending.filter(e=> e!==section );
-          if(pending.length == 0) window.print();
+          // if(pending.length == 0) window.print();
         });
     }) // end $.get
   }) // end $.each
