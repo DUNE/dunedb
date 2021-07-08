@@ -207,7 +207,7 @@ For example, an element might need to be entered in the DB, then located, then w
   name: <string>,    // user-readable name of this path (mutable)
   icon: <file reference>, // nice icon to display this thing with.
   tags: [ <string>,... ],  // Which tags to apply. Typically only one tag
-  path: <path>,
+  path: [ <step>, <step>, <step>],
 
   componentType,  // Primary component type this course will track.
 };
@@ -231,6 +231,21 @@ and
   }
 ```
 
+
+### Doc / Wiki
+Wiki or Doc entries are tracked like Components: there is a single ID (alphanumeric for the url) which identifies each, and old versions are kept.
+
+
+```
+{
+  _id: <BSON Uuid>,      // specific object
+  recordType: "doc",
+  docId: <string>,      // unique name of this path
+  validity: <validity>,  // This is a versioned object
+  insertion: <insertion>, // Last insertion
+  data: <markdown string>,
+};
+```
 
 
 

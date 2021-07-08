@@ -459,7 +459,61 @@ describe("private routes",function() {
 
     });
 
+    test('POST /json/course/<courseId>',()=>{
+      return myrequest(appAuthorized)
+        .post('/json/course/JEST_TEST_COURSE')
+        .send({
+          courseId: 'JEST_TEST_COURSE',
+          componentType: 'cform'+suffix,
+          name: 'Dummy Course by JEST',
+          icon: [],
+          tags: ['JEST'],
+          path: [
+            {  type: 'component',
+              formId: "cform"+suffix,
+              identifier: 'componentUuid',
+              advice: "advice1", },
+            { type: 'test',
+              formId: "test"+suffix,
+              advice: "advice2",
+              identifier: 'componentUuid',
+            }
+          ]
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(()=>{});
+    });
+    
+    test('GET /json/course/<courseId>',()=>{
+      return myrequest(appAuthorized)
+        .get('/json/course/JEST_TEST_COURSE')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(r=>{
+          expect(r.body).toBeDefined();
+          expect(r.body.path.length).toEqual(2);
+        });
+    });
 
+    test('GET /json/course/<courseId>/<objectId> (course evaluation)',()=>{
+      return myrequest(appAuthorized)
+        .get('/json/course/JEST_TEST_COURSE/'+uuid)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(r=>{
+          expect(r.body).toBeDefined();
+          expect(r.body.score).toEqual(2);
+          expect(r.body.score_denominator).toEqual(2);
+        });
+    })
+
+    test('GET /json/courses',()=>{
+      return myrequest(appAuthorized)
+        .get('/json/courses')
+        .expect('Content-Type', /json/)
+        .expect(200);
+    })
 
 
     // Various listings

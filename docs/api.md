@@ -295,6 +295,72 @@ Admin only can set `user_metata` object fields.  Currently, the only field used 
 This is to be used mostly by managers to either promote users' permissions, to change email addresses (so that users can use the 'lost password' links by auth0), or set the starint page.
 
 
+## Courses
+
+A Course is a description of a series of steps that must be undertaken to complete a construction or QA task. This typically includes a component, and some tests or jobs that should be done on that component.
+
+These are briefly described below:
+
+#### GET /api/courses
+Get a list of courseIds
+
+#### GET /api/<courseId>
+Get the course object that describes the course of courseId
+
+#### POST /api/<courseId>
+Set a new version of the course object of that courseId
+
+#### GET /api/<courseId>/<uuid>
+This evaluates the object against the course requirements, and returns the Course object, with extra fields attached:
+```
+{
+  recordType: "courseEvaluation",
+  courseId: <string>,
+  insertion: <insertion>,
+  validity: <validity>,
+  icon: [...],
+  tags: [...],
+  path: [<step>,<step>,<step>],
+  evaluation: [<evaluatedStep>, <evaluatedStep>, <evaluatedStep>]
+  score: <number>,  // How many steps got completed at least once
+  score_denominator: <number>,  // number of steps to be scored
+  most_recent: <step>,  // the most recent step to be completed
+  next_step: <step>,  // the next step that should be logically completed in the course order
+}
+```
+
+An `evaluatedStep` is just like a step, except it includes a `result` property:
+```
+  result: [ {obj}, {obj},..]
+```
+where the objects represent completed steps for that component.  e.g. a Test result includes testId and insertion information.
+
+## Docs and Wiki
+
+The docs are available for users at `/doc` and `/doc/topicname`.
+Note that this is different from the the static documentation, which is at `/docs/filename.md`
+
+
+#### GET /api/doc
+
+Retrieves a list of docIds for all valid documents.
+
+#### GET /api/doc/topicName
+
+Retrieves the record for the topicName topic, retrieving a JSON document including the Markdown code.  A rendered version of the document is at `/doc/topicName`
+
+#### POST /api/doc/topicName
+
+Saves a new version of the topicName.  Format should match that in the schema document, namely:
+```
+{ 
+  docId: "topicname",
+  data: <markdown string>
+}
+```
+Version data will be auto-incremented on save.
+
+
 
 
 
