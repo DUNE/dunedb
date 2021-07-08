@@ -36,26 +36,17 @@ block content
       | .
 
   div.border-success.border.rounded
-    h3 Things I need feedback on:
+    h3 Messages of the day:
     ul
-      li Permissions and authentication. 
-        ul
-          li Currently, the system has combinations of tests/jobs/components/forms edit/view/create, however, it's not clear if this is the right arrangement; we may wish to simplify to view/edit/admin  where 'admin' is allowed to edit forms. 
-          li A major question is how we use the QR-scan feature. If you scan a QR code in your phone, should you get a login screen? Or is it OK to jump straight to the traveller?  I think it would be good not to have to log in to see basic stuff, but it may open all sorts of security issues: it may, for example, expose email or physical addresses.  Do we care?
-      li Courses
-        ul
-          li The course system is basically in place. Does it do what we want?
-          li How would we like it to look better
-      li Custom landing pages
-        ul
-          li Users should not all be confronted by the left-hand task bar. We could assign a custom role for each user and send them to a Course or a Tag screen instead.  Should we? 
-      li Builtin docs
-        ul
-          li Is it worthwhile building in a wiki, or a markdown editor for certain pages?
-      li Printing - what kinds of documents will be printed?
-    br
-    | --Nathaniel
-    
+      li Check the Slack Channel where I'm making updates.
+      li Course pages now look better (Jun 29)
+      li Now a built-in wiki using Markdown; see the sidebar. You might need to log out and in to get privs. (Jul 6)
+      li The ArrayComponent, which makes plots of things like wire tensions, now has configurable specifications, and will count the number of elements outside those specifcations (Jul 6)
+      li There is a new "/traveller/<uuid>" route, which shows a printable page with all the latest tests for a component. Linked to from the component page.  See if this looks good! (Jul 6)
+      li Updated some documentation and unit tests. (Jul 7)
+      li 
+        em Note there may be some new instabilities or wonky features
+        | I just updated many 3rd party packages. It passes the unit tests, but things might render funny. Please let me know if there are any usability issues or bad formats.
 
 
   if(tags && tags.length>0)
