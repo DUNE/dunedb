@@ -70,7 +70,7 @@ class SpecNumberComponent extends NumberComponent{
       if (val > this.component.specification_maximum)
         warning = "Above maximum specification. ";
     }
-    if(warning) this.specification_label.prepend("<span class='specification-warning'>"+warning+"</span>");
+    if(warning) this.specification_label.prepend("<span class='specification-warning'><em>"+warning+"</em></span>");
   }
 
 

@@ -169,7 +169,7 @@ class QR_Component extends TextFieldComponent{
     }
     // tpl += `<a href="${value}" ref='linkToComponent' class="uuid-link" ></a>`;
     tpl += "</div>";
-    tpl += "<a target='_blank' ref='compUuidInfo' class='componentUuid-info'></a>";
+    tpl += "<em><a target='_blank' ref='compUuidInfo' class='componentUuid-info'></a></em>";
     return tpl;
     // return TextFieldComponent.prototype.renderElement.call(this,textvalue,index)+tpl;
   }
