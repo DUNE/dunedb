@@ -2,11 +2,11 @@
 # Might be useful to others (like me)
 # --NJT
 
-import SietchConnect
+from SietchConnect import SietchConnect
 import json
 
 # sietch = SietchConnect.SietchConnect("nicola.creds") # or whatever file you have.
-sietch = SietchConnect.SietchConnect("localhost_config.json") # or whatever file you have.
+sietch = SietchConnect("localhost_config.json") # or whatever file you have.
 
 board_id = "board ID 123132";
 board_type = "X-layer Head Board A"
@@ -19,12 +19,12 @@ r = sietch.api("/search/component?limit=1",{
     "data.board_id": board_id,
   });
 
-print r;
+print(r);
 
 uuid = "";
 if(len(r)>0) :
   uuid = r[0]['componentUuid'];
-  print "Object already exists with uuid " + uuid
+  print("Object already exists with uuid " + uuid)
 else:
   # this object does not yet exist. Create it.
 
@@ -41,7 +41,7 @@ else:
     }
     })
 
-  print "Inserted", r
+  print("Inserted "+ r)
 
 # Does this object already have test data?
 
@@ -50,7 +50,7 @@ test_type = 'thickness_measurment_type_123'
 tests = sietch.api("/search/test/thickness_measurment_type_123",
   {"componentUuid":uuid});
 
-print str(len(tests)) + " have been run on this board already."
+print(str(len(tests)) + " have been run on this board already.")
 
 # # How to run a test on an existing component, with UUID as given
 

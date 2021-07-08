@@ -27,8 +27,6 @@
 
 # Sietch API
 
-(Sietch schema v4, July 2020)
-
 Sietch does all API calls via HTTP GET and POST.  This can be done, for example, with the python `http` library.
 
 The API can be accessed one of two ways, by either a session token, or with a JWT token.
@@ -55,6 +53,46 @@ where these two fields are granted by a Sietch admin.  These users are special o
 where XXXXXXXXXX is the JWT access token string.
 
 These calls are all served from `routes/api.js`
+
+
+## Obtaining credentials
+At the moment, machine-to-machine credentials are created on the commandline on the server host using this format:
+```
+$ lib/m2m.js --name <name of script> --email <email of responsible person> 
+```
+The config is the last few lines of text.  FIXME: automate this for admin users.
+
+## Client libraries
+
+In the github repository (https://nathanieltagg/sietch) there is a 'client' subdirectory, which contains code usable from within python or node standalone scripts. Either version requires you to have a credentials file containing the above authentication codes.
+
+### Python
+To use the python libraries, copy SietchConnect.py to your project, then:
+```python
+from SietchConnect import SietchConnect
+import json
+ 
+sietch = new SietchConnect("credentials.json") # or whatever file you have.
+component = sietch.api("/component/123456789-abcd-1234-1234-123456789abc")
+sietch.api("/component/123456789-abcd-1234-1234-123456789abc",{<new component version>})
+```
+The if a second argument is given to the `api` call it is treated as a 'POST' operation; if not, it's a 'GET' operation. Commands throw errors if unsuccessful, and will return python objects analagous to the JSON below, and the second argument posts
+
+### Node.js
+The SietchConnect.js file shows a similar format for running scripts from node.  (I know this isn't very popular, but I've found it more convenient than mentally switching languages to python.).  Most functions are promises/async and throw errors if unsuccessful.
+```
+const SietchConnect = require("./SietchConnect.js");
+
+async function do_stuff() {
+    var sietch = new SietchConnect("localhost_config.json");
+    await sietch.connect();
+    // Print out the JSON list of component Types.
+    console.log(await sietch.get('/componentTypes'));
+    // Connection statistics
+    console.log(sietch.report())
+}
+do_stuff().then(()=>{console.log("Done!")});
+```
 
 ## Results
 Results will always be in JSON form, either a single element or an object. Successful calls with have status code 200.

@@ -1,6 +1,8 @@
+#! /usr/bin/env node
 "use strict";
 var request = require('request');
 var util    = require('util');
+const fs = require('fs');
 
 class TimeStats{
   constructor() {
@@ -22,7 +24,12 @@ class TimeStats{
 
 function SietchConnect(config)
 {
-  this.auth = config || require('./api_config2.json');
+  this.auth = config;
+  if(typeof config == 'string') {
+    // Load from file
+    var s = fs.readFileSync(config);
+    this.auth = JSON.parse(s)
+  }
   this.request_params = {
     method: "POST",
     headers: { 'content-type': 'application/json' },
@@ -33,7 +40,7 @@ function SietchConnect(config)
   this.stats = {};
 
   this.connect = async function() {
-    console.log("Connecting..",this.request_params);
+    console.log("Connecting..");
     var response = await util.promisify(request)(this.request_params);
     // console.log(response);
     if(response.statusCode != 200) throw new Error('Error in connect(). Response code '+response.statusCode+'\n'+ response.body);
@@ -86,4 +93,19 @@ function SietchConnect(config)
   }
 }
 
-module.exports = SietchConnect
+module.exports = SietchConnect;
+
+
+if (require.main === module) {
+// Test code
+
+  async function main(){
+    var sietch = new SietchConnect("localhost_config.json");
+    await sietch.connect();
+    console.log(await sietch.get('/componentTypes'));
+    // Quick test with local config file.
+    console.log(sietch.report())
+  }
+  main().then();
+
+}

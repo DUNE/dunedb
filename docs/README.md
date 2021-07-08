@@ -49,6 +49,17 @@ Use `nodemon` for testing. Use `pm2` to keep a server alive.
 
 Talk to Nathaniel.  Join the `apa_db` channel on the DUNE Slack.
 
+### Design principles
+In general, I try to make the URL routes human-readable and explicable.  The only hard-to-type things should be ID numbers for specific entries or components.
+
+Human-usable routes and API routes have similar structure.  For example:
+https://sietch.xyz/component/abcd123...  yields a view of the component
+https://sietch.xyz/json/component/abcd123...  can be gotten from the browser, for a JSON document with the component info
+https://sietch.xyz/api/component/abcd123...  gets the JSON document using an machine-to-machine authentication suitable for scripts.
+
+
+
+
 
 ## Code organization
 
@@ -77,7 +88,7 @@ Talk to Nathaniel.  Join the `apa_db` channel on the DUNE Slack.
 `/configuration.js` describes the default configuration.  Some elements will need overriding to work.  Overrides are to be put in `/config.js`  FIXME make a config directory
 ## Authors
 
-* **Nathaniel Tagg** - *Otterbein University* - http://neutrino.otterbein.edu
+* **Nathaniel Tagg** -  https://github.io/nathanieltagg
 
 
 ## Notes
