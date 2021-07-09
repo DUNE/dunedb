@@ -142,23 +142,28 @@ body(class="deployment-"+deployment)
               if(permissions && permissions.userHas(user,"users:view"))
                 li.nav-item
                   +navlink(href='/users')
-                    i.fa.fa-pencil("aria-hidden"="true")
+                    i.fa.fa-user("aria-hidden"="true")
                     | Users
+                  ul.nav.flex-column.ml-3.sub-bar
+
+                    if(permissions && permissions.userHas(user,"users:edit"))
+                      li.nav-item
+                        +navlink(href='/m2mUsers')
+                          | m2m Users
 
               li.nav-item
                 +navlink(href='/search')
                   i.fa.fa-search("aria-hidden"="true")
                   | Advanced Search
 
-
-
-            h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-              span Wiki
-            ul.nav.flex-column.mb-2
               li.nav-item
-                +navlink(href='/doc/start') Start page
-              li.nav-item
-                +navlink(href='/doc') All entries
+                +navlink(href='/doc/start')
+                  i.fa.fa-globe("aria-hidden"="true")
+                  span Wiki
+              
+                ul.nav.flex-column.ml-3.sub-bar
+                  li.nav-item
+                   +navlink(href='/doc') All entries
                 
             h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
               span About
