@@ -1,0 +1,30 @@
+extends default
+
+block layoutDefinitions
+  - sidebar="inactive"
+
+
+block content
+  
+    img.avatar_image.border(src=userProfile.picture)
+    dl
+      dt Display Name
+      dd=userProfile.name
+      dt User ID
+      dd=userProfile.user_id
+      dt Email
+      dd 
+        a(href='mailto:'+userProfile.email) #{userProfile.email} 
+        if(userProfile.email_verified)
+          span (Verified)
+      dt Created
+      dd=userProfile.created_at
+      dt Roles
+      dd
+        each role in userRoles
+          span #{role.name}
+            |
+            |
+
+    if(permissions.userHas(user,'users:edit'))
+      a(href='/user/'+user.user_id) Modify this user
