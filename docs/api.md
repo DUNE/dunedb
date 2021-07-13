@@ -400,5 +400,38 @@ Version data will be auto-incremented on save.
 
 
 
+## Files and images
+
+Generally, you should not be accessing this directly; files and images are uploaded via forms by hand.  Files storage can get very unweildly, and there are not good tools for tracking files yet.  Talk to an expert!  
+
+This information is included for programming reference.
+
+Files are currently configured to be stored in the mongo GridFS file system.  Files, when uploaded, are given unique identifiers and MIME file types.  
+
+These are currently not supported in the scripting interface, but this coulde change.
+
+### POST /file/gridfs
+
+Requires tests:submit privs
+
+Unlike other calls, this is a multipart/form-data request, not a JSON request.  Only one File component is accepted.  The server will return a JSON document of the form:
+```
+ {
+    url: <string>,
+   name: <filename>,
+   size: <int>
+}
+```  
+The URL part is the relevant one: this is the URL by which the uploaded document can be accessed later. There is NO OTHER WAY to search or access the files. Therefore, file data should only be saved when the file info is included in another document.
+
+URLs are immutable.  You cannot replace a file, only upload a new one with a new unique key.
+
+File accesses are tracked. (FIXME: we should have a special housekeeping search that will look for image URLs in other mongo records, to see if there are any orphan files so we can delete them.)
+
+### GET /file/gridfs/<objectid>
+
+This is the URL you will get from the above call.  Note that images will look like this, and will not have '.jpg' or '.png' suffixes.  However, the MIME-type should be set as was appropriate for the uploaded file.
+
+If `?resize=<int>` is added, and the file is an image, the server will dynamically resize the image to with width (in pixels) supplied as the int, keeping the aspect ratio the same.
 
 
