@@ -55,14 +55,22 @@ router.get("/doc/:docId/edit",permissions.checkPermission("docs:edit"),
 router.get("/doc/:docId",permissions.checkPermission("docs:view"),
   async function(req,res,next) {
     var docId = req.params.docId;
-    var record = await Docs.retrieve(docId);
+    var options = {};
+
+    var renderData = {};
+    if(req.query.v) {
+      options.version = parseInt(req.query.v);
+      renderData.version = req.query.v;
+    }
+
+    var record = await Docs.retrieve(docId,options);
     if(!record) {
       record = {data:`This document (${docId}) does not yet exist. [Click here to create it](/doc/${docId}/edit)`}
     }
-    var context = {md:md_converter.makeHtml(record.data)};
-    if(permissions.hasPermission(req,"docs:edit")) context.editlink="/doc/"+docId+"/edit";
-    console.log("context",context)
-    res.render("md.pug",context);
+    renderData.md = md_converter.makeHtml(record.data);
+    if(permissions.hasPermission(req,"docs:edit")) renderData.editlink="/doc/"+docId+"/edit";
+    // console.log("context",context)
+    res.render("md.pug",renderData);
   }
 );
 

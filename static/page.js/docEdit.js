@@ -37,6 +37,13 @@ $(async function(){
 
   function update() {
     $('#docId').text(docId);
+    if(record.validity && record.validity.version) {
+      var links = ''
+      for(var v=1; v<record.validity.version; v++) {
+        links+=`<a target="_blank" href="/doc/${docId}?v=${v}">v${v}</a> &nbsp;&nbsp;`;
+      }
+      $('#version-links').html(links);
+    }
     easyMDE.value(record.data);
     if(record.insertion)
       $('#last_edited').text(`${record.insertion.user.displayName} on ${record.insertion.insertDate}`)
