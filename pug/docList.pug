@@ -15,9 +15,30 @@ block vars
 block content  
   p.h3=title||"Documents"
 
-  div#list
+  table.table
+    thead
+      tr 
+        th docID
+        th Created
+        th Edited
+        th Version
+
     each item in docslist
-      a(href="/doc/"+item.docId)=item.docId
+      tr
+        th
+          a(href="/doc/"+item.docId)=item.docId
+        th 
+          +short_user(item.created_by)
+          |
+          |
+          +dateFormatAndAgo(item.created)
+        th 
+          +short_user(item.edited_by)
+          |
+          |
+          +dateFormatAndAgo(item.created)
+        th #{item.version}
+
   p
   if(permissions.userHas(user,"docs:create"))
       p.h5.mt-4
