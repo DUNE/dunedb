@@ -41,6 +41,7 @@ function CopyToDot(obj,prefix)
 
 async function loadFormIds(recordType)
 {
+  if(recordType == "doc") return;
   var route = '/json/'+recordType+"Forms";
   var types = await $.get(route);
   console.log('got types of formId:',types);
@@ -144,7 +145,7 @@ function displayResults(result)
     $('#results').append("<li>No results.</li>");
   for(var item of result) {
     var h = `<li class="search-result recordType-${item.recordType}">
-              <a href="${item.route}">${(item.type?item.type+":":"")}${item.name||item.formId}</a>
+              <a href="${item.route}">${(item.type?item.type+":":"")}${item.name||item.formId||item.docId}</a>
               ${item.recordType} ${item.insertion.user.displayName} ${moment(item.insertion.insertDate).format()}
             </li>`;
     $('#results').append(h);

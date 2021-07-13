@@ -12,6 +12,7 @@ const Jobs = require("lib/Jobs.js")('job');
 const ComponentTypes = require("lib/ComponentTypes.js");
 const Courses = require("lib/Courses.js");
 // const Jobs = require("lib/Jobs.js");
+const Docs = require("lib/Docs.js");
 const Cache = require("lib/Cache.js");
 const utils = require("lib/utils.js");
 const permissions = require("lib/permissions.js");
@@ -489,6 +490,10 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
     if(!req.params.recordType || req.params.recordType === 'job') {
       if(formId) matchobj.formId = formId;
       result.push(...await Jobs.search(searchterms,matchobj,limit,skip));
+      // logger.info("result",result);
+    }
+    if(!req.params.recordType || req.params.recordType === 'doc') {
+      result.push(...await Docs.search(searchterms,matchobj,limit,skip));
       // logger.info("result",result);
     }
     return res.json(result);
