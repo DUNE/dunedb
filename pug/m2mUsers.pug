@@ -40,12 +40,12 @@ block content
               th Email
               th Permissions
           tbody
-            each user in users
+            each m2muser in users
               tr.user_row
                 td
-                    span.displayname #{user.user.displayName}
+                    span.displayname #{m2muser.user.displayName}
                     br 
-                    span.user_id #{user.user_id}
-                td.email #{(user.user.emails||[]).join(',')}
-                td.permissions #{(user.user.permissions||[]).join(',')}
+                    span.user_id #{m2muser.user_id}
+                td.email #{(m2muser.user.emails||[]).join(',')}
+                td.permissions #{(m2muser.user.permissions||[]).join(',')}
 

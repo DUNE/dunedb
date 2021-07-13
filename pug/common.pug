@@ -85,16 +85,17 @@ mixin uuid_autocomplete
     select.form-control.component-uuid-autocomplete.go-to-component(autocomplete="off" placeholder='type to search...')
 
 block pugscripts
-  - function user_email(user) { return ((user.emails||[])[0]||{}).value || "" };
-  - function user_shortname(user) { return user.displayName || user_email(user) };
+  - function isAuthenticated() { return !!(user); }
+  - function user_email(aUser) { if (isAuthenticated()) return ((aUser.emails||[])[0]||{}).value || "";  else return "&lt;log in to see&gt;" };
+  - function user_shortname(aUser) { if (isAuthenticated()) return aUser.displayName || user_email(aUser); else return "&lt;log in to see&gt;" };
 
 
-mixin short_user(user)
+mixin short_user(aUser)
   if (!user)
-    span anonymous
+    span &lt;log in to see&gt;
   else
     //- a(href='mailto:'+user_email(user))=user.displayName||user_email(user)
-    a(href='/profile/'+encodeURIComponent(user.user_id))=user.displayName||user_email(user)
+    a(href='/profile/'+encodeURIComponent(aUser.user_id))=aUser.displayName||user_email(aUser)
 
 
 

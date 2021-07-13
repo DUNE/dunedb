@@ -21,7 +21,8 @@ module.exports = router;
 
 
 // A variant for traveller doc. Might want to adopt this instead for above.
-router.get('/traveller/'+utils.uuid_regex, permissions.checkPermission("components:view"),
+router.get('/traveller/'+utils.uuid_regex, 
+  //permissions.checkPermission("components:view"),
   async function(req,res,next) {
     var componentUuid = req.params.uuid;
     Courses.getCourseForComponentType()
@@ -34,7 +35,7 @@ router.get('/traveller/'+utils.uuid_regex, permissions.checkPermission("componen
     var courseId = await Courses.getCourseForComponentType(component.type);
     var evaluatedCourse = null;
     var jobs = [];
-    console.log("courseId",courseId)
+    // console.log("courseId",courseId)
     if(courseId) {
       evaluatedCourse = await Courses.evaluate(courseId,componentUuid);
 
@@ -47,7 +48,7 @@ router.get('/traveller/'+utils.uuid_regex, permissions.checkPermission("componen
       }
 
       var jobPromises = [];
-      console.log("jobs",jobs);
+      // console.log("jobs",jobs);
       for(var job of jobs) jobPromises.push(Jobs.retrieve(job.jobId))
       jobs = await Promise.all(jobPromises);
     }    

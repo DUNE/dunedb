@@ -1,34 +1,31 @@
-extend default
+html
 
-include common.pug
+  head
+    title "Inadequate permissions"
+  body
 
-block vars
-  - var page_title="Permissions error";
+    p You do not have permission to see this page or perform this action.
 
-block content
+    if(required_permission)
+      p Required permission: 
+        code #{required_permission}
 
-  p You do not have permission to perform this action.
-
-  if(required_permission)
-    p Required permission: 
-      code #{required_permission}
-
-  if(required_user)
-    p or required user:
-      code #{required_user}
+    if(required_user)
+      p or required user:
+        code #{required_user}
 
 
-  if(!user)
-    p You must 
-      |
-      |
-      a(href="/login") log in or sign up.
-  else
-    p You are logged in as
-      code #{user.user_id}
-      code #{user.name}
-    p Your roles: 
-      code #{user.roles.join(', ')}
-    p Your permissions: 
-      code #{user.permissions.join(', ')}
+    if(!user)
+      p You must 
+        |
+        |
+        a(href="/login") log in or sign up to see this page.
+    else
+      p You are logged in as
+        code #{user.user_id}
+        code #{user.name}
+      p Your roles: 
+        code #{user.roles.join(', ')}
+      p Your permissions: 
+        code #{user.permissions.join(', ')}
 

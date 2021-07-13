@@ -29,7 +29,7 @@ router.get("/uuid",async function(req,res,next) {
 router.get("/testId",async function(req,res,next) {
   // this functionality is put into Components, in case we change abstraction again.
   var matches = await Tests.findTestIdStartsWith(req.query.q,req.query.formId);
-  console.log(req.query);
+  //console.log(req.query);
   if(matches instanceof Error) return res.json([]);
 
   for(var m of matches) {

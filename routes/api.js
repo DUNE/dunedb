@@ -233,7 +233,7 @@ router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:forma
       var obj = await Forms.list(req.params.collection)
       if(req.params.format=="list") {
         var list = [];
-        console.log(obj);
+        // console.log(obj);
         for(var key in obj) list.push(obj[key]);
         return res.json(list);
       }
@@ -335,7 +335,7 @@ router.post("/test/getBulk",  permissions.checkPermissionJson('tests:view'),
   try {
     if(!Array.isArray(req.body)) throw(new Error("/test/getBulk expects and array"))
     var input = req.body;
-    console.log("/test/getBulk with ",req.body.length, " entries");
+    // console.log("/test/getBulk with ",req.body.length, " entries");
     logger.info("retrieve test data",req.body);
     var records = await Tests.retrieveBulk(req.body);
     return res.json(records,null,2);

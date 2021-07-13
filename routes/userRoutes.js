@@ -41,24 +41,6 @@ var manager = new ManagementClient({
 //   console.log(r);
 // })();
 
-// router.get('/profile/:userId?',permissions.checkPermission("components:view"),
-//   async function(req,res,next) {
-//     var user_id = req.user.user_id;
-//     if(req.params.userId)
-//       user_id = decodeURIComponent(req.params.userId);
-
-//     // logger.info("looking up",user_id);
-//     // logger.info(await manager.getUserRoles({id:user_id}))
-//     var [user,roles,user_permissions] = await Promise.all([
-//         manager.getUser({id:user_id}),
-//         manager.getUserRoles({id:user_id}),
-//         manager.getUserPermissions({id:user_id}),
-//       ]);
-//     if(Array.isArray(user)) return res.status(400).send("More than one user matched");
-//     if(!user)return res.status(400).send("No user with that ID");
-//    // logger.info(user);
-//    res.render("user.pug",{user,roles,user_permissions});
-// });
 
 // Self-promotion
 router.get("/promoteYourself",
@@ -69,23 +51,6 @@ router.get("/promoteYourself",
       res.render("promoteYourself.pug");
   });
 
-// rate limiting
-// var limiter = require('express-limiter-mongo')(
-//   {mongoUrl: global.config.mongo_uri,
-//   lookup: ['connection.remoteAddress','headers.x-forwarded-for'],
-//   total: 5,
-//   expire: 1000 * 60 * 60,
-//   onRateLimited: (req,res,next) => { res.status(429).send(`Too many tries. You are locked out for ${(res.get("Retry-After")/60.).toFixed()} minutes; try again then.`); },
-//   }
-// );
-
-// var limiter = require('express-bouncer')(500,10*60*1000,3);
-
-// limiter.blocked = function(req,res,next,remaining) {
-//   res.status(429);
-//   res.send("Too many requests have been made, " +
-//     "please wait " + Math.floor(remaining / 1000) + " seconds");
-// };
 
 router.post("/promoteYourself",
   permissions.ensureAuthenticated, // you can only promote if you're logged in.
@@ -154,12 +119,24 @@ router.get("/user/:user_id?",
   }
 );
 
-// alias for /user/:me
-router.get("/profile", permissions.checkAuthenticated,
+// public profile for user
+router.get('/profile/:userId?',permissions.checkPermission("users:view"),
   async function(req,res,next) {
-    res.render("user_edit.pug",{user_id:req.user.user_id});
-  }
-);
+    var user_id = req.user.user_id;
+    if(req.params.userId)
+      user_id = decodeURIComponent(req.params.userId);
+
+    // logger.info("looking up",user_id);
+    // logger.info(await manager.getUserRoles({id:user_id}))
+    var [userProfile,userRoles] = await Promise.all([
+        manager.getUser({id:user_id}),
+        manager.getUserRoles({id:user_id}),
+      ]);
+    if(Array.isArray(userProfile)) return res.status(400).send("More than one user matched");
+    if(!userProfile)return res.status(400).send("No user with that ID");
+   // logger.info(user);
+   res.render("userProfile.pug",{userProfile,userRoles});
+});
 
 const m2m = require("lib/m2m.js");
 

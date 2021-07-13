@@ -83,8 +83,12 @@ async function get_component(req,res) {
   }
 }
 
-router.get('/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
-router.get('/component/'+utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
+router.get('/'+utils.uuid_regex, 
+  // permissions.checkPermission("components:view"), 
+  get_component);
+router.get('/component/'+utils.uuid_regex, 
+  // permissions.checkPermission("components:view"),
+   get_component);
 
 // allow short UUIDs
 router.get('/'+utils.short_uuid_regex,function(req,res,next) {
