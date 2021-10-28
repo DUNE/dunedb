@@ -22,7 +22,7 @@ block content
       h3 Register a new component:
       each form in componentForms
         p 
-          a(href='/NewComponent/'+form.formId).btn.btn-outline-info 
+          a(href='/component/new/'+form.formId).btn.btn-outline-info 
             if(form.icon) 
               img.icon(src=form.icon)
             span #{form.formName}

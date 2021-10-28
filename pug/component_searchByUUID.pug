@@ -1,0 +1,68 @@
+extend default
+
+block vars
+  - var page_title = "Search Components by UUID";
+
+block extrascripts
+
+  // Script: create a one-entry form
+  // On change, validate it to see if it's a good UUID ... if so, create the URL and jump to it
+  script(type = 'text/javascript').
+    $(async function()
+    {
+      // I could do this by API query of the server, but this works for now.
+      var schema = 
+      {
+        "components": 
+        [
+          {
+            "label"     : "Component UUID",
+            "spellcheck": false,
+            "tableView" : false,
+            "key"       : "componentUuid",
+            "type"      : "ComponentUUID",
+            "autofocus" : true,  // Set the cursor to immediately focus to the entry box
+            "input"     : true,
+            "validate"  : 
+            {
+               "required": true
+            },
+          },
+        ]
+      }
+
+      form = await Formio.createForm(document.getElementById('builtform'), schema);
+      form.on("change", function()
+      {
+        if(form.isValid())
+        {
+          var uuid = form.submission.data.componentUuid;
+          
+          if(uuid && uuid.length > 10)
+          {
+             window.location.assign(`/${uuid}`)
+          }
+        }
+      });
+    });
+
+block content
+  pre #{''}
+  pre #{''}
+  
+  h3=page_title
+  
+  p The input box below uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
+    br
+    | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
+
+  pre #{''}
+
+  .row
+    .col
+      #builtform
+    
+    // This is a dirty way of restricting the width of the text box ... add another column to the right side of it
+    // Otherwise it fills the entire width of the page and looks really stupid
+    .col.offset-md-20
+

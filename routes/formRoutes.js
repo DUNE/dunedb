@@ -34,7 +34,7 @@ router.get("/NewTestForm/:formId", permissions.checkPermission("forms:edit"), as
 // Edit existing test form
 router.get("/EditTestForm/:formId?", permissions.checkPermission("forms:edit"), async function(req,res){
   var componentTypes = await Components.getTypes();
-  res.render('EditTestForm.pug',{collection:"testForms",componentTypes,formId:req.params.formId});
+  res.render('edit_testForm.pug',{collection:"testForms",componentTypes,formId:req.params.formId});
 });
 
 

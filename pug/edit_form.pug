@@ -1,0 +1,58 @@
+extend default
+
+//-  
+//- This is a template ... it must be extended to include 'block metaschema' in order to make it functional
+//-
+
+block extrascripts
+  style.
+    .formbuilder_area {border: 3px solid red; border-radius: 10px; padding: 5px;}
+
+  script(type = 'text/javascript').
+    //- var record = !{JSON.stringify(rec, null , 4)};
+    var formId = "!{formId}";
+    var collection = "!{collection}";
+    //- var componentTypes = !{JSON.stringify(componentTypes) || "null"} ;
+  
+  block metaschema
+  
+  block workscripts
+    script(src = '/page.js/edit_form.js')
+
+block content
+  pre #{''}
+  pre #{''}
+  
+  block content_header
+    
+  div#metaform
+
+  pre #{''}
+  
+  hr 
+  
+  pre #{''}
+  
+  div.row
+    div.col
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#json-holder')
+        | Contents of JSON entry (useful for debugging) 
+        i.chevron.fa.fa-fw    
+      div#json-holder.collapse
+        textarea#schema.form-control(rows = 20)
+      
+    div.col
+      a#download_schema_link(download = formId + ".json", href = "") Download JSON File
+       
+      pre #{''}
+        
+      button.btn.btn-primary#copySchemaToClipboard Copy JSON to Clipboard
+      
+      pre #{''}
+      
+      button.btn.btn-primary#pasteSchemaFromClipboard Paste JSON from Clipboard
+
+  pre #{''}
+  pre #{''}
+

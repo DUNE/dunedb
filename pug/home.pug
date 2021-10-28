@@ -4,79 +4,112 @@ include common.pug
 
 block extrascripts
   style.
-    .tagbutton { margin: 4px; }
+    .tagbutton {margin: 4px;}
 
 block vars
-  - var page_title="Sietch Dashboard";
+  - var page_title = "Sietch Dashboard";
 
 block content
   if deployment == "laptop"
     .alert.alert-warning
-      p This is Sietch running on your laptop. 
-        br
-        | Hi, and welcome to the production team! 
-        br
-        a(href='mailto=nathaniel.tagg@gmail.com') --Nathaniel 
+      p Hi, and welcome to the Sietch development team, currently led by  
+        a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar
+        | .  Sietch was originally developed by Nathaniel Tagg.
       
+      p This is an instance of Sietch running locally on your computer.  It is <strong>not</strong> connected to the development or production databases, so any changes made here will not be reflected there.
+        br
+        | If you create any content on here that you wish moved to the 
+        a(href = 'https://dev.sietch.xyz') development
+        |  or 
+        a(href = 'https://sietch.xyz') production
+        |  sites, talk to Krish.  Otherwise, this is your own personal playground.
+  
   if deployment == "devsite"
     .alert.alert-danger
-      p This is the Sietch development site
+      p This is the Sietch Development site.
         br
         | Feel free to create component types, components, forms, and workflows freely.
 
-      p If you create any content on here you wish moved to the production site,
-        | talk to Nathaniel.  Otherwise, this is a free playground.
-
-    a(href='https://sietch.xyz') Production site link
-
+      p If you create any content on here that you wish moved to the 
+        a(href = 'https://sietch.xyz') production
+        |  site, talk to Krish.  Otherwise, this is a free playground.
+  
   if deployment == "production"
-    p.alert.alert-success This is the Sietch production APA database.
-    p If you want a playground to try things out, use the 
-      a(href="https:/dev.sietch.xyz") development site
-      | .
-
-  div.border-success.border.rounded
-    h3 Messages of the day:
+    .alert.alert-success 
+      p This is the Sietch Production APA database.
+      p If you want a playground to try things out, please use either a local instance of Sietch or the 
+        a(href = "https:/dev.sietch.xyz") development 
+        |  site.
+  
+  pre #{''}
+  
+  div.border-success.border.rounded.p-2
+    h5 Messages from the Developers:
     ul
-      li Check the Slack Channel where I'm making updates.
-      li Course pages now look better (Jun 29)
-      li Now a built-in wiki using Markdown; see the sidebar. You might need to log out and in to get privs. (Jul 6)
-      li The ArrayComponent, which makes plots of things like wire tensions, now has configurable specifications, and will count the number of elements outside those specifcations (Jul 6)
-      li There is a new "/traveller/<uuid>" route, which shows a printable page with all the latest tests for a component. Linked to from the component page.  See if this looks good! (Jul 6)
-      li Updated some documentation and unit tests. (Jul 7)
-      li 
-        em Note there may be some new instabilities or wonky features
-        | I just updated many 3rd party packages. It passes the unit tests, but things might render funny. Please let me know if there are any usability issues or bad formats.git 
-
-
-  if(tags && tags.length>0)
+      li <strong>2021-10-15</strong> - We have begun cleaning up the backend code, as well as the frontend page layouts, formatting and fixing typos, starting with pages relating to <strong>components</strong> and <strong>non m2m users</strong>.  There should be no changes in any functionality, but please let us know if you find anything that has broken (currently known issues are listed below).
+      li <strong>2021-07-07</strong> - Updated some documentation and unit tests.
+      li <strong>2021-07-07</strong> - <em>Note there may be some new instabilities or wonky features.</em> I just updated many 3rd party packages. It passes the unit tests, but things might render funny. Please let me know if there are any usability issues or bad formats.
+      li <strong>2021-07-06</strong> - There is a new <strong>"/[uuid]/traveller/"</strong> route, which shows a printable page with all the latest tests for a component. Linked to from the component page.  See if this looks good!
+      li <strong>2021-07-06</strong> - The ArrayComponent, which makes plots of things like wire tensions, now has configurable specifications, and will count the number of elements outside those specifications.
+      li <strong>2021-07-06</strong> - Now we have a built-in wiki using Markdown - see the sidebar. You might need to log out and in to get privs.
+  
+  pre #{''}
+  
+  div.border-danger.border.rounded.p-2
+    h5 Known Bugs:
+    ul
+      li All component pages - the "Created" and "Last Updated" timestamps always give the current time and date (however both are correct in the list of recently changed components)
+      li All component pages - the component history is unavailable (currently gives supposed error in the UUID)
+      li Component Type editing page - the "Paste JSON from Clipboard" button doesn't seem to do anything
+  
+  pre #{''}
+  pre #{''}
+  
+  if(tags && tags.length > 0)
       h5 Work Categories (tags):
       each t in tags
-              a(href='/category/'+t).tagbutton.btn.btn-outline-primary=t
+        a(href = '/category/' + t).tagbutton.btn.btn-outline-primary=t
+  
+  pre #{''}
+  pre #{''}
+  
   hr
-
-
+  
   if(user) 
-    p You are logged in as #{user.displayName} and have roles:
+    p You are logged in as <strong>#{user.displayName}</strong> and have the following roles:
       pre #{user.roles.join(', ')}
-    p If you know the right secrets, you can 
+    p If you would like additional roles and know the right secrets, you can 
       |
-      a(href="/promoteYourself") promote yourself
+      a(href = "/user/promote") promote yourself
       |.
   else 
-    p You are not signed in
+    p You are not signed in.
     
+  pre #{''}
+  
   if(recentComponents)
-      p Recently visited components:
-        ul
-        each c in recentComponents
-          li
-            a(href='/'+c.componentUuid) #{c.componentUuid} &nbsp; &nbsp; #{c.name} [#{c.type}]
+      h5 Recently Visited Components:
+      
+      table(style = 'width: 40%')
+        tr
+          th Type
+          th Name
+          th UUID
+        tbody
+          each c in recentComponents
+            tr
+              td #{c.type}
+              td #{c.name}
+              td 
+                a(href = '/'+c.componentUuid) #{c.componentUuid}
+      
+      pre #{''}
+      pre #{''}
 
   if(git_info)
     p Git revision: #{git_info.revision}
     p Git branch: #{git_info.branch}
     p Git tags: #{git_info.tags}
     p Recent commits:
-      pre=git_info.log
+      pre = git_info.log
 

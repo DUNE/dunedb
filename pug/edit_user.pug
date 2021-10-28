@@ -1,0 +1,65 @@
+extend default
+
+include common.pug
+include course-mixin.pug
+
+block vars
+  - var page_title = "Modify User";
+
+block extrascripts
+  style.
+    img.user_picture {min-height: 50px;
+                      min-width: 10px;
+                      border: 1px solid black;}
+
+  script.
+    var user_id = "#{user_id}";
+    var is_admin = #{permissions.userHas(user, "users:edit")};
+
+  script(src = "/page.js/edit_user.js")
+
+block content
+  pre #{''}
+  pre #{''}
+
+  .row
+    .col
+      h2.user_name
+
+      #builtform
+
+    .col
+      img.avatar_image.border(src = "")
+
+      dl
+        pre #{''}
+      
+        dt User ID
+        dd.user_user_id ...
+      
+        dt Created
+        dd.user_created_at ...
+      
+        dt Last Updated
+        dd.user_updated_at ...
+      
+        dt Last Login
+        dd.user_last_login ...
+      
+        dt Last IP Address
+        dd.user_last_ip ...
+      
+        dt Logins Count
+        dd.user_logins_count ...
+      
+        dt Email Verified
+        dd.user_email_verified ...
+      
+        dt Metadata
+        dd
+          pre.user_user_metadata ...
+
+        dt Permissions granted by Current Roles
+        dd
+          pre.user_permissions
+

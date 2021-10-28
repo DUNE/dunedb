@@ -1,0 +1,107 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title = "Component Types";
+
+block content
+  pre #{''}
+  pre #{''}
+  
+  if(permissions.userHas(user, "forms:edit"))
+    a.NewComponentType.btn.btn-outline-primary(href = '#', data-toggle = "modal" data-target = "#NewComponentTypeModal") Create New Component Type Form
+    
+    #NewComponentTypeModal.modal.fade(tabindex = '-1' role = 'dialog' aria-labelledby = 'NewComponentTypeLabel' aria-hidden = 'true')
+      .modal-dialog(role = "document")
+        .modal-content
+          .modal-header
+            h5#NewComponentTypeLabel.modal-title New Component Type
+            button.close(type = "button", data-dismiss = "modal", aria-label = "Close")
+              span(aria-hidden = true) &times;
+          .modal-body
+            div
+              | Enter the name of this new component type.  Brevity is preferred.
+              input.NewComponentTypeName.form-control(type = "text")
+          .modal-footer
+            button.btn.btn-secondary(type = "button", data-dismiss = "modal") Close
+            button.btn.btn-primary.NewComponentTypeButton(type = "button") Create
+    script.
+      $('button.NewComponentTypeButton').click(function()
+      {
+         window.location.href = "/componentType/new/" + $('button.NewComponentTypeButton').parents('.modal-content').find('input').val();
+      })
+      $('input.NewComponentTypeName').on("keyup", function(e)
+      {
+        if(e.key == "Enter") 
+        {
+           window.location.href = "/componentType/new/" + $(this).val();
+        }
+      })
+  
+  pre #{''}
+  pre #{''}
+  
+  h3 Existing Component Types
+
+  table.table
+    thead
+      tr
+        th.col-md-1
+        th.col-md-2 Type
+        th.col-md-1 Count
+        th.col-md-3
+        th.col-md-3
+
+    tbody
+      each type in Object.keys(componentTypes).sort()
+        - var info = componentTypes[type];
+        
+        if(type && type != "null" && !(info.tags || []).includes("Trash"))
+          tr
+            td
+              img.icon(src = info.icon)
+            td
+              a(href = '/componentType/' + encodeURIComponent(type)) #{type}
+            td=info.count
+
+            if(permissions.userHas(user, "components:create"))
+              td
+                a(href = '/component/new/' + type).btn.btn-outline-info Create a New Component of this Type
+
+            if(permissions.userHas(user, "forms:edit"))
+              td
+                a(href = '/componentType/edit/' + type).btn.btn-outline-warning Edit Component Type Form
+
+  pre #{''}
+  pre #{''}
+
+  if(permissions.userHas(user, "forms:edit"))
+     h3 Trashed Component Types
+     
+     table.table
+        thead
+          tr
+            th.col-md-1
+            th.col-md-2 Type
+            th.col-md-1 Count
+            th.col-md-3
+            th.col-md-3
+
+        tbody
+          each type in Object.keys(componentTypes).sort()
+            - var info = componentTypes[type];
+            
+            if(info.tags || []).includes("Trash")
+              tr
+                td
+                  img.icon(src = info.icon)
+                td
+                  a(href = '/componentType/' + encodeURIComponent(type)) #{type}
+                td=info.count
+
+                td
+                
+                if(permissions.userHas(user, "forms:edit"))
+                  td
+                    a(href = '/componentType/edit/' + type).btn.btn-outline-warning Edit Component Type Form

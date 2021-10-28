@@ -1,137 +1,199 @@
-
 extend default
 
 include common.pug
 
-mixin label-link
-  a(href="/"+componentUuid+"/label") Printable labels for this component
-
 block vars
-  - var page_title=(component||{}).name || componentUuid;
+  - var page_title = componentUuid;
 
 block extrascripts
-  script(type='text/javascript').
-    var componentUuid = "!{componentUuid}";
-    // I could do this by API query of the server, but this works for now.
-    var schema=!{JSON.stringify(formrec.schema||{})};
-    var component=!{JSON.stringify(component||{})};
-    var base_url = "!{base_url}";
   style.
-    @media print {
-      .run-a-test-menu {
-        display:none;
-      }
+    .tagbutton {margin: 4px;}
+    
+    .copybutton {background-color: #008CBA;
+                 width: 45px;
+                 text-align: center;
+                 color: white;
+                 font-size: 10px;
+                 padding: 3px 3px;
+                 border-radius: 4px;
+                 border: 2px solid #008CBA;}
+  
+  script(type = 'text/javascript').
+    var componentUuid = "!{componentUuid}";
+    
+    var schema    = !{JSON.stringify(formrec.schema || {})};
+    var component = !{JSON.stringify(component || {})};
+    var base_url  = "!{base_url}";
+  
+  script(type = 'text/javascript').
+    var form      = null;
+    var shortuuid = window.ShortUUID();
+
+    window.onload = async function()
+    {
+      form = await Formio.createForm(document.getElementById('builtform'),schema,
+      {
+         readOnly: true,
+      });
+      form.submission = component;
+      form.nosubmit   = true;
     }
-
-  script(type='text/javascript').
-
-      var form = null;
-      var shortuuid = window.ShortUUID();
-
-      window.onload = async function() {
-
-        form = await Formio.createForm(document.getElementById('builtform'),schema,
-        {
-            readOnly: true,
-            //- renderMode: 'html'
-        });
-        form.submission = component;
-        form.nosubmit = true; // Use the beforeSubmit hook.
-
-        // Change the url to match
-      }
-
+  
+  script(type = 'text/javascript').
+    function CopyConfirm(componentUUID)
+    {
+      var copyhelper       = document.createElement("input");
+      copyhelper.className = 'copyhelper'
+      
+      document.body.appendChild(copyhelper);
+      
+      copyhelper.value = componentUUID;
+      copyhelper.select();
+      
+      document.execCommand('copy');
+      document.body.removeChild(copyhelper);
+      document.getElementById("copyButton").innerHTML = "Copied";
+      document.getElementById("copyButton").style.backgroundColor = "green";
+    };
 
 block content
   .container-fluid
+    pre #{''}
+    pre #{''}
+
     if(formrec.icon && formrec.icon[0])
-      img.icon.pull-left(src=formrec.icon[0].url)
-    h2
-      =component.type + ": " + (component.data.name||component.componentUuid.substr(0,8))
-    div
-        a(href='/'+componentUuid+'/edit') Edit this component
-    div
-        a(href='/traveller/'+componentUuid) Printable traveller
-    dl
-      dt Component UUID
-      dd
-        a(href='/'+componentUuid)=componentUuid
-      dt Version  #{component.validity.version}
-      dd edited by !{' '}
-        +short_user(component.insertion.user)
-        | 
-        | 
-        | on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}
-      dd 
-        a(href='/'+componentUuid+'/history') History
-      dt Effective as of
-      dd #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()})
-        
-
+      img.icon.pull-left(src = formrec.icon[0].url)
     
-    #builtform.col-md-8
-      +createdFrom(component.createdFrom)
-
-    if((((relationships||{}).linkedFrom)||[]).length>0 )
-      .row
-        .col 
-          p Linked from
-          ul
-          each o in relationships.linkedFrom
-            li
-              | #{o.type}:
-              a(href="/component/"+MUUID.from(o.componentUuid).toString()) #{o.name} 
-              | (#{o.path})
+    h2=component.type + ": " + component.data.name
+    
+    pre #{''}
+    
     .row
       .col
-        div
-            a(href='/json/component/'+componentUuid) Raw JSON Document
-
-        div
-          +label-link
+        dl
+          dt Name
+          dd #{component.data.name}
+      
+          dt UUID
+          dd
+            a(href = '/' + componentUuid)=componentUuid
+            br
+            |
+            div.copybutton(class = "btn-sm", id = "copyButton", type = "button", onclick = "CopyConfirm(componentUuid)") Copy
+      
+          dt Type
+          dd #{component.type}
+      
+          dt Created
+          dd #{moment(component.data.created).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.data.created).fromNow()})
+      
+          dt Last Updated
+          dd #{moment(component.data.last_edited).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.data.last_edited).fromNow()})
+      
+          dt Version and History
+          dd This is version #{component.validity.version} of the component:
+            
+            pre #{''}
+            
+            div.border-success.border.rounded
+              #builtform.col-md-8
+                +createdFrom(component.createdFrom)
+            
+            br
+            | This version was last edited by !{' '}
+            +short_user(component.insertion.user)
+            |  on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}.
+            br
+            | It is effective as of #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()}).
+          dd 
+            a(href = '/' + componentUuid + '/history') View Component History
         
+        if((((relationships || {}).linkedFrom) || []).length > 0)
+          pre #{''}
+          .row
+            .col 
+              p This component is linked to from the following other components:
+              
+              ul
+              
+              each o in relationships.linkedFrom
+                li
+                  | #{o.type}:
+                  a(href = "/component/" + MUUID.from(o.componentUuid).toString()) #{o.name} 
+                  | (#{o.path})
+        
+        pre #{''}
+    
+        h4 Component Options
+    
+        div
+          a(href = '/' + componentUuid + '/edit') Edit Component
+        div
+          a(href = '/' + componentUuid + '/label') View and print the component's QR code labels
+        div
+          a(href = '/' + componentUuid + '/traveller') View and print the component's traveller
+        div
+          a(href = '/json/component/' + componentUuid) View the component's full JSON document
+      
+      .col-md-4
+        div#qr-code
+          +qr-panel(base_url + '/' + component.componentUuid.toString(), component.data.name)
+    
+    pre #{''}
+    pre #{''}
+  
     hr
+    
     .row
-      .col-md-6
-        h4 Testing History:
-        if(!tests || tests.length==0)
+      .col
+        h4 Testing History
+        
+        if(!tests || tests.length == 0)
             p None
         else
             ul.testsPerformed
               each test in tests
                 li 
-                  -var parenthetical= " (on "+ moment(test.insertion.insertDate).format('MMM DD YYYY');
-                  -if(test.insertion.user) { parenthetical+=" by " + user_shortname(test.insertion.user) }
-                  -parenthetical+=")";
-                  a(href='/test/'+test._id)=(forms[test.formId].formName||test.formId)
+                  - var parenthetical = " (on " + moment(test.insertion.insertDate).format('MMM DD YYYY');
+                  - if(test.insertion.user) {parenthetical += " by " + user_shortname(test.insertion.user)}
+                  - parenthetical += ")";
+                  a(href = '/test/' + test._id)=(forms[test.formId].formName || test.formId)
                   =parenthetical
-      .col-md-6.run-a-test-menu
-        h4 Run a test on this component
+                  
+      .col-8
+        h4 Select a Test to Run on this Component
+        pre #{''}
+        
         div
-          ul.list-group#tests
-              // First, list specifically-matched ones:
-              each info,formId in forms
-                if(((info||{}).componentTypes||[]).includes(component.type)&& !info.tags.includes("Trash") )
-                  li.list-group-item
-                    a(href='/'+componentUuid+'/test/'+formId)
-                      img.icon(src=info.icon)
-                      =info.formName
-              // Tests tagged as 'all'
-              each info,formId in forms
-                if(((info||{}).componentTypes||[]).includes("All")&& !info.tags.includes("Trash") )
-                  li.list-group-item
-                    a(href='/'+componentUuid+'/test/'+formId)
-                      img.icon(src=info.icon)
-                      =info.formName
-
-              // Tests without tags
-              each info,formId in forms
-                if(!info.tags || info.tags.length==0) 
-                  li.list-group-item
-                    a(href='/'+componentUuid+'/test/'+formId)
-                      img.icon(src=info.icon)
-                      =info.formName
-
-    div#qr-code.col-md-4
-            +qr-panel(base_url+'/'+component.componentUuid.toString(),component.data.name)
-
+          h5 Suggested for this Component Type:
+          
+          // First, list the tests that are specifically matched to this component type
+          each info, formId in forms
+            if(((info || {}).componentTypes || []).includes(component.type)&& !info.tags.includes("Trash"))
+              a(href = '/' + componentUuid + '/test/' + formId).tagbutton.btn.btn-outline-primary=t
+                if((info || {}).icon)
+                  img.icon(src = info.icon)
+                =info.formName
+          
+          hr
+          
+          h5 Other Available Tests:
+          
+          // Next, list the tests which are tagged as being applicable to 'all' component types
+          each info, formId in forms
+            if(((info || {}).componentTypes || []).includes("All") && !info.tags.includes("Trash"))
+              a(href = '/' + componentUuid + '/test/' + formId).tagbutton.btn.btn-outline-primary=t
+                if((info || {}).icon)
+                  img.icon(src = info.icon)
+                =info.formName
+          
+          // Finally, list the tests that do not have any tags
+          each info, formId in forms
+            if(!info.tags || info.tags.length == 0) 
+              a(href = '/' + componentUuid + '/test/' + formId).tagbutton.btn.btn-outline-primary=t
+                if((info || {}).icon)
+                  img.icon(src = info.icon)
+                =info.formName
+          
+          pre #{''}
+          pre #{''}

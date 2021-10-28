@@ -1,0 +1,340 @@
+extend default
+
+block vars
+  - var page_title = ((component || {}).name || componentUuid) + " - Editing";
+
+block extrascripts
+  script(type = 'text/javascript').
+    var componentUuid = "!{componentUuid}";
+    var component = !{JSON.stringify(component || {})};
+  
+  script(type = 'text/javascript').
+    var form = null;
+    var metaform = null;
+    
+    function SubmitData(submission)
+    {
+      var record = {...submission};
+      
+      // Get the component information
+      record.componentUuid = componentUuid; 
+      record.type = component.type;
+      
+      // Only set the desired start date
+      record.validity = { startDate: metaform.submission.data.startDate };
+
+      console.log("Submitting data ...", record);
+      
+      var posting =  $.ajax({contentType: "application/json",
+                             method: "post",
+                             url: "/json/component/" + componentUuid,
+                             data: JSON.stringify(record),
+                             dataType: "json"});
+
+      // If the POST function completed ...
+      posting.done(function(retval)
+      {
+        console.log('Posting was successful', retval);
+        
+        if((retval.error))
+        {
+          form.setAlert("warning", c.error);
+          form.emit('error', c.error);
+        }
+        else form.setAlert(false);
+        
+        if(retval.data)
+        {
+          form.submission = {data: retval.data};
+        }
+        
+        if(window.location.pathname.includes("component/new"))
+        {
+          // Change the URL to match the new component's UUID, so we're now editing it
+          history.replaceState(null, null, "/" + retval.componentUuid + '/edit');
+          $('#name').html(submission.name);
+        }
+
+        // Jump to the component viewing page once editing is complete
+        form.emit('submitDone', retval.submission);
+        console.log("Successful retval", retval);
+        
+        if(retval.componentUuid)
+        {
+          window.location.href = '/' + retval.componentUuid;
+        }
+      });
+      
+      // If the POST function failed ...
+      posting.fail(function(res, statusCode, statusMsg)
+      {
+        if(res.responseText && res.responseText.length > 0)
+        {
+          form.setAlert("danger", res.responseText);
+        }
+        else
+        {
+          form.setAlert("danger", statusMsg + " (" + statusCode + ")");
+        }
+        
+        console.log("Posting failed", res, statusCode, statusMsg);
+      });
+    };
+
+    var shortuuid = window.ShortUUID();
+
+    function loadComponentForm(type, data) 
+    {
+      if(!type)
+      {
+        console.error(loadComponentForm, "No component type provided!");
+      }
+      
+      $.get("/json/componentForms/" + type,)
+      .then(async function(formrec)
+      {
+        // Add a 'submit' button to schema
+        var schema = formrec.schema;
+        
+        schema.components.push({type: "button",
+                                label: "Submit",
+                                key: "submit",
+                                disableOnInvalid: true,
+                                input: true,
+                                tableView: false});
+
+        $('#builtform').empty();
+        
+        form = await Formio.createForm(document.getElementById('builtform'), schema);
+
+        form.submission = {data: data};
+        form.nosubmit = true;
+        form.on('submit', SubmitData);
+      });
+    };
+
+    function metaformChanged(data)
+    {
+      if(((data.changed || {}).component || {}).key == "type")
+      {
+        var type = data.changed.value;
+        console.log('Reload for component type', type);
+        
+        // Copy any current changes to the component information into memory
+        component.type = type;
+        
+        loadComponentForm(type, ((form || {}).submission || {}).data || component.data);
+        
+        searchForRecentSubmission();
+      }
+    }
+
+    function removeEmpty(inobj)
+    {
+      var obj = {...inobj};
+      
+      Object.keys(obj).forEach(function(key)
+      {
+        if (obj[key] && typeof obj[key] === 'object')
+        { 
+          var subobj = removeEmpty(obj[key])
+          
+          if(Object.keys(subobj).length == 0)
+          {
+            delete obj[key];
+          }
+          else
+          {
+            obj[key] = subobj;
+          }
+        }
+        else
+        {
+          if (obj[key] == null)
+          {
+            delete obj[key];
+          }
+          
+          if (typeof obj[key] === 'string' && obj[key].length == 0)
+          {
+            delete obj[key];
+          }
+        }
+      });
+      
+      console.log("removeEmpty", inobj, obj);
+      return obj;
+    }
+
+    var recent = null;
+    
+    function searchForRecentSubmission()
+    {
+      $('#loadRecentData').hide();
+      
+      $.post("/json/search/component/" + (component.type || "") + "?limit=1",
+             {
+              "insertion.user.user_id": "!{user.user_id}",
+             })
+       .then(function(recent_components)
+       {
+         if(recent_components.length > 0)
+         {
+           var recent = recent_components.shift();
+           console.log("Got recent components", recent);
+           
+           $('#loadRecentData').html(`Load data from most recent database entry: ${recent.type} [${recent.name}]`)
+           .show()
+           .data('recent-rec', recent);
+         }
+       });
+    }
+
+    function fillFromRecentSubmission()
+    {
+      var recent = $('#loadRecentData').data("recent-rec");
+      
+      if(recent)
+      {
+        $.get("/json" + recent.route).then(function(record)
+              {
+                if(!component.type)
+                { 
+                  console.log("Changing component type and form data", record);
+                  metaform.submission = {data: {...metaform.submission.data, type: record.type}};
+
+                  loadComponentForm(record.type,record.data);
+                }
+                else
+                {
+                  var current_data = removeEmpty({...form.submission.data})
+                  console.log("Changing form data", current_data, record.data)
+                  
+                  // This SHOULD change only unchanged things
+                  // However, it appears that blank text boxes are evaluated to "", instead of being deleted
+                  // TOFIX: change this to additionally clean the record.data object of empty strings
+                  form.submission = {data: {...record.data, ...current_data}}
+                }
+              })
+      }
+    }
+
+    $(async function()
+    {
+      var metaform_schema = {components: [{"label": "Component Type",
+                                           "labelPosition": "left",
+                                           "widget": "choicesjs",
+                                           "tableView": true,
+                                           "dataSrc": "url",
+                                           "data": {"values": [{"label": "",
+                                                                "value": ""}],
+                                                    "url": "/json/componentForms/list",
+                                                    "headers": [{"key": "",
+                                                                 "value": ""}]},
+                                           "valueProperty": "formId",
+                                           "template": "<span>{{ item.formName }}</span>",
+                                           "selectThreshold": 0.3,
+                                           "validate": {"required": true},
+                                           "key": "type",
+                                           "type": "select",
+                                           "indexeddb": {"filter": {}},
+                                           "selectValues": "results",
+                                           "input": true,
+                                           "disableLimit": false},
+                                           
+                                          {"label": "These changes take effect on:",
+                                           "labelPosition": "left",
+                                           "tableView": false,
+                                           "enableMinDateInput": false,
+                                           "datePicker": {"disableWeekends": false,
+                                                          "disableWeekdays": false},
+                                           "enableMaxDateInput": false,
+                                           "key": "validity.startDate",
+                                           "type": "datetime",
+                                           "input": true,
+                                           "widget": {"type": "calendar",
+                                                      "displayInTimezone": "viewer",
+                                                      "language": "en",
+                                                      "useLocaleSettings": false,
+                                                      "allowInput": true,
+                                                      "mode": "single",
+                                                      "enableTime": true,
+                                                      "noCalendar": false,
+                                                      "format": "yyyy-MM-dd hh:mm a",
+                                                      "hourIncrement": 1,
+                                                      "minuteIncrement": 1,
+                                                      "time_24hr": false,
+                                                      "minDate": null,
+                                                      "disableWeekends": false,
+                                                      "disableWeekdays": false,
+                                                      "maxDate": null},
+                                           "hideOnChildrenHidden": false}]};
+
+      if(component.type)
+      {        
+        console.log('Loading component type', component.type)
+        
+        var type_select = FormioUtils.getComponent(metaform_schema.components, 'type');
+        type_select.disabled = true;
+        type_select.type = "textfield";
+        
+        loadComponentForm(component.type, component.data);
+      }
+      
+      metaform = await Formio.createForm(document.getElementById('metaform'), metaform_schema);
+      
+      var metaformdata = {...component};
+      metaformdata.validity = metaformdata.validity || {};
+      
+      if(metaformdata.validity.version >= 0)
+      {
+        metaformdata.validity.version += 1;
+      }
+
+      // Make the new validity datetime equal to the current datetime
+      metaformdata.validity.startDate = moment().toISOString();
+
+      metaform.submission = {data: metaformdata};
+      metaform.nosubmit = true;
+      metaform.on("change", metaformChanged);      
+
+      // For new components, get a recent object that this user filled out
+      if(Object.keys(component.data || {}).length == 0)
+      {
+        searchForRecentSubmission();
+        
+        $("#loadRecentData").hide().on("click", fillFromRecentSubmission);
+      }      
+
+      $('[data-toggle = "popover"]').popover()
+    });
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+    
+    h2#name
+      =(component.data) ? ("Edit Component") : ("New Component")
+      
+    pre #{''}
+    
+    .row
+      .col
+        dl
+          dt Component UUID
+          dd=component.componentUuid
+          
+    #metaform
+    
+    pre #{''}
+    
+    hr
+    
+    button.btn.btn-warning.mb-2#loadRecentData(style = "display: none", data-trigger = "hover", data-toggle = 'popover', data-content = "This button will load details from the last component that you edited or created.")
+    
+    pre #{''}
+    
+    div.border-success.border.rounded
+      #builtform.col-md-8
+

@@ -1,23 +1,31 @@
 extend default
+
 include common
 
 block vars
-  - var page_title="Promote yourself";
+  - var page_title = "User Promotion";
 
 block extrascripts
   script.
-    $(function(){
-      $('#user').on('keyup',function(){
-          if (event.key === "Enter") $('#password').focus();
-        });
-      $('#password').on('keyup',function(){
-          if (event.key === "Enter") $('#promotionForm').get(0).submit();
-        });
+    $(function()
+    {
+      $('#user').on('keyup', function()
+      {
+        if (event.key === "Enter") $('#password').focus();
+      });
+      
+      $('#password').on('keyup',function()
+      {
+        if (event.key === "Enter") $('#promotionForm').get(0).submit();
+      });
     })
-    
 
 block content
-  h1.h1 Promote Yourself
+  pre #{''}
+  pre #{''}
+  
+  h3 Promote Yourself
+  
   .container-fluid
     .row
       .col
@@ -44,4 +52,6 @@ block content
 
         if(message)
           .alert.alert-danger=message
+          
+      .col.offset-md-20
 
