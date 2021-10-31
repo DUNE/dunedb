@@ -94,9 +94,8 @@ mixin short_user(aUser)
   if (!user)
     span &lt;log in to see&gt;
   else
-    //- a(href='mailto:'+user_email(user))=user.displayName||user_email(user)
-    a(href='/profile/'+encodeURIComponent(aUser.user_id))=aUser.displayName||user_email(aUser)
-
+    a(href='mailto:'+user_email(user))=user.displayName||user_email(user)
+    
 
 
 mixin createdFrom(created_from)

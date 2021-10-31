@@ -63,7 +63,7 @@ async function get_component(req, res)
         res.redirect("/" + componentUuid + "/edit");
       }
       
-      return res.status(400).send("No such component ID: " + req.params.uuid);
+      return res.status(400).send("No such component ID: " + componentUuid);
     }
     
     // Get the other data relating to the component all in one go
@@ -211,41 +211,53 @@ router.get('/' + utils.uuid_regex + '/traveller/', permissions.checkPermission("
 router.get('/' + utils.short_uuid_regex + '/traveller/', permissions.checkPermission("components:view"), component_traveller);
 
 
-
-
-
-
-router.get("/"+utils.uuid_regex+'/history',permissions.checkPermission("components:view"),
-  async function(req,res) {
+// Show the history of a single component
+async function component_history(req, res)
+{
+  // Get the component from the given (full or shortened) UUID
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  // logger.info(get_component,componentUuid,req.params);
+  
+//  logger.info(get_component, componentUuid, req.params);
 
+  // Set the date (as a specific variable type) if the history query requires it
   var date = null;
-  if(req.query.date) {
+  
+  if(req.query.date)
+  {
     date = new Date(parseInt(req.query.date));
-    // logger.info("Trying effective date",date)
+//    logger.info("Trying effective date", date)
   }
 
-  // get form and data in one go
-  let [form, component, dates] = await Promise.all([
-      Forms.retrieve("componentForms","componentForms"),
-      Components.retrieve({componentUuid,"insertion.insertDate":{$lte:date}}),
-      Components.retrieveComponentChangeDates(componentUuid)
-    ]);
+  // Get the component information and component type form in one go, as well as the dates on which they were changed
+  let [form, component, dates] = await Promise.all(
+  [
+    Forms.retrieve("componentForms", "componentForms"),
+    Components.retrieve({componentUuid, "insertion.insertDate": {$lte: date}}),
+    Components.retrieveComponentChangeDates(componentUuid)
+  ]);
 
-  // equal:
-  // var component = await Components.findOne({componentUuid:req.params.uuid});
-  // var form = await Forms.retrieve("componentForms","componentForms");
-  if(!component) return res.status(400).send("No such component ID.");
-  res.render("component_history.pug",{
-    schema: form.schema,
-    dates: dates,
-    componentUuid:componentUuid,
-    component: component,
-    canEdit: permissions.hasPermission("components:edit"),
-  });
+  // If no component was retrieved, return an error
+  if(!component)
+  {
+    return res.status(400).send("Error getting component with UUID:  " + componentUuid + "  at insertion date:  " + date);
   }
-)
+  
+  // Render the component history page
+  res.render("component_history.pug", {schema: form.schema,
+                                       dates: dates,
+                                       componentUuid: componentUuid,
+                                       component: component,
+                                       canEdit: permissions.hasPermission("components:edit")});
+}
+
+// As with the component itself, the history can also be accessed by either the full or shortened UUID
+router.get('/' + utils.uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
+router.get('/' + utils.short_uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
+
+
+
+
+
 
 // Contact sheet of new unregistered components
 router.get("/NewComponentContactSheet/:type?",permissions.checkPermission("components:create"),

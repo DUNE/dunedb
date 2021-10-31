@@ -20,39 +20,40 @@ block extrascripts
     script(src = '/page.js/edit_form.js')
 
 block content
-  pre #{''}
-  pre #{''}
+  .container-fluid
+    pre #{''}
+    pre #{''}
   
-  block content_header
+    block content_header
     
-  div#metaform
+    div#metaform
 
-  pre #{''}
+    pre #{''}
   
-  hr 
+    hr 
   
-  pre #{''}
+    pre #{''}
   
-  div.row
-    div.col
-      .panel.panel-default
-      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#json-holder')
-        | Contents of JSON entry (useful for debugging) 
-        i.chevron.fa.fa-fw    
-      div#json-holder.collapse
-        textarea#schema.form-control(rows = 20)
+    div.row
+      div.col
+        .panel.panel-default
+        .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#json-holder')
+          | Contents of JSON entry (useful for debugging) 
+          i.chevron.fa.fa-fw    
+        div#json-holder.collapse
+          textarea#schema.form-control(rows = 20)
       
-    div.col
-      a#download_schema_link(download = formId + ".json", href = "") Download JSON File
+      div.col
+        a#download_schema_link(download = formId + ".json", href = "") Download JSON File
        
-      pre #{''}
+        pre #{''}
         
-      button.btn.btn-primary#copySchemaToClipboard Copy JSON to Clipboard
+        button.btn.btn-primary#copySchemaToClipboard Copy JSON to Clipboard
       
-      pre #{''}
+        pre #{''}
       
-      button.btn.btn-primary#pasteSchemaFromClipboard Paste JSON from Clipboard
+        button.btn.btn-primary#pasteSchemaFromClipboard Paste JSON from Clipboard
 
-  pre #{''}
-  pre #{''}
+    pre #{''}
+    pre #{''}
 
