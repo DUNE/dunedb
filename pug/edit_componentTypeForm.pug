@@ -1,4 +1,4 @@
-extend edit_testForm
+extend edit_form
 
 block content_header
     p.h3 Edit Component Type Form: #{formId}
@@ -128,7 +128,7 @@ block metaschema
                                                      "size": "md"},
                                                     {"components": [{"label": "Tags",
                                                                      "placeholder": "categories",
-                                                                     "tooltip": "Categories of forms or workflows that this component relates to",
+                                                                     "tooltip": "Categories of forms or workflows that this component relates to. Use the Trash category to delete from public view.",
                                                                      "tableView": false,
                                                                      "storeas": "array",
                                                                      "key": "tags",

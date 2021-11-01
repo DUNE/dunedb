@@ -86,21 +86,21 @@ body(class = "deployment-" + deployment)
 
               ul.nav.flex-column.ml-3.sub-bar
                   li.nav-item
-                    +navlink(href = '/components/searchByUUID')
+                    +navlink(href = '/search/componentsByUUID')
                       |      Search by UUID
                   li.nav-item
                     +navlink(href = '/componentTypes')
-                      |      List by Type
+                      |      List Component Types
 
             li.nav-item
-              +navlink(href = '/testForms')
+              +navlink(href = '/tests')
                 i.fa.fa-flask("aria-hidden" = "true")
                 | Tests
 
               ul.nav.flex-column.ml-3.sub-bar
                   li.nav-item
-                    +navlink(href = '/tests')
-                      |      Recent
+                    +navlink(href = '/testTypes')
+                      |      List Test Types
 
             li.nav-item
               +navlink(href = '/workflows')

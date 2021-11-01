@@ -1,0 +1,49 @@
+extend default
+
+include common.pug
+
+block vars
+  - var page_title = "Tests";
+
+block content
+  pre #{''}
+  pre #{''}
+  
+  if(formId)
+    - var name = formId;
+    
+    - if(tests && tests.length > 0) name = tests[0].formName;
+    
+    h3 Recently Completed '#{name}' Tests
+  
+  else
+    h3 All Recently Completed Tests
+
+  table.table
+    thead
+      tr
+        th
+        th Test Type
+        th Test ID
+        th Date Performed
+        th Performed By
+        th
+    
+    tbody
+      each test in tests
+        - var testid = test._id
+        
+        tr
+          td
+            if(test.info.icon)
+              img.small-icon(src = test.info.icon)
+          td #{test.formName}
+          td
+            a(href = '/test/' + testid) #{testid}
+          td #{moment(test.insertDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(test.insertDate).fromNow()})
+          td
+            +short_user(test.user)
+          td
+            a(href = '/json/test/' + testid + '?pretty').btn.btn-outline-primary
+              | View JSON Data
+

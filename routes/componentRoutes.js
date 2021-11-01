@@ -10,9 +10,9 @@ const deepmerge = require('deepmerge');
 const Components = require('lib/Components.js');
 const ComponentTypes = require('lib/ComponentTypes.js');
 const Courses = require('lib/Courses.js');
+const Forms = require('lib/Forms.js');
 const Jobs = require("lib/Jobs.js")();
 const permissions = require('lib/permissions.js');
-const Forms = require('lib/Forms.js');
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
 
@@ -78,7 +78,10 @@ async function get_component(req, res)
     // If no form for the component's type exist, redirect to the "component without form" page
     if(!formrec)
     {
-      return res.render("component_without_form.pug",{componentUuid, component,forms, tests});
+      return res.render("component_without_form.pug", {componentUuid,
+                                                       component,
+                                                       forms,
+                                                       tests});
     }
     
 //    logger.info(forms);
@@ -402,7 +405,8 @@ router.get('/componentType/new/:type', permissions.checkPermission("forms:edit")
     await ensureTypeFormExists(type, req, res);
     
     // Render the component type editing page (this is the same page template that is used for creating a new component type)
-    res.render('edit_componentTypeForm.pug', {collection: "componentForms", formId: type});
+    res.render('edit_componentTypeForm.pug', {collection: "componentForms",
+                                              formId: type});
   }
   catch (err)
   {
@@ -423,11 +427,12 @@ router.get('/componentType/edit/:type/:auto(auto)?', permissions.checkPermission
   }
   
   // Render the component type editing page
-  res.render('edit_componentTypeForm.pug', {collection: "componentForms", formId: type});
+  res.render('edit_componentTypeForm.pug', {collection: "componentForms",
+                                            formId: type});
 });
 
 
-// List recently edited or created components
+// List recently edited or created components of all types
 router.get('/components/recent', permissions.checkPermission("components:view"), async function(req, res, next)
 {
   // Get a list of the (first 30) components, ordered by last modified
@@ -441,37 +446,13 @@ router.get('/components/recent', permissions.checkPermission("components:view"),
   // Render the page showing the list of components
   res.render("list_components.pug", {forms,
                                      components,
-                                     title: "Recently Edited Components",
+                                     title: "All Recently Edited/Created Components",
                                      showType: true});
 });
 
 
-// Search for a specific component using a UUID
-router.get('/components/searchByUUID', permissions.checkPermission("components:view"), async function(req, res, next)
-{
-  // Render the search page
-  res.render("component_searchByUUID.pug");
-});
-
-
-// List the component types
-router.get('/componentTypes', permissions.checkPermission("components:view"), async function(req, res, next)
-{
-  // Get a list of the component types that already exist
-  var componentTypes =  await ComponentTypes.list();
-  var types = await Components.getTypes();
-
-  // Add onto this list any component types that exist but haven't been used to create any components yet
-  var forms = await Forms.list('componentForms');
-  var componentTypes = deepmerge(types, forms);
-
-  // Render the page showing the list of component types
-  res.render("list_componentTypes.pug", {componentTypes});
-});
-
-
-// List (all or some) components of a single type
-router.get('/componentType/:type', permissions.checkPermission("components:view"), async function(req, res, next)
+// List recently edited or created components of a single type
+router.get('/components/:type', permissions.checkPermission("components:view"), async function(req, res, next)
 {
   // Set the type in question
   var type = decodeURIComponent(req.params.type);
@@ -485,5 +466,29 @@ router.get('/componentType/:type', permissions.checkPermission("components:view"
   res.render("list_components.pug", {components,
                                      title: "All '" + type + "' Type Components",
                                      type});
+});
+
+
+// Search for a specific component using a UUID
+router.get('/search/componentsByUUID', permissions.checkPermission("components:view"), async function(req, res, next)
+{
+  // Render the search page
+  res.render("search_componentsByUUID.pug");
+});
+
+
+// List the component types
+router.get('/componentTypes', permissions.checkPermission("components:view"), async function(req, res, next)
+{
+  // Get a list of the component type forms that have already been used to create components of that type
+  var componentTypes = await ComponentTypes.list();
+  var types = await Components.getTypes();
+
+  // Add onto this list any component type forms that exist but haven't been used yet
+  var forms = await Forms.list('componentForms');
+  var componentTypes = deepmerge(types, forms);
+
+  // Render the page showing the list of component types
+  res.render("list_componentTypes.pug", {componentTypes});
 });
 

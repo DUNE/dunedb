@@ -39,8 +39,8 @@ block content
         }
       })
   
-  pre #{''}
-  pre #{''}
+    pre #{''}
+    pre #{''}
   
   h3 Existing Component Types
 
@@ -62,46 +62,53 @@ block content
             td
               img.icon(src = info.icon)
             td
-              a(href = '/componentType/' + encodeURIComponent(type)) #{type}
+              a(href = '/components/' + encodeURIComponent(type)) #{type}
             td=info.count
 
             if(permissions.userHas(user, "components:create"))
               td
-                a(href = '/component/new/' + type).btn.btn-outline-info Create a New Component of this Type
+                a(href = '/component/new/' + type).btn.btn-outline-info
+                  img.small-icon(src = '/images/edit_icon.svg')
+                  | &nbsp; Create a New Component of this Type
 
             if(permissions.userHas(user, "forms:edit"))
               td
-                a(href = '/componentType/edit/' + type).btn.btn-outline-warning Edit Component Type Form
+                a(href = '/componentType/edit/' + type).btn.btn-outline-warning
+                  img.small-icon(src = '/images/edit_icon.svg')
+                  | &nbsp; Edit Component Type Form
 
   pre #{''}
   pre #{''}
 
   if(permissions.userHas(user, "forms:edit"))
-     h3 Trashed Component Types
+    h3 Trashed Component Types
      
-     table.table
-        thead
-          tr
-            th.col-md-1
-            th.col-md-2 Type
-            th.col-md-1 Count
-            th.col-md-3
-            th.col-md-3
+    table.table
+      thead
+        tr
+          th.col-md-1
+          th.col-md-2 Type
+          th.col-md-1 Count
+          th.col-md-3
+          th.col-md-3
 
-        tbody
-          each type in Object.keys(componentTypes).sort()
-            - var info = componentTypes[type];
+      tbody
+        each type in Object.keys(componentTypes).sort()
+          - var info = componentTypes[type];
             
-            if(info.tags || []).includes("Trash")
-              tr
-                td
-                  img.icon(src = info.icon)
-                td
-                  a(href = '/componentType/' + encodeURIComponent(type)) #{type}
-                td=info.count
+          if(info.tags || []).includes("Trash")
+            tr
+              td
+                img.icon(src = info.icon)
+              td
+                a(href = '/components/' + encodeURIComponent(type)) #{type}
+              td=info.count
 
-                td
+              td
                 
-                if(permissions.userHas(user, "forms:edit"))
-                  td
-                    a(href = '/componentType/edit/' + type).btn.btn-outline-warning Edit Component Type Form
+              if(permissions.userHas(user, "forms:edit"))
+                td
+                  a(href = '/componentType/edit/' + type).btn.btn-outline-warning
+                    img.small-icon(src = '/images/edit_icon.svg')
+                    | &nbsp; Edit Component Type Form
+

@@ -1,18 +1,20 @@
-"use strict";
+'use strict';
 
-const permissions = require('lib/permissions.js');
-const Forms = require('lib/Forms.js');
+// General pug requirements
+const chalk = require('chalk');
+const express = require('express');
+
+// Local Javascript libraries
 const Components = require('lib/Components.js');
-const Tests = require('lib/Tests.js')('test');
+const Forms = require('lib/Forms.js');
+const permissions = require('lib/permissions.js');
 const Processes = require('lib/Processes.js');
-const express  = require("express");
+const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
 
 var router = express.Router();
-
 module.exports = router;
 
-// HTML/Pug routes:
 
 // look at a test result.
 router.get("/test/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:view"), 
@@ -110,13 +112,6 @@ async function(req,res,next) {
   } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
 });
 
-// Lists recent tests generally, or a specific formId
-router.get('/tests/:formId?', permissions.checkPermission("tests:view"), 
-  async function(req,res,next) {
-    var tests = await Tests.listRecent(req.params.formId,(req.query||{}).N);
-    res.render('recentTests.pug',{formId:req.params.formId, tests: tests});
-  });
-
 router.get('/test/copyAsDraft/:record_id([A-Fa-f0-9]{24})',permissions.checkPermission("tests:submit"),
   async function(req,res,next) {
     try{
@@ -128,4 +123,69 @@ router.get('/test/copyAsDraft/:record_id([A-Fa-f0-9]{24})',permissions.checkPerm
 
 })
 
+
+
+
+
+
+
+
+// Create a new test type form
+var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
+
+router.get('/testType/new/:formId', permissions.checkPermission("forms:edit"), async function(req, res)
+{
+  // Check if there is any record of an existing test type form with the same form ID as specified
+  var rec = await Forms.retrieve("testForms", req.params.formId);
+  
+  // If there is no existing test type form, set up a new record using the user-specified information and the default form schema
+  if(!rec)
+  {
+    var rec = {formId: req.params.formId,
+               formName: req.params.formId,
+               schema: default_form_schema}; 
+
+    Forms.save(rec, 'testForms', req);
+  }
+
+  // Redirect the user to the page for editing a test type form (is the same as for creating a new one)
+  res.redirect('/testType/edit/' + req.params.formId);
+});
+
+
+// Edit an existing test type form
+router.get('/testType/edit/:formId?', permissions.checkPermission("forms:edit"), async function(req, res)
+{
+  // Get a list of component types (since a particular test type must be associated with a component type)
+  var componentTypes = await Components.getTypes();
+  
+  // Render the test type editing page
+  res.render('edit_testTypeForm.pug', {collection: "testForms",
+                                       componentTypes,
+                                       formId: req.params.formId});
+});
+
+
+// List recently performed tests, either across all test types or from a specific one
+router.get('/tests/:formId?', permissions.checkPermission("tests:view"), async function(req, res, next)
+{
+  // Get a list of recently performed tests for a given test type (using the type form ID)
+  // If the ID is not given, this gives a list of all recently performed tests across all types
+  var tests = await Tests.listRecent(req.params.formId, (req.query || {}).N);
+  
+  // Render the page showing the list of tests
+  res.render("list_tests.pug", {formId: req.params.formId,
+                                tests: tests});
+});
+
+
+// Lists the test types
+router.get('/testTypes', permissions.checkPermission("tests:view"), async function(req, res, next)
+{
+  // Get a list of all test type forms that exist
+  var forms = await Forms.list('testForms');
+  
+  // Render the page showing the list of test types
+  res.render("list_testTypes.pug", {forms});
+});
 

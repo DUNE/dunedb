@@ -21,36 +21,6 @@ mixin component-list(list)
                 li 
                     a(href='/'+val.componentUuid)=val.name
 
-mixin NewTestForm
-  a.NewTestForm.btn.btn-outline-primary(href='#', data-toggle="modal" data-target="#NewTestFormModal") Create New Test Form
-  #NewTestFormModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewTestFormLabel' aria-hidden='true')
-    .modal-dialog(role="document")
-      .modal-content
-        .modal-header
-          h5#NewTestFormLabel.modal-title New Test Form
-          button.close(type="button",data-dismiss="modal",aria-label="Close")
-            span(aria-hidden=true) &times;
-        .modal-body
-          div
-            | Enter the new form ID.
-            br
-            | This ID should have only underscores and alphanumerics.
-            br
-            | The human-readable name will be set on the next page.
-            input.NewTestFormModalName.form-control(type="text")
-        .modal-footer
-          button.btn.btn-secondary(type="button", data-dismiss="modal") Close
-          button.btn.btn-primary.NewTestFormCreateButton(type="button") Create
-  script.
-    $('button.NewTestFormCreateButton').click(function(){
-      window.location.href="/NewTestForm/"+ $('button.NewTestFormCreateButton').parents('.modal-content').find('input').val();
-    })
-    $('input.NewTestFormModalName').on("keyup",function(e){
-      if(e.key=="Enter") {
-          window.location.href="/NewTestForm/"+ $(this).val();
-        }
-    })
-
 mixin NewWorkflowForm
   a.NewWorkflowForm.btn.btn-outline-primary(href='#', data-toggle="modal" data-target="#NewWorkflowFormModal") Create New Workflow Form
   #NewWorkflowFormModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='NewWorkflowFormLabel' aria-hidden='true')

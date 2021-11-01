@@ -11,10 +11,10 @@ block content
   
   if(type) 
     if(permissions.userHas(user, "components:create"))
-        a(href = '/component/new/' + type).btn.btn-outline-info Register a new #{type}
+      a(href = '/component/new/' + type).btn.btn-outline-info Register a new #{type}
         
-        pre #{''}
-        pre #{''}
+      pre #{''}
+      pre #{''}
 
   h3 #{title || page_title}
 
@@ -49,3 +49,4 @@ block content
             +dateFormat(component.created)
           td
             +dateFormat(component.last_edited)
+
