@@ -61,10 +61,12 @@ mixin component_subdoc(component)
     dt Version #{component.validity.version}
     dd edited by !{' '}
       +short_user(component.insertion.user)
-      |  on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}
+      |  on !{' '}
+      +dateFormat(component.insertion.insertDate)
     
-    dt Valid as of
-    dd #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()})
+    dt Valid as of !{' '}
+    dd
+      +dateFormatAndAgo(component.validity.startDate)
   
   .builtform.col-md-8(data-recordtype = component.recordType, data-record = component)
 
@@ -138,7 +140,7 @@ block allbody
          =moment().format('MMMM Do YYYY, h:mm:ss a')
       
       div#qr-code.col-md-3
-        +qr-panel(base_url + '/' + component.componentUuid.toString(), component.data.name)
+        +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
     
     div.pagebreak
     

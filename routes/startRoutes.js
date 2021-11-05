@@ -117,7 +117,7 @@ router.get('/', permissions.ensureAuthenticated, homePage);
 
 
 
-router.get('/category/:tag', async function(req, res, next) {
+router.get('/categories/:tag', async function(req, res, next) {
   function filterTag(tag,menu) {
     var retval = {};
     var got = false;

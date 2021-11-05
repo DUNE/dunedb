@@ -113,20 +113,8 @@ async function get_component(req, res)
 }
 
 // Instead of the full UUID, a component can also be accessed using the shortened UUID
-router.get('/' + utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
-router.get('/' + utils.short_uuid_regex, permissions.checkPermission("components:view"), get_component);
-
-// To add a little foolproofing, the single component page can be accessed by two different routes: "/[UUID]" or "/component/[UUID]"
-// In the case of the latter being used, redirect to the former (for both full and shortened UUIDs)
-router.get('/component/' + utils.uuid_regex, permissions.checkPermission("components:view"), function(req, res, next)
-{
-  res.redirect('/' + utils.uuid_regex);
-});
-
-router.get('/component/' + utils.short_uuid_regex, permissions.checkPermission("components:view"), function(req, res, next)
-{
-  res.redirect('/' + utils.short_uuid_regex);
-});
+router.get('/component/' + utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
+router.get('/component/' + utils.short_uuid_regex, permissions.checkPermission("components:view"), get_component);
 
 
 // Show the label for a single component
@@ -147,8 +135,8 @@ async function component_label(req, res, next)
 }
 
 // As with the component itself, the label can also be accessed by either the full or shortened UUID
-router.get('/' + utils.uuid_regex + '/label', permissions.checkPermission("components:view"), component_label);
-router.get('/' + utils.short_uuid_regex + '/label', permissions.checkPermission("components:view"), component_label);
+router.get('/component/' + utils.uuid_regex + '/label', permissions.checkPermission("components:view"), component_label);
+router.get('/componnent/' + utils.short_uuid_regex + '/label', permissions.checkPermission("components:view"), component_label);
 
 
 // Show the traveller for a single component
@@ -210,8 +198,8 @@ async function component_traveller(req, res, next)
 }
 
 // As with the component itself, the traveller can also be accessed by either the full or shortened UUID
-router.get('/' + utils.uuid_regex + '/traveller/', permissions.checkPermission("components:view"), component_traveller);
-router.get('/' + utils.short_uuid_regex + '/traveller/', permissions.checkPermission("components:view"), component_traveller);
+router.get('/component/' + utils.uuid_regex + '/traveller/', permissions.checkPermission("components:view"), component_traveller);
+router.get('/component/' + utils.short_uuid_regex + '/traveller/', permissions.checkPermission("components:view"), component_traveller);
 
 
 // Show the history of a single component
@@ -254,8 +242,8 @@ async function component_history(req, res)
 }
 
 // As with the component itself, the history can also be accessed by either the full or shortened UUID
-router.get('/' + utils.uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
-router.get('/' + utils.short_uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
+router.get('/component/' + utils.uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
+router.get('/component/' + utils.short_uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
 
 
 
@@ -340,8 +328,8 @@ async function edit_component(req, res)
 }
 
 // The component editing page can be accessed by either the full or shortened UUID
-router.get('/' + utils.uuid_regex + '/edit', permissions.checkPermission("components:edit"), edit_component);
-router.get('/' + utils.short_uuid_regex + '/edit', permissions.checkPermission("components:edit"), edit_component);
+router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermission("components:edit"), edit_component);
+router.get('/component/' + utils.short_uuid_regex + '/edit', permissions.checkPermission("components:edit"), edit_component);
 
 
 // [Internal Function] Make sure that a component type form already exists for the component type being requested
@@ -395,7 +383,7 @@ async function ensureTypeFormExists(type, req, res)
 }
 
 // Create a new component type form
-router.get('/componentType/new/:type', permissions.checkPermission("forms:edit"), async function (req, res)
+router.get('/components/:type/new', permissions.checkPermission("forms:edit"), async function (req, res)
 {
   try
   {
@@ -416,7 +404,7 @@ router.get('/componentType/new/:type', permissions.checkPermission("forms:edit")
 });
 
 // Edit an existing component type form
-router.get('/componentType/edit/:type/:auto(auto)?', permissions.checkPermission("forms:edit"), async function (req, res)
+router.get('/components/:type/edit/:auto(auto)?', permissions.checkPermission("forms:edit"), async function (req, res)
 {
   var type = decodeURIComponent(req.params.type);
   
@@ -451,6 +439,22 @@ router.get('/components/recent', permissions.checkPermission("components:view"),
 });
 
 
+// List the component types
+router.get('/components/types', permissions.checkPermission("components:view"), async function(req, res, next)
+{
+  // Get a list of the component type forms that have already been used to create components of that type
+  var componentTypes = await ComponentTypes.list();
+  var types = await Components.getTypes();
+
+  // Add onto this list any component type forms that exist but haven't been used yet
+  var forms = await Forms.list('componentForms');
+  var componentTypes = deepmerge(types, forms);
+
+  // Render the page showing the list of component types
+  res.render("list_componentTypes.pug", {componentTypes});
+});
+
+
 // List recently edited or created components of a single type
 router.get('/components/:type', permissions.checkPermission("components:view"), async function(req, res, next)
 {
@@ -474,21 +478,5 @@ router.get('/search/componentsByUUID', permissions.checkPermission("components:v
 {
   // Render the search page
   res.render("search_componentsByUUID.pug");
-});
-
-
-// List the component types
-router.get('/componentTypes', permissions.checkPermission("components:view"), async function(req, res, next)
-{
-  // Get a list of the component type forms that have already been used to create components of that type
-  var componentTypes = await ComponentTypes.list();
-  var types = await Components.getTypes();
-
-  // Add onto this list any component type forms that exist but haven't been used yet
-  var forms = await Forms.list('componentForms');
-  var componentTypes = deepmerge(types, forms);
-
-  // Render the page showing the list of component types
-  res.render("list_componentTypes.pug", {componentTypes});
 });
 

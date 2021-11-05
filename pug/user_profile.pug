@@ -4,40 +4,41 @@ block vars
   - var page_title = "User Profile";
 
 block content
-  pre #{''}
-  pre #{''}
+  .container-fluid
+    pre #{''}
+    pre #{''}
   
-  img.avatar_image.border(src = userProfile.picture)
+    img.avatar_image.border(src = userProfile.picture)
   
-  pre #{''}
+    pre #{''}
   
-  dl
-    dt Display Name
-    dd=userProfile.name
+    dl
+      dt Display Name
+      dd=userProfile.name
     
-    dt User ID
-    dd=userProfile.user_id
+      dt User ID
+      dd=userProfile.user_id
     
-    dt Email
-    dd 
-      a(href = 'mailto:' + userProfile.email) #{userProfile.email} 
+      dt Email
+      dd 
+        a(href = 'mailto:' + userProfile.email) #{userProfile.email} 
       
-      if(userProfile.email_verified)
-        span (Verified)
+        if(userProfile.email_verified)
+          span (Verified)
     
-    dt Created
-    dd=userProfile.created_at
+      dt Created
+      dd=userProfile.created_at
     
-    dt Roles
-    dd
-      pre #{user.roles.join(', ')}
+      dt Roles
+      dd
+        pre #{user.roles.join(', ')}
     
-    dt Permissions granted by these Roles:
-    dd
-      pre(style = 'white-space: pre-wrap') #{user.permissions.join(', ')}
+      dt Permissions granted by these Roles:
+      dd
+        pre(style = 'white-space: pre-wrap') #{user.permissions.join(', ')}
     
-    if(permissions.userHas(user, 'users:edit'))
-      pre #{''}
+      if(permissions.userHas(user, 'users:edit'))
+        pre #{''}
       
-      a(href = '/user/edit/' + user.user_id).btn.btn-outline-info Modify User
+        a(href = '/user/edit/' + user.user_id).btn.btn-outline-info Modify User
 

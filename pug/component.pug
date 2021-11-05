@@ -21,9 +21,9 @@ block extrascripts
   script(type = 'text/javascript').
     var componentUuid = "!{componentUuid}";
     
-    var schema    = !{JSON.stringify(formrec.schema || {})};
+    var schema = !{JSON.stringify(formrec.schema || {})};
     var component = !{JSON.stringify(component || {})};
-    var base_url  = "!{base_url}";
+    var base_url = "!{base_url}";
   
   script(type = 'text/javascript').
     var form      = null;
@@ -33,16 +33,17 @@ block extrascripts
     {
       form = await Formio.createForm(document.getElementById('builtform'),schema,
       {
-         readOnly: true,
+        readOnly: true,
       });
+      
       form.submission = component;
-      form.nosubmit   = true;
+      form.nosubmit = true;
     }
   
   script(type = 'text/javascript').
     function CopyConfirm(componentUUID)
     {
-      var copyhelper       = document.createElement("input");
+      var copyhelper = document.createElement("input");
       copyhelper.className = 'copyhelper'
       
       document.body.appendChild(copyhelper);
@@ -76,7 +77,7 @@ block content
       
           dt UUID
           dd
-            a(href = '/' + componentUuid)=componentUuid
+            a(href = '/component/' + componentUuid)=componentUuid
             br
             |
             div.copybutton(class = "btn-sm", id = "copyButton", type = "button", onclick = "CopyConfirm(componentUuid)") Copy
@@ -85,28 +86,34 @@ block content
           dd #{component.type}
       
           dt Created
-          dd #{moment(component.data.created).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.data.created).fromNow()})
+          dd
+            +dateFormatAndAgo(component.data.created)
       
           dt Last Updated
-          dd #{moment(component.data.last_edited).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.data.last_edited).fromNow()})
+          dd
+            +dateFormatAndAgo(component.data.last_edited)
       
           dt Version and History
           dd This is version #{component.validity.version} of the component:
             
             pre #{''}
             
-            div.border-success.border.rounded
-              #builtform.col-md-8
+            div.border-success.border.rounded.p-2
+              #builtform
                 +createdFrom(component.createdFrom)
             
             br
             | This version was last edited by !{' '}
             +short_user(component.insertion.user)
-            |  on #{moment(component.insertion.insertDate).format('MMMM Do YYYY, h:mm:ss a')}.
+            |  on !{' '}
+            +dateFormatAndAgo(component.insertion.insertDate)
+            | .
             br
-            | It is effective as of #{moment(component.validity.startDate).format('MMMM Do YYYY, h:mm:ss a')} (#{moment(component.validity.startDate).fromNow()}).
+            | It is effective as of !{' '}
+            +dateFormatAndAgo(component.validity.startDate)
+            | .
           dd 
-            a(href = '/' + componentUuid + '/history') View Component History
+            a(href = '/component/' + componentUuid + '/history') View Component History
         
         if((((relationships || {}).linkedFrom) || []).length > 0)
           pre #{''}
@@ -119,7 +126,7 @@ block content
               each o in relationships.linkedFrom
                 li
                   | #{o.type}:
-                  a(href = "/component/" + MUUID.from(o.componentUuid).toString()) #{o.name} 
+                  a(href = '/component/' + MUUID.from(o.componentUuid).toString()) #{o.name} 
                   | (#{o.path})
         
         pre #{''}
@@ -127,17 +134,17 @@ block content
         h4 Component Options
     
         div
-          a(href = '/' + componentUuid + '/edit') Edit Component
+          a(href = '/component/' + componentUuid + '/edit') Edit Component
         div
-          a(href = '/' + componentUuid + '/label') View and print the component's QR code labels
+          a(href = '/component/' + componentUuid + '/label') View and print the component's QR code labels
         div
-          a(href = '/' + componentUuid + '/traveller') View and print the component's traveller
+          a(href = '/component/' + componentUuid + '/traveller') View and print the component's traveller
         div
-          a(href = '/json/component/' + componentUuid) View the component's full JSON document
+          a(href = '/json/component/' + componentUuid) View the component's full JSON entry
       
       .col-md-4
         div#qr-code
-          +qr-panel(base_url + '/' + component.componentUuid.toString(), component.data.name)
+          +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
     
     pre #{''}
     pre #{''}
@@ -170,7 +177,7 @@ block content
           // First, list the tests that are specifically matched to this component type
           each info, formId in forms
             if(((info || {}).componentTypes || []).includes(component.type)&& !info.tags.includes("Trash"))
-              a(href = '/' + componentUuid + '/test/' + formId).tagbutton.btn.btn-outline-primary=t
+              a(href = '/test/' + formId + '/' + componentUuid).tagbutton.btn.btn-outline-primary=t
                 if((info || {}).icon)
                   img.icon(src = info.icon)
                 =info.formName
@@ -182,7 +189,7 @@ block content
           // Next, list the tests which are tagged as being applicable to 'all' component types
           each info, formId in forms
             if(((info || {}).componentTypes || []).includes("All") && !info.tags.includes("Trash"))
-              a(href = '/' + componentUuid + '/test/' + formId).tagbutton.btn.btn-outline-primary=t
+              a(href = '/test/' + formId + '/' + componentUuid).tagbutton.btn.btn-outline-primary=t
                 if((info || {}).icon)
                   img.icon(src = info.icon)
                 =info.formName
@@ -190,7 +197,7 @@ block content
           // Finally, list the tests that do not have any tags
           each info, formId in forms
             if(!info.tags || info.tags.length == 0) 
-              a(href = '/' + componentUuid + '/test/' + formId).tagbutton.btn.btn-outline-primary=t
+              a(href = '/test/' + formId + '/' + componentUuid).tagbutton.btn.btn-outline-primary=t
                 if((info || {}).icon)
                   img.icon(src = info.icon)
                 =info.formName

@@ -83,7 +83,7 @@ router.get("/job/:formId",permissions.checkPermission("jobs:submit"),async funct
     var options = {onDate: new Date()};
     var workflow = await Forms.retrieve('jobForms',req.params.formId,options);
     if(!workflow) return res.status(400).send("No such job workflow");
-    res.render('test.pug',{formId:req.params.formId, form:workflow, 
+    res.render('test_run_singleComponent.pug',{formId:req.params.formId, form:workflow, 
                           route_on_submit: '/job',
                           submission_url: '/json/job'});
   } catch(err) { logger.error(err); next(); }
@@ -103,7 +103,7 @@ async function(req,res,next) {
 
     var form = await Forms.retrieve('jobForms',job.formId);
     if(!form) return res.status(400).send("No such test form");
-    res.render('test.pug',{formId: job.formId, form:form, testdata:job, route_on_submit:'/job', submission_url:'/json/job'})
+    res.render('test_run_singleComponent.pug',{formId: job.formId, form:form, testdata:job, route_on_submit:'/job', submission_url:'/json/job'})
   } catch(err) { logger.error(err); next(); }
 });
 
@@ -151,16 +151,5 @@ router.get('/job/copyAsDraft/:job_id([A-Fa-f0-9]{24})',permissions.checkPermissi
 
 })
 
-
-// Common
-
-router.get('/drafts',  permissions.checkPermission("tests:view"),
-  async function(req,res,next){
-  var job_drafts = null;
-  var test_drafts = null;
-  if(req.user && req.user.user_id) test_drafts=await Tests.listUserDrafts(req.user.user_id);
-  if(req.user && req.user.user_id) job_drafts=await Jobs.listUserDrafts(req.user.user_id);
-  res.render('drafts.pug',{test_drafts,job_drafts});
-  })
 
 

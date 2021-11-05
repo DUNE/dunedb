@@ -89,17 +89,17 @@ body(class = "deployment-" + deployment)
                     +navlink(href = '/search/componentsByUUID')
                       |      Search by UUID
                   li.nav-item
-                    +navlink(href = '/componentTypes')
+                    +navlink(href = '/components/types')
                       |      List Component Types
 
             li.nav-item
-              +navlink(href = '/tests')
+              +navlink(href = '/tests/recent')
                 i.fa.fa-flask("aria-hidden" = "true")
                 | Tests
 
               ul.nav.flex-column.ml-3.sub-bar
                   li.nav-item
-                    +navlink(href = '/testTypes')
+                    +navlink(href = '/tests/types')
                       |      List Test Types
 
             li.nav-item
@@ -118,7 +118,7 @@ body(class = "deployment-" + deployment)
                 | Courses
 
             li.nav-item
-              +navlink(href = '/drafts')
+              +navlink(href = '/user/drafts')
                 i.fa.fa-pencil("aria-hidden" = "true")
                 | My Drafts
 

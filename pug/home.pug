@@ -46,7 +46,7 @@ block content
   div.border-success.border.rounded.p-2
     h5 Messages from the Developers:
     ul
-      li <strong>2021-11-01</strong> - Partial cleanup of the <strong>tests</strong> related pages, specifically those listing the various tests of all and specific types, as well as the create/edit test type form page.  Remaining tests-related pages to be cleaned up at a later date.
+      li <strong>2021-11-05</strong> - Cleanup completed on the <strong>tests</strong> and <strong>draft tests</strong> related pages.
       li <strong>2021-10-15</strong> - We have begun cleaning up the backend code, as well as the frontend page layouts, formatting and fixing typos, starting with pages relating to <strong>components</strong> and <strong>non m2m users</strong>.  There should be no changes in any functionality, but please let us know if you find anything that has broken (currently known issues are listed below).
       li <strong>2021-07-07</strong> - Updated some documentation and unit tests.
       li <strong>2021-07-07</strong> - <em>Note there may be some new instabilities or wonky features.</em> I just updated many 3rd party packages. It passes the unit tests, but things might render funny. Please let me know if there are any usability issues or bad formats.
@@ -62,6 +62,9 @@ block content
       li All component pages - the "Created" and "Last Updated" timestamps always give the current time and date (however both are correct in the list of recently changed components)
       li All component pages - the component history is unavailable (currently gives supposed error in the UUID)
       li Component Type editing page - the "Paste JSON from Clipboard" button doesn't seem to do anything
+      li All lists of tests and test results pages - the "submitting user" is wrong
+      li All test results pages - the "Date Performed" timestamp always gives the current time and date (however both are correct in the list of recently performed tests)
+      li My Drafts page - the test timestamp always gives the current time and date
   
   pre #{''}
   pre #{''}
@@ -69,7 +72,7 @@ block content
   if(tags && tags.length > 0)
       h5 Work Categories (tags):
       each t in tags
-        a(href = '/category/' + t).tagbutton.btn.btn-outline-primary=t
+        a(href = '/categories/' + t).tagbutton.btn.btn-outline-primary=t
   
   pre #{''}
   pre #{''}
@@ -102,7 +105,7 @@ block content
               td #{c.type}
               td #{c.name}
               td 
-                a(href = '/'+c.componentUuid) #{c.componentUuid}
+                a(href = '/component/' + c.componentUuid) #{c.componentUuid}
       
       pre #{''}
       pre #{''}

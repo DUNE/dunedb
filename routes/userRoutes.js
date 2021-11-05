@@ -44,7 +44,7 @@ var manager = new ManagementClient(
   console.log(u);
   
   var user_metadata = u.user_metadata || {};
-  user_metadata.start_page = "/category/flute";
+  user_metadata.start_page = "/categories/flute";
   
   var r = await manager.updateUserMetadata({id: u.user_id}, user_metadata);
   console.log("Updated user metadata");

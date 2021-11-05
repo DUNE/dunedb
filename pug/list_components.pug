@@ -6,47 +6,48 @@ block vars
   - var page_title = "Components";
 
 block content
-  pre #{''}
-  pre #{''}
+  .container-fluid
+    pre #{''}
+    pre #{''}
   
-  if(type) 
-    if(permissions.userHas(user, "components:create"))
-      a(href = '/component/new/' + type).btn.btn-outline-info Register a new #{type}
+    if(type) 
+      if(permissions.userHas(user, "components:create"))
+        a(href = '/component/new/' + type).btn.btn-outline-info Register a new #{type}
         
-      pre #{''}
-      pre #{''}
+        pre #{''}
+        pre #{''}
 
-  h3 #{title || page_title}
+    h3 #{title || page_title}
 
-  table.table
-    thead
-      tr
-        if(showType)
-          th
-          th Type
-
-        th Name
-        th UUID
-        th Created
-        th Last Updated
-
-    tbody
-      each component in components
-        - var uuid = MUUID.from(component.componentUuid).toString();
-        
-        tr          
+    table.table
+      thead
+        tr
           if(showType)
+            th
+            th Type
+
+          th Name
+          th UUID
+          th Created
+          th Last Updated
+
+      tbody
+        each component in components
+          - var uuid = MUUID.from(component.componentUuid).toString();
+        
+          tr          
+            if(showType)
+              td
+                if((forms[component.type] || {}).icon)
+                  img.small-icon(src = forms[component.type].icon)
+
+              td #{component.type}
+
+            td #{component.name} 
             td
-              if((forms[component.type] || {}).icon)
-                img.small-icon(src = forms[component.type].icon)
-
-            td #{component.type}
-
-          td #{component.name} 
-          td
-            a(href = '/' + uuid) #{uuid}
-          td
-            +dateFormat(component.created)
-          td
-            +dateFormat(component.last_edited)
+              a(href = '/component/' + uuid) #{uuid}
+            td
+              +dateFormat(component.created)
+            td
+              +dateFormat(component.last_edited)
 
