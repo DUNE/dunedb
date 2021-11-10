@@ -113,7 +113,7 @@ router.post('/user/promote', permissions.ensureAuthenticated, async function(req
       // Tell the authorities!
       email(
       {
-        subject: "Sietch: " + req.user.displayName + " self-promoted",
+        subject: "APA DB: " + req.user.displayName + " self-promoted",
         text: `${req.user.displayName} (${req.user.emails[0].value}) just self-promoted using username ${req.body.user}.\n\n`
             + `Their new roles are:\n`
             +   roles.join("\n")
@@ -139,7 +139,7 @@ router.post('/user/promote', permissions.ensureAuthenticated, async function(req
 });
 
 
-// View a list of all Sietch users
+// View a list of all users
 router.get('/users', permissions.checkPermissionJson('users:view'), async function(req, res, next)
 {
   // Render the users list page

@@ -85,14 +85,6 @@ block content
           dt Type
           dd #{component.type}
       
-          dt Created
-          dd
-            +dateFormatAndAgo(component.data.created)
-      
-          dt Last Updated
-          dd
-            +dateFormatAndAgo(component.data.last_edited)
-      
           dt Version and History
           dd This is version #{component.validity.version} of the component:
             
@@ -104,7 +96,7 @@ block content
             
             br
             | This version was last edited by !{' '}
-            +short_user(component.insertion.user)
+            a(href = 'mailto:' + user_email(component.insertion.user)) #{component.insertion.user.displayName}
             |  on !{' '}
             +dateFormatAndAgo(component.insertion.insertDate)
             | .

@@ -4,7 +4,7 @@ head
   block pugscripts
 
   block vars
-   title #{page_title || 'Sietch'}
+   title #{page_title || 'APA Construction Database'}
 
   <meta charset = "utf-8">
   <meta http-equiv = "X-UA-Compatible" content = "IE=edge">
@@ -48,9 +48,9 @@ body(class = "deployment-" + deployment)
               if(deployment == 'laptop')
                 | Laptop
               else if(deployment == 'devsite')
-                | SietchDev
+                | Development
               else 
-                | Sietch            
+                | Production            
             div.pull-right(style = "height: 1.3em; display: inline-block")
               img(src = "/images/noun_cave_1842206.svg", style = "height: 100%; width: auto; fill: black;")
               
@@ -152,7 +152,7 @@ body(class = "deployment-" + deployment)
             span About
           ul.nav.flex-column.mb-2
             li.nav-item
-                +navlink(href = '/docs/') Sietch Documentation
+                +navlink(href = '/docs/') Documentation
  
       #content
         block content 
