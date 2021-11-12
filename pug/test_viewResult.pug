@@ -54,11 +54,11 @@ block content
       if testdata 
         dt Date Performed: 
         dd
-          +dateFormatAndAgo(testdata.insertion.startTime)
+          +dateFormatAndAgo(testdata.insertion.insertDate)
           
           if testdata.insertion.user
               |  by !{' '}
-              +short_user(testdata.insertion.user)
+              a(href = 'mailto:' + user_email(testdata.insertion.user)) #{testdata.insertion.user.displayName}
 
       if(testdata.componentUuid && component)
         - var uuid = MUUID.from(testdata.componentUuid);

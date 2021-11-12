@@ -28,7 +28,7 @@ block content
             li.ml-4
               a(href = '/draft/test/' + draft._id) #{draft.formName || draft.formId}
               |  (
-              +dateFormatAndAgo(draft.insertDate)
+              +dateFormatAndAgo(draft.insertion.insertDate)
               | ) 
               a(href = '/draft/test/' + draft._id + '/delete') [delete]
 
@@ -46,9 +46,9 @@ block content
           
           each draft in job_drafts
             li.ml-4
-              a(href = '/job/draft/' + draft._id) #{draft.formName || draft.formId}
+              a(href = '/draft/job/' + draft._id) #{draft.formName || draft.formId}
               |  (
-              +dateFormat(draft.insertDate)
+              +dateFormatAndAgo(draft.insertion.insertDate)
               | ) 
-              a(href = '/job/deleteDraft/' + draft._id) [delete]
+              a(href = '/draft/job/' + draft._id + '/delete') [delete]
 

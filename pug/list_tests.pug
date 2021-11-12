@@ -35,8 +35,6 @@ block content
     
       tbody
         each test in tests
-          - var testid = test._id
-        
           tr
             if(showType)
               td
@@ -46,12 +44,12 @@ block content
               td #{test.formName}
           
             td
-              a(href = '/test/' + testid) #{testid}
+              a(href = '/test/' + test._id) #{test._id}
             td
               +dateFormatAndAgo(test.insertDate)
             td
-              +short_user(test.user)
+              a(href = 'mailto:' + user_email(test.user)) #{test.user.displayName}
             td
-              a(href = '/json/test/' + testid).btn.btn-outline-primary
+              a(href = '/json/test/' + test._id).btn.btn-outline-primary
                 | View JSON Data
 

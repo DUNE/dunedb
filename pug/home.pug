@@ -7,16 +7,16 @@ block extrascripts
     .tagbutton {margin: 4px;}
 
 block vars
-  - var page_title = "Sietch Dashboard";
+  - var page_title = "Dashboard";
 
 block content
   if deployment == "laptop"
     .alert.alert-warning
-      p Hi, and welcome to the Sietch development team, currently led by  
+      p Hi, and welcome to the APA Construction Database development team, currently led by  
         a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar
-        | .  Sietch was originally developed by Nathaniel Tagg.
+        | .  This project (previously named 'Sietch') was originally developed by Nathaniel Tagg.
       
-      p This is an instance of Sietch running locally on your computer.  It is <strong>not</strong> connected to the development or production databases, so any changes made here will not be reflected there.
+      p This is an instance of the database running locally on your computer.  It is <strong>not</strong> connected to the development or production databases, so any changes made here will not be reflected there.
         br
         | If you create any content on here that you wish moved to the 
         a(href = 'https://dev.sietch.xyz') development
@@ -26,7 +26,7 @@ block content
   
   if deployment == "devsite"
     .alert.alert-danger
-      p This is the Sietch Development site.
+      p This is the APA Construction Database development site.
         br
         | Feel free to create component types, components, forms, and workflows freely.
 
@@ -36,8 +36,8 @@ block content
   
   if deployment == "production"
     .alert.alert-success 
-      p This is the Sietch Production APA database.
-      p If you want a playground to try things out, please use either a local instance of Sietch or the 
+      p This is the APA Construction Database Production APA database.
+      p If you want a playground to try things out, please use either a local instance of the database or the 
         a(href = "https:/dev.sietch.xyz") development 
         |  site.
   
@@ -59,13 +59,9 @@ block content
   div.border-danger.border.rounded.p-2
     h5 Known Bugs:
     ul
-      li All component pages - the "Created" and "Last Updated" timestamps always give the current time and date (however both are correct in the list of recently changed components)
-      li All component pages - the component history is unavailable (currently gives supposed error in the UUID)
-      li Component Type editing page - the "Paste JSON from Clipboard" button doesn't seem to do anything
-      li All lists of tests and test results pages - the "submitting user" is wrong
-      li All test results pages - the "Date Performed" timestamp always gives the current time and date (however both are correct in the list of recently performed tests)
-      li My Drafts page - the test timestamp always gives the current time and date
-  
+      li All pages - the page titles are not showing up in browser tabs
+      li All component pages - the component history is unavailable (null date error)
+      
   pre #{''}
   pre #{''}
   
