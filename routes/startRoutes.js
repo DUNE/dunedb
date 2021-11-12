@@ -60,7 +60,7 @@ child_process.exec('git log -n 10 --date=short --pretty=format:"%ad %h %s"', (er
 */
 
 
-// [Internal Function] Display the Sietch homepage
+// [Internal Function] Display the homepage
 async function homePage(req, res, next)
 {
   var tags = await Tags.get();
@@ -88,8 +88,8 @@ async function homePage(req, res, next)
 
 
 // Start page ... note that this has 2 functions
-// The first function (re)directs the user to their designated start page or to the Sietch homepage (if they are logged in)
-// The second function, which is used in case neither of those options exists, directs the view to the Sietch splash page
+// The first function (re)directs the user to their designated start page or to the homepage (if they are logged in)
+// The second function, which is used in case neither of those options exists, directs the view to the splash page
 router.get('/', async function(req, res, next)
 {
   if(!req.user)
@@ -110,7 +110,7 @@ function(req, res, next)
 });
 
 
-// Direct access to the Sietch homepage (for logged in users only)
+// Direct access to the homepage (for logged in users only)
 router.get('/', permissions.ensureAuthenticated, homePage);
 
 
