@@ -150,16 +150,25 @@ block content
         if(!tests || tests.length == 0)
             p None
         else
-            ul.testsPerformed
-              each test in tests
-                li 
-                  - var parenthetical = " (on " + moment(test.insertion.insertDate).format('MMM DD YYYY');
-                  - if(test.insertion.user) {parenthetical += " by " + user_shortname(test.insertion.user)}
-                  - parenthetical += ")";
-                  a(href = '/test/' + test._id)=(forms[test.formId].formName || test.formId)
-                  =parenthetical
-                  
-      .col-8
+            table.table
+              thead
+                tr
+                  th.col-md-2 Test
+                  th.col-md-2 Date
+                  th.col-md-1 Performed By
+              
+              tbody
+                each test in tests
+                  tr
+                    td
+                      a(href = '/test/' + test._id)=(forms[test.formId].formName || test.formId)
+                    td
+                      +dateFormat(test.insertion.insertDate)
+                    td #{user_shortname(test.insertion.user)}
+      
+      .col-sm-1
+      
+      .col-6
         h4 Select a Test to Run on this Component
         pre #{''}
         

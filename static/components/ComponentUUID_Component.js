@@ -126,7 +126,7 @@ class ComponentUUID_Component extends QR_Component{
     // }
     if(this.refs.compUuidInfo && value && value.length==36) {
       var info_target = $(this.refs.compUuidInfo[index]);
-      info_target.show().prop('href','/'+value).text('link');
+      info_target.show().prop('href','/component/'+value).text('link');
       $.get('/json/component/'+value+"/simple").then(function(component){
         info_target.text(component.type +": "+ component.data.name);
       })
