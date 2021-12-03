@@ -54,25 +54,24 @@ class ArrayComponent extends TextFieldComponent{
     if(!value) value = this.parseText('');
     if(value.data) value = value.data; // Backward comp
     var textvalue = value.join(',');
-    // tpl += "<input ref='input' type='text'>";
-    var tpl = '';
-    tpl += super.renderElement(textvalue,index);
     gArrayComponentId++;
-//    tpl += `<div class='array-component-readonly-text' ref='readonly_display'></div>`
-      tpl += `<div class="d-flex justify-content-around border">`;
-        tpl += `<div class="align-self-center p-2">`;
-          tpl += `<div>Number of Wires: <span class='arrayComponentLength'></span></div>`;
-          tpl += `<div>Min. Tension (N): <span class='arrayComponentMin'></span></div>`;
-          tpl += `<div>Max. Tension (N): <span class='arrayComponentMax'></span></div>`;
-          tpl += `<div>Mean Tension (N): <span class='arrayComponentMean'></span></div>`;
-          tpl += `<div>RMS Tensions (N): <span class='arrayComponentRMS'></span></div>`;
-          var bounds = this.getBounds();
-          if(!isNaN(bounds.hi)) tpl += `<div>Out-of-spec high: <span class='arrayComponentOobHi'>n/a</span></div>`;
-          if(!isNaN(bounds.lo)) tpl += `<div>Out-of-spec low: <span class='arrayComponentOobLo'>n/a</span></div>`;
-        tpl += `</div>`
-        tpl += `<div class='flex-grow-1 p-4 arrayComponentGraph' style='height: 200px; width: 240px;'></div>`;
-        tpl += `<div class='flex-grow-1 p-4 arrayComponentHistogram' style='height: 200px; width: 240px;'></div>`;
-      tpl += `</div>`
+    
+    var tpl = super.renderElement(textvalue,index);
+    var bounds = this.getBounds();
+      
+    tpl += `<div class="d-flex justify-content-around border">
+              <div class="align-self-center p-2">
+                <div>Number of Wires: <span class='arrayComponentLength'></span></div>
+                <div>Min. Tension (N): <span class='arrayComponentMin'></span></div>
+                <div>Max. Tension (N): <span class='arrayComponentMax'></span></div>
+                <div>Mean Tension (N): <span class='arrayComponentMean'></span></div>
+                <div>RMS Tension (N): <span class='arrayComponentRMS'></span></div>`;
+    if(!isNaN(bounds.hi)) tpl += `<div>Out-of-Spec High: <span class='arrayComponentOobHi'>n/a</span></div>`;
+    if(!isNaN(bounds.lo)) tpl += `<div>Out-of-Spec Low: <span class='arrayComponentOobLo'>n/a</span></div>`;
+    tpl += `  </div>
+              <div class='flex-grow-1 p-4 arrayComponentGraph' style='height: 200px; width: 240px;'></div>
+              <div class='flex-grow-1 p-4 arrayComponentHistogram' style='height: 200px; width: 240px;'></div>
+            </div>`;
 
     return tpl;
 

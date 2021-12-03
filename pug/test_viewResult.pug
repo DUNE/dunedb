@@ -46,7 +46,7 @@ block extrascripts
       var side = document.getElementById("apaSide").value;
       var number = document.getElementById("wireNumber").value;
       
-      var keyName = "wires." + layer + "." + side + "[" + number + "]";
+      var keyName = `wires.${layer}.${side}[${number}]`;
       document.getElementById("tensionKey").value = keyName;
       
       var tension = testdata.data.wires[layer][side][number];
