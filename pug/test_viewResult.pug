@@ -37,6 +37,21 @@ block extrascripts
       form.nosubmit = true;
       form.submission = testdata;
     }
+  
+  script(type = 'text/javascript').
+    
+    function GetWireTension()
+    {
+      var layer = document.getElementById("wireLayer").value;
+      var side = document.getElementById("apaSide").value;
+      var number = document.getElementById("wireNumber").value;
+      
+      var keyName = `wires.${layer}.${side}[${number}]`;
+      document.getElementById("tensionKey").value = keyName;
+      
+      var tension = testdata.data.wires[layer][side][number];
+      document.getElementById("wireTension").value = tension;
+    };
 
 block content
   .container-fluid
@@ -71,7 +86,39 @@ block content
       else
         dt span.alert.alert-danger Component information is not available!
     
-    pre #{''}
+      pre #{''}
+        
+      if(formrec.formName == "Wire Tensions")
+        .row
+          .col-9
+            div.border-warning.border.rounded.p-2
+              .row
+                .col <strong>Query a Wire Tension: </strong>
+                .col
+                  select.form-control(id = "wireLayer", type = "text")
+                    option(value = '' ) Wire Layer
+                    option(value = 'X') X
+                    option(value = 'U') U
+                    option(value = 'V') V
+                    option(value = 'G') G
+                .col
+                  select.form-control(id = "apaSide", type = "text")
+                    option(value = '' ) APA Side
+                    option(value = 'A') A
+                    option(value = 'B') B
+                .col
+                  input.form-control(id = "wireNumber", type = "text", placeholder = "Wire Number")
+                .col
+                  input.btn.btn-info#submitPromotion(type = "submit", onclick = "GetWireTension()")
+                .col-2
+                  input.form-control(id = "tensionKey", type = "text", placeholder = "Tension Key", readonly)
+                .col-2
+                  input.form-control(id = "wireTension", type = "text", placeholder = "Wire Tension (N)", readonly)
+          
+          .col-3
+      
+        pre #{''}
+        pre #{''}
     
     div.border-success.border.rounded.p-2
       #builtform  
@@ -111,7 +158,6 @@ block content
           =process.state
           |  - #{process.created.length} objects created
 
-
     p
       if(permissions.userHas(user,'testdatas:process'))
         each process, processId in (formrec.processes || {})
@@ -132,3 +178,6 @@ block content
     div
       a.btn.btn-info(href = '/test/' + testdata._id + '/copyToDraft') Copy Test to New Draft
   
+    pre #{''}
+    pre #{''}
+

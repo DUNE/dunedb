@@ -29,18 +29,18 @@ function HistCanvas( element, options )
     log_y : false,
     suppress_zero: false,
     draw_grid_y : true,
-    draw_grid_x : false,
-    margin_left : 30,
+    draw_grid_x : true,
+    margin_left : 40,
     margin_bottom : 40,
-    draw_box : false,    
+    draw_box : true,    
     margin_right : 10,
     margin_top : 10,
     xlabel : "X",
     ylabel : "Y",
     marker: null,
-  	adjuct_display: false,
+  	adjunct_display: false,
   	adjunct_height: 0,
-		adunct_label: null,
+	adjunct_label: null,
     pan_x_allow: true,
     pan_y_allow: true,
     scale_x_allow: true,
@@ -152,7 +152,7 @@ HistCanvas.prototype.DrawAdjunct = function()
 	
 	// Draw the label
   if(this.adjunct_label) {
-    this.ctx.font = "12px sans-serif";
+    this.ctx.font = "6px sans-serif";
     this.ctx.textAlign = 'right';
     this.ctx.textBaseline = 'middle';
     this.ctx.fillStyle = "rgba(20,20,20,1.0)";
@@ -387,9 +387,8 @@ HistCanvas.prototype.DrawHist = function( iHist )
      this.ctx.globalCompositeOperation=o.composite;     
      for (i = 0; i < hist.n; i++) {
        t = hist.GetX(i);
-       t2 = hist.GetX(i+1);
        f = hist.data[i];
-       x = (this.GetX(t) + this.GetX(t2))/2;
+       x = this.GetX(t);
        y = this.GetY(f);
        if(x<this.origin_x) continue;
        if(x>(this.origin_x + this.span_x)) continue;
