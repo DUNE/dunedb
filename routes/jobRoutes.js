@@ -1,155 +1,220 @@
 
-const permissions = require('lib/permissions.js');
+const express = require('express');
 const Forms = require('lib/Forms.js');
 const Jobs = require('lib/Jobs.js')('job');
-const Tests = require('lib/Tests.js')('test');
-const Processes = require('lib/Processes.js');
-const utils = require("lib/utils.js");
-const express  = require("express");
+const permissions = require('lib/permissions.js');
 
 var router = express.Router();
-
 module.exports = router;
 
-// HTML/Pug routes:
 
-// look at a job result
-router.get("/job/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("tests:view"),
- async function(req,res,next) {
-    try{
-      var options = {};
-      let [job,processes] = await Promise.all([
-          Jobs.retrieve(req.params.job_id),
-          Processes.findInputRecord(req.params.job_id)
-        ]);
-      if(!job) return res.status(404).send("No such job recorded.");
-      var formId = job.formId;
-      if(!formId) throw new Error("Job has no formId");
-
-      if(req.query.formVersion) options.version = parseInt(req.query.formVersion);
-      // fixme rollback
-      var formrec = await Forms.retrieve('jobForms',formId,options);
-      var formversions = await Forms.getFormVersions('jobForms',formId);
-      // logger.info('versions',versions);
-      if(!formrec) return res.status(400).send("No such job form");  
-      res.render('viewJob.pug',{formId:req.params.formId, formrec,  processes, job, formversions, retrieved:true})
-    } 
-    catch(err) { 
-      logger.error("error in router function",err); //next(); 
+// View information about an existing job
+router.get('/job/:jobId([A-Fa-f0-9]{24})', permissions.checkPermission("jobs:view"), async function(req, res, next)
+{
+  try
+  {
+    // Set up a query for both the DB entry's job ID and (optionally) version to match those provided
+    var query = {jobId: req.params.jobId};
+    
+    if(req.query.version)
+    {
+      query["validity.version"] = parseInt(req.query.version);
     }
-
-});
-
-
-// look at a job result
-router.get("/job/:jobId([A-Fa-f0-9]{24})/history", permissions.checkPermission("tests:view"),
- async function(req,res,next) {
-    // logger.info("job/<>/history");
-
-    try{
-        var query = {jobId: req.params.jobId};
-        if(req.query.version) query["validity.version"] = parseInt(req.query.version);
-
-        var options = {};
-        let [job,processes,versions] = await Promise.all([
-            Jobs.retrieve(query),
-            Processes.findInputRecord(req.params.job_id),
-            Jobs.versions(req.params.jobId),
-          ]);
-        if(!job) return res.status(404).send("No such job recorded.");
-        var formId = job.formId;
-        if(!formId) throw new Error("Job has no formId");
-
-        if(req.query.formVersion) options.version = parseInt(req.query.formVersion);
-        // fixme rollback
-        var formrec = await Forms.retrieve('jobForms',formId,options);
-        var formVersions = await Forms.getFormVersions('jobForms',formId);
-        // logger.info('versions',versions);
-        if(!formrec) return res.status(400).send("No such job form");  
-        res.render('viewJobHistory.pug',{formId:req.params.formId, formrec, processes, job, versions, formVersions, retrieved:true})
-    } 
-    catch(err) { 
-      logger.error("error in router function",err); next(); 
+    
+    // Retrieve the job's DB entry, using its job ID, and all versions of the job as well
+    // Throw an error if there is no DB entry corresponding to this job ID
+    let [job, jobVersions] = await Promise.all(
+    [
+      Jobs.retrieve(query),
+      Jobs.versions(req.params.jobId)
+    ]);
+    
+    if(!job)
+    {
+      return res.status(400).send("There is no DB entry for a job with ID: " + req.params.jobId);
     }
-
+    
+    // Get the job's type form's ID
+    // Throw an error if the form's ID cannot be found within the job's DB entry
+    var formId = job.formId;
+    
+    if(!formId)
+    {
+      return res.status(400).send("This job (ID: " + req.params.jobId + ") has no type form ID!");
+    }
+    
+    // Retrieve a particular version of the job's type form, using its form ID and specified version number
+    // If no version number is specified, the most recent version will be retrieved
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var options = {};
+    
+    if(req.query.formVersion)
+    {
+      options.version = parseInt(req.query.formVersion);
+    }
+    
+    var form = await Forms.retrieve('jobForms', formId, options);
+    
+    if(!form)
+    {
+      return res.status(400).send("There is no DB entry for a job type form with ID: " + formId);
+    }
+    
+    // Render the page for viewing the information about an existing job
+    res.render('job.pug', {job,
+                           jobVersions,
+                           form})
+  } 
+  catch(err)
+  { 
+    next();
+  }
 });
 
 
-
-/// Run an new job
-router.get("/job/:formId",permissions.checkPermission("jobs:submit"),async function(req,res,next){
-  try{
-    // logger.info("run a new job");
-    var options = {onDate: new Date()};
-    var workflow = await Forms.retrieve('jobForms',req.params.formId,options);
-    if(!workflow) return res.status(400).send("No such job workflow");
-    res.render('test_run_singleComponent.pug',{formId:req.params.formId, form:workflow, 
-                          route_on_submit: '/job',
-                          submission_url: '/json/job'});
-  } catch(err) { logger.error(err); next(); }
+// Submit a new job of a given type
+router.get('/job/:formId', permissions.checkPermission("jobs:submit"), async function(req, res, next)
+{
+  try
+  {
+    // Retrieve the job type form corresponding to the specified form ID
+    // Set the retrieval (and therefore, submission) timestamp to be the current date and time
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve('jobForms', req.params.formId, {onDate: new Date()});
+    
+    if(!form)
+    {
+      return res.status(400).send("There is no DB entry for a job type form with ID: " + formId);
+    }
+    
+    // Render the page for submitting a new job
+    res.render('job_submit.pug', {form});
+  }
+  catch(err)
+  {
+    next();
+  }
 });
 
 
-router.get("/job/edit/:job_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
-async function(req,res,next) {
-  try{
-    // logger.info("edit job",req.params.job_id);
-    // get the draft.
-    var job = await Jobs.retrieve(req.params.job_id);
-    if(!job) next();
-    // if(job.state != "draft") return res.status(400).send("Data is not a draft");
-    // logger.info(job);
-    if(!job.formId) return res.status(400).send("Can't find test data");
-
-    var form = await Forms.retrieve('jobForms',job.formId);
-    if(!form) return res.status(400).send("No such test form");
-    res.render('test_run_singleComponent.pug',{formId: job.formId, form:form, testdata:job, route_on_submit:'/job', submission_url:'/json/job'})
-  } catch(err) { logger.error(err); next(); }
+// Edit an existing job
+router.get('/job/:jobId([A-Fa-f0-9]{24})/edit', permissions.checkPermission("jobs:submit"), async function(req, res, next)
+{
+  try
+  {
+    // Retrieve the job's DB entry, using its job ID
+    // Throw an error if there is no DB entry corresponding to this job ID
+    var job = await Jobs.retrieve(req.params.jobId);
+    
+    if(!job)
+    {
+      next();
+    }
+    
+    // Get the job's type form's ID
+    // Throw an error if the form's ID cannot be found within the job's DB entry
+    var formId = job.formId;
+    
+    if(!formId)
+    {
+      return res.status(400).send("This job (ID: " + req.params.jobId + ") has no type form ID!");
+    }
+    
+    // Retrieve the job's type form, using its form ID
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve('jobForms', job.formId);
+    
+    if(!form)
+    {
+      return res.status(400).send("There is no DB entry for a job type form with ID: " + formId);
+    }
+    
+    // Render the page for submitting a new job
+    // The same page can be used to edit an existing job, since it is effectively just a 'new' job with the same ID, and information already filled in
+    res.render('job_submit.pug', {job,
+                                  form});
+  }
+  catch(err)
+  {
+    next();
+  }
 });
 
 
-// router.get("/job/deleteDraft/:record_id([A-Fa-f0-9]{24})", permissions.checkPermission("jobs:submit"),
-// async function(req,res,next) {
-//   try{
-//     logger.info("delete draft",req.params.record_id);
-//     // get the draft.
-//     var testdata = await Jobs.retrieve(req.params.record_id);
-//     if(!testdata) next();
-//     if(testdata.state != "draft") return res.status(400).send("Data is not a draft");
-//     if(testdata.insertion.user.user_id != req.user.user_id) return res.status(400).send("You are not the draft owner");
+// Create a new job type form
+var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
 
-//     await Jobs.deleteDraft(req.params.record_id);
-//     var backURL=req.header('Referer') || '/';
-//     res.redirect(backURL);
-//   } catch(err) { logger.error(err); next(); }
-// });
-
-
-// Lists recent tests generally, or a specific formId
-router.get('/jobs/:formId?', permissions.checkPermission("tests:view"), 
-  async function(req,res,next) {
-    var opts = {};
-    if(req.query && req.query.N) opts.limit = parseInt(req.query.N);
-    if(req.query && req.query.skip) opts.skip = parseInt(req.query.skip);
-
-    var formInfo = await Forms.list(this._formCollection);
-
-    var match = (req.params.formId) ? {formId:req.params.formId} : {};
-    var jobs = await Jobs.list(match,opts);
-    // logger.info(jobs);
-    res.render('recentJobs.pug',{formId:req.params.formId, jobs: jobs, formInfo: formInfo});
-  });
-
-router.get('/job/copyAsDraft/:job_id([A-Fa-f0-9]{24})',permissions.checkPermission("tests:submit"),
-  async function(req,res,next) {
-    try{
-      var newdraft = await Jobs.copyToDraft(req.params.job_id,req);
-      // logger.info("Made copy ",newdraft);
-      if(newdraft) res.redirect("/job/edit/"+newdraft.jobId.toString())
-
-    } catch(err) {  logger.error(err); res.status(400).send(err.toString()); }
-
-})
+router.get('/jobs/:formId/new', permissions.checkPermission("forms:edit"), async function(req, res)
+{
+  // Retrieve any and all existing job type forms with the same form ID as the one provided
+  var form = await Forms.retrieve("jobForms", req.params.formId);
+  
+  // If there is no existing job type form with the same ID, set up a new one using the ID and the default form schema
+  // Initially, use the form ID as the form name as well - the user will have the option of changing the name later
+  if(!form)
+  {
+    var form = {formId: req.params.formId,
+                formName: req.params.formId,
+                schema: default_form_schema}; 
+    
+    Forms.save(form, 'jobForms', req);
+  }
+  
+  // Redirect the user to the page for editing an existing job type form
+  res.redirect('/jobs/' + req.params.formId + '/edit');
+});
 
 
+// Edit an existing job type form
+router.get('/jobs/:formId?/edit', permissions.checkPermission("forms:edit"), async function(req, res)
+{
+  // Render the page for editing an existing job type form
+  res.render('edit_jobTypeForm.pug', {collection: "jobForms",
+                                      formId: req.params.formId});
+});
+
+
+// List all job types
+router.get('/jobs/types', permissions.checkPermission("jobs:view"), async function(req, res, next)
+{
+  // Retrieve a list of all job type forms that currently exist
+  var forms = await Forms.list('jobForms');
+  
+  // Render the page for listing all job types
+  res.render('list_jobTypes.pug', {forms});
+});
+
+
+// List recently submitted jobs across all types
+router.get('/jobs/recent', permissions.checkPermission("jobs:view"), async function(req, res, next)
+{
+  // Retrieve a list of submitted jobs across all job types (since no type form ID is given)
+  // Set a limit on the number of displayed jobs (otherwise every single one in the DB will be shown!)
+  var jobs = await Jobs.list(null, {limit: 30});
+  
+  // Render the page for showing a generic list of jobs
+  res.render('list_jobs.pug', {jobs,
+                               singleType: false});
+});
+
+
+// List recently submitted jobs of a single type
+router.get('/jobs/:formId?', permissions.checkPermission("jobs:view"), async function(req, res, next)
+{
+  // Construct the 'match conditions' to be passed to the function that retrieves a list of jobs
+  // For this, it is simply the requirement that the job type form ID must match the provided one
+  var match = (req.params.formId) ? {formId: req.params.formId} : {};
+  
+  // Retrieve a list of submitted jobs with a matching type form ID
+  // Set a limit on the number of displayed jobs (otherwise every single one in the DB will be shown!)
+  var jobs = await Jobs.list(match, {limit: 50});
+  
+  // Retrieve the job type form corresponding to the provided form ID
+  var form = await Forms.retrieve('jobForms', req.params.formId);
+  
+  // Render the page for showing a generic list of jobs
+  res.render('list_jobs.pug', {jobs,
+                               singleType: true,
+                               form});
+});
 

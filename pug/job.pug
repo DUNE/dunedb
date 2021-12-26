@@ -1,0 +1,95 @@
+
+extend default
+include common.pug
+
+
+block vars
+  - var page_title = "View Submitted Job";
+
+
+block extrascripts
+  
+  script(type = 'text/javascript').
+    
+    // Get information about the job and its corresponding type form
+    var job = !{JSON.stringify(job || {}, null, 4)};
+    var form = !{JSON.stringify(form || {}, null, 4)};
+  
+  script(type = 'text/javascript').
+    
+    // Get the job's type form, and populate it with the job's actual submission
+    // Then disable the submission button (since the form is only to be displayed, not used)
+    window.onload = async function()
+    {
+      form = await Formio.createForm(document.getElementById('builtform'), form.schema, {readOnly: true});
+      form.submission = job;
+      form.nosubmit = true;
+    };
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+    
+    h2 View Submitted Job
+    
+    pre #{''}
+    
+    dl
+      if job 
+        dt ID
+        dd
+          a(href = '/job/' + job.jobId)=job.jobId
+          
+        dt Type
+        dd #{form.formName || form.formId}
+        
+        pre #{''}
+        
+        dt Current Version: 
+        dd This is version #{job.validity.version} of the job:
+        
+          pre #{''}
+          
+          div.border-success.border.rounded.p-2
+            #builtform  
+              +createdFrom(job.createdFrom)
+          
+          br
+          | This version was last edited on !{' '}
+          +dateFormatAndAgo(job.insertion.insertDate)
+          
+          if job.insertion.user
+            |  by !{' '}
+            a(href = 'mailto:' + user_email(job.insertion.user)) #{job.insertion.user.displayName}
+          
+          
+        pre #{''}
+        
+        dt All Versions:
+        dd
+          ul
+            each v in jobVersions
+              li 
+                a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
+                |  on 
+                +dateFormatAndAgo(v.insertion.insertDate)
+                
+                if v.insertion.user
+                  |  by !{' '}
+                  a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
+    
+    pre #{''}
+    pre #{''}
+    
+    div.form-inline
+      a.btn.btn-info(href = '/job/' + job.jobId + '/edit') Edit Job
+      
+      pre #{'    '}
+      
+      a.btn.btn-info(href = '/json/job/' + job.jobId, target = '_blank') View the job's JSON file
+    
+    pre #{''}
+    pre #{''}
+

@@ -28,7 +28,7 @@ block content
     .alert.alert-danger
       p This is the APA Construction Database development site.
         br
-        | Feel free to create component types, components, forms, and workflows freely.
+        | Feel free to create components, tests, jobs and associated types freely.
 
       p If you create any content on here that you wish moved to the 
         a(href = 'https://sietch.xyz') production
@@ -43,76 +43,70 @@ block content
   
   pre #{''}
   
-  div.border-success.border.rounded.p-2
-    h5 Messages from the Developers:
-    ul
-      li <strong>2021-11-05</strong> - Cleanup completed on the <strong>tests</strong> and <strong>draft tests</strong> related pages.
-      li <strong>2021-10-15</strong> - We have begun cleaning up the backend code, as well as the frontend page layouts, formatting and fixing typos, starting with pages relating to <strong>components</strong> and <strong>non m2m users</strong>.  There should be no changes in any functionality, but please let us know if you find anything that has broken (currently known issues are listed below).
-      li <strong>2021-07-07</strong> - Updated some documentation and unit tests.
-      li <strong>2021-07-07</strong> - <em>Note there may be some new instabilities or wonky features.</em> I just updated many 3rd party packages. It passes the unit tests, but things might render funny. Please let me know if there are any usability issues or bad formats.
-      li <strong>2021-07-06</strong> - There is a new <strong>"/[uuid]/traveller/"</strong> route, which shows a printable page with all the latest tests for a component. Linked to from the component page.  See if this looks good!
-      li <strong>2021-07-06</strong> - The ArrayComponent, which makes plots of things like wire tensions, now has configurable specifications, and will count the number of elements outside those specifications.
-      li <strong>2021-07-06</strong> - Now we have a built-in wiki using Markdown - see the sidebar. You might need to log out and in to get privs.
-  
-  pre #{''}
-  
-  div.border-danger.border.rounded.p-2
-    h5 Bugs and Other Issues
-    ul
-      li Bugs and other errors with existing functionality should be reported at our 
-         |
-         a(href = "https://github.com/DUNE/dunedb/issues", target = "_blank") Github Issues page
-         |  (a Github account is required).  Please give as much information as you can - an example page or link where the bug occurs, how to reproduce the error (if appropriate), etc.
-      li Requests for new features and functionality can also be made on that page, but please first make sure that the addition cannot instead be made by users through the database interface.
-      
-  pre #{''}
-  pre #{''}
-  
-  if(tags && tags.length > 0)
-      h5 Work Categories (tags):
-      each t in tags
-        a(href = '/categories/' + t).tagbutton.btn.btn-outline-primary=t
-  
-  pre #{''}
-  pre #{''}
-  
-  hr
-  
-  if(user) 
-    p You are logged in as <strong>#{user.displayName}</strong> and have the following roles:
-      pre #{user.roles.join(', ')}
-    p If you would like additional roles and know the right secrets, you can 
-      |
-      a(href = "/user/promote") promote yourself
-      |.
-  else 
-    p You are not signed in.
+  .container-fluid
+    div.border-success.border.rounded.p-2
+      h5 Messages from the Developers:
+      ul
+        li <strong>2021-11-05</strong> - Cleanup completed on the <strong>tests</strong> and <strong>draft tests</strong> related pages.
+        li <strong>2021-10-15</strong> - We have begun cleaning up the backend code, as well as the frontend page layouts, formatting and fixing typos, starting with pages relating to <strong>components</strong> and <strong>non m2m users</strong>.  There should be no changes in any functionality, but please let us know if you find anything that has broken (currently known issues are listed below).
+        li <strong>2021-07-07</strong> - Updated some documentation and unit tests.
+        li <strong>2021-07-07</strong> - <em>Note there may be some new instabilities or wonky features.</em> I just updated many 3rd party packages. It passes the unit tests, but things might render funny. Please let me know if there are any usability issues or bad formats.
+        li <strong>2021-07-06</strong> - There is a new <strong>"/[uuid]/traveller/"</strong> route, which shows a printable page with all the latest tests for a component. Linked to from the component page.  See if this looks good!
+        li <strong>2021-07-06</strong> - The ArrayComponent, which makes plots of things like wire tensions, now has configurable specifications, and will count the number of elements outside those specifications.
+        li <strong>2021-07-06</strong> - Now we have a built-in wiki using Markdown - see the sidebar. You might need to log out and in to get privs.
     
-  pre #{''}
-  
-  if(recentComponents)
-      h5 Recently Visited Components:
+    pre #{''}
+    
+    div.border-danger.border.rounded.p-2
+      h5 Bugs and Other Issues
+      ul
+        li Bugs and other errors with existing functionality should be reported at our 
+           |
+           a(href = "https://github.com/DUNE/dunedb/issues", target = "_blank") Github Issues page
+           |  (a Github account is required).  Please give as much information as you can - an example page or link where the bug occurs, how to reproduce the error (if appropriate), etc.
+        li Requests for new features and functionality can also be made on that page, but please first make sure that the addition cannot instead be made by users through the database interface.
       
-      table(style = 'width: 40%')
-        tr
-          th Type
-          th Name
-          th UUID
-        tbody
-          each c in recentComponents
-            tr
-              td #{c.type}
-              td #{c.name}
-              td 
-                a(href = '/component/' + c.componentUuid) #{c.componentUuid}
+    pre #{''}
+    pre #{''}
+    
+    if(tags && tags.length > 0)
+        h5 Work Categories (tags):
+        each t in tags
+          a(href = '/categories/' + t).tagbutton.btn.btn-outline-primary=t
+    
+    pre #{''}
+    pre #{''}
+    
+    hr
+    
+    if(user) 
+      p You are logged in as <strong>#{user.displayName}</strong> and have the following roles:
+        pre #{user.roles.join(', ')}
+      p If you would like additional roles and know the right secrets, you can 
+        |
+        a(href = "/user/promote") promote yourself
+        |.
+    else 
+      p You are not signed in.
+    
+    pre #{''}
+    
+    if(recentComponents)
+        h5 Recently Visited Components:
+        
+        table(style = 'width: 40%')
+          tr
+            th Type
+            th Name
+            th UUID
+          tbody
+            each c in recentComponents
+              tr
+                td #{c.type}
+                td #{c.name}
+                td 
+                  a(href = '/component/' + c.componentUuid) #{c.componentUuid}
       
-      pre #{''}
-      pre #{''}
-
-  if(git_info)
-    p Git revision: #{git_info.revision}
-    p Git branch: #{git_info.branch}
-    p Git tags: #{git_info.tags}
-    p Recent commits:
-      pre = git_info.log
+        pre #{''}
+        pre #{''}
 

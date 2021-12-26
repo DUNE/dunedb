@@ -1,11 +1,7 @@
+
 'use strict';
 
-// General pug requirements
-const chalk = require('chalk');
 const express = require('express');
-
-// Local Javascript libraries
-const Jobs = require('lib/Jobs.js')('job');
 const Forms = require('lib/Forms.js');
 const permissions = require('lib/permissions.js');
 const Tests = require('lib/Tests.js')('test');
@@ -14,109 +10,112 @@ var router = express.Router();
 module.exports = router;
 
 
-// View a list of the user's draft tests and jobs
-router.get('/user/drafts', permissions.checkPermission("tests:view"), async function(req, res, next)
+// View a list of the user's drafts
+router.get('/user/drafts', async function(req, res, next)
 {
-  // Get lists of the user's test and job drafts
+  // Get lists of the user's owned drafts from all sources, using the user's ID
+  // Note that a user 'owns' a draft if they were the one who originally submitted it
   var test_drafts = null;
-  var job_drafts = null;
   
   if(req.user && req.user.user_id)
   {
     test_drafts = await Tests.listUserDrafts(req.user.user_id);
-    job_drafts = await Jobs.listUserDrafts(req.user.user_id);
   }
   
-  // Render the page showing the list of drafts
-  res.render('list_drafts.pug', {test_drafts,
-                                 job_drafts});
+  // Render the page for viewing a list of the user's drafts
+  res.render('list_drafts.pug', {test_drafts});
 });
 
 
-// Edit an existing test draft
-router.get('/draft/test/:record_id([A-Fa-f0-9]{24})', permissions.checkPermission("tests:submit"), async function(req, res, next)
+// Edit an existing draft test
+router.get('/draft/test/:testId([A-Fa-f0-9]{24})', permissions.checkPermission("tests:submit"), async function(req, res, next)
 {
   try
   {
-    logger.info("Resume editing draft", req.params.record_id);
+    // Retrieve the draft test's DB entry, using its test ID
+    // If there is no DB entry corresponding to this test ID, just move on
+    var test = await Tests.retrieve(req.params.testId);
     
-    // Get the draft test record
-    var testdata = await Tests.retrieve(req.params.record_id);
-    
-    if(!testdata)
+    if(!test)
     {
       next();
     }
     
-    if(testdata.state != "draft")
+    // Inform the user if the provided test ID does not correspond to a draft
+    // This could happen if the test was in fact submitted, but has somehow also still remained in its original draft state in the DB
+    if(test.state != "draft")
     {
-      return res.status(400).send("Data is not a draft");
+      return res.status(400).send("This test (ID: " + req.params.testId + ") is not a draft!");
     }
     
-    logger.info(testdata);
+    // Get the draft test's type form's ID
+    // Throw an error if the form's ID cannot be found within the draft test's DB entry
+    var formId = test.formId;
     
-    if(!testdata.formId)
+    if(!formId)
     {
-      return res.status(400).send("Cannot find test data with form ID:" + testdata.formId);
+      return res.status(400).send("This draft test (ID: " + req.params.testId + ") has no type form ID!");
     }
 
-    // Get the test type form associated with the given form ID
-    var form = await Forms.retrieve('testForms',testdata.formId);
+    // Retrieve the test's type form, using its form ID
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve('testForms', formId);
     
     if(!form)
     {
-      return res.status(400).send("This form ID does not correspond to an existing test type form!");
+      return res.status(400).send("There is no DB entry for a test type form with ID: " + formId);
     }
     
-    // Render the single-component test page
-    res.render('test_run_singleComponent.pug', {formId: testdata.formId,
-                                                form: form,
-                                                componentUuid: testdata.componentUuid,
-                                                testdata: testdata});
+    // Render the page for running a test on a single component (i.e. continue to run this test on the same component)
+    res.render('test_run_singleComponent.pug', {testdata: test,
+                                                formId,
+                                                form,
+                                                componentUuid: test.componentUuid});
   }
   catch(err)
   {
-    logger.error(err);
     res.status(400).send(err.toString());
   }
 });
 
 
-// Delete an existing test draft
-router.get('/draft/test/:record_id([A-Fa-f0-9]{24})/delete', permissions.checkPermission("tests:submit"), async function(req, res, next)
+// Delete an existing draft test
+router.get('/draft/test/:testId([A-Fa-f0-9]{24})/delete', permissions.checkPermission("tests:submit"), async function(req, res, next)
 {
   try
   {
-    logger.info("Delete draft test", req.params.record_id);
+    // Retrieve the draft test's DB entry, using its test ID
+    // If there is no DB entry corresponding to this test ID, just move on
+    var test = await Tests.retrieve(req.params.testId);
     
-    // Get the draft test record
-    var testdata = await Tests.retrieve(req.params.record_id);
-    
-    if(!testdata)
+    if(!test)
     {
       next();
     }
     
-    if(testdata.state != "draft")
+    // Inform the user if the provided ID does not correspond to a draft
+    // This could happen if the test was in fact submitted, but has somehow also still remained in its original draft state in the DB
+    if(test.state != "draft")
     {
-      return res.status(400).send("Data is not a draft");
+      return res.status(400).send("This test (ID: " + req.params.testId + ") is not a draft!");
     }
     
-    if(testdata.insertion.user.user_id != req.user.user_id)
+    // Check that the draft test is actually owned by the user (users can only view and delete their own drafts, not those of other users)
+    if(test.insertion.user.user_id != req.user.user_id)
     {
-      return res.status(400).send("You do not have permission to delete this test draft - you are not the draft owner");
+      return res.status(400).send("You do not have permission to delete this draft test - you did not originally submit it!");
     }
-
-    await Tests.deleteDraft(req.params.record_id);
     
-    // Redirect back to the main (and updated) drafts page
-    var backURL = req.header('Referer') || '/';
-    res.redirect(backURL);
+    // Delete the draft test
+    await Tests.deleteDraft(req.params.testId);
+    
+    // Redirect the user back to the page for viewing a list of the user's drafts
+    res.redirect('/user/drafts');
   }
   catch(err)
   {
-    logger.error(err);
     res.status(400).send(err.toString());
   }
 });
+
 

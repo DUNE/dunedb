@@ -145,7 +145,7 @@ async function component_traveller(req, res, next)
   // Get the component from the given (full or shortened) UUID
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
   
-  // Get the component's information from all possible sources - component, type, tests, workflows and courses
+  // Get the component's information from all possible sources - component, type, tests, jobs and courses
   Courses.getCourseForComponentType()
   
   let [component, tests] = await Promise.all(

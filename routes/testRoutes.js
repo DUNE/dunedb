@@ -66,13 +66,13 @@ router.get('/test/:record_id([A-Fa-f0-9]{24})', permissions.checkPermission("tes
     var component = await Components.retrieve(test.componentUuid);
   
     // Render the test results viewing page
-    res.render('test_viewResult.pug', {formId: req.params.formId,
-                                       formrec,
-                                       testdata: test,
-                                       processes,
-                                       versions,
-                                       component,
-                                       retrieved: true})
+    res.render('test.pug', {formId: req.params.formId,
+                            formrec,
+                            testdata: test,
+                            processes,
+                            versions,
+                            component,
+                            retrieved: true})
   }
   catch(err)
   {

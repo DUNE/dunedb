@@ -1,23 +1,28 @@
-extend default
 
 //-  
-//- This is a template ... it must be extended to include 'block metaschema' in order to make it functional
+//- This is a template ... it must be extended to add content under 'block metaschema' in order to make it functional
 //-
 
+extend default
+
+
 block extrascripts
+  
+  // Set a border around the form builder area, to make it distinct
   style.
     .formbuilder_area {border: 3px solid red; border-radius: 10px; padding: 5px;}
 
+  // Get information about the form and form collection
   script(type = 'text/javascript').
-    //- var record = !{JSON.stringify(rec, null , 4)};
+    
     var formId = "!{formId}";
     var collection = "!{collection}";
-    //- var componentTypes = !{JSON.stringify(componentTypes) || "null"} ;
   
   block metaschema
   
   block workscripts
     script(src = '/page.js/edit_form.js')
+
 
 block content
   .container-fluid
@@ -38,20 +43,20 @@ block content
       div.col
         .panel.panel-default
         .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#json-holder')
-          | Contents of JSON entry (useful for debugging) 
+          | View contents of JSON file (useful for debugging) 
           i.chevron.fa.fa-fw    
         div#json-holder.collapse
           textarea#schema.form-control(rows = 20)
       
       div.col
-        a#download_schema_link(download = formId + ".json", href = "") Download JSON File
+        a#download_schema_link(download = formId + ".json", href = "") Download JSON file
        
         pre #{''}
         
-        button.btn.btn-primary#copySchemaToClipboard Copy JSON to Clipboard
+        button.btn.btn-primary#copySchemaToClipboard Copy JSON file contents to Clipboard
         
         // TOFIX: The 'Paste JSON from Clipboard' button below doesn't seem to actually do anything
-        // I'm removing it for now, but will add back in and fix later if the functionality is asked for
+        // I'm commenting it out for now, but will add back in and fix later if the functionality is asked for
         // pre #{''}
         //
         // button.btn.btn-primary#pasteSchemaFromClipboard Paste JSON from Clipboard

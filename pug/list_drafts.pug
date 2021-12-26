@@ -10,13 +10,13 @@ block content
     pre #{''}
     pre #{''}
   
-    h3 My Drafts
+    h2 My Drafts
   
     pre #{''}
   
     if test_drafts
       .border.border-primary.p-3.m-2
-        h5 Test Drafts:
+        h4 Test Drafts:
         
         if (test_drafts.length == 0)
           p (None)
@@ -24,31 +24,14 @@ block content
         else
           ul
         
-          each draft in test_drafts
+          each test in test_drafts
             li.ml-4
-              a(href = '/draft/test/' + draft._id) #{draft.formName || draft.formId}
+              a(href = '/draft/test/' + test._id) #{test.formName || test.formId}
               |  (
-              +dateFormatAndAgo(draft.insertion.insertDate)
+              +dateFormatAndAgo(test.insertion.insertDate)
               | ) 
-              a(href = '/draft/test/' + draft._id + '/delete') [delete]
+              a(href = '/draft/test/' + test._id + '/delete') [delete]
 
     pre #{''}
-
-    if job_drafts
-      .border.border-primary.p-3.m-2
-        h5 Job Drafts:
-        
-        if (job_drafts.length == 0)
-          p (None)
-
-        else
-          ul
-          
-          each draft in job_drafts
-            li.ml-4
-              a(href = '/draft/job/' + draft._id) #{draft.formName || draft.formId}
-              |  (
-              +dateFormatAndAgo(draft.insertion.insertDate)
-              | ) 
-              a(href = '/draft/job/' + draft._id + '/delete') [delete]
+    pre #{''}
 

@@ -103,14 +103,14 @@ body(class = "deployment-" + deployment)
                       |      List Test Types
 
             li.nav-item
-              +navlink(href = '/workflows')
+              +navlink(href = '/jobs/recent')
                 i.fa.fa-list-ol("aria-hidden" = "true")
-                | Workflows
+                | Jobs
                
               ul.nav.flex-column.ml-3.sub-bar
                   li.nav-item
-                    +navlink(href = '/jobs')
-                      |      Recent
+                    +navlink(href = '/jobs/types')
+                      |      List Job Types
          
             li.nav-item
               +navlink(href = '/courses')
