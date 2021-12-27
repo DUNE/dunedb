@@ -84,11 +84,15 @@ block content
     pre #{''}
     
     div.form-inline
-      a.btn.btn-info(href = '/job/' + job.jobId + '/edit') Edit Job
+      a(href = '/job/' + job.jobId + '/edit').btn.btn-warning
+        img.small-icon(src = '/images/edit_icon.svg')
+        | &nbsp; Edit Job
       
       pre #{'    '}
       
-      a.btn.btn-info(href = '/json/job/' + job.jobId, target = '_blank') View the job's JSON file
+      a(href = '/json/job/' + job.jobId, target = '_blank').btn.btn-secondary
+        img.small-icon(src = '/images/checklist_icon.svg')
+        | &nbsp; View the job's JSON file
     
     pre #{''}
     pre #{''}

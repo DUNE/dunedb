@@ -15,7 +15,7 @@ block content
     if(singleType) 
       if(permissions.userHas(user, "jobs:submit"))
         if(form.tags && !form.tags.includes("Trash"))
-          a(href = '/job/' + form.formId).btn.btn-info
+          a(href = '/job/' + form.formId).btn.btn-primary
             img.small-icon(src = '/images/run_icon.svg')
             | &nbsp; Submit a New Job of this Type
           
@@ -49,8 +49,9 @@ block content
             td
               a(href = 'mailto:' + user_email(job.user)) #{job.user.displayName}
             td
-              a(href = '/json/job/' + job.jobId, target = '_blank').btn.btn-outline-primary
-                | View JSON file
+              a(href = '/json/job/' + job.jobId, target = '_blank').btn.btn-secondary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON file
     
     pre #{''}
     pre #{''}

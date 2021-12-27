@@ -13,7 +13,7 @@ block content
     pre #{''}
   
     if(permissions.userHas(user, "forms:edit"))
-      a(href = '#', data-toggle = "modal" data-target = "#NewJobTypeModal").NewJobType.btn.btn-info
+      a(href = '#', data-toggle = "modal" data-target = "#NewJobTypeModal").NewJobType.btn.btn-warning
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Create New Job Type
       
@@ -32,8 +32,8 @@ block content
               pre #{''}
               input.NewJobTypeName.form-control(type = "text")
             .modal-footer
-              button.btn.btn-secondary(type = "button", data-dismiss = "modal") Close
-              button.btn.btn-primary.NewJobTypeButton(type = "button") Create
+              button.btn.btn-danger(type = "button", data-dismiss = "modal") Close
+              button.btn.btn-success.NewJobTypeButton(type = "button") Create
       
       script.
         $('button.NewJobTypeButton').click(function()
@@ -76,12 +76,12 @@ block content
                 a(href = '/jobs/' + formId) #{form.formName}
               
               td
-                a(href = '/job/' + formId).btn.btn-outline-primary
+                a(href = '/job/' + formId).btn.btn-primary
                   img.small-icon(src = '/images/run_icon.svg')
                   | &nbsp; Submit a New Job of this Type
               
               td
-                a(href = '/jobs/' + formId + '/edit').btn.btn-outline-warning
+                a(href = '/jobs/' + formId + '/edit').btn.btn-warning
                   img.small-icon(src = '/images/edit_icon.svg')
                   | &nbsp; Edit Job Type Form
 
@@ -114,7 +114,7 @@ block content
               td
               
               td
-                a(href = '/jobs/' + formId + '/edit').btn.btn-outline-warning
+                a(href = '/jobs/' + formId + '/edit').btn.btn-warning
                   img.small-icon(src = '/images/edit_icon.svg')
                   | &nbsp; Edit Job Type Form
 
