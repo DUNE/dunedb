@@ -67,7 +67,7 @@ router.get('/job/:jobId([A-Fa-f0-9]{24})', permissions.checkPermission("jobs:vie
   } 
   catch(err)
   { 
-    next();
+    res.status(400).send(err.toString());
   }
 });
 
@@ -92,7 +92,7 @@ router.get('/job/:formId', permissions.checkPermission("jobs:submit"), async fun
   }
   catch(err)
   {
-    next();
+    res.status(400).send(err.toString());
   }
 });
 
@@ -136,7 +136,7 @@ router.get('/job/:jobId([A-Fa-f0-9]{24})/edit', permissions.checkPermission("job
   }
   catch(err)
   {
-    next();
+    res.status(400).send(err.toString());
   }
 });
 
