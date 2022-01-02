@@ -48,7 +48,7 @@ block extrascripts
         function postFail(res, statusCode, statusMsg)
         {
           // Set up and relay error messages
-          if(res.responseText && res.responseText.length > 0)
+          if(res.responseText)
           {
             jobForm.setAlert("danger", res.responseText);
           }
@@ -76,7 +76,9 @@ block extrascripts
     };
 
     // On first accessing this page ...
-    window.onload = async function()
+    window.addEventListener('load', loadingFunction);
+    
+    async function loadingFunction()
     {
       // Temporarily add an additional submission button to the job type form
       var append_to = form.schema;
@@ -118,11 +120,9 @@ block content
     
     pre #{''}
     
-    .row
-      .col
-        dl
-          dt Job Type
-          dd=form.formName
+    dl
+      dt Job Type
+      dd=form.formName
     
     pre #{''}
     
