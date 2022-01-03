@@ -1,179 +1,125 @@
+
 extend default
 
+
 block vars
-  - var page_title = "Run Test (Single Component): " + formId;
+  - var page_title = "Run Test (Single Component)";
+
 
 block extrascripts
+  
   script(type = 'text/javascript').
     
-    // I could do this by API query of the server, but this works for now
-    var formrec = !{JSON.stringify(form || {}, null , 4)}; 
-    var testdata = !{JSON.stringify((testdata || {}), null , 4)}; 
-    var readOnly = !{retrieved || false};
-    var route_on_submit = "!{route_on_submit || '/test'}";
-    var submission_url = "!{submission_url || '/json/test'}"
+    // Get information about the test, corresponding type form, and component to be used
+    var test = !{JSON.stringify((test || {}), null, 4)}; 
+    var form = !{JSON.stringify(form || {}, null, 4)}; 
     var componentUuid = !{JSON.stringify(componentUuid || null)};
 
-  script(type = 'text/javascript').
-
-    var form = null;
+    // Set up a variable to hold the test type form that will actually be submitted
+    // This will (eventually) be a modified version of the 'form' defined above
+    var testForm = null;
+    
+    // Set the initial time of the last draft save to be the time at which this page is first accessed
     var lastDraftSave = new Date();
 
-    function LoadLastTest()
-    {
-      if(componentUuid)
-      {
-        // Retrieve the most recent test of this type for this component
-        $.ajax({method: "get",
-                url: '/json/tests/' + componentUuid,
-                dataType: 'json' })
-         .then(function(data)
-         {
-           var best = null;
-           
-           for(var oldtest of data)
-           {
-             if(oldtest.formId == formrec.formId)
-             {
-               if(!best)
-               {
-                 best = oldtest;
-               }
-               else
-               {
-                 if(moment(oldtest.insertion.insertDate).isAfter(moment(best.insertion.insertDate)))
-                 {
-                   best = form;
-                 }
-               }
-             }
-           }
-           
-           // Once the best test form has been retrieved ...
-           if(best)
-           {
-             console.log("figured out best", best);
-             
-             $.ajax({method: "GET",
-                     url: '/json/test/' + best._id,
-                     dataType: 'json'})
-              .then(function(record)
-              {
-                console.log("old record", record);
-                console.log("cur record", form.submission);
-                
-                if(record.data)
-                {
-                  var new_data = {...record.data, ...form.submission.data};
-                  form.submission = {data: new_data};
-                }
-              })
-            }
-         });
-      }
-    }
-    
+    // Save the currently entered data as a draft test instead of a final submission
     function SaveDraft()
     {
       // Get the time since the last draft save
       var seconds = Math.floor((new Date() - lastDraftSave) / 1000);
       
+      // If the last draft save time was more than 10 seconds ago, save the current data as a draft
       if(seconds > 10)
       {
-        var submission = form.submission;
+        var submission = testForm.submission;
         submission.state = "draft";
+        
         SubmitData(submission);
       }
     }
-
+    
+    // Submit the test data to the DB, either as a draft or as a final submission
     function SubmitData(submission)
     {
       try
       {
         var draft = submission.state !== "submitted";
       
-        // Include relevant information about the form, for later retrieval
-        // These MUST be in the submission information
-        submission.formId = formrec.formId;
-        submission.formName = formrec.formName;
-        submission.formObjectId = formrec._id;
+        // Include relevant information about the test type form and tested component (these MUST be in the submission information)
+        submission.formId = form.formId;
+        submission.formName = form.formName;
+        submission.formObjectId = form._id;
         submission.componentUuid = componentUuid;
-
-        if(!draft)
-        {
-          console.log("SubmitData", ...arguments);
-        }
-        else
-        {
-          console.log("SubmitData AS DRAFT", ...arguments);
-        }
-
+        
+        // If the submission is successful ...
         function postSuccess(retval)
         {
-          console.log('postSuccess', retval);
-          
-          if((retval.error))
+          // Just in case, output any error messages that might have occurred even with a successful submission
+          if(retval.error)
           {
-            form.setAlert("warning", nretval.error);
-            form.emit('submitError');
+            testForm.setAlert("warning", retval.error);
+            testForm.emit('submitError');
           }
 
+          // If the submission is final ...
           if(!draft)
           { 
-            form.emit('submitDone');
+            testForm.emit('submitDone');
             
-            // Go to the completed results form, and do not leave this page in the browser history
-            window.location.replace(route_on_submit + '/' + retval);
+            // Go to the page for viewing the test results, and do not leave the submission page in the browser history
+            window.location.replace('/test/' + retval);
           }
+          
+          // If the submission is a draft ...
           else
           {
-            // Update the draft ID
-            form.submission._id = retval;
+            // Update the draft's ID, and reset the time of the last draft save
+            testForm.submission._id = retval;
             lastDraftSave = new Date();
-
-            // Formio doesn't actually have a way of doing this ...
-            var saveButtons = FormioUtils.searchComponents(form.components, {type: 'button',
-                                                                             "component.action": 'saveState'});
+            
+            // Indicate on screen that the draft has been saved, by briefly showing some text below the corresponding button
+            var saveButtons = FormioUtils.searchComponents(testForm.components, {type: 'button',
+                                                                                 "component.action": 'saveState'});
             
             for(button of saveButtons)
             {
               button.loading = false;
               button.disabled = false;
+              
               $(button.refs.buttonMessage).text("Draft Saved").show().delay(2000).fadeOut(500);
             }
 
-            // Re-enable any submit buttons that might have been removed by other uses of the results form
-            saveButtons = FormioUtils.searchComponents(form.components, {type: 'button',
-                                                                         "component.action": 'submit'});
-                                                                         
-            for(button of saveButtons)
+            // Re-enable any submission buttons that might have been disabled or removed by other uses of the test type form (i.e. displaying rather than usage)
+            submitButtons = FormioUtils.searchComponents(testForm.components, {type: 'button',
+                                                                               "component.action": 'submit'});
+            
+            for(button of submitButtons)
             {
               button.disabled = false;
             }
           }
         }
         
+        // If the submission fails ...
         function postFail(res, statusCode, statusMsg)
         {
-          // If the submission failed, set up and relay error messages
-          if(res.responseText && res.responseText.length > 0)
+          // Set up and relay error messages
+          if(res.responseText)
           {
-            form.setAlert("danger", res.responseText);
+            testForm.setAlert("danger", res.responseText);
           }
           else
           {
-            form.setAlert("danger", statusMsg + " (" + statusCode + ")");
+            testForm.setAlert("danger", statusMsg + " (" + statusCode + ")");
           }
           
-          form.emit('submitError');
-          console.log("Posting fail", res, statusCode, statusMsg);
+          testForm.emit('submitError');
         }; 
 
-        console.log("Submitting data", submission, JSON.stringify(submission));
-        
+        // Perform the submission to the DB, using the success and failure functions defined above
         $.ajax({contentType: "application/json",
                 method: "post",
-                url: submission_url,
+                url: '/json/test',
                 data: JSON.stringify(submission),
                 dataType: "json",
                 success: postSuccess})
@@ -181,103 +127,83 @@ block extrascripts
       }
       catch (e)
       {
-        console.error(e);
-        debugger;
+        // TOFIX: not sure what to put here (used to be console and debugger, but we're no longer using them)
       }
     };
-
-    // General Setup function
-    window.onload = async function()
+    
+    // On first accessing this page ...
+    window.addEventListener('load', loadingFunction);
+    
+    async function loadingFunction()
     {
-      console.log("schema", formrec.schema);
-
-      // Add buttons for saving results as draft and submitting results to the results schema
-      var append_to = formrec.schema;
+      // Temporarily add additional submission and save draft buttons to the test type form
+      var append_to = form.schema;
       
-      if(formrec.schema.display === 'wizard')
+      if(form.schema.display === 'wizard')
       {
-        append_to = formrec.schema.components[formrec.schema.components.length - 1];
+        append_to = form.schema.components[form.schema.components.length - 1];
       }
 
-      if(!readOnly)
-      {
-        append_to.components.push({type: 'button',
-                                   action: "saveState",
-                                   state: 'draft',
-                                   theme: 'secondary',
-                                   key: 'saveAsDraft',
-                                   label: 'Save Results as Draft'});
+      append_to.components.push({type: 'button',
+                                 theme: "btn btn-info",
+                                 label: 'Save as Draft',
+                                 key: 'saveAsDraft',
+                                 action: "saveState",
+                                 state: 'draft'});
         
-        append_to.components.push({type: "button",
-                                   label: "Submit Results",
-                                   key: "submit",
-                                   disableOnInvalid: true,
-                                   input: true,
-                                   tableView: false});
-      }
-
-      // Remove the 'submit' button if the results page is in read-only status
-      form = await Formio.createForm(document.getElementById('builtform'), formrec.schema, {readOnly: readOnly,
-                                                                                            buttonSettings: {showCancel: false,
-                                                                                                             showSubmit: false}});
+      append_to.components.push({type: "button",
+                                 theme: "btn btn-success",
+                                 label: "Submit Results",
+                                 key: "submit",
+                                 disableOnInvalid: true,
+                                 input: true,
+                                 tableView: false});
       
-      console.log(form);
-      form.submission = Object.assign(form.submission, testdata);
+      // Get the revised job type form
+      testForm = await Formio.createForm(document.getElementById('builtform'), form.schema, {readOnly: false,
+                                                                                             buttonSettings: {showCancel: false,
+                                                                                                              showSubmit: false}});
       
-      if(window.location.hash)
-      {
-        // Okay, we got this with a hash, so now see if we can interpret it
-        var hash = window.location.hash.substring(1);
-        var frags = hash.split("&");
-        
-        for(frag of frags)
-        {
-          var a = frag.split(/([^=]+)=(.+)/);
-          
-          if(a[1] && a[2])
-          {
-            // Attempt to prefill the results form
-            var key = decodeURIComponent(a[1]);
-            var value = decodeURIComponent(a[2]);
-            
-            // Parse the key as a jsonpath
-            // Note that we can do this only after the data object is initialized by the form
-            jsonpath.value(form.submission, key, value);
-            
-            // Goose the 'set' function into changing the displayed data
-            form.submission = form.submission;
-          }
-        }
-      }
-
-      if(!readOnly)
-      {
-        form.on('submit', SubmitData);
-        form.on('change', SaveDraft);
-      }
-
-      $('#loadRecentTestData').on('click', LoadLastTest);
+      // Populate the form with the contents of the test itself
+      // If this page is being used to submit a new test, this won't make any changes
+      // If this page is being used to edit an existing draft test, this is where the existing information is filled in
+      testForm.submission = Object.assign(testForm.submission, test);
+      
+      // Set what happens when actions are performed by the user
+      testForm.on('change', SaveDraft);
+      testForm.on('submit', SubmitData);
     }
+
 
 block content
   .container-fluid
     pre #{''}
     pre #{''}
     
-    h3="Run Test (Single Component): " + form.formName
-    
-    dl
-      dt Component UUID
-      dd
-        a(href = '/component/' + componentUuid)=componentUuid
+    h2 Run Test (Single Component)
     
     pre #{''}
     
-    button.btn.btn-info#loadRecentTestData Load Most Recent Test Data
+    dl
+      dt Test Type
+      dd=form.formName
+      
+      dt Component UUID
+      dd
+        if(componentUuid)
+          a(href = '/component/' + componentUuid)=componentUuid
+        else
+          div.span.alert.alert-danger No component UUID available!
     
     pre #{''}
     
     hr
     
-    #builtform
+    pre #{''}
+    
+    div.border-editForm
+      #builtform
+
+    pre #{''}
+    pre #{''}
 

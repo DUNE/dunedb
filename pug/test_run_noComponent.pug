@@ -1,31 +1,32 @@
+
 extend default
 
+
 block vars
-  - var page_title = "Run Test: " + formId;
+  - var page_title = "Run Test (Unspecified Single Component)";
+
 
 block extrascripts
 
-  // Script: create a one-entry form
-  // On change, validate it to see if it's a good UUID ... if so, create the URL and jump to it
   script(type = 'text/javascript').
+    
+    // Create an auto-complete form to allow the user to select a component UUID to run the test with
+    // If a good UUID is selected, create the corresponding URL for running the test on the component, and go to the page
     $(async function()
     {
-      // I could do this by API query of the server, but this works for now
       var schema =
       {
-        "components":
-        [
-          {
-            "label"     : "Component UUID",
-            "spellcheck": false,
-            "tableView" : false,
-            "key"       : "componentUuid",
-            "type"      : "ComponentUUID",
-            "autofocus" : true,  // Set the cursor to immediately focus to the entry box
-            "input"     : true,
-            "validate": {"required": true},
-          },
-        ]
+        "components": [
+        {
+          "label": "Component UUID",
+          "spellcheck": false,
+          "tableView": false,
+          "key": "componentUuid",
+          "type": "ComponentUUID",
+          "autofocus": true,
+          "input": true,
+          "validate": {"required": true}
+        }]
       }
 
       form = await Formio.createForm(document.getElementById('builtform'), schema);
@@ -43,17 +44,28 @@ block extrascripts
       });
     });
 
+
 block content
   .container-fluid
     pre #{''}
     pre #{''}
   
-    h3="Run Test: " + (form.formName || formId)
+    h2 Run Test (Unspecified Single Component)
 
-    p Each test is performed on at least one component. Please enter the desired component's UUID below.
+    pre #{''}
+    
+    dl
+      dt Test Type
+      dd=form.formName
+    
+    pre #{''}
+    
+    hr
+    
+    p Each test is performed on one or more components. Please enter the desired component's UUID below.
       br
-      | If you wish to run this test on multiple components simultaneously, please click 
-      a(href = formId + '/multiComponent') here
+      | If you wish to run this test type on multiple components simultaneously, please click 
+      a(href = form.formId + '/multiComponent') here
       | .
     
     p The input box uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
@@ -69,4 +81,7 @@ block content
       // This is a dirty way of restricting the width of the text box ... add another column to the right side of it
       // Otherwise it fills the entire width of the page and looks really stupid
       .col.offset-md-20
+
+    pre #{''}
+    pre #{''}
 
