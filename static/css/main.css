@@ -40,3 +40,9 @@ img.small-icon {
   height:1em;
   width:auto;
 }
+
+.border-editForm {
+    border: 3px solid red;
+    border-radius: 10px;
+    padding: 10px;
+}
