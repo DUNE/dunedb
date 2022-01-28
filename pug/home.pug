@@ -79,16 +79,6 @@ block content
     
     hr
     
-    if(user) 
-      p You are logged in as <strong>#{user.displayName}</strong> and have the following roles:
-        pre #{user.roles.join(', ')}
-      p If you would like additional roles and know the right secrets, you can 
-        |
-        a(href = "/user/promote") promote yourself
-        |.
-    else 
-      p You are not signed in.
-    
     pre #{''}
     
     if(recentComponents)

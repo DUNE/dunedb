@@ -101,6 +101,9 @@ body(class = "deployment-" + deployment)
                   li.nav-item
                     +navlink(href = '/tests/types')
                       |      List Test Types
+                  li.nav-item
+                    +navlink(href = '/tests/drafts')
+                      |      My Draft Tests
 
             li.nav-item
               +navlink(href = '/jobs/recent')
@@ -117,11 +120,6 @@ body(class = "deployment-" + deployment)
                 i.fa.fa-graduation-cap("aria-hidden" = "true")
                 | Courses
 
-            li.nav-item
-              +navlink(href = '/user/drafts')
-                i.fa.fa-pencil("aria-hidden" = "true")
-                | My Drafts
-
             if(permissions && permissions.userHas(user, "users:view"))
               li.nav-item
                 +navlink(href = '/users')
@@ -131,7 +129,7 @@ body(class = "deployment-" + deployment)
                 ul.nav.flex-column.ml-3.sub-bar
                   if(permissions && permissions.userHas(user, "users:edit"))
                     li.nav-item
-                      +navlink(href = '/m2mUsers')
+                      +navlink(href = '/users/m2m')
                         | m2m Users
 
             li.nav-item

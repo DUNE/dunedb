@@ -1,45 +1,34 @@
-extend default
 
+extend default
 include common.pug
 
+
 block vars
-  - var page_title = formrec.formName || formId;
+  - var page_title = "View Test Results";
+
 
 block extrascripts
+  
   script(type = 'text/javascript').
   
-    // I could do this by API query of the server, but this works for now
-    var formrec = !{JSON.stringify(formrec || {}, null , 4)}; 
-    var testdata = !{JSON.stringify(testdata || {}, null , 4)}; 
-
-  script(type = 'text/javascript').
-
-    // Remove the 'submit' button from the test type form's schema
-    // It is more efficient and reliable to just reproduce the schema here from the existing template (without the button) rather than recreate it from scratch
-    for(var i = 0; i < formrec.schema.components.length; i++)
-    {
-      var c = formrec.schema.components[i];
-      
-      if(c.type == 'button' && c.label == 'Submit')
-      {
-        formrec.schema.components.splice(i, 1);
-      }
-    }
+    // Get information about the test and its corresponding type form
+    var test = !{JSON.stringify(test || {}, null, 4)}; 
+    var form = !{JSON.stringify(form || {}, null, 4)}; 
     
-    window.onload = async function()
+  script(type = 'text/javascript').
+  
+    // Get the test's type form, and populate it with the test's actual submission
+    // Then disable the submission button (since the form is only to be displayed, not used)
+    window.addEventListener('load', populateForm);
+    
+    async function populateForm()
     {
-      form = await Formio.createForm(document.getElementById('builtform'), formrec.schema, 
-      {
-        readOnly: true
-        //- renderMode: 'html'
-      });
-      
+      form = await Formio.createForm(document.getElementById('builtform'), form.schema, {readOnly: true});
+      form.submission = test;
       form.nosubmit = true;
-      form.submission = testdata;
     }
   
-  script(type = 'text/javascript').
-    
+    // For 'Wire Tension' type tests, build an additional section of the page for querying a single tension value
     function GetWireTension()
     {
       var layer = document.getElementById("wireLayer").value;
@@ -49,135 +38,103 @@ block extrascripts
       var keyName = `wires.${layer}.${side}[${number}]`;
       document.getElementById("tensionKey").value = keyName;
       
-      var tension = testdata.data.wires[layer][side][number];
+      var tension = test.data.wires[layer][side][number];
       document.getElementById("wireTension").value = tension;
     };
+
 
 block content
   .container-fluid
     pre #{''}
     pre #{''}
     
-    if(formrec.icon && formrec.icon[0])
-      img.icon.pull-left(src = formrec.icon[0].url)
-    
-    h2="Test Result: " + formrec.formName || formrec.formId
+    h2 View Test Results
     
     pre #{''}
     
     dl
-      if testdata 
-        dt Date Performed: 
+      if test 
+        dt ID
         dd
-          +dateFormatAndAgo(testdata.insertion.insertDate)
-          
-          if testdata.insertion.user
-              |  by !{' '}
-              a(href = 'mailto:' + user_email(testdata.insertion.user)) #{testdata.insertion.user.displayName}
-
-      if(testdata.componentUuid && component)
-        - var uuid = MUUID.from(testdata.componentUuid);
-      
-        dt Run on component:
-        dd
-          a(href = '/component/' + uuid.toString())=uuid.toString()
-          br
-          | #{component.data.name} (#{component.type})
-      else
-        div.span.alert.alert-danger Component information is not available!
-    
-      pre #{''}
+          a(href = '/test/' + test._id)=test._id
         
-      if(formrec.formName == "Wire Tensions")
-        .row
-          .col-9
-            div.border-warning.border.rounded.p-2
-              .row
-                .col <strong>Query a Wire Tension: </strong>
-                .col
-                  select.form-control(id = "wireLayer", type = "text")
-                    option(value = '' ) Wire Layer
-                    option(value = 'X') X
-                    option(value = 'U') U
-                    option(value = 'V') V
-                    option(value = 'G') G
-                .col
-                  select.form-control(id = "apaSide", type = "text")
-                    option(value = '' ) APA Side
-                    option(value = 'A') A
-                    option(value = 'B') B
-                .col
-                  input.form-control(id = "wireNumber", type = "text", placeholder = "Wire Number")
-                .col
-                  input.btn.btn-info#submitPromotion(type = "submit", onclick = "GetWireTension()")
-                .col-2
-                  input.form-control(id = "tensionKey", type = "text", placeholder = "Tension Key", readonly)
-                .col-2
-                  input.form-control(id = "wireTension", type = "text", placeholder = "Wire Tension (N)", readonly)
+        dt Type
+        dd #{form.formName || form.formId}
+        
+        if(test.componentUuid && component)
+          - var uuid = MUUID.from(test.componentUuid);
           
-          .col-3
+          dt Run on Component:
+          dd Type: #{component.type}
+            br
+            | Name: #{component.data.name}  
+            br
+            | UUID: 
+            a(href = '/component/' + uuid.toString())=uuid.toString()
+        else
+          div.span.alert.alert-danger No component information available!
       
         pre #{''}
-        pre #{''}
-    
-    div.border-success.border.rounded.p-2
-      #builtform  
-        +createdFrom(testdata.createdFrom)
-    
-    pre #{''}
-    
-    if testdata.form
-      div These results were submitted using version #{testdata.form.version} of the test type form.
+        
+        if(form.formName === "Wire Tensions")
+          .row
+            .col-9
+              div.border-info.border.rounded.p-2
+                .row
+                  .col <strong>Query a Wire Tension: </strong>
+                  .col
+                    select.form-control(id = "wireLayer", type = "text")
+                      option(value = '' ) Wire Layer
+                      option(value = 'X') X
+                      option(value = 'U') U
+                      option(value = 'V') V
+                      option(value = 'G') G
+                  .col
+                    select.form-control(id = "apaSide", type = "text")
+                      option(value = '' ) APA Side
+                      option(value = 'A') A
+                      option(value = 'B') B
+                  .col
+                    input.form-control(id = "wireNumber", type = "text", placeholder = "Wire Number")
+                  .col
+                    input.btn.btn-info#submitPromotion(type = "submit", onclick = "GetWireTension()")
+                  .col-2
+                    input.form-control(id = "tensionKey", type = "text", placeholder = "Tension Key", readonly)
+                  .col-2
+                    input.form-control(id = "wireTension", type = "text", placeholder = "Wire Tension (N)", readonly)
+            
+            .col-3
+           
+          pre #{''}
       
-      if(testdata.formObjectId == formrec._id) 
-        | 
-        span (Shown)
-      else
-        | 
-        a(href = "?version=" + testdata.form.version) (See this version)
+        dt Results:
+        dd This test was performed on !{' '}
+          +dateFormatAndAgo(test.insertion.insertDate)
+          
+          if test.insertion.user
+            |  by !{' '}
+            a(href = 'mailto:' + user_email(test.insertion.user)) #{test.insertion.user.displayName}
+          
+          pre #{''}
+          
+          div.border-success.border.rounded.p-2
+            #builtform  
+              +createdFrom(test.createdFrom)
     
-      div View the results using version:
-        each v in versions
-          a(href = '?version=' + v)=v
-          |
-          |
-
+    pre #{''}
     pre #{''}
     
-    if(processes && processes.length > 0)
-      h4 Associated Processes
+    div.form-inline
+      a(href = '/test/' + test._id + '/copyToDraft').btn.btn-primary
+        img.small-icon(src = '/images/run_icon.svg')
+        | &nbsp; Copy Results to New Draft
       
-      for process of processes
-        p 
-          a(href = '/processRecord/' + process._id.toString())=process.process.processId 
-          | !{' '}
-          +dateFormat(process.insertion.insertDate)
-          | !{' '}
-          +short_user(process.insertion.user)
-          | !{' '}
-          =process.state
-          |  - #{process.created.length} objects created
-
-    p
-      if(permissions.userHas(user, 'testdatas:process'))
-        each process, processId in (formrec.processes || {})
-          a.btn.btn-warning(href = '/process' + testdata.recordType + '/' + testdata._id + '/' + formrec._id + '/' + encodeURIComponent(processId))
-            | Process: #{processId}
-          |
-          |
-    
-    pre #{''}
-    
-    h4 Test Options
-    
-    div
-      a(href = `/json/test/${testdata._id}`) View the test's full JSON entry
-    
-    pre #{''}
-    
-    div
-      a.btn.btn-info(href = '/test/' + testdata._id + '/copyToDraft') Copy Test to New Draft
-  
+      pre #{'    '}
+      
+      a(href = '/json/test/' + test._id, target = '_blank').btn.btn-secondary
+        img.small-icon(src = '/images/checklist_icon.svg')
+        | &nbsp; View the test's JSON file
+        
     pre #{''}
     pre #{''}
 

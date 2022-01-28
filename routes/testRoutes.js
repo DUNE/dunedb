@@ -1,14 +1,10 @@
+
 'use strict';
 
-// General pug requirements
-const chalk = require('chalk');
-const express = require('express');
-
-// Local Javascript libraries
 const Components = require('lib/Components.js');
+const express = require('express');
 const Forms = require('lib/Forms.js');
 const permissions = require('lib/permissions.js');
-const Processes = require('lib/Processes.js');
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
 
@@ -17,62 +13,52 @@ module.exports = router;
 
 
 // View the results of a single test
-router.get('/test/:record_id([A-Fa-f0-9]{24})', permissions.checkPermission("tests:view"), async function(req, res, next)
+router.get('/test/:testId([A-Fa-f0-9]{24})', permissions.checkPermission("tests:view"), async function(req, res, next)
 {
   try
   {
-    logger.info("Finding test ", req.params.record_id)
-    
-    var options = {};
-    
-    // Get all information relating to the test in one go
-    let [test, processes] = await Promise.all(
-    [
-      Tests.retrieve(req.params.record_id),
-      Processes.findInputRecord(req.params.record_id)
-    ]);
+    // Retrieve the test's DB entry, using its test ID
+    // Throw an error if there is no DB entry corresponding to this test ID
+    var test = await Tests.retrieve(req.params.testId);
 
-    // Throw an error if there is no test corresponding to the given record ID
     if(!test)
     {
-      return res.status(404).render("No such test recorded.");
+      return res.status(400).render("There is no DB entry for a test with ID: " + req.params.testId);
     }
     
-    // Get the form ID of the test type, followed by any other relevant information
-    // Throw an error if the form ID cannot be found
+    // Get the test's type form's ID
+    // Throw an error if the form's ID cannot be found within the test's DB entry
     var formId = test.formId;
     
     if(!formId)
     {
-      throw("Test has no formId.");
+      return res.status(400).send("This test (ID: " + req.params.testId + ") has no type form ID!");
     }
 
-    if(req.query.version)
+    // Retrieve a particular version of the test's type form, using its form ID and specified version number
+    // If no version number is specified, the most recent version will be retrieved
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var options = {};
+    
+    if(req.query.formVersion)
     {
-      options.version = parseInt(req.query.version);
+      options.version = parseInt(req.query.formVersion);
     }
     
-    var formrec = await Forms.retrieve('testForms', formId, options);
+    var form = await Forms.retrieve('testForms', formId, options);
     
-    if(!formrec)
+    if(!form)
     {
-      return res.status(400).send("No such test form.");
+      return res.status(400).send("There is no DB entry for a test type form with ID: " + formId);
     }
-    
-    var versions = await Forms.getFormVersions('testForms', formId);
-    logger.info('versions', versions);
     
     // Get the UUID of the component that the test was performed on
     var component = await Components.retrieve(test.componentUuid);
   
-    // Render the test results viewing page
-    res.render('test.pug', {formId: req.params.formId,
-                            formrec,
-                            testdata: test,
-                            processes,
-                            versions,
-                            component,
-                            retrieved: true})
+    // Render the page for viewing the results of a single test
+    res.render('test.pug', {test,
+                            form,
+                            component})
   }
   catch(err)
   {
@@ -85,34 +71,31 @@ router.get('/test/:record_id([A-Fa-f0-9]{24})', permissions.checkPermission("tes
 // Run a test on a single component without specifying the component's UUID
 router.get('/test/:formId', permissions.checkPermission("tests:submit"), async function(req, res, next)
 {
-  // Get the test type form corresponding to the desired test
+  // Retrieve the test type form corresponding to the provided form ID
   var form = await Forms.retrieve('testForms', req.params.formId);
   
-  // Render the single-component test page
+  // Render the page for running a test on a single unspecified component
   res.render('test_run_noComponent.pug', {formId: req.params.formId,
-                                          form: form});
+                                          form});
 });
 
 
-// Run a test on a single component with the specified component UUID
+// Run a test on a single component with a specified component UUID
 router.get('/test/:formId/' + utils.uuid_regex, permissions.checkPermission("tests:submit"), async function(req, res, next)
 {
   try
   {
-    logger.info("Run a new test");
-    
-    // Get the test type form, but only the version that is current right now
-    var options = {onDate: new Date()};
-    var form = await Forms.retrieve('testForms', req.params.formId, options);
+    // Retrieve the most recent version of the test type form corresponding to the provided form ID
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve('testForms', req.params.formId, {onDate: new Date()});
     
     if(!form)
     {
-      return res.status(400).send("No such test form!");
+      return res.status(400).send("There is no DB entry for a test type form with ID: " + req.params.formId);
     }
     
-    // Render the single-component test page
-    res.render('test_run_singleComponent.pug', {formId: req.params.formId,
-                                                form,
+    // Render the page for running a test on a single specified component
+    res.render('test_run_singleComponent.pug', {form,
                                                 componentUuid: req.params.uuid});
   }
   catch(err)
@@ -128,20 +111,17 @@ router.get('/test/:formId/multiComponent', permissions.checkPermission("tests:su
 {
   try
   {
-    logger.info("Run a new multi-component test");
-    
-    // Get the test type form, but only the version that is current right now
-    var options = {onDate: new Date()};
-    var form = await Forms.retrieve('testForms', req.params.formId, options);
+    // Retrieve the most recent version of the test type form corresponding to the provided form ID
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve('testForms', req.params.formId, {onDate: new Date()});
     
     if(!form)
     {
-      return res.status(400).send("No such test form!");
+      return res.status(400).send("There is no DB entry for a test type form with ID: " + req.params.formId);
     }
     
-    // Render the multi-component test page
-    res.render('test_run_multiComponent.pug', {formId: req.params.formId,
-                                               form});
+    // Render the page for running a test simultaneously on multiple components
+    res.render('test_run_multiComponent.pug', {form});
   }
   catch(err)
   {
@@ -151,20 +131,18 @@ router.get('/test/:formId/multiComponent', permissions.checkPermission("tests:su
 });
 
 
-// Make a copy of a test and its results, and save the copy as a new draft
-router.get('/test/:record_id([A-Fa-f0-9]{24})/copyToDraft', permissions.checkPermission("tests:submit"), async function(req, res, next)
+// Make a copy of a test and its results, and save the copy as a new draft test
+router.get('/test/:testId([A-Fa-f0-9]{24})/copyToDraft', permissions.checkPermission("tests:submit"), async function(req, res, next)
 {
   try
   {
-    // Create the draft using the existing test and recorded results
-    var newdraft = await Tests.copyToDraft(req.params.record_id, req);
+    // Create the draft test using the existing test and results
+    var newdraft = await Tests.copyToDraft(req.params.testId, req);
     
-    logger.info("Made copy ", newdraft);
-    
-    // Once the draft has been successfully created, redirect the user to the draft editing page
+    // If the draft test has been successfully created, redirect the user to the page for editing a draft test
     if(newdraft) 
     {
-      res.redirect('/draft/test/' + newdraft.toString())
+      res.redirect('/test/draft/' + newdraft.toString());
     }
   }
   catch(err)
@@ -172,7 +150,118 @@ router.get('/test/:record_id([A-Fa-f0-9]{24})/copyToDraft', permissions.checkPer
     logger.error(err);
     res.status(400).send(err.toString());
   }
-})
+});
+
+
+// List the current user's draft tests
+router.get('/tests/drafts', async function(req, res, next)
+{
+  // Retrieve a list of the user's owned draft tests, using the user's ID
+  // Note that a user 'owns' a draft if they were the one who originally submitted it
+  var test_drafts = null;
+  
+  if(req.user && req.user.user_id)
+  {
+    test_drafts = await Tests.listUserDrafts(req.user.user_id);
+  }
+  
+  // Render the page for viewing a list of the user's draft tests
+  res.render('list_draftTests.pug', {test_drafts});
+});
+
+
+// Edit an existing draft test
+router.get('/test/draft/:testId([A-Fa-f0-9]{24})', permissions.checkPermission("tests:submit"), async function(req, res, next)
+{
+  try
+  {
+    // Retrieve the draft test's DB entry, using its test ID
+    // Throw and error if there is no DB entry corresponding to this test ID
+    var test = await Tests.retrieve(req.params.testId);
+    
+    if(!test)
+    {
+      return res.status(400).render("There is no DB entry for a draft test with ID: " + req.params.testId);
+    }
+    
+    // Inform the user if the provided test ID does not correspond to a draft
+    // This could happen if the test was in fact submitted, but has somehow also still remained in its original draft state in the DB
+    if(test.state != "draft")
+    {
+      return res.status(400).send("This test (ID: " + req.params.testId + ") is not a draft!");
+    }
+    
+    // Get the draft test's type form's ID
+    // Throw an error if the form's ID cannot be found within the draft test's DB entry
+    var formId = test.formId;
+    
+    if(!formId)
+    {
+      return res.status(400).send("This draft test (ID: " + req.params.testId + ") has no type form ID!");
+    }
+
+    // Retrieve the test's type form, using its form ID
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve('testForms', formId);
+    
+    if(!form)
+    {
+      return res.status(400).send("There is no DB entry for a test type form with ID: " + formId);
+    }
+    
+    // Render the page for running a test on a single component (i.e. continue to run this test on the same component)
+    res.render('test_run_singleComponent.pug', {test,
+                                                formId,
+                                                form,
+                                                componentUuid: test.componentUuid});
+  }
+  catch(err)
+  {
+    logger.error(err);
+    res.status(400).send(err.toString());
+  }
+});
+
+
+// Delete an existing draft test
+router.get('/test/draft/:testId([A-Fa-f0-9]{24})/delete', permissions.checkPermission("tests:submit"), async function(req, res, next)
+{
+  try
+  {
+    // Retrieve the draft test's DB entry, using its test ID
+    // Throw an error if there is no DB entry corresponding to this test ID
+    var test = await Tests.retrieve(req.params.testId);
+    
+    if(!test)
+    {
+      return res.status(400).render("There is no DB entry for a draft test with ID: " + req.params.testId);
+    }
+    
+    // Inform the user if the provided ID does not correspond to a draft
+    // This could happen if the test was in fact submitted, but has somehow also still remained in its original draft state in the DB
+    if(test.state != "draft")
+    {
+      return res.status(400).send("This test (ID: " + req.params.testId + ") is not a draft!");
+    }
+    
+    // Check that the draft test is actually owned by the user (users can only view and delete their own drafts, not those of other users)
+    if(test.insertion.user.user_id != req.user.user_id)
+    {
+      return res.status(400).send("You do not have permission to delete this draft test - you did not originally submit it!");
+    }
+    
+    // Delete the draft test
+    await Tests.deleteDraft(req.params.testId);
+    
+    // Redirect the user back to the page for viewing a list of the user's drafts
+    res.redirect('/tests/drafts');
+  }
+  catch(err)
+  {
+    logger.error(err);
+    res.status(400).send(err.toString());
+  }
+});
 
 
 // Create a new test type form
@@ -180,20 +269,21 @@ var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_
 
 router.get('/tests/:formId/new', permissions.checkPermission("forms:edit"), async function(req, res)
 {
-  // Check if there is any record of an existing test type form with the same form ID as specified
-  var rec = await Forms.retrieve("testForms", req.params.formId);
+  // Retrieve any and all existing test type forms with the same form ID as the one provided
+  var form = await Forms.retrieve("testForms", req.params.formId);
   
-  // If there is no existing test type form, set up a new record using the user-specified information and the default form schema
-  if(!rec)
+  // If there is no existing test type form with the same ID, set up a new one using the ID and the default form schema
+  // Initially, use the form ID as the form name as well - the user will have the option of changing the name later
+  if(!form)
   {
-    var rec = {formId: req.params.formId,
-               formName: req.params.formId,
-               schema: default_form_schema}; 
+    var form = {formId: req.params.formId,
+                formName: req.params.formId,
+                schema: default_form_schema}; 
 
-    Forms.save(rec, 'testForms', req);
+    Forms.save(form, 'testForms', req);
   }
 
-  // Redirect the user to the page for editing a test type form (is the same as for creating a new one)
+  // Redirect the user to the page for editing an existing test type form
   res.redirect('/tests/' + req.params.formId + '/edit');
 });
 
@@ -201,50 +291,53 @@ router.get('/tests/:formId/new', permissions.checkPermission("forms:edit"), asyn
 // Edit an existing test type form
 router.get('/tests/:formId?/edit', permissions.checkPermission("forms:edit"), async function(req, res)
 {
-  // Get a list of component types (since a particular test type must be associated with a component type)
+  // Retrieve a list of all component types (since a particular test type must be associated with one or more component type)
   var componentTypes = await Components.getTypes();
   
-  // Render the test type editing page
+  // Render the page for editing an existing test type form
   res.render('edit_testTypeForm.pug', {collection: "testForms",
                                        componentTypes,
                                        formId: req.params.formId});
 });
 
 
-// List recently performed tests across all types
-router.get('/tests/recent', permissions.checkPermission("tests:view"), async function(req, res, next)
-{
-  // Get a list of recently performed tests for a given test type (using the type form ID)
-  // If the ID is not given, this gives a list of all recently performed tests across all types
-  var tests = await Tests.listRecent(req.params.formId, (req.query || {}).N);
-  
-  // Render the page showing the list of tests
-  res.render("list_tests.pug", {formId: req.params.formId,
-                                tests: tests,
-                                showType: true});
-});
-
-
 // Lists the test types
 router.get('/tests/types', permissions.checkPermission("tests:view"), async function(req, res, next)
 {
-  // Get a list of all test type forms that exist
+  // Retrieve a list of all test type forms that currently exist
   var forms = await Forms.list('testForms');
   
-  // Render the page showing the list of test types
+  // Render the page for listing all test types
   res.render("list_testTypes.pug", {forms});
+});
+
+
+// List recently performed tests across all types
+router.get('/tests/recent', permissions.checkPermission("tests:view"), async function(req, res, next)
+{
+  // Retrieve a list of performed tests across all test types (since no type form ID is given)
+  // Set a limit on the number of displayed tests (otherwise every single one in the DB will be shown!)
+  var tests = await Tests.listRecent(null, 30);
+  
+  // Render the page for showing a generic list of tests
+  res.render("list_tests.pug", {tests,
+                                singleType: false});
 });
 
 
 // List recently performed tests of a single type
 router.get('/tests/:formId?', permissions.checkPermission("tests:view"), async function(req, res, next)
 {
-  // Get a list of recently performed tests for a given test type (using the type form ID)
-  // If the ID is not given, this gives a list of all recently performed tests across all types
-  var tests = await Tests.listRecent(req.params.formId, (req.query || {}).N);
+  // Retrieve a list of performed tests with the provided test type form ID
+  // Set a limit on the number of displayed tests (otherwise every single one in the DB will be shown!)
+  var tests = await Tests.listRecent(req.params.formId, 50);
   
-  // Render the page showing the list of tests
-  res.render("list_tests.pug", {formId: req.params.formId,
-                                tests: tests});
+  // Retrieve the test type form corresponding to the provided form ID
+  var form = await Forms.retrieve('testForms', req.params.formId);
+  
+  // Render the page for showing a generic list of tests
+  res.render("list_tests.pug", {tests,
+                                singleType: true,
+                                form});
 });
 
