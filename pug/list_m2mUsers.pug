@@ -17,67 +17,84 @@ block extrascripts
     $(async function()
     {
       // Create the input form
-      form = await Formio.createForm(document.getElementById("formio"), {"display": "form",
-                                                                         "components": [{"label": "User ID",
-                                                                                         "disabled": true,
-                                                                                         "tableView": true,
-                                                                                         "key": "user_id",
-                                                                                         "type": "textfield",
-                                                                                         "input": true},
-                                                                                         
-                                                                                        {"label": "Display Name",
-                                                                                        "placeholder": "This will be saved and shown in forms",
-                                                                                        "tableView": true,
-                                                                                        "validate": {"required": true,
-                                                                                                     "minLength": 5},
-                                                                                        "key": "displayName",
-                                                                                        "type": "textfield",
-                                                                                        "input": true},
-                                                                                        
-                                                                                       {"label": "Email",
-                                                                                        "placeholder": "This should be the real email address of a responsible script owner",
-                                                                                        "tableView": true,
-                                                                                        "validate": {"required": true},
-                                                                                        "key": "email",
-                                                                                        "type": "email",
-                                                                                        "input": true},
-                                                                                        
-                                                                                       {"label": "Permissions (click and select from dropdown menu)",
-                                                                                        "widget": "choicesjs",
-                                                                                        "tableView": true,
-                                                                                        "multiple": true,
-                                                                                        "data": {"values": [{ "label": "dev:components:edit",   "value": "dev:components:edit"   },
-                                                                                                            { "label": "dev:components:view",   "value": "dev:components:view"   },
-                                                                                                            { "label": "dev:components:create", "value": "dev:components:create" },
-                                                                                                            { "label": "dev:jobs:view",         "value": "dev:jobs:view"         },
-                                                                                                            { "label": "dev:jobs:submit",       "value": "dev:jobs:submit"       },
-                                                                                                            { "label": "dev:tests:view",        "value": "dev:tests:view"        },
-                                                                                                            { "label": "dev:tests:submit",      "value": "dev:tests:submit"      },
-                                                                                                            { "label": "dev:docs:create",       "value": "dev:docs:create"       },
-                                                                                                            { "label": "dev:docs:edit",         "value": "dev:docs:edit"         },
-                                                                                                            { "label": "dev:docs:view",         "value": "dev:docs:view"         },
-                                                                                                            { "label": "components:edit",       "value": "components:edit"       },
-                                                                                                            { "label": "components:view",       "value": "components:view"       },
-                                                                                                            { "label": "components:create",     "value": "components:create"     },
-                                                                                                            { "label": "jobs:view",             "value": "jobs:view"             },
-                                                                                                            { "label": "jobs:submit",           "value": "jobs:submit"           },
-                                                                                                            { "label": "tests:view",            "value": "tests:view"            },
-                                                                                                            { "label": "tests:submit",          "value": "tests:submit"          },
-                                                                                                            { "label": "docs:create",           "value": "docs:create"           },
-                                                                                                            { "label": "docs:edit",             "value": "docs:edit"             },
-                                                                                                            { "label": "docs:view",             "value": "docs:view"             }]},
-                                                                                        "selectThreshold": 0.3,
-                                                                                        "key": "permissions",
-                                                                                        "type": "select",
-                                                                                        "input": true},
-                                                                                        
-                                                                                       {"type": "button",
-                                                                                        "theme": "info",
-                                                                                        "label": "Submit Changes",
-                                                                                        "key": "submit",
-                                                                                        "disableOnInvalid": true,
-                                                                                        "input": true,
-                                                                                        "tableView": false}]});
+      form = await Formio.createForm(document.getElementById("formio"), 
+      {
+        "display": "form",
+        "components": [
+        {
+          "label": "User ID",
+          "disabled": true,
+          "tableView": true,
+          "key": "user_id",
+          "type": "textfield",
+          "input": true
+        },
+        
+        {
+          "label": "Display Name",
+          "placeholder": "This will be saved and shown in forms",
+          "tableView": true,
+          "validate": {"required": true,
+                       "minLength": 5},
+          "key": "displayName",
+          "type": "textfield",
+          "input": true
+        },
+        
+        {
+          "label": "Email",
+          "placeholder": "This should be the real email address of a responsible script owner",
+          "tableView": true,
+          "validate": {"required": true},
+          "key": "email",
+          "type": "email",
+          "input": true
+        },
+        
+        {
+          "label": "Permissions (click and select from dropdown menu)",
+          "widget": "choicesjs",
+          "tableView": true,
+          "multiple": true,
+          "data": 
+          {
+            "values": [{ "label": "dev:components:edit",   "value": "dev:components:edit"   },
+                       { "label": "dev:components:view",   "value": "dev:components:view"   },
+                       { "label": "dev:components:create", "value": "dev:components:create" },
+                       { "label": "dev:jobs:view",         "value": "dev:jobs:view"         },
+                       { "label": "dev:jobs:submit",       "value": "dev:jobs:submit"       },
+                       { "label": "dev:tests:view",        "value": "dev:tests:view"        },
+                       { "label": "dev:tests:submit",      "value": "dev:tests:submit"      },
+                       { "label": "dev:docs:create",       "value": "dev:docs:create"       },
+                       { "label": "dev:docs:edit",         "value": "dev:docs:edit"         },
+                       { "label": "dev:docs:view",         "value": "dev:docs:view"         },
+                       { "label": "components:edit",       "value": "components:edit"       },
+                       { "label": "components:view",       "value": "components:view"       },
+                       { "label": "components:create",     "value": "components:create"     },
+                       { "label": "jobs:view",             "value": "jobs:view"             },
+                       { "label": "jobs:submit",           "value": "jobs:submit"           },
+                       { "label": "tests:view",            "value": "tests:view"            },
+                       { "label": "tests:submit",          "value": "tests:submit"          },
+                       { "label": "docs:create",           "value": "docs:create"           },
+                       { "label": "docs:edit",             "value": "docs:edit"             },
+                       { "label": "docs:view",             "value": "docs:view"             }]
+          },
+          "selectThreshold": 0.3,
+          "key": "permissions",
+          "type": "select",
+          "input": true
+        },
+        
+        {
+          "type": "button",
+          "theme": "info",
+          "label": "Submit Changes",
+          "key": "submit",
+          "disableOnInvalid": true,
+          "input": true,
+          "tableView": false
+        }]
+      });
       
       // If the user clicks on an existing m2m user client's entry, fill in the contents of the form automatically
       // Also, re-enable the button for deleting the client (is disabled if the form contains no contents)
