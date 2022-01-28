@@ -1,0 +1,204 @@
+
+extend default
+include common.pug
+
+
+block vars
+  - var page_title = "Machine-to-Machine (m2m) Users";
+
+
+block extrascripts
+  
+  script(type = 'text/javascript').
+  
+    // Declare the input form for creating and editing m2m user client details
+    var form;
+    
+    $(async function()
+    {
+      // Create the input form
+      form = await Formio.createForm(document.getElementById("formio"), {"display": "form",
+                                                                         "components": [{"label": "User ID",
+                                                                                         "disabled": true,
+                                                                                         "tableView": true,
+                                                                                         "key": "user_id",
+                                                                                         "type": "textfield",
+                                                                                         "input": true},
+                                                                                         
+                                                                                        {"label": "Display Name",
+                                                                                        "placeholder": "This will be saved and shown in forms",
+                                                                                        "tableView": true,
+                                                                                        "validate": {"required": true,
+                                                                                                     "minLength": 5},
+                                                                                        "key": "displayName",
+                                                                                        "type": "textfield",
+                                                                                        "input": true},
+                                                                                        
+                                                                                       {"label": "Email",
+                                                                                        "placeholder": "This should be the real email address of a responsible script owner",
+                                                                                        "tableView": true,
+                                                                                        "validate": {"required": true},
+                                                                                        "key": "email",
+                                                                                        "type": "email",
+                                                                                        "input": true},
+                                                                                        
+                                                                                       {"label": "Permissions (click and select from dropdown menu)",
+                                                                                        "widget": "choicesjs",
+                                                                                        "tableView": true,
+                                                                                        "multiple": true,
+                                                                                        "data": {"values": [{ "label": "dev:components:edit",   "value": "dev:components:edit"   },
+                                                                                                            { "label": "dev:components:view",   "value": "dev:components:view"   },
+                                                                                                            { "label": "dev:components:create", "value": "dev:components:create" },
+                                                                                                            { "label": "dev:jobs:view",         "value": "dev:jobs:view"         },
+                                                                                                            { "label": "dev:jobs:submit",       "value": "dev:jobs:submit"       },
+                                                                                                            { "label": "dev:tests:view",        "value": "dev:tests:view"        },
+                                                                                                            { "label": "dev:tests:submit",      "value": "dev:tests:submit"      },
+                                                                                                            { "label": "dev:docs:create",       "value": "dev:docs:create"       },
+                                                                                                            { "label": "dev:docs:edit",         "value": "dev:docs:edit"         },
+                                                                                                            { "label": "dev:docs:view",         "value": "dev:docs:view"         },
+                                                                                                            { "label": "components:edit",       "value": "components:edit"       },
+                                                                                                            { "label": "components:view",       "value": "components:view"       },
+                                                                                                            { "label": "components:create",     "value": "components:create"     },
+                                                                                                            { "label": "jobs:view",             "value": "jobs:view"             },
+                                                                                                            { "label": "jobs:submit",           "value": "jobs:submit"           },
+                                                                                                            { "label": "tests:view",            "value": "tests:view"            },
+                                                                                                            { "label": "tests:submit",          "value": "tests:submit"          },
+                                                                                                            { "label": "docs:create",           "value": "docs:create"           },
+                                                                                                            { "label": "docs:edit",             "value": "docs:edit"             },
+                                                                                                            { "label": "docs:view",             "value": "docs:view"             }]},
+                                                                                        "selectThreshold": 0.3,
+                                                                                        "key": "permissions",
+                                                                                        "type": "select",
+                                                                                        "input": true},
+                                                                                        
+                                                                                       {"type": "button",
+                                                                                        "theme": "info",
+                                                                                        "label": "Submit Changes",
+                                                                                        "key": "submit",
+                                                                                        "disableOnInvalid": true,
+                                                                                        "input": true,
+                                                                                        "tableView": false}]});
+      
+      // If the user clicks on an existing m2m user client's entry, fill in the contents of the form automatically
+      // Also, re-enable the button for deleting the client (is disabled if the form contains no contents)
+      $('tr.user_row').on('click',function()
+      {
+        form.submission = {data: {user_id    : $(".user_id", this).text(),
+                                  email      : $(".email", this).text(),
+                                  displayName: $(".displayname", this).text(),
+                                  permissions: $(".permissions", this).text().split(',')}};
+                                  
+        $('#deleteButton').removeAttr('disabled');
+      })
+            
+      // If the user clicks the button to clear the form, clear the contents and disable the deletion button
+      $('#clearForm').on("click",() => 
+      {
+        form.submission = {}
+        
+        $('#deleteButton').attr('disabled', true);
+      });
+
+      // If the submission of a new m2m user client fails ...
+      function postFail(res, statusCode, statusMsg)
+      {
+        // Set up and relay error messages
+        if(res.responseText)
+        {
+          form.setAlert("danger", res.responseText);
+        }
+        else
+        {
+          form.setAlert("danger", statusMsg + " (" + statusCode + ")");
+        }
+        
+        form.emit('submitError');
+      }
+      
+      // If the user clicks the button to delete a m2m user client, perform the appropriate 'submission' to the DB
+      // Then reload the current page, showing the m2m users
+      $('#deleteButton').on('click', function()
+      {
+        if(form.submission.data.user_id)
+        {
+          $.post("/json/m2mUser/delete", {user_id: form.submission.data.user_id})
+           .done(() => {form.emit('submitDone');            
+                        window.location.reload()})
+           .fail(postFail);
+        }
+      })
+
+      // For a new or edited m2m user client, perform the actual submission to the DB
+      form.on('submit', function(submission)
+      {
+        $('#creds').hide();
+        
+        $.post("/json/m2mUser", submission.data)
+         .done((creds) => {form.emit('submitDone');
+                           $('#creds').show()
+                           $('#creds pre').text(JSON.stringify(creds, null, 2));})
+         .fail(postFail);
+      });
+    })
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+    
+    h2 Machine-to-Machine (m2m) Users
+
+    pre #{''}
+    
+    .row
+      .col-md-5
+        
+        p To add a new m2m user client, enter the credentials in the boxes below and press the 'Submit' button.
+        p To change an existing m2m user client, click the client in the list to the right, modify as required using the boxes below, and press the 'Submit' button.
+        p To remove an existing m2m user client, click the client in the list to the right, and then press the 'Delete This User' button.
+        p.font-weight-bold Please be aware that any change to a m2m user client will result in new authentication tokens being issued.
+        
+        pre #{''}
+        
+        div.border-success.border.rounded.p-2
+          #formio
+        
+        pre #{''}
+        
+        div.form-inline
+          button.btn.btn-danger(disabled = true)#deleteButton Delete This User
+          
+          pre #{'  '}
+          
+          button.btn.btn-secondary#clearForm Clear Form
+          
+        #creds.border.rounded.border-success.hidden.m-5
+          p Success!
+          p.font-weight-bold You must copy these credentials to the user script now - this is the only time these credentials will be shown!
+          pre(style = "user-select:all")
+
+      .col-md-7
+        
+        table#users_table.table
+          thead
+            tr
+              th.col-md-2 Display Name
+                br
+                | User ID
+              th.col-md-2 Email
+              th.col-md-3 Permissions
+          
+          tbody
+            each m2muser in users
+              tr.user_row
+                td.displayname #{m2muser.user.displayName}
+                  br
+                  span.user_id #{m2muser.user_id}
+                td.email
+                  a(href = 'mailto:' + (m2muser.user.emails[0] || [])) #{(m2muser.user.emails[0] || [])}
+                td.permissions <pre>#{(m2muser.user.permissions || []).join(', ')}</pre>
+
+    pre #{''}
+    pre #{''}
+
