@@ -1,7 +1,11 @@
+
 extends default
+include common.pug
+
 
 block vars
   - var page_title = "User Profile";
+
 
 block content
   .container-fluid
@@ -26,19 +30,35 @@ block content
         if(userProfile.email_verified)
           span (Verified)
     
-      dt Created
-      dd=userProfile.created_at
+      dt Created On:
+      dd
+        +dateFormat(userProfile.created_at)
+      
+      dt Last Edited On:
+      dd
+        +dateFormat(userProfile.updated_at)
     
+      dt Last Login:
+      dd
+        +dateFormat(userProfile.last_login)
+      
+      dt Last IP Address
+      dd=userProfile.last_ip
+      
+      dt Total Logins Count
+      dd=userProfile.logins_count
+      
+      hr
+      
       dt Roles
       dd
         pre #{user.roles.join(', ')}
     
       dt Permissions granted by these Roles:
       dd
-        pre(style = 'white-space: pre-wrap') #{user.permissions.join(', ')}
+        <pre>#{user.permissions.join(', ')}</pre>
     
-      if(permissions.userHas(user, 'users:edit'))
-        pre #{''}
-      
-        a(href = '/user/edit/' + user.user_id).btn.btn-outline-info Modify User
+    
+    pre #{''}
+    pre #{''}
 
