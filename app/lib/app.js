@@ -16,6 +16,8 @@ const glob = require('glob');
  
 
 // Global configuration
+const { db } = require('./db');
+const { DB_NAME } = require('./constants');
 var database = require('lib/database.js'); // Exports global 'db' variable
 var Components = require('lib/Components.js');
 var Forms     = require('lib/Forms.js');
@@ -181,16 +183,16 @@ async function create_app(app)
   } else {
     const MongoStore = require('connect-mongo');
     session_config = {
-              store: MongoStore.create({
-                      client: database.get_client(),
-                      dbName: config.mongo_db,
-                      collection:"sessionStore",
-              }),
-              secret: config.localsecret, // session secret
-              resave: false,
-              saveUninitialized: true,
-              cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },  // 1 week
-            };
+      store: MongoStore.create({
+        client: db.client,
+        dbName: DB_NAME,
+        collection: "sessionStore",
+      }),
+      secret: config.localsecret, // session secret
+      resave: false,
+      saveUninitialized: true,
+      cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },  // 1 week
+    };
   }
 
 

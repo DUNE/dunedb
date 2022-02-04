@@ -2,7 +2,8 @@
 
 const chalk = require('chalk');
 var express = require('express');
-var database = require('lib/database.js'); // Exports global 'db' variable
+//var database = require('lib/database.js'); // Exports global 'db' variable
+const { db } = require('./db');
 var permissions = require('lib/permissions.js');
 var commonSchema = require('lib/commonSchema.js');
 var MUUID = require('uuid-mongodb');

@@ -1,5 +1,5 @@
 "use strict";
-var database = require('lib/database.js');  // Exports global 'db' variable
+var { db } = require('./db');
 var permissions = require('lib/permissions.js');
 var commonSchema = require("lib/commonSchema.js");
 var Cache = require("lib/Cache.js");

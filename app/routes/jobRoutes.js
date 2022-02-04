@@ -145,7 +145,7 @@ router.get('/job/:jobId([A-Fa-f0-9]{24})/edit', permissions.checkPermission("job
 
 
 // Create a new job type form
-var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
+var default_form_schema = JSON.parse(require('fs').readFileSync('./schemas/default_form_schema.json'));
 
 router.get('/jobs/:formId/new', permissions.checkPermission("forms:edit"), async function(req, res)
 {

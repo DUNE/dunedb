@@ -16,8 +16,7 @@
 // Cache.fast("name"); // Get the current cache. If empty, regenerate. If invalid, regenerate AFTER retrieving.
 // Cache.cached("name"); // Get the current cache. If empty, it's empty.
 
-const database = require("lib/database.js");
-
+const { db } = require('./db');
 
 class Cache
 {

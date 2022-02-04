@@ -265,7 +265,7 @@ router.get('/test/draft/:testId([A-Fa-f0-9]{24})/delete', permissions.checkPermi
 
 
 // Create a new test type form
-var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
+var default_form_schema = JSON.parse(require('fs').readFileSync('./schemas/default_form_schema.json'));
 
 router.get('/tests/:formId/new', permissions.checkPermission("forms:edit"), async function(req, res)
 {

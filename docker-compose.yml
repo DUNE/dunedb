@@ -1,0 +1,29 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - 12313:12313
+    volumes:
+      - ./app:/app
+    environment:
+      NODE_ENV: development
+      APP_PORT: 12313
+      DATABASE_URL: mongodb://db:27017/dunedb
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mongo:4.4
+    environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: dunedb
+    volumes:
+      - ./db/mongo:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "'db.runCommand(\"ping\").ok'", "localhost:27017/test"]
+      interval: 5s
+      timeout: 10s
+      retries: 5

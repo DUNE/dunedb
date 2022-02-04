@@ -1,14 +1,13 @@
 {
-  "name": "sietch",
+  "name": "dunedb",
   "version": "1.0.0",
-  "description": "Dune Database",
+  "description": "Dune APA QA Database",
   "private": true,
   "main": "index.js",
   "scripts": {
     "test": "jest"
   },
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "@jsonurl/jsonurl": "^1.1.4",
     "@popperjs/core": "^2.9.2",

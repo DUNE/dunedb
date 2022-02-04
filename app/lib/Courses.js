@@ -1,6 +1,6 @@
 "use strict";
 
-const database = require("lib/database.js");
+const { db } = require('./db');
 const ObjectID = require('mongodb').ObjectID;
 const MUUID = require('uuid-mongodb');
 const chalk = require("chalk");

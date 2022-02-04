@@ -1,4 +1,4 @@
-'use strict';
+const { db } = require('./lib/db');
 
 // All code uses two important globals: 'global.config' and 'global.db' 
 // I know that's not best practice, but it is by far the most elegant solution.
@@ -60,7 +60,8 @@ global.logger = require("pino")(pino_opts);
 logger.info("Starting up in mode: "+((process.env.NODE_ENV)||'development') + " deployment: "+config.deployment)
 
 
-database.attach_to_database()
+//database.attach_to_database()
+db.open()
   .then(async function run(){
     var app = await App.create_app();
 
