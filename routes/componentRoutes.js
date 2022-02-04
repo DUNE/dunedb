@@ -1,18 +1,13 @@
-// General pug requirements
-const chalk = require('chalk');
-const express = require('express');
-const shortuuid = require('short-uuid')();
-const MUUID = require('uuid-mongodb');
-const moment = require('moment');
-const deepmerge = require('deepmerge');
 
-// Local Javascript libraries
 const Components = require('lib/Components.js');
 const ComponentTypes = require('lib/ComponentTypes.js');
 const Courses = require('lib/Courses.js');
+const deepmerge = require('deepmerge');
+const express = require('express');
 const Forms = require('lib/Forms.js');
 const Jobs = require("lib/Jobs.js")();
 const permissions = require('lib/permissions.js');
+const shortuuid = require('short-uuid')();
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
 
@@ -20,127 +15,131 @@ var router = express.Router();
 module.exports = router;
 
 
-// [Internal Function] Add a component to the user's personal list of recently accessed components
-function setRecent(req, type, item)
+// View information about an existing component
+router.get('/component/' + utils.uuid_regex, permissions.checkPermission("components:view"), async function(req, res, next)
 {
-  // The generic list is set with most recent item appearing first
-  if(!req.session) return;
-  
-  req.session.recent = req.session.recent || {};
-  req.session.recent[type] = req.session.recent[type] || [];
-  
-  var list = req.session.recent[type];
-  var i = list.indexOf(item);
-  
-  if(i > -1) list.splice(i, 1);
-  list.unshift(item);
-  
-//  logger.info("list",list);
-  logger.info(chalk.blue("recent:", JSON.stringify((req.session || {}).recent)));
-}
-
-
-// [Internal Function] View a single component
-async function get_component(req, res)
-{
-  // Attempt to get the component information based on the supplied UUID
-  // If no such component exists, display the corresponding error
   try
   {
-    // Get the component UUID
-    var componentUuid = req.params.uuid;
-//    logger.info(get_component, componentUuid, req.params);
-
-    // Retrieve the component data
-    // If no such component exists and the user has permission to create components, redirect them to the component creation page
-    // If no such component exists and the user does not have permission to create it, exit with error
-    var component = await Components.retrieve(componentUuid);
+    // If there is no user currently logged in, immediately exit
+    // An active login is required in order to add the component to the list of the user's recently viewed components
+    if(!req.session)
+    {
+      return res.status(404).send("Please log in to access this page!");
+    }
+    
+    // Set up a query for both the DB entry's component ID and (optionally) version to match those provided
+    var query = {componentUuid: req.params.uuid};
+    
+    if(req.query.version)
+    {
+      query["validity.version"] = parseInt(req.query.version);
+    }
+    
+    // Retrieve the component's DB entry, using its UUID, and all versions of the component as well
+    // Throw an error if there is no DB entry corresponding to this UUID
+    let [component, componentVersions] = await Promise.all(
+    [
+      Components.retrieve(query),
+      Components.versions(req.params.uuid)
+    ]);
     
     if(!component)
     {
-      if(permissions.hasPermission(req, "components:create"))
-      {
-        res.redirect("/" + componentUuid + "/edit");
-      }
-      
-      return res.status(400).send("No such component ID: " + componentUuid);
+      return res.status(400).send("There is no DB entry for a component with UUID: " + req.params.uuid);
     }
     
-    // Get the other data relating to the component all in one go
-    let [formrec, forms, tests, relationships] = await Promise.all(
+    // Get the component's type form's name
+    // Throw an error if the form's name cannot be found within the component's DB entry
+    var formName = component.type;
+    
+    if(!formName)
+    {
+      return res.status(400).send("This component (UUID: " + req.params.uuid + ") has no type form name!");
+    }
+    
+    // Get any other information relating to this component ... this includes the following:
+    //  - the component's type form, using its form name
+    //  - the results of tests that have already been performed on this component
+    //  - all currently available test type forms
+    //  - any related components
+    // Throw an error if there is no DB entry corresponding to this form name
+    let [form, tests, testForms, relatedComponents] = await Promise.all(
     [
-      Forms.retrieve("componentForms", component.type),
+      Forms.retrieve("componentForms", formName),
+      Tests.listComponentTests(req.params.uuid),
       Forms.list(),
-      Tests.listComponentTests(componentUuid),
-      Components.relationships(componentUuid)
+      Components.relationships(req.params.uuid)
     ]);
     
-    // If no form for the component's type exist, redirect to the "component without form" page
-    if(!formrec)
+    if(!form)
     {
-      return res.render("component_without_form.pug", {componentUuid,
-                                                       component,
-                                                       forms,
-                                                       tests});
+      return res.status(400).send("There is no DB entry for a component type form with name: " + formName);
     }
     
-//    logger.info(forms);
-//    logger.info("component")
-//    logger.info(component);
-//    logger.info("tests",tests);
-//    logger.info(tests);
-//    logger.info('componentForms');
-//    logger.info(componentform);
-//    logger.info(JSON.stringify(relationships,null,2));
-
-    // Add the component to the user's list of recently accessed components
-    setRecent(req, 'componentUuid', componentUuid);
-
-    // Render the single component information page
-    res.render("component.pug", {formrec,
-                                 componentUuid,
-                                 component,
-                                 relationships,
-                                 forms,
+    // Add the component to the list of the user's recently viewed components
+    req.session.recent = req.session.recent || {};
+    req.session.recent['componentUuid'] = req.session.recent['componentUuid'] || [];
+    
+    var list = req.session.recent['componentUuid'];
+    var i = list.indexOf(req.params.uuid);
+    
+    if(i > -1)
+    {
+      list.splice(i, 1);
+    }
+    
+    list.unshift(req.params.uuid);
+    
+    // Render the page for viewing the information about an existing component
+    res.render("component.pug", {component,
+                                 componentVersions,
+                                 form,
                                  tests,
-                                 canEdit: permissions.hasPermission(req, "components:edit")});
+                                 testForms,
+                                 relatedComponents});
   }
-  catch (err)
+  catch(err)
   {
     logger.error(err);
-    res.status(400).send(err.toString())
+    res.status(400).send(err.toString());
   }
-}
-
-// Instead of the full UUID, a component can also be accessed using the shortened UUID
-router.get('/component/' + utils.uuid_regex, permissions.checkPermission("components:view"), get_component);
-router.get('/component/' + utils.short_uuid_regex, permissions.checkPermission("components:view"), get_component);
+});
 
 
-// Show the label for a single component
-async function component_label(req, res, next)
+// A shortened URL is coded into the component QR code, instead of the full URL of the component information page
+// Redirect the shortened URL to the full URL
+router.get('/c/' + utils.short_uuid_regex, async function(req, res, next)
 {
-  // Get the component from the given (full or shortened) UUID
-  // Throw an error if the UUID doesn't correspond to an existing component
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
+  // Reconstruct the full UUID from the shortened UUID
+  var componentUuid = shortuuid.toUUID(req.params.shortuuid);
   
-  component = await Components.retrieve(componentUuid);
-  
-  if(!component) return res.status(404).send("No component with this UUID currently exists in the database!");
-  
-//  logger.info({component: component});
-  
-  // Render the component label page
-  res.render('component_label.pug', {component: component});
-}
-
-// As with the component itself, the label can also be accessed by either the full or shortened UUID
-router.get('/component/' + utils.uuid_regex + '/label', permissions.checkPermission("components:view"), component_label);
-router.get('/componnent/' + utils.short_uuid_regex + '/label', permissions.checkPermission("components:view"), component_label);
+  // Redirect the user to the page for viewing the information about the component with this full UUID
+  res.redirect('/component/' + componentUuid);
+});
 
 
-// Show the traveller for a single component
-async function component_traveller(req, res, next)
+
+
+
+// View the label of a single component
+router.get('/component/' + utils.uuid_regex + '/label', permissions.checkPermission("components:view"), async function(req, res, next)
+{
+  // Retrieve the component's DB entry, using its UUID
+  // Throw an error if there is no DB entry corresponding to this UUID
+  var component = await Components.retrieve(req.params.uuid);
+  
+  if(!component)
+  {
+    return res.status(400).send("There is no DB entry for a component with UUID: " + req.params.uuid);
+  }
+  
+  // Render the page for viewing the label of a single component
+  res.render('component_label.pug', {component});
+});
+
+
+// View the traveller of a single component
+router.get('/component/' + utils.uuid_regex + '/traveller/', permissions.checkPermission("components:view"), async function(req, res, next)
 {
   // Get the component from the given (full or shortened) UUID
   var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
@@ -195,55 +194,7 @@ async function component_traveller(req, res, next)
   res.render("component_traveller.pug", {component,
                                          componentUuid,
                                          records});
-}
-
-// As with the component itself, the traveller can also be accessed by either the full or shortened UUID
-router.get('/component/' + utils.uuid_regex + '/traveller/', permissions.checkPermission("components:view"), component_traveller);
-router.get('/component/' + utils.short_uuid_regex + '/traveller/', permissions.checkPermission("components:view"), component_traveller);
-
-
-// Show the history of a single component
-async function component_history(req, res)
-{
-  // Get the component from the given (full or shortened) UUID
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  
-//  logger.info(get_component, componentUuid, req.params);
-
-  // Set the date (as a specific variable type) if the history query requires it
-  var date = null;
-  
-  if(req.query.date)
-  {
-    date = new Date(parseInt(req.query.date));
-//    logger.info("Trying effective date", date)
-  }
-
-  // Get the component information and component type form in one go, as well as the dates on which they were changed
-  let [form, component, dates] = await Promise.all(
-  [
-    Forms.retrieve("componentForms", "componentForms"),
-    Components.retrieve({componentUuid, "insertion.insertDate": {$lte: date}}),
-    Components.retrieveComponentChangeDates(componentUuid)
-  ]);
-
-  // If no component was retrieved, return an error
-  if(!component)
-  {
-    return res.status(400).send("Error getting component with UUID:  " + componentUuid + "  at insertion date:  " + date);
-  }
-  
-  // Render the component history page
-  res.render("component_history.pug", {schema: form.schema,
-                                       dates: dates,
-                                       componentUuid: componentUuid,
-                                       component: component,
-                                       canEdit: permissions.hasPermission("components:edit")});
-}
-
-// As with the component itself, the history can also be accessed by either the full or shortened UUID
-router.get('/component/' + utils.uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
-router.get('/component/' + utils.short_uuid_regex + '/history/', permissions.checkPermission("components:view"), component_history);
+});
 
 
 
@@ -341,7 +292,6 @@ async function ensureTypeFormExists(type, req, res)
   
   if(!form)
   {
-    logger.info(chalk.red("Creating a new component type form ..."))
     
     var newform = {formId: type,
                    formName: type};
