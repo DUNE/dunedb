@@ -3,30 +3,20 @@ require('lib/configuration.js');
 const express = require('express');
 const session = require('express-session');
 
-const pug = require('pug');
-const chalk = require('chalk');
 const path = require("path");
-const shortuuid = require('short-uuid')();
 const MUUID = require('uuid-mongodb');  // Addon for storing UUIDs as binary for faster lookup
-const ObjectID = require('mongodb').ObjectID;
 
 const bodyParser = require('body-parser');
-const jsondiffpatch = require('jsondiffpatch');
 const glob = require('glob');
  
 
 // Global configuration
-const { db } = require('./db');
-const { DB_NAME } = require('./constants');
-var database = require('lib/database.js'); // Exports global 'db' variable
-var Components = require('lib/Components.js');
-var Forms     = require('lib/Forms.js');
-var Tests     = require('lib/Tests.js')('test');
-var Jobs     = require('lib/Jobs.js')('job');
+const { db } = require('./lib/db');
+const { DB_NAME } = require('./lib/constants');
+const routes = require('./routes');
 var Cache    = require('lib/Cache.js');
 
 var permissions = require('lib/permissions.js');
-var utils = require('lib/utils.js');
 
 // Module is a single function which returns an app 
 // (Usable by either the real app or a unit test suite)
@@ -206,50 +196,9 @@ async function create_app(app)
   require('lib/auth.js')(app,session_config); 
 
 
-  // Setup all routes.
-
-  // app.get('/api/test/prot',  function (req, res, next) {
-  //   const { _raw, _json, ...userProfile } = req.user;
-  //   res.render('user.pug', {
-  //     userProfile: JSON.stringify(userProfile, null, 2),
-  //     title: 'Protected page'
-  //   });
-  // });
-
-
-  // app.get('/public', function(req, res) {
-  //   res.json({
-  //     message: 'Hello from a public endpoint! You don\'t need to be authenticated to see this.'
-  //   });
-  // });
-
-  // // This route needs authentication
-  // app.get('/api/private', permissions.checkAuthenticatedJson, function(req, res) {
-  //   res.json({
-  //     message: 'Hello from a private endpoint! You need to be authenticated to see this.',
-  //     user: req.user
-  //   });
-  // });
-
-
-
-  // routes in other files
-  app.use(require('routes/componentRoutes.js'));
-  app.use(require("routes/courseRoutes.js"));
-  app.use(require('routes/docsRoutes.js'));
-  app.use(require("routes/jobRoutes.js"));
-  app.use(require("routes/processRoutes.js"));
-  app.use(require('routes/searchRoutes.js'));
-  app.use(require("routes/testRoutes.js"));
-  app.use(require("routes/userRoutes.js"));
-  
-  app.use('/file',require('routes/fileRoutes.js'));
-  app.use('/autocomplete',require("routes/autocomplete.js"));
-
-  // Two names for api
-  app.use('/json',require("routes/api.js"));
-  app.use('/api',require("routes/api.js"));
-
+  // Setup all routes
+  routes.routes.forEach(route => app.use(route));
+  routes.paths.forEach(({ path, route }) => app.use(path, route));
 
   // icon contact sheet
   app.get("/icons",function(req,res,next){
@@ -258,11 +207,6 @@ async function create_app(app)
       res.render("icons.pug",{icons})
     })
   })
-
-  // Routes like /
-  app.use(require("routes/startRoutes.js"));
-
-
 
   //  pug/simple is a set of static pages, for prototyping or quick things
   var sanitize = require("sanitize-filename");

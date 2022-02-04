@@ -719,10 +719,5 @@ router.post("/m2mUser", permissions.checkPermissionJson("users:edit"),
   }
 )
 
-
 /// Docs
-router.use(require('routes/api/docsApi.js'));
-
-
-
-
+router.use(require('./docsApi'));

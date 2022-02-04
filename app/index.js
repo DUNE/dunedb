@@ -25,7 +25,7 @@ console.log("configured");
 
 
 const database = require('lib/database.js'); // Exports global 'db' variable
-var App = require("lib/app.js"); 
+var App = require('./app'); 
 var http = require('http'); // to run the server
 // var https = require('https');
 
