@@ -6,7 +6,7 @@
 "use strict";
 const express = require("express");
 const Forms = require("lib/Forms.js");
-const Components = require("lib/Components.js");
+const Components = require("lib/Components.js")('component');
 const Tests = require("lib/Tests.js")('test');
 const Jobs = require("lib/Jobs.js")('job');
 const ComponentTypes = require("lib/ComponentTypes.js");

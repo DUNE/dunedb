@@ -1,7 +1,7 @@
 
 'use strict';
 
-const Components = require('lib/Components.js');
+const Components = require('lib/Components.js')('component');
 const express = require('express');
 const Forms = require('lib/Forms.js');
 const permissions = require('lib/permissions.js');
@@ -154,7 +154,7 @@ router.get('/test/:testId([A-Fa-f0-9]{24})/copyToDraft', permissions.checkPermis
 
 
 // List the current user's draft tests
-router.get('/tests/drafts', async function(req, res, next)
+router.get('/tests/myDrafts', async function(req, res, next)
 {
   // Retrieve a list of the user's owned draft tests, using the user's ID
   // Note that a user 'owns' a draft if they were the one who originally submitted it

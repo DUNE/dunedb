@@ -1,48 +1,47 @@
-extend default
 
+extend default
 include common.pug
+
 
 block vars
   - var page_title = "Components";
+
 
 block content
   .container-fluid
     pre #{''}
     pre #{''}
   
-    if(type) 
-      if(permissions.userHas(user, "components:create"))
-        a(href = '/component/new/' + type).btn.btn-outline-info Register a new #{type}
-        
-        pre #{''}
-        pre #{''}
-
-    h3 #{title || page_title}
-
+    if(singleType) 
+      if(permissions.userHas(user, "components:edit"))
+        if(form.tags && !form.tags.includes("Trash"))
+          a(href = '/component/' + form.formId).btn.btn-primary
+            img.small-icon(src = '/images/run_icon.svg')
+            | &nbsp; Create a New Component of this Type
+          
+          pre #{''}
+          pre #{''}
+    
+    h2=title
+    
+    pre #{''}
+    
     table.table
       thead
         tr
-          if(showType)
-            th
-            th Type
-
-          th Name
-          th UUID
-          th Created
-          th Last Updated
-
+          th.col-md-2 Type
+          th.col-md-2 Name
+          th.col-md-2 UUID
+          th.col-md-2 Created On:
+          th.col-md-2 Last Updated On:
+          th.col-md-1
+      
       tbody
         each component in components
           - var uuid = MUUID.from(component.componentUuid).toString();
-        
+          
           tr          
-            if(showType)
-              td
-                if((forms[component.type] || {}).icon)
-                  img.small-icon(src = forms[component.type].icon)
-
-              td #{component.type}
-
+            td #{component.formName}
             td #{component.name} 
             td
               a(href = '/component/' + uuid) #{uuid}
@@ -50,4 +49,11 @@ block content
               +dateFormat(component.created)
             td
               +dateFormat(component.last_edited)
+            td
+              a(href = '/json/component/' + uuid, target = '_blank').btn.btn-secondary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON file
+    
+    pre #{''}
+    pre #{''}
 

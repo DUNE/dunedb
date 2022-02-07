@@ -85,7 +85,7 @@ router.get('/job/:formId', permissions.checkPermission("jobs:submit"), async fun
     
     if(!form)
     {
-      return res.status(400).send("There is no DB entry for a job type form with ID: " + formId);
+      return res.status(400).send("There is no DB entry for a job type form with ID: " + req.params.formId);
     }
     
     // Render the page for submitting a new job
@@ -169,7 +169,7 @@ router.get('/jobs/:formId/new', permissions.checkPermission("forms:edit"), async
 
 
 // Edit an existing job type form
-router.get('/jobs/:formId?/edit', permissions.checkPermission("forms:edit"), async function(req, res)
+router.get('/jobs/:formId/edit', permissions.checkPermission("forms:edit"), async function(req, res)
 {
   // Render the page for editing an existing job type form
   res.render('edit_jobTypeForm.pug', {collection: "jobForms",
@@ -202,7 +202,7 @@ router.get('/jobs/recent', permissions.checkPermission("jobs:view"), async funct
 
 
 // List recently submitted jobs of a single type
-router.get('/jobs/:formId?', permissions.checkPermission("jobs:view"), async function(req, res, next)
+router.get('/jobs/:formId', permissions.checkPermission("jobs:view"), async function(req, res, next)
 {
   // Construct the 'match conditions' to be passed to the function that retrieves a list of jobs
   // For this, it is simply the requirement that the job type form ID must match the provided one

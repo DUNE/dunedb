@@ -1,6 +1,6 @@
 // Pull component data as json doc.
 const express = require("express");
-const Components = require("lib/Components.js");
+const Components = require("lib/Components.js")('component');
 const Tests = require("lib/Tests.js")('test');
 
 var router = express.Router();

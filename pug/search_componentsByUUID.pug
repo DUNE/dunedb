@@ -1,16 +1,21 @@
+
 extend default
+
 
 block vars
   - var page_title = "Search Components by UUID";
 
-block extrascripts
 
-  // Script: create a one-entry form
-  // On change, validate it to see if it's a good UUID ... if so, create the URL and jump to it
+block extrascripts
+  
   script(type = 'text/javascript').
-    $(async function()
+    
+    // On first accessing this page ...
+    window.addEventListener('load', setupFunction);
+    
+    async function setupFunction()
     {
-      // I could do this by API query of the server, but this works for now
+      // Create a single-box input form for specifying the component UUID to search for
       var schema = 
       {
         "components": 
@@ -21,14 +26,16 @@ block extrascripts
             "tableView" : false,
             "key"       : "componentUuid",
             "type"      : "ComponentUUID",
-            "autofocus" : true,  // Set the cursor to immediately focus to the entry box
+            "autofocus" : true,
             "input"     : true,
             "validate"  : {"required": true},
           },
         ]
       }
-
+      
       form = await Formio.createForm(document.getElementById('builtform'), schema);
+      
+      // When a UUID is entered, first check if it is valid, and then if so, redirect the user to the corresponding component information page
       form.on("change", function()
       {
         if(form.isValid())
@@ -37,30 +44,32 @@ block extrascripts
           
           if(uuid && uuid.length > 10)
           {
-             window.location.assign(`/component/${uuid}`)
+            window.location.assign(`/component/${uuid}`)
           }
         }
       });
-    });
+    }
+
 
 block content
   .container-fluid
     pre #{''}
     pre #{''}
   
-    h3=page_title
-  
+    h2 Search Components by UUID
+    
+    pre #{''}
+    
     p The input box below uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
       br
       | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
-
+    
     pre #{''}
-
+    
     .row
-      .col
+      .col-md-6
         #builtform
     
-      // This is a dirty way of restricting the width of the text box ... add another column to the right side of it
-      // Otherwise it fills the entire width of the page and looks really stupid
-      .col.offset-md-20
+    pre #{''}
+    pre #{''}
 
