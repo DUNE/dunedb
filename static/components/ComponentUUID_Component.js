@@ -64,7 +64,7 @@ class ComponentUUID_Component extends QR_Component{
     if(this.component.autocomplete ) {
       var url = this.component.autocomplete;
       var query = {};
-      if(this.component.autocomplete_type) query.type = this.component.autocomplete_type;
+      if(this.component.autocomplete_type) query.formName = this.component.autocomplete_type;
 
       $(this.refs.input).each(function(index) {
         $(this).autoComplete({
@@ -127,8 +127,8 @@ class ComponentUUID_Component extends QR_Component{
     if(this.refs.compUuidInfo && value && value.length==36) {
       var info_target = $(this.refs.compUuidInfo[index]);
       info_target.show().prop('href','/component/'+value).text('link');
-      $.get('/json/component/'+value+"/simple").then(function(component){
-        info_target.text(component.type +": "+ component.data.name);
+      $.get('/json/component/'+value).then(function(component){
+        info_target.text(component.formName +": "+ component.data.name);
       })
     }
 

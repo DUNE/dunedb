@@ -2,7 +2,7 @@
 
 const permissions = require('lib/permissions.js');
 const Courses = require('lib/Courses.js');
-const Components = require('lib/Components.js');
+const Components = require('lib/Components.js')('component');
 const Forms = require('lib/Forms.js');
 const express  = require("express");
 const utils = require("lib/utils.js");

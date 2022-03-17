@@ -76,27 +76,4 @@ block content
     
     pre #{''}
     pre #{''}
-    
-    hr
-    
-    pre #{''}
-    
-    if(recentComponents)
-        h5 Recently Visited Components:
-        
-        table(style = 'width: 40%')
-          tr
-            th Type
-            th Name
-            th UUID
-          tbody
-            each c in recentComponents
-              tr
-                td #{c.type}
-                td #{c.name}
-                td 
-                  a(href = '/component/' + c.componentUuid) #{c.componentUuid}
-      
-        pre #{''}
-        pre #{''}
 

@@ -229,9 +229,9 @@ block extrascripts
         {
           $('.name', componentDiv).html(component.data.name);
           
-          getComponentType(component.type).then((component) => 
+          getComponentType(component.formName).then((component) => 
           {
-            $('.type', componentDiv).html(component.type);
+            $('.formName', componentDiv).html(component.formName);
           })
         });
       }
@@ -413,7 +413,7 @@ block content
       .testform-panel.rounded.p-2
         .componentInfo
           h5.uuid &nbsp;
-          h6.type &nbsp;
+          h6.formId &nbsp;
           h6.name &nbsp;
           pre #{''}
         

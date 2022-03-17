@@ -9,7 +9,7 @@ const fs = require("fs");
 // Local Javascript libraries
 const email = require("lib/email.js");
 var permissions = require('lib/permissions.js');
-const Components = require("lib/Components.js");
+const Components = require("lib/Components.js")('component');
 const Tags = require("lib/Tags.js");
 const Forms = require("lib/Forms.js");
 const Courses = require("lib/Courses.js");
@@ -65,25 +65,8 @@ async function homePage(req, res, next)
 {
   var tags = await Tags.get();
   
-  var recentComponents = [];
-  if(((req.session || {}).recent || {}).componentUuid)
-  {
-//    logger.info(chalk.blue("recent:", req.session.recent.componentUuid));
-
-    // Get a list of the user's recently accessed components
-    var list = await Components.list({componentUuid: {$in:req.session.recent.componentUuid}});
-
-    // Order the list
-    var recentComponents = [];
-    
-    for(var u of req.session.recent.componentUuid)
-    {
-      recentComponents.push( list.find(element => element.componentUuid == u) );
-    }
-  }
-  
-  // Render the homepage with the user-specific list of recent components
-  res.render('home.pug', {tags, recentComponents, git_info});
+  // Render the homepage
+  res.render('home.pug', {tags, git_info});
 }
 
 

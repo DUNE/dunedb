@@ -1,11 +1,9 @@
 
-const Components = require('lib/Components.js');
-const ComponentTypes = require('lib/ComponentTypes.js');
+const Components = require('lib/Components.js')('component');
 const Courses = require('lib/Courses.js');
-const deepmerge = require('deepmerge');
 const express = require('express');
 const Forms = require('lib/Forms.js');
-const Jobs = require("lib/Jobs.js")();
+const Jobs = require("lib/Jobs.js")('job');
 const permissions = require('lib/permissions.js');
 const shortuuid = require('short-uuid')();
 const Tests = require('lib/Tests.js')('test');
@@ -48,24 +46,24 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission("compon
       return res.status(400).send("There is no DB entry for a component with UUID: " + req.params.uuid);
     }
     
-    // Get the component's type form's name
-    // Throw an error if the form's name cannot be found within the component's DB entry
-    var formName = component.type;
+    // Get the component's type form's ID
+    // Throw an error if the form's ID cannot be found within the component's DB entry
+    var formId = component.formId;
     
-    if(!formName)
+    if(!formId)
     {
-      return res.status(400).send("This component (UUID: " + req.params.uuid + ") has no type form name!");
+      return res.status(400).send("This component (UUID: " + req.params.uuid + ") has no type form ID!");
     }
     
     // Get any other information relating to this component ... this includes the following:
-    //  - the component's type form, using its form name
+    //  - the component's type form, using its form ID
     //  - the results of tests that have already been performed on this component
     //  - all currently available test type forms
     //  - any related components
-    // Throw an error if there is no DB entry corresponding to this form name
+    // Throw an error if there is no DB entry corresponding to this form ID
     let [form, tests, testForms, relatedComponents] = await Promise.all(
     [
-      Forms.retrieve("componentForms", formName),
+      Forms.retrieve("componentForms", formId),
       Tests.listComponentTests(req.params.uuid),
       Forms.list(),
       Components.relationships(req.params.uuid)
@@ -73,7 +71,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission("compon
     
     if(!form)
     {
-      return res.status(400).send("There is no DB entry for a component type form with name: " + formName);
+      return res.status(400).send("There is no DB entry for a component type form with ID: " + formId);
     }
     
     // Add the component to the list of the user's recently viewed components
@@ -118,11 +116,8 @@ router.get('/c/' + utils.short_uuid_regex, async function(req, res, next)
 });
 
 
-
-
-
-// View the label of a single component
-router.get('/component/' + utils.uuid_regex + '/label', permissions.checkPermission("components:view"), async function(req, res, next)
+// View and print a set of a component's QR codes
+router.get('/component/' + utils.uuid_regex + '/qrCodes', permissions.checkPermission("components:view"), async function(req, res, next)
 {
   // Retrieve the component's DB entry, using its UUID
   // Throw an error if there is no DB entry corresponding to this UUID
@@ -133,121 +128,100 @@ router.get('/component/' + utils.uuid_regex + '/label', permissions.checkPermiss
     return res.status(400).send("There is no DB entry for a component with UUID: " + req.params.uuid);
   }
   
-  // Render the page for viewing the label of a single component
-  res.render('component_label.pug', {component});
+  // Render the page for viewing and printing a set of a component's QR codes
+  res.render('component_qrCodes.pug', {component});
 });
 
 
-// View the traveller of a single component
-router.get('/component/' + utils.uuid_regex + '/traveller/', permissions.checkPermission("components:view"), async function(req, res, next)
+// View and print a component's summary
+router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermission("components:view"), async function(req, res, next)
 {
-  // Get the component from the given (full or shortened) UUID
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-  
-  // Get the component's information from all possible sources - component, type, tests, jobs and courses
-  Courses.getCourseForComponentType()
+  // First retrieve information related to the component from the 'components' and 'tests' sections of the DB:
+  //  - information about the component itself
+  //  - information about tests that have been performed on the component
   
   let [component, tests] = await Promise.all(
   [
-    Components.retrieve(componentUuid),
-    Tests.getRecentComponentTests(componentUuid)
+    Components.retrieve(req.params.uuid),
+    Tests.getRecentComponentTests(req.params.uuid)
   ]);
-
-  var courseId = await Courses.getCourseForComponentType(component.type);
+  
+  // Next, get information about the course that this component's type relates to (if one exists)
+  var courseId = await Courses.getCourseForComponentType(component.formId);
+  
+  // If there is a course relating to this component type, evaluate it via its ID
+  // Then check the course steps, and get information about all steps that are 'jobs'
   var evaluatedCourse = null;
   var jobs = [];
-
-//  console.log("courseId", courseId)
-
+  
   if(courseId)
   {
-    evaluatedCourse = await Courses.evaluate(courseId, componentUuid);
+    evaluatedCourse = await Courses.evaluate(courseId, req.params.uuid);
 
-    var jobs = [];
+    var courseJobs = [];
     
     for(var step of evaluatedCourse.evaluation)
     {
       if(step.type == "job")
+      {
         if(step.result.length > 0)
-          jobs.push(step.result[0]);
+        {
+          courseJobs.push(step.result[0]);
+        }
+      }
     }
-
+    
     var jobPromises = [];
     
-//    console.log("jobs",jobs);
-
-    for(var job of jobs)
+    for(var job of courseJobs)
+    {
       jobPromises.push(Jobs.retrieve(job.jobId))
+    }
     
     jobs = await Promise.all(jobPromises);
   }
   
+  // Gather all of the retrieved data into a single 'records' entity
   var records = [component];
   
-  if(evaluatedCourse) records.push(evaluatedCourse);
   records.push(...tests);
   records.push(...jobs);
-
-//  console.log(records);
-
-  // Render the component traveller page
-  res.render("component_traveller.pug", {component,
-                                         componentUuid,
-                                         records});
+  
+  if(evaluatedCourse)
+  {
+    records.push(evaluatedCourse);
+  }
+  
+  // Render the page for viewing and printing a component's summary
+  res.render("component_summary.pug", {component,
+                                       records});
 });
 
 
-
-
-
-
-// Contact sheet of new unregistered components
-router.get("/NewComponentContactSheet/:type?",permissions.checkPermission("components:create"),
-  async function(req,res,next){
-    var components = [];
-    for(var i=0;i<15;i++) {
-      components.push(
-      {
-        componentUuid: Components.newUuid(),
-        data: {
-        // name: ""
-        },
-      })
-    }
-    res.render("contact_sheet.pug",{components});
-
-  }
-);
-
-
-
-
-
-
-// Create a new component of a specified type
-// Note that you cannot create a new component without FIRST specifying the type
-router.get('/component/new/:type', permissions.checkPermission("components:create"), async function (req, res)
+// Create a new component of a given type
+router.get('/component/:formId', permissions.checkPermission("components:edit"), async function (req, res, next)
 {
   try
   {
-    // Get the component type and associated type form
-    // If no form exists for the specified component type, throw an error
-    var type = decodeURIComponent(req.params.type);
-    var form = await Forms.retrieve("componentForms", type);
+    // Retrieve the component type form corresponding to the specified form ID
+    // Set the retrieval (and therefore, submission) timestamp to be the current date and time
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve("componentForms", req.params.formId, {onDate: new Date()});
     
-    if(!form) return res.status(400).send("No such type: " + type);
+    if(!form)
+    {
+      return res.status(400).send("There is no DB entry for a component type form with ID: " + req.params.formId);
+    }
     
-    // Produce a new UUID
+    // Generate a new full UUID
     var componentUuid = Components.newUuid();
+    var formId = req.params.formId;
     
-    // Render the component editing page (this is the same page template that is used for creating a new component)
-    res.render("edit_component.pug", {schema: form.schema,
-                                      componentUuid: componentUuid,
-                                      component: {type: type,
-                                                  componentUuid: componentUuid},
-                                      canEdit: permissions.hasPermission("components:edit"),
-                                      tests: [],
-                                      performed: []});
+    // Render the page for editing an existing component
+    res.render("edit_component.pug", {componentUuid,
+                                      component: {componentUuid, formId},
+                                      form,
+                                      newComponent: true});
   }
   catch(err)
   {
@@ -258,93 +232,74 @@ router.get('/component/new/:type', permissions.checkPermission("components:creat
 
 
 // Edit an existing component
-async function edit_component(req, res)
-{
-  // Get the component from the given (full or shortened) UUID
-  var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-//  logger.info(get_component, componentUuid, req.params);
-
-  var component = await Components.retrieve(componentUuid);
-  
-  // If the component or associated type doesn't exist, that's fine
-  // Just get set up for creating a new component instead (is the same page as is used for editing an existing one anyway)
-  if(!component || !component.type)
-  {
-    component = {componentUuid: componentUuid};
-  }
-  
-  // Render the component editing page
-  res.render("edit_component.pug", {componentUuid: componentUuid,
-                                    component: component});
-}
-
-// The component editing page can be accessed by either the full or shortened UUID
-router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermission("components:edit"), edit_component);
-router.get('/component/' + utils.short_uuid_regex + '/edit', permissions.checkPermission("components:edit"), edit_component);
-
-
-// [Internal Function] Make sure that a component type form already exists for the component type being requested
-var automaticallyCreateSchema =  require('lib/automaticallyCreateSchema.js');
-
-async function ensureTypeFormExists(type, req, res)
-{
-  var form = await Forms.retrieve("componentForms", type);
-  
-  if(!form)
-  {
-    
-    var newform = {formId: type,
-                   formName: type};
-
-    // Do any components already exist for this type?  If not, let's do automagic!
-    var exists = await Components.list({type: type}, {limit: 20});
-    logger.info(exists, "exists");
-    
-    if(exists && exists.length > 0)
-    {
-        var records = [];
-        
-        for(var c of exists)
-        {
-          records.push(await Components.retrieve(c.componentUuid));
-        }
-        
-        var auto = automaticallyCreateSchema(records);
-        newform.schema = auto;
-        logger.info(auto, "Creating a new auto form ...");
-    }
-    else
-    {
-      // Create a blank component type form
-      newform.schema = {components: [{"label": "Name",
-                                      "placeholder": "example: apa 10",
-                                      "tooltip": "Human readable and searchable identifier or nickname. This field is required for all types. It may be calculated.",
-                                      "tableView": true,
-                                      "key": "name",
-                                      "type": "textfield",
-                                      "validate": {"required": true},
-                                      "input": true}]}
-      
-      logger.info("Creating a new blank component type form ...")
-    }
-    
-    await Forms.save(newform, "componentForms", req);
-  }
-}
-
-// Create a new component type form
-router.get('/components/:type/new', permissions.checkPermission("forms:edit"), async function (req, res)
+router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermission("components:edit"), async function(req, res, next)
 {
   try
   {
-    var type = decodeURIComponent(req.params.type);
+    // Retrieve the component's DB entry, using its UUID
+    // Throw an error if there is no DB entry corresponding to this UUID
+    var component = await Components.retrieve(req.params.uuid);
+  
+    if(!component)
+    {
+      return res.status(400).send("There is no DB entry for a component with UUID: " + req.params.uuid);
+    }
     
-    // Even when creating a new component type, we still need to check if the type's form already exists
-    await ensureTypeFormExists(type, req, res);
+    // Get the component's type form's ID
+    // Throw an error if the form's ID cannot be found within the component's DB entry
+    var formId = component.formId;
     
-    // Render the component type editing page (this is the same page template that is used for creating a new component type)
-    res.render('edit_componentTypeForm.pug', {collection: "componentForms",
-                                              formId: type});
+    if(!formId)
+    {
+      return res.status(400).send("This component (UUID: " + req.params.uuid + ") has no type form ID!");
+    }
+    
+    // Retrieve the component's type form, using its form ID
+    // Throw an error if there is no DB entry corresponding to this form ID
+    var form = await Forms.retrieve("componentForms", formId);
+    
+    if(!form)
+    {
+      return res.status(400).send("There is no DB entry for a component type form with ID: " + formId);
+    }
+    
+    // Render the page for editing an existing component
+    res.render("edit_component.pug", {componentUuid: req.params.uuid,
+                                      component,
+                                      form,
+                                      newComponent: false});
+  }
+  catch(err)
+  {
+    logger.error(err);
+    res.status(400).send(err.toString());
+  }
+});
+
+
+// Create a new component type form
+var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
+
+router.get('/components/:formId/new', permissions.checkPermission("forms:edit"), async function (req, res)
+{
+  try
+  {
+    // Retrieve any and all existing component type forms with the same form ID as the one provided
+    var form = await Forms.retrieve("componentForms", req.params.formId);
+  
+    // If there is no existing component type form with the same ID, set up a new one using the ID and the default form schema
+    // Initially, use the form ID as the form name as well - the user will have the option of changing the name later
+    if(!form)
+    {
+      var form = {formId: req.params.formId,
+                  formName: req.params.formId,
+                  schema: default_form_schema};
+      
+      Forms.save(form, 'componentForms', req);
+    }
+    
+    // Redirect the user to the page for editing an existing component type form
+    res.redirect('/components/' + req.params.formId + '/edit');
   }
   catch (err)
   {
@@ -353,80 +308,99 @@ router.get('/components/:type/new', permissions.checkPermission("forms:edit"), a
   }
 });
 
+
 // Edit an existing component type form
-router.get('/components/:type/edit/:auto(auto)?', permissions.checkPermission("forms:edit"), async function (req, res)
+router.get('/components/:formId/edit', permissions.checkPermission("forms:edit"), async function (req, res)
 {
-  var type = decodeURIComponent(req.params.type);
-  
-  // Check if the requested component type's form exists
-  if(req.params.auto == "auto")
-  {
-    await ensureTypeFormExists(type, req, res);
-  }
-  
-  // Render the component type editing page
+  // Render the page for editing an existing component type form
   res.render('edit_componentTypeForm.pug', {collection: "componentForms",
-                                            formId: type});
+                                            formId: req.params.formId});
 });
 
 
-// List recently edited or created components of all types
-router.get('/components/recent', permissions.checkPermission("components:view"), async function(req, res, next)
-{
-  // Get a list of the (first 30) components, ordered by last modified
-  var components = await Components.list(null, {limit: 30});
-
-  // Get a list of any component types that exist but haven't been used to create any actual components yet
-  var forms = await Forms.list('componentForms');
-
-//  logger.info(components);
-
-  // Render the page showing the list of components
-  res.render("list_components.pug", {forms,
-                                     components,
-                                     title: "All Recently Edited/Created Components",
-                                     showType: true});
-});
-
-
-// List the component types
+// List all component types
 router.get('/components/types', permissions.checkPermission("components:view"), async function(req, res, next)
 {
-  // Get a list of the component type forms that have already been used to create components of that type
-  var componentTypes = await ComponentTypes.list();
-  var types = await Components.getTypes();
-
-  // Add onto this list any component type forms that exist but haven't been used yet
+  // Retrieve a list of all component type forms that currently exist
   var forms = await Forms.list('componentForms');
-  var componentTypes = deepmerge(types, forms);
-
-  // Render the page showing the list of component types
-  res.render("list_componentTypes.pug", {componentTypes});
+  
+  // Render the page for listing all component types
+  res.render("list_componentTypes.pug", {forms});
 });
 
 
-// List recently edited or created components of a single type
-router.get('/components/:type', permissions.checkPermission("components:view"), async function(req, res, next)
+// List recently created and edited components across all types
+router.get('/components/recent', permissions.checkPermission("components:view"), async function(req, res, next)
 {
-  // Set the type in question
-  var type = decodeURIComponent(req.params.type);
+  // Retrieve a list of created and edited components across all component types (since no type form ID is given)
+  // Set a limit on the number of displayed components (otherwise every single one in the DB will be shown!)
+  var components = await Components.list(null, {limit: 30});
 
-  // List the (first 30) components which have a type matching this type, ordered by last modified
-  var components = await Components.list({type: type}, {limit: 30});
-
-//  logger.info(components);
-
-  // Render the page showing the list of components
+  // Render the page for showing a generic list of components
   res.render("list_components.pug", {components,
-                                     title: "All '" + type + "' Type Components",
-                                     type});
+                                     singleType: false,
+                                     title: "Recent Components (All Types)"});
+});
+
+
+// List the current user's recently visited components
+router.get('/components/myRecents', async function(req, res, next)
+{
+  // Set up a list to hold the user's recently visited components
+  var recentComponents = [];
+  
+  // If there is an active user login ...
+  if(((req.session || {}).recent || {}).componentUuid)
+  {
+    // Construct the 'match conditions' to be passed to the function that retrieves a list of components
+    // For this, it is that a component's UUID must be in the list of UUIDs that the user has recently visited (via the corresponding component information page)
+    var match = {componentUuid: {$in:req.session.recent.componentUuid}}
+    
+    // Retrieve a list of components matching the condition set above
+    // Set a limit on the number of displayed components 
+    var componentList = await Components.list(match, {limit: 50});
+    
+    // Order and save the list
+    for(var c of req.session.recent.componentUuid)
+    {
+      recentComponents.push(componentList.find(element => element.componentUuid == c));
+    }
+  }
+  
+  // Render the page for showing a generic list of components
+  res.render("list_components.pug", {components: recentComponents,
+                                     singleType: false,
+                                     title: "My Recently Visited Components"});
+});
+
+
+// List recently created and edited components of a single type
+router.get('/components/:formId', permissions.checkPermission("components:view"), async function(req, res, next)
+{
+  // Construct the 'match conditions' to be passed to the function that retrieves a list of components
+  // For this, it is simply the requirement that the component type form ID must match the provided one
+  var match = (req.params.formId) ? {formId: req.params.formId} : {};
+  
+  // Retrieve a list of created and edited components with a matching type form ID
+  // Set a limit on the number of displayed components (otherwise every single one in the DB will be shown!)
+  var components = await Components.list(match, {limit: 50});
+  
+  // Retrieve the component type form corresponding to the provided form ID
+  var form = await Forms.retrieve('componentForms', req.params.formId);
+  
+  // Render the page for showing a generic list of components
+  res.render("list_components.pug", {components,
+                                     singleType: true,
+                                     title: "Recent Components (Single Type)",
+                                     form});
 });
 
 
 // Search for a specific component using a UUID
-router.get('/search/componentsByUUID', permissions.checkPermission("components:view"), async function(req, res, next)
+// Keep this route in this file, rather than 'searchRoutes.js', so that it doesn't conflict with the other search route (they both template as '/search/<text>')
+router.get('/search/componentsByUUID', async function(req, res, next)
 {
-  // Render the search page
+  // Render the page for searching for a component via its UUID
   res.render("search_componentsByUUID.pug");
 });
 

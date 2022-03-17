@@ -16,7 +16,7 @@ head
   link(rel = 'stylesheet'  href = '/dist/formiojs/formio.full.min.css')
   link(rel = 'stylesheet', href = '/css/main.css', type='text/css', media='all')
   link(rel = 'stylesheet', href = '/css/AnnotationCanvas.css', type='text/css', media='all')
-  link(rel = 'stylesheet'  href = '/css/qr.css')
+  link(rel = 'stylesheet'  href = '/css/qrCodes.css')
   link(rel = "preconnect" ,href = "https://fonts.gstatic.com")
   link(href = "https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap", rel = "stylesheet")
 
@@ -86,11 +86,14 @@ body(class = "deployment-" + deployment)
 
               ul.nav.flex-column.ml-3.sub-bar
                   li.nav-item
+                    +navlink(href = '/components/types')
+                      |      List Component Types
+                  li.nav-item
                     +navlink(href = '/search/componentsByUUID')
                       |      Search by UUID
                   li.nav-item
-                    +navlink(href = '/components/types')
-                      |      List Component Types
+                    +navlink(href = '/components/myRecents')
+                      |      My Recent Components
 
             li.nav-item
               +navlink(href = '/tests/recent')
@@ -102,7 +105,7 @@ body(class = "deployment-" + deployment)
                     +navlink(href = '/tests/types')
                       |      List Test Types
                   li.nav-item
-                    +navlink(href = '/tests/drafts')
+                    +navlink(href = '/tests/myDrafts')
                       |      My Draft Tests
 
             li.nav-item

@@ -91,7 +91,7 @@ block content
             dd Not Available
           
           dt Type
-          dd #{component.type}
+          dd #{component.formName || component.formId}
           
           dt Current Version:
           dd This is version #{component.validity.version} of the component:
@@ -131,7 +131,7 @@ block content
             if((((relatedComponents || {}).linkedFrom) || []).length > 0)
               each o in relatedComponents.linkedFrom
                 li
-                  | #{o.type}:
+                  | #{o.formName}:
                   a(href = '/component/' + MUUID.from(o.componentUuid).toString()) #{o.name} 
                   | (#{o.path})
         
@@ -151,15 +151,15 @@ block content
           
           pre #{'    '}
           
-          a(href = '/component/' + component.componentUuid + '/label').btn.btn-primary
+          a(href = '/component/' + component.componentUuid + '/qrCodes').btn.btn-primary
             img.small-icon(src = '/images/checklist_icon.svg')
             | &nbsp; Print a set of the component's QR codes
           
           pre #{'    '}
           
-          a(href = '/component/' + component.componentUuid + '/traveller').btn.btn-primary
+          a(href = '/component/' + component.componentUuid + '/summary').btn.btn-primary
             img.small-icon(src = '/images/checklist_icon.svg')
-            | &nbsp; View and print the component's traveller
+            | &nbsp; View and print the component's summary
       
       .col-md-3
         div#qr-code
@@ -209,13 +209,13 @@ block content
           
           // First, list the tests that are specifically tagged to this component type
           each info, formId in testForms
-            if(((info || {}).componentTypes || []).includes(component.type)&& !info.tags.includes("Trash"))
+            if(((info || {}).componentTypes || []).includes(component.formId) && !info.tags.includes("Trash"))
               a(href = '/test/' + formId + '/' + component.componentUuid).tagbutton.btn.btn-primary=t
                 =info.formName
           
           hr
           
-          h5 Other Available Tests:
+          h5 All Available Tests:
           
           // Next, list the tests which are tagged as being applicable to 'all' component types
           each info, formId in testForms

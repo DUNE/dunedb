@@ -1,115 +1,123 @@
-extend default
 
+extend default
 include common.pug
 
+
 block vars
-  - var page_title = "Component Types";
+  - var page_title = "All Component Types";
+
 
 block content
   .container-fluid
     pre #{''}
     pre #{''}
-  
-    if(permissions.userHas(user, "forms:edit"))
-      a.NewComponentType.btn.btn-outline-primary(href = '#', data-toggle = "modal" data-target = "#NewComponentTypeModal") Create New Component Type Form
     
+    if(permissions.userHas(user, "forms:edit"))
+      a(href = '#', data-toggle = "modal" data-target = "#NewComponentTypeModal").NewComponentType.btn.btn-warning
+        img.small-icon(src = '/images/edit_icon.svg')
+        | &nbsp; Create New Component Type
+      
       #NewComponentTypeModal.modal.fade(tabindex = '-1' role = 'dialog' aria-labelledby = 'NewComponentTypeLabel' aria-hidden = 'true')
         .modal-dialog(role = "document")
           .modal-content
             .modal-header
-              h5#NewComponentTypeLabel.modal-title New Component Type
+              h5#NewComponentTypeLabel.modal-title Create New Component Type
               button.close(type = "button", data-dismiss = "modal", aria-label = "Close")
                 span(aria-hidden = true) &times;
             .modal-body
               div
-                | Enter the name of this new component type.  Brevity is preferred.
-                input.NewComponentTypeName.form-control(type = "text")
+                | Enter the new component type's form ID.
+                br
+                | NOTE: this ID should have only underscores and alphanumerics (no spaces) - the human-readable name will be set on the next page.
+              pre #{''}
+              input.NewComponentTypeName.form-control(type = "text")
             .modal-footer
-              button.btn.btn-secondary(type = "button", data-dismiss = "modal") Close
-              button.btn.btn-primary.NewComponentTypeButton(type = "button") Create
+              button.btn.btn-danger(type = "button", data-dismiss = "modal") Close
+              button.btn.btn-success.NewComponentTypeButton(type = "button") Create
+      
       script.
         $('button.NewComponentTypeButton').click(function()
         {
-           window.location.href = "/components/" + $('button.NewComponentTypeButton').parents('.modal-content').find('input').val() + "/new";
+          window.location.href = "/components/" + $('button.NewComponentTypeButton').parents('.modal-content').find('input').val() + "/new";
         })
+        
         $('input.NewComponentTypeName').on("keyup", function(e)
         {
-          if(e.key == "Enter") 
+          if(e.key === "Enter") 
           {
-             window.location.href = "/components/" + $(this).val() + "/new";
+            window.location.href = "/components/" + $(this).val() + "/new";
           }
         })
-  
+      
       pre #{''}
       pre #{''}
     
-    h3 Existing Component Types
+    h2 Available Component Types
 
+    pre #{''}
+    
     table.table
       thead
         tr
-          th.col-md-1
-          th.col-md-2 Type
-          th.col-md-1 Count
+          th.col-md-3 Type ID
+          th.col-md-4 Type Name
           th.col-md-3
-          th.col-md-3
-
+          th.col-md-2
+      
       tbody
-        each type in Object.keys(componentTypes).sort()
-          - var info = componentTypes[type];
+        each formId in Object.keys(forms).sort()
+          - var form = forms[formId];
         
-          if(type && type != "null" && !(info.tags || []).includes("Trash"))
+          if(form.tags && !form.tags.includes("Trash"))
             tr
-              td
-                img.icon(src = info.icon)
-              td
-                a(href = '/components/' + type) #{type}
-              td=info.count
-
-              if(permissions.userHas(user, "components:create"))
-                td
-                  a(href = '/component/new/' + type).btn.btn-outline-info
-                    img.small-icon(src = '/images/edit_icon.svg')
-                    | &nbsp; Create a New Component of this Type
-
-              if(permissions.userHas(user, "forms:edit"))
-                td
-                  a(href = '/components/' + type + '/edit').btn.btn-outline-warning
-                    img.small-icon(src = '/images/edit_icon.svg')
-                    | &nbsp; Edit Component Type Form
-
-    pre #{''}
-    pre #{''}
-
-    if(permissions.userHas(user, "forms:edit"))
-      h3 Trashed Component Types
-     
-      table.table
-        thead
-          tr
-            th.col-md-1
-            th.col-md-2 Type
-            th.col-md-1 Count
-            th.col-md-3
-            th.col-md-3
-
-        tbody
-          each type in Object.keys(componentTypes).sort()
-            - var info = componentTypes[type];
+              td #{formId}
               
-            if(info.tags || []).includes("Trash")
-              tr
-                td
-                  img.icon(src = info.icon)
-                td
-                  a(href = '/components/' + type) #{type}
-                td=info.count
-
-                td
-                  
-                if(permissions.userHas(user, "forms:edit"))
-                  td
-                    a(href = '/components/' + type + '/edit').btn.btn-outline-warning
-                      img.small-icon(src = '/images/edit_icon.svg')
-                      | &nbsp; Edit Component Type Form
+              td
+                a(href = '/components/' + formId) #{form.formName}
+              
+              td
+                a(href = '/component/' + formId).btn.btn-primary
+                  img.small-icon(src = '/images/run_icon.svg')
+                  | &nbsp; Create a New Component of this Type
+              
+              td
+                a(href = '/components/' + formId + '/edit').btn.btn-warning
+                  img.small-icon(src = '/images/edit_icon.svg')
+                  | &nbsp; Edit Component Type Form
+    
+    pre #{''}
+    pre #{''}
+    
+    h2 Trashed Component Types
+    
+    pre #{''}
+    
+    table.table
+      thead
+        tr
+          th.col-md-3 Type ID
+          th.col-md-4 Type Name
+          th.col-md-3
+          th.col-md-2
+      
+      tbody
+        each formId in Object.keys(forms).sort()
+          - var form = forms[formId];
+        
+          if(form.tags && form.tags.includes("Trash"))
+            tr
+              td #{formId}
+              
+              td
+                a(href = '/components/' + formId) #{form.formName}
+              
+              td
+              
+              td
+                a(href = '/components/' + formId + '/edit').btn.btn-warning
+                  img.small-icon(src = '/images/edit_icon.svg')
+                  | &nbsp; Edit Component Type Form
+    
+    pre #{''}
+    pre #{''}
 
