@@ -3,6 +3,7 @@
 const MUUID = require('uuid-mongodb');
 const moment = require('moment');
 const jp = require('jsonpath');
+const logger = require('./logger');
 // const {JSONPath} = require('jsonpath-plus');
 
 //
@@ -204,9 +205,6 @@ if (typeof require !== 'undefined' && require.main === module)
       arr: [ {serial: 1, measure:2},{serial:2,measure:3} ],
     }},
   ];
-
-
-  // logger.info(jp.paths(testthing,"$.*"))
 
   console.log(JSON.stringify(automaticallyCreateSchema(docs),null,2));
 }

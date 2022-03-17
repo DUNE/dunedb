@@ -3,6 +3,7 @@ const express = require('express');
 const Forms = require('lib/Forms.js');
 const Jobs = require('lib/Jobs.js')('job');
 const permissions = require('lib/permissions.js');
+const logger = require('../lib/logger');
 
 var router = express.Router();
 module.exports = router;

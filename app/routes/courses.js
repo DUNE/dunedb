@@ -6,6 +6,7 @@ const Components = require('lib/Components.js')('component');
 const Forms = require('lib/Forms.js');
 const express  = require("express");
 const utils = require("lib/utils.js");
+const logger = require('../lib/logger');
 
 var router = express.Router();
 

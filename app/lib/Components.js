@@ -5,11 +5,12 @@ const Binary = require('mongodb').Binary;
 const Cache = require("lib/Cache.js");
 const commonSchema = require("lib/commonSchema.js");
 const componentRelationships = require("lib/component_relationships.js");
-//const database = require('lib/database.js');
+//const database = require('lib/db');
 const { db } = require('./db');
 const dbLock = require("lib/dbLock.js");
 const permissions = require('lib/permissions.js');
 const shortuuid = require('short-uuid')();
+const logger = require('./logger');
 
 var MUUID = require('uuid-mongodb');
 module.exports = function(type) {return new ComponentsModule(type)};

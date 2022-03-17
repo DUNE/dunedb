@@ -1,5 +1,7 @@
 "use strict";
 
+const logger = require('./logger');
+
 // uses global db.
 
 class FailLimiter

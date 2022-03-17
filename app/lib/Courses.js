@@ -12,6 +12,7 @@ const Jobs = require("lib/Jobs.js")();
 const Components = require("lib/Components.js")('component');
 const Cache = require("lib/Cache.js");
 var dbLock = require("lib/dbLock.js");
+const logger = require('./logger');
 
 
 module.exports = {

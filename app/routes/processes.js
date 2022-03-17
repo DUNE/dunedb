@@ -9,6 +9,7 @@ var Jobs = require('lib/Tests.js')('job');
 var Components = require('lib/Components.js');
 var permissions = require('lib/permissions.js');
 var Processes = require("lib/Processes.js");
+const logger = require('../lib/logger');
 var router = express.Router();
 
 module.exports = router;

@@ -12,6 +12,7 @@ var Components = require('lib/Components.js');
 var Tests = require('lib/Tests.js')('test');
 var commonSchema = require('lib/commonSchema.js');
 var utils = require("lib/utils.js");
+const logger = require('./logger');
 var automaticallyCreateSchema = require("lib/automaticallyCreateSchema.js");
 var router = express.Router();
 

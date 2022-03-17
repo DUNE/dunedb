@@ -2,7 +2,7 @@
 
 const ObjectID = require('mongodb').ObjectID;
 var MUUID = require('uuid-mongodb');
-
+const logger = require('./logger');
 
 
 module.exports = {

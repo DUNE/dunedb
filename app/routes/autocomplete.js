@@ -2,6 +2,7 @@
 const express = require("express");
 const Components = require("lib/Components.js")('component');
 const Tests = require("lib/Tests.js")('test');
+const logger = require('../lib/logger');
 
 var router = express.Router();
 module.exports = router;

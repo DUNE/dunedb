@@ -4,6 +4,7 @@ const MUUID = require('uuid-mongodb');
 const moment = require('moment');
 const jp = require('jsonpath');
 const utils = require('lib/utils.js');
+const logger = require('./logger');
 // const {JSONPath} = require('jsonpath-plus');
 
 //

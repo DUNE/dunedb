@@ -6,6 +6,7 @@ var permissions = require('lib/permissions.js');
 var router = express.Router();
 var Docs = require("lib/Docs.js");
 const fs = require("fs/promises");
+const logger = require('../lib/logger');
 
 module.exports = router;
 

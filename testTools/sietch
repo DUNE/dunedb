@@ -12,8 +12,7 @@ const Path = require("path");
 const basepath = Path.resolve(__dirname,"../");
 require('app-module-path').addPath(basepath);
 const repl = require('repl');
-const configuration = require("lib/configuration.js");
-const database = require("lib/database.js");
+const database = require("lib/db");
 const App= require("lib/app.js");
 const express = require('express');
 const request = require('supertest');
@@ -27,7 +26,7 @@ var pino_opts = {
     },
     level: 'http',
   };
-global.logger = pino( pino_opts );
+const logger = pino( pino_opts );
 
 var user =  {
          displayName: 'Command Line User '+process.env.USER,

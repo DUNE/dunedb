@@ -1,13 +1,11 @@
-
 "use strict";
 
+const { NODE_ENV } = require("./constants");
+const logger = require('./logger');
 
 // These are permissions granted to users who are not logged in.
-global.config.default_permissions = global.config.default_permissions ||
-                                    ['components:view', 'tests:view', 'forms:view', 'jobs:view'];
-
-// const default_user_permissions = global.config.default_user_permissions || [ 
-//                                   'components:create', 'components:edit', 'tests:edit', 'tests:submit', 'jobs:view', 'forms:edit', 'jobs:edit', 'jobs:submit', 'jobs:process'];
+// TODO(micchickenburger): This was defined in global config but isn't being used anywhere!
+// const default_permissions = ['components:view', 'tests:view', 'forms:view', 'jobs:view'];
 
 // route middleware to make sure a user is logged in
 // Now I know how to use these:
@@ -34,12 +32,10 @@ global.config.default_permissions = global.config.default_permissions ||
 function userHas(user,required_permission)
 {
   var p = required_permission;
-  if( global.config.deployment=='devsite'
-   || global.config.deployment=='laptop') 
+  if (NODE_ENV == 'development') 
     p = "dev:"+required_permission;
   return ((user||{}).permissions||[]).includes(p);
 }
-
 
 function hasPermission(req,required_permission)
 {
@@ -60,8 +56,7 @@ function checkPermission(required_permission) {
   {
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-     if( global.config.deployment=='devsite'
-      || global.config.deployment=='laptop') 
+     if (NODE_ENV == 'development') 
       p = "dev:"+required_permission;
      return res.status(400).render('permissionsError.pug',{required_permission:p});
   }
@@ -74,8 +69,7 @@ function checkPermissionOrUserId(required_permission) {
     if(req.params.user_id == req.user.user_id) return next();
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-     if( global.config.deployment=='devsite'
-      || global.config.deployment=='laptop') 
+     if (NODE_ENV == 'development') 
       p = "dev:"+required_permission;
      return res.status(400).render('permissionsError.pug',{required_permission:p,required_user:req.params.user_id});
   }
@@ -88,8 +82,7 @@ function checkPermissionJson(required_permission) {
   {
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-    if( global.config.deployment=='devsite'
-     || global.config.deployment=='laptop') 
+    if (NODE_ENV == 'development') 
      p = "dev:"+required_permission;
     logger.info({user:req.user},"Check Permission Failed");
     var retval = {error:"Insufficient privileges. Need "+p+" have "+((req.user||{}).permissions||[]).join(',')};
@@ -108,8 +101,7 @@ function checkPermissionOrUserIdJson(required_permission) {
       && req.params.user_id == req.user.user_id) return next();
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-    if( global.config.deployment=='devsite'
-     || global.config.deployment=='laptop') 
+    if (NODE_ENV == 'development') 
      p = "dev:"+required_permission;
     logger.info({route:req.route.path,user:req.user},"Check Permission Failed")
     return res.status(400).json({error:`Insufficient privileges. Need to be user ${(req.params||{}).user_id}, or permission ${p}. Logged in as ${(req.user||{}).user_id} and permissions ${((req.user||{}).permissions||[]).join(',')}`});

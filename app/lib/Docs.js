@@ -1,5 +1,6 @@
 "use strict";
 var { db } = require('./db');
+const logger = require('./logger');
 var permissions = require('lib/permissions.js');
 var commonSchema = require("lib/commonSchema.js");
 var Cache = require("lib/Cache.js");

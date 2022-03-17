@@ -4,7 +4,7 @@ const Components = require("lib/Components.js")('component');
 const Forms = require("lib/Forms.js");
 const deepmerge = require('deepmerge');
 var Cache = require("lib/Cache.js");
-
+const logger = require('./logger');
 
 module.exports = {
   list,

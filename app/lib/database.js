@@ -1,9 +1,10 @@
 "use strict";
-// require("lib/configuration.js");
+
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
 const Grid = require('mongodb').Grid;
 const MUUID = require('uuid-mongodb');
+const logger = require('./logger');
 
 // attempt to find where mongo failures are happening. doesn't really work.
 //require('longjohn').async_trace_limit = 500;

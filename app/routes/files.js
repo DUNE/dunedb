@@ -5,8 +5,10 @@ const permissions = require('lib/permissions.js');
 const mongo = require('mongodb');
 const Busboy = require('busboy');
 const moment = require('moment');
-// var database = require('./database.js'); // Exports global 'db' variable
+// var database = require('./db'); // Exports global 'db' variable
 let sharp = require('sharp'); // image resizing library and crap
+const { BASE_URL } = require('../lib/constants');
+const logger = require('../lib/logger');
 /// submit file data0
 
 var router = express.Router();
@@ -32,7 +34,7 @@ module.exports = router;
 //         if (err) return res.status(500).send(err);
 
 //          res.json({
-//           url: config.my_url+'/disk/'+fileinfo.name,
+//           url: BASE_URL+'/disk/'+fileinfo.name,
 //           name: fileinfo.name,
 //           size: fileinfo.size
 //          });
@@ -94,7 +96,7 @@ router.post("/gridfsBase64",permissions.checkPermission("tests:submit"),
         .on('finish',function(gridfs_record){
             logger.info("upload to mongo finished");
             logger.info(gridfs_record);
-            var url = config.my_url + req.baseUrl;
+            var url = BASE_URL + req.baseUrl;
             if (url.substr(-1) != '/') url += '/'; // ensure trailing slash
             url+="gridfs/";
             var response = {
@@ -134,7 +136,7 @@ router.post("/gridfs",permissions.checkPermission("tests:submit"),
           .on('finish',function(gridfs_record){
             logger.info("upload to mongo finished");
             logger.info(gridfs_record);
-            var url = config.my_url + req.baseUrl;
+            var url = BASE_URL + req.baseUrl;
             if (url.substr(-1) != '/') url += '/'; // ensure trailing slash
             url+="gridfs/";
             var response = {

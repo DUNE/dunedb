@@ -49,9 +49,9 @@
 // requisition: [components] or component
 
 const jp = require('jsonpath');
-require('configuration.js');
 const Components = require('lib/Components.js')('component'); // for newUuids.
 const {NodeVM} = require('vm2');
+const logger = require('./logger');
 
 function decompose(record, requisition, instance)
 {
@@ -455,7 +455,7 @@ var decomp_fn_text = `
 
 
   const ObjectID = require('mongodb').ObjectID;
-  const database = require("lib/database.js");
+  const database = require("lib/db");
   database.attach_to_database().then(async function(){
 
     var record = await db.collection("jobs").findOne({_id:ObjectID('5ef264101bb6da203b27fb3c')});

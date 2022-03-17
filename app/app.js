@@ -1,5 +1,4 @@
 // Third-party libraries
-require('lib/configuration.js'); 
 const express = require('express');
 const session = require('express-session');
 
@@ -8,11 +7,12 @@ const MUUID = require('uuid-mongodb');  // Addon for storing UUIDs as binary for
 
 const bodyParser = require('body-parser');
 const glob = require('glob');
- 
+const MongoStore = require('connect-mongo');
 
 // Global configuration
 const { db } = require('./lib/db');
-const { DB_NAME } = require('./lib/constants');
+const logger = require('./lib/logger');
+const { DB_NAME, BASE_URL, NODE_ENV, SESSION_SECRET } = require('./lib/constants');
 const routes = require('./routes');
 var Cache    = require('lib/Cache.js');
 
@@ -24,13 +24,7 @@ var permissions = require('lib/permissions.js');
 /// This function is run after the database is intialized, 
 /// so that session persistence is set up correctly!
 
-module.exports = {
-  create_app
-};
-
-
-async function create_app(app) 
-{
+async function createApp(app) {
   var app = app || express();
 
   ///
@@ -55,7 +49,7 @@ async function create_app(app)
   // app.use(logRequestStart);
   // app.use(morgan('tiny',{skip:skip}));
 
-  app.set('trust proxy', config.trust_proxy || false ); // for use when forwarding via apache
+  app.set('trust proxy', false); // for use when forwarding via apache
 
   // A lot of this code looted from pino-http, but simplified to only what I want.
   var startTime = Symbol('startTime');
@@ -84,21 +78,12 @@ async function create_app(app)
     logger['http'](logobj);
   }
   app.use(my_express_logger);
-  // var my_express_logger = require("pino-http")({
-  //   logger: global.logger, //| require("pino")(),
-  //   useLevel: 'info',
-  // });
-  // app.use(my_express_logger);
-
-
-
-
 
   // Static routes to installed modules.
   // Any installed module with a dist/ directory gets that directory exposed
   // on the route /dist/<module>/
     // list all modules:
-  var matches = glob.sync(`${global.BaseDir}/node_modules/*/dist`);
+  var matches = glob.sync(`${__dirname}/node_modules/*/dist`);
   var list = [];
   for(var pathname of matches) {
     // logger.info("path",path)
@@ -110,15 +95,16 @@ async function create_app(app)
   logger.info("Added /dist/ paths on modules",list.join(' '))
   
   // add some static routes to libraries explicity..
-  app.use('/dist/fabric-history',express.static(`${global.BaseDir}/node_modules/fabric-history/src`));
-  app.use('/dist/moment',express.static(`${global.BaseDir}/node_modules/moment/min`));
-  app.use('/dist/jsonurl',express.static(`${global.BaseDir}/node_modules/@jsonurl/jsonurl/dist`));
+  // TODO(micchickenburger):  WTF
+  app.use('/dist/fabric-history',express.static(`${__dirname}/node_modules/fabric-history/src`));
+  app.use('/dist/moment',express.static(`${__dirname}/node_modules/moment/min`));
+  app.use('/dist/jsonurl',express.static(`${__dirname}/node_modules/@jsonurl/jsonurl/dist`));
 
 
   // CSS precompiler. needs to come before /static call
   var compileSass = require('express-compile-sass');
   app.use('/css',compileSass({
-      root: `${global.BaseDir}/scss`,
+      root: `${__dirname}/scss`,
       sourceMap: true, // Includes Base64 encoded source maps in output css
       sourceComments: true, // Includes source comments in output css
       watchFiles: true, // Watches sass files and updates mtime on main files for each change
@@ -127,8 +113,8 @@ async function create_app(app)
   app.use('/css',express.static('../scss'));
 
   // local overrides for testing.
-  app.use(express.static(`${global.BaseDir}/local/static`));
-  app.use(express.static(`${global.BaseDir}/static`));
+  app.use(express.static(`${__dirname}/local/static`));
+  app.use(express.static(`${__dirname}/static`));
 
   // For container deployment: monitor /persistent/static
   app.use(express.static("/persistent/static"));
@@ -145,8 +131,8 @@ async function create_app(app)
     res.locals.moment = moment; 
     res.locals.MUUID = MUUID;
     res.locals.route = req.originalUrl;
-    res.locals.base_url = global.config.my_url;
-    res.locals.deployment = global.config.deployment;
+    res.locals.base_url = BASE_URL;
+    res.locals.deployment = NODE_ENV;
     res.locals.permissions = permissions;
     next(); 
   }); // moment.js in pug
@@ -155,37 +141,19 @@ async function create_app(app)
   app.set('view options', { pretty: true });
   app.set('view engine', 'pug')
   app.set('views','pug');
-    app.locals.pretty = true;
+  app.locals.pretty = true;
 
-  var session_config = null
-  if(config.redis_store) {
-    const RedisStore = require('connect-redis')(session);
-    const redis = require("redis");
-    let redisClient = redis.createClient(config.redis_store); // connection info, probably just URL, password
-    session_config = {
-        store: new RedisStore({ client: redisClient }),
-        saveUninitialized: true,
-        secret: config.localsecret,
-        resave: false,      
-        cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },  // 1 week
-      };
-
-  } else {
-    const MongoStore = require('connect-mongo');
-    session_config = {
-      store: MongoStore.create({
-        client: db.client,
-        dbName: DB_NAME,
-        collection: "sessionStore",
-      }),
-      secret: config.localsecret, // session secret
-      resave: false,
-      saveUninitialized: true,
-      cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },  // 1 week
-    };
-  }
-
-
+  const session_config = {
+    store: MongoStore.create({
+      client: db.client,
+      dbName: DB_NAME,
+      collection: "sessionStore",
+    }),
+    secret: SESSION_SECRET, // session secret
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },  // 1 week
+  };
   app.use(session(session_config));
 
   delete session_config.cookie;
@@ -225,3 +193,5 @@ async function create_app(app)
 
   return app;
 }
+
+module.exports = createApp;

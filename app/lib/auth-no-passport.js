@@ -14,8 +14,10 @@ var jsonwebtoken = require('jsonwebtoken');
 var Permissions = require("lib/permissions.js");
 var chalk = require("chalk");
 
-// routes.
+const { M2M_SECRET, AUTH0_DOMAIN, BASE_URL, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('./constants');
+const logger = require('./logger');
 
+// routes.
 var router = express.Router();
 
 // My homebrew m2m authentication
@@ -56,7 +58,7 @@ function verify_m2m_middleware(req,res,next) {
   if(! authstring.startsWith('Bearer ')) return res.status(401).send("JWT token required");
   var token = authstring.split(' ')[1];
   // logger.info("got authstring ",authstring);
-  jsonwebtoken.verify(token,config.m2m_secret,{audience: "sietch-m2m"},
+  jsonwebtoken.verify(token,M2M_SECRET,{audience: "dunedb-m2m"},
       (err,decoded)=>{
         if(err) return res.status(401).send("Token not verified... " + err);
         req.user = decoded;   // Verified! Copy user info into the req.user
@@ -69,21 +71,21 @@ function verify_m2m_middleware(req,res,next) {
 }
 
 
-module.exports = function(app,session_config) {
+module.exports = function(app) {
 
     const { auth } = require("express-openid-connect");
     app.use(auth({
-      issuerBaseURL: "https://" + config.auth0_domain,
-      baseURL: config.my_url,
-      clientID: config.auth0_client_id,
-      secret: config.auth0_client_secret, // this could probably be anything static but private
-      clientSecret: config.auth0_client_secret,
+      issuerBaseURL: `https://${AUTH0_DOMAIN}`,
+      baseURL: BASE_URL,
+      clientID: AUTH0_CLIENT_ID,
+      secret: AUTH0_CLIENT_SECRET, // TODO: is this necessary? how is it used?
+      clientSecret: AUTH0_CLIENT_SECRET,
       idpLogout: true,
       authRequired: false,
       authorizationParams: {
         response_type: 'code',
         scope: 'openid profile email offline_access', // offline_access allows renewal tokens
-        audience: "https://sietch.xyz/api", // This is required to get permissions
+        audience: `${BASE_URL}/api`, // This is required to get permissions
       },
       // session: session_config
     }));
@@ -121,8 +123,8 @@ module.exports = function(app,session_config) {
       if(req.oidc && req.oidc.user) {
         const data = req.oidc.user;
         var   user = {...req.user,...req.oidc.user};
-        user.roles = data['https://sietch.xyz/roles'] || data['http://sietch.xyz/roles'];
-        user.user_metadata = data['https://sietch.xyz/user_metadata'] || data['http://sietch.xyz/user_metadata'];
+        user.roles = data[`${BASE_URL}/roles`];
+        user.user_metadata = data[`${BASE_URL}/user_metadata`];
 
         // Copied from passport-auth0/lib/Profile.js
         user.displayName = data.name;

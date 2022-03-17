@@ -1,6 +1,6 @@
 const express = require('express');
 
-var database = require('./database.js');
+var database = require('./db');
 var MUUID = require('uuid-mongodb');
 var Components = require('./Components.js');
 var Forms = require('./Forms.js');

@@ -14,8 +14,10 @@ var jsonwebtoken = require('jsonwebtoken');
 var Permissions = require("lib/permissions.js");
 var chalk = require("chalk");
 
-// routes.
+const { BASE_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, M2M_SECRET, AUTH0_CLIENT_SECRET } = require('./constants');
+const logger = require('./logger');
 
+// routes.
 var router = express.Router();
 
 // Perform the login, after login Auth0 will redirect to callback
@@ -55,14 +57,14 @@ router.get('/logout', (req, res) => {
   if (port !== undefined && port !== 80 && port !== 443) {
     returnTo += ':' + port;
   }
-  returnTo = config.my_url;
+  returnTo = BASE_URL;
 
   var logoutURL = new url.URL(
-    util.format('https://%s/v2/logout', config.auth0_domain)
+    util.format('https://%s/v2/logout', AUTH0_DOMAIN)
   );
   var searchString = querystring.stringify({
-    client_id: config.auth0_client_id,
-    returnTo: returnTo
+    client_id: AUTH0_CLIENT_ID,
+    returnTo
   });
   logoutURL.search = searchString;
 
@@ -117,7 +119,7 @@ function verify_m2m_middleware(req,res,next) {
   if(! authstring.startsWith('Bearer ')) return res.status(401).send("JWT token required");
   var token = authstring.split(' ')[1];
   // logger.info("got authstring ",authstring);
-  jsonwebtoken.verify(token,config.m2m_secret,{audience: "sietch-m2m"},
+  jsonwebtoken.verify(token,M2M_SECRET,{audience: "dunedb-m2m"},
       (err,decoded)=>{
         if(err) return res.status(401).send("Token not verified... " + err);
         req.user = decoded;   // Verified! Copy user info into the req.user
@@ -131,16 +133,13 @@ function verify_m2m_middleware(req,res,next) {
 
 
 module.exports = function(app) {
-
-    // Configure Passport.
-    logger.info(config.my_url+"/callback");
     // Configure Passport to use Auth0
     var strategy = new Auth0Strategy(
       {
-        domain:       config.auth0_domain,
-        clientID:     config.auth0_client_id,
-        clientSecret: config.auth0_client_secret,
-        callbackURL:  config.my_url+"/callback",
+        domain:       AUTH0_DOMAIN,
+        clientID:     AUTH0_CLIENT_ID,
+        clientSecret: AUTH0_CLIENT_SECRET,
+        callbackURL:  `${BASE_URL}/callback`,
       },
       function (accessToken, refreshToken, extraParams, profile, done) {
         // accessToken is the token to call Auth0 API (not needed in the most cases)

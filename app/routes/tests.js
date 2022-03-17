@@ -7,6 +7,7 @@ const Forms = require('lib/Forms.js');
 const permissions = require('lib/permissions.js');
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
+const logger = require('../lib/logger');
 
 var router = express.Router();
 module.exports = router;

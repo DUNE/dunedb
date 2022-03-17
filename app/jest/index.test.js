@@ -1,6 +1,5 @@
 // app-module-path doesn't work in this context...
 // require('app-module-path').addPath('./');
-const Config = require("../lib/configuration.js");
 const request = require('supertest');
 const express = require('express');
 const session = require('supertest-session');
@@ -8,7 +7,7 @@ const { getRoutes } = require('./getRoutes.js');
 const fs = require("fs");
 
 const App= require("../lib/app.js");
-const database = require("../lib/database.js");
+const database = require("../lib/db");
 global.BaseDir = process.cwd();
 
 
@@ -92,7 +91,7 @@ pino = require("pino");
     level: 'http', 
   };
 var dest = pino.destination("jest.log");
-global.logger = pino(pino_opts, pino.destination('jest.log') );
+const logger = pino(pino_opts, pino.destination('jest.log') );
 
 
 beforeAll(async () => {

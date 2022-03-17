@@ -1,8 +1,8 @@
 "use strict";
-var database = require('lib/database.js'); // Exports global 'db' variable
+var database = require('lib/db'); // Exports global 'db' variable
+const logger = require('./logger');
 
 const chalk = require('chalk');
-var database = require('lib/database.js'); // Exports global 'db' variable
 var {ObjectID} = require('mongodb');
 
 var lockCollection = null;

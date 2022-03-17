@@ -17,6 +17,7 @@
 // Cache.cached("name"); // Get the current cache. If empty, it's empty.
 
 const { db } = require('./db');
+const logger = require('./logger');
 
 class Cache
 {

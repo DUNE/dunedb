@@ -5,6 +5,7 @@ const MUUID = require('uuid-mongodb');
 const moment = require('moment');
 
 var permissions = require('lib/permissions.js');
+const logger = require('../lib/logger');
 var utils = require("lib/utils.js");
 
 var router = express.Router();

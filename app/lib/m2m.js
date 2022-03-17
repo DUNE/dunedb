@@ -7,7 +7,8 @@ if (require.main === module) {
   require('app-module-path').addPath(Path.resolve(__dirname,"../")); // Set this as the base for all 'require' lines in future.
 }
 
-var database = require('lib/database.js'); // Exports global 'db' variable
+var database = require('lib/db');
+const logger = require('./logger');
 
 var express = require('express');
 var router = express.Router();
@@ -16,6 +17,7 @@ var url = require('url');
 var querystring = require('querystring');
 var jwt = require('jsonwebtoken');
 var crypto = require('crypto');
+const { BASE_URL, M2M_SECRET } = require("./constants");
 
 async function AddMachineUser(userinfo)
 {
@@ -81,7 +83,7 @@ async function AuthenticateMachineUser(user_id,secret)
     audience: "sietch-m2m",
   }
   logger.info("authenticating m2m user "+user_id)
-  return jwt.sign(rec.user,config.m2m_secret,options);
+  return jwt.sign(rec.user,M2M_SECRET,options);
 }
 
 async function ListMachineUsers()
@@ -108,7 +110,6 @@ module.exports = {
 
 
 if (require.main === module) {
-  require("lib/configuration.js")
   var pino = require("pino"); 
   var pino_opts = {
     customLevels: {
@@ -144,7 +145,7 @@ if (require.main === module) {
     var rec = await AddMachineUser({email: argv.email,displayName: argv.name, permissions: argv.permissions });
     console.log('added a new machine user:',rec);
     console.log("\n\n\n");
-    var output_record = { url: global.config.my_url, 
+    var output_record = { url: BASE_URL, 
                         client_credentials: {
                         user_id: rec.user_id,
                         secret:  rec.secret,

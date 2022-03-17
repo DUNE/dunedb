@@ -5,6 +5,7 @@ const express = require('express');
 const m2m = require("lib/m2m.js");
 var ManagementClient = require('auth0').ManagementClient;
 var permissions = require('lib/permissions.js');
+const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../lib/constants');
 
 /// To ensure the manager below works:
 ///    - go to auth0 dashboard -> Applications -> APIs -> Auth0ManagementAPI
@@ -12,9 +13,9 @@ var permissions = require('lib/permissions.js');
 ///    - set the Sietch application to "Authorized"
 ///    - using the pulldown arrow on the right, authorize the scopes given below
 /// There is no issue using the same 'clientId' and 'clientSecret' that we use for the main authentication
-var manager = new ManagementClient({domain      : config.auth0_domain,
-                                    clientId    : config.auth0_client_id,
-                                    clientSecret: config.auth0_client_secret,
+var manager = new ManagementClient({domain      : AUTH0_DOMAIN,
+                                    clientId    : AUTH0_CLIENT_ID,
+                                    clientSecret: AUTH0_CLIENT_SECRET,
                                     scope       : 'read:users update:users read:roles'});
 
 var router = express.Router();

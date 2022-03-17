@@ -6,6 +6,7 @@ const pretty = require('express-prettify');
 // const fs = require('fs');
 // const util = require('util');
 const fs = require("fs/promises");
+const logger = require('../../lib/logger');
 
 const Docs = require('lib/Docs.js');
 

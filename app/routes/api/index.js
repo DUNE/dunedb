@@ -16,6 +16,7 @@ const Docs = require("lib/Docs.js");
 const Cache = require("lib/Cache.js");
 const utils = require("lib/utils.js");
 const permissions = require("lib/permissions.js");
+const logger = require('../../lib/logger');
 const chalk = require("chalk");
 const pretty = require('express-prettify');
 
@@ -32,6 +33,7 @@ router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer 
 // data format: none
 
 var QRCodeSVG = require('qrcode-svg');
+const { BASE_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require("../../lib/constants");
 
 // /api/generateComponentUuid returns the UUID string
 // /api/generateComponentUuid/url returns URL+UUID
@@ -43,11 +45,11 @@ router.get('/generateComponentUuid/:format(svg|url)?', permissions.checkPermissi
     var uuid = Components.newUuid();
     if(req.params.format) {
       if(req.params.format=="url") {
-        return res.json(config.my_url+"/"+uuid.toString());
+        return res.json(`${BASE_URL}/${uuid.toString()}`);
       }
       if(req.params.format=="svg") {
         var qr = new QRCodeSVG({
-          content:config.my_url+"/"+uuid.toString(),
+          content: `${BASE_URL}/${uuid.toString()}`,
           padding: 0,
           ecl: (['L','M',"H","Q"].includes(req.query.ecl))?req.query.ecl:"Q",
           container: "svg-viewbox",
@@ -517,9 +519,9 @@ var manager = new ManagementClient({
   // There is no issue using the same authentication clientId and clientSecret that we use
   // for the main authentication.
 
-  domain: config.auth0_domain,
-  clientId: config.auth0_client_id,
-  clientSecret: config.auth0_client_secret,
+  domain: AUTH0_DOMAIN,
+  clientId: AUTH0_CLIENT_ID,
+  clientSecret: AUTH0_CLIENT_SECRET,
   scope: 'read:users update:users read:roles'
 });
 router.get("/roles",  permissions.checkPermissionJson('users:view'),
@@ -668,7 +670,7 @@ router.post("/user/:user_id", permissions.checkPermissionOrUserIdJson("users:edi
   }
 )
 
-var m2m = require("lib/m2m.js")
+var m2m = require("lib/m2m.js");
 router.get("/m2mUsers", permissions.checkPermissionJson("users:edit"),
   async (req,res,next) => {
     try {
@@ -704,7 +706,7 @@ router.post("/m2mUser", permissions.checkPermissionJson("users:edit"),
             permissions: req.body.permissions
           }
         );
-      var output_record = { url: global.config.my_url, 
+      var output_record = { url: BASE_URL, 
                             client_credentials: {
                               user_id: rec.user_id,
                              secret:  rec.secret,

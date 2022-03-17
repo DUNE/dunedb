@@ -1,7 +1,4 @@
-// global.config = require('./configuration.js');
-// var database = require('./lib/database.js');
 const ObjectID = require('mongodb').ObjectID;
-
 
 async function insertBatch(collection, documents) {
   console.log("start insertBatch");

@@ -13,6 +13,7 @@ const Components = require("lib/Components.js")('component');
 const Tags = require("lib/Tags.js");
 const Forms = require("lib/Forms.js");
 const Courses = require("lib/Courses.js");
+const logger = require('../lib/logger');
 
 var router = express.Router();
 module.exports = router;

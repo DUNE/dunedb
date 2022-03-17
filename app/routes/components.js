@@ -8,6 +8,7 @@ const permissions = require('lib/permissions.js');
 const shortuuid = require('short-uuid')();
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
+const logger = require('../lib/logger');
 
 var router = express.Router();
 module.exports = router;
@@ -278,7 +279,7 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 
 
 // Create a new component type form
-var default_form_schema = JSON.parse(require('fs').readFileSync('dbSeed/default_form_schema.json'));
+var default_form_schema = JSON.parse(require('fs').readFileSync('schemas/default_form_schema.json'));
 
 router.get('/components/:formId/new', permissions.checkPermission("forms:edit"), async function (req, res)
 {

@@ -1,18 +1,24 @@
 const { MongoClient } = require('mongodb');
-const { DB_NAME } = require('../constants');
+const { DB_NAME, DB_URL } = require('../constants');
 
 class MongoConnection {
   constructor(url, db) {
-    this.MONGO_URL = url || 'mongodb://localhost:27017/dunedb';
-    this.DB_NAME = db || 'dunedb';
+    this.MONGO_URL = url;
+    this.DB_NAME = db;
   }
 
   async open() {
-    this.client = await MongoClient.connect(this.MONGO_URL, { useNewUrlParser: true });
+    const mongoParameters = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      connectTimeoutMS: 100,
+      socketTimeoutMS: 30000,
+    };
+    this.client = await MongoClient.connect(this.MONGO_URL, mongoParameters);
     this.db = this.client.db(this.DB_NAME);
   }
 
-  close() {
+  async close() {
     this.client.close();
   }
 
@@ -21,4 +27,4 @@ class MongoConnection {
   }
 }
 
-module.exports = new MongoConnection(process.env.DATABASE_URL, DB_NAME);
+module.exports = new MongoConnection(DB_URL, DB_NAME);

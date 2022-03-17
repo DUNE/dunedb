@@ -61,16 +61,9 @@
 // 	type, name,id - just for convenience in the linkedFrom case.
 // }
 
-
-const database = require("lib/database.js");
+const database = require("lib/db");
+const logger = require('./logger');
 let {ObjectId} = require("mongodb");
-
-
-
-
-
-
-
 
 function mapRelationships()
 {
@@ -333,11 +326,9 @@ async function doMapReduce() {
 if (require.main === module) {
 	const Path = require("path");
 	require('app-module-path').addPath(Path.resolve(__dirname,"../")); // Set this as the base for all 'require' lines in future.
-  const configuration = require('lib/configuration.js');  // must be first
 
 	database.attach_to_database()
 		.then(async ()=>await doIncrementalMapReduce("restart"))
 		// .then(testOne)
 		.then(function(){database.shutdown()})
-
 }

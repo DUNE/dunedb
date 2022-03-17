@@ -1,7 +1,4 @@
-const express = require('express');
-
-global.config = require('../configuration.js');
-var database = require('../lib/database.js');
+var database = require('../lib/db');
 var MUUID = require('uuid-mongodb');
 var uuid = require('uuid');
 var componentslib = require('../lib/Components.js');
