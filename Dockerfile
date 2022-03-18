@@ -1,11 +1,15 @@
 FROM node:lts-alpine
 
+# Install node-gyp and dependencies
+WORKDIR /build
+RUN apk add python3 make g++
+COPY app/package.json app/package-lock.jso[n] /build/
+RUN npm ci
+
 VOLUME /app
 WORKDIR /app
 COPY ./app /
 
-# Install node-gyp and dependencies
-RUN apk add python3 make g++
-RUN npm install
-
-CMD ["node", "index.js"]
+COPY entrypoint.sh /usr/bin/
+RUN chmod +x /usr/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]

@@ -82,17 +82,15 @@ async function createApp(app) {
   // Static routes to installed modules.
   // Any installed module with a dist/ directory gets that directory exposed
   // on the route /dist/<module>/
-    // list all modules:
+  // list all modules:
   var matches = glob.sync(`${__dirname}/node_modules/*/dist`);
   var list = [];
   for(var pathname of matches) {
-    // logger.info("path",path)
-    var modname = /.*\/node_modules\/([^\/]*)\/dist/.exec(pathname)[1];
+    var modname = pathname.match(/node_modules\/(.+)\//)[1];
     list.push(modname);
-    // logger.info('modname',modname,pathname);
-    app.use('/dist/'+modname,express.static(pathname));
+    app.use(`/dist/${modname}`, express.static(pathname));
   }
-  logger.info("Added /dist/ paths on modules",list.join(' '))
+  logger.info(`Added /dist/ paths on modules: ${list.join(', ')}`)
   
   // add some static routes to libraries explicity..
   // TODO(micchickenburger):  WTF
@@ -132,7 +130,7 @@ async function createApp(app) {
     res.locals.MUUID = MUUID;
     res.locals.route = req.originalUrl;
     res.locals.base_url = BASE_URL;
-    res.locals.deployment = NODE_ENV;
+    res.locals.NODE_ENV = NODE_ENV;
     res.locals.permissions = permissions;
     next(); 
   }); // moment.js in pug

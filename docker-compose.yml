@@ -13,9 +13,9 @@ services:
       DATABASE_URL: mongodb://db:27017/dunedb
       SESSION_SECRET: abcdefghijklmnopqrstuvwxyz
       M2M_SECRET: abcdefghijklmnopqrstuvwxyz
-      AUTH0_CLIENT_ID: PlUmEcuB1huOLDa1TRxGq0OFac2alylx
-      AUTH0_CLIENT_SECRET: jh3ojz_Dh0It3a05aLgjxkUBYgkJIdiJca0G77RlTocExPwLONncuiiZoJlYIP_B
-      AUTH0_DOMAIN: dev-pserbfiw.auth0.com
+      AUTH0_CLIENT_ID: g36o06k2gII5s7GSJ3ApRU4E1mOkk0Oz
+      AUTH0_CLIENT_SECRET: 3okNn6iL37WplRV30EbLNwNamezDYYubsuy6_DrcHjCrLCfSfo8DYn8JTOqJA1zo
+      AUTH0_DOMAIN: dunedb-dev.us.auth0.com
     depends_on:
       db:
         condition: service_healthy
@@ -23,8 +23,6 @@ services:
   db:
     image: mongo:4.4
     environment:
-    #   MONGO_INITDB_ROOT_USERNAME: root
-    #   MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: dunedb
     volumes:
       - ./db/mongo:/data/db
