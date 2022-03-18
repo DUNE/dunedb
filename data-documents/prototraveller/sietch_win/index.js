@@ -1,4 +1,4 @@
-// var Database = require('database-js');
+// const { db } = require('database-js');
 
 // var Connection = require('database-js').Connection;
 

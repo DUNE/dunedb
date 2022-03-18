@@ -1,8 +1,0 @@
-VKS is a package to allow "someone to come off the street" and do the thing just as efficiently as your experts.  boy, that sounds evil.
-
-"Pro" level adds SQL database of "work order" completetion. 
-	[Aimed at managers wanting to know how fast people do shit
-
-"Enterprise" level adds an API
-	- interface with IOT so you can tell [ if your minion is doing something wrong
-	

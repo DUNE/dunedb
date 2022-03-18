@@ -1,0 +1,33 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - 12313:12313
+    volumes:
+      - ./app:/app
+    environment:
+      NODE_ENV: development
+      APP_PORT: 12313
+      BASE_URL: http://localhost:12313
+      DATABASE_URL: mongodb://db:27017/dunedb
+      SESSION_SECRET: abcdefghijklmnopqrstuvwxyz
+      M2M_SECRET: abcdefghijklmnopqrstuvwxyz
+      AUTH0_CLIENT_ID: g36o06k2gII5s7GSJ3ApRU4E1mOkk0Oz
+      AUTH0_CLIENT_SECRET: 3okNn6iL37WplRV30EbLNwNamezDYYubsuy6_DrcHjCrLCfSfo8DYn8JTOqJA1zo
+      AUTH0_DOMAIN: dunedb-dev.us.auth0.com
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mongo:4.4
+    environment:
+      MONGO_INITDB_DATABASE: dunedb
+    volumes:
+      - ./db/mongo:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "'db.runCommand(\"ping\").ok'", "localhost:27017/test"]
+      interval: 5s
+      timeout: 10s
+      retries: 5

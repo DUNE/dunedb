@@ -1,11 +1,6 @@
-# Sietch
+# DUNE DB
 
-[Github Repository](https://github.com/nathanieltagg/sietch)
-
-This project is the code that will be used to run the DUNE experiment APA construction database.
-
-
-
+The Quality Assurance app for the Deep Underground Neutrino Experiment frame manufacturing process.
 
 ## Machine-to-Machine (m2m) interface
 
@@ -18,79 +13,42 @@ To see metadata schemas used, see [docs/schemas.md](schemas.md)
 
 ## Getting Started
 
-See [sietch.xyz]
+Have a recent version of Docker installed and execute:
 
-### Prerequisites
-
-- Node.js
-- npm
-- Mongodb
-- auth0.com developer account (free)
-
-### Installing
-
-For installing a fresh copy of this db system:
-
-- Make sure node.js and npm are [installed](https://developers.redhat.com/hello-world/nodejs/) on this system. 
-- `npm install`
-- Create a `config.js` file for configurations. This file should simply export overrides for what is in `configuration.js`
-- Install mongodb. Start the server.  
-- Provide the connection details to mongo in `config.js`
-- In config.js, set the auth0 tokens and secrets required to do logins.
-
-To run it, 
+```bash
+$ docker compose up
 ```
-node index.js
-```
-
-Use `nodemon` for testing. Use `pm2` to keep a server alive.
 
 ## Contributing
 
-Talk to Nathaniel.  Join the `apa_db` channel on the DUNE Slack.
+Join the `apa_db` channel on the DUNE Slack.
 
 ### Design principles
+
 In general, I try to make the URL routes human-readable and explicable.  The only hard-to-type things should be ID numbers for specific entries or components.
 
 Human-usable routes and API routes have similar structure.  For example:
-https://sietch.xyz/component/abcd123...  yields a view of the component
-https://sietch.xyz/json/component/abcd123...  can be gotten from the browser, for a JSON document with the component info
-https://sietch.xyz/api/component/abcd123...  gets the JSON document using an machine-to-machine authentication suitable for scripts.
-
-
-
-
+https://apa.dunedb.org/component/abcd123...  yields a view of the component
+https://apa.dunedb.org/json/component/abcd123...  can be gotten from the browser, for a JSON document with the component info
+https://apa.dunedb.org/api/component/abcd123...  gets the JSON document using an machine-to-machine authentication suitable for scripts.
 
 ## Code organization
 
-`index.js` is the launch point. (Also the home page. FIXME)
+The app is located in the `/app` directory.  Brief outline:
 
-`/pug` contains only Pug templates, which are used to render web pages.
+* `/app/index.js` is the launch point. (Also the home page. FIXME)
+* `/app/lib` contains app logic
+* `/app/pug` contains only Pug templates, which are used to render web pages.
+* `/app/routes` contains the Express route functions, which in turn mostly call the Pug render routines.
+* `/app/routes/api` has all the low-level API calls accessible, see [docs/api.md](api.md)
+* `/app/schemas` are some JSON forms used to set up defaults in first-time intialization of the entire database 
+* `/app/scss` contains SCSS files that are rendered into CSS files dynamicaly.
+* `/app/static` contains static files accessible to the UI
+* `/client` contains example files showing how to use the API.js
+* `/dbTools` are some scripts used in development and for schema evolution
 
-`/routes` contains the Express route functions, which in turn mostly call the Pug render routines.
-
-`/routes/api.js` has all the low-level API calls accessible, see [docs/api.md](api.md)
-
-`/lib` has all the internals. Database should be accessed ONLY through functions in these source files.  It is FORBIDDEN to write to the database in any way other than these.
-
-`/static` contains files used by the front-end only.  All files in here are statically presented to the client under the root path.  (i.e. `./static/images/logo.png` is available to the browser as `/images/logo.png`)
-
-`/local` contains files used by the front-end, and will override or append to files in the `/static` area. This is indended for local overrides for debugging.
-
-`/client` contains example files showing how to use the API.js
-
-`/scss` contains SCSS files that are rendered into CSS files dynamicaly.
-
-`/dbTools` are some scripts used in development and for schema evolution
-
-`/dbSeed` are some JSON forms used to set up defaults in first-time intialization of the entire database 
-
-`/configuration.js` describes the default configuration.  Some elements will need overriding to work.  Overrides are to be put in `/config.js`  FIXME make a config directory
 ## Authors
 
-* **Nathaniel Tagg** -  https://github.io/nathanieltagg
-
-
-## Notes
-
-[Working notes](.md)
+* **Nathaniel Tagg** - https://github.com/nathanieltagg
+* **Krish Majumdar** - https://github.com/krishmaj
+* **Micah Henning** - https://micah.soy

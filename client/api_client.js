@@ -3,7 +3,7 @@ const express = require('express');
 var request = require('request');
 var util    = require('util');
 
-function SietchConnect(config)
+function DuneDBConnect(config)
 {
   this.auth = config || require('./api_config2.json');
   this.request_params = {
@@ -41,4 +41,4 @@ function SietchConnect(config)
   }
 }
 
-module.exports = SietchConnect
+module.exports = DuneDBConnect
