@@ -1,8 +1,0 @@
-RUN chown node:node /app
-RUN apk add dumb-init
-USER node
-ENV NODE_ENV production
-COPY --chmod=node:node package*.json /app/
-RUN ls -al
-RUN npm ci --only=production
-

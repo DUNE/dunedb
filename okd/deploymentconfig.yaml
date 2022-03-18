@@ -1,0 +1,96 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: dunedb-deployment-config
+objects:
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: dunedb-${DEPLOYMENT}
+      namespace: dune-apa-db
+    spec:
+      replicas: 1
+      selector:
+        app: dunedb-${DEPLOYMENT}
+        deploymentconfig: dunedb-${DEPLOYMENT}
+      template: 
+        metadata:
+            labels:
+              app: dunedb-${DEPLOYMENT}
+              deploymentconfig: dunedb-${DEPLOYMENT}
+        spec:
+          containers:
+            - image: >-
+                docker-registry.default.svc:5000/dune-apa-db/dunedb
+              imagePullPolicy: Always
+              name: dunedb-${DEPLOYMENT}
+              envFrom:
+                - secretRef:
+                    name: ${DEPLOYMENT}.db
+                - secretRef:
+                    name: ${DEPLOYMENT}
+              ports: 
+                - containerPort: 443
+                  protocol: TCP
+              livenessProbe:
+                  failureThreshold: 3
+                  httpGet:
+                    path: /
+                    port: 443
+                    scheme: HTTPS
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  successThreshold: 1
+                  timeoutSeconds: 1
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /
+                  port: 443
+                  scheme: HTTPS
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              volumeMounts:
+                - mountPath: /persistent
+                  name: volume-persistent
+          volumes:
+            - name: volume-persistent
+              persistentVolumeClaim:
+                claimName: dunedb-persistent
+      triggers:
+      - type: ConfigChange 
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - dunedb-${DEPLOYMENT}
+          from:
+            kind: ImageStreamTag
+            namespace: dune-apa-db
+            name: dunedb:${DEPLOYMENT}
+        type: ImageChange  
+      strategy:
+        type: Rolling  
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: dunedb-${DEPLOYMENT}
+      namespace: dune-apa-db
+    spec:
+        ports:
+          - name: 443-tcp
+            port: 443
+            protocol: TCP
+            targetPort: 443
+        externalIPs:
+          - ${EXTERNAL_IP}
+        selector:
+          deploymentconfig: dunedb-${DEPLOYMENT}
+parameters:
+  - name: DEPLOYMENT
+    displayName: production, staging
+    require: true
+  - name: EXTERNAL_IP
+    displayName: external IP address for this instance
+    require: true
