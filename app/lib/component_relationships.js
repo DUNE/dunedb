@@ -61,7 +61,7 @@
 // 	type, name,id - just for convenience in the linkedFrom case.
 // }
 
-const database = require("lib/db");
+const { db } = require("lib/db");
 const logger = require('./logger');
 let {ObjectId} = require("mongodb");
 
@@ -321,14 +321,12 @@ async function doMapReduce() {
 	}
 }
 
-
-
 if (require.main === module) {
 	const Path = require("path");
 	require('app-module-path').addPath(Path.resolve(__dirname,"../")); // Set this as the base for all 'require' lines in future.
 
-	database.attach_to_database()
+	db.open()
 		.then(async ()=>await doIncrementalMapReduce("restart"))
 		// .then(testOne)
-		.then(function(){database.shutdown()})
+		.then(function(){db.close()})
 }

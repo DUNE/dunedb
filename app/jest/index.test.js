@@ -7,7 +7,7 @@ const { getRoutes } = require('./getRoutes.js');
 const fs = require("fs");
 
 const App= require("../lib/app.js");
-const database = require("../lib/db");
+const { db } = require("../lib/db");
 global.BaseDir = process.cwd();
 
 
@@ -98,7 +98,7 @@ beforeAll(async () => {
   try{
   console.log("beforeAll");
   
-  await database.attach_to_database();
+  await db.open();
   console.log("attached");
  
   await App.create_app(appPublic);
@@ -140,7 +140,7 @@ afterAll( async () => {
     await db.collection("components").deleteMany({type:"cform"+suffix});
     await db.collection("tests").deleteMany({formId:"test"+suffix});
     await db.collection("jobs").deleteMany({formId:"job"+suffix});
-    await database.shutdown(true);
+    await db.close();
 } );
 
 // inject a custom user authorization here.

@@ -2,7 +2,7 @@
 'use strict';
 
 const commonSchema = require("lib/commonSchema.js");
-const database = require("lib/db");
+const { db } = require("./db");
 const logger = require('./logger');
 const Forms = require("lib/Forms.js");
 const ObjectID = require('mongodb').ObjectID;

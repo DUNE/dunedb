@@ -2,7 +2,7 @@
 
 const chalk = require('chalk');
 var express = require('express');
-//var database = require('lib/db'); // Exports global 'db' variable
+//const { db } = require('lib/db'); // Exports global 'db' variable
 const { db } = require('./db');
 const logger = require('./logger');
 var permissions = require('lib/permissions.js');

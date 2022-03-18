@@ -2,7 +2,7 @@
 'use strict';
 
 const commonSchema = require("lib/commonSchema.js");
-const database = require("lib/db");
+const { db } = require("./db");
 const logger = require('./logger');
 const dbLock = require("lib/dbLock.js");
 const Forms = require("lib/Forms.js");

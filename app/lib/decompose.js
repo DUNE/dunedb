@@ -455,17 +455,12 @@ var decomp_fn_text = `
 
 
   const ObjectID = require('mongodb').ObjectID;
-  const database = require("lib/db");
-  database.attach_to_database().then(async function(){
-
+  const { db } = require("./db");
+  db.open().then(async function(){
     var record = await db.collection("jobs").findOne({_id:ObjectID('5ef264101bb6da203b27fb3c')});
     // logger.info(JSON.stringify(record,null,2));
     // decompose(record,  decomp_4x4);
 
     runDecompositionFunction(decomp_fn_text,record);
-
-
-
-
-  }).finally(()=>{database.shutdown()});
+  }).finally(()=>{db.close()});
 }

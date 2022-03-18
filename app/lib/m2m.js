@@ -7,7 +7,7 @@ if (require.main === module) {
   require('app-module-path').addPath(Path.resolve(__dirname,"../")); // Set this as the base for all 'require' lines in future.
 }
 
-var database = require('lib/db');
+const { db } = require('lib/db');
 const logger = require('./logger');
 
 var express = require('express');

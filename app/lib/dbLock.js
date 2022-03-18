@@ -1,5 +1,5 @@
 "use strict";
-var database = require('lib/db'); // Exports global 'db' variable
+const { db } = require('lib/db'); // Exports global 'db' variable
 const logger = require('./logger');
 
 const chalk = require('chalk');

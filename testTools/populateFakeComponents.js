@@ -1,4 +1,4 @@
-var database = require('../lib/db');
+const { db } = require('../lib/db');
 var MUUID = require('uuid-mongodb');
 var uuid = require('uuid');
 var componentslib = require('../lib/Components.js');
