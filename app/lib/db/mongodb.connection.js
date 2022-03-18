@@ -1,5 +1,5 @@
 const { MongoClient } = require('mongodb');
-const { DB_NAME, DB_URL } = require('../constants');
+const { DB_NAME, DB_URL, DB_CERTKEY, DB_CA } = require('../constants');
 
 class MongoConnection {
   constructor(url, db) {
@@ -11,8 +11,11 @@ class MongoConnection {
     const mongoParameters = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      connectTimeoutMS: 100,
+      connectTimeoutMS: 1000,
       socketTimeoutMS: 30000,
+      tls: !!DB_CERTKEY,
+      tlsCAFile: DB_CA,
+      tlsCertificateKeyFile: DB_CERTKEY,
     };
     this.client = await MongoClient.connect(this.MONGO_URL, mongoParameters);
     this.db = this.client.db(this.DB_NAME);

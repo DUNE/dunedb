@@ -514,7 +514,7 @@ var manager = new ManagementClient({
   // To ensure this works:
   // Go to auth0 dsh: Applications / APIs  / Auth0ManagementAPI
   // Tab:  Machine to Machine Applications
-  // Turn on the Sietch application to "Authorized"
+  // Turn on the application to "Authorized"
   // Use the pulldown-arrow on the right and authorize the scopes shown below.
   // There is no issue using the same authentication clientId and clientSecret that we use
   // for the main authentication.

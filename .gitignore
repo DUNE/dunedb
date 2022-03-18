@@ -6,7 +6,6 @@ config.js
 api_config.json
 api2_config.json
 local/
-sietch_dev
 app/static/css/local.css
 pm2*.config.js
 *.log

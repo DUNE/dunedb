@@ -32,8 +32,6 @@ const logger = require('./logger');
 function userHas(user,required_permission)
 {
   var p = required_permission;
-  if (NODE_ENV == 'development') 
-    p = "dev:"+required_permission;
   return ((user||{}).permissions||[]).includes(p);
 }
 
@@ -56,8 +54,6 @@ function checkPermission(required_permission) {
   {
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-     if (NODE_ENV == 'development') 
-      p = "dev:"+required_permission;
      return res.status(400).render('permissionsError.pug',{required_permission:p});
   }
 }
@@ -69,8 +65,6 @@ function checkPermissionOrUserId(required_permission) {
     if(req.params.user_id == req.user.user_id) return next();
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-     if (NODE_ENV == 'development') 
-      p = "dev:"+required_permission;
      return res.status(400).render('permissionsError.pug',{required_permission:p,required_user:req.params.user_id});
   }
 }
@@ -82,8 +76,6 @@ function checkPermissionJson(required_permission) {
   {
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-    if (NODE_ENV == 'development') 
-     p = "dev:"+required_permission;
     logger.info({user:req.user},"Check Permission Failed");
     var retval = {error:"Insufficient privileges. Need "+p+" have "+((req.user||{}).permissions||[]).join(',')};
     return res.status(400).json(retval);
@@ -101,8 +93,6 @@ function checkPermissionOrUserIdJson(required_permission) {
       && req.params.user_id == req.user.user_id) return next();
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-    if (NODE_ENV == 'development') 
-     p = "dev:"+required_permission;
     logger.info({route:req.route.path,user:req.user},"Check Permission Failed")
     return res.status(400).json({error:`Insufficient privileges. Need to be user ${(req.params||{}).user_id}, or permission ${p}. Logged in as ${(req.user||{}).user_id} and permissions ${((req.user||{}).permissions||[]).join(',')}`});
   }
@@ -130,12 +120,7 @@ function ensureAuthenticated (req, res, next) {
     res.redirect('/login');
 };
 
-
-
-
-
-module.exports = 
-{
+module.exports = {
   // userPermissions,
   userHas,
   hasPermission,
@@ -146,5 +131,4 @@ module.exports =
   ensureAuthenticated,
   checkAuthenticated,
   checkAuthenticatedJson,
-
 }

@@ -10,7 +10,7 @@ const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../lib/c
 /// To ensure the manager below works:
 ///    - go to auth0 dashboard -> Applications -> APIs -> Auth0ManagementAPI
 ///    - go to the "Machine to Machine Applications" tab
-///    - set the Sietch application to "Authorized"
+///    - set the application to "Authorized"
 ///    - using the pulldown arrow on the right, authorize the scopes given below
 /// There is no issue using the same 'clientId' and 'clientSecret' that we use for the main authentication
 var manager = new ManagementClient({domain      : AUTH0_DOMAIN,

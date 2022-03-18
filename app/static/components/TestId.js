@@ -19,7 +19,7 @@ class TestIdComponent extends TextFieldComponent{
     return TextFieldComponent.schema({
       "label": "Test ID",
       "placeholder": "Example: 507f191e810c19729de860ea",
-      "tooltip": "ID number of a unique test in the Sietch database",
+      "tooltip": "ID number of a unique test in the DUNE database",
       // "inputMask": "************************",
       "validateOn": "change",
       "validate": {

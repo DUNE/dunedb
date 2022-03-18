@@ -52,11 +52,11 @@ block content
       
       dt Roles
       dd
-        pre #{user.roles.join(', ')}
+        pre #{JSON.stringify(user.roles)}
     
       dt Permissions granted by these Roles:
       dd
-        <pre>#{user.permissions.join(', ')}</pre>
+        <pre>#{JSON.stringify(user.permissions)}</pre>
     
     
     pre #{''}

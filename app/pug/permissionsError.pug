@@ -25,7 +25,7 @@ html
         code #{user.user_id}
         code #{user.name}
       p Your roles: 
-        code #{user.roles.join(', ')}
+        code #{JSON.stringify(user.roles)}
       p Your permissions: 
-        code #{user.permissions.join(', ')}
+        code #{JSON.stringify(user.permissions)}
 

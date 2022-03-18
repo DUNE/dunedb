@@ -10,7 +10,7 @@ block vars
   - var page_title = "Dashboard";
 
 block content
-  if deployment == "laptop"
+  if NODE_ENV == "development"
     .alert.alert-warning
       p Hi, and welcome to the APA Construction Database development team, currently led by  
         a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar
@@ -19,26 +19,26 @@ block content
       p This is an instance of the database running locally on your computer.  It is <strong>not</strong> connected to the development or production databases, so any changes made here will not be reflected there.
         br
         | If you create any content on here that you wish moved to the 
-        a(href = 'https://dev.sietch.xyz') development
+        a(href = 'https://apa-dev.dunedb.org') development
         |  or 
-        a(href = 'https://sietch.xyz') production
+        a(href = 'https://apa.dunedb.org') production
         |  sites, talk to Krish.  Otherwise, this is your own personal playground.
   
-  if deployment == "devsite"
+  if NODE_ENV == "staging"
     .alert.alert-danger
-      p This is the APA Construction Database development site.
+      p This is the APA Construction Database staging site.
         br
         | Feel free to create components, tests, jobs and associated types freely.
 
       p If you create any content on here that you wish moved to the 
-        a(href = 'https://sietch.xyz') production
+        a(href = 'https://apa.dunedb.org') production
         |  site, talk to Krish.  Otherwise, this is a free playground.
   
-  if deployment == "production"
+  if NODE_ENV == "production"
     .alert.alert-success 
       p This is the APA Construction Database Production APA database.
       p If you want a playground to try things out, please use either a local instance of the database or the 
-        a(href = "https:/dev.sietch.xyz") development 
+        a(href = "https://apa-dev.dunedb.org") staging 
         |  site.
   
   pre #{''}

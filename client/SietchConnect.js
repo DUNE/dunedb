@@ -22,7 +22,7 @@ class TimeStats{
   }
 }
 
-function SietchConnect(config)
+function DuneDBConnect(config)
 {
   this.auth = config;
   if(typeof config == 'string') {
@@ -93,19 +93,17 @@ function SietchConnect(config)
   }
 }
 
-module.exports = SietchConnect;
-
+module.exports = DuneDBConnect;
 
 if (require.main === module) {
 // Test code
 
   async function main(){
-    var sietch = new SietchConnect("localhost_config.json");
-    await sietch.connect();
-    console.log(await sietch.get('/componentTypes'));
+    var dune = new DuneDBConnect("localhost_config.json");
+    await dune.connect();
+    console.log(await dune.get('/componentTypes'));
     // Quick test with local config file.
-    console.log(sietch.report())
+    console.log(dune.report())
   }
   main().then();
-
 }

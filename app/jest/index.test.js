@@ -26,29 +26,14 @@ var user =  {
          [ 'components:create',
            'components:edit',
            'components:view',
-           'dev:components:create',
-           'dev:components:edit',
-           'dev:components:view',
-           'dev:forms:edit',
-           'dev:forms:view',
-           'dev:jobs:process',
-           'dev:jobs:submit',
-           'dev:jobs:view',
-           'dev:tests:submit',
-           'dev:tests:view',
            'forms:view',
            'tests:submit',
            'tests:view' ,
            'users:view',
-           'dev:users:view'
            // 'users:edit'
            ],
            roles:
          [ 'component editor',
-           'dev-admin',
-           'dev component editor',
-           'dev tester',
-           'dev-user',
            'tester' ]
         };
 

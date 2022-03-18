@@ -23,7 +23,7 @@ var router = express.Router();
 // Perform the login, after login Auth0 will redirect to callback
 router.get('/login', passport.authenticate('auth0', {
   scope: 'openid email profile',
-  audience: 'https://sietch.xyz/api'
+  audience: `https://apa.dunedb.org/api/` // Hardcoded URI is just an identifier for the Auth0 API
 }), function (req, res) {
   res.redirect('/');
 });
@@ -34,7 +34,7 @@ router.get('/login', passport.authenticate('auth0', {
 router.get('/callback', function (req, res, next) {
   passport.authenticate('auth0', function (err, user, info) {
     if (err) { return next(err); }
-    if (!user) { return res.send("no user???"); /*res.redirect('/login');*/}
+    if (!user) { return res.send(`${JSON.stringify(err)}\n\n${JSON.stringify(user)}`); /*res.redirect('/login');*/}
     // logger.info(chalk.red("/callback authenticate callback"));
     // logger.info(chalk.red("user",JSON.stringify(user,null,2)));
     // logger.info(chalk.red("info",JSON.stringify(info,null,2)));
@@ -152,8 +152,8 @@ module.exports = function(app) {
         // logger.info(chalk.red("profile",JSON.stringify(profile,null,2)));
         // logger.info(chalk.red("token",JSON.stringify(decoded,null,2)));
         profile.permissions = decoded.permissions;
-        profile.user_metadata = decoded["https://sietch.xyz/user_metadata"] || decoded["http://sietch.xyz/user_metadata"]
-        profile.roles = decoded["https://sietch.xyz/roles"] || decoded["http://sietch.xyz/roles"];
+        profile.user_metadata = decoded[`${BASE_URL}/user_metadata`];
+        profile.roles = decoded[`${BASE_URL}/roles`];
         logger.info(decoded,profile);
         // logger.info("auth0 strategy callback",...arguments);
         return done(null, profile);
@@ -184,7 +184,7 @@ module.exports = function(app) {
     //       jwksRequestsPerMinute: 5,
     //       jwksUri: 'https://' + config.auth0_domain + '/.well-known/jwks.json'
     // }),
-    // audience: 'https://sietch.xyz/api',
+    // audience: `${BASE_URL}/api`,
     // issuer: 'https://' + config.auth0_domain + '/',
     // algorithms: ['RS256'],
     // credentialsRequired: false,

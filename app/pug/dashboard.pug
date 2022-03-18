@@ -35,7 +35,7 @@ block layoutDefinitions
 //  - sidebar = "inactive"    // Comment this back in to disable the sidebar
                               // Alternatively, pass {sidebar:inactive} to pug
 
-body(class = "deployment-" + deployment)
+body(class = `deployment-${NODE_ENV}`)
   block allbody
     block navbar
       nav.navbar.navbar-dark.bg-dark.flex-nowrap.p-0.shadow
@@ -44,13 +44,7 @@ body(class = "deployment-" + deployment)
           i.fa.fa-align-left
 
         a.navbar-brand.col-sm-3.col-md-2.mr-0.align-middle#navbar-brand(href = '/')
-            span.pagename 
-              if(deployment == 'laptop')
-                | Laptop
-              else if(deployment == 'devsite')
-                | Development
-              else 
-                | Production            
+            span.pagename #{NODE_ENV}
             div.pull-right(style = "height: 1.3em; display: inline-block")
               img(src = "/images/noun_cave_1842206.svg", style = "height: 100%; width: auto; fill: black;")
               

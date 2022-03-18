@@ -12,6 +12,8 @@ module.exports = {
   // Database Constants
   DB_NAME,
   DB_URL: process.env.DATABASE_URL || `mongodb://localhost:27017/${DB_NAME}`,
+  DB_CA: process.env.DATABASE_CA, // Certificate Authority and Intermediate certs for trust
+  DB_CERTKEY: process.env.DATABASE_CERTKEY, // Cert & Key in PEM format
 
   // App Constants
   APP_PORT,

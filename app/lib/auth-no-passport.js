@@ -85,7 +85,7 @@ module.exports = function(app) {
       authorizationParams: {
         response_type: 'code',
         scope: 'openid profile email offline_access', // offline_access allows renewal tokens
-        audience: `${BASE_URL}/api`, // This is required to get permissions
+        audience: `https://apa.dunedb.org/api/`, // Hardcoded URI is just an identifier for the Auth0 API
       },
       // session: session_config
     }));

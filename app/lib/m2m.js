@@ -48,8 +48,7 @@ async function AddMachineUser(userinfo)
     displayName: userinfo.displayName || "MachineClient",
     emails: [userinfo.email || "unknown@unknown.edu"],
     permissions: userinfo.permissions 
-                  || [ 'dev:components:view',     'components:create',     'components:edit',     'tests:edit',     'tests:submit',     'tests:view',     'jobs:view',     'forms:edit',     'jobs:edit',     'jobs:submit',
-                       'dev:components:view', 'dev:components:create', 'dev:components:edit', 'dev:tests:edit', 'dev:tests:submit', 'dev:tests:view', 'dev:jobs:view', 'dev:forms:edit', 'dev:jobs:edit', 'dev:jobs:submit'],
+                  || [ 'components:view', 'components:create', 'components:edit', 'tests:edit', 'tests:submit', 'tests:view', 'jobs:view', 'forms:edit', 'jobs:edit', 'jobs:submit'],
   }
   // create the record.
   var record = {
@@ -80,7 +79,7 @@ async function AuthenticateMachineUser(user_id,secret)
   // return a token.
   var options = {
     expiresIn: "7 days",
-    audience: "sietch-m2m",
+    audience: "dunedb-m2m",
   }
   logger.info("authenticating m2m user "+user_id)
   return jwt.sign(rec.user,M2M_SECRET,options);
