@@ -1,0 +1,58 @@
+
+extend default
+include common.pug
+
+
+block vars
+  - var page_title = "Submitted Jobs";
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+  
+    if(singleType) 
+      if(permissions.userHas(user, "jobs:submit"))
+        if(form.tags && !form.tags.includes("Trash"))
+          a(href = '/job/' + form.formId).btn.btn-primary
+            img.small-icon(src = '/images/run_icon.svg')
+            | &nbsp; Submit a New Job of this Type
+          
+          pre #{''}
+          pre #{''}
+
+        h2 Recently Submitted Jobs (Single Type)
+    
+    else
+      h2 Recently Submitted Jobs (All Types)
+    
+    pre #{''}
+    
+    table.table
+      thead
+        tr
+          th.col-md-3 Type Name
+          th.col-md-2 Job ID
+          th.col-md-3 Last Edited On:
+          th.col-md-2 Last Edited By:
+          th.col-md-1
+    
+      tbody
+        each job in jobs
+          tr
+            td #{job.formName}
+            td
+              a(href = '/job/' + job.jobId) #{job.jobId}
+            td
+              +dateFormatAndAgo(job.last_edited)
+            td
+              a(href = 'mailto:' + user_email(job.user)) #{job.user.displayName}
+            td
+              a(href = '/json/job/' + job.jobId, target = '_blank').btn.btn-secondary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON file
+    
+    pre #{''}
+    pre #{''}
+

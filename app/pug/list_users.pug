@@ -1,0 +1,85 @@
+
+extend default
+include common.pug
+
+
+block vars
+  - var page_title = "Users";
+
+
+block extrascripts
+  
+  script(type = 'text/javascript').
+    
+    // Sort the collection of JSON user objects alphabetically by a selected key name
+    function sortBy(keyName)
+    {
+      var sortOrder = 1;
+      
+      if (keyName[0] === "-")
+      {
+        sortOrder = -1;
+        keyName = keyName.substr(1);
+      }
+      
+      return function(a, b)
+      {
+        if(sortOrder == -1)
+        {
+          return b[keyName].localeCompare(a[keyName]);
+        }
+        else
+        {
+          return a[keyName].localeCompare(b[keyName]);
+        }
+      }
+    }
+    
+    
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+  
+    h2 Users
+    
+    pre #{''}
+    
+    table#users_table.table
+      thead
+        tr
+          th.col-md-2 Name
+          th.col-md-3 Email
+          th.col-md-3 User ID
+          th.col-md-4 Roles
+    
+      tbody
+
+    script.
+      $(function()
+      {
+        $.get("/json/users").then(function(data)
+        {
+          var tbody = $('#users_table tbody');
+          tbody.empty();
+          
+          data.sort(sortBy("name"));
+          
+          for(var u of data)
+          {        
+            tr = $("<tr>");
+          
+            tr.append(`<td>${u.name}</td>`);
+            tr.append(`<td><a href = "${'mailto:' + u.email}">${u.email}</td>`);
+            tr.append(`<td>${u.user_id}</td>`);
+            tr.append(`<td><pre>${u.roles.join(', ')}</pre></td>`);
+          
+            tbody.append(tr);
+            $('')
+          }      
+        })
+      })
+
+    pre #{''}
+    pre #{''}
+

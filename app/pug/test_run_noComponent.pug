@@ -1,0 +1,87 @@
+
+extend default
+
+
+block vars
+  - var page_title = "Run Test (Unspecified Single Component)";
+
+
+block extrascripts
+
+  script(type = 'text/javascript').
+    
+    // Create an auto-complete form to allow the user to select a component UUID to run the test with
+    // If a good UUID is selected, create the corresponding URL for running the test on the component, and go to the page
+    $(async function()
+    {
+      var schema =
+      {
+        "components": [
+        {
+          "label": "Component UUID",
+          "spellcheck": false,
+          "tableView": false,
+          "key": "componentUuid",
+          "type": "ComponentUUID",
+          "autofocus": true,
+          "input": true,
+          "validate": {"required": true}
+        }]
+      }
+
+      form = await Formio.createForm(document.getElementById('builtform'), schema);
+      form.on("change", function()
+      {
+        if(form.isValid())
+        {
+          var uuid = form.submission.data.componentUuid;
+          
+          if(uuid && uuid.length > 10)
+          {
+            window.location.assign(`/test/!{formId}/${uuid}`)
+          }
+        }
+      });
+    });
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+  
+    h2 Run Test (Unspecified Single Component)
+
+    pre #{''}
+    
+    dl
+      dt Test Type
+      dd=form.formName
+    
+    pre #{''}
+    
+    hr
+    
+    p Each test is performed on one or more components. Please enter the desired component's UUID below.
+      br
+      | If you wish to run this test type on multiple components simultaneously, please click 
+      a(href = form.formId + '/multiComponent') here
+      | .
+    
+    p The input box uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
+      br
+      | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
+
+    pre #{''}
+
+    .row
+      .col
+        #builtform
+    
+      // This is a dirty way of restricting the width of the text box ... add another column to the right side of it
+      // Otherwise it fills the entire width of the page and looks really stupid
+      .col.offset-md-20
+
+    pre #{''}
+    pre #{''}
+

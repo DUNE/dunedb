@@ -1,0 +1,63 @@
+
+extend default
+include common.pug
+
+
+block vars
+  - var page_title = "Performed Tests";
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+  
+    if(singleType) 
+      if(permissions.userHas(user, "tests:submit"))
+        if(form.tags && !form.tags.includes("Trash"))
+          a(href = '/test/' + form.formId).btn.btn-primary
+            img.small-icon(src = '/images/run_icon.svg')
+            | &nbsp; Run a New Test of this Type
+          
+          pre #{''}
+          pre #{''}
+
+        h2 Recently Performed Tests (Single Type)
+    
+    else
+      h2 Recently Performed Tests (All Types)
+    
+    pre #{''}
+    
+    table.table
+      thead
+        tr
+        
+          th.col-md-2 Type Name
+          th.col-md-2 Test ID
+          th.col-md-2 Tested Component
+          th.col-md-3 Performed On:
+          th.col-md-1 Performed By:
+          th.col-md-1
+    
+      tbody
+        each test in tests
+          - var uuid = MUUID.from(test.componentUuid);
+          
+          tr
+            td #{test.formName}
+            td
+              a(href = '/test/' + test._id) #{test._id}
+            td
+              a(href = '/component/' + uuid.toString())=uuid.toString()
+            td
+              +dateFormatAndAgo(test.insertDate)
+            td
+              a(href = 'mailto:' + user_email(test.user)) #{test.user.displayName}
+            td
+              a(href = '/json/test/' + test._id, target = '_blank').btn.btn-secondary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON file
+    pre #{''}
+    pre #{''}
+

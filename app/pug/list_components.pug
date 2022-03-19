@@ -1,0 +1,59 @@
+
+extend default
+include common.pug
+
+
+block vars
+  - var page_title = "Components";
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+  
+    if(singleType) 
+      if(permissions.userHas(user, "components:edit"))
+        if(form.tags && !form.tags.includes("Trash"))
+          a(href = '/component/' + form.formId).btn.btn-primary
+            img.small-icon(src = '/images/run_icon.svg')
+            | &nbsp; Create a New Component of this Type
+          
+          pre #{''}
+          pre #{''}
+    
+    h2=title
+    
+    pre #{''}
+    
+    table.table
+      thead
+        tr
+          th.col-md-2 Type
+          th.col-md-2 Name
+          th.col-md-2 UUID
+          th.col-md-2 Created On:
+          th.col-md-2 Last Updated On:
+          th.col-md-1
+      
+      tbody
+        each component in components
+          - var uuid = MUUID.from(component.componentUuid).toString();
+          
+          tr          
+            td #{component.formName}
+            td #{component.name} 
+            td
+              a(href = '/component/' + uuid) #{uuid}
+            td
+              +dateFormat(component.created)
+            td
+              +dateFormat(component.last_edited)
+            td
+              a(href = '/json/component/' + uuid, target = '_blank').btn.btn-secondary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON file
+    
+    pre #{''}
+    pre #{''}
+

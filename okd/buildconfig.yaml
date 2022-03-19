@@ -1,0 +1,51 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: dunedb-build
+objects:
+  - kind: BuildConfig
+    apiVersion: build.openshift.io/v1
+    metadata:
+      labels:
+      name: dunedb-${RELEASE_BRANCH}
+    spec:
+      source:
+        git:
+          uri: https://github.com/DUNE/dunedb.git
+          ref: ${RELEASE_BRANCH}
+        contextDir: "./"
+        dockerfile: |-
+          FROM node:lts-alpine
+
+          WORKDIR /app
+          COPY . .
+          RUN chown -R node:node /app
+
+          # Install node-gyp and dependencies
+          RUN apk add --no-cache --virtual .gyp python3 make g++
+          USER node
+          RUN npm ci --only=production
+          USER root
+          RUN apk del .gyp
+
+          USER node
+          CMD ["node", "index.js"]
+      strategy:
+        type: Docker
+        dockerStrategy:
+          env:
+            - name: NODE_ENV
+              value: production
+      output:
+        to:
+          kind: ImageStreamTag
+          name: dunedb:${RELEASE_BRANCH}
+      triggers:
+      - type: ConfigChange
+      - imageChange:
+          type: ImageChange
+parameters:
+  - name: RELEASE_BRANCH
+    displayName: Which branch on github
+    value: production
+    require: true

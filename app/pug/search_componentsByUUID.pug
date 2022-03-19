@@ -1,0 +1,75 @@
+
+extend default
+
+
+block vars
+  - var page_title = "Search Components by UUID";
+
+
+block extrascripts
+  
+  script(type = 'text/javascript').
+    
+    // On first accessing this page ...
+    window.addEventListener('load', setupFunction);
+    
+    async function setupFunction()
+    {
+      // Create a single-box input form for specifying the component UUID to search for
+      var schema = 
+      {
+        "components": 
+        [
+          {
+            "label"     : "Component UUID",
+            "spellcheck": false,
+            "tableView" : false,
+            "key"       : "componentUuid",
+            "type"      : "ComponentUUID",
+            "autofocus" : true,
+            "input"     : true,
+            "validate"  : {"required": true},
+          },
+        ]
+      }
+      
+      form = await Formio.createForm(document.getElementById('builtform'), schema);
+      
+      // When a UUID is entered, first check if it is valid, and then if so, redirect the user to the corresponding component information page
+      form.on("change", function()
+      {
+        if(form.isValid())
+        {
+          var uuid = form.submission.data.componentUuid;
+          
+          if(uuid && uuid.length > 10)
+          {
+            window.location.assign(`/component/${uuid}`)
+          }
+        }
+      });
+    }
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+  
+    h2 Search Components by UUID
+    
+    pre #{''}
+    
+    p The input box below uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
+      br
+      | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
+    
+    pre #{''}
+    
+    .row
+      .col-md-6
+        #builtform
+    
+    pre #{''}
+    pre #{''}
+

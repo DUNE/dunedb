@@ -1,0 +1,31 @@
+html
+
+  head
+    title "Inadequate permissions"
+  body
+
+    p You do not have permission to see this page or perform this action.
+
+    if(required_permission)
+      p Required permission: 
+        code #{required_permission}
+
+    if(required_user)
+      p or required user:
+        code #{required_user}
+
+
+    if(!user)
+      p You must 
+        |
+        |
+        a(href="/login") log in or sign up to see this page.
+    else
+      p You are logged in as
+        code #{user.user_id}
+        code #{user.name}
+      p Your roles: 
+        code #{JSON.stringify(user.roles)}
+      p Your permissions: 
+        code #{JSON.stringify(user.permissions)}
+

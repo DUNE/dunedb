@@ -1,0 +1,140 @@
+
+extend default
+include common.pug
+
+
+block vars
+  - var page_title = "View Test Results";
+
+
+block extrascripts
+  
+  script(type = 'text/javascript').
+  
+    // Get information about the test and its corresponding type form
+    var test = !{JSON.stringify(test || {}, null, 4)}; 
+    var form = !{JSON.stringify(form || {}, null, 4)}; 
+    
+  script(type = 'text/javascript').
+  
+    // Get the test's type form, and populate it with the test's actual submission
+    // Then disable the submission button (since the form is only to be displayed, not used)
+    window.addEventListener('load', populateForm);
+    
+    async function populateForm()
+    {
+      form = await Formio.createForm(document.getElementById('builtform'), form.schema, {readOnly: true});
+      form.submission = test;
+      form.nosubmit = true;
+    }
+  
+    // For 'Wire Tension' type tests, build an additional section of the page for querying a single tension value
+    function GetWireTension()
+    {
+      var layer = document.getElementById("wireLayer").value;
+      var side = document.getElementById("apaSide").value;
+      var number = document.getElementById("wireNumber").value;
+      
+      var keyName = `wires.${layer}.${side}[${number}]`;
+      document.getElementById("tensionKey").value = keyName;
+      
+      var tension = test.data.wires[layer][side][number];
+      document.getElementById("wireTension").value = tension;
+    };
+
+
+block content
+  .container-fluid
+    pre #{''}
+    pre #{''}
+    
+    h2 View Test Results
+    
+    pre #{''}
+    
+    dl
+      if test 
+        dt ID
+        dd
+          a(href = '/test/' + test._id)=test._id
+        
+        dt Type
+        dd #{form.formName || form.formId}
+        
+        if(test.componentUuid && component)
+          - var uuid = MUUID.from(test.componentUuid);
+          
+          dt Run on Component:
+          dd Type: #{component.formName}
+            br
+            | Name: #{component.data.name}  
+            br
+            | UUID: 
+            a(href = '/component/' + uuid.toString())=uuid.toString()
+        else
+          div.span.alert.alert-danger No component information available!
+      
+        pre #{''}
+        
+        if(form.formName === "Wire Tensions")
+          .row
+            .col-9
+              div.border-info.border.rounded.p-2
+                .row
+                  .col <strong>Query a Wire Tension: </strong>
+                  .col
+                    select.form-control(id = "wireLayer", type = "text")
+                      option(value = '' ) Wire Layer
+                      option(value = 'X') X
+                      option(value = 'U') U
+                      option(value = 'V') V
+                      option(value = 'G') G
+                  .col
+                    select.form-control(id = "apaSide", type = "text")
+                      option(value = '' ) APA Side
+                      option(value = 'A') A
+                      option(value = 'B') B
+                  .col
+                    input.form-control(id = "wireNumber", type = "text", placeholder = "Wire Number")
+                  .col
+                    input.btn.btn-info#submitPromotion(type = "submit", onclick = "GetWireTension()")
+                  .col-2
+                    input.form-control(id = "tensionKey", type = "text", placeholder = "Tension Key", readonly)
+                  .col-2
+                    input.form-control(id = "wireTension", type = "text", placeholder = "Wire Tension (N)", readonly)
+            
+            .col-3
+           
+          pre #{''}
+      
+        dt Results:
+        dd This test was performed on !{' '}
+          +dateFormatAndAgo(test.insertion.insertDate)
+          
+          if test.insertion.user
+            |  by !{' '}
+            a(href = 'mailto:' + user_email(test.insertion.user)) #{test.insertion.user.displayName}
+          
+          pre #{''}
+          
+          div.border-success.border.rounded.p-2
+            #builtform  
+              +createdFrom(test.createdFrom)
+    
+    pre #{''}
+    pre #{''}
+    
+    div.form-inline
+      a(href = '/test/' + test._id + '/copyToDraft').btn.btn-primary
+        img.small-icon(src = '/images/run_icon.svg')
+        | &nbsp; Copy Results to New Draft
+      
+      pre #{'    '}
+      
+      a(href = '/json/test/' + test._id, target = '_blank').btn.btn-secondary
+        img.small-icon(src = '/images/checklist_icon.svg')
+        | &nbsp; View the test's JSON file
+        
+    pre #{''}
+    pre #{''}
+
