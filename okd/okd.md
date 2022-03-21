@@ -13,8 +13,8 @@ oc process -f buildconfig.yaml -p RELEASE_BRANCH=staging | oc create -f -
 ```
 
 Create the deployment configuration for production and staging, along with their
-respective services so that they are Internet-routeable.  These assume the secrets have
-already been created.
+respective services so that they are Internet-routeable.  These assume the secrets 
+have already been created.
 
 ```bash
 oc process -f deploymentconfig.yaml -p DEPLOYMENT=staging -p EXTERNAL_IP=$(dig +short apa-dev.dunedb.org | tail -1) | oc create -f -

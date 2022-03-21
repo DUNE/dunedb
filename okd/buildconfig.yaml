@@ -18,7 +18,7 @@ objects:
           FROM node:lts-alpine
 
           WORKDIR /app
-          COPY . .
+          COPY ./app /app
           RUN chown -R node:node /app
 
           # Install node-gyp and dependencies
@@ -29,7 +29,7 @@ objects:
           RUN apk del .gyp
 
           USER node
-          CMD ["node", "index.js"]
+          CMD ["npm", "start"]
       strategy:
         type: Docker
         dockerStrategy:

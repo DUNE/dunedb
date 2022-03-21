@@ -26,17 +26,19 @@ objects:
               name: dunedb-${DEPLOYMENT}
               envFrom:
                 - secretRef:
-                    name: ${DEPLOYMENT}.db
-                - secretRef:
                     name: ${DEPLOYMENT}
               ports: 
-                - containerPort: 443
+                - containerPort: 12313
                   protocol: TCP
+              volumeMounts:
+                - mountPath: /db-tls
+                  name: db-tls
+                  readOnly: true
               livenessProbe:
                   failureThreshold: 3
                   httpGet:
                     path: /
-                    port: 443
+                    port: 12313
                     scheme: HTTPS
                   initialDelaySeconds: 5
                   periodSeconds: 10
@@ -46,19 +48,17 @@ objects:
                 failureThreshold: 3
                 httpGet:
                   path: /
-                  port: 443
+                  port: 12313
                   scheme: HTTPS
                 initialDelaySeconds: 5
                 periodSeconds: 10
                 successThreshold: 1
                 timeoutSeconds: 1
-              volumeMounts:
-                - mountPath: /persistent
-                  name: volume-persistent
           volumes:
-            - name: volume-persistent
-              persistentVolumeClaim:
-                claimName: dunedb-persistent
+            - name: db-tls
+              secret:
+                defaultMode: 420
+                secretName: ${DEPLOYMENT}.db.tls
       triggers:
       - type: ConfigChange 
       - imageChangeParams:
@@ -82,7 +82,7 @@ objects:
           - name: 443-tcp
             port: 443
             protocol: TCP
-            targetPort: 443
+            targetPort: 12313
         externalIPs:
           - ${EXTERNAL_IP}
         selector:
