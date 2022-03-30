@@ -68,6 +68,7 @@ router.get('/user/profile', permissions.checkPermission("users:view"), async fun
   }
   
   // Render the page for viewing the user profile
-  res.render("user_profile.pug", {userProfile, userRoles});
+  res.render("user_profile.pug", {userProfile,
+                                  userRoles});
 });
 

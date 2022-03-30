@@ -11,39 +11,37 @@ block content
   .container-fluid
     pre #{''}
     pre #{''}
-  
+    
     img.avatar_image.border(src = userProfile.picture)
-  
+    
     pre #{''}
-  
+    
     dl
       dt Display Name
       dd=userProfile.name
-    
+      
       dt User ID
-      dd=userProfile.user_id
-    
+      dd
+        code #{userProfile.user_id}
+      
       dt Email
       dd 
         a(href = 'mailto:' + userProfile.email) #{userProfile.email} 
       
         if(userProfile.email_verified)
           span (Verified)
-    
+      
       dt Created On:
       dd
         +dateFormat(userProfile.created_at)
       
-      dt Last Edited On:
-      dd
-        +dateFormat(userProfile.updated_at)
-    
       dt Last Login:
       dd
         +dateFormat(userProfile.last_login)
       
       dt Last IP Address
-      dd=userProfile.last_ip
+      dd
+        code #{userProfile.last_ip}
       
       dt Total Logins Count
       dd=userProfile.logins_count
@@ -52,12 +50,11 @@ block content
       
       dt Roles
       dd
-        pre #{JSON.stringify(user.roles)}
-    
+        code #{JSON.stringify(user.roles)}
+      
       dt Permissions granted by these Roles:
       dd
-        <pre>#{JSON.stringify(user.permissions)}</pre>
-    
+        code #{JSON.stringify(user.permissions)}
     
     pre #{''}
     pre #{''}
