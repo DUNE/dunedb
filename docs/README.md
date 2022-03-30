@@ -42,8 +42,7 @@ The app is located in the `/app` directory.  Brief outline:
 * `/app/routes` contains the Express route functions, which in turn mostly call the Pug render routines.
 * `/app/routes/api` has all the low-level API calls accessible, see [docs/api.md](api.md)
 * `/app/schemas` are some JSON forms used to set up defaults in first-time intialization of the entire database 
-* `/app/scss` contains SCSS files that are rendered into CSS files dynamicaly.
-* `/app/static` contains static files accessible to the UI
+* `/app/static` contains static files accessible to the UI, and SCSS files that are rendered into CSS files dynamicaly.
 * `/client` contains example files showing how to use the API.js
 * `/dbTools` are some scripts used in development and for schema evolution
 

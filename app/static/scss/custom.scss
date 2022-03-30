@@ -1,0 +1,70 @@
+/* 1. import only the necessary Bootstrap files */
+@import "../node_modules/bootstrap/scss/_functions.scss"; 
+@import "../node_modules/bootstrap/scss/_variables.scss"; 
+
+/* 2. begin customization ---- */
+// (variable changes as before here...)
+// $font-size-base: 8;
+
+/* --- end customization ------ */
+/* 3. import Bootstrap to set the changes! */
+@import "../node_modules/bootstrap/scss/bootstrap.scss"; 
+/* 4. add @mixin or @extend customizations here */
+/* create new custom classes from existing classes */
+.specification-label {
+    @extend .text-right;
+    @extend .small;
+    color: #777;
+    .specification-warning {
+    	color: red;
+    }
+}
+/* uuid component */
+div.componentUuidComponent {
+  display:flex;
+
+  .main-input {
+    flex: 1 1 auto;
+  }
+  .runQrCameraModel {
+    @extend .btn;
+    @extend .btn-secondary ;
+    @extend .btn-sm;
+  }
+  .uuid-link {
+    display:none;
+    flex: 0 0 auto;
+    padding: 5px;
+    @extend .align-middle
+  }
+
+}
+
+.componentUuid-info {
+  @extend .text-right;
+  @extend .small;
+  color: #00F;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow:hidden;
+}
+
+/* use @mixins */
+.btn-custom {
+  @include button-variant(red, white, red, red);
+}
+
+/* array component */
+.array-component-readonly-text::-webkit-scrollbar {
+  display:none;
+}
+.array-component-readonly-text {
+  @extend .small;
+  width: 100%;
+  // max-width:400px;
+  white-space: nowrap;
+  overflow:scroll;
+  scrollbar-height: none;
+  -ms-overflow-style:none;
+
+}

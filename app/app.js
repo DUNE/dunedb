@@ -102,13 +102,13 @@ async function createApp(app) {
   // CSS precompiler. needs to come before /static call
   var compileSass = require('express-compile-sass');
   app.use('/css',compileSass({
-      root: `${__dirname}/scss`,
+      root: `${__dirname}/static/scss`,
       sourceMap: true, // Includes Base64 encoded source maps in output css
       sourceComments: true, // Includes source comments in output css
       watchFiles: true, // Watches sass files and updates mtime on main files for each change
       logToConsole: false // If true, will log to logger.error on errors
   }));
-  app.use('/css',express.static('../scss'));
+  app.use('/css',express.static('../static/scss'));
 
   // local overrides for testing.
   app.use(express.static(`${__dirname}/local/static`));
@@ -172,19 +172,6 @@ async function createApp(app) {
       var icons = files.filter(filename=>!filename.startsWith('.'));
       res.render("icons.pug",{icons})
     })
-  })
-
-  //  pug/simple is a set of static pages, for prototyping or quick things
-  var sanitize = require("sanitize-filename");
-  const fs = require('fs');
-  app.get('/simple/:pagename', function (req, res, next) {
-    var pugfile = sanitize(req.params.pagename);
-    var pathname = path.join('./pug/simple',pugfile+".pug");
-    logger.error("Got request for ",req.params.pagename,pathname)
-    if (fs.existsSync(pathname)) 
-      res.render('simple/'+pugfile+".pug", { pagename: pugfile })
-    else
-      next();
   })
 
   await Cache.regenerateAllPromise();
