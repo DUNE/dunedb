@@ -35,10 +35,9 @@ var user =  {
          emails: [ { value:  process.env.USER+'@'+process.env.HOST} ],
          nickname: process.env.USER,
          permissions:
-         [ 'components:create',
-           'components:edit',
+         [ 'components:edit',
            'components:view',
-           'forms:view',
+           'forms:edit',
            'tests:submit',
            'tests:view' ,
            'users:view',

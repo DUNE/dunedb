@@ -5,7 +5,7 @@ const logger = require('./logger');
 
 // These are permissions granted to users who are not logged in.
 // TODO(micchickenburger): This was defined in global config but isn't being used anywhere!
-// const default_permissions = ['components:view', 'tests:view', 'forms:view', 'jobs:view'];
+// const default_permissions = ['components:view', 'tests:view', 'jobs:view'];
 
 // route middleware to make sure a user is logged in
 // Now I know how to use these:
@@ -54,7 +54,7 @@ function checkPermission(required_permission) {
   {
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-     return res.status(400).render('permissionsError.pug',{required_permission:p});
+     return res.status(400).render('user_permissionError.pug',{required_permission:p});
   }
 }
 
@@ -65,7 +65,7 @@ function checkPermissionOrUserId(required_permission) {
     if(req.params.user_id == req.user.user_id) return next();
     if(hasPermission(req,required_permission)) return next();
     var p = required_permission;
-     return res.status(400).render('permissionsError.pug',{required_permission:p,required_user:req.params.user_id});
+     return res.status(400).render('user_permissionError.pug',{required_permission:p,required_user:req.params.user_id});
   }
 }
 

@@ -445,7 +445,7 @@ ComponentsModule.prototype.save = async function(input,req)
   var components = db.collection("components");
   if(!old) {
     // No conflict. Is this user allowed to enter data?
-    if(!permissions.hasPermission(req,'components:create'))  {
+    if(!permissions.hasPermission(req,'components:edit'))  {
       _lock.release();
       throw new Error("You don't have data entry priviledges.");
     }

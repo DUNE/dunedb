@@ -148,8 +148,7 @@ This call retrieves the Component record for this Component UUID, as a hex strin
 
 #### POST  /api/component/123456789-abcd-1234-1234-123456789abcd
 
-Required permissions: "components:edit" (changing an existing component)
-or "components:create" (which only allows new insertions)
+Required permissions: "components:edit" (adding a new component or changing an existing one)
 
 This sets the component to the new information provided. The body of the post should be formatted as follows:
 ```
@@ -177,7 +176,7 @@ A form describes a [Formio.js](https://github.com/formio/formio.js) schema allow
 
 #### GET `/api/<collection>/<formId>`
 
-Required permissions: "forms:view"
+Required permissions: "forms:edit"
 
 This retrieves the current Formio.js record that describes the schema (i.e. what the data{} blocks look like). 
 

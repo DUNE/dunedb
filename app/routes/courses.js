@@ -42,7 +42,7 @@ router.get("/EditCourse/:courseId", permissions.checkPermission("tests:view"),
 });
 
 // look at a course
-router.get("/course/:courseId", permissions.checkPermission("forms:view"), 
+router.get("/course/:courseId", permissions.checkPermission("forms:edit"), 
   async function(req,res,next) {
     try{
       logger.info("finding course ",req.params.courseId)

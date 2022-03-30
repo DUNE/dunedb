@@ -1,0 +1,46 @@
+
+doctype html
+
+
+head
+  title Incorrect Permission / User
+
+
+body
+  p <strong>You do not have permission to view this page or perform this action.</strong>
+  
+    if(!user)
+      br 
+      | Please first  
+      a(href = '/login') login or sign up
+      | .
+    
+    else
+      p You are currently logged in as: 
+        br
+        code #{user.displayName}
+        |  (
+        code #{user.user_id}
+        | )
+      
+        if(required_user)
+          p Only the following user is allowed to view this page or perform this action: 
+            br
+            code #{required_user.displayName}
+            |  (User ID: 
+            code #{required_user.user_id}
+            | )
+      
+      p Your currently assigned roles are: 
+        br
+        code #{JSON.stringify(user.roles)}
+      
+      p These roles give you the following permissions: 
+        br
+        code #{JSON.stringify(user.permissions)}
+      
+        if(required_permission)
+          p The following permissions are required in order to view this page or perform this action: 
+            br        
+            code #{required_permission}
+
