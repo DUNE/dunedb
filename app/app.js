@@ -102,13 +102,13 @@ async function createApp(app) {
   // CSS precompiler. needs to come before /static call
   var compileSass = require('express-compile-sass');
   app.use('/css',compileSass({
-      root: `${__dirname}/static/scss`,
+      root: `${__dirname}/scss`,
       sourceMap: true, // Includes Base64 encoded source maps in output css
       sourceComments: true, // Includes source comments in output css
       watchFiles: true, // Watches sass files and updates mtime on main files for each change
       logToConsole: false // If true, will log to logger.error on errors
   }));
-  app.use('/css',express.static('../static/scss'));
+  app.use('/css',express.static('../scss'));
 
   // local overrides for testing.
   app.use(express.static(`${__dirname}/local/static`));

@@ -6,6 +6,10 @@ pre {
   white-space: pre-wrap;
 }
 
+codelike {
+  font-family: monospace, monospace;
+}
+
 .hidden {
   display:none;
 }
