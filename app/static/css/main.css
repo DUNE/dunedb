@@ -7,7 +7,14 @@ pre {
 }
 
 .monospace {
-  font-family: monospace, monospace;
+  /* A note on Monospace Fonts
+     Some browsers tend to automatically reduce the displayed size of monospace fonts, regardless of any explicit size that the user may have set.
+     This is a well known, inconsistent and long-standing issue across a number of browsers (and versions of browsers).
+     There are a number of 'solutions' (which are really just hacks / workarounds) to this problem, depending on the users knowledge and understanding of browsers and stylesheets.
+     Probably the most simple is to simply declare 'monospace' TWICE in the CSS stylesheet ... but nobody really knows why this works!
+     See here for more detailed discussions and additional comments: https://stackoverflow.com/questions/38781089/font-family-monospace-monospace */
+  
+  font-family: monospace, monospace;  
 }
 
 .hidden {
