@@ -166,14 +166,6 @@ async function createApp(app) {
   routes.routes.forEach(route => app.use(route));
   routes.paths.forEach(({ path, route }) => app.use(path, route));
 
-  // icon contact sheet
-  app.get("/icons",function(req,res,next){
-    fs.readdir("./static/icons",function(err,files){
-      var icons = files.filter(filename=>!filename.startsWith('.'));
-      res.render("icons.pug",{icons})
-    })
-  })
-
   await Cache.regenerateAllPromise();
 
   return app;
