@@ -201,10 +201,10 @@ block content
               tr.user_row
                 td.displayname #{m2muser.user.displayName}
                   br
-                  span.user_id #{m2muser.user_id}
+                  span.user_id <codelike>#{m2muser.user_id}</codelike>
                 td.email
                   a(href = 'mailto:' + (m2muser.user.emails[0] || [])) #{(m2muser.user.emails[0] || [])}
-                td.permissions <pre>#{(m2muser.user.permissions || []).join(', ')}</pre>
+                td.permissions <codelike>#{(m2muser.user.permissions || []).join(', ')}</codelike>
 
     pre #{''}
     pre #{''}
