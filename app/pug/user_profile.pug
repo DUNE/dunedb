@@ -22,7 +22,7 @@ block content
       
       dt User ID
       dd
-        codelike #{userProfile.user_id}
+        .monospace #{userProfile.user_id}
       
       dt Email
       dd 
@@ -41,7 +41,7 @@ block content
       
       dt Last IP Address
       dd
-        codelike #{userProfile.last_ip}
+        .monospace #{userProfile.last_ip}
       
       dt Total Logins Count
       dd=userProfile.logins_count
@@ -50,11 +50,11 @@ block content
       
       dt Roles
       dd
-        codelike #{JSON.stringify(user.roles)}
+        .monospace #{JSON.stringify(user.roles)}
       
       dt Permissions granted by these Roles:
       dd
-        codelike #{JSON.stringify(user.permissions).replace(/,/g, ", ")}
+        .monospace #{JSON.stringify(user.permissions).replace(/,/g, ", ")}
     
     pre #{''}
     pre #{''}

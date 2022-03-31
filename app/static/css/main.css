@@ -6,7 +6,7 @@ pre {
   white-space: pre-wrap;
 }
 
-codelike {
+.monospace {
   font-family: monospace, monospace;
 }
 
