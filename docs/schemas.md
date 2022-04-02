@@ -92,7 +92,7 @@ In addition, some will have this field:
   recordType: "component",  // component, form, test, job
   insertion: <insertion block>,
   state: "submitted",
-  referencesComponents: [ <BSON Uuid>,... ], // list of uuids in data given below.., found by deep searh
+  relatedComponents: [ <BSON Uuid>,... ], // list of uuids in data given below.., found by deep searh
   createdFrom: {},  //optional, see createdFrom block.
 
   // supplied by caller:

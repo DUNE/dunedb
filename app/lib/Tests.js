@@ -19,6 +19,126 @@ function TestsModule()
 }
 
 
+TestsModule.prototype.save = async function(input, req)
+{
+  /// Usage:
+  ///   Tests.save(input, req)
+  ///
+  /// The 'input' must contain the following fields at minimum:
+  ///   _id          : 24 character test ID
+  ///   formId       : test type form ID
+  ///   componentUuid: full 36 character UUID
+  ///   data         : test information entered by the user
+  ///   metadata     : submission metadata
+  ///
+  /// The 'req' must be a valid Express request, including 'user' and 'ip' fields
+  /// These fields will be used to populate the test's 'insertion' field
+  
+  if(!input)
+  {
+    throw new Error("Tests::save() - the 'input' object has not been specified!");
+  }
+  
+  if(!input.formId)
+  {
+    throw new Error("Tests::save() - the test type form ID has not been specified!");
+  }
+  
+  if(!input.data)
+  {
+    throw new Error("Tests::save() - input data has not been specified!");
+  }
+  
+  var list = await Forms.list(this._formCollection);
+  var formInfo = list[input.formId];
+  
+  if(!formInfo)
+  {
+    throw new Error("Tests:save() - the formId: " + input.formId + " does not match a known test type form!");
+  }
+  
+  var record = {...input};
+  
+  if(!input.formObjectId)
+  {
+    record.formObjectId = formInfo.formObjectId;
+  }
+  else
+  {
+    record.formObjectId = new ObjectID(input.formObjectId);
+    
+    if(!ObjectID.isValid(record.formObjectId))
+    {
+      throw new Error("Tests::save() - the formObjectId: " + input.formObjectId + " is not consistent with a formId-like object!");
+    }
+  }
+  
+  if(!input.formName)
+  {
+    record.formName = formInfo.formName;
+  }
+  
+  if(!input.componentUuid)
+  {
+    throw new Error("Tests::save() - the component UUID has not been specified!");
+  }
+  
+  record.componentUuid = MUUID.from(input.componentUuid); 
+  record.recordType = this._type;
+  record.insertion = commonSchema.insertion(req);
+  record.state = record.state || 'submitted';
+  
+  if(!permissions.hasPermission(req, 'tests:submit'))
+  {
+    throw new Error("Tests::save() - you don't have permission [tests:submit] to submit tests!");
+  }
+  
+  var result;
+  var draft_id = input._id;
+  
+  if(input.state === "draft" && draft_id)
+  {
+    record._id = ObjectID(draft_id);
+    
+    var old = await this.retrieve(record._id);
+    
+    if(old.state !== "draft")
+    {
+      throw new Error("Tests::save() - you are attempting to replace the final submission of a test (the current state is 'submitted')!");
+    }
+    
+    var result = await db.collection(this._collection)
+                         .replaceOne({_id: ObjectID(draft_id)}, record);
+    
+    if(result.modifiedCount != 1)
+    {
+      throw new Error("Tests::save() - failed to update draft test in the database!");
+    }
+    
+    return record._id;
+  }
+  else
+  {
+    delete record._id;
+    
+    var result = await db.collection(this._collection)
+                         .insertOne(record);
+    
+    if(result.insertedCount != 1)
+    {
+      throw new Error("Tests::save() - failed to insert a new test record into the database!");
+    }
+    
+    if(draft_id)
+    {
+      this.deleteDraft(draft_id);
+    }
+    
+    return result.ops[0]._id;
+  }
+}
+
+
 TestsModule.prototype.retrieve = async function(testId, projection)
 {
   /// Usage:
@@ -42,6 +162,41 @@ TestsModule.prototype.retrieve = async function(testId, projection)
   res.componentUuid = MUUID.from(res.componentUuid).toString();
 
   return res;
+}
+
+
+TestsModule.prototype.retrieveBulk = async function(testIds, projection)
+{
+  /// Usage:
+  ///   Tests.retrieveBulk(testIds [, projection])
+  ///
+  /// Example projection:
+  ///   "insertion.insertDate": {$lte: rollbackDate}
+  
+  var objIds = [];
+  
+  for(var r of testIds)
+  {
+    objIds.push(new ObjectID(r));
+  }
+  
+  var options = {};
+  
+  if(projection)
+  {
+    options.projection = projection;
+  }
+  
+  var records = await db.collection(this._collection)
+                        .find({_id: {$in: objIds}}, options)
+                        .toArray();
+  
+  for(var rec of records)
+  {
+    rec.componentUuid = MUUID.from(rec.componentUuid).toString();
+  }
+  
+  return records;
 }
 
 
@@ -94,8 +249,8 @@ TestsModule.prototype.deleteDraft = async function(testId)
   /// Usage:
   ///   Tests.deleteDraft(testId)
   
-  var query = {_id: ObjectID(testId),
-               state:'draft'};
+  var query = {_id  : ObjectID(testId),
+               state: 'draft'};
   
   return await db.collection(this._collection)
                  .deleteOne(query);
@@ -214,206 +369,131 @@ TestsModule.prototype.getRecentComponentTests = async function(componentUuid)
 }
 
 
-// for the Autocomplete Route
-TestsModule.prototype.findTestIdStartsWith = async function(id_string,formId,max)
+TestsModule.prototype.autocompleteId = async function(id_string, formId, limit)
 {
-  // binary version.
-  max = max || 10;
-
-  // sanitize string of all extra characters.
-  var q = id_string.replace(/[_-]/g,'');
-
-  // pad with zeroes and "F"s.
-  var qlow = q.padEnd(24,'0');
-  var qhigh = q.padEnd(24,'F');
-  // logger.info(qlow,qhigh);
-  var bitlow = ObjectID(qlow);
-  var bithigh =  ObjectID(qhigh);
+  /// Usage:
+  ///  Tests.autocompleteId(ID, formId, limit)
+  ///
+  /// Options:
+  ///  ID     - test ID string to match to
+  ///  formId - test type form ID to limit the matching to
+  ///  limit  - maximum number of matched test IDs to display
+  ///
+  /// This function is only used by the test ID autocomplete route
   
-  var query = {_id:{$gte: bitlow, $lte: bithigh}};
-  if(formId) query.formId = formId;
-
-  // logger.info(qlow,qhigh,bitlow,bithigh);
-  logger.info(query,"QfindTestIdStartsWith");
- 
-  var matches = await db.collection("tests")
-    .find(query)  // binary ObjectIds only
-    .project({"_id":1, 'componentUuid':1, 'formId':1})
-    .limit(max)
-    .toArray();
-  // if(matches.length>=max) return new Error("Too many entries"); // too many!
-  for(var m of matches) {
-    try {  m.componentUuid = MUUID.from(m.componentUuid).toString(); } catch {};
+  limit = limit || 10;
+  
+  var q     = id_string.replace(/[_-]/g, '');
+  var qlow  = q.padEnd(24, '0');
+  var qhigh = q.padEnd(24, 'F');
+  
+  var bitlow  = ObjectID(qlow);
+  var bithigh = ObjectID(qhigh);
+  
+  var query = {_id: {$gte: bitlow,
+                     $lte: bithigh}};
+  
+  if(formId)
+  {
+    query.formId = formId;
   }
+
+  var matches = await db.collection(this._collection)
+                        .find(query)
+                        .project({"_id"          : 1,
+                                  "componentUuid": 1,
+                                  "formId"       : 1})
+                        .limit(limit)
+                        .toArray();
+  
+  for(var m of matches)
+  {
+    m.componentUuid = MUUID.from(m.componentUuid).toString();
+  }
+  
   return matches;
-
 }
 
 
-TestsModule.prototype.search = async function(txt,match,limit,skip)
+TestsModule.prototype.search = async function(txt, match, limit, skip)
 {
-  var matchobj= {...match} || {};
-  logger.info("TestsModule::search",this._collection,matchobj);
-  var result = [];
-  if(matchobj.componentUuid) matchobj.componentUuid = MUUID.from(matchobj.componentUuid)
-  skip = parseInt(skip); if(isNaN(skip)) skip = 0;
-  limit = parseInt(limit); if(isNaN(limit)) limit = 0;
-
-  if(txt) {
-    matchobj["$text"] = {$search: txt};
-    result= await 
-      db.collection(this._collection).aggregate([      
-        // { $match: {$text: {$search: txt}}},
-        { $match: matchobj },
-        { $sort: { score:{$meta:"textScore"}, "insertion.insertDate": -1 } },
-        { $skip: parseInt(skip) || 0 },
-        { $limit: (limit || 100) },
-        { $project: { _id:1,
-                      recordType:1,
-                      formId:1,
-                      name:"$formId",
-                      insertion:1,
-                      componentUuid:1,
-                      score: {$meta:"textScore"}
-                    }},
-      ]).toArray();
-    } else {
-      result= await 
-        db.collection(this._collection).aggregate([      
-        { $match: matchobj },
-        { $sort : {"insertion.insertDate": -1}},
-        { $skip: skip || 0 },
-        { $limit: (limit || 100) },
-        { $project: { _id:1,
-                      recordType:1,
-                      name:"$formId",
-                      formId:1,
-                      insertion:1,
-                      componentUuid:1,
-                    }},
-      ]).toArray();
-
-    }
-    var output =[];
-    for(var el of result) {
-      var o = {...el};
-      try{
-        o.componentUuid = MUUID.from(el.componentUuid).toString();
-      } catch{};
-      o.route = "/"+this._type+"/"+el._id.toString();
-      output.push(o);
-    }
-    return output;
-}
-
-
-TestsModule.prototype.retrieveBulk = async function(record_ids,projection)
-{
-  logger.info("Tests::retrieveBulk() ",this._collection,record_ids);
-  var objIds = [];
-  for(var r of record_ids) {
-    objIds.push(new ObjectID(r));
+  /// Usage:
+  ///  Tests.search(txt, match [, limit, skip]
+  ///
+  /// Either 'txt' (a text search) or 'match' (a specific DB entry to search for) should be provided
+  /// Optional arguments are:
+  ///   limit: maximum number of found tests to display
+  ///   skip : number of found tests to ignore
+  
+  var matchobj = {...match} || {};
+  
+  if(matchobj.componentUuid)
+  {
+    matchobj.componentUuid = MUUID.from(matchobj.componentUuid)
   }
-  var options = {};
-  if(projection) options.projection = projection;
-  var records = await db.collection(this._collection).find(
-    {_id: {$in: objIds}},options).toArray();
+  
+  limit = parseInt(limit);
+  
+  if(isNaN(limit))
+  {
+    limit = 100;
+  }
 
-  for(var rec of records) 
-    rec.componentUuid = MUUID.from(rec.componentUuid).toString();
-
-  return records;
-}
-
-
-TestsModule.prototype.save = async function(input, req)
-{
-    // Save. The input object should be as the schema:
-    //  
-    // supplied by caller:
-
-    // componentUuid,  // BSON component UUID. Required for 'test', should not be there for 'job'
-    // formId: <string>, 
-    // formRecordId: <ObjectId>,  // objectID of the form record used.
-    // state: <string>         // Required. "submitted" for final data, "draft" for a draft verison.
-    //                         // Also reserved: 'trash'
-    // data: { ...  }      // actual test data. (Also contains uuid?)
-    // metadata: { ... }   // optional, Formio stuff.
-
-    // supplied by API:
-    //{}
-    // _id: <ObjectId>,    // Auto-set by Mongo, Includes insertion timestamp redundantly.
-    // recordType: <string>   //  "test" or "job" respectively
-    // insertion: <insertion block>
-
-    // Returns the ObjectID of the saved record.
-    //
-    // req must contain user and ip objects.
-
-    if(!input) throw new Error("saveTestData: no input data provided");
-    if(!input.formId) throw new Error("saveTestData: formId not defined");
-    if(!input.data) throw new Error("saveTestData: no data given");
-
-    var list = await Forms.list(this._formCollection);
-    var formInfo = list[input.formId];
-    // logger.info("formId",input.formId);
-    // logger.info("formInfo",formInfo);
-    // logger.info("list",list);
-    if(!formInfo) {
-        // This form doesn't actually exit.
-        throw new Error("saveTestData: '"+input.formId+"' is not a known formId");
-        // formInfo = {};
-    }
-
-    var record = {...input};
-
-    if(!input.formObjectId) {
-      record.formObjectId = formInfo.formObjectId;
-    } else {
-      record.formObjectId = new ObjectID(input.formObjectId);
-      if(!ObjectID.isValid(record.formObjectId) ) throw new Error("saveTestData: formObjectId not a correct formId");
-    }
-    if(!input.formName) {
-      record.formName = formInfo.formName;
-    }
-
-    // Ensure componentID in binary form.
-    if(this._type === "test") {
-        if(!input.componentUuid) throw new Error("Tests::save() No componentUuid provided.");
-        record.componentUuid = MUUID.from(input.componentUuid);
-    } 
-    record.recordType = this._type; // required
-    // logger.info('req.user',req.user);
-    record.insertion = commonSchema.insertion(req);
-
-    // metadata.
-    record.state = record.state || 'submitted'; // ensure 'state' is set.
-    // logger.info("Tests::save()",record.formId,record.state);
-
-    if(!permissions.hasPermission(req,this._collection+':submit'))  throw new Error("You don't have permission to edit forms.");
+  skip = parseInt(skip);
+  
+  if(isNaN(skip))
+  {
+    skip = 0;
+  }
+  
+  var result = [];
+  
+  if(txt)
+  {
+    matchobj["$text"] = {$search: txt};
     
-    var result;
-    var draft_id = input._id;
-
-    // If it's a draft and already has a record number, replace it.
-    if(input.state === "draft" && draft_id) {
-      // replace with updated draft.
-      record._id = ObjectID(draft_id);
-      var old = await this.retrieve(record._id);
-      if(old.state !== "draft") throw new Error("Attempted to replace final submission of a form.")
-      var result = await db.collection(this._collection).replaceOne({_id: ObjectID(draft_id)}, record);
-      if(result.modifiedCount!=1) throw new Error("Update draft test document failed.");
-      logger.info("updated record id",record._id)
-      return record._id;
-    } else
-    {
-      delete record._id;
-      var result = await db.collection(this._collection).insertOne(record);
-      logger.info("inserted record id",result.ops[0]._id);
-      // delete in the background if there was a draft.
-      if(draft_id) this.deleteDraft(draft_id).then(
-        ()=>{logger.info("deleted draft "+draft_id);});
-      return result.ops[0]._id;
-    }
+    result = await db.collection(this._collection)
+                     .aggregate([ {$match  : matchobj},
+                                  {$sort   : {score: {$meta: "textScore"},
+                                              "insertion.insertDate": -1}},
+                                  {$limit  : limit},
+                                  {$skip   : skip},
+                                  {$project: {_id          : 1,
+                                              recordType   : 1,
+                                              formId       : 1,
+                                              name         : "$formId",
+                                              insertion    : 1,
+                                              componentUuid: 1,
+                                              score        : {$meta: "textScore"}}} ])
+                     .toArray();
+  }
+  else
+  {
+    result = await db.collection(this._collection)
+                     .aggregate([ {$match  : matchobj},
+                                  {$sort   : {"insertion.insertDate": -1}},
+                                  {$limit  : limit},
+                                  {$skip   : skip},
+                                  {$project: {_id          : 1,
+                                              recordType   : 1,
+                                              formId       : 1,
+                                              name         : "$formId",
+                                              insertion    : 1,
+                                              componentUuid: 1}} ])
+                     .toArray();
+  }
+  
+  var output = [];
+  
+  for(var el of result)
+  {
+    var o = {...el};
+    o.componentUuid = MUUID.from(el.componentUuid).toString();
+    o.route = '/' + this._type + '/' + o._id.toString();
+    
+    output.push(o);
+  }
+  
+  return output;
 }
 

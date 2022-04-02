@@ -1,30 +1,40 @@
-"use strict";
 
+'use strict';
+
+const Cache = require("lib/Cache.js");
 const Components = require("lib/Components.js")('component');
-const Forms = require("lib/Forms.js");
 const deepmerge = require('deepmerge');
-var Cache = require("lib/Cache.js");
+const Forms = require("lib/Forms.js");
 const logger = require('./logger');
 
-module.exports = {
-  list,
-}
+module.exports = {list};
 
-Cache.add('componentTypes',
-    async function(){
-      logger.info("regenerating componentTypes");
-      var types = await Components.getTypes();
-      var forms = await Forms.list('componentForms');
-      var componentTypes = deepmerge(types,forms);
-      return componentTypes;
-  },
-  ['componentCountsByType','formlist_componentForms'] // invalidate if these are invalidated
-);
+
+Cache.add('componentTypes', async function()
+{
+  var types = await Components.getTypes();
+  var forms = await Forms.list('componentForms');
+  
+  var componentTypes = deepmerge(types, forms);
+  
+  return componentTypes;
+}, ['componentCountsByType', 'formlist_componentForms']);
+
+
 
 async function list()
 {
-  // returns component counts, formId, formName, tags, icon for type listed, or all types if no argument
+  /// Usage:
+  ///   ComponentTypes.list()
+  ///
+  /// This function returns the following values for each component type:
+  ///   - component count
+  ///   - formId
+  ///   - formName
+  ///   - tags
+  
   var types =  await Cache.current('componentTypes');
+  
   return types;
 }
 
