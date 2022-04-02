@@ -4,11 +4,11 @@ const Courses = require('lib/Courses.js');
 const express = require('express');
 const Forms = require('lib/Forms.js');
 const Jobs = require("lib/Jobs.js")('job');
+const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
 const shortuuid = require('short-uuid')();
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
-const logger = require('../lib/logger');
 
 var router = express.Router();
 module.exports = router;
@@ -376,7 +376,7 @@ router.get('/components/myRecents', async function(req, res, next)
 
 
 // List recently created and edited components of a single type
-router.get('/components/:formId', permissions.checkPermission("components:view"), async function(req, res, next)
+router.get('/components/:formId/list', permissions.checkPermission("components:view"), async function(req, res, next)
 {
   // Construct the 'match conditions' to be passed to the function that retrieves a list of components
   // For this, it is simply the requirement that the component type form ID must match the provided one
