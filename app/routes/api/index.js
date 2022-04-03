@@ -228,7 +228,7 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:view'), 
+router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:edit'), 
   async function(req,res,next){
     if(req.params.collection == "workflowForms") req.params.collection = "jobForms";
     try {
@@ -248,7 +248,7 @@ router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:forma
 
 // API/Backend: Get a form schema
 
-router.get('/:collection(testForms|componentForms|jobForms)/:formId', permissions.checkPermissionJson('forms:view'), 
+router.get('/:collection(testForms|componentForms|jobForms)/:formId', permissions.checkPermissionJson('forms:edit'), 
   async function(req,res,next){
     if(req.params.collection == 'componentForms') Cache.invalidate('componentTypes');  
 
@@ -396,7 +396,7 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 
 
 /// Courses
-router.get("/courses", permissions.checkPermissionJson('forms:view'),
+router.get("/courses", permissions.checkPermissionJson('forms:edit'),
 async function (req,res,next) {
   try {
     var record = await Courses.list();
@@ -408,7 +408,7 @@ async function (req,res,next) {
 });
 
 /// Courses
-router.get("/course/:courseId", permissions.checkPermissionJson('forms:view'),
+router.get("/course/:courseId", permissions.checkPermissionJson('forms:edit'),
 async function (req,res,next) {
   try {
     logger.info("retrieve course data",req.params);

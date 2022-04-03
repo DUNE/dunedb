@@ -7,9 +7,9 @@ const commonSchema = require("lib/commonSchema.js");
 const componentRelationships = require("lib/component_relationships.js");
 const { db } = require('./db');
 const dbLock = require("lib/dbLock.js");
+const logger = require('./logger');
 const permissions = require('lib/permissions.js');
 const shortuuid = require('short-uuid')();
-const logger = require('./logger');
 
 var MUUID = require('uuid-mongodb');
 module.exports = function(type) {return new ComponentsModule(type)};
@@ -19,6 +19,124 @@ function ComponentsModule()
   this._type == 'component';
   this._collection = 'components';
   this._formCollection = 'componentForms';
+}
+
+
+ComponentsModule.prototype.findRelationships = function(data)
+{
+  /// Usage:
+  ///  Components.findRelationships(data)
+  ///
+  /// This function is only used by the Components.save() function
+  
+  var list = [];
+  
+  function recurse(thing)
+  {
+    for(var i in thing)
+    {
+      var obj = thing[i];
+      
+      if ((typeof obj === "object") || (typeof obj === "array"))
+      {
+        recurse(obj);
+      }
+      else if ((typeof obj === 'string') || (obj instanceof Binary))
+      {
+        try
+        {
+          muuid = MUUID.from(obj);
+          list.push(muuid);
+        } 
+        catch(err)
+        {
+          logger.error(err);
+        };
+      }
+    }
+  }
+  
+  recurse(data);
+  return list;
+}
+
+
+ComponentsModule.prototype.save = async function(input, req)
+{
+  /// Usage:
+  ///   Components.save(input, req)
+  ///
+  /// The 'input' must contain the following fields at minimum:
+  ///   componentUuid: full 36 character UUID
+  ///   formId       : component type form ID
+  ///   data         : component information entered by the user
+  ///   validity     : { startDate,
+  ///                    version }
+  ///   metadata     : submission metadata
+  ///
+  /// The 'req' must be a valid Express request, including 'user' and 'ip' fields
+  /// These fields will be used to populate the component's 'insertion' field
+  
+  if(!input.componentUuid)
+  {
+    throw new Error("Components::save() - the component UUID has not been specified!");
+  }
+  
+  if(!input.formId)
+  {
+    throw new Error("Components::save() - the component type form ID has not been specified!");
+  }
+  
+  if(!input.data)
+  {
+    throw new Error("Components::save() - input data has not been specified!");
+  }
+  
+  var _lock = await dbLock("saveComponent" + MUUID.from(input.componentUuid), 1000);
+  var old = await this.retrieve(input.componentUuid);
+  
+  var record = {...input};
+  record.componentUuid = MUUID.from(input.componentUuid);
+  record.shortUuid = shortuuid.fromUUID(input.componentUuid);
+  record.recordType = this._type;
+  record.relatedComponents = this.findRelationships(record.data);
+  record.insertion = commonSchema.insertion(req);
+  record.validity = commonSchema.validity(record.validity, old);
+  record.validity.ancestor_id = record._id;
+  
+  delete record._id;
+  
+  if(!old)
+  {
+    if(!permissions.hasPermission(req, 'components:edit'))
+    {
+      _lock.release();
+      throw new Error("Components::save() - you don't have permission [components:edit] to create/edit components!");
+    }
+  }
+  else
+  {
+    if(!permissions.hasPermission(req, 'components:edit'))
+    {
+      _lock.release();
+      throw new Error("Components::save() - a component with this UUID: " + input.componentUuid + " already exists in the database, and you don't have permission [components:edit] to create/edit components!");
+    }
+  }
+  
+  var result = await db.collection(this._collection)
+                       .insertOne(record);
+  _lock.release();
+
+  if(result.insertedCount !== 1)
+  {
+    throw new Error("Components::save() - failed to insert a new component record into the database!");
+  }
+  
+  var outrecord = {...result.ops[0]};
+  outrecord.componentUuid = MUUID.from(record.componentUuid).toString();
+
+  Cache.invalidate('componentCountsByType');  
+  return outrecord;
 }
 
 
@@ -42,7 +160,7 @@ ComponentsModule.prototype.retrieve = async function(componentUuid, projection)
   
   if(!query.componentUuid)
   {
-    throw new Error("Components::retrieve() no componentUuid has been given!");
+    throw new Error("Components::retrieve() - the componentUuid has not been given!");
   }
   
   query.componentUuid = MUUID.from(query.componentUuid);
@@ -54,7 +172,7 @@ ComponentsModule.prototype.retrieve = async function(componentUuid, projection)
     options.projection = projection;
   }
   
-  var res = await db.collection('components')
+  var res = await db.collection(this._collection)
                     .find(query, options)
                     .sort({"validity.version": -1})
                     .limit(1)
@@ -85,12 +203,12 @@ ComponentsModule.prototype.versions = async function(componentUuid)
   
   if(!query.componentUuid)
   {
-    throw new Error("Components::versions() no componentUuid has been given!");
+    throw new Error("Components::versions()- the componentUuid has not been given!");
   }
   
   query.componentUuid = MUUID.from(query.componentUuid);
   
-  var res = await db.collection('components')
+  var res = await db.collection(this._collection)
                     .find(query)
                     .sort({"validity.version": -1})
                     .toArray();
@@ -145,7 +263,9 @@ ComponentsModule.prototype.relationships = async function(componentUuid)
                                      created      : {"$last" : "$validity.startDate"}} });
   aggregation_stages.push({ $sort : {last_edited : -1} });
 
-  var items = await db.collection("components").aggregate(aggregation_stages).toArray();
+  var items = await db.collection(this._collection)
+                      .aggregate(aggregation_stages)
+                      .toArray();
   
   for(var doc of items)
   {
@@ -184,8 +304,8 @@ ComponentsModule.prototype.list = async function(match_condition, options)
   ///   Components.list(match_condition [, options])
   ///
   /// Options:
-  ///   skip : number of listed jobs to ignore
-  ///   limit: maximum number of listed jobs to display
+  ///   skip : number of listed components to ignore
+  ///   limit: maximum number of listed components to display
   
   var aggregation_stages = [];
   var opts = options || {};
@@ -223,7 +343,9 @@ ComponentsModule.prototype.list = async function(match_condition, options)
     aggregation_stages.push({ $limit: opts.limit });
   }
   
-  var items = [...await db.collection("components").aggregate(aggregation_stages).toArray()];
+  var items = [...await db.collection(this._collection)
+                          .aggregate(aggregation_stages)
+                          .toArray()];
   
   for(var c of items)
   {
@@ -241,9 +363,9 @@ Cache.add('componentCountsByType', async function()
                                                   uuid: "$componentUuid"}} },
                                   {$group: {_id  : "$_id.type", 
                                             count: {$sum: 1}} },
-                                  {$project: {type: "$_id",
-                                             count: true,
-                                             _id  : false}} ])
+                                  {$project: {type : "$_id",
+                                              count: true,
+                                              _id  : false}} ])
                      .toArray();
   
   var retval = {};
@@ -266,210 +388,139 @@ ComponentsModule.prototype.getTypes = async function()
 }
 
 
-
-
-
-
-
-
-
-// for the Autocomplete Route
-ComponentsModule.prototype.findUuidStartsWith = async function(uuid_string,types,max)
+ComponentsModule.prototype.autocompleteUuid = async function(uuid_string, types, limit)
 {
-  // binary version.
-  max = max || 10;
+  /// Usage:
+  ///  Components.autocompleteUuid(UUID, types, limit)
+  ///
+  /// Options:
+  ///  UUID  - component UUID string to match to
+  ///  types - component types to limit the matching to
+  ///  limit - maximum number of matched component UUIDs to display
+  ///
+  /// This function is only used by the component UUID autocomplete route
+  
+  limit = limit || 10;
 
-  // sanitize string of all extra characters.
-  var q = uuid_string.replace(/[_-]/g,'');
-
-  // pad with zeroes and "F"s.
-  var qlow = q.padEnd(32,'0');
-  var qhigh = q.padEnd(32,'F');
-  // logger.info(qlow,qhigh);
-  var bitlow = Binary(Buffer.from(qlow, 'hex'),Binary.SUBTYPE_UUID);
-  var bithigh =  Binary(Buffer.from(qhigh, 'hex'),Binary.SUBTYPE_UUID);
-  // logger.info(qlow,qhigh,bitlow,bithigh);
-  var query = {componentUuid:{$gte: bitlow, $lte: bithigh}};
-  if(types) query.type = {$in: types};
-  var matches = await db.collection("components")
-    .find(query)  // binary UUIDs only
-    .project({"componentUuid":1, 'type':1, 'data.name':1})
-    .limit(max)
-    .toArray();
-  // if(matches.length>=max) return new Error("Too many entries"); // too many!
-  for(var m of matches) {
+  var q     = uuid_string.replace(/[_-]/g, '');
+  var qlow  = q.padEnd(32, '0');
+  var qhigh = q.padEnd(32, 'F');
+  
+  var bitlow  = Binary(Buffer.from(qlow , 'hex'), Binary.SUBTYPE_UUID);
+  var bithigh = Binary(Buffer.from(qhigh, 'hex'), Binary.SUBTYPE_UUID);
+  
+  var query = {componentUuid: {$gte: bitlow, 
+                               $lte: bithigh}};
+  
+  if(types)
+  {
+    query.type = {$in: types};
+  }
+  
+  var matches = await db.collection(this._collection)
+                        .find(query)
+                        .project({"componentUuid": 1, 
+                                  "type"         : 1,
+                                  "data.name"    : 1})
+                        .limit(limit)
+                        .toArray();
+  
+  for(var m of matches)
+  {
     m.componentUuid = MUUID.from(m.componentUuid).toString();
   }
+  
   return matches;
-
 }
 
 
-// used by saveComponent to locate UUIDs in there.
-ComponentsModule.prototype.findRelationships = function(data)
+ComponentsModule.prototype.search = async function(txt, match, limit, skip)
 {
-  // recurse through record
-  var list = [];
-  function recurse(thing) {
-    for(var i in thing) {
-      var obj = thing[i];
-      if (typeof obj === "object") recurse(obj);
-      if (typeof obj === "array") recurse(obj);
-      else if ( (typeof obj === 'string') || (obj instanceof Binary) ) {
-        try {
-          muuid = MUUID.from(obj);
-          list.push(muuid); // if from() call throws, this won't get executed - not a valid uuid.
-        } 
-        catch(err) {};  // not a uuid, that's not a real problem.
-      }
-    }
+  /// Usage:
+  ///  Components.search(txt, match [, limit, skip]
+  ///
+  /// Either 'txt' (a text search) or 'match' (a specific DB entry to search for) should be provided
+  /// Optional arguments are:
+  ///   limit: maximum number of found components to display
+  ///   skip : number of found components to ignore
+  
+  var matchobj = match || {};
+  
+  if(matchobj.componentUuid)
+  {
+    matchobj.componentUuid = MUUID.from(matchobj.componentUuid)
   }
-  recurse(data);
-  return list;
-}
 
+  limit = parseInt(limit);
+  
+  if(isNaN(limit))
+  {
+    limit = 100;
+  }
 
-
-
-// Search and retrieval
-
-
-ComponentsModule.prototype.search = async function(txt,match,limit,skip)
-{
-  // logger.info("Components::search()",txt,match)
-  var matchobj= match || {};
-  if(matchobj.componentUuid) matchobj.componentUuid = MUUID.from(matchobj.componentUuid)
-
-  skip = parseInt(skip); if(isNaN(skip)) skip = 0;
-  limit = parseInt(limit); if(isNaN(limit)) limit = 0;
-
+  skip = parseInt(skip);
+  
+  if(isNaN(skip))
+  {
+    skip = 0;
+  }
+  
   var result = [];
-  if(txt) {
+  
+  if(txt)
+  {
     matchobj["$text"] = {$search: txt};
-    logger.info("Components::search  text search",matchobj);
-    result = await 
-      db.collection('components').aggregate([      
-        // { $match: {$text: {$search: txt}}},
-        { $match: matchobj },
-        { $sort:{ score:{$meta:"textScore" }, "validity.startDate" : -1} },
-        { $limit: (limit || 100)+(skip||0) },
-        { $skip: skip || 0 },
-        { $group: {_id: { componentUuid : "$componentUuid" },
-                          componentUuid: { "$first":  "$componentUuid" },
-                          insertion: { "$first":  "$insertion" },
-                          type: { "$first":  "$type" },
-                          name: { "$first":  "$data.name" },
-                          last_edited: { "$first": "$validity.startDate" },
-                          created: { "$last": "$validity.startDate" },
-                          recordType: { "$first": "$recordType" },
-                          score: {"$max" : {$meta:"textScore" }}
-                        }
-            },
-        { $sort: {score: -1, last_edited:-1} },
-      ]).toArray();
-    } else {
-      logger.info(matchobj,"Components::search non-text search");
-      result = await 
-        db.collection('components').aggregate([      
-          // { $match: {$text: {$search: txt}}},
-          { $match: matchobj },
-          { $sort:{ "validity.startDate" : -1, _id:-1 } },
-          { $limit: (limit || 100)+(skip||0) },
-          { $skip: skip || 0 },
-          { $group: {_id: { componentUuid : "$componentUuid" },
-                            componentUuid: { "$first":  "$componentUuid" },
-                            insertion: { "$first":  "$insertion" },
-                            type: { "$first":  "$type" },
-                            name: { "$first":  "$data.name" },
-                            last_edited: { "$first": "$validity.startDate" },                            
-                            created: { "$last": "$validity.startDate" },
-                            recordType: { "$first": "$recordType" }, 
-                          }
-              },
-          { $sort: {last_edited:-1} },
-      ]).toArray();
-
-    }
-    var output =[];
-    for(var el of result) {
-      var o = {...el};
-      o.componentUuid = MUUID.from(el.componentUuid).toString();
-      o.route = "/component/"+o.componentUuid;
-      output.push(o);
-    }
-    return output;
-
-
-}
-
-
-ComponentsModule.prototype.save = async function(input,req)
-{
-  // input MUST contain:
-  // { componentUuid: < any form > ,
-  //   validity: { startDate: <startDate>,
-  //               version: <int>,
-  //               changed_from: <ObjectId> 
-  //             },
-  //  data: { type: <string>,
-  //          any other component data.
-  //        }
-  //  metadata: {}
-  // }
-  // req must be a valid Express request, including a user field and ip field.
-  // FIXME: provid workaround?
-  
-  // Check it conforms:
-  var componentUuid = input.componentUuid;
-  if(!componentUuid) throw new Error("No componentUuid specified in saveComponent()");
-  if(!input.data) throw new Error("No data specified in saveComponent()");
-  if(!input.formId) throw new Error("No formId specified in saveComponent()");
-
-  var _lock = await dbLock("saveComponent"+MUUID.from(input.componentUuid),1000);
-  var old = await this.retrieve(componentUuid);
-  logger.info("submit component",input);
-  // logger.info("old one:",old);
-  
-
-  var record = {...input};
-  record.componentUuid = MUUID.from(input.componentUuid);
-  record.shortUuid = shortuuid.fromUUID(input.componentUuid);
-  record.recordType = "component"; // required
-  record.insertion = commonSchema.insertion(req);
-
-  record.validity = commonSchema.validity(record.validity, old);
-  record.validity.ancestor_id = record._id;
-  delete record._id;
-
-
-  var components = db.collection("components");
-  if(!old) {
-    // No conflict. Is this user allowed to enter data?
-    if(!permissions.hasPermission(req,'components:create'))  {
-      _lock.release();
-      throw new Error("You don't have data entry priviledges.");
-    }
-  } else {
-    // this is an edit to an existng record.
-    if(!permissions.hasPermission(req,'components:edit')) {
-      _lock.release();
-      throw new Error("Component UUID "+componentUuid+" is already in database and you don't have edit priviledges.");
-    }
+    
+    result = await db.collection(this._collection)
+                     .aggregate([ {$match: matchobj},
+                                  {$sort : {score: {$meta: "textScore"}, 
+                                            "validity.startDate" : -1}},
+                                  {$limit: limit},
+                                  {$skip : skip},
+                                  {$group: {_id: { componentUuid: "$componentUuid" },
+                                                   componentUuid: { "$first": "$componentUuid" },
+                                                   insertion    : { "$first": "$insertion" },
+                                                   type         : { "$first": "$type" },
+                                                   name         : { "$first": "$data.name" },
+                                                   last_edited  : { "$first": "$validity.startDate" },
+                                                   created      : { "$last" : "$validity.startDate" },
+                                                   recordType   : { "$first": "$recordType" },
+                                                   score        : { "$max"  : {$meta: "textScore"} }}},
+                                  {$sort : {score: -1, 
+                                            last_edited: -1}} ])
+                     .toArray();
   }
-
-
-  // Can do here: insert relationship data.
-  record.referencesComponents = this.findRelationships(record.data);
-
-  // Do it!
-  var result = await components.insertOne(record); // fixme TRANSACTION LOG wutg req.body.metadata
-  _lock.release();
-
-  if(result.insertedCount !== 1) throw new Error("Could not insert new form record.");
-  var outrecord = {...result.ops[0]};
-  outrecord.componentUuid = MUUID.from(record.componentUuid).toString();
-
-  Cache.invalidate('componentCountsByType');  
-  return outrecord;
+  else
+  {
+    result = await db.collection(this._collection)
+                     .aggregate([ {$match: matchobj},
+                                  {$sort : {"validity.startDate" : -1,
+                                            _id: -1}},
+                                  {$limit: limit},
+                                  {$skip : skip},
+                                  {$group: {_id: { componentUuid: "$componentUuid" },
+                                                   componentUuid: { "$first": "$componentUuid" },
+                                                   insertion    : { "$first": "$insertion" },
+                                                   type         : { "$first": "$type" },
+                                                   name         : { "$first": "$data.name" },
+                                                   last_edited  : { "$first": "$validity.startDate" },
+                                                   created      : { "$last" : "$validity.startDate" },
+                                                   recordType   : { "$first": "$recordType" }}},
+                                  {$sort : {last_edited: -1}} ])
+                     .toArray();
+  }
+  
+  var output = [];
+  
+  for(var el of result)
+  {
+    var o = {...el};
+    o.componentUuid = MUUID.from(el.componentUuid).toString();
+    o.route = '/' + this._type + '/' + o.componentUuid;
+    
+    output.push(o);
+  }
+  
+  return output;
 }
 

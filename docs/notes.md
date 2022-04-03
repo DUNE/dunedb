@@ -85,12 +85,6 @@
 - Basic feature, works by config.js option. ->Done
 - Also, send email -> Done
 
-### Feature: icons
-- Add an icon upload on each form page (comp,test,workfow)
-  - Sensible max size -> Done
-  - Cache? No need - the files cache on browser quite well due to good work in the fileserver system. 
-
-
 ### Features: searching
 - Look at full text search of components and workflows DONE July 27 v 4.4
 - Attempt to pull up a version of the form and allow partial entries with auto-lookup. DONE July 27 v 4.4

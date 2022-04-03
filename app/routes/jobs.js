@@ -2,8 +2,8 @@
 const express = require('express');
 const Forms = require('lib/Forms.js');
 const Jobs = require('lib/Jobs.js')('job');
-const permissions = require('lib/permissions.js');
 const logger = require('../lib/logger');
+const permissions = require('lib/permissions.js');
 
 var router = express.Router();
 module.exports = router;
@@ -203,7 +203,7 @@ router.get('/jobs/recent', permissions.checkPermission("jobs:view"), async funct
 
 
 // List recently submitted jobs of a single type
-router.get('/jobs/:formId', permissions.checkPermission("jobs:view"), async function(req, res, next)
+router.get('/jobs/:formId/list', permissions.checkPermission("jobs:view"), async function(req, res, next)
 {
   // Construct the 'match conditions' to be passed to the function that retrieves a list of jobs
   // For this, it is simply the requirement that the job type form ID must match the provided one

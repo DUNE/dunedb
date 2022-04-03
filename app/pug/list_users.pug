@@ -71,8 +71,8 @@ block content
           
             tr.append(`<td>${u.name}</td>`);
             tr.append(`<td><a href = "${'mailto:' + u.email}">${u.email}</td>`);
-            tr.append(`<td>${u.user_id}</td>`);
-            tr.append(`<td><pre>${u.roles.join(', ')}</pre></td>`);
+            tr.append(`<td class = monospace>${u.user_id}</td>`);
+            tr.append(`<td class = monospace>${u.roles.join(', ')}</td>`);
           
             tbody.append(tr);
             $('')
