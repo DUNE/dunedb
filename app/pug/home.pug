@@ -1,16 +1,7 @@
-
 extend default
-
-
-block extrascripts
-  
-  style.
-    .tagbutton {margin: 4px;}
-
 
 block vars
   - var page_title = "Dashboard";
-
 
 block content
   if NODE_ENV == "development"
@@ -29,6 +20,7 @@ block content
   
   if NODE_ENV == "staging"
     .alert.alert-danger
+      br
       p This is the <strong>STAGING</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
         a(href = 'https://apa.dunedb.org') production
         |  database, and is to be used <strong>only</strong> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
@@ -38,21 +30,18 @@ block content
   
   if NODE_ENV == "production"
     .alert.alert-success 
+      br
       p This is the <strong>PRODUCTION</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.
       p
   
-  pre #{''}
-  
   .container-fluid
-    div.border-success.border.rounded.p-2
-      h5 Messages from the Developement Team:
+    div.vert-space-x1.border-success.border.rounded.p-2
+      h5 Messages from the Development Team:
       ul
         li <strong>2022-03-29</strong> - The 'production' deployment is now live and accessible from outside the Fermilab firewall by any user with an appropriate Auth0 account or Fermilab SSO.  The development team will conduct some initial testing to confirm that the basic functionality and interface are working correctly, but please do report any issues that we may have missed.  The 'staging' deployment will be rolled out at a later date, and access to that will be restricted to only a select group of users for the time being (this may change in the future).
         li <strong>2022-03-18</strong> - Welcome to version 2 of the DUNE APA Construction Database!  This database was previously known as 'Sietch', and initially developed by Nathaniel Tagg.  The current development team have now completed a major refactoring of the entire database code, as well as streamlining the Docker environment setup and OKD configuration.  This should not significantly change the web interface, but will considerably improve the stability, reliability and long-term ease-of-use of the code itself.
     
-    pre #{''}
-    
-    div.border-danger.border.rounded.p-2
+    div.vert-space-x1.border-danger.border.rounded.p-2
       h5 Bugs and Other Issues
       ul
         li Bugs and other errors with existing functionality should be reported at our 
@@ -61,6 +50,4 @@ block content
            |  (a Github account is required).  Please give as much information as you can - an example page or link to where the bug occurs, how to reproduce the error (if appropriate), etc.
         li Requests for new features and functionality can also be made on the Issues page, but please first make sure that the addition/alteration cannot instead be made by users themselves through the web interface.
     
-    pre #{''}
-    pre #{''}
-
+    div.vert-space-x2

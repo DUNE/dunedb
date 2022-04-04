@@ -1,187 +1,131 @@
-
 extend default
 include common.pug
-
 
 block vars
   - var page_title = "View Component";
 
-
 block extrascripts
-  
-  style.
-    .tagbutton {margin: 4px;}
-    
-    .copybutton {background-color: #008CBA;
-                 width           : 45px;
-                 text-align      : center;
-                 color           : white;
-                 font-size       : 10px;
-                 padding         : 3px 3px;
-                 border-radius   : 4px;
-                 border          : 2px solid #008CBA;}
-  
   script(type = 'text/javascript').
-    
-    // Get information about the component and its corresponding type form
     var component = !{JSON.stringify(component || {})};
     var form = !{JSON.stringify(form || {})};
     var base_url = "!{base_url}";
   
-  script(type = 'text/javascript').
-    
-    // Get the component's type form, and populate it with the component's actual submission
-    // Then disable the submission button (since the form is only to be displayed, not used)
-    window.addEventListener('load', populateForm);
-    
-    async function populateForm()
-    {
-      form = await Formio.createForm(document.getElementById('builtform'), form.schema, {readOnly: true});
-      form.submission = component;
-      form.nosubmit = true;
-    };
-    
-    // When the 'Copy UUID' button is pressed, perform the copy to clipboard, and then change the button appearance to confirm
-    function CopyConfirm(componentUUID)
-    {
-      var copyhelper = document.createElement("input");
-      copyhelper.className = 'copyhelper'
-      
-      document.body.appendChild(copyhelper);
-      
-      copyhelper.value = componentUUID;
-      copyhelper.select();
-      
-      document.execCommand('copy');
-      document.body.removeChild(copyhelper);
-      document.getElementById("copyButton").innerHTML = "Copied";
-      document.getElementById("copyButton").style.backgroundColor = "green";
-    };
-
+  block workscripts
+    script(src = '/pages/component.js')
 
 block content
   .container-fluid
-    pre #{''}
-    pre #{''}
+    div.vert-space-x2
+      h2 View Component
     
-    h2 View Component
-    
-    pre #{''}
-    
-    .row
-      .col
-        dl
-          dt Name
-          dd #{component.data.name}
-          
-          dt UUID
-          dd
-            div.form-inline
-              a(href = '/component/' + component.componentUuid)=component.componentUuid
-              
-              pre #{' '}
-              
-              div.copybutton(class = "btn-sm", id = "copyButton", type = "button", onclick = "CopyConfirm(component.componentUuid)") Copy
-          
-          dt Short UUID
-          
-          if component.shortUuid
-            dd #{component.shortUuid}
-          else
-            dd Not Available
-          
-          dt Type
-          dd #{component.formName || component.formId}
-          
-          dt Current Version:
-          dd This is version #{component.validity.version} of the component:
+    div.vert-space-x1
+      .row
+        .col
+          dl
+            dt Name
+            dd #{component.data.name}
             
-            pre #{''}
-            
-            div.border-success.border.rounded.p-2
-              #builtform
-                +createdFrom(component.createdFrom)
-            
-            br
-            | This version was last edited on !{' '}
-            +dateFormatAndAgo(component.insertion.insertDate)
-            
-            if component.insertion.user
-              |  by !{' '}
-              a(href = 'mailto:' + user_email(component.insertion.user)) #{component.insertion.user.displayName}
-        
-        pre #{''}
-        
-        dt All Versions:
-        dd
-          ul
-            each v in componentVersions
-              li 
-                a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
-                |  on 
-                +dateFormatAndAgo(v.insertion.insertDate)
+            dt UUID
+            dd
+              div.form-inline
+                a(href = '/component/' + component.componentUuid)=component.componentUuid
                 
-                if v.insertion.user
-                  |  by !{' '}
-                  a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
+                p &nbsp; &nbsp;
+                
+                div.copybutton(class = "btn-sm", id = "copyButton", type = "button", onclick = "CopyConfirm(component.componentUuid)") Copy
+            
+            dt Short UUID
+            
+            if component.shortUuid
+              dd #{component.shortUuid}
+            else
+              dd Not Available
+            
+            dt Type
+            dd #{component.formName || component.formId}
+            
+            dt Current Version:
+            dd This is version #{component.validity.version} of the component:
+              
+              div.vert-space-x1.border-success.border.rounded.p-2
+                #builtform
+                  +createdFrom(component.createdFrom)
+                
+              br
+              | This version was last edited on !{' '}
+              +dateFormatAndAgo(component.insertion.insertDate)
+              
+              if component.insertion.user
+                |  by !{' '}
+                a(href = 'mailto:' + user_email(component.insertion.user)) #{component.insertion.user.displayName}
         
-        dt Related Components (linked from):
-        dd
-          ul
+          div.vert-space-x1
+            dt All Versions:
+            dd
+              ul
+                each v in componentVersions
+                  li 
+                    a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
+                    |  on 
+                    +dateFormatAndAgo(v.insertion.insertDate)
+                    
+                    if v.insertion.user
+                      |  by !{' '}
+                      a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
+            
+            dt Related Components (linked from):
+            
             if((((relatedComponents || {}).linkedFrom) || []).length > 0)
-              each o in relatedComponents.linkedFrom
-                li
-                  | #{o.formName}:
-                  a(href = '/component/' + MUUID.from(o.componentUuid).toString()) #{o.name} 
-                  | (#{o.path})
-        
-        pre #{''}
-        pre #{''}
-        
-        div.form-inline
-          a(href = '/component/' + component.componentUuid + '/edit').btn.btn-warning
-            img.small-icon(src = '/images/edit_icon.svg')
-            | &nbsp; Edit Component
+              dd
+                ul
+                  each o in relatedComponents.linkedFrom
+                    li
+                      | #{o.formName}:
+                      a(href = '/component/' + MUUID.from(o.componentUuid).toString()) #{o.name} 
+                      | (#{o.path})
+            else
+              dd None
           
-          pre #{'    '}
+          div.vert-space-x2.form-inline
+            a(href = '/component/' + component.componentUuid + '/edit').btn.btn-warning
+              img.small-icon(src = '/images/edit_icon.svg')
+              | &nbsp; Edit Component
+            
+            div.hori-space-x2
+              a(href = '/json/component/' + component.componentUuid, target = '_blank').btn.btn-secondary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View the component's JSON file
+            
+            div.hori-space-x2
+              a(href = '/component/' + component.componentUuid + '/qrCodes').btn.btn-primary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; Print a set of the component's QR codes
+            
+            div.hori-space-x2
+              a(href = '/component/' + component.componentUuid + '/summary').btn.btn-primary
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View and print the component's summary
           
-          a(href = '/json/component/' + component.componentUuid, target = '_blank').btn.btn-secondary
-            img.small-icon(src = '/images/checklist_icon.svg')
-            | &nbsp; View the component's JSON file
-          
-          pre #{'    '}
-          
-          a(href = '/component/' + component.componentUuid + '/qrCodes').btn.btn-primary
-            img.small-icon(src = '/images/checklist_icon.svg')
-            | &nbsp; Print a set of the component's QR codes
-          
-          pre #{'    '}
-          
-          a(href = '/component/' + component.componentUuid + '/summary').btn.btn-primary
-            img.small-icon(src = '/images/checklist_icon.svg')
-            | &nbsp; View and print the component's summary
-      
-      .col-md-3
-        div#qr-code
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+        .col-md-3
+          div#qr-code
+            if component.shortUuid
+              +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
+            else
+              +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
     
-    pre #{''}
-    pre #{''}
+    div.vert-space-x2
+      hr
     
-    hr
-    
-    pre #{''}
-    
-    .row
-      .col
-        h4 Testing History
-        
-        if(!tests || tests.length == 0)
+    div.vert-space-x1
+      .row
+        .col
+          h4 Testing History
+          
+          hr
+          
+          if(!tests || tests.length == 0)
             p None
-        else
+          else
             table.table
               thead
                 tr
@@ -197,17 +141,16 @@ block content
                     td
                       +dateFormat(test.insertion.insertDate)
                     td #{user_shortname(test.insertion.user)}
-      
-      .col-sm-1
-      
-      .col-6
-        h4 Select a Test to Run on this Component
-        pre #{''}
         
-        div
+        .col-sm-1
+        
+        .col-6
+          h4 Select a Test to Run on this Component
+          
+          hr
+          
           h5 Suggested for this Component Type:
           
-          // First, list the tests that are specifically tagged to this component type
           each info, formId in testForms
             if(((info || {}).componentTypes || []).includes(component.formId) && !info.tags.includes("Trash"))
               a(href = '/test/' + formId + '/' + component.componentUuid).tagbutton.btn.btn-primary=t
@@ -217,18 +160,14 @@ block content
           
           h5 All Available Tests:
           
-          // Next, list the tests which are tagged as being applicable to 'all' component types
           each info, formId in testForms
             if(((info || {}).componentTypes || []).includes("All") && !info.tags.includes("Trash"))
               a(href = '/test/' + formId + '/' + component.componentUuid).tagbutton.btn.btn-primary=t
                 =info.formName
           
-          // Finally, list the tests that do not have any tags
           each info, formId in testForms
             if(!info.tags || info.tags.length == 0) 
               a(href = '/test/' + formId + '/' + component.componentUuid).tagbutton.btn.btn-primary=t
                 =info.formName
-          
-          pre #{''}
-          pre #{''}
-
+    
+    div.vert-space-x2

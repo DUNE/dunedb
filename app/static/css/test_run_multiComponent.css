@@ -1,0 +1,21 @@
+#testpanels {
+    background-color: gray;
+    white-space     : normal;
+    width           : 100%;
+}
+
+.testform-panel {
+    display         : inline-block;
+    width           : 33%;
+    min-height      : 100px;
+    border          : 1px solid black;
+    margin          : 2px;
+    background-color: white;
+    vertical-align  : top;
+}
+
+#add-one-panel {
+    display: inline-block;
+    width  : auto;
+    height : 100%;
+}
