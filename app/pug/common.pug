@@ -28,7 +28,7 @@ mixin qr-panel(text, desc)
     .canvas-holder
       canvas.qr-code(data-QR-text = text, data-QR-desc = desc)      
 
-mixin short_user(aUser)
+mixin short_user(user)
   if (!user)
     span [Please login to see!]
   else
