@@ -58,12 +58,6 @@ var builder_config =
         url: true,
         qrCode: true,
         datetime: true,
-        file: comps.file.builderInfo,
-        file: {title: "File upload",
-               icon: 'file',
-               schema: {type: 'file',
-                        label: 'File Upload',
-                        key: 'files'}},
         ImageAnnotator: true,
         image: deepmerge(comps.file.builderInfo, {title: "Image upload",
                                                   icon: 'picture-o', 
@@ -107,7 +101,6 @@ var builder_config =
         well: true,
         container: true,
         DatabaseImage: true,
-        DatabaseFile: true,
         AnnotatedImage: true
       }
     },
