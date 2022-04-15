@@ -52,8 +52,6 @@ $(async function()
           { "label": "jobs:submit",           "value": "jobs:submit"     },
           { "label": "tests:view",            "value": "tests:view"      },
           { "label": "tests:submit",          "value": "tests:submit"    },
-          { "label": "docs:edit",             "value": "docs:edit"       },
-          { "label": "docs:view",             "value": "docs:view"       },
         ]
       },
       "selectThreshold": 0.3,

@@ -23,7 +23,8 @@ head
   link(rel = 'stylesheet', href = '/css/test_run_multiComponent.css')
   link(rel = 'preconnect', href = 'https://fonts.gstatic.com')
   link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap')
-  
+  link(rel = 'stylesheet', href = 'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css')
+
   // Perform the 'jquery' early, since it's used in lots of scripts, possibly defined in body
   script(src = '/dist/jquery/jquery.min.js')
 
@@ -135,22 +136,19 @@ body(class = `deployment-${NODE_ENV}`)
               +navlink(href = '/search')
                 i.fa.fa-search("aria-hidden" = "true")
                 | Advanced Search
-            
-            li.nav-item
-              +navlink(href = '/doc/start')
-                i.fa.fa-globe("aria-hidden" = "true")
-                | Wiki
-              
-              ul.nav.flex-column.ml-3.sub-bar
-                li.nav-item
-                  +navlink(href = '/doc') All Entries
           
-          h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-            span About
+          hr
           
           ul.nav.flex-column
             li.nav-item
-              +navlink(href = '/docs/') Documentation
+              +navlink(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank')
+                i.fa.fa-globe("aria-hidden" = "true")
+                | DB Documentation
+            
+            li.nav-item
+              +navlink(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank')
+                i.fa.fa-globe("aria-hidden" = "true")
+                | EDMS File Storage
       
       #content
         block content 
