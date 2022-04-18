@@ -15,9 +15,9 @@ $(function()
     // Get the type form corresponding to the record
     var schema_url = '';
     
-    if(recordType === "component") { schema_url = "/json/componentForms/" + record.formId; }
-    else if(recordType === "test") { schema_url = "/json/testForms/" + record.formId; }
-    else if(recordType === "job")  { schema_url = "/json/jobForms/" + record.formId; }
+    if(recordType === "component") { schema_url = `/json/componentForms/${record.formId}`; }
+    else if(recordType === "test") { schema_url = `/json/testForms/${record.formId}`; }
+    else if(recordType === "job")  { schema_url = `/json/jobForms/${record.formId}`; }
     else return;
     
     // Add the section to the list of sections to be included in the summary

@@ -149,7 +149,7 @@ function searchForRecentSubmission()
 {
   $('#loadRecentData').hide();
   
-  $.post('/json/search/component/' + (component.formId || "") + "?limit=1", {"insertion.user.user_id": "!{user.user_id}"})
+  $.post(`/json/search/component/${(component.formId || "")}?limit=1`, {"insertion.user.user_id": "!{user.user_id}"})
    .then(function(recent_components)
    {
      if(recent_components.length > 0)
