@@ -1,8 +1,13 @@
 
 block pugscripts
-  - function isAuthenticated()     { return !!(user); }
-  - function user_email(aUser)     { if (isAuthenticated()) return ((aUser.emails || [])[0] || {}).value || ""; else return "[Please login to see!]" };
-  - function user_shortname(aUser) { if (isAuthenticated()) return aUser.displayName || user_email(aUser); else return "[Please login to see!]" };
+  // Return the appropriate boolean flag ('true' or 'false') based on the 'truthiness' of the user authentication
+  - const isAuthenticated = () => !!user;
+  
+  // Return the user's primary email address if the user is authenticated, or an error message if not
+  - function user_email(user)     { if (isAuthenticated()) return (user.emails[0].value); return "[Please login to see!]" };
+  
+  // Return the user's display name if the user is authenticated (or the email address if no display name has been set), or an error message if not
+  - function user_shortname(user) { if (isAuthenticated()) return (user.displayName || user_email(user)); return "[Please login to see!]" };
 
 mixin dateFormat(date)
   span.date(data - date = date)=moment(date).format('MMMM Do YYYY, h:mm:ss a')

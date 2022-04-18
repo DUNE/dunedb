@@ -1,35 +1,36 @@
 .pagebreak {
-    break-before: page;
+  break-before: page;
 }
 
 .section {
-    break-inside: avoid-page; 
-    display     : block;
-    position    : relative;
-    margin      : 40px 0;
-    border-left : 34px solid #006;
-    border-top  : 4px solid #006;
-    padding-left: 10px;
+  break-inside: avoid-page; 
+  display: block;
+  position: relative;
+  margin: 40px 0;
+  border-left: 34px solid #006;
+  border-top: 4px solid #006;
+  padding-left: 10px;
 }
 
 .section-side {
-    font            : bold 12px Sans-Serif;
-    letter-spacing  : 2px;
-    text-transform  : uppercase;
-    color           : #FFFFFF;
-    padding         : 5px 10px;
-    margin          : 0 0 10px 0;
-    line-height     : 24px;
-    position        : absolute;
-    top             : 0;
-    left            : 0;
-    transform-origin: top left;
-    transform       : rotate(90deg);}
+  font: bold 12px Sans-Serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  padding: 5px 10px;
+  margin: 0 0 10px 0;
+  line-height: 24px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  transform: rotate(90deg);}
 
 .section-content {
-    
+  
 }
 
 .section-header {
-    margin-left: 44px;
+  margin-left: 44px;
 }
+

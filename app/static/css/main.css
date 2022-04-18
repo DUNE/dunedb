@@ -18,56 +18,57 @@ pre {
 }
 
 .vert-space-x1 {
-    margin-top: 1em
+  margin-top: 1em
 }
 
 .vert-space-x2 {
-    margin-top: 2em
+  margin-top: 2em
 }
 
 .hori-space-x1 {
-    margin-left: 1em
+  margin-left: 1em
 }
 
 .hori-space-x2 {
-    margin-left: 2em
+  margin-left: 2em
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .workstep-img {
-	max-height: 90vh;
+  max-height: 90vh;
 }
 
 .foldable-heading {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .foldable-heading .chevron:after {
-    content: "\f078";   
+  content: "\f078";   
 }
 
 .foldable-heading.collapsed .chevron:after {
-    content: "\f054"; 
+  content: "\f054"; 
 }  
 
 .datagrid-table td {
-	min-width: 6em;
+  min-width: 6em;
 }
 
 .fixed-width-textarea {
-	font-family: 'Inconsolata', monospace;
+  font-family: 'Inconsolata', monospace;
 }
 
 img.small-icon {
-    height: 1em;
-    width : auto;
+  height: 1em;
+  width: auto;
 }
 
 .formbuilder_area {
-    border       : 3px solid red;
-    border-radius: 10px; 
-    padding      : 10px;
+  border: 3px solid red;
+  border-radius: 10px; 
+  padding: 10px;
 }
+
