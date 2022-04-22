@@ -4,10 +4,10 @@
 const Components = require('lib/Components.js')('component');
 const express = require('express');
 const Forms = require('lib/Forms.js');
+const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
-const logger = require('../lib/logger');
 
 var router = express.Router();
 module.exports = router;
@@ -255,7 +255,7 @@ router.get('/test/draft/:testId([A-Fa-f0-9]{24})/delete', permissions.checkPermi
     await Tests.deleteDraft(req.params.testId);
     
     // Redirect the user back to the page for viewing a list of the user's drafts
-    res.redirect('/tests/drafts');
+    res.redirect('/tests/myDrafts');
   }
   catch(err)
   {
@@ -290,7 +290,7 @@ router.get('/tests/:formId/new', permissions.checkPermission("forms:edit"), asyn
 
 
 // Edit an existing test type form
-router.get('/tests/:formId?/edit', permissions.checkPermission("forms:edit"), async function(req, res)
+router.get('/tests/:formId/edit', permissions.checkPermission("forms:edit"), async function(req, res)
 {
   // Retrieve a list of all component types (since a particular test type must be associated with one or more component type)
   var componentTypes = await Components.getTypes();
@@ -327,7 +327,7 @@ router.get('/tests/recent', permissions.checkPermission("tests:view"), async fun
 
 
 // List recently performed tests of a single type
-router.get('/tests/:formId?', permissions.checkPermission("tests:view"), async function(req, res, next)
+router.get('/tests/:formId/list', permissions.checkPermission("tests:view"), async function(req, res, next)
 {
   // Retrieve a list of performed tests with the provided test type form ID
   // Set a limit on the number of displayed tests (otherwise every single one in the DB will be shown!)

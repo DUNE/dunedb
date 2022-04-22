@@ -166,27 +166,6 @@ async function createApp(app) {
   routes.routes.forEach(route => app.use(route));
   routes.paths.forEach(({ path, route }) => app.use(path, route));
 
-  // icon contact sheet
-  app.get("/icons",function(req,res,next){
-    fs.readdir("./static/icons",function(err,files){
-      var icons = files.filter(filename=>!filename.startsWith('.'));
-      res.render("icons.pug",{icons})
-    })
-  })
-
-  //  pug/simple is a set of static pages, for prototyping or quick things
-  var sanitize = require("sanitize-filename");
-  const fs = require('fs');
-  app.get('/simple/:pagename', function (req, res, next) {
-    var pugfile = sanitize(req.params.pagename);
-    var pathname = path.join('./pug/simple',pugfile+".pug");
-    logger.error("Got request for ",req.params.pagename,pathname)
-    if (fs.existsSync(pathname)) 
-      res.render('simple/'+pugfile+".pug", { pagename: pugfile })
-    else
-      next();
-  })
-
   await Cache.regenerateAllPromise();
 
   return app;

@@ -1,59 +1,54 @@
+
 extend default
 
-include common.pug
 
 block extrascripts
+  
   style.
     .tagbutton {margin: 4px;}
+
 
 block vars
   - var page_title = "Dashboard";
 
+
 block content
   if NODE_ENV == "development"
     .alert.alert-warning
-      p Hi, and welcome to the APA Construction Database development team, currently led by  
-        a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar
-        | .  This project (previously named 'Sietch') was originally developed by Nathaniel Tagg.
-      
-      p This is an instance of the database running locally on your computer.  It is <strong>not</strong> connected to the development or production databases, so any changes made here will not be reflected there.
-        br
-        | If you create any content on here that you wish moved to the 
-        a(href = 'https://apa-dev.dunedb.org') development
+      br
+      p This is a <strong>DEVELOPMENT</strong> deployment of the DUNE APA Construction Database, hosted locally on your computer.  It is <strong>not</strong> connected to either the 
+        a(href = 'https://apa-dev.dunedb.org') staging
         |  or 
         a(href = 'https://apa.dunedb.org') production
-        |  sites, talk to Krish.  Otherwise, this is your own personal playground.
+        |  deployments, so any additions and/or alterations to the database that are made through this web interface will not be reflected outside of this deployment.
+        br
+        | If you have any such content here that you wish moved to the staging and/or production deployments, please contact 
+        a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar. 
+        |  Otherwise, this deployment is your own personal playground.
+      p
   
   if NODE_ENV == "staging"
     .alert.alert-danger
-      p This is the APA Construction Database staging site.
-        br
-        | Feel free to create components, tests, jobs and associated types freely.
-
-      p If you create any content on here that you wish moved to the 
+      p This is the <strong>STAGING</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
         a(href = 'https://apa.dunedb.org') production
-        |  site, talk to Krish.  Otherwise, this is a free playground.
+        |  database, and is to be used <strong>only</strong> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
+        br
+        | Changes to the underlying code made by the developers will be automatically pushed to the production deployment, but it up to individual users to copy over any additions and/or alterations to the database that they make through this deployment's web interface.
+      p
   
   if NODE_ENV == "production"
     .alert.alert-success 
-      p This is the APA Construction Database Production APA database.
-      p If you want a playground to try things out, please use either a local instance of the database or the 
-        a(href = "https://apa-dev.dunedb.org") staging 
-        |  site.
+      p This is the <strong>PRODUCTION</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.
+      p
   
   pre #{''}
   
   .container-fluid
     div.border-success.border.rounded.p-2
-      h5 Messages from the Developers:
+      h5 Messages from the Developement Team:
       ul
-        li <strong>2021-11-05</strong> - Cleanup completed on the <strong>tests</strong> and <strong>draft tests</strong> related pages.
-        li <strong>2021-10-15</strong> - We have begun cleaning up the backend code, as well as the frontend page layouts, formatting and fixing typos, starting with pages relating to <strong>components</strong> and <strong>non m2m users</strong>.  There should be no changes in any functionality, but please let us know if you find anything that has broken (currently known issues are listed below).
-        li <strong>2021-07-07</strong> - Updated some documentation and unit tests.
-        li <strong>2021-07-07</strong> - <em>Note there may be some new instabilities or wonky features.</em> I just updated many 3rd party packages. It passes the unit tests, but things might render funny. Please let me know if there are any usability issues or bad formats.
-        li <strong>2021-07-06</strong> - There is a new <strong>"/[uuid]/traveller/"</strong> route, which shows a printable page with all the latest tests for a component. Linked to from the component page.  See if this looks good!
-        li <strong>2021-07-06</strong> - The ArrayComponent, which makes plots of things like wire tensions, now has configurable specifications, and will count the number of elements outside those specifications.
-        li <strong>2021-07-06</strong> - Now we have a built-in wiki using Markdown - see the sidebar. You might need to log out and in to get privs.
+        li <strong>2022-03-29</strong> - The 'production' deployment is now live and accessible from outside the Fermilab firewall by any user with an appropriate Auth0 account or Fermilab SSO.  The development team will conduct some initial testing to confirm that the basic functionality and interface are working correctly, but please do report any issues that we may have missed.  The 'staging' deployment will be rolled out at a later date, and access to that will be restricted to only a select group of users for the time being (this may change in the future).
+        li <strong>2022-03-18</strong> - Welcome to version 2 of the DUNE APA Construction Database!  This database was previously known as 'Sietch', and initially developed by Nathaniel Tagg.  The current development team have now completed a major refactoring of the entire database code, as well as streamlining the Docker environment setup and OKD configuration.  This should not significantly change the web interface, but will considerably improve the stability, reliability and long-term ease-of-use of the code itself.
     
     pre #{''}
     
@@ -63,16 +58,8 @@ block content
         li Bugs and other errors with existing functionality should be reported at our 
            |
            a(href = "https://github.com/DUNE/dunedb/issues", target = "_blank") Github Issues page
-           |  (a Github account is required).  Please give as much information as you can - an example page or link where the bug occurs, how to reproduce the error (if appropriate), etc.
-        li Requests for new features and functionality can also be made on that page, but please first make sure that the addition cannot instead be made by users through the database interface.
-      
-    pre #{''}
-    pre #{''}
-    
-    if(tags && tags.length > 0)
-        h5 Work Categories (tags):
-        each t in tags
-          a(href = '/categories/' + t).tagbutton.btn.btn-outline-primary=t
+           |  (a Github account is required).  Please give as much information as you can - an example page or link to where the bug occurs, how to reproduce the error (if appropriate), etc.
+        li Requests for new features and functionality can also be made on the Issues page, but please first make sure that the addition/alteration cannot instead be made by users themselves through the web interface.
     
     pre #{''}
     pre #{''}

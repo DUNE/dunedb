@@ -1,43 +1,67 @@
-// Pull component data as json doc.
-const express = require("express");
+
 const Components = require("lib/Components.js")('component');
-const Tests = require("lib/Tests.js")('test');
+const express = require("express");
 const logger = require('../lib/logger');
+const Tests = require("lib/Tests.js")('test');
 
 var router = express.Router();
 module.exports = router;
 
 
-// Autocomplete Route
-
-router.get("/uuid",async function(req,res,next) {
-  // this functionality is put into Components, in case we change abstraction again.
+// Autocomplete a component's UUID - i.e. return matching DB entries as the UUID is supplied
+router.get('/uuid', async function(req, res, next)
+{
+  // The user can optionally restrict the matched UUIDs to only those corresponding to specific component types
   var types = null;
-  if(req.query.type) types = req.query.type.split(',');
-  var matches = await Components.findUuidStartsWith(req.query.q,types,8);
-  if(matches instanceof Error) return res.json([]);
-
-  for(var m of matches) {
-    m.val = m.componentUuid;
-    m.text = m.val + ' ' +m.data.name;
+  
+  if(req.query.type)
+  {
+    types = req.query.type.split(',');
   }
-  // logger.info('autocomplete matches',matches);
+  
+  // Get any and all component UUIDs that match the supplied string and optional component types
+  // If there are no matches, simply return an empty JSON document
+  var matches = await Components.autocompleteUuid(req.query.q, types, 8);
+  
+  if(matches instanceof Error)
+  {
+    return res.json([]);
+  }
+  
+  // For each matched UUID, construct a simple string consisting of the UUID and component name
+  for(var m of matches)
+  {
+    m.val = m.componentUuid;
+    m.text = m.val + ' ' + m.data.name;
+  }
+  
+  // Return a JSON document containing the matched UUIDs
   return res.json(matches);
-})
+});
 
 
-
-router.get("/testId",async function(req,res,next) {
-  // this functionality is put into Components, in case we change abstraction again.
-  var matches = await Tests.findTestIdStartsWith(req.query.q,req.query.formId);
-  //console.log(req.query);
-  if(matches instanceof Error) return res.json([]);
-
-  for(var m of matches) {
+// Autocomplete a test's ID - i.e. return matching DB entries as the ID is supplied
+router.get('/testId', async function(req, res, next)
+{
+  // The user can optionally restrict the matched IDs to only those corresponding to a specific test type (set by its test form ID)
+  
+  // Get any and all test IDs that match the supplied string and optional test type
+  // If there are no matches, simply return an empty JSON document
+  var matches = await Tests.autocompleteId(req.query.q, req.query.formId, 8);
+  
+  if(matches instanceof Error)
+  {
+    return res.json([]);
+  }
+  
+  // For each matched ID, construct a simple string consisting of the test's ID and type form ID
+  for(var m of matches)
+  {
     m.val = m._id;
     m.text = m.formId + ' ' + m.val;
   }
-  // logger.info('autocomplete matches',matches);
+  
+  // Return a JSON document containing the matched IDs
   return res.json(matches);
-})
+});
 
