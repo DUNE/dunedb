@@ -1,4 +1,3 @@
-
 var builder   = null;
 var trialform = null;
 var comps     = Formio.Components.components;
@@ -59,12 +58,6 @@ var builder_config =
         url: true,
         qrCode: true,
         datetime: true,
-        file: comps.file.builderInfo,
-        file: {title: "File upload",
-               icon: 'file',
-               schema: {type: 'file',
-                        label: 'File Upload',
-                        key: 'files'}},
         ImageAnnotator: true,
         image: deepmerge(comps.file.builderInfo, {title: "Image upload",
                                                   icon: 'picture-o', 
@@ -108,7 +101,6 @@ var builder_config =
         well: true,
         container: true,
         DatabaseImage: true,
-        DatabaseFile: true,
         AnnotatedImage: true
       }
     },
@@ -148,7 +140,6 @@ var builder_config =
   }
 };
 
-
 function updateSchemaField(schema)
 {
   $('#schema').val(JSON.stringify(schema, null, 2));
@@ -158,7 +149,6 @@ function updateSchemaField(schema)
   
   $('#download_schema_link').attr('href', schema_save_url);
 }
-
 
 function onBuild()
 {
@@ -180,7 +170,6 @@ function onBuild()
 
   console.log("onBuild", JSON.stringify(builder.instance.schema));
 };
-
 
 var gformdata;
 
@@ -241,7 +230,6 @@ function schemaRecordChange(formdata)
   }
 }
 
-
 function SubmitData(submission)
 {
   console.log("submitting data", submission);
@@ -268,7 +256,6 @@ function SubmitData(submission)
   });
 };
 
-
 function findComponent(components, key)
 {
   for(var c of components)
@@ -289,7 +276,6 @@ function findComponent(components, key)
     }
   }
 }
-
 
 $(function()
 {
@@ -390,4 +376,3 @@ $(function()
             });
   })
 });
-

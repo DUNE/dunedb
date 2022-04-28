@@ -198,7 +198,8 @@ router.get('/jobs/recent', permissions.checkPermission("jobs:view"), async funct
   
   // Render the page for showing a generic list of jobs
   res.render('list_jobs.pug', {jobs,
-                               singleType: false});
+                               singleType: false,
+                               title: "Recently Submitted Jobs (All Types)"});
 });
 
 
@@ -219,6 +220,7 @@ router.get('/jobs/:formId/list', permissions.checkPermission("jobs:view"), async
   // Render the page for showing a generic list of jobs
   res.render('list_jobs.pug', {jobs,
                                singleType: true,
+                               title: "Recently Submitted Jobs (Single Type)",
                                form});
 });
 

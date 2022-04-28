@@ -1,32 +1,31 @@
-
 doctype html
-
 
 head
   block pugscripts
   
-  
   block vars
-    title #{page_title || 'APA Construction Database'}
   
+  title #{page_title || 'APA Construction Database'}
   
   <meta charset = "utf-8">
   <meta http-equiv = "X-UA-Compatible" content = "IE=edge">
   <meta name = "viewport" content = "width = device-width, initial-scale = 1, shrink-to-fit = no">
+  
   link(rel = 'icon',       href = '/images/browser_icon.png', type = 'image/png')
   link(rel = 'stylesheet', href = '/css/dashboard.css')
   link(rel = 'stylesheet', href = '/css/custom.scss')
   link(rel = 'stylesheet', href = '/dist/formiojs/formio.full.min.css')
-  link(rel = 'stylesheet', href = '/css/main.css', type = 'text/css', media = 'all')
-  link(rel = 'stylesheet', href = '/css/AnnotationCanvas.css', type = 'text/css', media = 'all')
-  link(rel = 'stylesheet', href = '/css/qrCodes.css')
-  link(rel = 'preconnect', href = 'https://fonts.gstatic.com')
+  link(rel = 'stylesheet', href = '/css/main.css')
+  link(rel = 'stylesheet', href = '/css/AnnotationCanvas.css')
+  link(rel = 'stylesheet', href = '/css/component.css')
+  link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
+  link(rel = 'stylesheet', href = '/css/component_summary.css')
+  link(rel = 'stylesheet', href = '/css/test_run_multiComponent.css')
+  link(rel = 'preload',    href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap', as = 'style')
   link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap')
-  
-  
+
   // Perform the 'jquery' early, since it's used in lots of scripts, possibly defined in body
   script(src = '/dist/jquery/jquery.min.js')
-
 
 mixin navlink
   if(attributes.href == route)
@@ -36,14 +35,11 @@ mixin navlink
     a.nav-link&attributes(attributes)
       block
 
-
 block layoutDefinitions
-//  - sidebar = "inactive"    // Comment this back in to disable the sidebar
-                              // Alternatively, pass {sidebar:inactive} to pug
-
+// - sidebar = "inactive"    // Comment this back in to disable the sidebar
+//                           // Alternatively, pass {sidebar:inactive} to pug
 
 body(class = `deployment-${NODE_ENV}`)
-  
   block allbody
     block navbar
       nav.navbar.navbar-dark.bg-dark.flex-nowrap.p-0.shadow
@@ -52,9 +48,10 @@ body(class = `deployment-${NODE_ENV}`)
           i.fa.fa-align-left
         
         a.navbar-brand.col-sm-3.col-md-2.mr-0.align-middle#navbar-brand(href = '/')
-            span.pagename.text-capitalize #{NODE_ENV}
-            div.pull-right(style = "height: 1.3em; display: inline-block")
-              img(src = "/images/noun_cave_1842206.svg", style = "height: 100%; width: auto; fill: black;")
+          span.pagename.text-capitalize #{NODE_ENV}
+          
+          div.pull-right(style = "height: 1.3em; display: inline-block")
+            img(src = "/images/noun_cave_1842206.svg", style = "height: 100%; width: auto; fill: black;")
         
         input.form-control.form-control-dark#navbar-search(type = 'search' placeholder = 'Search ...' aria-label = 'Search')
         
@@ -138,22 +135,19 @@ body(class = `deployment-${NODE_ENV}`)
               +navlink(href = '/search')
                 i.fa.fa-search("aria-hidden" = "true")
                 | Advanced Search
-            
-            li.nav-item
-              +navlink(href = '/doc/start')
-                i.fa.fa-globe("aria-hidden" = "true")
-                | Wiki
-              
-              ul.nav.flex-column.ml-3.sub-bar
-                li.nav-item
-                  +navlink(href = '/doc') All Entries
           
-          h6.sidebar-heading.d-flex.justify-content-between.align-items-center.px-3.mt-4.mb-1.text-muted
-            span About
+          hr
           
           ul.nav.flex-column
             li.nav-item
-              +navlink(href = '/docs/') Documentation
+              +navlink(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank')
+                i.fa.fa-globe("aria-hidden" = "true")
+                | DB Documentation
+            
+            li.nav-item
+              +navlink(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank')
+                i.fa.fa-globe("aria-hidden" = "true")
+                | EDMS File Storage
       
       #content
         block content 
@@ -216,4 +210,3 @@ style.
   li.nav-item img {height: 40px;}
 
 block extrascripts  
-

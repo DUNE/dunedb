@@ -1,164 +1,75 @@
-
 extend default
 include common.pug
-
 
 block vars
   - var page_title = "Component Summary";
 
-
 block extrascripts
-  
-  script(type = 'text/javascript').
-    
-    // On loading the component summary page, set up and populate the various sections to be included
-    var pending = [];
-    
-    $(function()
-    {
-      // For each section ...
-      $('div.section').each(function()
-      {
-        // Get information about what type of record this section contains
-        var section    = this;
-        var builtform  = $('.builtform', this);
-        var recordType = builtform.data("recordtype");
-        var record     = builtform.data("record");
-        
-        // Get the type form corresponding to the record
-        var schema_url = '';
-        
-        if(recordType === "component") { schema_url = "/json/componentForms/" + record.formId; }
-        else if(recordType === "test") { schema_url = "/json/testForms/" + record.formId; }
-        else if(recordType === "job")  { schema_url = "/json/jobForms/" + record.formId; }
-        else return;
-        
-        // Add the section to the list of sections to be included in the summary
-        pending.push(section);
-        
-        $.get(schema_url, function(formRecord)
-        {
-          // Update some things in the metadata
-          $(".formname", section).text(formRecord.formName);
-          
-          // Create the record type form, and disable the submission button (since it is only being displayed)
-          Formio.createForm(builtform[0], formRecord.schema, {readOnly: true})
-                .then(function(form)
-                {
-                  form.submission = record;
-                  form.nosubmit = true;
-                  
-                  pending = pending.filter(e => e !== section);
-                });
-        })
-      })
-    })
-  
-  style.
-    div.pagebreak {break-before: page;}
-    
-    div.section {break-inside: avoid-page; 
-                 display     : block;
-                 position    : relative;
-                 margin      : 40px 0;
-                 border-left : 34px solid #006;
-                 border-top  : 4px solid #006;
-                 padding-left: 10px;}
-    
-    div.section-side {font            : bold 12px Sans-Serif;
-                      letter-spacing  : 2px;
-                      text-transform  : uppercase;
-                      color           : #FFFFFF;
-                      padding         : 5px 10px;
-                      margin          : 0 0 10px 0;
-                      line-height     : 24px;
-                      position        : absolute;
-                      top             : 0;
-                      left            : 0;
-                      transform-origin: top left;
-                      transform       : rotate(90deg);}
-    
-    div.section-content{}
-    
-    .sectionheader {margin-left: 44px;}
-
+  block workscripts
+    script(src = '/pages/component_summary.js')
 
 mixin subdoc_component(component)
-  pre #{''}
-  
-  dl
-    dt Component Name
-    dd #{component.data.name}
-    
-    dt Component Type
-    dd #{component.formName}
-    
-    dt Current Version:
-    dd This is version #{component.validity.version} of the component.
-      br
-      | It was last edited on !{' '}
-      +dateFormat(component.insertion.insertDate)
+  div.vert-space-x1
+    dl
+      dt Component Name
+      dd #{component.data.name}
       
-      if component.insertion.user
-        |  by !{' '} #{component.insertion.user.displayName}
+      dt Component Type
+      dd #{component.formName}
       
-      pre #{''}
-      
-      div.border-success.border.rounded.p-2
-        .builtform(data-recordtype = component.recordType, data-record = component)
-
+      dt Current Version:
+      dd This is version #{component.validity.version} of the component.
+        br
+        | It was last edited on !{' '}
+        +dateFormat(component.insertion.insertDate)
+        
+        if component.insertion.user
+          |  by !{' '} #{component.insertion.user.displayName}
+        
+        div.vert-space-x1.border-success.border.rounded.p-2
+          .builtform(data-recordtype = component.recordType, data-record = component)
 
 mixin subdoc_test(record)
-  pre #{''}
-  
-  dl
-    dt Test Type
-    dd #{record.formName || record.formId}
-    
-    dt Results:
-    dd This test was performed on !{' '}
-      +dateFormatAndAgo(record.insertion.insertDate)
+  div.vert-space-x1
+    dl
+      dt Test Type
+      dd #{record.formName || record.formId}
       
-      if record.insertion.user
-        |  by !{' '} #{record.insertion.user.displayName}
+      dt Results:
+      dd This test was performed on !{' '}
+        +dateFormatAndAgo(record.insertion.insertDate)
+        
+        if record.insertion.user
+          |  by !{' '} #{record.insertion.user.displayName}
       
-      pre #{''}
-    
-      div.border-success.border.rounded.p-2
+      div.vert-space-x1.border-success.border.rounded.p-2
         .builtform(data-recordtype = record.recordType, data-record = record)
-
 
 mixin subdoc_job(record)
-  pre #{''}
-  
-  dl
-    dt Job Type
-    dd #{record.formName || record.formId}
-    
-    dt Current Version:
-    dd This is version #{record.validity.version} of the job.
-      br
-      | It was last edited on !{' '}
-      +dateFormat(record.insertion.insertDate)
+  div.vert-space-x1
+    dl
+      dt Job Type
+      dd #{record.formName || record.formId}
       
-      if record.insertion.user
-        |  by !{' '} #{record.insertion.user.displayName}
+      dt Current Version:
+      dd This is version #{record.validity.version} of the job.
+        br
+        | It was last edited on !{' '}
+        +dateFormat(record.insertion.insertDate)
+        
+        if record.insertion.user
+          |  by !{' '} #{record.insertion.user.displayName}
       
-      pre #{''}
-      
-      div.border-success.border.rounded.p-2
+      div.vert-space-x1.border-success.border.rounded.p-2
         .builtform(data-recordtype = record.recordType, data-record = record)
 
-
 mixin subdoc_courseEvaluation(record)
-  pre #{''}
-  
-  dl
-    dt Course Name
-    dd #{record.name}
-    
-    +evaluated-course(record, false)
-
+  div.vert-space-x1
+    dl
+      dt Course Name
+      dd #{record.name}
+      
+      +evaluated-course(record, false)
 
 mixin subdocument(record)
   if(record.recordType === "component") 
@@ -173,57 +84,41 @@ mixin subdocument(record)
   if(record.recordType === "courseEvaluation") 
     +subdoc_courseEvaluation(record)
 
-
 block allbody
-  pre #{''}
-  pre #{''}
+  div.vert-space-x2.hori-space-x1.noprint
+    a.btn.btn-primary(onclick = "window.print(); return false;" href = '#print') Print Summary
+    
+    div.vert-space-x1
+      p For best display, please print <strong>without headers and footers</strong> and <strong>with backgrounds</strong>.
   
-  div.noprint
-    div.form-inline
-      pre #{' '}
-      
-      a.btn.btn-primary(onclick = "window.print(); return false;" href = '#print') Print Summary
-      
-    .container-fluid
-      pre #{''}
-      
-      p For best display, please print <strong> without headers and footers </strong> and <strong> with backgrounds </strong>.
-  
-    pre #{''}
-    pre #{''}
-  
+  div.vert-space-x2
     hr
   
-  pre #{''}
-  pre #{''}
-  
-  div(style = 'clear: both;')
-  
-  .container-fluid
-    .row
-      .col-md-9
-        h1 Component Summary
-        h4 UUID: #{component.componentUuid}
-        h4 Name: #{component.data.name}
-        h4 Type: #{component.formName}
-        p Printed: 
-          +dateFormat(moment())
-      
-      .col-md-3
-        div#qr-code
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
-    
-    div.pagebreak
-    
-    each record in records
-      div.section
-        div.section-side.formName #{record.recordType}
+  div.vert-space-x2(style = 'clear: both;')
+    .container-fluid
+      .row
+        .col-md-9
+          h1 Component Summary
+          h4 UUID: #{component.componentUuid}
+          h4 Name: #{component.data.name}
+          h4 Type: #{component.formName}
+          p Printed: 
+            +dateFormat(moment())
         
-        div.section-content
-          +subdocument(record)
+        .col-md-3
+          div#qr-code
+            if component.shortUuid
+              +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
+            else
+              +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
       
       div.pagebreak
-
+      
+      each record in records
+        div.section
+          div.section-side.formName #{record.recordType}
+          
+          div.section-content
+            +subdocument(record)
+        
+        div.pagebreak

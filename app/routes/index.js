@@ -2,7 +2,6 @@
 const routes = [
   require('./components'),
   require('./courses'),
-  require('./docs'),
   require('./jobs'),
   require('./processes'),
   require('./search'),
@@ -15,7 +14,6 @@ const routes = [
 const api = require('./api');
 
 const paths = [
-  { path: '/file', route: require('./files') },
   { path: '/autocomplete', route: require('./autocomplete') },
   { path: '/json', route: api },
   { path: '/api', route: api },

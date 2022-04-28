@@ -1,51 +1,43 @@
-
 extend default
 include common.pug
-
 
 block vars
   - var page_title = "My Draft Tests";
 
-
 block content
   .container-fluid
-    pre #{''}
-    pre #{''}
-  
-    h2 My Draft Tests
-  
-    pre #{''}
-  
-    if test_drafts
-      
-      if (test_drafts.length == 0)
-        p (No Saved Draft Tests)
-      
-      else
-        .col-md-9
-          table.table
-            thead
-              tr
-                th.col-md-3 Type Name
-                th.col-md-2 Test ID
-                th.col-md-3 Drafted On:
-                th.col-md-1
-            
-            tbody
-              each test in test_drafts
-                tr
-                  td #{test.formName}
-                  td
-                    a(href = '/test/draft/' + test._id) #{test._id}
-                  td
-                    +dateFormatAndAgo(test.insertion.insertDate)
-                  td
-                    a(href = '/test/draft/' + test._id + '/delete').btn.btn-danger
-                      img.small-icon(src = '/images/edit_icon.svg')
-                      | &nbsp; Delete
-
-        .col-md-3
+    div.vert-space-x2
+      h2 My Draft Tests
     
-    pre #{''}
-    pre #{''}
-
+    div.vert-space-x1
+      if test_drafts
+        
+        if (test_drafts.length == 0)
+          p (No Saved Draft Tests)
+        
+        else
+          .col-md-9
+            table.table
+              thead
+                tr
+                  th.col-md-3 Type Name
+                  th.col-md-2 Test ID
+                  th.col-md-3 Drafted On:
+                  th.col-md-1
+              
+              tbody
+                each test in test_drafts
+                  tr
+                    td #{test.formName}
+                    td
+                      a(href = '/test/draft/' + test._id) #{test._id}
+                    td
+                      +dateFormatAndAgo(test.insertion.insertDate)
+                    td
+                      a(href = '/test/draft/' + test._id + '/delete').btn.btn-danger
+                        img.small-icon(src = '/images/edit_icon.svg')
+                        | &nbsp; Delete
+          
+          .col-md-3
+    
+    div.vert-space-x2

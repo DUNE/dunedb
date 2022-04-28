@@ -1,100 +1,69 @@
-
 extend default
 include common.pug
-
 
 block vars
   - var page_title = "View Submitted Job";
 
-
 block extrascripts
-  
   script(type = 'text/javascript').
-    
-    // Get information about the job and its corresponding type form
     var job = !{JSON.stringify(job || {}, null, 4)};
     var form = !{JSON.stringify(form || {}, null, 4)};
   
-  script(type = 'text/javascript').
-    
-    // Get the job's type form, and populate it with the job's actual submission
-    // Then disable the submission button (since the form is only to be displayed, not used)
-    window.addEventListener('load', populateForm);
-    
-    async function populateForm()
-    {
-      form = await Formio.createForm(document.getElementById('builtform'), form.schema, {readOnly: true});
-      form.submission = job;
-      form.nosubmit = true;
-    };
-
+  block workscripts
+    script(src = '/pages/job.js')
 
 block content
   .container-fluid
-    pre #{''}
-    pre #{''}
+    div.vert-space-x2
+      h2 View Submitted Job
     
-    h2 View Submitted Job
-    
-    pre #{''}
-    
-    dl
-      if job 
-        dt ID
-        dd
-          a(href = '/job/' + job.jobId)=job.jobId
+    div.vert-space-x1
+      dl
+        if job 
+          dt ID
+          dd
+            a(href = '/job/' + job.jobId)=job.jobId
+            
+          dt Type
+          dd #{form.formName || form.formId}
           
-        dt Type
-        dd #{form.formName || form.formId}
-        
-        pre #{''}
-        
-        dt Current Version: 
-        dd This is version #{job.validity.version} of the job:
-        
-          pre #{''}
+          dt Current Version: 
+          dd This is version #{job.validity.version} of the job:
           
-          div.border-success.border.rounded.p-2
-            #builtform  
-              +createdFrom(job.createdFrom)
+            div.vert-space-x1.border-success.border.rounded.p-2
+              #builtform  
+                +createdFrom(job.createdFrom)
+            
+            br
+            | This version was last edited on !{' '}
+            +dateFormatAndAgo(job.insertion.insertDate)
+            
+            if job.insertion.user
+              |  by !{' '}
+              a(href = 'mailto:' + user_email(job.insertion.user)) #{job.insertion.user.displayName}
           
-          br
-          | This version was last edited on !{' '}
-          +dateFormatAndAgo(job.insertion.insertDate)
-          
-          if job.insertion.user
-            |  by !{' '}
-            a(href = 'mailto:' + user_email(job.insertion.user)) #{job.insertion.user.displayName}
-        
-        pre #{''}
-        
-        dt All Versions:
-        dd
-          ul
-            each v in jobVersions
-              li 
-                a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
-                |  on 
-                +dateFormatAndAgo(v.insertion.insertDate)
-                
-                if v.insertion.user
-                  |  by !{' '}
-                  a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
+          div.vert-space-x1
+            dt All Versions:
+            dd
+              ul
+                each v in jobVersions
+                  li 
+                    a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
+                    |  on 
+                    +dateFormatAndAgo(v.insertion.insertDate)
+                    
+                    if v.insertion.user
+                      |  by !{' '}
+                      a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
     
-    pre #{''}
-    pre #{''}
-    
-    div.form-inline
+    div.vert-space-x2.form-inline
       a(href = '/job/' + job.jobId + '/edit').btn.btn-warning
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Edit Job
       
-      pre #{'    '}
-      
-      a(href = '/json/job/' + job.jobId, target = '_blank').btn.btn-secondary
-        img.small-icon(src = '/images/checklist_icon.svg')
-        | &nbsp; View the job's JSON file
+      div.hori-space-x2
+        a(href = '/json/job/' + job.jobId, target = '_blank').btn.btn-secondary
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; View the job's JSON file
     
-    pre #{''}
-    pre #{''}
-
+    div.vert-space-x2
