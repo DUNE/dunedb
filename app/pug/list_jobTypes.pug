@@ -1,18 +1,16 @@
-
 extend default
 include common.pug
-
 
 block vars
   - var page_title = "All Job Types"
 
+block extrascripts
+  block workscripts
+    script(src = '/pages/list_jobTypes.js')
 
 block content
   .container-fluid
-    pre #{''}
-    pre #{''}
-  
-    if(permissions.userHas(user, "forms:edit"))
+    div.vert-space-x2
       a(href = '#', data-toggle = "modal" data-target = "#NewJobTypeModal").NewJobType.btn.btn-warning
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Create New Job Type
@@ -29,95 +27,67 @@ block content
                 | Enter the new job type's form ID.
                 br
                 | NOTE: this ID should have only underscores and alphanumerics (no spaces) - the human-readable name will be set on the next page.
-              pre #{''}
-              input.NewJobTypeName.form-control(type = "text")
+              div.vert-space-x1
+                input.NewJobTypeName.form-control(type = "text")
             .modal-footer
               button.btn.btn-danger(type = "button", data-dismiss = "modal") Close
               button.btn.btn-success.NewJobTypeButton(type = "button") Create
-      
-      script.
-        $('button.NewJobTypeButton').click(function()
-        {
-          window.location.href = '/jobs/' + $('button.NewJobTypeButton').parents('.modal-content').find('input').val() + '/new';
-        })
+    
+    div.vert-space-x2
+      h2 Available Job Types
+
+    div.vert-space-x1
+      table.table
+        thead
+          tr
+            th.col-md-3 Type ID
+            th.col-md-3 Type Name
+            th.col-md-2
+            th.col-md-1
         
-        $('input.NewJobTypeName').on("keyup",function(e)
-        {
-          if(e.key === "Enter")
-          {
-            window.location.href = '/jobs/' + $(this).val() + '/new';
-          }
-        })
-    
-      pre #{''}
-      pre #{''}
+        tbody
+          each formId in Object.keys(forms).sort()
+            - var form = forms[formId];
+            
+            if(form.tags && !form.tags.includes("Trash")) 
+              tr
+                td #{formId}    
+                td
+                  a(href = '/jobs/' + formId + '/list') #{form.formName}
+                td
+                  a(href = '/job/' + formId).btn.btn-primary
+                    img.small-icon(src = '/images/run_icon.svg')
+                    | &nbsp; Submit a New Job of this Type
+                td
+                  a(href = '/jobs/' + formId + '/edit').btn.btn-warning
+                    img.small-icon(src = '/images/edit_icon.svg')
+                    | &nbsp; Edit Job Type Form
 
-    h2 Available Job Types
+    div.vert-space-x2
+      h2 Trashed Job Types
     
-    pre #{''}
+    div.vert-space-x1
+      table.table
+        thead
+          tr
+            th.col-md-3 Type ID
+            th.col-md-3 Type Name
+            th.col-md-2
+            th.col-md-1
+        
+        tbody
+          each formId in Object.keys(forms).sort()
+            - var form = forms[formId];
+            
+            if(form.tags && form.tags.includes("Trash")) 
+              tr
+                td #{formId}   
+                td
+                  a(href = '/jobs/' + formId + '/list') #{form.formName} 
+                td 
+                td
+                  a(href = '/jobs/' + formId + '/edit').btn.btn-warning
+                    img.small-icon(src = '/images/edit_icon.svg')
+                    | &nbsp; Edit Job Type Form
     
-    table.table
-      thead
-        tr
-          th.col-md-3 Type ID
-          th.col-md-3 Type Name
-          th.col-md-2
-          th.col-md-1
-          
-      tbody
-        each formId in Object.keys(forms).sort()
-          - var form = forms[formId];
-          
-          if(form.tags && !form.tags.includes("Trash")) 
-            tr
-              td #{formId}
-                
-              td
-                a(href = '/jobs/' + formId + '/list') #{form.formName}
-              
-              td
-                a(href = '/job/' + formId).btn.btn-primary
-                  img.small-icon(src = '/images/run_icon.svg')
-                  | &nbsp; Submit a New Job of this Type
-              
-              td
-                a(href = '/jobs/' + formId + '/edit').btn.btn-warning
-                  img.small-icon(src = '/images/edit_icon.svg')
-                  | &nbsp; Edit Job Type Form
-
-    pre #{''}
-    pre #{''}
-
-    h2 Trashed Job Types
-    
-    pre #{''}
-    
-    table.table
-      thead
-        tr
-          th.col-md-3 Type ID
-          th.col-md-3 Type Name
-          th.col-md-2
-          th.col-md-1
-      
-      tbody
-        each formId in Object.keys(forms).sort()
-          - var form = forms[formId];
-          
-          if(form.tags && form.tags.includes("Trash")) 
-            tr
-              td #{formId}
-                
-              td
-                a(href = '/jobs/' + formId + '/list') #{form.formName}
-              
-              td
-              
-              td
-                a(href = '/jobs/' + formId + '/edit').btn.btn-warning
-                  img.small-icon(src = '/images/edit_icon.svg')
-                  | &nbsp; Edit Job Type Form
-
-    pre #{''}
-    pre #{''}
-
+    div.vert-space-x2

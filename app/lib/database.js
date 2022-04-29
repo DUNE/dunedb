@@ -192,19 +192,6 @@ async function initialize_database(db)
 	   	status_obj.version =6.0;
 		}
 
-
-	  if(status_obj.version < 7.0) {
-	  	logger.info("v7 docs");
-	  	await ensure_exists(db,"docs")
-	  	await db.collection("docs").dropIndexes();
-	  	await db.collection("docs").createIndex({docId:1});
-	  	await db.collection("docs").createIndex({"validity.version":1});
-	  	await db.collection("docs").createIndex({"validity.startDate":1});
-		 	await db.collection("docs").createIndex({"data": "text"});
-	  	logger.info("Indexed docs collection")
-	   	status_obj.version =7.0;
-		}
-
 	} catch(err) {
 		console.error(err);
 		logger.info(err);

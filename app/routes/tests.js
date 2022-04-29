@@ -322,7 +322,8 @@ router.get('/tests/recent', permissions.checkPermission("tests:view"), async fun
   
   // Render the page for showing a generic list of tests
   res.render("list_tests.pug", {tests,
-                                singleType: false});
+                                singleType: false,
+                                title: "Recently Performed Tests (All Types)"});
 });
 
 
@@ -339,6 +340,7 @@ router.get('/tests/:formId/list', permissions.checkPermission("tests:view"), asy
   // Render the page for showing a generic list of tests
   res.render("list_tests.pug", {tests,
                                 singleType: true,
+                                title: "Recently Performed Tests (Single Type)",
                                 form});
 });
 

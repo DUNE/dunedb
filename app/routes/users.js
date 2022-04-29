@@ -43,7 +43,7 @@ router.get('/users/m2m', permissions.checkPermission("users:edit"), async functi
 
 
 // View the currently logged in user's profile
-router.get('/user/profile', permissions.checkPermission("users:view"), async function(req, res, next)
+router.get('/user/profile', async function(req, res, next)
 {
   // Get the user ID from the current user's session information
   var userId = req.user.user_id;
