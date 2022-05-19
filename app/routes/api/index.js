@@ -227,7 +227,7 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:format(list|object)?', permissions.checkPermissionJson('forms:edit'), 
+router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:format(list|object)?', 
   async function(req,res,next){
     if(req.params.collection == "workflowForms") req.params.collection = "jobForms";
     try {
@@ -247,7 +247,7 @@ router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:forma
 
 // API/Backend: Get a form schema
 
-router.get('/:collection(testForms|componentForms|jobForms)/:formId', permissions.checkPermissionJson('forms:edit'), 
+router.get('/:collection(testForms|componentForms|jobForms)/:formId', 
   async function(req,res,next){
     if(req.params.collection == 'componentForms') Cache.invalidate('componentTypes');  
 
@@ -261,7 +261,7 @@ router.get('/:collection(testForms|componentForms|jobForms)/:formId', permission
 
 
 // API/Backend: Update a form schema.
-router.post('/:collection(testForms|componentForms|jobForms)/:formId', permissions.checkPermissionJson('forms:edit'), 
+router.post('/:collection(testForms|componentForms|jobForms)/:formId', 
   async function(req,res,next){
     logger.info(chalk.blue("Schema submission","/json/"+req.params.collection));
 
