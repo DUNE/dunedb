@@ -35,11 +35,7 @@ block content
                 div.copybutton(class = "btn-sm", id = "copyButton", type = "button", onclick = "CopyConfirm(component.componentUuid)") Copy
             
             dt Short UUID
-            
-            if component.shortUuid
-              dd #{component.shortUuid}
-            else
-              dd Not Available
+            dd #{component.shortUuid}
             
             dt Type
             dd #{component.formName || component.formId}
@@ -108,10 +104,7 @@ block content
           
         .col-md-3
           div#qr-code
-            if component.shortUuid
-              +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-            else
-              +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
     
     div.vert-space-x2
       hr
