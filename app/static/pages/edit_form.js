@@ -42,6 +42,7 @@ var builder_config =
       components:
       {
         radio: true,
+        checkbox: true,
         select: true,
         selectboxes: true,
       }

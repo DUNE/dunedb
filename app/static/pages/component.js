@@ -25,3 +25,18 @@ function CopyConfirm(componentUUID)
   document.getElementById("copyButton").innerHTML = "Copied";
   document.getElementById("copyButton").style.backgroundColor = "green";
 };
+
+// When the 'Download List of Links' button is pressed, write a list of QR code links to a file and then download the file
+function DownloadLinks(shortUuids)
+{
+  var links = "";
+  
+  for (shortUuid of shortUuids) {
+    link = base_url + '/c/' + shortUuid + '\n';
+    links = links.concat(link);
+  }
+  
+  var links_save_url = window.URL.createObjectURL(new Blob([links], {type: "text/plain"}));
+  
+  $('#download_links').attr('href', links_save_url);
+};

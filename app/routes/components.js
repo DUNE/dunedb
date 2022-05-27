@@ -215,14 +215,39 @@ router.get('/component/:formId', permissions.checkPermission("components:edit"),
     }
     
     // Generate a new full UUID
-    var componentUuid = Components.newUuid();
+    var componentUuid = Components.newUuid().toString();
     var formId = req.params.formId;
     
+    var subComponent_fullUuids = [];
+    var subComponent_shortUuids = [];
+    
+    // For component type forms that have the 'isBatch' property ...
+    // ... not all of them do since, this property is being added after some type forms have already been created, so we must first check if the property exists ...
+    if (form.hasOwnProperty('isBatch'))
+    {
+      // ... and the value of the property is 'true' (the existence of the property is not a guarantee that it is 'true') ...
+      if (form.isBatch)
+      {
+        // ... generate a large number of UUIDs for the batch sub-components, to be passed to the page for editing an existing component (where they will be added into the component data)
+        // At this stage we don't know how many sub-components are required (since that information has not been entered into the form yet), so prepare for any (reasonable!) number
+        
+        // The sub-component UUIDs must be generated here, and not within the editing page itself, because that page operates at browser level ...
+        // ... meaning that it does not have access to the server-side library that actually generates UUIDs
+        for(var i = 0; i < 50; i++) {
+          var fullUuid = Components.newUuid().toString();
+          var shortUuid = shortuuid.fromUUID(fullUuid);
+          
+          subComponent_fullUuids.push(fullUuid);
+          subComponent_shortUuids.push(shortUuid);
+        }
+      }
+    }
+    
     // Render the page for editing an existing component
-    res.render("edit_component.pug", {componentUuid,
-                                      component: {componentUuid, formId},
+    res.render("edit_component.pug", {component: {componentUuid, formId},
                                       form,
-                                      newComponent: true});
+                                      subComponent_fullUuids,
+                                      subComponent_shortUuids});
   }
   catch(err)
   {
@@ -265,10 +290,10 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
     }
     
     // Render the page for editing an existing component
-    res.render("edit_component.pug", {componentUuid: req.params.uuid,
-                                      component,
+    res.render("edit_component.pug", {component,
                                       form,
-                                      newComponent: false});
+                                      subComponent_fullUuids: [],
+                                      subComponent_shortUuids: []});
   }
   catch(err)
   {
@@ -335,7 +360,7 @@ router.get('/components/recent', permissions.checkPermission("components:view"),
 {
   // Retrieve a list of created and edited components across all component types (since no type form ID is given)
   // Set a limit on the number of displayed components (otherwise every single one in the DB will be shown!)
-  var components = await Components.list(null, {limit: 30});
+  var components = await Components.list(null, {limit: 100});
 
   // Render the page for showing a generic list of components
   res.render("list_components.pug", {components,
@@ -359,7 +384,7 @@ router.get('/components/myRecents', async function(req, res, next)
     
     // Retrieve a list of components matching the condition set above
     // Set a limit on the number of displayed components 
-    var componentList = await Components.list(match, {limit: 50});
+    var componentList = await Components.list(match, {limit: 100});
     
     // Order and save the list
     for(var c of req.session.recent.componentUuid)
@@ -384,7 +409,7 @@ router.get('/components/:formId/list', permissions.checkPermission("components:v
   
   // Retrieve a list of created and edited components with a matching type form ID
   // Set a limit on the number of displayed components (otherwise every single one in the DB will be shown!)
-  var components = await Components.list(match, {limit: 50});
+  var components = await Components.list(match, {limit: 100});
   
   // Retrieve the component type form corresponding to the provided form ID
   var form = await Forms.retrieve('componentForms', req.params.formId);
