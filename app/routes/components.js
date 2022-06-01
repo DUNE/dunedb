@@ -1,6 +1,5 @@
 
 const Components = require('lib/Components.js')('component');
-const Courses = require('lib/Courses.js');
 const express = require('express');
 const Forms = require('lib/Forms.js');
 const Jobs = require("lib/Jobs.js")('job');
@@ -9,6 +8,7 @@ const permissions = require('lib/permissions.js');
 const shortuuid = require('short-uuid')();
 const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
+const Workflows = require('lib/Workflows.js');
 
 var router = express.Router();
 module.exports = router;
@@ -147,34 +147,34 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
     Tests.getRecentComponentTests(req.params.uuid)
   ]);
   
-  // Next, get information about the course that this component's type relates to (if one exists)
-  var courseId = await Courses.getCourseForComponentType(component.formId);
+  // Next, get information about the workflow that this component's type relates to (if one exists)
+  var workflowId = await Workflows.getWorkflowForComponentFormId(component.formId);
   
-  // If there is a course relating to this component type, evaluate it via its ID
-  // Then check the course steps, and get information about all steps that are 'jobs'
-  var evaluatedCourse = null;
+  // If there is a workflow relating to this component type, evaluate it via its ID
+  // Then check the workflow steps, and get information about all steps that are 'jobs'
+  var evaluatedWorkflow = null;
   var jobs = [];
   
-  if(courseId)
+  if(workflowId)
   {
-    evaluatedCourse = await Courses.evaluate(courseId, req.params.uuid);
+    evaluatedWorkflow = await Workflows.evaluate(workflowId, req.params.uuid);
 
-    var courseJobs = [];
+    var workflowJobs = [];
     
-    for(var step of evaluatedCourse.evaluation)
+    for(var step of evaluatedWorkflow.evaluation)
     {
       if(step.type == "job")
       {
         if(step.result.length > 0)
         {
-          courseJobs.push(step.result[0]);
+          workflowJobs.push(step.result[0]);
         }
       }
     }
     
     var jobPromises = [];
     
-    for(var job of courseJobs)
+    for(var job of workflowJobs)
     {
       jobPromises.push(Jobs.retrieve(job.jobId))
     }
@@ -188,9 +188,9 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
   records.push(...tests);
   records.push(...jobs);
   
-  if(evaluatedCourse)
+  if(evaluatedWorkflow)
   {
-    records.push(evaluatedCourse);
+    records.push(evaluatedWorkflow);
   }
   
   // Render the page for viewing and printing a component's summary
