@@ -1,149 +1,54 @@
-$(function(){
-  DrawQRCodes();
-  $('#qr-error-safe').on("change",DrawQRCodes);
-  ResizeQrText();
-  $( window ).resize(ResizeQrText);
 
+// Main function for generating and displaying a QR code canvas
+$(function() {
+  DrawQRCode();
+  ResizeQRText();
+  $( window ).resize(ResizeQRText);
 })
- 
 
-function ResizeQrText() {
-    $('div.qr').each(function(){
-      $(this).css('font-size',15*$(this).width()/500);
-     })
-}
-// This function to redraw all QR canvases.
-function DrawQRCodes(){
-  // lowres = false means lots of error correction, 
-  // lowres = true means low-res, easier to see
-  var lowres = $('#qr-error-safe').is(":not(:checked)");
-  var short = true;
-  canvases = $("canvas.qr-code");
-
-  // newer version: no text in canvas, use CSS to do that instead.
-  console.log("DrawQRCode",...arguments);
-  $(canvases).each(function(){
-      var canvas = this;
-      var text = $(canvas).data('qr-text');
-      var desc = $(canvas).data('qr-desc');
-
-      // if using short code, then reformat the text for the QR.
-      if(short) {
-        var regex_match = text.match(/(([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}))/);
-        if(regex_match && regex_match[0]) {
-          var uuid = regex_match[0];
-          // this uses base58 encoding, which usually will yield 21 to 22 characters.
-          var short_uuid = ShortUUID().fromUUID(uuid);
-          // pad the short code to 22 characters, to ensure matching.
-          var padded = short_uuid.padEnd(22,'-'); 
-          text = text.substr(0,regex_match.index) + short_uuid + text.substr(regex_match.index+regex_match[0].length);
-
-        } else {
-          // Whaaaaat?
-          console.error('couldnt find the UUID')
-        }
-
-      }
-      console.log("Drawing QR code",text,desc,lowres);
-
-      var segs = qrcodegen.QrSegment.makeSegments(text);
-
-      var ecl = qrcodegen.QrCode.Ecc.HIGH;
-      var minVersion = 8; // 8; // Determines size, but adds correction bits.
-      if(short) {
-        minVersion = 1; // not quite so many bits.
-      }
-     if(lowres){
-        ecl = qrcodegen.QrCode.Ecc.LOW;
-        minVersion = 1; // 8; // Determines size, but adds correction bits.
-      }
-      var qr = qrcodegen.QrCode.encodeSegments(segs, ecl, minVersion);
-      gqr = qr;
-      console.log(qr);
-      var w = canvas.width;
-      var scale = 8;//Math.Round(w/12*8);
-      var border = 0; //w/12*4;
-
-      var ctx = canvas.getContext("2d");
-      qr.drawCanvas(scale, border, canvas);
+// Resize the displayed QR code canvas text based on the window size
+function ResizeQRText() {
+  $('div.qr').each(function() {
+    $(this).css('font-size', 15 * $(this).width() / 500);
   })
+}
 
-
- //  // This is the older version that puts in the text in the canvas.
- //  console.log("DrawQRCode",...arguments);
-	// $(canvases).each(function(){
-	// 		var canvas = this;
- //      var text = $(canvas).data('qr-text');
- //      var desc = $(canvas).data('qr-desc');
-
-	// 		var segs = qrcodegen.QrSegment.makeSegments(text);
-
-	// 		var ecl = qrcodegen.QrCode.Ecc.HIGH;
- //      var minVersion = 8; // 8; // Determines size, but adds correction bits.
-
- //      console.log("Drawing QR code",text,desc,lowres);
-
- //     if(lowres){
- //        ecl = qrcodegen.QrCode.Ecc.LOW;
-	//   		minVersion = 1; // 8; // Determines size, but adds correction bits.
- //      }
-	// 		var qr = qrcodegen.QrCode.encodeSegments(segs, ecl, minVersion);
- //      gqr = qr;
-	//     console.log(qr);
- //      var w = canvas.width;
- //      var scale = 12;//Math.Round(w/12*8);
- //      var border = 8; //w/12*4;
-
- //  	// 	var scale = 8; // pixels per module
-	// 		// var border = 8;//4; // modules
-	// 		// var svg = document.getElementById("qrcode-svg");
-	// 		// canvas.style.display = "none";
-	// 		// svg.style.display = "none";
-
-	// 		var ctx = canvas.getContext("2d");
-	// 		qr.drawCanvas(scale, border, canvas);
-	// 		ctx.font = "16px Inconsolata";
-	// 		ctx.fillStyle = "black";
-	// 		var width = canvas.width;
-	// 		var height = canvas.height;
-	// 		ctx.save();
-	// 		ctx.translate(width/2,height/2);
-
-	// 		ctx.save();
-	// 		ctx.translate(-width/2,-height/2);
-
- //        ctx.scale(width/520,width/520);
- //  			ctx.fillText(text,14,14);
- //  			if(desc) ctx.fillText(desc,14,31);
-
-	// 		ctx.restore();
-
-	// 		ctx.rotate(90*Math.PI/180.)
-	// 		ctx.save();
-	// 		ctx.translate(-width/2,-height/2);
- //        ctx.scale(width/520,width/520);
- //        ctx.fillText(text,14,14);
- //        if(desc) ctx.fillText(desc,14,31);
-	// 		ctx.restore();
-
-	// 		ctx.rotate(90*Math.PI/180.)
-	// 		ctx.save();
-	// 		ctx.translate(-width/2,-height/2);
- //        ctx.scale(width/520,width/520);
- //        ctx.fillText(text,14,14);
- //        if(desc) ctx.fillText(desc,14,31);
-	// 		ctx.restore();
-
-	// 		ctx.rotate(90*Math.PI/180.)
-	// 		ctx.save();
-	// 		ctx.translate(-width/2,-height/2);
- //        ctx.scale(width/520,width/520);
- //        ctx.fillText(text,14,14);
- //        if(desc) ctx.fillText(desc,14,31);
-	// 		ctx.restore();
-
-	// 		ctx.restore();
-	// })
-
+// Draw (or redraw) a single QR code canvas
+function DrawQRCode() {
+  
+  // Each individual QR code points to a web address like the following: [base_url]/c/[short_uuid]
+  // where:  [base_url]   = http://localhost:12313 for development deployments, or https://apa.dunedb.org for the production deployment
+  //         [short_uuid] = the 22 character-length short component UUID
+  // QR codes DO NOT use the full (36 character-length) component UUID
+  
+  // Set up one or more canvases onto which to (re)draw QR codes
+  canvases = $("canvas.qr-code");
+  
+  // For each canvas being (re)drawn ...
+  $(canvases).each(function() {
+    
+    // Retrieve the canvas, as well as the text and description to write on each side of the QR code
+    // The 'text' will always be the full web address that the QR code is to point to
+    // The 'desc' will always be the component name
+    var canvas = this;
+    var text = $(canvas).data('qr-text');
+    var desc = $(canvas).data('qr-desc');
+    
+    // Generate the QR code segments representing the 'text' string
+    var segs = qrcodegen.QrSegment.makeSegments(text);
+    
+    // Set the error correction level 
+    var ecl = qrcodegen.QrCode.Ecc.HIGH;
+    
+    // Create the overall QR code using the segments and error correction level
+    var qr = qrcodegen.QrCode.encodeSegments(segs, ecl);
+    
+    // Set up some canvas parameters
+    var scale  = 8;
+    var border = 0;
+    
+    // Draw the QR code onto the canvas, with the provided canvas parameters
+    qr.drawCanvas(scale, border, canvas);
+  })
 };
 

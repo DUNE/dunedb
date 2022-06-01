@@ -22,6 +22,9 @@ block content
       .row
         .col
           dl
+            dt Type
+            dd #{component.formName || component.formId}
+            
             dt Name
             dd #{component.data.name}
             
@@ -35,30 +38,47 @@ block content
                 div.copybutton(class = "btn-sm", id = "copyButton", type = "button", onclick = "CopyConfirm(component.componentUuid)") Copy
             
             dt Short UUID
-            
-            if component.shortUuid
-              dd #{component.shortUuid}
-            else
-              dd Not Available
-            
-            dt Type
-            dd #{component.formName || component.formId}
+            dd #{component.shortUuid}
             
             dt Current Version:
-            dd This is version #{component.validity.version} of the component:
-              
-              div.vert-space-x1.border-success.border.rounded.p-2
-                #builtform
-                  +createdFrom(component.createdFrom)
-                
-              br
-              | This version was last edited on !{' '}
+            dd This is version #{component.validity.version} of the component, and was last edited on !{' '}
               +dateFormatAndAgo(component.insertion.insertDate)
               
               if component.insertion.user
                 |  by !{' '}
                 a(href = 'mailto:' + user_email(component.insertion.user)) #{component.insertion.user.displayName}
-        
+              
+              div.vert-space-x1.border-success.border.rounded.p-2
+                #builtform
+                  +createdFrom(component.createdFrom)
+            
+            if component.data.subComponent_fullUuids
+              div.vert-space-x1.border-success.border.rounded.p-2
+                dt Sub Components
+                
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-3 UUID
+                        th.col-md-3 QR Code Link
+                    
+                    tbody
+                      each uuid, index in component.data.subComponent_fullUuids
+                        - var shortUuid = component.data.subComponent_shortUuids[index]
+                        
+                        tr
+                          td
+                            a(href = '/component/' + uuid, target = '_blank') #{uuid}
+                          td #{base_url + '/c/' + shortUuid}
+                
+                a.btn.btn-secondary#download_links(onclick = "DownloadLinks(component.data.subComponent_shortUuids)", download = "links.txt", href = "") Download List of Links
+            
+            if component.data.fromBatch
+              dt Part of Batch:
+              dd
+                a(href = '/component/' + component.data.fromBatch, target = '_blank')=component.data.fromBatch
+          
           div.vert-space-x1
             dt All Versions:
             dd
@@ -108,10 +128,7 @@ block content
           
         .col-md-3
           div#qr-code
-            if component.shortUuid
-              +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-            else
-              +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
     
     div.vert-space-x2
       hr

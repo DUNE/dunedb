@@ -5,11 +5,11 @@ block vars
 
 block extrascripts
   script(type = 'text/javascript').
-    var componentUuid = "!{componentUuid}";
     var component = !{JSON.stringify(component || {}, null, 4)};
     var form = !{JSON.stringify(form || {}, null, 4)};
-    var newComponent = !{newComponent};
-    
+    var subComponent_fullUuids = !{JSON.stringify(subComponent_fullUuids)};
+    var subComponent_shortUuids = !{JSON.stringify(subComponent_shortUuids)};
+  
   block workscripts
     script(src = '/pages/edit_component.js')
 
@@ -28,12 +28,6 @@ block content
     
     div.vert-space-x1
       hr
-    
-    div.vert-space-x1
-      button.btn.btn-warning.mb-2#loadRecentData(style        = "display: none", 
-                                                 data-trigger = "hover", 
-                                                 data-toggle  = 'popover', 
-                                                 data-content = "Load component details from the last component of this type that you created or edited")
     
     div.vert-space-x1.formbuilder_area
       #builtform

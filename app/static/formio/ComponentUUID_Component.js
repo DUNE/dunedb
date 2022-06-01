@@ -100,16 +100,10 @@ class ComponentUUID_Component extends QR_Component{
 
   cameraCallback(index,qrcode)
   {
-    // do the match thing
-    var match_long = qrcode.match(".*/([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})");
-    if(match_long) {
-      this.setValueAt(index,match_long[1]);
-    }
-
-    var match_short = qrcode.match(".*/([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ-]{22})");
-    if(match_short) {
-      var txt = match_short[1].match('[^\-]*')[0];
-      var uuid = ShortUUID().toUUID(txt);
+    var match_address = qrcode.match(".*/([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ-]{22})");
+    if(match_address) {
+      var shortuuid = match_address[1].match('[^\-]*')[0];
+      var uuid = ShortUUID().toUUID(shortuuid);
       this.setValueAt(index,uuid);
       return true;
     }

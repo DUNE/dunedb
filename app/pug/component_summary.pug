@@ -107,10 +107,7 @@ block allbody
         
         .col-md-3
           div#qr-code
-            if component.shortUuid
-              +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-            else
-              +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
       
       div.pagebreak
       

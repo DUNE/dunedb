@@ -168,7 +168,16 @@ var metaschema =
     },
     
     {
-      "components": [],
+      "components": [
+      {
+        "label": "This is a Batch of Components",
+        "tableView": false,
+        "key": "isBatch",
+        "type": "checkbox",
+        "input": true,
+        "defaultValue": false
+      }],
+      
       "width": 6,
       "offset": 0,
       "push": 0,

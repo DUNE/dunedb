@@ -6,52 +6,30 @@ block vars
 
 block allbody
   div.vert-space-x2.form-inline.noprint
-    div.hori-space-x1.switchToggle
-      input#qr-error-safe(type = "checkbox", checked = "checked")
-      label.label-primary(for = 'qr-error-safe')
-    
-    div.hori-space-x2
+    div.hori-space-x1
       a.btn.btn-primary(onclick = "window.print(); return false;" href = '#print') Print QR Codes
   
   div.vert-space-x2(style = 'clear: both;')
     .container
       .row.qr-row
         div.col-sm-6(style = "border: 1px solid #EEE")
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
         
         div.col-sm-6(style = "border: 1px solid #EEE")
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
       
       .row.qr-row
         div.col-sm-6(style = "border: 1px solid #EEE")
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
         
         div.col-sm-6(style = "border: 1px solid #EEE")
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
       
       .row.qr-row
         div.col-sm-6(style = "border: 1px solid #EEE")
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
         
         div.col-sm-6(style = "border: 1px solid #EEE")
-          if component.shortUuid
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-          else
-            +qr-panel(base_url + '/component/' + component.componentUuid.toString(), component.data.name)
+          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
   
   div.vert-space-x2

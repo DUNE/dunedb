@@ -222,7 +222,6 @@ Formio.Components.addComponent('ImageAnnotator', ImageAnnotator);
 
 $(function(){
   // Add to the body of the HTML. Do this just once.
-  console.log('appending modal');
   $(document.body).append(
     ` <!-- Modal for image annotations -->
     <div class="modal fade" id="AnnotatorModal" data-keyboard="false" data-backdrop="static"  role="dialog" aria-labelledby="AnnotatorModalTitle" aria-hidden="true">
