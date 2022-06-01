@@ -1,207 +1,167 @@
-// Set up a variable to hold the component type form that will actually be submitted
-// This will (eventually) be a modified version of the 'form' defined above
-var componentForm = null;
 
-// Submit the component to the DB
-function SubmitData(submission)
-{
-  // Include relevant information about the component and component type form (these MUST be in the submission information)
-  submission.componentUuid = component.componentUuid; 
-  submission.formName = form.formName;
-  submission.formId = form.formId;
+// Declare script-level variables
+var componentForm = null;         // A variable to hold the completed and populated component type form that will eventually be submitted to the DB
+var newBatchComponent = false;    // A variable to act as a flag for if we are submitting a new batch-type component or not
+
+// Arrays called  'subComponent_fullUuids' and 'subComponent_shortUuids' are passed from 'edit_component.pug'
+// If we are submitting a new batch-type component, these arrays will contain full and short sub-component UUIDs (and therefore have a size > 0)
+// If we are instead editing an existing batch-type component or dealing with a non-batch-type component, the arrays will be empty
+if (subComponent_fullUuids.length > 0) {
+  newBatchComponent = true;
+}
+
+
+// Run a specific function when the page is loaded
+window.addEventListener('load', onPageLoad);
+
+
+/// Function to run when the page is loaded
+async function onPageLoad() {
   
-  // If the submission is successful ...
-  function postSuccess(retval)
-  {
-    // Just in case, output any error messages that might have occurred even with a successful submission
-    if(retval.error)
-    {
-      componentForm.setAlert("warning", retval.error);
-      componentForm.emit('error', retval.error);
-    }
-    else componentForm.setAlert(false);
-    
-    if(retval.data)
-    {
-      componentForm.submission = {data: retval.data};
-    }
-    
-    // If creating a new component, change the displayed URL to be the component editing page
-    if(newComponent)
-    {
-      history.replaceState(null, null, '/component/' + retval.componentUuid + '/edit');
-      $('#name').html(submission.name);
-    }
+  // Make sure that a component type form ID has been provided (using the 'form' variable passed from 'edit_component.pug')
+  if(!form.formId) {
+    console.error(onPageLoad, "No component type form ID has been provided!");
+  }
+  
+  // Retrieve the component type form corresponding to the provided type form ID, and then ...
+  $.get('/json/componentForms/' + form.formId).then(
+    async function(form) {
+      
+      // Set up the component type form's schema
+      var schema = form.schema;
+      
+      // Add a 'Submit' button to the schema (this is temporary, i.e. only in the scope of this script)
+      schema.components.push({
+        type: "button",
+        theme: "btn btn-success",
+        label: "Submit Component",
+        key: "submit",
+        disableOnInvalid: true,
+        input: true,
+        tableView: false
+      });
+      
+      // Make sure that the designated space on the page where the component type form will be displayed is empty
+      $('#builtform').empty();
+      
+      // Create the component type form using the previously defined schema, and display it in the designated space
+      componentForm = await Formio.createForm(document.getElementById('builtform'), schema);
+      
+      // Populate the (initally empty) form with any pre-existing component information (using the 'component' variable passed from 'edit_component.pug')
+      // If a new component is being created, the 'component' variable will not contain any form-level information (i.e. no 'data' field), so it will remain empty
+      componentForm.submission = {data: component.data};
+      
+      // We want to submit the completed type to our own API rather than the 'form.io' server, so set the 'nosubmit' flag on the form to 'true'
+      componentForm.nosubmit = true;
+      
+      // When the populated form is submitted (via clicking on the 'Submit' button added to the schema above), run the appropriate event handler callback function
+      // Note that this is a Formio event handler, NOT a jQuery one (the code syntax '.on' is identical, but the input argument and callback structure are different)
+      componentForm.on('submit', function(submission) {
+        
+        // At this point, the 'submission' object contains ONLY the information that has been entered into the component type form by the user
+        // Add all required information to the submission object from the 'component' and 'form' variables (passed from 'edit_component.pug')
+        submission.componentUuid = component.componentUuid; 
+        submission.formName = form.formName;
+        submission.formId = form.formId;
+        
+        // If we are submitting a new batch-type component ...
+        if (newBatchComponent) {
+          
+          // Retrieve the desired number of sub-components from the submission object (since it will have already been entered into the component type form by the user)
+          var numberOfSubComponents = submission.data.subComponent_count;
+          
+          // Then get sub-arrays of the full and short sub-component UUIDs by taking slices of the corresponding full arrays, of length equal to the desired number of sub-components
+          var slice_fullUuids = subComponent_fullUuids.slice(0, numberOfSubComponents);
+          var slice_shortUuids = subComponent_shortUuids.slice(0, numberOfSubComponents);
+          
+          // Save the full and short sub-component UUID sub-arrays into the submission object, under the 'data' field that contains the rest of the form-level information
+          submission.data.subComponent_fullUuids = slice_fullUuids;
+          submission.data.subComponent_shortUuids = slice_shortUuids;
+          
+          // For each sub-component ...
+          for (let s = 0; s < numberOfSubComponents; s++) {
+            
+            // Set up a new empty 'sub-submission' object, using the existing 'submission' object as a template
+            var sub_submission = Object.create(submission);
+            
+            // Add all required sub-component information
+            sub_submission.componentUuid = slice_fullUuids[s];
+            sub_submission.formId = submission.data.subComponent_formId;
+            sub_submission.data = Object.create(submission.data);
+            
+            // Add information to the sub-component's 'data' field indicating a default name and which batch-type component it is related to
+            var subComponent_name = "Created from " + sub_submission.data.name;
+            
+            sub_submission.data.name = subComponent_name;
+            sub_submission.data.fromBatch = submission.componentUuid;
+            
+            // Since there is nothing more to be added to the sub-component submission data this point, immediately submit it to the DB
+            // Do not redirect the user back to the sub-component's information page, since we still need to deal with any other sub-components and the main batch-type component
+            SubmitData(sub_submission, false);
+          }
+        }
+        
+        // Once all additions and changes to the submission data have been completed, submit it to the DB
+        SubmitData(submission, true);
+      });
+    });
+}
 
-    componentForm.emit('submitDone', retval.submission);
+
+/// Function for submitting the completed submission data to the DB
+function SubmitData(submission, redirectToInfo) {
+  
+  // Submit the 'submission' object to the DB via a jQuery 'ajax' call, with the success and failure functions as defined below
+  $.ajax({
+    contentType: "application/json",
+    method: "post",
+    url: '/json/component/' + submission.componentUuid,
+    data: JSON.stringify(submission),
+    dataType: "json",
+    success: postSuccess
+  }).fail(postFail);
+  
+  
+  /// Function to run for a successful submission
+  function postSuccess(result) {
     
-    // Once the submission is complete, go to the page for viewing information about an existing component
-    if(retval.componentUuid)
-    {
-      window.location.href = '/component/' + retval.componentUuid;
+    // If the submission result contains an error (even with a successful submission), display it along with the appropriate Formio alert type
+    // Otherwise, set the Formio alert type to 'success'
+    if(result.error) {
+      componentForm.setAlert('warning', result.error);
+      componentForm.emit('error', result.error);
+    } else {
+      componentForm.setAlert('success');
+    }
+    
+    // If the submission result contains a 'data' field, make sure that the component type form's submission information is the same as the contents of this field
+    // It is technically possible that there is no 'data' field if the submitted component has no form-level information ... in which case the component type form will remain empty as well
+    if(result.data) {
+      componentForm.submission = {data: result.data};
+    }
+    
+    // Display a 'submission complete' message, along with the submission result
+    componentForm.emit('submitDone', result.submission);
+    
+    // If desired, once the submission is complete (and if the result contains a component UUID [which it always should if successful]), redirect the user back to the component's information page
+    if((redirectToInfo) && (result.componentUuid)) {
+        window.location.href = '/component/' + result.componentUuid;
     }
   }
   
-  // If the submission fails ...
-  function postFail(res, statusCode, statusMsg)
-  {
-    // Set up and relay error messages
-    if(res.responseText)
-    {
-      componentForm.setAlert("danger", res.responseText);
-    }
-    else
-    {
-      componentForm.setAlert("danger", statusMsg + " (" + statusCode + ")");
+  
+  /// Function to run for a failed submission
+  function postFail(result, statusCode, statusMsg) {
+    
+    // If the submission result contains a response message, display it along with the appropriate Formio alert type
+    // Otherwise, display any status message and error code instead
+    if(result.responseText) {
+      componentForm.setAlert('danger', result.responseText);
+    } else {
+      componentForm.setAlert('danger', statusMsg + " (" + statusCode + ")");
     }
     
+    // Display a 'submission error' message
     componentForm.emit('submitError');
-  };
-  
-  // Perform the submission to the DB, using the success and failure functions defined above
-  $.ajax({contentType: "application/json",
-          method: "post",
-          url: '/json/component/' + componentUuid,
-          data: JSON.stringify(submission),
-          dataType: "json",
-          success: postSuccess})
-   .fail(postFail);
-};
-
-// Load the component type form ready for data to be entered and submitted
-function loadComponentForm(formId, data) 
-{
-  if(!formId)
-  {
-    console.error(loadComponentForm, "No component type ID has been provided!");
   }
-  
-  $.get('/json/componentForms/' + formId)
-   .then(async function(form)
-   {
-     // Get the component type form
-     var schema = form.schema;
-     
-     // Temporarily add an additional submission button to the job type form
-     schema.components.push({type: "button",
-                             theme: "btn btn-success",
-                             label: "Submit Component",
-                             key: "submit",
-                             disableOnInvalid: true,
-                             input: true,
-                             tableView: false});
-     
-     // Create the form, initially with no data entered
-     $('#builtform').empty();
-    
-     componentForm = await Formio.createForm(document.getElementById('builtform'), schema);
-     
-     // Populate the form with the contents of the component itself
-     // If this page is being used to submit a new component, this won't make any changes
-     // If this page is being used to edit an existing component, this is where the existing information is filled in
-     componentForm.submission = {data: data};
-     componentForm.nosubmit = true;
-     
-     // Set what happens when actions are performed by the user
-     componentForm.on('submit', SubmitData);
-   });
 };
-
-// Remove empty fields from the submission, in preparation for refilling them from an existing recently submitted component
-function removeEmpty(inobj)
-{
-  var obj = {...inobj};
-  
-  Object.keys(obj).forEach(function(key)
-  {
-    if (obj[key] && typeof obj[key] === 'object')
-    {
-      var subobj = removeEmpty(obj[key])
-      
-      if(Object.keys(subobj).length === 0)
-      {
-        delete obj[key];
-      }
-      else
-      {
-        obj[key] = subobj;
-      }
-    }
-    else
-    {
-      if (obj[key] === null)
-      {
-        delete obj[key];
-      }
-      
-      if (typeof obj[key] === 'string' && obj[key].length === 0)
-      {
-        delete obj[key];
-      }
-    }
-  });
-  
-  return obj;
-}
-
-// Search the DB for any component of the same type as this submission that was most recently modified (created or edited) by this user
-function searchForRecentSubmission()
-{
-  $('#loadRecentData').hide();
-  
-  $.post(`/json/search/component/${(component.formId || "")}?limit=1`, {"insertion.user.user_id": "!{user.user_id}"})
-   .then(function(recent_components)
-   {
-     if(recent_components.length > 0)
-     {
-       var recentComponent = recent_components.shift();
-       
-       $('#loadRecentData').html(`Copy data from the most recently modified component of this type: '${recentComponent.name}'`)
-                           .show()
-                           .data('recent-component', recentComponent);
-     }
-   });
-}
-
-// Fill the submission form with the submitted information from the most recently modified component found from above
-// Note that this will only fill any fields that are currently empty - it will not overwrite any new information that has already been entered
-function fillFromRecentSubmission()
-{
-  var recentComponent = $('#loadRecentData').data("recent-component");
-  
-  if(recentComponent)
-  {
-    $.get('/json' + recentComponent.route)
-     .then(function(submission)
-     {
-       if(!component.formId)
-       { 
-         loadComponentForm(submission.formId, submission.data);
-       }
-       else
-       {
-         var current_data = removeEmpty({...componentForm.submission.data})
-         componentForm.submission = {data: {...submission.data, ...current_data}}
-       }
-     })
-  }
-}
-
-// On first accessing this page ...
-window.addEventListener('load', setupFunction);
-
-async function setupFunction()
-{
-  // Display the component's type form with or without any existing data filled in
-  loadComponentForm(form.formId, component.data);
-  
-  // For new components, show the button for optionally loading data from a recently modified component of the same type
-  if(Object.keys(component.data || {}).length === 0)
-  {
-    searchForRecentSubmission();
-    
-    $("#loadRecentData").hide().on("click", fillFromRecentSubmission);
-  }      
-  
-  $('[data-toggle = "popover"]').popover()
-}
