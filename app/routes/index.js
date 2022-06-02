@@ -1,7 +1,7 @@
 // Import routes
 const routes = [
   require('./components'),
-  require('./courses'),
+  require('./workflows'),
   require('./jobs'),
   require('./processes'),
   require('./search'),

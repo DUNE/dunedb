@@ -12,7 +12,7 @@ var permissions = require('lib/permissions.js');
 const Components = require("lib/Components.js")('component');
 const Tags = require("lib/Tags.js");
 const Forms = require("lib/Forms.js");
-const Courses = require("lib/Courses.js");
+const Workflows = require("lib/Workflows.js");
 const logger = require('../lib/logger');
 
 var router = express.Router();
@@ -118,15 +118,15 @@ router.get('/categories/:tag', async function(req, res, next) {
     return retval;
   }
 
-  var courses = filterTag(req.params.tag, await Courses.list());
+  var workflows = filterTag(req.params.tag, await Workflows.list());
   var componentForms = filterTag(req.params.tag, await Forms.list("componentForms") );
   var testForms = filterTag(req.params.tag, await Forms.list("testForms") );
   var jobForms = filterTag(req.params.tag, await Forms.list("jobForms") );
-  logger.info("courses: %o",Object.keys(courses||{}))
+  logger.info("workflows: %o",Object.keys(workflows||{}))
   logger.info("components: %o",Object.keys(componentForms||{}))
   logger.info("tests: %o",Object.keys(testForms||{}))
   logger.info("jobs: %o",Object.keys(jobForms||{}))
-  res.render('category.pug',{tag:req.params.tag,courses,componentForms,testForms,jobForms});
+  res.render('category.pug',{tag:req.params.tag,workflows,componentForms,testForms,jobForms});
 
 });
 
