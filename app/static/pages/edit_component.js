@@ -89,10 +89,12 @@ async function onPageLoad() {
             sub_submission.formId = submission.data.subComponent_formId;
             sub_submission.data = Object.create(submission.data);
             
-            // Add information to the sub-component's 'data' field indicating a default name and which batch-type component it is related to
+            // Add information to the sub-component's 'data' field indicating the fields and values that are inherited from the batch component
             var subComponent_name = "Created from " + sub_submission.data.name;
             
             sub_submission.data.name = subComponent_name;
+            sub_submission.data.partNumber = submission.data.subComponent_partNumber;
+            sub_submission.data.partString = submission.data.subComponent_partString;
             sub_submission.data.fromBatch = submission.componentUuid;
             
             // Since there is nothing more to be added to the sub-component submission data this point, immediately submit it to the DB
