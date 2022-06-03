@@ -10,8 +10,7 @@ const Components = require("lib/Components.js")('component');
 const Tests = require("lib/Tests.js")('test');
 const Jobs = require("lib/Jobs.js")('job');
 const ComponentTypes = require("lib/ComponentTypes.js");
-const Courses = require("lib/Courses.js");
-// const Jobs = require("lib/Jobs.js");
+const Workflows = require("lib/Workflows.js");
 const Cache = require("lib/Cache.js");
 const utils = require("lib/utils.js");
 const permissions = require("lib/permissions.js");
@@ -227,9 +226,8 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|workflowForms|componentForms|jobForms)/:format(list|object)?', 
+router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)?', 
   async function(req,res,next){
-    if(req.params.collection == "workflowForms") req.params.collection = "jobForms";
     try {
       var obj = await Forms.list(req.params.collection)
       if(req.params.format=="list") {
@@ -394,11 +392,11 @@ router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson(
 });
 
 
-/// Courses
-router.get("/courses", permissions.checkPermissionJson('forms:edit'),
+/// Workflows
+router.get("/workflows", permissions.checkPermissionJson('workflows:view'),
 async function (req,res,next) {
   try {
-    var record = await Courses.list();
+    var record = await Workflows.list();
     return res.json(record,null,2);
   } catch(err) {
     logger.info({route:req.route.path},err.message);
@@ -406,12 +404,12 @@ async function (req,res,next) {
   }
 });
 
-/// Courses
-router.get("/course/:courseId", permissions.checkPermissionJson('forms:edit'),
+
+router.get("/workflow/:workflowId", permissions.checkPermissionJson('workflows:view'),
 async function (req,res,next) {
   try {
-    logger.info("retrieve course data",req.params);
-    var record = await Courses.retrieve(req.params.courseId);
+    logger.info("retrieve workflow data",req.params);
+    var record = await Workflows.retrieve(req.params.workflowId);
     return res.json(record,null,2);
   } catch(err) {
     logger.info({route:req.route.path},err.message);
@@ -419,12 +417,12 @@ async function (req,res,next) {
   }
 });
 
-router.post("/course/:courseId", permissions.checkPermissionJson('forms:edit'),
+router.post("/workflow/:workflowId", permissions.checkPermissionJson('workflows:view'),
 async function (req,res,next) {
   try {
-    logger.info("save course data",req.params);
-    var outrec  = await Courses.save(req.body, req);
-    if(req.body.courseId !== req.params.courseId) throw new Error("Mismatch between courseId in route and posted object");
+    logger.info("save workflow data",req.params);
+    var outrec  = await Workflows.save(req.body, req);
+    if(req.body.workflowId !== req.params.workflowId) throw new Error("Mismatch between workflowId in route and posted object");
     return res.json(outrec,null,2);
   } catch(err) {
     logger.info({route:req.route.path},err.message);
@@ -432,11 +430,11 @@ async function (req,res,next) {
   }
 });
 
-router.get("/course/:courseId/"+utils.uuid_regex, permissions.checkPermissionJson("tests:view"),
+router.get("/workflow/:workflowId/"+utils.uuid_regex, permissions.checkPermissionJson("workflows:view"),
   async function(req, res, rext) {
   try {
 
-    var outrec  = await Courses.evaluate(req.params.courseId, req.params.uuid);
+    var outrec  = await Workflows.evaluate(req.params.workflowId, req.params.uuid);
     return res.json(outrec);
   } catch(err) {
     logger.info({route:req.route.path},err.message);

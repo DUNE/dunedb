@@ -183,12 +183,12 @@ async function initialize_database(db)
 
 	  if(status_obj.version < 6.0) {
 	  	logger.info("v6 jobs");
-	  	await ensure_exists(db,"courses")
-	  	db.collection("courses").dropIndexes();
-	  	db.collection("courses").createIndex({courseId:1});
-	  	db.collection("courses").createIndex({"validity.version":1});
-	  	db.collection("courses").createIndex({"validity.startDate":1});
-	  	logger.info("Indexed courses collection")
+	  	await ensure_exists(db,"workflows")
+	  	db.collection("workflows").dropIndexes();
+	  	db.collection("workflows").createIndex({workflowId:1});
+	  	db.collection("workflows").createIndex({"validity.version":1});
+	  	db.collection("workflows").createIndex({"validity.startDate":1});
+	  	logger.info("Indexed workflows collection")
 	   	status_obj.version =6.0;
 		}
 
