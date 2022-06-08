@@ -6,9 +6,9 @@ extend default
 
 block extrascripts
   script(type = 'text/javascript').
-    var formId = "!{formId}";
     var collection = "!{collection}";
-  
+    var formId = "!{formId}";
+    
   block metaschema
   
   block workscripts
@@ -29,16 +29,16 @@ block content
         .col
           .panel.panel-default
           .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#json-holder')
-            | View contents of JSON file (useful for debugging) 
+            | View JSON Record: 
             i.chevron.fa.fa-fw    
           div#json-holder.collapse
             textarea#schema.form-control(rows = 20)
         
         .col
-          a#download_schema_link(download = formId + ".json", href = "") Download JSON file
+          a#download_schema_link(download = formId + ".json", href = "") Download JSON Record
        
           div.vert-space-x1
-            button.btn.btn-primary#copySchemaToClipboard Copy JSON file contents to Clipboard
+            button.btn.btn-primary#copySchemaToClipboard Copy JSON Record to Clipboard
           
           // TOFIX: The 'Paste JSON from Clipboard' button below doesn't seem to actually do anything
           // I'm commenting it out for now, but will add back in and fix later if the functionality is asked for

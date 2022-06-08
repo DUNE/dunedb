@@ -240,9 +240,17 @@ function SubmitData(submission)
     contentType: 'application/json',
     url:  "/json/" + collection + "/" + formId,
     data: JSON.stringify(submission.data),
-    success: schemaRecordChange
+    success: postSuccess
   })
-   .fail(function(res, statusCode, statusMsg)
+   .fail(postFail);
+  
+  function postSuccess(result)
+  {
+    schemaRecordChange;
+    window.location.href = '/actionTypes/list';
+  }
+     
+  function postFail(res, statusCode, statusMsg)
   {
     if(res.responseText)
     {
@@ -254,7 +262,7 @@ function SubmitData(submission)
     }
     
     console.log("posting fail", res, statusCode, statusMsg);
-  });
+  }
 };
 
 function findComponent(components, key)

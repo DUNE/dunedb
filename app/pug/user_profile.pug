@@ -44,10 +44,10 @@ block content
         
         dt Roles
         dd
-          .monospace #{JSON.stringify(user.roles)}
+          .monospace #{JSON.stringify(user.roles).replace(/"/g, "").replace(/,/g, ", ").replace(/^\[|]/g, '')}
         
         dt Permissions granted by these Roles:
         dd
-          .monospace #{JSON.stringify(user.permissions).replace(/,/g, ", ")}
+          .monospace #{JSON.stringify(user.permissions).replace(/"/g, "").replace(/,/g, ", ").replace(/^\[|]/g, '')}
     
     div.vert-space-x2

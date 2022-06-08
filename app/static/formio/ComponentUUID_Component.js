@@ -19,12 +19,12 @@ class ComponentUUID_Component extends QR_Component{
     return TextFieldComponent.schema({
       "label": "Component UUID",
       "placeholder": "Example: 123e4567-e89b-12d3-a456-426655440000",
-      "tooltip": "Database component UUID. Found on QR code.",
+      "tooltip": "Component UUID. Enter manually or scan component QR code.",
       "inputMask": "********-****-****-****-************",
       "validateOn": "change",
       "validate": {
         "pattern": "^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})",
-        "customMessage": "Needs to be hexadecimal in 8-4-4-4-12 layout",
+        "customMessage": "Must be hexadecimal in 8-4-4-4-12 layout.",
         "unique": false,
         "multiple": false
       },
