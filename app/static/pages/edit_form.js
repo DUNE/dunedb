@@ -2,6 +2,17 @@ var builder   = null;
 var trialform = null;
 var comps     = Formio.Components.components;
 
+var entityRoute = '';
+if(collection === 'componentForms')
+{
+  entityRoute = 'components/types';
+}
+
+if(collection === 'actionForms')
+{
+  entityRoute = 'actiontypes/list';
+}
+
 var builder_config = 
 {
   noDefaultSubmitButton: true,
@@ -247,7 +258,7 @@ function SubmitData(submission)
   function postSuccess(result)
   {
     schemaRecordChange;
-    window.location.href = '/actionTypes/list';
+    window.location.href = '/' + entityRoute;
   }
      
   function postFail(res, statusCode, statusMsg)
