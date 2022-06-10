@@ -4,6 +4,7 @@
 // Probably should be put into seperate files in routes/api/componentApi.js, etc
 // and loaded from this file.
 "use strict";
+const Actions = require('lib/Actions.js');
 const express = require("express");
 const Forms = require("lib/Forms.js");
 const Components = require("lib/Components.js")('component');
@@ -220,13 +221,62 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 );
 
 
+////////////////////////////////////////////////////////
+// Actions
+
+/// Retrieve the most recent version of a single action record
+router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Retrieve the most recent version of the record corresponding to the specified action ID
+    var action = await Actions.retrieve(req.params.actionId);
+
+    // Return the record in JSON format
+    return res.json(action, null, 2);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(400).json({ error: err.toString() });
+  }
+});
+
+
+/// Save a new or edited action record
+router.post('/action', permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
+  try {
+    // Display a logger message indicating that a record is being saved via the '/action' route
+    logger.info(req.body, "Submission to /action");
+
+    // Save the record
+    var action = await Actions.save(req.body, req);
+    res.json(action.actionId);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(400).json({ error: err.toString() });
+  }
+});
+
+
+/// Retrieve records of all actions that have been performed on a single component across all action types
+router.get('/actions/' + utils.uuid_regex, permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Retrieve all records using the specified component UUID
+    var match_condition = { componentUuid: req.params.uuid };
+
+    var actions = await Actions.list(match_condition);
+
+    // Return the records in JSON format
+    return res.json(actions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(400).json({ error: err.toString() });
+  }
+});
 
 
 ////////////////////////////////////////////////////////
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)?', 
+router.get('/:collection(testForms|componentForms|jobForms|actionForms)/:format(list|object)?', 
   async function(req,res,next){
     try {
       var obj = await Forms.list(req.params.collection)
@@ -245,7 +295,7 @@ router.get('/:collection(testForms|componentForms|jobForms)/:format(list|object)
 
 // API/Backend: Get a form schema
 
-router.get('/:collection(testForms|componentForms|jobForms)/:formId', 
+router.get('/:collection(testForms|componentForms|jobForms|actionForms)/:formId', 
   async function(req,res,next){
     if(req.params.collection == 'componentForms') Cache.invalidate('componentTypes');  
 
@@ -259,7 +309,7 @@ router.get('/:collection(testForms|componentForms|jobForms)/:formId',
 
 
 // API/Backend: Update a form schema.
-router.post('/:collection(testForms|componentForms|jobForms)/:formId', 
+router.post('/:collection(testForms|componentForms|jobForms|actionForms)/:formId', 
   async function(req,res,next){
     logger.info(chalk.blue("Schema submission","/json/"+req.params.collection));
 

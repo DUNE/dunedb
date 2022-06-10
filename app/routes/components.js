@@ -1,4 +1,5 @@
 
+const Actions = require('lib/Actions.js');
 const Components = require('lib/Components.js')('component');
 const express = require('express');
 const Forms = require('lib/Forms.js');
@@ -58,15 +59,19 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission("compon
     
     // Get any other information relating to this component ... this includes the following:
     //  - the component's type form, using its form ID
-    //  - the results of tests that have already been performed on this component
-    //  - all currently available test type forms
+    //  - the results of actions and tests that have already been performed on this component
+    //  - all currently available action and test type forms
     //  - any related components
     // Throw an error if there is no DB entry corresponding to this form ID
-    let [form, tests, testForms, relatedComponents] = await Promise.all(
+    var match_condition = { componentUuid: req.params.uuid };
+
+    let [form, actions, actionForms, tests, testForms, relatedComponents] = await Promise.all(
     [
       Forms.retrieve("componentForms", formId),
+      Actions.list(match_condition),
+      Forms.list("actionForms"),
       Tests.listComponentTests(req.params.uuid),
-      Forms.list(),
+      Forms.list("testForms"),
       Components.relationships(req.params.uuid)
     ]);
     
@@ -93,6 +98,8 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission("compon
     res.render("component.pug", {component,
                                  componentVersions,
                                  form,
+                                 actions,
+                                 actionForms,
                                  tests,
                                  testForms,
                                  relatedComponents});
@@ -362,10 +369,14 @@ router.get('/components/recent', permissions.checkPermission("components:view"),
   // Set a limit on the number of displayed components (otherwise every single one in the DB will be shown!)
   var components = await Components.list(null, {limit: 100});
 
+  // Retrieve a list of all component type forms that currently exist
+  var forms = await Forms.list('componentForms');
+  
   // Render the page for showing a generic list of components
   res.render("list_components.pug", {components,
                                      singleType: false,
-                                     title: "Recent Components (All Types)"});
+                                     title: "Recent Components (All Types)", 
+                                     forms});
 });
 
 
@@ -414,11 +425,15 @@ router.get('/components/:formId/list', permissions.checkPermission("components:v
   // Retrieve the component type form corresponding to the provided form ID
   var form = await Forms.retrieve('componentForms', req.params.formId);
   
+  // Retrieve a list of all component type forms that currently exist
+  var forms = await Forms.list('componentForms');
+  
   // Render the page for showing a generic list of components
   res.render("list_components.pug", {components,
                                      singleType: true,
                                      title: "Recent Components (Single Type)",
-                                     form});
+                                     form,
+                                     forms});
 });
 
 
