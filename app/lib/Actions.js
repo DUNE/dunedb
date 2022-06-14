@@ -1,101 +1,68 @@
-'use strict';
+const MUUID = require('uuid-mongodb');
+const ObjectID = require('mongodb').ObjectID;
 
 const commonSchema = require('lib/commonSchema.js');
 const { db } = require('./db');
 const dbLock = require('lib/dbLock.js');
 const Forms = require('lib/Forms.js');
-const MUUID = require('uuid-mongodb');
-const ObjectID = require('mongodb').ObjectID;
 const permissions = require('lib/permissions.js');
-
-module.exports = {
-  save,
-  retrieve,
-  versions,
-  list,
-  search,
-  autoCompleteId
-}
 
 
 /// Save a new or edited action record
 async function save(input, req) {
   // Check that the user has permission to perform (and re-perform) actions
-  if (!permissions.hasPermission(req, 'actions:perform')) {
-    throw new Error("Actions::save() - you do not have permission [actions:perform] to create and/or edit actions!");
-  }
+  if (!permissions.hasPermission(req, 'actions:perform')) throw new Error("Actions::save() - you do not have permission [actions:perform] to create and/or edit actions!");
 
   // Check that the minimum required information has been provided for a record to be saved
   // For action records, these are:
   //   - the action type form ID
   //   - the UUID of the component on which the action has been performed
   //   - user-provided data (may be empty of content, but must still exist)
-  if (!input) {
-    throw new Error("Actions::save() - the 'input' object has not been specified!");
-  }
-
-  if (!input.typeFormId) {
-    throw new Error("Actions::save() - the 'input.typeFormId' has not been specified!");
-  }
-
-  if (!input.componentUuid) {
-    throw new Error("Actions::save() - the 'input.componentUuid' has not been specified!");
-  }
-
-  if (!input.data) {
-    throw new Error("Actions::save() - the 'input.data' has not been specified!");
-  }
+  if (!(input instanceof Object)) throw new Error("Actions::save() - the 'input' object has not been specified!");
+  if (!input.hasOwnProperty('typeFormId')) throw new Error("Actions::save() - the 'input.typeFormId' has not been specified!");
+  if (!input.hasOwnProperty('componentUuid')) throw new Error("Actions::save() - the 'input.componentUuid' has not been specified!");
+  if (!input.hasOwnProperty('data')) throw new Error("Actions::save() - the 'input.data' has not been specified!");
 
   // Check that there is an existing type form corresponding to the the provided type form ID
   var typeFormsList = await Forms.list('actionForms');
   var typeForm = typeFormsList[input.typeFormId];
 
-  if (!typeForm) {
-    throw new Error("Actions:save() - the specified 'input.typeFormId' (" + input.typeFormId + ") does not match a known action type form!");
-  }
+  if (!typeForm) throw new Error("Actions:save() - the specified 'input.typeFormId' (" + input.typeFormId + ") does not match a known action type form!");
 
   // Set up a new record using the provided 'input' object as a basis
   var newRecord = { ...input };
 
   // Add the type form name to the new record
   // If no type form name has been specified in the 'input' object, use the one directly from the type form itself
-  if (!input.typeFormName) {
-    newRecord.typeFormName = typeForm.formName;
-  }
+  newRecord.typeFormName = newRecord.typeFormName || typeForm.formName;
 
   // Make sure that the new record's 'componentUuid' field is in the correct format (it may not be so in the 'input' object)
   newRecord.componentUuid = MUUID.from(input.componentUuid);
 
   // Add additional information to the new record
-  newRecord.actionId = (input.actionId) ? new ObjectID(input.actionId) : new ObjectID();
+  newRecord.actionId = new ObjectID(input.actionId);
   newRecord.recordType = 'action';
   newRecord.state = 'submitted';
 
   // Remove the existing 'insertion' field from the new record if it already exists, and generate a new one
   // When editing an existing record, this field will already exist due to the way that the 'input' object inherits information from the previous record version
-  if (newRecord.insertion) {
-    delete newRecord.insertion;
-  }
+  if (newRecord.insertion) delete newRecord.insertion;
 
   newRecord.insertion = commonSchema.insertion(req);
 
-  var _lock = await dbLock("saveAction" + newRecord.actionId, 1000);
+  var _lock = await dbLock('saveAction' + newRecord.actionId, 1000);
 
   // Attempt to retrieve an existing record with the same action ID as the specified one
   // This is relevant if we are editing an existing record
   // If no such record exists, i.e. we are saving a completely new action, this will return 'null'
   var oldRecord = null;
 
-  if (input.actionId) {
-    oldRecord = await retrieve(input.actionId);
-  }
+  if (input.actionId) oldRecord = await retrieve(input.actionId);
 
   // Remove the existing 'validity' field from the new record if it already exists, and generate a new one
   // When editing an existing record, this field will already exist due to the way that the 'input' object inherits information from the previous record version
   // The new 'validity' field may be generated from scratch (for a new record), or via incrementing that of the existing record (if editing)
-  if (newRecord.validity) {
-    delete newRecord.validity;
-  }
+  if (newRecord.validity) delete newRecord.validity;
 
   newRecord.validity = commonSchema.validity(newRecord.validity, oldRecord);
   newRecord.validity.ancestor_id = newRecord._id;
@@ -111,9 +78,7 @@ async function save(input, req) {
   _lock.release();
 
   // Throw an error if the insertion fails
-  if (result.insertedCount != 1) {
-    throw new Error("Actions::save() - failed to insert a new action record into the database!");
-  }
+  if (result.insertedCount !== 1) throw new Error("Actions::save() - failed to insert a new action record into the database!");
 
   // Return the record as proof that it has been saved successfully
   return result.ops[0];
@@ -124,16 +89,12 @@ async function save(input, req) {
 async function retrieve(actionId, projection) {
   // Construct the 'match_condition' to be used as the database query
   // For this function, it is that a record's action ID must match the specified one
-  var match_condition = { actionId: actionId };
+  let match_condition = { actionId };
 
-  if (typeof actionId === 'object' && !(actionId instanceof ObjectID)) {
-    match_condition = actionId;
-  }
+  if (typeof actionId === 'object' && !(actionId instanceof ObjectID)) match_condition = actionId;
 
   // Throw an error if no action ID has been specified
-  if (!match_condition.actionId) {
-    throw new Error("Actions::retrieve(): the 'actionId' has not been specified!");
-  }
+  if (!match_condition.actionId) throw new Error("Actions::retrieve(): the 'actionId' has not been specified!");
 
   match_condition.actionId = new ObjectID(match_condition.actionId);
 
@@ -141,9 +102,7 @@ async function retrieve(actionId, projection) {
   // For this function, the only additional option will be a specified record version number
   var options = {};
 
-  if (projection) {
-    options.projection = projection;
-  }
+  if (projection) options.projection = projection;
 
   // Query the 'actions' records collection for records matching the condition and additional options
   // Then sort any matching records such that the most recent version is first in the list
@@ -160,9 +119,8 @@ async function retrieve(actionId, projection) {
     // Return the first matching record
     return records[0];
   }
-  else {
-    return null;
-  }
+
+  return null;
 }
 
 
@@ -173,9 +131,7 @@ async function versions(actionId) {
   var match_condition = { actionId: new ObjectID(actionId) };
 
   // Throw an error if no action ID has been specified
-  if (!match_condition.actionId) {
-    throw new Error("Actions::versions(): the 'actionId' has not been specified!");
-  }
+  if (!match_condition.actionId) throw new Error("Actions::versions(): the 'actionId' has not been specified!");
 
   // Query the 'actions' records collection for records matching the condition
   // Then sort any matching records such that the most recent version is first in the list
@@ -203,9 +159,7 @@ async function list(match_condition, options) {
   // If a condition has not been specified (i.e. it is 'null'), the match is made to all records
   // If the matching condition contains a component UUID, make sure that it is in binary format first
   if (match_condition) {
-    if (match_condition.componentUuid) {
-      match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
-    }
+    if (match_condition.componentUuid) match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
     aggregation_stages.push({ $match: match_condition });
   }
@@ -227,8 +181,8 @@ async function list(match_condition, options) {
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       name: { '$first': '$data.name' },
-      insertDate: { '$last': '$insertion.insertDate' }
-    }
+      insertDate: { '$last': '$insertion.insertDate' },
+    },
   });
 
   // Finally re-sort the remaining matching records by most recent insertion date first (now called 'insertDate' as per the group name)
@@ -236,13 +190,8 @@ async function list(match_condition, options) {
 
   // Add aggregation stages for any additionally specified options
   if (options) {
-    if (options.skip) {
-      aggregation_stages.push({ $skip: options.skip });
-    }
-
-    if (options.limit) {
-      aggregation_stages.push({ $limit: options.limit });
-    }
+    if (options.skip) aggregation_stages.push({ $skip: options.skip });
+    if (options.limit) aggregation_stages.push({ $limit: options.limit });
   }
 
   // Query the 'actions' records collection using the aggregation stages
@@ -262,34 +211,24 @@ async function list(match_condition, options) {
 
 /// Search for action records
 /// The search can be performed via either a text search or specifying a record to match to
-async function search(textSearch, matchRecord, skip, limit) {
-  // Set the number of records to skip at the start of the search result, and the maximum number of matching records to return
-  skip = skip || 0;
-  limit = limit || 20;
-
+async function search(textSearch, matchRecord, skip = 0, limit = 20) {
   // Construct the 'match_condition' to be used as the database query
   // If no record to match to is specified (i.e. we are doing a text search), the condition will remain empty for now
   // Otherwise, it is that a record must match the specified one
   var match_condition = { ...matchRecord } || {};
 
   // If the condition contains a component UUID, set it to binary format
-  if (match_condition.componentUuid) {
-    match_condition.componentUuid = MUUID.from(match_condition.componentUuid)
-  }
+  if (match_condition.componentUuid) match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
   // If we are doing a text search, set the 'text' field of the condition
-  if (textSearch) {
-    match_condition['$text'] = { $search: textSearch };
-  }
+  if (textSearch) match_condition['$text'] = { $search: textSearch };
 
   // Set up the 'aggregation stages' of the query - these are the query steps in sequence
   var aggregation_stages = [];
 
   aggregation_stages.push({ $match: match_condition });
 
-  if (textSearch) {
-    aggregation_stages.push({ $sort: { score: { $meta: 'textScore' } } });
-  }
+  if (textSearch) aggregation_stages.push({ $sort: { score: { $meta: 'textScore' } } });
 
   aggregation_stages.push({ $sort: { 'insertion.insertDate': -1 } });
   aggregation_stages.push({ $skip: skip });
@@ -320,10 +259,7 @@ async function search(textSearch, matchRecord, skip, limit) {
 
 /// Auto-complete an action ID string as it is being typed
 /// This actually returns the records of all actions with a matching action ID to that being typed
-async function autoCompleteId(inputString, typeFormId, limit) {
-  // Set the maximum number of matching action IDs to display
-  limit = limit || 10;
-
+async function autoCompleteId(inputString, typeFormId, limit = 10) {
   // The action ID is 24 alphanumeric characters long, so pad the input string out to this length
   // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
   var q = inputString.replace(/[_-]/g, '');
@@ -343,10 +279,8 @@ async function autoCompleteId(inputString, typeFormId, limit) {
 
   // If an action type form ID has also been specified, add it to the condition
   // This means that as well as the binary value match above, the corresponding action record must also contain the specified type form ID
-  if (typeFormId) {
-    match_condition.typeFormId = typeFormId;
-  }
-
+  if (typeFormId) match_condition.typeFormId = typeFormId;
+  
   // Set up the 'aggregation stages' of the query - these are the query steps in sequence
   var aggregation_stages = [];
 
@@ -365,4 +299,14 @@ async function autoCompleteId(inputString, typeFormId, limit) {
 
   // Return the entire list of action records
   return records;
+}
+
+
+module.exports = {
+  save,
+  retrieve,
+  versions,
+  list,
+  search,
+  autoCompleteId,
 }

@@ -1,16 +1,10 @@
-'use strict';
-
 const router = require('express').Router();
-
-module.exports = router;
 
 
 /// View the home page
 router.get('/', async function (req, res, next) {
   // If the user is not logged in, go to the next function below
-  if (!req.user) {
-    return next();
-  }
+  if (!req.user) return next();
 
   // If the user is logged in and they have a specified start page, redirect there
   if (req.user.user_metadata && req.user.user_metadata.start_page) {
@@ -25,3 +19,6 @@ router.get('/', async function (req, res, next) {
   function (req, res, next) {
     res.render('splash.pug');
   });
+
+
+module.exports = router;

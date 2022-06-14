@@ -234,7 +234,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermissionJson
     return res.json(action, null, 2);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
-    res.status(400).json({ error: err.toString() });
+    res.status(500).json({ error: err.toString() });
   }
 });
 
@@ -243,14 +243,14 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermissionJson
 router.post('/action', permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
   try {
     // Display a logger message indicating that a record is being saved via the '/action' route
-    logger.info(req.body, "Submission to /action");
+    logger.info(req.body, 'Submission to /action');
 
     // Save the record
     var action = await Actions.save(req.body, req);
     res.json(action.actionId);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
-    res.status(400).json({ error: err.toString() });
+    res.status(500).json({ error: err.toString() });
   }
 });
 
@@ -267,7 +267,7 @@ router.get('/actions/' + utils.uuid_regex, permissions.checkPermissionJson('acti
     return res.json(actions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
-    res.status(400).json({ error: err.toString() });
+    res.status(500).json({ error: err.toString() });
   }
 });
 

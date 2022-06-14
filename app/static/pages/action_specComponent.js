@@ -1,5 +1,5 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
-var typeForm = null;
+let typeForm;
 
 // Run a specified function when the page is loaded
 window.addEventListener('load', onPageLoad);
@@ -12,13 +12,13 @@ async function onPageLoad() {
 
   // Add a 'Submit' button to the type form (this is temporary, only in the scope of this script)
   schema.components.push({
-    type: "button",
-    theme: "btn btn-success",
-    label: "Submit Action Record",
-    key: "submit",
+    type: 'button',
+    theme: 'btn btn-success',
+    label: 'Submit Action Record',
+    key: 'submit',
     disableOnInvalid: true,
     input: true,
-    tableView: false
+    tableView: false,
   });
 
   // Render the type form in the page element called 'typeform'
@@ -26,7 +26,7 @@ async function onPageLoad() {
     readOnly: false,
     buttonSettings: {
       showCancel: false,
-      showSubmit: false
+      showSubmit: false,
     }
   });
 
@@ -54,12 +54,12 @@ async function onPageLoad() {
 function SubmitData(submission) {
   // Submit the 'submission' object via a jQuery 'ajax' call, with the success and failure functions as defined below
   $.ajax({
-    contentType: "application/json",
-    method: "post",
+    contentType: 'application/json',
+    method: 'post',
     url: '/json/action',
     data: JSON.stringify(submission),
-    dataType: "json",
-    success: postSuccess
+    dataType: 'json',
+    success: postSuccess,
   }).fail(postFail);
 
 

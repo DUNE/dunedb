@@ -1,16 +1,13 @@
-'use strict';
+const router = require('express').Router();
 
 const Actions = require('lib/Actions.js');
 const Components = require('lib/Components.js')('component');
 const Forms = require('lib/Forms.js');
 const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
-const router = require('express').Router();
 const utils = require('lib/utils.js');
 
 var default_form_schema = JSON.parse(require('fs').readFileSync('./schemas/default_form_schema.json'));
-
-module.exports = router;
 
 
 /// View a single action record
@@ -20,28 +17,24 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     var query = { actionId: req.params.actionId };
 
     if (req.query.version) {
-      query['validity.version'] = parseInt(req.query.version);
+      query['validity.version'] = parseInt(req.query.version, 10);
     }
 
     // Retrieve the specified version of the record using the query
     // Simultaneously, retrieve ALL versions of the same record
     let [action, actionVersions] = await Promise.all([
       Actions.retrieve(query),
-      Actions.versions(req.params.actionId)
+      Actions.versions(req.params.actionId),
     ]);
 
     // Throw an error if there is no record corresponding to the query
-    if (!action) {
-      return res.status(400).render("There is no action record with action ID = " + req.params.actionId);
-    }
+    if (!action) return res.status(404).render("There is no action record with action ID = " + req.params.actionId);
 
     // Retrieve the action type form, using its type form ID (which is specified in the record)
     var actionTypeForm = await Forms.retrieve('actionForms', action.typeFormId);
 
     // Throw an error if there is no type form corresponding to the type form ID
-    if (!actionTypeForm) {
-      return res.status(400).send("There is no action type form with form ID = " + action.typeFormId);
-    }
+    if (!actionTypeForm) return res.status(404).send("There is no action type form with form ID = " + action.typeFormId);
 
     // Get the record of the component that the action was performed on, using its component UUID (also specified in the record)
     var component = await Components.retrieve(action.componentUuid);
@@ -51,11 +44,11 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
       action,
       actionVersions,
       actionTypeForm,
-      component
+      component,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -67,19 +60,17 @@ router.get('/action/:typeFormId', permissions.checkPermission('actions:perform')
     var actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
 
     // Throw an error if there is no type form corresponding to the type form ID
-    if (!actionTypeForm) {
-      return res.status(400).send("There is no action type form with form ID = " + req.params.typeFormId);
-    }
+    if (!actionTypeForm) return res.status(404).send("There is no action type form with form ID = " + req.params.typeFormId);
 
     // Render the interface page for performing an action on an unspecified component
     // This (eventually) redirects to the page for performing an action on a specified component, but first allows the component UUID to be set
     res.render('action_unspecComponent.pug', {
       actionTypeFormId: req.params.typeFormId,
-      actionTypeFormName: actionTypeForm.formName
+      actionTypeFormName: actionTypeForm.formName,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -91,18 +82,16 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
     var actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
 
     // Throw an error if there is no type form corresponding to the type form ID
-    if (!actionTypeForm) {
-      return res.status(400).send("There is no action type form with form ID = " + req.params.typeFormId);
-    }
+    if (!actionTypeForm) return res.status(404).send("There is no action type form with form ID = " + req.params.typeFormId);
 
     // Render the interface page for performing an action on a specified component
     res.render('action_specComponent.pug', {
       actionTypeForm,
-      componentUuid: req.params.uuid
+      componentUuid: req.params.uuid,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -114,28 +103,24 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
     var action = await Actions.retrieve(req.params.actionId);
 
     // Throw an error if there is no record corresponding to the action ID
-    if (!action) {
-      return res.status(400).render("There is no action record with action ID = " + req.params.actionId);
-    }
+    if (!action) return res.status(404).render("There is no action record with action ID = " + req.params.actionId);
 
     // Retrieve the action type form, using its type form ID (which is specified in the record)
     var actionTypeForm = await Forms.retrieve('actionForms', action.typeFormId);
 
     // Throw an error if there is no type form corresponding to the type form ID
-    if (!actionTypeForm) {
-      return res.status(400).send("There is no action type form with form ID = " + action.typeFormId);
-    }
+    if (!actionTypeForm) return res.status(404).send("There is no action type form with form ID = " + action.typeFormId);
 
     // Render the interface page for performing an action on a specified component
     // Editing the action is effectively the same as 're-performing' it on the same component, so we can use the same interface page
     res.render('action_specComponent.pug', {
       action,
       actionTypeForm,
-      componentUuid: action.componentUuid
+      componentUuid: action.componentUuid,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -154,7 +139,7 @@ router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:ed
       var typeForm = {
         formId: req.params.typeFormId,
         formName: req.params.typeFormId,
-        schema: default_form_schema
+        schema: default_form_schema,
       };
 
       Forms.save(typeForm, 'actionForms', req);
@@ -164,7 +149,7 @@ router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:ed
     res.redirect('/actionTypes/' + req.params.typeFormId + '/edit');
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -175,11 +160,11 @@ router.get('/actionTypes/:typeFormId/edit', permissions.checkPermission('forms:e
     // Render the interface page for editing an existing action type form
     res.render('action_editTypeForm.pug', {
       collection: 'actionForms',
-      formId: req.params.typeFormId
+      formId: req.params.typeFormId,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -194,7 +179,7 @@ router.get('/actionTypes/list', permissions.checkPermission('actions:view'), asy
     res.render('action_listTypes.pug', { actionTypeForms });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -214,11 +199,11 @@ router.get('/actions/list', permissions.checkPermission('actions:view'), async f
       actions,
       singleType: false,
       title: 'All Performed Actions (All Types)',
-      allActionTypeForms
+      allActionTypeForms,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
@@ -245,10 +230,13 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
       singleType: true,
       title: 'All Actions (Single Type)',
       actionTypeForm,
-      allActionTypeForms
+      allActionTypeForms,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
+
+
+module.exports = router;

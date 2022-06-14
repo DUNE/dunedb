@@ -1,10 +1,7 @@
-'use strict';
+const router = require('express').Router();
 
 const Forms = require('lib/Forms.js');
 const logger = require('../lib/logger');
-const router = require('express').Router();
-
-module.exports = router;
 
 
 /// List the type form tags which are associated with specific entity type forms
@@ -15,7 +12,7 @@ router.get('/tags', async function (req, res, next) {
     let [typeFormTags, componentTypeForms, actionTypeForms] = await Promise.all([
       Forms.tags(),
       Forms.list('componentForms'),
-      Forms.list('actionForms')
+      Forms.list('actionForms'),
     ]);
 
     // Render the interface page for listing the tags which are associated with specific entity type forms
@@ -23,10 +20,13 @@ router.get('/tags', async function (req, res, next) {
     res.render('tags.pug', {
       typeFormTags,
       componentTypeForms,
-      actionTypeForms
+      actionTypeForms,
     });
   } catch (err) {
     logger.error(err);
-    res.status(400).send(err.toString());
+    res.status(500).send(err.toString());
   }
 });
+
+
+module.exports = router;
