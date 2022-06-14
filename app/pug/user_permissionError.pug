@@ -26,11 +26,11 @@ body
 
       p Your currently assigned roles are: 
         br
-        .monospace #{JSON.stringify(user.roles).replace(/"/g, "").replace(/,/g, ", ").replace(/^\[|]/g, '')}
+        +arrayFormat(user.roles)
 
       p These roles give you the following permissions: 
         br
-        .monospace #{JSON.stringify(user.permissions).replace(/"/g, "").replace(/,/g, ", ").replace(/^\[|]/g, '')}
+        +arrayFormat(user.permissions)
 
         if(required_permission)
           p The following permissions are required in order to view this page or perform this action: 

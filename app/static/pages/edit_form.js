@@ -2,16 +2,9 @@ var builder   = null;
 var trialform = null;
 var comps     = Formio.Components.components;
 
-var entityRoute = '';
-if(collection === 'componentForms')
-{
-  entityRoute = 'components/types';
-}
-
-if(collection === 'actionForms')
-{
-  entityRoute = 'actiontypes/list';
-}
+let entityRoute = '';
+if(collection === 'componentForms') entityRoute = 'components/types';
+if(collection === 'actionForms') entityRoute = 'actiontypes/list';
 
 var builder_config = 
 {
@@ -251,14 +244,13 @@ function SubmitData(submission)
     contentType: 'application/json',
     url:  "/json/" + collection + "/" + formId,
     data: JSON.stringify(submission.data),
-    success: postSuccess
+    success: postSuccess,
   })
    .fail(postFail);
   
-  function postSuccess(result)
+  function postSuccess()
   {
-    schemaRecordChange;
-    window.location.href = '/' + entityRoute;
+    window.location.href = `/${entityRoute}`;
   }
      
   function postFail(res, statusCode, statusMsg)
