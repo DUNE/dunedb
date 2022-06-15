@@ -1,3 +1,4 @@
+const { readFileSync } = require('fs');
 const router = require('express').Router();
 
 const Actions = require('lib/Actions.js');
@@ -7,7 +8,7 @@ const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
 const utils = require('lib/utils.js');
 
-var default_form_schema = JSON.parse(require('fs').readFileSync('./schemas/default_form_schema.json'));
+const default_form_schema = JSON.parse(readFileSync('./schemas/default_form_schema.json'));
 
 
 /// View a single action record
