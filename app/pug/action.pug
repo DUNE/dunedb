@@ -1,0 +1,80 @@
+extend default
+include common.pug
+
+block vars
+  - var page_title = "View Action Record";
+
+block extrascripts
+  script(type = 'text/javascript').
+    var action = !{JSON.stringify(action || {}, null, 4)};
+    var actionVersions = !{JSON.stringify(actionVersions || {}, null, 4)};
+    var actionTypeForm = !{JSON.stringify(actionTypeForm || {}, null, 4)};
+    var component = !{JSON.stringify(component || {}, null, 4)};
+
+  block workscripts
+    script(src = '/pages/action.js')
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      h2 View Action Record
+
+    div.vert-space-x1
+      dl
+        dt Action Type
+        dd #{actionTypeForm.formName || actionTypeForm.formId}
+
+        dt Action ID
+        dd
+          a(href = '/action/' + action.actionId)=action.actionId
+
+        - var uuid = MUUID.from(action.componentUuid).toString();
+
+        dt Performed on Component:
+        dd UUID: 
+          a(href = '/component/' + uuid)=uuid
+          br
+          | Type: #{component.formName}
+          br
+          | Name: #{component.data.name}
+
+        dt Performance Data:
+        dd This is version #{action.validity.version} of the action, performed on !{' '}
+          +dateFormatAndAgo(action.insertion.insertDate)
+
+          if action.insertion.user
+            |  by !{' '}
+            a(href = 'mailto:' + user_email(action.insertion.user)) #{action.insertion.user.displayName}
+
+          div.vert-space-x1.border-success.border.rounded.p-2
+            #typeform
+
+    div.vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
+        | All Versions: 
+        i.chevron.fa.fa-fw 
+
+      div#versionsBox.collapse
+        ul
+          each v in actionVersions
+            li 
+              a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
+              |  on 
+              +dateFormatAndAgo(v.insertion.insertDate)
+
+              if v.insertion.user
+                |  by !{' '}
+                a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
+
+    div.vert-space-x2.form-inline
+      a(href = '/action/' + action.actionId + '/edit').btn.btn-warning
+        img.small-icon(src = '/images/edit_icon.svg')
+        | &nbsp; Edit Action
+
+      div.hori-space-x2
+        a(href = '/json/action/' + action.actionId, target = '_blank').btn.btn-secondary
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; View JSON Record
+
+    div.vert-space-x2

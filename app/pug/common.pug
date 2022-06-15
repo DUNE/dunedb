@@ -16,6 +16,9 @@ mixin dateFormatAndAgo(date)
   span.date(data - date = date)=moment(date).format('MMMM Do YYYY, h:mm:ss a')
     =" (" + moment(date).fromNow() + ")"
 
+mixin arrayFormat(array)
+  .monospace #{JSON.stringify(array).replace(/["\[\]]/g, '').replace(/,/g, ', ')}
+
 mixin qr-panel(text, desc)
   div.qr&attributes(attributes)
     .qr-label.qr-label-top

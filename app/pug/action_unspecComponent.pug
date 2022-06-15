@@ -1,0 +1,40 @@
+extend default
+
+block vars
+  - var page_title = "Perform Action (Unspecified Component)";
+
+block extrascripts
+  script(type = 'text/javascript').
+    var actionTypeFormId = '!{actionTypeFormId}';
+    var actionTypeFormName = '!{actionTypeFormName}';
+
+  block workscripts
+    script(src = '/pages/action_unspecComponent.js')
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      h2 Perform Action (Unspecified Component)
+
+    div.vert-space-x1
+      dl
+        dt Action Type
+        dd=actionTypeFormName
+
+    div.vert-space-x1
+      hr
+
+      p An action must be performed on a single specified component. Please enter the component UUID in the input box below.
+        br
+        | The box uses auto-complete - just start typing a component UUID, and any matching UUIDs in the database will be displayed.
+        br
+        | Alternatively, click on the camera icon (to the right of the box) to scan the component's QR code if you have it available.
+
+    div.vert-space-x1
+      .row
+        .col
+          #uuidform
+
+        .col.offset-md-20
+
+    div.vert-space-x2

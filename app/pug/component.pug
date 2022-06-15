@@ -136,6 +136,58 @@ block content
     div.vert-space-x1
       .row
         .col
+          h4 Action History
+          
+          hr
+          
+          if(!actions || actions.length == 0)
+            p None
+          else
+            table.table
+              thead
+                tr
+                  th.col-md-2 Action Type Name
+                  th.col-md-2 Action Name
+                  th.col-md-2 Date Performed
+              
+              tbody
+                each action in actions
+                  tr
+                    td #{action.typeFormName}
+                    td 
+                      a(href = '/action/' + action.actionId)=action.name
+                    td
+                      +dateFormat(action.insertDate)
+        
+        .col-sm-1
+        
+        .col-6
+          h4 Select an Action to Perform
+          
+          hr
+          
+          h5 Recommended for this Component Type:
+          
+          each actionForm in actionForms
+            if(actionForm.componentTypes.includes(component.formName) && !actionForm.tags.includes("Trash"))
+              a(href = '/action/' + actionForm.formId + '/' + component.componentUuid).tagbutton.btn.btn-success=t
+                =actionForm.formName
+          
+          hr
+          
+          h5 Other Available Action Types:
+          
+          each actionForm in actionForms
+            if(!actionForm.componentTypes.includes(component.formName) && !actionForm.tags.includes("Trash"))
+              a(href = '/action/' + actionForm.formId + '/' + component.componentUuid).tagbutton.btn.btn-success=t
+                =actionForm.formName
+    
+    div.vert-space-x2
+      hr
+
+    div.vert-space-x1
+      .row
+        .col
           h4 Testing History
           
           hr
