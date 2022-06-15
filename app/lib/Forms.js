@@ -135,7 +135,7 @@ function getFormList(collection) {
                                     icon:           {"$first": {"$arrayElemAt": ["$icon.url", 0]}}
                                   }
                                 }
-        if(collection!='testForms') delete grouping["$group"].componentTypes;
+        if((collection=='componentForms') || (collection=='workflowForms')) delete grouping["$group"].componentTypes;
         pipeline.push(grouping);
 
          var forms = await db.collection(collection)
@@ -154,6 +154,7 @@ function getFormList(collection) {
 Cache.add("formlist_testForms",getFormList("testForms")); 
 Cache.add("formlist_jobForms",getFormList("jobForms")); 
 Cache.add("formlist_componentForms",getFormList("componentForms")); 
+Cache.add("formlist_actionForms",getFormList("actionForms")); 
 
 
 async function list(collection)
@@ -175,8 +176,9 @@ Cache.add("all_tags",async function() {
           db.collection("testForms").distinct("tags"),
           db.collection("jobForms").distinct("tags"),
           db.collection("componentForms").distinct("tags"),
+          db.collection("actionForms").distinct("tags"),
         ]);
-    // This gives three arrays of results. we want to concatenate
+    // This gives four arrays of results. we want to concatenate
     // and take only unique values. Turn each array element into a key.
     var tokens = {};
     for(var arr of tags_lists)

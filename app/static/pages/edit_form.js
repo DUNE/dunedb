@@ -2,6 +2,10 @@ var builder   = null;
 var trialform = null;
 var comps     = Formio.Components.components;
 
+let entityRoute = '';
+if(collection === 'componentForms') entityRoute = 'components/types';
+if(collection === 'actionForms') entityRoute = 'actiontypes/list';
+
 var builder_config = 
 {
   noDefaultSubmitButton: true,
@@ -240,9 +244,16 @@ function SubmitData(submission)
     contentType: 'application/json',
     url:  "/json/" + collection + "/" + formId,
     data: JSON.stringify(submission.data),
-    success: schemaRecordChange
+    success: postSuccess,
   })
-   .fail(function(res, statusCode, statusMsg)
+   .fail(postFail);
+  
+  function postSuccess()
+  {
+    window.location.href = `/${entityRoute}`;
+  }
+     
+  function postFail(res, statusCode, statusMsg)
   {
     if(res.responseText)
     {
@@ -254,7 +265,7 @@ function SubmitData(submission)
     }
     
     console.log("posting fail", res, statusCode, statusMsg);
-  });
+  }
 };
 
 function findComponent(components, key)

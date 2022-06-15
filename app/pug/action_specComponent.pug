@@ -1,0 +1,35 @@
+extend default
+
+block vars
+  - var page_title = "Perform Action (Specified Component)";
+
+block extrascripts
+  script(type = 'text/javascript').
+    var action = !{JSON.stringify((action || {}), null, 4)}; 
+    var actionTypeForm = !{JSON.stringify(actionTypeForm || {}, null, 4)}; 
+    var componentUuid = !{JSON.stringify(componentUuid || null)};
+
+  block workscripts
+    script(src = '/pages/action_specComponent.js')
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      h2 Perform Action (Specified Component)
+
+    div.vert-space-x1
+      dl
+        dt Action Type
+        dd=actionTypeForm.formName
+
+        dt Component UUID
+        dd
+          a(href = '/component/' + componentUuid)=componentUuid
+
+    div.vert-space-x1
+      hr
+
+    div.vert-space-x1.formbuilder_area
+      #typeform
+
+    div.vert-space-x2

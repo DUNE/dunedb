@@ -63,31 +63,32 @@ block content
                     img.small-icon(src = '/images/edit_icon.svg')
                     | &nbsp; Edit Component Type Form
     
-    div.vert-space-x2
-      h2 Trashed Component Types
+    if(permissions.userHas(user, 'forms:edit'))
+      div.vert-space-x2
+        h2 Trashed Component Types
     
-    div.vert-space-x1
-      table.table
-        thead
-          tr
-            th.col-md-3 Type ID
-            th.col-md-4 Type Name
-            th.col-md-3
-            th.col-md-2
+      div.vert-space-x1
+        table.table
+          thead
+            tr
+              th.col-md-3 Type ID
+              th.col-md-4 Type Name
+              th.col-md-3
+              th.col-md-2
         
-        tbody
-          each formId in Object.keys(forms).sort()
-            - var form = forms[formId];
+          tbody
+            each formId in Object.keys(forms).sort()
+              - var form = forms[formId];
           
-            if(form.tags && form.tags.includes("Trash"))
-              tr
-                td #{formId}
-                td
-                  a(href = '/components/' + formId + '/list') #{form.formName}
-                td
-                td
-                  a(href = '/components/' + formId + '/edit').btn.btn-warning
-                    img.small-icon(src = '/images/edit_icon.svg')
-                    | &nbsp; Edit Component Type Form
+              if(form.tags && form.tags.includes("Trash"))
+                tr
+                  td #{formId}
+                  td
+                    a(href = '/components/' + formId + '/list') #{form.formName}
+                  td
+                  td
+                    a(href = '/components/' + formId + '/edit').btn.btn-warning
+                      img.small-icon(src = '/images/edit_icon.svg')
+                      | &nbsp; Edit Component Type Form
     
     div.vert-space-x2

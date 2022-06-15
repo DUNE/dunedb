@@ -29,20 +29,21 @@ block content
         
         tbody
           each component in components
-            - var uuid = MUUID.from(component.componentUuid).toString();
+            if((!singleType && !forms[component.formId].tags.includes("Trash")) || (singleType))
+              - var uuid = MUUID.from(component.componentUuid).toString();
             
-            tr          
-              td #{component.formName}
-              td #{component.name} 
-              td
-                a(href = '/component/' + uuid) #{uuid}
-              td
-                +dateFormat(component.created)
-              td
-                +dateFormatAndAgo(component.last_edited)
-              td
-                a(href = '/json/component/' + uuid, target = '_blank').btn.btn-secondary
-                  img.small-icon(src = '/images/checklist_icon.svg')
-                  | &nbsp; View JSON file
+              tr          
+                td #{component.formName}
+                td #{component.name} 
+                td
+                  a(href = '/component/' + uuid) #{uuid}
+                td
+                  +dateFormat(component.created)
+                td
+                  +dateFormatAndAgo(component.last_edited)
+                td
+                  a(href = '/json/component/' + uuid, target = '_blank').btn.btn-secondary
+                    img.small-icon(src = '/images/checklist_icon.svg')
+                    | &nbsp; View JSON file
     
     div.vert-space-x2

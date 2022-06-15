@@ -42,6 +42,7 @@ pre {
 }
 
 .foldable-heading {
+  font-weight: bold;
   cursor: pointer;
 }
 
