@@ -1,13 +1,15 @@
 // Import routes
 const routes = [
+  require('./actions'),
   require('./components'),
-  require('./workflows'),
   require('./jobs'),
   require('./processes'),
   require('./search'),
+  require('./start'),
+  require('./tags'),
   require('./tests'),
   require('./users'),
-  require('./misc'), // includes entry route; TODO: rename
+  require('./workflows'),
 ];
 
 // Routes with prepended paths

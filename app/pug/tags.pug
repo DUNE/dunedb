@@ -1,0 +1,75 @@
+extend default
+
+block vars
+  - var page_title = "Type Form Tags";
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      h2 Type Form Tags
+
+    div.vert-space-x1 
+      p Tags may be assigned to component, action or workflow type forms using their respective 'Edit [entity] Type Form' pages.
+        br
+        | Please note that you must have the correct user permission [forms:edit] to add and modify tags.
+      p The table below lists all currently cached type form tags (apart from the 'Trash' tag), and which component, action and/or workflow type forms each tag is associated with.
+
+      hr
+
+    div.vert-space-x2
+      table.table
+        thead
+          tr
+            th.col-md-2 Type Form Tag
+            th.col-md-3 Component Types
+            th.col-md-3 Action Types
+            th.col-md-3 Workflow Types
+
+        tbody
+          each tag in typeFormTags
+
+            - var filteredComponentTypeIds = [];
+            - var filteredComponentTypeNames = [];
+            - var filteredActionTypeIds = [];
+            - var filteredActionTypeNames = [];
+
+            each componentForm in componentTypeForms
+              if(componentForm.tags.includes(tag) && !componentForm.tags.includes("Trash"))
+                - filteredComponentTypeIds.push(componentForm.formId)
+                - filteredComponentTypeNames.push(componentForm.formName)
+
+            each actionForm in actionTypeForms
+              if(actionForm.tags.includes(tag) && !actionForm.tags.includes("Trash"))
+                - filteredActionTypeIds.push(actionForm.formId)
+                - filteredActionTypeNames.push(actionForm.formName)
+
+            tr 
+              td #{tag}
+
+              if(filteredComponentTypeNames.length > 0)
+                td
+                  div.form-inline 
+                    each typeName, i in filteredComponentTypeNames 
+                      | [
+                      a(href = '/components/' + filteredComponentTypeIds[i] + '/list')=typeName 
+                      | ]
+                      if(i != filteredComponentTypeNames.length - 1)
+                        | &nbsp; &nbsp;
+              else
+                td (none)
+
+              if(filteredActionTypeNames.length > 0)
+                td
+                  div.form-inline 
+                    each typeName, i in filteredActionTypeNames 
+                      | [
+                      a(href = '/actions/' + filteredActionTypeIds[i] + '/list')=typeName 
+                      | ]
+                      if(i != filteredActionTypeNames.length - 1)
+                        | &nbsp; &nbsp;
+              else
+                td (none)
+
+              td 
+
+    div.vert-space-x2                
