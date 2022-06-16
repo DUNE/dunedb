@@ -2,14 +2,14 @@ extend default
 include common.pug
 
 block vars
-  - var page_title = "View Action Record";
+  - const page_title = 'View Action Record';
 
 block extrascripts
   script(type = 'text/javascript').
-    var action = !{JSON.stringify(action || {}, null, 4)};
-    var actionVersions = !{JSON.stringify(actionVersions || {}, null, 4)};
-    var actionTypeForm = !{JSON.stringify(actionTypeForm || {}, null, 4)};
-    var component = !{JSON.stringify(component || {}, null, 4)};
+    const action = !{JSON.stringify(action, null, 4)};
+    const actionVersions = !{JSON.stringify(actionVersions, null, 4)};
+    const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
+    const component = !{JSON.stringify(component, null, 4)};
 
   block workscripts
     script(src = '/pages/action.js')
@@ -26,13 +26,13 @@ block content
 
         dt Action ID
         dd
-          a(href = '/action/' + action.actionId)=action.actionId
+          a(href = `/action/${action.actionId}`)=action.actionId
 
-        - var uuid = MUUID.from(action.componentUuid).toString();
+        - const uuid = MUUID.from(action.componentUuid).toString();
 
         dt Performed on Component:
         dd UUID: 
-          a(href = '/component/' + uuid)=uuid
+          a(href = `/component/${uuid}`)=uuid
           br
           | Type: #{component.formName}
           br
@@ -44,7 +44,7 @@ block content
 
           if action.insertion.user
             |  by !{' '}
-            a(href = 'mailto:' + user_email(action.insertion.user)) #{action.insertion.user.displayName}
+            a(href = `mailto:${user_email(action.insertion.user)}`) #{action.insertion.user.displayName}
 
           div.vert-space-x1.border-success.border.rounded.p-2
             #typeform
@@ -59,21 +59,21 @@ block content
         ul
           each v in actionVersions
             li 
-              a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
+              a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
               |  on 
               +dateFormatAndAgo(v.insertion.insertDate)
 
               if v.insertion.user
                 |  by !{' '}
-                a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
+                a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
     div.vert-space-x2.form-inline
-      a(href = '/action/' + action.actionId + '/edit').btn.btn-warning
+      a(href = `/action/${action.actionId}/edit`).btn.btn-warning
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Edit Action
 
       div.hori-space-x2
-        a(href = '/json/action/' + action.actionId, target = '_blank').btn.btn-secondary
+        a(href = `/json/action/${action.actionId}`, target = '_blank').btn.btn-secondary
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View JSON Record
 

@@ -44,10 +44,12 @@ block content
         
         dt Roles
         dd
-          +arrayFormat(user.roles)
+          .monospace
+            +arrayFormat(user.roles)
         
         dt Permissions granted by these Roles:
         dd
-          +arrayFormat(user.permissions)
+          .monospace
+            +arrayFormat(user.permissions)
     
     div.vert-space-x2

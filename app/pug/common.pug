@@ -1,10 +1,9 @@
-
 block pugscripts
   // Return the appropriate boolean flag ('true' or 'false') based on the 'truthiness' of the user authentication
   - const isAuthenticated = () => !!user;
   
   // Return the user's primary email address if the user is authenticated, or an error message if not
-  - function user_email(user)     { if (isAuthenticated()) return (user.emails[0].value); return "[Please login to see!]" };
+  - function user_email(user) { if (isAuthenticated()) return (user.emails[0].value); return "[Please login to see!]" };
   
   // Return the user's display name if the user is authenticated (or the email address if no display name has been set), or an error message if not
   - function user_shortname(user) { if (isAuthenticated()) return (user.displayName || user_email(user)); return "[Please login to see!]" };
@@ -14,10 +13,10 @@ mixin dateFormat(date)
 
 mixin dateFormatAndAgo(date)
   span.date(data - date = date)=moment(date).format('MMMM Do YYYY, h:mm:ss a')
-    =" (" + moment(date).fromNow() + ")"
+    =` (${moment(date).fromNow()})`
 
 mixin arrayFormat(array)
-  .monospace #{JSON.stringify(array).replace(/["\[\]]/g, '').replace(/,/g, ', ')}
+  span #{JSON.stringify(array).replace(/["\[\]]/g, '').replace(/,/g, ', ')}
 
 mixin qr-panel(text, desc)
   div.qr&attributes(attributes)
@@ -37,12 +36,14 @@ mixin qr-panel(text, desc)
       canvas.qr-code(data-QR-text = text, data-QR-desc = desc)      
 
 mixin short_user(user)
+  //- This mixin only used by 'processResult.pug' ... delete if no longer needed
   if (!user)
     span [Please login to see!]
   else
     a(href = 'mailto:' + user_email(user)) = user.displayName || user_email(user)
 
 mixin createdFrom(created_from)
+  //- This mixin related to processes ... delete if no longer needed
   if(created_from && created_from.processRecordId)
     div.createdFrom.alert.alert-info
       span This DB entry was created by an automated process:

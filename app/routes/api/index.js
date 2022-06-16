@@ -228,7 +228,7 @@ router.get('/componentTypesTags', permissions.checkPermissionJson('components:vi
 router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified action ID
-    var action = await Actions.retrieve(req.params.actionId);
+    const action = await Actions.retrieve(req.params.actionId);
 
     // Return the record in JSON format
     return res.json(action, null, 2);
@@ -246,7 +246,7 @@ router.post('/action', permissions.checkPermissionJson('actions:perform'), async
     logger.info(req.body, 'Submission to /action');
 
     // Save the record
-    var action = await Actions.save(req.body, req);
+    const action = await Actions.save(req.body, req);
     res.json(action.actionId);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
@@ -259,9 +259,9 @@ router.post('/action', permissions.checkPermissionJson('actions:perform'), async
 router.get('/actions/' + utils.uuid_regex, permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
     // Retrieve all records using the specified component UUID
-    var match_condition = { componentUuid: req.params.uuid };
+    const match_condition = { componentUuid: req.params.uuid };
 
-    var actions = await Actions.list(match_condition);
+    const actions = await Actions.list(match_condition);
 
     // Return the records in JSON format
     return res.json(actions);
