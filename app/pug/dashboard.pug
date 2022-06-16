@@ -7,11 +7,11 @@ head
 
   title #{page_title || 'APA Construction Database'}
 
-  <meta charset = "utf-8">
-  <meta http-equiv = "X-UA-Compatible" content = "IE=edge">
-  <meta name = "viewport" content = "width = device-width, initial-scale = 1, shrink-to-fit = no">
+  <meta charset = 'utf-8'>
+  <meta http-equiv = 'X-UA-Compatible' content = 'IE=edge'>
+  <meta name = 'viewport' content = 'width = device-width, initial-scale = 1, shrink-to-fit = no'>
 
-  link(rel = 'icon',       href = '/images/browser_icon.png', type = 'image/png')
+  link(rel = 'icon', href = '/images/browser_icon.png', type = 'image/png')
   link(rel = 'stylesheet', href = '/css/dashboard.css')
   link(rel = 'stylesheet', href = '/css/custom.scss')
   link(rel = 'stylesheet', href = '/dist/formiojs/formio.full.min.css')
@@ -21,7 +21,7 @@ head
   link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
   link(rel = 'stylesheet', href = '/css/component_summary.css')
   link(rel = 'stylesheet', href = '/css/test_run_multiComponent.css')
-  link(rel = 'preload',    href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap', as = 'style')
+  link(rel = 'preload', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap', as = 'style')
   link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap')
 
   // Perform the 'jquery' early, since it's used in lots of scripts, possibly defined in body
@@ -36,22 +36,22 @@ mixin navlink
       block
 
 block layoutDefinitions
-// - sidebar = "inactive"    // Comment this back in to disable the sidebar
-//                           // Alternatively, pass {sidebar:inactive} to pug
+//-  sidebar = 'inactive'    // Comment this back in to disable the sidebar
+//-                          // Alternatively, pass {sidebar: inactive} to pug
 
 body(class = `deployment-${NODE_ENV}`)
   block allbody
     block navbar
       nav.navbar.navbar-dark.bg-dark.flex-nowrap.p-0.shadow
 
-        button#sidebarCollapse.btn-btn-info(type = "button")
+        button#sidebarCollapse.btn-btn-info(type = 'button')
           i.fa.fa-align-left
 
         a.navbar-brand.col-sm-3.col-md-2.mr-0.align-middle#navbar-brand(href = '/')
           span.pagename.text-capitalize #{NODE_ENV}
 
-          div.pull-right(style = "height: 1.3em; display: inline-block")
-            img(src = "/images/noun_cave_1842206.svg", style = "height: 100%; width: auto; fill: black;")
+          div.pull-right(style = 'height: 1.3em; display: inline-block')
+            img(src = '/images/noun_cave_1842206.svg', style = 'height: 100%; width: auto; fill: black;')
 
         input.form-control.form-control-dark#navbar-search(type = 'search' placeholder = 'Search ...' aria-label = 'Search')
 
@@ -74,12 +74,12 @@ body(class = `deployment-${NODE_ENV}`)
           ul.nav.flex-column
             li.nav-item
               +navlink(href = '/')
-                i.fa.fa-home("aria-hidden" = "true")
+                i.fa.fa-home(aria-hidden = 'true')
                 | Home
 
             li.nav-item
               +navlink(href = '/components/recent')
-                i.fa.fa-puzzle-piece("aria-hidden" = "true")
+                i.fa.fa-puzzle-piece(aria-hidden = 'true')
                 | Components
 
               ul.nav.flex-column.ml-3.sub-bar
@@ -95,7 +95,7 @@ body(class = `deployment-${NODE_ENV}`)
 
             li.nav-item
               +navlink(href = '/actions/list')
-                i.fa.fa-flask("aria-hidden" = "true")
+                i.fa.fa-flask(aria-hidden = 'true')
                 | Actions
 
               ul.nav.flex-column.ml-3.sub-bar
@@ -105,7 +105,7 @@ body(class = `deployment-${NODE_ENV}`)
 
             li.nav-item
               +navlink(href = '/tests/recent')
-                i.fa.fa-flask("aria-hidden" = "true")
+                i.fa.fa-flask(aria-hidden = 'true')
                 | Tests
 
               ul.nav.flex-column.ml-3.sub-bar
@@ -118,7 +118,7 @@ body(class = `deployment-${NODE_ENV}`)
 
             li.nav-item
               +navlink(href = '/jobs/recent')
-                i.fa.fa-list-ol("aria-hidden" = "true")
+                i.fa.fa-list-ol(aria-hidden = 'true')
                 | Jobs
 
               ul.nav.flex-column.ml-3.sub-bar
@@ -128,18 +128,18 @@ body(class = `deployment-${NODE_ENV}`)
 
             li.nav-item
               +navlink(href = '/courses')
-                i.fa.fa-graduation-cap("aria-hidden" = "true")
+                i.fa.fa-graduation-cap(aria-hidden = 'true')
                 | Courses
 
             //- [KRISH] Leave this sidebar item commented out for now ... will enable it once we know more about type form tags usage
             //- li.nav-item
             //-   +navlink(href = '/tags')
-            //-     i.fa.fa-list-ol("aria-hidden" = "true")
+            //-     i.fa.fa-list-ol(aria-hidden = 'true')
             //-     | Type Form Tags
 
             li.nav-item
               +navlink(href = '/users')
-                i.fa.fa-user("aria-hidden" = "true")
+                i.fa.fa-user(aria-hidden = 'true')
                 | Users
 
               ul.nav.flex-column.ml-3.sub-bar
@@ -149,7 +149,7 @@ body(class = `deployment-${NODE_ENV}`)
 
             li.nav-item
               +navlink(href = '/search')
-                i.fa.fa-search("aria-hidden" = "true")
+                i.fa.fa-search(aria-hidden = 'true')
                 | Advanced Search
 
           hr
@@ -157,12 +157,12 @@ body(class = `deployment-${NODE_ENV}`)
           ul.nav.flex-column
             li.nav-item
               +navlink(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank')
-                i.fa.fa-globe("aria-hidden" = "true")
+                i.fa.fa-globe(aria-hidden = 'true')
                 | DB Documentation
 
             li.nav-item
               +navlink(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank')
-                i.fa.fa-globe("aria-hidden" = "true")
+                i.fa.fa-globe(aria-hidden = 'true')
                 | EDMS File Storage
 
       #content
@@ -181,7 +181,7 @@ script(src = '/dist/bootstrap-autocomplete/latest/bootstrap-autocomplete.min.js'
 script(src = '/dist/formiojs/formio.full.js')
 
 script.
-  Formio.setBaseUrl("!{base_url}");
+  Formio.setBaseUrl('!{base_url}');
 
 script(src = '/dist/short-uuid/short-uuid.min.js')
 script(src = '/dist/deepmerge/umd.js')

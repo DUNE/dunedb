@@ -1,12 +1,11 @@
 extend default
 
 block vars
-  - var page_title = "Perform Action (Unspecified Component)";
+  - const page_title = 'Perform Action (Unspecified Component)';
 
 block extrascripts
   script(type = 'text/javascript').
-    var actionTypeFormId = '!{actionTypeFormId}';
-    var actionTypeFormName = '!{actionTypeFormName}';
+    const actionTypeFormId = !{JSON.stringify(actionTypeFormId)};
 
   block workscripts
     script(src = '/pages/action_unspecComponent.js')

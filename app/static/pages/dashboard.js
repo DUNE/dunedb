@@ -1,41 +1,31 @@
-function executeASearch(term) {
-        //- console.log("Execute a Search:",term);
-        window.location.href = `/search?`+JsonURL.stringify({search:term});
-};
-
-
-// Don't wait for document-load since it creates an annoyingly slow flicker
-console.log('sidebar state on load:',localStorage.getItem('sidebar'));
+// Set up sidebar animations before page load, since waiting creates an annoyingly slow flicker
 if (localStorage.getItem('sidebar') === '0') {
-    $('body').addClass('disable-animations');
-    $('#sidebar').addClass('inactive');
-    requestAnimationFrame(function () {
-        $('body').removeClass('disable-animations');
-    });
+  document.getElementById('body').classList.add('disable-animations');
+  document.getElementById('sidebar').classList.add('inactive');
+
+  requestAnimationFrame(function () {
+    document.getElementById('body').classList.remove('disable-animations');
+  });
 }
 
-$(function(){
-    $("#navbar-search")
-    .on('change',function(){
-      executeASearch($(this).val());
-    })
-    .on('keyup',function(){
-      if (event.key === "Enter") executeASearch($(this).val());
-    });
 
+// Functions for user interaction on the homepage
+$(function () {
+  // Execute a search from the navigation bar by entering a search term and then pressing the 'Enter' key
+  document.getElementById('navbar-search').addEventListener('keyup', function (e) {
+    if (e.key === 'Enter') window.location.href = `/search?${JsonURL.stringify({ search: this.value })}`;
+  });
 
+  // Collapse / expand the sidebar on button click
+  document.getElementById('sidebarCollapse').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('inactive');
+    
+    const state = document.getElementById('sidebar').classList.contains('inactive') ? 0 : 1;
+    localStorage.setItem('sidebar', state);
+  });
 
-
-    $('#sidebarCollapse').on('click', function () {
-        // $('#sidebar').toggle();
-       $('#sidebar').toggleClass("inactive");
-       var state = $('#sidebar').hasClass('inactive') ? 0 : 1;
-       console.log("sidebar save state",state)
-       localStorage.setItem('sidebar', state);
-
-        // document.getElmentById("sidebar").classList.toggle("closed");
-    });
-
-    $(document).on('click', '[data-toggle="lightbox"]', function(event) {event.preventDefault();$(this).ekkoLightbox({alwaysShowClose: true});});
-
+  document.on('click', '[data-toggle = "lightbox"]', function (e) {
+    e.preventDefault();
+    this.ekkoLightbox({ alwaysShowClose: true });
+  });
 });

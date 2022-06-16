@@ -1,10 +1,10 @@
 extend default
 
 block vars
-  - var page_title = "Dashboard";
+  - const page_title = 'Dashboard';
 
 block content
-  if NODE_ENV == "development"
+  if NODE_ENV == 'development'
     .alert.alert-warning
       br
       p This is a <strong>DEVELOPMENT</strong> deployment of the DUNE APA Construction Database, hosted locally on your computer.  It is <strong>not</strong> connected to either the 
@@ -17,8 +17,8 @@ block content
         a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar. 
         |  Otherwise, this deployment is your own personal playground.
       p
-  
-  if NODE_ENV == "staging"
+
+  if NODE_ENV == 'staging'
     .alert.alert-danger
       br
       p This is the <strong>STAGING</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
@@ -27,42 +27,42 @@ block content
         br
         | Changes to the underlying code made by the developers will be automatically pushed to the production deployment, but it up to individual users to copy over any additions and/or alterations to the database that they make through this deployment's web interface.
       p
-  
-  if NODE_ENV == "production"
+
+  if NODE_ENV == 'production'
     .alert.alert-success 
       br
       p This is the <strong>PRODUCTION</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.
       p
-  
+
   .container-fluid
     div.vert-space-x1.border-success.border.rounded.p-2
       h5 Messages from the Development Team:
       ul
         li <strong>2022-04-07</strong> - We have moved all internal database documentation to the 
-           a(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank') Github Wiki
-           | .  Additionally, files can no longer be uploaded to the database - they must now be stored in the 
-           a(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank') APA area
-           |  of CERN's EDMS system.  Users are welcome to provided links to EDMS files within DB entries.
+          a(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank') Github Wiki
+          | .  Additionally, files can no longer be uploaded to the database - they must now be stored in the 
+          a(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank') APA area
+          |  of CERN's EDMS system.  Users are welcome to provided links to EDMS files within DB entries.
         li <strong>2022-03-29</strong> - The 'production' deployment is now live and accessible from outside the Fermilab firewall by any user with an appropriate Auth0 account.  (Access using a Fermilab SSO will be added soon.)  The development team will conduct some initial testing to confirm that the basic functionality and interface are working correctly, but please do report any issues that we may have missed.  The 'staging' deployment will be rolled out at a later date, and access to that will be restricted to only a select group of users for the time being (this may change in the future).
         li <strong>2022-03-18</strong> - Welcome to version 2 of the DUNE APA Construction Database!  This database was previously known as <strong>Sietch</strong>, and initially developed by Nathaniel Tagg.  The current development team have now completed a major refactoring of the entire database code, as well as streamlining the Docker environment setup and OKD configuration.  This should not significantly change the web interface, but will considerably improve the stability, reliability and long-term ease-of-use of the code itself.
-    
+
     div.vert-space-x1.border-danger.border.rounded.p-2
       h5 Useful Links, Bugs and Other Issues
       ul
         li For documentation relating to the database itself (i.e. descriptions of the functionality, overviews of common usage, etc.), please see our 
-           |
-           a(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank') Github Wiki page
-           |  (a Github account is not required to view the Wiki).  Please note that this Wiki should always be considered 'in progress'.
+          |
+          a(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank') Github Wiki page
+          |  (a Github account is not required to view the Wiki).  Please note that this Wiki should always be considered 'in progress'.
         li Documents and other files relating to APA construction (manufacturer invoices, procedure write-ups, etc.) should be stored externally in the 
-           a(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank') APA area
-           |  of CERN's EDMS system (a CERN account is not required to view documents).
-        
+          a(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank') APA area
+          |  of CERN's EDMS system (a CERN account is not required to view documents).
+
         br
-        
+
         li Bugs and other errors with existing functionality should be reported at our 
-           |
-           a(href = 'https://github.com/DUNE/dunedb/issues', target = '_blank') Github Issues page
-           |  (a Github account is required to report issues).  Please give as much information as you can - an example page or link to where the bug occurs, how to reproduce the error (if appropriate), etc.
+          |
+          a(href = 'https://github.com/DUNE/dunedb/issues', target = '_blank') Github Issues page
+          |  (a Github account is required to report issues).  Please give as much information as you can - an example page or link to where the bug occurs, how to reproduce the error (if appropriate), etc.
         li Requests for new and/or additional features and functionality can also be made on the Issues page, but please first check if the addition and/or change can be made by users directly through the web interface.
-    
+
     div.vert-space-x2

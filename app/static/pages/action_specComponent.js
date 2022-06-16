@@ -8,7 +8,7 @@ window.addEventListener('load', onPageLoad);
 /// Function to run when the page is loaded
 async function onPageLoad() {
   // Set up a new type form based on the schema of the action type form
-  var schema = actionTypeForm.schema;
+  let schema = actionTypeForm.schema;
 
   // Add a 'Submit' button to the type form (this is temporary, only in the scope of this script)
   schema.components.push({
@@ -76,7 +76,7 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user back to the page for viewing an action record ('result' is the action's action ID)
-    window.location.href = '/action/' + result;
+    window.location.href = `/action/${result}`;
   }
 
 
@@ -87,7 +87,7 @@ function SubmitData(submission) {
     if (result.responseText) {
       typeForm.setAlert('danger', result.responseText);
     } else {
-      typeForm.setAlert('danger', statusMsg + " (" + statusCode + ")");
+      typeForm.setAlert('danger', `${statusMsg} (${statusCode})`);
     }
 
     // Display a 'submission error' message
