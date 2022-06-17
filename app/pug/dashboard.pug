@@ -20,7 +20,6 @@ head
   link(rel = 'stylesheet', href = '/css/component.css')
   link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
   link(rel = 'stylesheet', href = '/css/component_summary.css')
-  link(rel = 'stylesheet', href = '/css/test_run_multiComponent.css')
   link(rel = 'preload', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap', as = 'style')
   link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap')
 
@@ -102,29 +101,6 @@ body(class = `deployment-${NODE_ENV}`)
                 li.nav-item
                   +navlink(href = '/actionTypes/list')
                     |      Action Types
-
-            li.nav-item
-              +navlink(href = '/tests/recent')
-                i.fa.fa-flask(aria-hidden = 'true')
-                | Tests
-
-              ul.nav.flex-column.ml-3.sub-bar
-                li.nav-item
-                  +navlink(href = '/tests/types')
-                    |      List Test Types
-                li.nav-item
-                  +navlink(href = '/tests/myDrafts')
-                    |      My Draft Tests
-
-            li.nav-item
-              +navlink(href = '/jobs/recent')
-                i.fa.fa-list-ol(aria-hidden = 'true')
-                | Jobs
-
-              ul.nav.flex-column.ml-3.sub-bar
-                li.nav-item
-                  +navlink(href = '/jobs/types')
-                    |      List Job Types
 
             li.nav-item
               +navlink(href = '/courses')

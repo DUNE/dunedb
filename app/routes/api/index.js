@@ -8,8 +8,6 @@ const Actions = require('lib/Actions.js');
 const express = require("express");
 const Forms = require("lib/Forms.js");
 const Components = require("lib/Components.js")('component');
-const Tests = require("lib/Tests.js")('test');
-const Jobs = require("lib/Jobs.js")('job');
 const ComponentTypes = require("lib/ComponentTypes.js");
 const Workflows = require("lib/Workflows.js");
 const Cache = require("lib/Cache.js");
@@ -276,7 +274,7 @@ router.get('/actions/' + utils.uuid_regex, permissions.checkPermissionJson('acti
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(testForms|componentForms|jobForms|actionForms)/:format(list|object)?', 
+router.get('/:collection(componentForms|actionForms)/:format(list|object)?', 
   async function(req,res,next){
     try {
       var obj = await Forms.list(req.params.collection)
@@ -295,7 +293,7 @@ router.get('/:collection(testForms|componentForms|jobForms|actionForms)/:format(
 
 // API/Backend: Get a form schema
 
-router.get('/:collection(testForms|componentForms|jobForms|actionForms)/:formId', 
+router.get('/:collection(componentForms|actionForms)/:formId', 
   async function(req,res,next){
     if(req.params.collection == 'componentForms') Cache.invalidate('componentTypes');  
 
@@ -309,7 +307,7 @@ router.get('/:collection(testForms|componentForms|jobForms|actionForms)/:formId'
 
 
 // API/Backend: Update a form schema.
-router.post('/:collection(testForms|componentForms|jobForms|actionForms)/:formId', 
+router.post('/:collection(componentForms|actionForms)/:formId', 
   async function(req,res,next){
     logger.info(chalk.blue("Schema submission","/json/"+req.params.collection));
 
@@ -325,121 +323,6 @@ router.post('/:collection(testForms|componentForms|jobForms|actionForms)/:formId
     }
   }
 );
-
-
-/////////////////////////////////////////////////////////////
-// Test data
-
-/// submit test form data
-router.post("/test", permissions.checkPermissionJson('tests:submit'), 
-  async function submit_test_data(req,res,next) {
-    logger.info(chalk.blue("Form submission",req.params.formId));
-    // var body = await parse.json(req);
-    try {
-      logger.info(req.body,"Submission to /test");
-      var outrec = await Tests.save(req.body, req);
-      res.json(outrec);
-    } catch(err) {
-      logger.error("error submitting form /test"+req.params.formId);
-      res.status(400).json({error:err.toString()});
-    } 
-  }
-);
-
-
-// Get a specific test
-
-router.get("/test/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson('tests:view'), 
-  async function retrieve_test_data(req,res,next) {
-  try {
-    logger.info("retrieve test data",req.params);
-    var record = await Tests.retrieve(req.params.record_id);
-    return res.json(record,null,2);
-  } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
-  }
-});
-
-
-// Get summary data for specific test
-router.get("/test/:record_id([A-Fa-f0-9]{24})/info",  permissions.checkPermissionJson('tests:view'), 
-  async function retrieve_test_data(req,res,next) {
-  try {
-    var test = await Tests.retrieve(req.params.record_id, {_id:1, componentUuid:1, formId: 1, insertion: 1});
-    var forminfo = {};
-    if(test) forminfo = (await Forms.list("testForms"))[test.formId];
-    var record = {...forminfo,...test};
-    return res.json(record,null,2);
-  } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
-  }
-});
-
-// Get many specific tests
-router.post("/test/getBulk",  permissions.checkPermissionJson('tests:view'), 
-  async function(req,res,next) {
-
-  try {
-    if(!Array.isArray(req.body)) throw(new Error("/test/getBulk expects and array"))
-    var input = req.body;
-    // console.log("/test/getBulk with ",req.body.length, " entries");
-    logger.info("retrieve test data",req.body);
-    var records = await Tests.retrieveBulk(req.body);
-    return res.json(records,null,2);
-  } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
-  }
-});
-
-// Get list of tests done on a specific component
-
-router.get("/tests/"+utils.uuid_regex,  permissions.checkPermissionJson('tests:view'), 
-  async function (req,res,next) {
-  try {
-    return res.json(await Tests.listComponentTests(req.params.uuid));
-  } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
-  }
-});
-
-
-
-
-/////////////////////////////////////////////////////////////
-// Job data
-
-/// submit job form data
-// Same as test, but no componentUuid required.
-router.post("/job", permissions.checkPermissionJson('jobs:submit'), 
-  async function submit_test_data(req,res,next) {
-    logger.info(chalk.blue("Job submission",req.params.formId));
-    // var body = await parse.json(req);
-    try {
-      var outrec  = await Jobs.save(req.body, req);
-      res.json(outrec.jobId);
-    } catch(err) {
-      logger.info({route:req.route.path},err.message);
-      res.status(400).json({error:err.toString()});
-    } 
-  }
-);
-
-
-router.get("/job/:record_id([A-Fa-f0-9]{24})",  permissions.checkPermissionJson('tests:view'), 
-  async function retrieve_test_data(req,res,next) {
-  try {
-    logger.info("retrieve test data",req.params);
-    var record = await Jobs.retrieve(req.params.record_id);
-    return res.json(record,null,2);
-  } catch(err) {
-      logger.info({route:req.route.path},err.message);
-      res.status(400).json({error:err.toString()});
-  }
-});
 
 
 /// Workflows
@@ -496,7 +379,7 @@ router.get("/workflow/:workflowId/"+utils.uuid_regex, permissions.checkPermissio
 // searching via POST parameters
 // 
 // /search/<recordType>/<type>?search=<textsearch>&insertAfter=<date>&insertBefore=<date>
-router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.checkPermissionJson('tests:view'), 
+router.post("/search/:recordType(component)?/:formId?",  permissions.checkPermissionJson('tests:view'), 
   async function retrieve_test_data(req,res,next) {
   try {
     logger.info("search request",req.params,req.body);
@@ -528,17 +411,6 @@ router.post("/search/:recordType(component|job|test)?/:formId?",  permissions.ch
     if(!req.params.recordType || req.params.recordType === 'component') {
       if(formId) matchobj.type = formId;
       result.push(...await Components.search(searchterms,matchobj,limit,skip));
-      // logger.info("result",result);
-    }
-    if(!req.params.recordType ||req.params.recordType === 'test') {
-      if(formId) matchobj.formId = formId;
-      // logger.info("matchobj",matchobj);
-      result.push(...await Tests.search(searchterms,matchobj,limit,skip));
-      // logger.info("result",result);
-    }
-    if(!req.params.recordType || req.params.recordType === 'job') {
-      if(formId) matchobj.formId = formId;
-      result.push(...await Jobs.search(searchterms,matchobj,limit,skip));
       // logger.info("result",result);
     }
     return res.json(result);

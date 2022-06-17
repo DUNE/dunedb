@@ -35,9 +35,9 @@ async function save(input,collection,req)
   //
   // req must contain user and ip fields.
   //
-  // collection is a string, ususally "testForms" that indicates which collection this is.
+  // collection is a string that indicates which collection this is.
 
-  collection = collection || "testForms";
+  collection = collection;
   if(!input) throw new Error("No input given to saveForm");
   if(!input.formId) throw new Error("No formId given to saveForm")
   if(!input.formName) throw new Error("No formName given to saveForm")
@@ -86,7 +86,7 @@ async function retrieve(collection,formId,options){
 	//	 i.e. show me results that should be valid on that date (although data may have been retroactively entered)
 	// version - roll form back to this version
 	// logger.info("Forms::retrieve()",...arguments);
-	// collection = collection || "testForms"; // collection no longer optional
+	// collection = collection; // collection no longer optional
 
 	var col  = db.collection(collection);
 
@@ -131,7 +131,7 @@ function getFormList(collection) {
                                     formName:       { "$first":  "$formName" },
                                     formObjectId:   { "$first": "$_id" },
                                     tags:           {"$first": "$tags"},
-                                    componentTypes: {"$first": "$componentTypes"}, // tests only
+                                    componentTypes: {"$first": "$componentTypes"}, // actions only
                                     icon:           {"$first": {"$arrayElemAt": ["$icon.url", 0]}}
                                   }
                                 }
@@ -151,15 +151,13 @@ function getFormList(collection) {
   }
 }
 
-Cache.add("formlist_testForms",getFormList("testForms")); 
-Cache.add("formlist_jobForms",getFormList("jobForms")); 
 Cache.add("formlist_componentForms",getFormList("componentForms")); 
 Cache.add("formlist_actionForms",getFormList("actionForms")); 
 
 
 async function list(collection)
 { 
-  collection = collection || "testForms";
+  collection = collection;
   // Cache.invalidate("formlist_"+collection);
   var retval = await Cache.current("formlist_"+collection);
   // logger.info(retval,"Forms::list()"+collection);
@@ -173,12 +171,10 @@ async function list(collection)
 Cache.add("all_tags",async function() {
     // Simultaneous queries. Fun!
     var tags_lists = await Promise.all([
-          db.collection("testForms").distinct("tags"),
-          db.collection("jobForms").distinct("tags"),
           db.collection("componentForms").distinct("tags"),
           db.collection("actionForms").distinct("tags"),
         ]);
-    // This gives four arrays of results. we want to concatenate
+    // This gives two arrays of results. we want to concatenate
     // and take only unique values. Turn each array element into a key.
     var tokens = {};
     for(var arr of tags_lists)

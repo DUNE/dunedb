@@ -190,7 +190,7 @@ var metaschema =
       {
         "label": "Tags",
         "placeholder": "categories",
-        "tooltip": "Test or job types that this component relates to. Use the 'Trash' tag to remove this component type from public view.",
+        "tooltip": "Action types that this component relates to. Use the 'Trash' tag to remove this component type from public view.",
         "tableView": false,
         "storeas": "array",
         "key": "tags",
