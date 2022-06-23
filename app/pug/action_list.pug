@@ -7,10 +7,10 @@ block vars
 block content
   .container-fluid
     div.vert-space-x2
-      if(singleType && actionTypeForm.tags && !actionTypeForm.tags.includes("Trash"))
+      if(singleType && actionTypeForm.tags && !actionTypeForm.tags.includes('Trash'))
         a(href = `/action/${actionTypeForm.formId}`).btn.btn-primary
           img.small-icon(src = '/images/run_icon.svg')
-          | &nbsp; Perform this Action on a Component
+          | &nbsp; Perform a New Action of this Type
 
         div.vert-space-x2
 
@@ -24,15 +24,15 @@ block content
             th.col-md-2 Action ID
             th.col-md-2 Action Name
             th.col-md-2 Performed on Component:
-            th.col-md-2 Performed On:
+            th.col-md-2 Last Performed On:
             th.col-md-1
 
         tbody
           each action in actions
-            - const notSingleType_notTrashed = !singleType && !allActionTypeForms[action.typeFormId].tags.includes("Trash");
+            - const notSingleType_notTrashed = !singleType && !allActionTypeForms[action.typeFormId].tags.includes('Trash');
 
             if(notSingleType_notTrashed || singleType)
-              - const uuid = MUUID.from(action.componentUuid);
+              - const uuid = MUUID.from(action.componentUuid).toString();
 
               tr
                 td #{action.typeFormName}
@@ -40,9 +40,9 @@ block content
                   a(href = `/action/${action.actionId}`) #{action.actionId}
                 td #{action.name}
                 td
-                  a(href = `/component/${uuid.toString()}`)=uuid.toString()
+                  a(href = `/component/${uuid}`) #{uuid}
                 td
-                  +dateFormatAndAgo(action.insertDate)
+                  +dateFormatAndAgo(action.lastEditDate)
                 td
                   a(href = `/json/action/${action.actionId}`, target = '_blank').btn-sm.btn-secondary
                     img.small-icon(src = '/images/checklist_icon.svg')

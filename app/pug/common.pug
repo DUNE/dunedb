@@ -19,7 +19,7 @@ mixin arrayFormat(array)
   span #{JSON.stringify(array).replace(/["\[\]]/g, '').replace(/,/g, ', ')}
 
 mixin qr-panel(text, desc)
-  div.qr&attributes(attributes)
+  .qr&attributes(attributes)
     .qr-label.qr-label-top
       div=text
       div=desc

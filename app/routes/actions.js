@@ -2,7 +2,7 @@ const { readFileSync } = require('fs');
 const router = require('express').Router();
 
 const Actions = require('lib/Actions.js');
-const Components = require('lib/Components.js')('component');
+const Components = require('lib/Components.js');
 const Forms = require('lib/Forms.js');
 const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
@@ -124,7 +124,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
 });
 
 
-// Create a new action type form
+/// Create a new action type form
 router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
     // Check that the specified type form ID is not already being used
@@ -153,7 +153,7 @@ router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:ed
 });
 
 
-// Edit an existing action type form
+/// Edit an existing action type form
 router.get('/actionTypes/:typeFormId/edit', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
     // Render the interface page for editing an existing action type form
@@ -168,7 +168,7 @@ router.get('/actionTypes/:typeFormId/edit', permissions.checkPermission('forms:e
 });
 
 
-// List all action types
+/// List all action types
 router.get('/actionTypes/list', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
     // Retrieve a list of all action type forms that currently exist in the 'actionForms' collection
@@ -183,10 +183,10 @@ router.get('/actionTypes/list', permissions.checkPermission('actions:view'), asy
 });
 
 
-// List all actions performed across all action types
+/// List all actions across all action types
 router.get('/actions/list', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
-    // Retrieve records of all performed actions across all action types
+    // Retrieve records of all actions across all action types
     // The first argument ('match_condition') should be 'null' in order to match to any record
     const actions = await Actions.list(null, { limit: 100 });
 
@@ -207,7 +207,7 @@ router.get('/actions/list', permissions.checkPermission('actions:view'), async f
 });
 
 
-// List all actions of a single action type
+/// List all actions of a single action type
 router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
     // Construct the 'match_condition' to be used for querying the database
@@ -227,7 +227,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
     res.render('action_list.pug', {
       actions,
       singleType: true,
-      title: 'All Actions (Single Type)',
+      title: 'All Performed Actions (Single Type)',
       actionTypeForm,
       allActionTypeForms,
     });

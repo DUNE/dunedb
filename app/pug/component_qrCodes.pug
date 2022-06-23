@@ -2,34 +2,42 @@ extend default
 include common.pug
 
 block vars
-  - var page_title = "Component QR Codes";
+  - const page_title = 'Component QR Codes';
 
 block allbody
-  div.vert-space-x2.form-inline.noprint
-    div.hori-space-x1
-      a.btn.btn-primary(onclick = "window.print(); return false;" href = '#print') Print QR Codes
-  
-  div.vert-space-x2(style = 'clear: both;')
-    .container
+  div.vert-space-x2.hori-space-x1.noprint
+    a.btn.btn-primary(onclick = 'window.print(); return false;' href = '#print') Print QR Codes
+
+    div.vert-space-x1
+      p For best display, please print <strong>without headers and footers</strong>, <strong>without backgrounds</strong> and <strong>with no top and bottom margins</strong>.
+
+  div.vert-space-x2
+    hr
+
+  div.vert-space-x2
+    .container.fluid
+      - const qrCodeText = `${base_url}/c/${component.shortUuid.toString()}`;
+      - const qrCodeDesc = component.data.name;
+
       .row.qr-row
-        div.col-sm-6(style = "border: 1px solid #EEE")
-          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-        
-        div.col-sm-6(style = "border: 1px solid #EEE")
-          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-      
+        .col-sm-6.qr-col
+          +qr-panel(qrCodeText, qrCodeDesc)
+
+        .col-sm-6.qr-col
+          +qr-panel(qrCodeText, qrCodeDesc)
+
       .row.qr-row
-        div.col-sm-6(style = "border: 1px solid #EEE")
-          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-        
-        div.col-sm-6(style = "border: 1px solid #EEE")
-          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-      
+        .col-sm-6.qr-col
+          +qr-panel(qrCodeText, qrCodeDesc)
+
+        .col-sm-6.qr-col
+          +qr-panel(qrCodeText, qrCodeDesc)
+
       .row.qr-row
-        div.col-sm-6(style = "border: 1px solid #EEE")
-          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-        
-        div.col-sm-6(style = "border: 1px solid #EEE")
-          +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-  
+        .col-sm-6.qr-col
+          +qr-panel(qrCodeText, qrCodeDesc)
+
+        .col-sm-6.qr-col
+          +qr-panel(qrCodeText, qrCodeDesc)
+
   div.vert-space-x2

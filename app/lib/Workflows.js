@@ -2,7 +2,7 @@
 
 const Cache = require('lib/Cache.js');
 const commonSchema = require('lib/commonSchema.js');
-const Components = require('lib/Components.js')('component');
+const Components = require('lib/Components.js');
 const { db } = require('./db');
 const dbLock = require('lib/dbLock.js');
 const Forms = require('lib/Forms.js');

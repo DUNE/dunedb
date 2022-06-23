@@ -22,7 +22,14 @@ block content
     div.vert-space-x1
       dl
         dt Action Type
-        dd #{actionTypeForm.formName || actionTypeForm.formId}
+        dd #{action.typeFormName}
+
+        dt Action Name
+
+        if action.data.name
+          dd #{action.data.name}
+        else
+          dd (none)
 
         dt Action ID
         dd

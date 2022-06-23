@@ -7,8 +7,7 @@
 const Actions = require('lib/Actions.js');
 const express = require("express");
 const Forms = require("lib/Forms.js");
-const Components = require("lib/Components.js")('component');
-const ComponentTypes = require("lib/ComponentTypes.js");
+const Components = require("lib/Components.js");
 const Workflows = require("lib/Workflows.js");
 const Cache = require("lib/Cache.js");
 const utils = require("lib/utils.js");
@@ -25,198 +24,41 @@ module.exports = router;
 
 router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer json.
 
-
-// /generateComponentUuid
-// data format: none
-
-var QRCodeSVG = require('qrcode-svg');
 const { BASE_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require("../../lib/constants");
 
-// /api/generateComponentUuid returns the UUID string
-// /api/generateComponentUuid/url returns URL+UUID
-// /api/generateComponentUuid/svg returns an SVG file that formats the URL+UUID
-// /api/generateComponentUuid/svg?ecl=L,M, or H turns down the error correction from Q
 
-router.get('/generateComponentUuid/:format(svg|url)?', permissions.checkPermissionJson('components:edit'), 
-  async function(req,res){
-    var uuid = Components.newUuid();
-    if(req.params.format) {
-      if(req.params.format=="url") {
-        return res.json(`${BASE_URL}/${uuid.toString()}`);
-      }
-      if(req.params.format=="svg") {
-        var qr = new QRCodeSVG({
-          content: `${BASE_URL}/${uuid.toString()}`,
-          padding: 0,
-          ecl: (['L','M',"H","Q"].includes(req.query.ecl))?req.query.ecl:"Q",
-          container: "svg-viewbox",
-          join: true
-        });
-        res.set('Content-Type', "image/svg+xml");
-        logger.info(qr.svg());
-        return res.send(qr.svg());
-      }
-    }
-    res.json(uuid.toString());
+////////////////////////////////////////////////////////
+// Components
+
+/// Retrieve the most recent version of a single component record
+router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function(req, res, next) {
+  try {
+    // Retrieve the most recent version of the record corresponding to the specified component UUID
+    const component = await Components.retrieve(req.params.uuid);
+
+    // Return the record in JSON format
+    return res.json(component, null, 2);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
-);
+});
 
-// GET /component/uuid
-// data format: none
-// retrieves component of given id
-router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    // fresh retrival
-    var componentUuid = req.params.uuid;
-    var component= await Components.retrieve(componentUuid);
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
+
+/// Save a new or edited component record
+router.post('/component', permissions.checkPermissionJson('components:edit'), async function(req, res, next) {
+  try {
+    // Display a logger message indicating that a record is being saved via the '/component' route
+    logger.info(req.body, 'Submission to /component');
+
+    // Save the record
+    const component = await Components.save(req.body, req);
+    res.json(component.componentUuid);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
-);
-
-
-// GET /<shortuuid>
-// As above.
-router.get('/'+utils.short_uuid_regex, permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    var componentUuid = utils.unshortenUuid(req.params.shortuuid);
-    var component= await Components.retrieve(componentUuid);
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
-  }
-);
-
-
-// GET /<componentUuid>
-// As above.
-router.get('/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    var componentUuid = req.params.uuid
-    var component= await Components.retrieve(componentUuid);
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
-  }
-);
-
-
-// GET /component/uuid/simple
-// data format: component, but only small projection.
-// retrieves component of given id, but lightweight
-router.get('/component/'+utils.uuid_regex+'/simple', permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    // fresh retrival
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-    var component= await Components.retrieve(componentUuid,
-      {type:1, "data.name":1, componentUuid:1, validity:1, insertion:1});
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
-  }
-);
-
-router.get('/component/'+utils.uuid_regex+'/relationships', permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-  try{
-    // fresh retrival
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-    var relationships = await Components.relationships(componentUuid);
-    if(!relationships)  return res.status(400).json({error:"UUID not found"});
-    // for(var i in relationships.linkedFrom) {
-    //   var list = relationships.linkedFrom[i];
-    //   for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
-    // }
-    // for(var i in relationships.linkedTo) {
-    //   var list = relationships.linkedTo[i];
-    //   for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
-    // }
-    // logger.info("relationships",relationships);
-    res.json(relationships);
-  } catch(err) {
-      logger.error(err);
-      res.status(400).json({error:"Save failure "+err.toString()})
-    }  
-  }
-);
-
-
-// POST /component/uuid
-// data format: {
-//   data: {
-//     component fields, including uuid
-//   }
-// }
-//
-// retrieves component of given id
-router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('components:edit'), 
-  async function(req,res,next){
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-    var record = req.body;
-    record.componentUuid = componentUuid; // Ensure that record is keyed with URL route
-    try {
-      logger.info("saving component",record);
-      var data = await Components.save(record,req);
-      return res.json(data);
-    } catch(err) {
-      logger.error(err);
-      res.status(400).json({error:"Save failure "+err.toString()})
-    }  
-  }
-);
-
-
-router.get('/components/:type', permissions.checkPermissionJson('components:view'), 
-  async function(req,res,next){
-    // FIXME, add search terms
-    try {
-      var type = decodeURIComponent(req.params.type);
-      var data = await Components.list({type:type});
-      return res.json(data);
-    } catch(err) {
-      res.status(400).json({error:err.toString()})
-    }  
-  }
-);
-
-
-Cache.add('componentTypes',
-    async function(){
-      logger.info("regenerating componentTypes");
-      var types = await Components.getTypes();
-      var forms = await Forms.list('componentForms');
-      var componentTypes = deepmerge(types,forms);
-      return componentTypes;
-  },
-  ['componentCountsByType','formlist_componentForms'] // invalidate if these are invalidated
-);
-
-router.get('/componentTypes/:type?', permissions.checkPermissionJson('components:view'), 
-  async function(req,res,next){
-    try {
-      var componentTypes =  await ComponentTypes.list();
-      // one type
-      if(req.params.type) return res.json(componentTypes[decodeURIComponent(req.params.type)]);
-      return res.json(componentTypes);
-    } catch(err) {
-      res.status(400).json({error:err.toString()})
-    }  
-  }
-);
-
-router.get('/componentTypesTags', permissions.checkPermissionJson('components:view'), 
-  async function(req,res,next){
-    logger.info("Type tags",)
-    try {
-      var data = await Forms.list("componentForms");
-      var list=[{formId:"Trash"}];
-      for(var key in data) {
-        list.push(data[key]);
-      }
-      return res.json(list);
-    } catch(err) {
-      res.status(400).json({error:err.toString()})
-      logger.info({route:req.route.path},err.message);
-    }  
-  }
-);
+});
 
 
 ////////////////////////////////////////////////////////

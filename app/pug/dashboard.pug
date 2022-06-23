@@ -15,7 +15,7 @@ head
   link(rel = 'stylesheet', href = '/css/dashboard.css')
   link(rel = 'stylesheet', href = '/css/custom.scss')
   link(rel = 'stylesheet', href = '/dist/formiojs/formio.full.min.css')
-  link(rel = 'stylesheet', href = '/css/main.css')
+  link(rel = 'stylesheet', href = '/css/common.css')
   link(rel = 'stylesheet', href = '/css/AnnotationCanvas.css')
   link(rel = 'stylesheet', href = '/css/component.css')
   link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
@@ -23,7 +23,7 @@ head
   link(rel = 'preload', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap', as = 'style')
   link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap')
 
-  // Perform the 'jquery' early, since it's used in lots of scripts, possibly defined in body
+  //- Perform the 'jquery' early, since it's used in lots of scripts, possibly defined in body
   script(src = '/dist/jquery/jquery.min.js')
 
 mixin navlink
@@ -77,20 +77,17 @@ body(class = `deployment-${NODE_ENV}`)
                 | Home
 
             li.nav-item
-              +navlink(href = '/components/recent')
+              +navlink(href = '/components/list')
                 i.fa.fa-puzzle-piece(aria-hidden = 'true')
                 | Components
 
               ul.nav.flex-column.ml-3.sub-bar
                 li.nav-item
-                  +navlink(href = '/components/types')
-                    |      List Component Types
+                  +navlink(href = '/componentTypes/list')
+                    |      Component Types
                 li.nav-item
-                  +navlink(href = '/search/componentsByUUID')
+                  +navlink(href = '/search/componentByUUID')
                     |      Search by UUID
-                li.nav-item
-                  +navlink(href = '/components/myRecents')
-                    |      My Recent Components
 
             li.nav-item
               +navlink(href = '/actions/list')

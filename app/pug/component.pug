@@ -2,144 +2,135 @@ extend default
 include common.pug
 
 block vars
-  - var page_title = "View Component";
+  - const page_title = 'View Component';
 
 block extrascripts
   script(type = 'text/javascript').
-    var component = !{JSON.stringify(component || {})};
-    var form = !{JSON.stringify(form || {})};
-    var base_url = "!{base_url}";
-  
+    const component = !{JSON.stringify(component, null, 4)};
+    const componentVersions = !{JSON.stringify(componentVersions, null, 4)};
+    const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
+    const actions = !{JSON.stringify(actions, null, 4)};
+    const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
+    const base_url = '!{base_url}';
+
   block workscripts
     script(src = '/pages/component.js')
 
 block content
   .container-fluid
     div.vert-space-x2
-      h2 View Component
-    
+      h2 View Component Record
+
     div.vert-space-x1
       .row
         .col
           dl
-            dt Type
-            dd #{component.formName || component.formId}
-            
-            dt Name
+            dt Component Type
+            dd #{component.formName}
+
+            dt Component Name
             dd #{component.data.name}
-            
-            dt UUID
+
+            dt Component UUID
             dd
               div.form-inline
-                a(href = '/component/' + component.componentUuid)=component.componentUuid
-                
+                a(href = `/component/${component.componentUuid}`)=component.componentUuid
+
                 p &nbsp; &nbsp;
-                
-                div.copybutton(class = "btn-sm", id = "copyButton", type = "button", onclick = "CopyConfirm(component.componentUuid)") Copy
-            
+
+                a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
+
             dt Short UUID
             dd #{component.shortUuid}
-            
-            dt Current Version:
-            dd This is version #{component.validity.version} of the component, and was last edited on !{' '}
+
+            dt Component Data:
+            dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
               +dateFormatAndAgo(component.insertion.insertDate)
-              
+
               if component.insertion.user
                 |  by !{' '}
-                a(href = 'mailto:' + user_email(component.insertion.user)) #{component.insertion.user.displayName}
-              
+                a(href = `mailto:${user_email(component.insertion.user)}`) #{component.insertion.user.displayName}
+
               div.vert-space-x1.border-success.border.rounded.p-2
-                #builtform
-                  +createdFrom(component.createdFrom)
-            
+                #typeform
+
             if component.data.subComponent_fullUuids
               div.vert-space-x1.border-success.border.rounded.p-2
                 dt Sub Components
-                
+
                 dd
                   table.table
                     thead
                       tr
                         th.col-md-3 UUID
                         th.col-md-3 QR Code Link
-                    
+
                     tbody
                       each uuid, index in component.data.subComponent_fullUuids
-                        - var shortUuid = component.data.subComponent_shortUuids[index]
-                        
                         tr
                           td
-                            a(href = '/component/' + uuid, target = '_blank') #{uuid}
-                          td #{base_url + '/c/' + shortUuid}
-                
-                a.btn.btn-secondary#download_links(onclick = "DownloadLinks(component.data.subComponent_shortUuids)", download = "links.txt", href = "") Download List of Links
-            
+                            a(href = `/component/${uuid}`, target = '_blank') #{uuid}
+                          td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
+
+                a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.name}.txt`, href = '') Download List of Links
+
             if component.data.fromBatch
               dt Part of Batch:
               dd
-                a(href = '/component/' + component.data.fromBatch, target = '_blank')=component.data.fromBatch
-          
+                a(href = `/component/${component.data.fromBatch}`, target = '_blank')=component.data.fromBatch
+
           div.vert-space-x1
-            dt All Versions:
-            dd
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
+              | All Versions: 
+              i.chevron.fa.fa-fw 
+
+            div#versionsBox.collapse
               ul
                 each v in componentVersions
                   li 
-                    a(href = '?version='+(v.validity.version)) Version #{(v.validity||{}).version}
+                    a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
                     |  on 
                     +dateFormatAndAgo(v.insertion.insertDate)
-                    
+
                     if v.insertion.user
                       |  by !{' '}
-                      a(href = 'mailto:' + user_email(v.insertion.user)) #{v.insertion.user.displayName}
-            
-            dt Related Components (linked from):
-            
-            if((((relatedComponents || {}).linkedFrom) || []).length > 0)
-              dd
-                ul
-                  each o in relatedComponents.linkedFrom
-                    li
-                      | #{o.formName}:
-                      a(href = '/component/' + MUUID.from(o.componentUuid).toString()) #{o.name} 
-                      | (#{o.path})
-            else
-              dd None
-          
+                      a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
+
           div.vert-space-x2.form-inline
-            a(href = '/component/' + component.componentUuid + '/edit').btn.btn-warning
+            a(href = `/component/${component.componentUuid}/edit`).btn.btn-warning
               img.small-icon(src = '/images/edit_icon.svg')
               | &nbsp; Edit Component
-            
+
             div.hori-space-x2
-              a(href = '/json/component/' + component.componentUuid, target = '_blank').btn.btn-secondary
+              a(href = `/json/component/${component.componentUuid}`, target = '_blank').btn.btn-secondary
                 img.small-icon(src = '/images/checklist_icon.svg')
-                | &nbsp; View the component's JSON file
-            
+                | &nbsp; View JSON Record
+
             div.hori-space-x2
-              a(href = '/component/' + component.componentUuid + '/qrCodes').btn.btn-primary
+              a(href = `/component/${component.componentUuid}/qrCodes`).btn.btn-primary
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; Print a set of the component's QR codes
-            
+
             div.hori-space-x2
-              a(href = '/component/' + component.componentUuid + '/summary').btn.btn-primary
+              a(href = `/component/${component.componentUuid}/summary`).btn.btn-primary
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; View and print the component's summary
-          
+
         .col-md-3
           div#qr-code
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-    
+            +qr-panel(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
+
     div.vert-space-x2
       hr
-    
+
     div.vert-space-x1
       .row
-        .col
+        .col-sm-6
           h4 Action History
-          
+
           hr
-          
+
           if(!actions || actions.length == 0)
             p None
           else
@@ -149,37 +140,40 @@ block content
                   th.col-md-2 Action Type Name
                   th.col-md-2 Action Name
                   th.col-md-2 Date Performed
-              
+
               tbody
                 each action in actions
                   tr
                     td #{action.typeFormName}
-                    td 
-                      a(href = '/action/' + action.actionId)=action.name
+
                     td
-                      +dateFormat(action.insertDate)
-        
-        .col-sm-1
-        
-        .col-6
+                      if action.name
+                        a(href = `/action/${action.actionId}`)=action.name
+                      else
+                        a(href = `/action/${action.actionId}`) (none)
+
+                    td
+                      +dateFormat(action.lastEditDate)
+
+        .col-sm-6
           h4 Select an Action to Perform
-          
+
           hr
-          
+
           h5 Recommended for this Component Type:
-          
-          each actionForm in actionForms
-            if(actionForm.componentTypes.includes(component.formName) && !actionForm.tags.includes("Trash"))
-              a(href = '/action/' + actionForm.formId + '/' + component.componentUuid).tagbutton.btn.btn-success=t
-                =actionForm.formName
-          
+
+          each typeForm in actionTypeForms
+            if(typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash'))
+              a(href = `/action/${typeForm.formId}/${component.componentUuid}`).tagbutton.btn.btn-success=t
+                =typeForm.formName
+
           hr
-          
+
           h5 Other Available Action Types:
-          
-          each actionForm in actionForms
-            if(!actionForm.componentTypes.includes(component.formName) && !actionForm.tags.includes("Trash"))
-              a(href = '/action/' + actionForm.formId + '/' + component.componentUuid).tagbutton.btn.btn-success=t
-                =actionForm.formName
-    
+
+          each typeForm in actionTypeForms
+            if(!typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash'))
+              a(href = `/action/${typeForm.formId}/${component.componentUuid}`).tagbutton.btn.btn-success=t
+                =typeForm.formName
+
     div.vert-space-x2
