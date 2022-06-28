@@ -57,7 +57,7 @@ body(class = `deployment-${NODE_ENV}`)
         if locals.user
           .navbar-nav.px-3
             .nav-item.text-nowrap
-              +navlink(href = '/user/profile') Profile
+              +navlink(href = '/user') Profile
           .navbar-nav.px-3
             .nav-item.text-nowrap
               +navlink(href = '/logout') Logout
@@ -111,7 +111,7 @@ body(class = `deployment-${NODE_ENV}`)
             //-     | Type Form Tags
 
             li.nav-item
-              +navlink(href = '/users')
+              +navlink(href = '/users/list')
                 i.fa.fa-user(aria-hidden = 'true')
                 | Users
 
@@ -142,10 +142,9 @@ body(class = `deployment-${NODE_ENV}`)
         block content 
 
 
-//
-// Bootstrap core JavaScript
-// ==================================================
-// Placed at the end of the document so the pages load faster
+//- Bootstrap core JavaScript
+//- ==================================================
+//- Placed at the end of the document so the pages load faster
 
 script(src = '/pages/dashboard.js')
 

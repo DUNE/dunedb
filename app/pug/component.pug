@@ -34,7 +34,7 @@ block content
             dt Component UUID
             dd
               div.form-inline
-                a(href = `/component/${component.componentUuid}`)=component.componentUuid
+                a(href = `/component/${component.componentUuid}`) #{component.componentUuid}
 
                 p &nbsp; &nbsp;
 
@@ -77,7 +77,7 @@ block content
             if component.data.fromBatch
               dt Part of Batch:
               dd
-                a(href = `/component/${component.data.fromBatch}`, target = '_blank')=component.data.fromBatch
+                a(href = `/component/${component.data.fromBatch}`, target = '_blank') #{component.data.fromBatch}
 
           div.vert-space-x1
             .panel.panel-default
@@ -148,7 +148,7 @@ block content
 
                     td
                       if action.name
-                        a(href = `/action/${action.actionId}`)=action.name
+                        a(href = `/action/${action.actionId}`) #{action.name}
                       else
                         a(href = `/action/${action.actionId}`) (none)
 
@@ -164,8 +164,7 @@ block content
 
           each typeForm in actionTypeForms
             if(typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash'))
-              a(href = `/action/${typeForm.formId}/${component.componentUuid}`).tagbutton.btn.btn-success=t
-                =typeForm.formName
+              a(href = `/action/${typeForm.formId}/${component.componentUuid}`).tagbutton.btn.btn-success #{typeForm.formName}
 
           hr
 
@@ -173,7 +172,6 @@ block content
 
           each typeForm in actionTypeForms
             if(!typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash'))
-              a(href = `/action/${typeForm.formId}/${component.componentUuid}`).tagbutton.btn.btn-success=t
-                =typeForm.formName
+              a(href = `/action/${typeForm.formId}/${component.componentUuid}`).tagbutton.btn.btn-success #{typeForm.formName}
 
     div.vert-space-x2

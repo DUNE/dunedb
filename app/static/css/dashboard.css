@@ -1,76 +1,19 @@
-body {
-  font-size: 0.875rem;
-}
-
-.disable-animations, 
+.disable-animations,
 .disable-animations * {
   -o-transition-property: none;
   -moz-transition-property: none;
   -webkit-transition-property: none;
   transition-property: none;
-  
+
   -o-transform: none;
   -moz-transform: none;
   -webkit-transform: none;
   transform: none;
-  
-  -webkit-animation: none;
-  -moz-animation: none;
+
   -o-animation: none;
+  -moz-animation: none;
+  -webkit-animation: none;
   animation: none;
-}
-
-@media print {
-  .wrapper {
-    display: block;
-  }
-  
-  #sidebar {
-    display: none;
-    width: 0px;
-    max-height: 0px;
-  }
-  
-  h2#name {
-    color: green;
-  }
-  
-  input.form-control::-webkit-input-placeholder {
-    opacity: 0;
-  }
-  
-  input.form-control::-moz-placeholder {
-    opacity: 0;
-  }
-  
-  input.form-control::-ms-placeholder {
-    opacity: 0;
-  }
-  
-  input.form-control::placeholder {
-    color: transparent;
-  }
-}
-
-@media (max-width: 768px) {
-  .wrapper {
-    display: block;
-  }
-  
-  #sidebar {
-    min-width: auto;
-    max-width: none;
-    min-height: 0px;
-  }
-    
-  #sidebar.inactive {
-    margin-left: -1000px;
-    height: 0px;
-  }
-  
-  .navbar span.pagename {
-    display: none;
-  }
 }
 
 .wrapper {
@@ -98,24 +41,24 @@ body {
   color: #333;
 }
 
-#sidebar i.fa {
-  font-size: 0.75rem;
-  margin-right: 3px;
-  color: #999;
-}
-
 #sidebar .nav-link.active {
   color: #000;
   font-weight: 800;
+}
+
+#sidebar .nav-link:hover i.fa,
+#sidebar .nav-link.active i.fa {
+  color: inherit;
 }
 
 #sidebar .sub-bar {
   font-size: 0.75em;
 }
 
-#sidebar .nav-link:hover i.fa,
-#sidebar .nav-link.active i.fa {
-  color: inherit;
+#sidebar i.fa {
+  font-size: 0.75rem;
+  margin-right: 3px;
+  color: #999;
 }
 
 #content {
@@ -150,6 +93,10 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
 }
 
+body {
+  font-size: 0.875rem;
+}
+
 body.deployment-development #navbar-brand {
   background-color: #fff3cd;
   color: black;
@@ -176,4 +123,3 @@ body.deployment-production #navbar-brand {
 body.deployment-production .navbar-brand img {
   filter: invert(100%);
 }
-

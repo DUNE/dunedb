@@ -33,13 +33,13 @@ block content
 
         dt Action ID
         dd
-          a(href = `/action/${action.actionId}`)=action.actionId
+          a(href = `/action/${action.actionId}`) #{action.actionId}
 
         - const uuid = MUUID.from(action.componentUuid).toString();
 
         dt Performed on Component:
         dd UUID: 
-          a(href = `/component/${uuid}`)=uuid
+          a(href = `/component/${uuid}`) #{uuid}
           br
           | Type: #{component.formName}
           br

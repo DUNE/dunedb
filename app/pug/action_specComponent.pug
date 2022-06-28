@@ -20,11 +20,11 @@ block content
     div.vert-space-x1
       dl
         dt Action Type
-        dd=actionTypeForm.formName
+        dd #{actionTypeForm.formName}
 
         dt Component UUID
         dd
-          a(href = `/component/${componentUuid}`)=componentUuid
+          a(href = `/component/${componentUuid}`) #{componentUuid}
 
     div.vert-space-x1
       hr
