@@ -194,9 +194,9 @@ const metaschema = {
   },
 
   {
-    components: [],
     width: 12,
     size: 'md',
+    components: [],
   },
 
   {
