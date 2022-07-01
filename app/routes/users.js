@@ -2,6 +2,7 @@ const ManagementClient = require('auth0').ManagementClient;
 const router = require('express').Router();
 
 const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../lib/constants');
+const logger = require('../lib/logger');
 const m2m = require('lib/m2m.js');
 const permissions = require('lib/permissions.js');
 
