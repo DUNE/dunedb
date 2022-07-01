@@ -22,17 +22,24 @@ block content
     div.vert-space-x1
       dl
         dt Action Type
-        dd #{actionTypeForm.formName || actionTypeForm.formId}
+        dd #{action.typeFormName}
+
+        dt Action Name
+
+        if action.data.name
+          dd #{action.data.name}
+        else
+          dd (none)
 
         dt Action ID
         dd
-          a(href = `/action/${action.actionId}`)=action.actionId
+          a(href = `/action/${action.actionId}`) #{action.actionId}
 
         - const uuid = MUUID.from(action.componentUuid).toString();
 
         dt Performed on Component:
         dd UUID: 
-          a(href = `/component/${uuid}`)=uuid
+          a(href = `/component/${uuid}`) #{uuid}
           br
           | Type: #{component.formName}
           br

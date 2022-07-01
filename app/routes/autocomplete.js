@@ -1,5 +1,5 @@
 
-const Components = require("lib/Components.js")('component');
+const Components = require("lib/Components.js");
 const express = require("express");
 const logger = require('../lib/logger');
 const Actions = require("lib/Actions.js");
@@ -21,7 +21,7 @@ router.get('/uuid', async function(req, res, next)
   
   // Get any and all component UUIDs that match the supplied string and optional component types
   // If there are no matches, simply return an empty JSON document
-  var matches = await Components.autocompleteUuid(req.query.q, types, 8);
+  var matches = await Components.autoCompleteUuid(req.query.q, types, 8);
   
   if(matches instanceof Error)
   {
@@ -47,7 +47,7 @@ router.get('/actionId', async function(req, res, next)
   
   // Get any and all action IDs that match the supplied string and optional action type
   // If there are no matches, simply return an empty JSON document
-  var matches = await Actions.autocompleteId(req.query.q, req.query.formId, 8);
+  var matches = await Actions.autoCompleteId(req.query.q, req.query.formId, 8);
   
   if(matches instanceof Error)
   {

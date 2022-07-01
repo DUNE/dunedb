@@ -51,7 +51,7 @@ block content
                   div.form-inline 
                     each typeName, i in filteredComponentTypeNames 
                       | [
-                      a(href = `/components/${filteredComponentTypeIds[i]}/list`)=typeName 
+                      a(href = `/components/${filteredComponentTypeIds[i]}/list`) #{typeName}
                       | ]
                       if(i != filteredComponentTypeNames.length - 1)
                         | &nbsp; &nbsp;
@@ -63,7 +63,7 @@ block content
                   div.form-inline 
                     each typeName, i in filteredActionTypeNames 
                       | [
-                      a(href = `/actions/${filteredActionTypeIds[i]}/list`)=typeName 
+                      a(href = `/actions/${filteredActionTypeIds[i]}/list`) #{typeName}
                       | ]
                       if(i != filteredActionTypeNames.length - 1)
                         | &nbsp; &nbsp;

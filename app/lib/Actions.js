@@ -11,7 +11,7 @@ const permissions = require('lib/permissions.js');
 /// Save a new or edited action record
 async function save(input, req) {
   // Check that the user has permission to perform (and re-perform) actions
-  if (!permissions.hasPermission(req, 'actions:perform')) throw new Error(`Actions::save() - you do not have permission [actions:perform] to create and/or edit actions!`);
+  if (!permissions.hasPermission(req, 'actions:perform')) throw new Error(`Actions::save() - you do not have permission [actions:perform] to perform actions!`);
 
   // Check that the minimum required information has been provided for a record to be saved
   // For action records, these are:
@@ -167,12 +167,13 @@ async function list(match_condition, options) {
       typeFormName: { '$first': '$typeFormName' },
       componentUuid: { '$first': '$componentUuid' },
       name: { '$first': '$data.name' },
-      insertDate: { '$last': '$insertion.insertDate' },
+      lastEditDate: { '$first': '$validity.startDate' },
+      creationDate: { '$last': '$validity.startDate' },
     },
   });
 
-  // Finally re-sort the remaining matching records by most recent insertion date first (now called 'insertDate' as per the group name)
-  aggregation_stages.push({ $sort: { insertDate: -1 } });
+  // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
   // Add aggregation stages for any additionally specified options
   if (options) {
@@ -201,7 +202,7 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
   // Construct the 'match_condition' to be used as the database query
   // If no record to match to is specified (i.e. we are doing a text search), the condition will remain empty for now
   // Otherwise, it is that a record must match the specified one
-  let match_condition = { ...matchRecord } || {};
+  let match_condition = matchRecord || {};
 
   // If the condition contains a component UUID, set it to binary format
   if (match_condition.componentUuid) match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
@@ -216,9 +217,31 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
 
   if (textSearch) aggregation_stages.push({ $sort: { score: { $meta: 'textScore' } } });
 
-  aggregation_stages.push({ $sort: { 'insertion.insertDate': -1 } });
+  aggregation_stages.push({ $sort: { 'validity.startDate': -1 } });
   aggregation_stages.push({ $skip: skip });
   aggregation_stages.push({ $limit: limit });
+
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      typeFormId: { '$first': '$typeFormId' },
+      typeFormName: { '$first': '$typeFormName' },
+      componentUuid: { '$first': '$componentUuid' },
+      name: { '$first': '$data.name' },
+      creationDate: { "$last": "$validity.startDate" },
+      lastEditDate: { '$last': '$insertion.insertDate' },
+    },
+  });
+
+  if (textSearch) {
+    aggregation_stages.push({
+      $group: { score: { "$max": { $meta: "textScore" } } },
+      $sort: { score: -1 },
+    });
+  }
+
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
   // Query the 'actions' records collection for records matching the condition and additionally defined aggregation stages
   let records = await db.collection('actions')
@@ -229,7 +252,7 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
   // Additionally, add a 'route' field to each record, which is the URL of that record's information page
   for (let record of records) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
-    record.route = `/action/${result.actionId.toString()}`;
+    record.route = `/action/${record.actionId.toString()}`;
   }
 
   // Return the entire list of action records
@@ -260,15 +283,15 @@ async function autoCompleteId(inputString, typeFormId, limit = 10) {
   // This means that as well as the binary value match above, the corresponding action record must also contain the specified type form ID
   if (typeFormId) match_condition.typeFormId = typeFormId;
 
-  // Set up the 'aggregation stages' of the query - these are the query steps in sequence
-  let aggregation_stages = [];
-
-  aggregation_stages.push({ $match: match_condition });
-  aggregation_stages.push({ $limit: limit });
-
-  // Query the 'actions' records collection for records matching the condition and additionally defined aggregation stages
+  // Query the 'actions' records collection for records matching the condition
   let records = await db.collection('actions')
-    .aggregate(aggregation_stages)
+    .find(match_condition)
+    .project({
+      'actionId': 1,
+      'typeFormId': 1,
+      'data.name': 1,
+    })
+    .limit(limit)
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability

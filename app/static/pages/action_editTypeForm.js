@@ -155,7 +155,7 @@ const metaschema = {
             label: '',
             value: '',
           }],
-          url: '/json/componenttypes',
+          url: '/json/componentForms/list',
           headers: [{
             key: '',
             value: '',
@@ -212,9 +212,9 @@ const metaschema = {
   },
 
   {
-    components: [],
     width: 12,
     size: 'md',
+    components: [],
   },
 
   {

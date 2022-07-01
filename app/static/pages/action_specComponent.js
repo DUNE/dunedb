@@ -66,7 +66,6 @@ function SubmitData(submission) {
   /// Function to run for a successful submission
   function postSuccess(result) {
     // If the submission result contains an error (even with a successful submission), display it along with the appropriate Formio alert type
-    // Otherwise, set the Formio alert type to 'success' and 
     if (result.error) {
       typeForm.setAlert('warning', result.error);
       typeForm.emit('error', result.error);

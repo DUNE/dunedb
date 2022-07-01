@@ -1,37 +1,37 @@
 block pugscripts
-  // Return the appropriate boolean flag ('true' or 'false') based on the 'truthiness' of the user authentication
+  //- Return the appropriate boolean flag ('true' or 'false') based on the 'truthiness' of the user authentication
   - const isAuthenticated = () => !!user;
-  
-  // Return the user's primary email address if the user is authenticated, or an error message if not
-  - function user_email(user) { if (isAuthenticated()) return (user.emails[0].value); return "[Please login to see!]" };
-  
-  // Return the user's display name if the user is authenticated (or the email address if no display name has been set), or an error message if not
-  - function user_shortname(user) { if (isAuthenticated()) return (user.displayName || user_email(user)); return "[Please login to see!]" };
+
+  //- Return the user's primary email address if the user is authenticated, or an error message if not
+  - function user_email(user) { if (isAuthenticated()) return (user.emails[0].value); return '[Login to see!]' };
+
+  //- Return the user's display name if the user is authenticated (or the email address if no display name has been set), or an error message if not
+  - function user_shortname(user) { if (isAuthenticated()) return (user.displayName || user_email(user)); return '[Login to see!]' };
 
 mixin dateFormat(date)
-  span.date(data - date = date)=moment(date).format('MMMM Do YYYY, h:mm:ss a')
+  span.date(data - date = date) #{moment(date).format('MMMM Do YYYY, h:mm:ss a')}
 
 mixin dateFormatAndAgo(date)
-  span.date(data - date = date)=moment(date).format('MMMM Do YYYY, h:mm:ss a')
+  span.date(data - date = date) #{moment(date).format('MMMM Do YYYY, h:mm:ss a')}
     =` (${moment(date).fromNow()})`
 
 mixin arrayFormat(array)
   span #{JSON.stringify(array).replace(/["\[\]]/g, '').replace(/,/g, ', ')}
 
 mixin qr-panel(text, desc)
-  div.qr&attributes(attributes)
+  .qr&attributes(attributes)
     .qr-label.qr-label-top
-      div=text
-      div=desc
+      div #{text}
+      div #{desc}
     .qr-label.qr-label-left
-      div=text
-      div=desc
+      div #{text}
+      div #{desc}
     .qr-label.qr-label-right
-      div=text
-      div=desc
+      div #{text}
+      div #{desc}
     .qr-label.qr-label-bottom
-      div=text
-      div=desc
+      div #{text}
+      div #{desc}
     .canvas-holder
       canvas.qr-code(data-QR-text = text, data-QR-desc = desc)      
 
@@ -53,83 +53,84 @@ mixin createdFrom(created_from)
       a(href = '/' + created_from.inputRecordType + '/' + created_from.inputRecordId.toString()) Input Record
 
 mixin evaluated-course(course,interactive)
-    -if(interactive!==false) interactive = true;
-    table.table.table-hover
-      thead
-        tr
-          th 
-          th Type
-          th Name
-          th OK?
-          th Completed
-          th Advice
+  //- This process needs fully cleaning up when workflows are working properly
+  -if(interactive!==false) interactive = true;
+  table.table.table-hover
+    thead
+      tr
+        th 
+        th Type
+        th Name
+        th OK?
+        th Completed
+        th Advice
 
-      tbody
-        each step of course.evaluation
-          tr
+    tbody
+      each step of course.evaluation
+        tr
+          td
+            icon.small-icon(src=(step.meta||{}).icon)
+          td
+            = step.type
+          td
+            = (step.meta||{}).formName || (step.meta||{}).name || step.formId
+          td
+            if step.result.length>0
+              i.fa.fa-check.text-success
+            else
+              i.fa.fa-times.text-danger
+          if step.type == "component"
             td
-              icon.small-icon(src=(step.meta||{}).icon)
-            td
-              = step.type
-            td
-              = (step.meta||{}).formName || (step.meta||{}).name || step.formId
+              if step.result.length>0                  
+                a(href='/'+componentUuid).btn.btn-success=moment(component.insertion.insertDate).format("MMM D YY")
+              else
+                if interactive
+                  a(href='/'+componentUuid+"/edit").btn.btn--outline-danger
+                    img.small-icon(src='/images/edit_icon.svg')
+                    |  &nbsp; Create
+
+
+          if step.type == "test"
             td
               if step.result.length>0
-                i.fa.fa-check.text-success
+
+                for test,index in step.result
+                  a(href='/test/'+test._id).btn.btn-success=moment(test.insertion.insertDate).format("MMM D YY")
+                  | &nbsp;
+
+                if interactive
+                  a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-success
+                    img.small-icon(src='/images/edit_icon.svg')
+                    | &nbsp; Run again 
               else
-                i.fa.fa-times.text-danger
-            if step.type == "component"
-              td
-                if step.result.length>0                  
-                  a(href='/'+componentUuid).btn.btn-success=moment(component.insertion.insertDate).format("MMM D YY")
-                else
-                  if interactive
-                    a(href='/'+componentUuid+"/edit").btn.btn--outline-danger
-                      img.small-icon(src='/images/edit_icon.svg')
-                      |  &nbsp; Create
+                if interactive
+                  a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-danger
+                    img.small-icon(src='/images/edit_icon.svg')
+                    | &nbsp; Run
 
+          if step.type == "job"
+            td
+              if step.result.length>0
 
-            if step.type == "test"
-              td
-                if step.result.length>0
+                for job,index in step.result
+                  a(href='/job/'+job.jobId).btn.btn-success=moment(job.insertion.insertDate).format("MMM D YY")
+                  | &nbsp;
 
-                  for test,index in step.result
-                    a(href='/test/'+test._id).btn.btn-success=moment(test.insertion.insertDate).format("MMM D YY")
-                    | &nbsp;
+                if interactive
+                  a(href='/job/'+step.formId).btn.btn-outline-success
+                    img.small-icon(src='/images/edit_icon.svg')
+                    | &nbsp; Run again
+              else
+                if interactive
+                  a(href='/job/'+step.formId).btn.btn-outline-danger
+                    img.small-icon(src='/images/edit_icon.svg')
+                    | &nbsp; Run
+          td !{step.advice}
 
-                  if interactive
-                    a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-success
-                          img.small-icon(src='/images/edit_icon.svg')
-                          | &nbsp; Run again 
-                else
-                  if interactive
-                    a(href='/'+componentUuid+"/test/"+step.formId).btn.btn-outline-danger
-                          img.small-icon(src='/images/edit_icon.svg')
-                          | &nbsp; Run
-
-            if step.type == "job"
-              td
-                if step.result.length>0
-
-                  for job,index in step.result
-                    a(href='/job/'+job.jobId).btn.btn-success=moment(job.insertion.insertDate).format("MMM D YY")
-                    | &nbsp;
-
-                  if interactive
-                    a(href='/job/'+step.formId).btn.btn-outline-success
-                          img.small-icon(src='/images/edit_icon.svg')
-                          | &nbsp; Run again
-                else
-                  if interactive
-                    a(href='/job/'+step.formId).btn.btn-outline-danger
-                          img.small-icon(src='/images/edit_icon.svg')
-                          | &nbsp; Run
-            td !{step.advice}
-    
-    if(interactive)
-      p
-        a(href='/course/'+course.courseId+"/next/"+componentUuid) Next Step
-      p
-        a(href='/course/'+course.courseId+"/next/"+componentUuid+"?firstUnfinished=1") Next Unfinished Step
-    // pre
-    //   =JSON.stringify(course,null,2)
+  if(interactive)
+    p
+      a(href='/course/'+course.courseId+"/next/"+componentUuid) Next Step
+    p
+      a(href='/course/'+course.courseId+"/next/"+componentUuid+"?firstUnfinished=1") Next Unfinished Step
+  // pre
+  //   =JSON.stringify(course,null,2)
