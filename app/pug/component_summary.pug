@@ -29,33 +29,15 @@ mixin subdoc_component(component)
         div.vert-space-x1.border-success.border.rounded.p-2
           .builtform(data-recordtype = component.recordType, data-record = component)
 
-mixin subdoc_test(record)
+mixin subdoc_action(record)
   div.vert-space-x1
     dl
-      dt Test Type
+      dt Action Type
       dd #{record.formName || record.formId}
       
       dt Results:
-      dd This test was performed on !{' '}
+      dd This action was performed on !{' '}
         +dateFormatAndAgo(record.insertion.insertDate)
-        
-        if record.insertion.user
-          |  by !{' '} #{record.insertion.user.displayName}
-      
-      div.vert-space-x1.border-success.border.rounded.p-2
-        .builtform(data-recordtype = record.recordType, data-record = record)
-
-mixin subdoc_job(record)
-  div.vert-space-x1
-    dl
-      dt Job Type
-      dd #{record.formName || record.formId}
-      
-      dt Current Version:
-      dd This is version #{record.validity.version} of the job.
-        br
-        | It was last edited on !{' '}
-        +dateFormat(record.insertion.insertDate)
         
         if record.insertion.user
           |  by !{' '} #{record.insertion.user.displayName}
@@ -75,11 +57,8 @@ mixin subdocument(record)
   if(record.recordType === "component") 
     +subdoc_component(record)
   
-  if(record.recordType === "test") 
-    +subdoc_test(record)
-  
-  if(record.recordType === "job") 
-    +subdoc_job(record)
+  if(record.recordType === "action") 
+    +subdoc_action(record)
   
   if(record.recordType === "courseEvaluation") 
     +subdoc_courseEvaluation(record)

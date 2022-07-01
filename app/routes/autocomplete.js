@@ -2,7 +2,7 @@
 const Components = require("lib/Components.js")('component');
 const express = require("express");
 const logger = require('../lib/logger');
-const Tests = require("lib/Tests.js")('test');
+const Actions = require("lib/Actions.js");
 
 var router = express.Router();
 module.exports = router;
@@ -40,21 +40,21 @@ router.get('/uuid', async function(req, res, next)
 });
 
 
-// Autocomplete a test's ID - i.e. return matching DB entries as the ID is supplied
-router.get('/testId', async function(req, res, next)
+// Autocomplete an action's ID - i.e. return matching DB entries as the ID is supplied
+router.get('/actionId', async function(req, res, next)
 {
-  // The user can optionally restrict the matched IDs to only those corresponding to a specific test type (set by its test form ID)
+  // The user can optionally restrict the matched IDs to only those corresponding to a specific action type (set by its action type form ID)
   
-  // Get any and all test IDs that match the supplied string and optional test type
+  // Get any and all action IDs that match the supplied string and optional action type
   // If there are no matches, simply return an empty JSON document
-  var matches = await Tests.autocompleteId(req.query.q, req.query.formId, 8);
+  var matches = await Actions.autocompleteId(req.query.q, req.query.formId, 8);
   
   if(matches instanceof Error)
   {
     return res.json([]);
   }
   
-  // For each matched ID, construct a simple string consisting of the test's ID and type form ID
+  // For each matched ID, construct a simple string consisting of the action's ID and type form ID
   for(var m of matches)
   {
     m.val = m._id;

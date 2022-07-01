@@ -48,7 +48,7 @@ async function AddMachineUser(userinfo)
     displayName: userinfo.displayName || "MachineClient",
     emails: [userinfo.email || "unknown@unknown.edu"],
     permissions: userinfo.permissions 
-                  || [ 'components:view', 'components:edit', 'tests:submit', 'tests:view', 'jobs:submit', 'jobs:view', 'forms:edit'],
+                  || [ 'components:view', 'components:edit', 'actions:view', 'actions:perform', 'forms:edit'],
   }
   // create the record.
   var record = {

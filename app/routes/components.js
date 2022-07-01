@@ -3,11 +3,9 @@ const Actions = require('lib/Actions.js');
 const Components = require('lib/Components.js')('component');
 const express = require('express');
 const Forms = require('lib/Forms.js');
-const Jobs = require("lib/Jobs.js")('job');
 const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
 const shortuuid = require('short-uuid')();
-const Tests = require('lib/Tests.js')('test');
 const utils = require("lib/utils.js");
 const Workflows = require('lib/Workflows.js');
 
@@ -59,19 +57,17 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission("compon
     
     // Get any other information relating to this component ... this includes the following:
     //  - the component's type form, using its form ID
-    //  - the results of actions and tests that have already been performed on this component
-    //  - all currently available action and test type forms
+    //  - the results of actions that have already been performed on this component
+    //  - all currently available action type forms
     //  - any related components
     // Throw an error if there is no DB entry corresponding to this form ID
     var match_condition = { componentUuid: req.params.uuid };
 
-    let [form, actions, actionForms, tests, testForms, relatedComponents] = await Promise.all(
+    let [form, actions, actionForms, relatedComponents] = await Promise.all(
     [
       Forms.retrieve("componentForms", formId),
       Actions.list(match_condition),
       Forms.list("actionForms"),
-      Tests.listComponentTests(req.params.uuid),
-      Forms.list("testForms"),
       Components.relationships(req.params.uuid)
     ]);
     
@@ -100,8 +96,6 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission("compon
                                  form,
                                  actions,
                                  actionForms,
-                                 tests,
-                                 testForms,
                                  relatedComponents});
   }
   catch(err)
@@ -144,56 +138,31 @@ router.get('/component/' + utils.uuid_regex + '/qrCodes', permissions.checkPermi
 // View and print a component's summary
 router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermission("components:view"), async function(req, res, next)
 {
-  // First retrieve information related to the component from the 'components' and 'tests' sections of the DB:
+  // First retrieve information related to the component from the 'components' and 'actions' sections of the DB:
   //  - information about the component itself
-  //  - information about tests that have been performed on the component
+  //  - information about actions that have been performed on the component
   
-  let [component, tests] = await Promise.all(
+  let [component, actions] = await Promise.all(
   [
     Components.retrieve(req.params.uuid),
-    Tests.getRecentComponentTests(req.params.uuid)
+    Actions.list({ componentUuid: req.params.uuid })
   ]);
   
   // Next, get information about the workflow that this component's type relates to (if one exists)
   var workflowId = await Workflows.getWorkflowForComponentFormId(component.formId);
   
   // If there is a workflow relating to this component type, evaluate it via its ID
-  // Then check the workflow steps, and get information about all steps that are 'jobs'
   var evaluatedWorkflow = null;
-  var jobs = [];
   
   if(workflowId)
   {
     evaluatedWorkflow = await Workflows.evaluate(workflowId, req.params.uuid);
-
-    var workflowJobs = [];
-    
-    for(var step of evaluatedWorkflow.evaluation)
-    {
-      if(step.type == "job")
-      {
-        if(step.result.length > 0)
-        {
-          workflowJobs.push(step.result[0]);
-        }
-      }
-    }
-    
-    var jobPromises = [];
-    
-    for(var job of workflowJobs)
-    {
-      jobPromises.push(Jobs.retrieve(job.jobId))
-    }
-    
-    jobs = await Promise.all(jobPromises);
   }
   
   // Gather all of the retrieved data into a single 'records' entity
   var records = [component];
   
-  records.push(...tests);
-  records.push(...jobs);
+  records.push(...actions);
   
   if(evaluatedWorkflow)
   {

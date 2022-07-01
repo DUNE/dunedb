@@ -7,9 +7,7 @@ const {NodeVM,VM} = require('vm2');
 var {ObjectId} = require("mongodb");
 var Components = require('lib/Components.js');
 var Forms = require('lib/Forms.js');
-var Jobs = require('lib/Tests.js')('job');
 var Components = require('lib/Components.js');
-var Tests = require('lib/Tests.js')('test');
 var commonSchema = require('lib/commonSchema.js');
 var utils = require("lib/utils.js");
 const logger = require('./logger');
@@ -268,7 +266,7 @@ async function run(req, jobform, processId, record, dry_run) {
         newtest.collection = 'testForms';
         newtest.recordType = 'test';
       } else {
-        newtest = await Tests.save(test,req);
+       // newtest = await Tests.save(test,req);
       }
       allObjects.push(newtest);
 

@@ -6,15 +6,14 @@ const Components = require('lib/Components.js')('component');
 const { db } = require('./db');
 const dbLock = require('lib/dbLock.js');
 const Forms = require('lib/Forms.js');
-const Jobs = require('lib/Jobs.js')('job');
 const permissions = require('lib/permissions.js');
-const Tests = require('lib/Tests.js')('test');
 
 module.exports = {
     save, 
     retrieve, 
     list, 
     evaluate, 
+    getWorkflowForComponentFormId, 
     nextStep, 
     tags
 }
@@ -159,22 +158,24 @@ async function list(match_condition, options) {
         $sort: {last_edited : -1}
     });
     
-    if(options.second_selection) {
+    if (options) {
+      if(options.second_selection) {
         aggregation_stages.push({
             $match: options.second_selection
         });
-    }
+      }
     
-    if(options.skip) {
-        aggregation_stages.push({
-            $skip: options.skip
-        });
-    }
-    
-    if(options.limit) {
-        aggregation_stages.push({
-            $limit: options.limit
-        });
+      if(options.skip) {
+          aggregation_stages.push({
+              $skip: options.skip
+          });
+      }
+      
+      if(options.limit) {
+          aggregation_stages.push({
+              $limit: options.limit
+          });
+      }
     }
     
     var items = await db.collection('workflows')
@@ -200,21 +201,6 @@ async function evaluatePath(path, entityId) {
             
             item.result = await Components.search(null, match);
             item.meta = (await Forms.list('componentForms'))[step.formId];
-        }
-        
-        if(step.type === 'test') {
-            item.result = await Tests.listComponentTests(entityId, step.formId);
-            item.meta = (await Forms.list('testForms'))[step.formId];
-        }
-        
-        if(step.type === 'job') {
-            var match = {};
-            
-            match[step.identifier] = entityId;
-            match.formId = step.formId;
-            
-            item.result = await Jobs.search(null, match);
-            item.meta = (await Forms.list('jobForms'))[step.formId];
         }
         
         result.push(item);

@@ -2,12 +2,10 @@
 const routes = [
   require('./actions'),
   require('./components'),
-  require('./jobs'),
   require('./processes'),
   require('./search'),
   require('./start'),
   require('./tags'),
-  require('./tests'),
   require('./users'),
   require('./workflows'),
 ];
