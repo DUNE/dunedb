@@ -7,8 +7,7 @@
 const Actions = require('lib/Actions.js');
 const express = require("express");
 const Forms = require("lib/Forms.js");
-const Components = require("lib/Components.js")('component');
-const ComponentTypes = require("lib/ComponentTypes.js");
+const Components = require("lib/Components.js");
 const Workflows = require("lib/Workflows.js");
 const Cache = require("lib/Cache.js");
 const utils = require("lib/utils.js");
@@ -16,6 +15,8 @@ const permissions = require("lib/permissions.js");
 const logger = require('../../lib/logger');
 const chalk = require("chalk");
 const pretty = require('express-prettify');
+const ManagementClient = require('auth0').ManagementClient;
+const m2m = require('lib/m2m.js');
 
 var MUUID = require('uuid-mongodb');
 const deepmerge = require('deepmerge');
@@ -25,198 +26,41 @@ module.exports = router;
 
 router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer json.
 
-
-// /generateComponentUuid
-// data format: none
-
-var QRCodeSVG = require('qrcode-svg');
 const { BASE_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require("../../lib/constants");
 
-// /api/generateComponentUuid returns the UUID string
-// /api/generateComponentUuid/url returns URL+UUID
-// /api/generateComponentUuid/svg returns an SVG file that formats the URL+UUID
-// /api/generateComponentUuid/svg?ecl=L,M, or H turns down the error correction from Q
 
-router.get('/generateComponentUuid/:format(svg|url)?', permissions.checkPermissionJson('components:edit'), 
-  async function(req,res){
-    var uuid = Components.newUuid();
-    if(req.params.format) {
-      if(req.params.format=="url") {
-        return res.json(`${BASE_URL}/${uuid.toString()}`);
-      }
-      if(req.params.format=="svg") {
-        var qr = new QRCodeSVG({
-          content: `${BASE_URL}/${uuid.toString()}`,
-          padding: 0,
-          ecl: (['L','M',"H","Q"].includes(req.query.ecl))?req.query.ecl:"Q",
-          container: "svg-viewbox",
-          join: true
-        });
-        res.set('Content-Type', "image/svg+xml");
-        logger.info(qr.svg());
-        return res.send(qr.svg());
-      }
-    }
-    res.json(uuid.toString());
+////////////////////////////////////////////////////////
+// Components
+
+/// Retrieve the most recent version of a single component record
+router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function(req, res, next) {
+  try {
+    // Retrieve the most recent version of the record corresponding to the specified component UUID
+    const component = await Components.retrieve(req.params.uuid);
+
+    // Return the record in JSON format
+    return res.json(component, null, 2);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
-);
+});
 
-// GET /component/uuid
-// data format: none
-// retrieves component of given id
-router.get('/component/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    // fresh retrival
-    var componentUuid = req.params.uuid;
-    var component= await Components.retrieve(componentUuid);
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
+
+/// Save a new or edited component record
+router.post('/component', permissions.checkPermissionJson('components:edit'), async function(req, res, next) {
+  try {
+    // Display a logger message indicating that a record is being saved via the '/component' route
+    logger.info(req.body, 'Submission to /component');
+
+    // Save the record
+    const component = await Components.save(req.body, req);
+    res.json(component.componentUuid);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
-);
-
-
-// GET /<shortuuid>
-// As above.
-router.get('/'+utils.short_uuid_regex, permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    var componentUuid = utils.unshortenUuid(req.params.shortuuid);
-    var component= await Components.retrieve(componentUuid);
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
-  }
-);
-
-
-// GET /<componentUuid>
-// As above.
-router.get('/'+utils.uuid_regex, permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    var componentUuid = req.params.uuid
-    var component= await Components.retrieve(componentUuid);
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
-  }
-);
-
-
-// GET /component/uuid/simple
-// data format: component, but only small projection.
-// retrieves component of given id, but lightweight
-router.get('/component/'+utils.uuid_regex+'/simple', permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-    // fresh retrival
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-    var component= await Components.retrieve(componentUuid,
-      {type:1, "data.name":1, componentUuid:1, validity:1, insertion:1});
-    if(!component)  return res.status(400).json({error:"UUID not found"});
-    res.json(component);
-  }
-);
-
-router.get('/component/'+utils.uuid_regex+'/relationships', permissions.checkPermissionJson('components:view'), 
-  async function(req,res){
-  try{
-    // fresh retrival
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-    var relationships = await Components.relationships(componentUuid);
-    if(!relationships)  return res.status(400).json({error:"UUID not found"});
-    // for(var i in relationships.linkedFrom) {
-    //   var list = relationships.linkedFrom[i];
-    //   for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
-    // }
-    // for(var i in relationships.linkedTo) {
-    //   var list = relationships.linkedTo[i];
-    //   for(var elem of list) elem.componentUuid = MUUID.from(elem.componentUuid).toString();
-    // }
-    // logger.info("relationships",relationships);
-    res.json(relationships);
-  } catch(err) {
-      logger.error(err);
-      res.status(400).json({error:"Save failure "+err.toString()})
-    }  
-  }
-);
-
-
-// POST /component/uuid
-// data format: {
-//   data: {
-//     component fields, including uuid
-//   }
-// }
-//
-// retrieves component of given id
-router.post('/component/'+utils.uuid_regex, permissions.checkPermissionJson('components:edit'), 
-  async function(req,res,next){
-    var componentUuid = (req.params.uuid) || shortuuid.toUUID(req.params.shortuuid);
-    var record = req.body;
-    record.componentUuid = componentUuid; // Ensure that record is keyed with URL route
-    try {
-      logger.info("saving component",record);
-      var data = await Components.save(record,req);
-      return res.json(data);
-    } catch(err) {
-      logger.error(err);
-      res.status(400).json({error:"Save failure "+err.toString()})
-    }  
-  }
-);
-
-
-router.get('/components/:type', permissions.checkPermissionJson('components:view'), 
-  async function(req,res,next){
-    // FIXME, add search terms
-    try {
-      var type = decodeURIComponent(req.params.type);
-      var data = await Components.list({type:type});
-      return res.json(data);
-    } catch(err) {
-      res.status(400).json({error:err.toString()})
-    }  
-  }
-);
-
-
-Cache.add('componentTypes',
-    async function(){
-      logger.info("regenerating componentTypes");
-      var types = await Components.getTypes();
-      var forms = await Forms.list('componentForms');
-      var componentTypes = deepmerge(types,forms);
-      return componentTypes;
-  },
-  ['componentCountsByType','formlist_componentForms'] // invalidate if these are invalidated
-);
-
-router.get('/componentTypes/:type?', permissions.checkPermissionJson('components:view'), 
-  async function(req,res,next){
-    try {
-      var componentTypes =  await ComponentTypes.list();
-      // one type
-      if(req.params.type) return res.json(componentTypes[decodeURIComponent(req.params.type)]);
-      return res.json(componentTypes);
-    } catch(err) {
-      res.status(400).json({error:err.toString()})
-    }  
-  }
-);
-
-router.get('/componentTypesTags', permissions.checkPermissionJson('components:view'), 
-  async function(req,res,next){
-    logger.info("Type tags",)
-    try {
-      var data = await Forms.list("componentForms");
-      var list=[{formId:"Trash"}];
-      for(var key in data) {
-        list.push(data[key]);
-      }
-      return res.json(list);
-    } catch(err) {
-      res.status(400).json({error:err.toString()})
-      logger.info({route:req.route.path},err.message);
-    }  
-  }
-);
+});
 
 
 ////////////////////////////////////////////////////////
@@ -423,169 +267,65 @@ router.post("/search/:recordType(component)?/:formId?",  permissions.checkPermis
 });
 
 
-// User management
-var ManagementClient = require('auth0').ManagementClient;
-var manager = new ManagementClient({
-  // To ensure this works:
-  // Go to auth0 dsh: Applications / APIs  / Auth0ManagementAPI
-  // Tab:  Machine to Machine Applications
-  // Turn on the application to "Authorized"
-  // Use the pulldown-arrow on the right and authorize the scopes shown below.
-  // There is no issue using the same authentication clientId and clientSecret that we use
-  // for the main authentication.
+////////////////////////////////////////////////////////
+// Users
 
+/// To ensure the manager below works:
+///    - go to Auth0 Dashboard -> Applications -> APIs -> Auth0ManagementAPI
+///    - go to the "Machine to Machine Applications" tab
+///    - set the application to "Authorized"
+///    - using the pulldown arrow on the right to authorise the scopes given below
+/// There is no issue using the same 'clientId' and 'clientSecret' that we use for the main authentication
+
+const manager = new ManagementClient({
   domain: AUTH0_DOMAIN,
   clientId: AUTH0_CLIENT_ID,
   clientSecret: AUTH0_CLIENT_SECRET,
   scope: 'read:users update:users read:roles'
 });
-router.get("/roles",  permissions.checkPermissionJson('users:view'),
-    async (req,res,next) => {
-      try {
-        return res.json(await manager.getRoles({per_page:100}));
-      } catch(err) {
-        logger.info({route:req.route.path},err.message);
-        res.status(400).json({error:err.toString()});
+
+
+/// Retrieve a list of all human users
+router.get('/users/list', permissions.checkPermissionJson('users:view'), async function (req, res, next) {
+  try {
+    // Get a list of all available roles in the Auth0 tenant
+    const all_user_roles = await manager.getRoles(req.query);
+
+    // Set up a matrix of which roles belong to which users
+    let promises = [];
+
+    for(const role of all_user_roles) {
+      promises.push(manager.getUsersInRole({
+        id: role.id,
+        per_page: 100,
+      }))
+    }
+
+    const role_results = await Promise.all(promises);
+
+    // Collect and collate all information and roles for each user
+    let user_data = {};
+
+    for(let i = 0; i < all_user_roles.length; i++) {
+      const role = all_user_roles[i];
+      const users_with_role = role_results[i];
+
+      for (const u of users_with_role) {
+        user_data[u.user_id] = user_data[u.user_id] || u;
+        user_data[u.user_id].roles = user_data[u.user_id].roles || [];
+        user_data[u.user_id].roles.push(role.name);
       }
     }
-);
 
-router.get("/users",  permissions.checkPermissionJson('users:view'),
-  async (req,res,next) => {
-    try {
-      // console.log("roles",await(manager.getUsersInRole({id:"rol_n8NDlqVTh01dZf1Z"})));
-      // var result = await manager.getUsers({
-      //   per_page: parseInt(req.query.per_page) || 10,
-      //   page: parseInt(req.query.page) || 0,
-      //   q: req.query.q
-      // });
-      // get list of all role types.
-      var p = req.query;
-      if(! p.per_page) p.per_page = 100;
-      var all_roles = await manager.getRoles(p);
-      var promises = [];
-      for(var role of all_roles) {
-        promises.push(manager.getUsersInRole({id:role.id,per_page:100}))
-      }
-      var role_results = await Promise.all(promises);
-      var user_data = {};
-      for(var i=0;i<all_roles.length;i++) {
-        var role=all_roles[i];
-        var role_users =role_results[i];
-        for (var u of role_users) {
-          user_data[u.user_id] = user_data[u.user_id] || u;
-          user_data[u.user_id].roles = user_data[u.user_id].roles || [];
-          user_data[u.user_id].roles.push(role.name);
-        }
-      }
-
-      res.json(Object.values(user_data));
-    } catch(err) {
-      logger.info({route:req.route.path},err.message);
-      res.status(400).json({error:err.toString()});
-    }
+    // Return the list of users in JSON format
+    res.json(Object.values(user_data));
+  } catch(err) {
+    logger.info({route:req.route.path},err.message);
+    res.status(500).json({error:err.toString()});
   }
-)
+});
 
 
-async function user_info(user_id) 
-{
-    var [user,roles_description,permissions_description]= await Promise.all([
-       await manager.getUser({id:user_id}),
-       await manager.getUserRoles({id:user_id}),
-       await manager.getUserPermissions({id:user_id}),
-    ]);
-    var result = {...user,roles_description,permissions_description};
-    result.permissions = [];
-    result.roles = [];
-    result.roleIds = [];
-    for(var a of roles_description) result.roles.push(a.name);
-    for(var a of roles_description) result.roleIds.push(a.id);
-    for(var a of permissions_description) result.permissions.push(a.permission_name);
-    return result;
-}
-
-
-router.get("/user/:user_id",  permissions.checkPermissionOrUserIdJson("users:view"),
-  async (req,res,next) => {
-    try {
-      res.json(await user_info(req.params.user_id));
-    } catch(err) {
-      logger.info({route:req.route.path},err.message);
-      res.status(400).json({error:err.toString()});
-    }
-  }
-)
-
-router.post("/user/:user_id", permissions.checkPermissionOrUserIdJson("users:edit"),
-  async (req,res,next) => {
-    try {
-
-      // First, check permissions.
-      // only admins can edit these values:
-      var is_admin = permissions.hasPermission(req,"users:edit");
-      if(!is_admin) {
-        if(req.body.user_metadata || req.body.roleIds || req.body.roles || req.body.permissions) {
-          return res.status(400).json({error:"Metadata, roles, and permissions are only editable by an admin."});
-        }
-      }
-
-      var resultses = []
-      if(req.body.roleIds) {
-        /// change roles
-        var new_roles = req.body.roleIds;
-        //need role_ids submitted.  This code would change from names->roles
-        logger.info({user_id:req.user.user_id,new_roles},`${req.user.user_id} attempting to change user roles for user ${req.params.user_id}`);
-        var r = await manager.assignRolestoUser({id:req.params.user_id},{roles:req.body.roleIds});
-        logger.info(r,"Result of change");
-
-      }
-      // if(req.body.roles) {
-      //   /// change roles
-      //   var new_roles = req.body.roles;
-      //   need role_ids submitted.  This code would change from names->roles
-      //   var all_roles = await manager.getRoles({per_page:100});
-      //   for(var role_name of req.body.roles) {
-      //     for(var role of all_roles) {
-      //       if(role.name == role_name) {
-      //         new_roles.push(role.id);
-      //       }
-      //     }
-      //   }
-      //   logger.info({user_id:req.user.user_id,update_user},`${req.user.user_id} attempting to change user roles for user ${req.params.user_id}`);
-      //   var r = await manager.assignRolestoUser({id:req.params.user_id},{roles:req.body.roles});
-      //   logger.info(r,"Result of change");
-
-      // }
-      // if(req.body.permissions) {
-      //   /// change permissions
-      //   /// Usually this isn't what we want to do!  Use roles instead!
-      // }
-
-
-
-      var allowed_keys = ['user_metadata','email','picture','family_name','given_name','name','nickname','phone_number',]
-      var update_obj = {}
-      var update_user = false;
-      for(var key in req.body) {
-        if(allowed_keys.includes(key)) { update_user = true; update_obj[key] = req.body[key];}
-      }
-      if(update_user) {
-        var r = await manager.updateUser({id:req.params.user_id},update_obj);
-        logger.info({user_id:req.user.user_id,update_user},"Changed user profile");
-        logger.info(r,"Result of change");
-      }
-
-      res.json(await user_info(req.params.user_id));
-
-    } catch(err) {
-      logger.info({route:req.route.path},err.message);
-      res.status(400).json({error:err.toString()});
-    }
-  }
-)
-
-var m2m = require("lib/m2m.js");
 router.get("/m2mUsers", permissions.checkPermissionJson("users:edit"),
   async (req,res,next) => {
     try {

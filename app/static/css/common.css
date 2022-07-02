@@ -13,8 +13,8 @@ pre {
      There are a number of 'solutions' (which are really just hacks / workarounds) to this problem, depending on the users knowledge and understanding of browsers and stylesheets.
      Probably the most simple is to simply declare 'monospace' TWICE in the CSS stylesheet ... but nobody really knows why this works!
      See here for more detailed discussions and additional comments: https://stackoverflow.com/questions/38781089/font-family-monospace-monospace */
-  
-  font-family: monospace, monospace;  
+
+  font-family: monospace, monospace;
 }
 
 .vert-space-x1 {
@@ -47,19 +47,11 @@ pre {
 }
 
 .foldable-heading .chevron:after {
-  content: "\f078";   
+  content: "\f078";
 }
 
 .foldable-heading.collapsed .chevron:after {
-  content: "\f054"; 
-}  
-
-.datagrid-table td {
-  min-width: 6em;
-}
-
-.fixed-width-textarea {
-  font-family: 'Inconsolata', monospace;
+  content: "\f054";
 }
 
 img.small-icon {
@@ -69,7 +61,76 @@ img.small-icon {
 
 .formbuilder_area {
   border: 3px solid red;
-  border-radius: 10px; 
+  border-radius: 10px;
   padding: 10px;
 }
 
+.qr:before {
+  content: "";
+  display: inline-block;
+  padding-top: 100%;
+  width: 100%;
+}
+
+.qr {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  font-family: Inconsolata, sans-serif;
+  font-size: 15px;
+}
+
+.qr-label {
+  transform-origin: left top;
+  position: absolute;
+  padding-left: 5px;
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.qr-label-top {
+  top: 0;
+  left: 0;
+}
+
+.qr-label-left {
+  top: 100%;
+  left: 0;
+  transform: rotate(-90deg);
+}
+
+.qr-label-right {
+  top: 0;
+  left: 100%;
+  transform: rotate(90deg);
+}
+
+.qr-label-bottom {
+  top: 100%;
+  left: 100%;
+  transform: rotate(180deg);
+}
+
+.qr .canvas-holder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+}
+
+.qr .canvas-holder canvas {
+  width: calc(100% - 6em);
+  height: calc(100% - 6em);
+}
+
+@media print {
+  .noprint {
+    visibility: hidden;
+  }
+}

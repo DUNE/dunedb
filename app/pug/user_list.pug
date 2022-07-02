@@ -2,26 +2,26 @@ extend default
 include common.pug
 
 block vars
-  - var page_title = "Users";
+  - const page_title = 'Users';
 
 block extrascripts
   block workscripts
-    script(src = '/pages/list_users.js')
+    script(src = '/pages/user_list.js')
 
 block content
   .container-fluid
     div.vert-space-x2
       h2 Users
-    
+
     div.vert-space-x1
-      table#users_table.table
+      table.table#users_table
         thead
           tr
             th.col-md-2 Name
             th.col-md-3 Email
             th.col-md-3 User ID
             th.col-md-4 Roles
-        
+
         tbody
-    
+
     div.vert-space-x2

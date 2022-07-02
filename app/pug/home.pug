@@ -11,7 +11,7 @@ block content
         a(href = 'https://apa-dev.dunedb.org') staging
         |  or 
         a(href = 'https://apa.dunedb.org') production
-        |  deployments, so any additions and/or alterations to the database that are made through this web interface will not be reflected outside of this deployment.
+        |  deployments, so any additions and/or alterations to database records that are made through this web interface will not be reflected outside of this deployment.
         br
         | If you have any such content here that you wish moved to the staging and/or production deployments, please contact 
         a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar. 
@@ -25,7 +25,7 @@ block content
         a(href = 'https://apa.dunedb.org') production
         |  database, and is to be used <strong>only</strong> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
         br
-        | Changes to the underlying code made by the developers will be automatically pushed to the production deployment, but it up to individual users to copy over any additions and/or alterations to the database that they make through this deployment's web interface.
+        | Changes to the underlying code made by the developers will be automatically pushed to the production deployment, but it up to individual users to copy over any additions and/or alterations to database records that they make through this deployment's web interface.
       p
 
   if NODE_ENV == 'production'
@@ -38,6 +38,7 @@ block content
     div.vert-space-x1.border-success.border.rounded.p-2
       h5 Messages from the Development Team:
       ul
+        li <strong>2022-06-23</strong> - We have replaced the 'tests' and 'jobs' database entities with 'actions'.  These are designed to serve the same purpose as the former, but in a less restrictive manner, and in a way that has more parity with component entities.  Tests and jobs will shortly be removed entirely from the database interface, and all such records will be deleted.
         li <strong>2022-04-07</strong> - We have moved all internal database documentation to the 
           a(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank') Github Wiki
           | .  Additionally, files can no longer be uploaded to the database - they must now be stored in the 

@@ -3,7 +3,7 @@
 }
 
 .section {
-  break-inside: avoid-page; 
+  break-inside: avoid-page;
   display: block;
   position: relative;
   margin: 40px 0;
@@ -24,13 +24,5 @@
   top: 0;
   left: 0;
   transform-origin: top left;
-  transform: rotate(90deg);}
-
-.section-content {
-  
+  transform: rotate(90deg);
 }
-
-.section-header {
-  margin-left: 44px;
-}
-
