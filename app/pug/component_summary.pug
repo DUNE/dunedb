@@ -2,120 +2,80 @@ extend default
 include common.pug
 
 block vars
-  - var page_title = "Component Summary";
+  - const page_title = 'Component Summary';
 
 block extrascripts
+  script(type = 'text/javascript').
+    const component = !{JSON.stringify(component, null, 4)};
+    const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
+    const actions = !{JSON.stringify(actions, null, 4)};
+
   block workscripts
     script(src = '/pages/component_summary.js')
 
-mixin subdoc_component(component)
-  div.vert-space-x1
-    dl
-      dt Component Name
-      dd #{component.data.name}
-      
-      dt Component Type
-      dd #{component.formName}
-      
-      dt Current Version:
-      dd This is version #{component.validity.version} of the component.
-        br
-        | It was last edited on !{' '}
-        +dateFormat(component.insertion.insertDate)
-        
-        if component.insertion.user
-          |  by !{' '} #{component.insertion.user.displayName}
-        
-        div.vert-space-x1.border-success.border.rounded.p-2
-          .builtform(data-recordtype = component.recordType, data-record = component)
-
-mixin subdoc_test(record)
-  div.vert-space-x1
-    dl
-      dt Test Type
-      dd #{record.formName || record.formId}
-      
-      dt Results:
-      dd This test was performed on !{' '}
-        +dateFormatAndAgo(record.insertion.insertDate)
-        
-        if record.insertion.user
-          |  by !{' '} #{record.insertion.user.displayName}
-      
-      div.vert-space-x1.border-success.border.rounded.p-2
-        .builtform(data-recordtype = record.recordType, data-record = record)
-
-mixin subdoc_job(record)
-  div.vert-space-x1
-    dl
-      dt Job Type
-      dd #{record.formName || record.formId}
-      
-      dt Current Version:
-      dd This is version #{record.validity.version} of the job.
-        br
-        | It was last edited on !{' '}
-        +dateFormat(record.insertion.insertDate)
-        
-        if record.insertion.user
-          |  by !{' '} #{record.insertion.user.displayName}
-      
-      div.vert-space-x1.border-success.border.rounded.p-2
-        .builtform(data-recordtype = record.recordType, data-record = record)
-
-mixin subdoc_courseEvaluation(record)
-  div.vert-space-x1
-    dl
-      dt Course Name
-      dd #{record.name}
-      
-      +evaluated-course(record, false)
-
-mixin subdocument(record)
-  if(record.recordType === "component") 
-    +subdoc_component(record)
-  
-  if(record.recordType === "test") 
-    +subdoc_test(record)
-  
-  if(record.recordType === "job") 
-    +subdoc_job(record)
-  
-  if(record.recordType === "courseEvaluation") 
-    +subdoc_courseEvaluation(record)
-
 block allbody
   div.vert-space-x2.hori-space-x1.noprint
-    a.btn.btn-primary(onclick = "window.print(); return false;" href = '#print') Print Summary
-    
+    a.btn.btn-primary(onclick = 'window.print(); return false;' href = '#print') Print Summary
+
     div.vert-space-x1
       p For best display, please print <strong>without headers and footers</strong> and <strong>with backgrounds</strong>.
-  
+
   div.vert-space-x2
     hr
-  
-  div.vert-space-x2(style = 'clear: both;')
+
+  div.vert-space-x2
     .container-fluid
       .row
         .col-md-9
           h1 Component Summary
-          h4 UUID: #{component.componentUuid}
-          h4 Name: #{component.data.name}
           h4 Type: #{component.formName}
+          h4 Name: #{component.data.name}
+          h4 UUID: #{component.componentUuid}
           p Printed: 
             +dateFormat(moment())
-        
+
+          div.vert-space-x1
+          dl
+            dt Current Version:
+            dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
+              +dateFormat(component.insertion.insertDate)
+
+              if component.insertion.user
+                |  by !{' '} #{component.insertion.user.displayName}
+
+              div.vert-space-x1.border-success.border.rounded.p-2
+                #componenttypeform
+
         .col-md-3
           div#qr-code
-            +qr-panel(base_url + '/c/' + component.shortUuid.toString(), component.data.name)
-      
+            +qr-panel(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
+
       div.pagebreak
-      
-      each record in records
-        div.section
-          div.section-side.formName #{record.recordType}
-          
-          div.section-content
-            +subdocument(record)
-        
+
+      each action in actions
+        div.section.actionSection
+          div.section-side.formName action
+
+          div.vert-space-x1
+            dl
+              dt Action Type
+              dd #{action.typeFormName}
+
+              dt Action Name
+
+              if action.data.name
+                dd #{action.data.name}
+              else
+                dd (none)
+
+              dt Action ID
+              dd #{action.actionId}
+
+              dt Performance Data:
+              dd This is version #{action.validity.version} of the action, performed on !{' '}
+                +dateFormat(action.insertion.insertDate)
+
+                div.vert-space-x1.border-success.border.rounded.p-2
+                  .actiontypeform(data-record = action)
+
         div.pagebreak

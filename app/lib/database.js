@@ -89,10 +89,9 @@ async function initialize_database(db)
 	  	// Create collections if they do not exist.
 	  	var collections = [
 	  		"components",
-				"jobs",
-				"tests",
+				"actions",
 				"processed",
-	  		"componentForms","jobForms","testForms",
+	  		"componentForms","actionForms",
 		  	"m2mUsers",
 	  	];
 
@@ -120,28 +119,15 @@ async function initialize_database(db)
 			// await db.collection("components").createIndex({"data.$**": 1}); // mongodb version limited.
 		 	await db.collection("components").createIndex({"$**": "text"},{"weights":{"type":3,"data.name":2}});
 
-		 	logger.info("jobs");
-			await db.collection("jobs").dropIndexes(); 
-			await db.collection("jobs").createIndex({jobId:1});
-			await db.collection("jobs").createIndex({formId:1});
-			await db.collection("jobs").createIndex({state:1});
-			await db.collection("jobs").createIndex({"validity.startDate":1});
-			await db.collection("jobs").createIndex({"validity.version":1});
-			await db.collection("jobs").createIndex({"insertion.insertDate":1});
-			await db.collection("jobs").createIndex({"insertion.user.user_id":1});
-			// await db.collection("jobs").createIndex({"data.$**": 1});
-		 	await db.collection("jobs").createIndex({"$**": "text"},{"weights":{"type":3,"data.name":2}});
-
-		 	logger.info("test");
-
-			await db.collection("tests").dropIndexes(); // often cruft in early versions.
-			await db.collection("tests").createIndex({componentUuid:1});
-			await db.collection("tests").createIndex({formId:1});
-			await db.collection("tests").createIndex({state:1});
-			await db.collection("tests").createIndex({"insertion.insertDate":1});
-			await db.collection("tests").createIndex({"insertion.user.user_id":1});
-			// await db.collection("tests").createIndex({"data.$**": 1});
-		 	await db.collection("tests").createIndex({"$**": "text"},{"weights":{"formId":3,"data.name":2}});
+		 	logger.info("actions");
+            await db.collection("actions").dropIndexes(); // often cruft in early versions.
+			await db.collection("actions").createIndex({componentUuid:1});
+			await db.collection("actions").createIndex({formId:1});
+			await db.collection("actions").createIndex({state:1});
+			await db.collection("actions").createIndex({"insertion.insertDate":1});
+			await db.collection("actions").createIndex({"insertion.user.user_id":1});
+			// await db.collection("actions").createIndex({"data.$**": 1});
+		 	await db.collection("actions").createIndex({"$**": "text"},{"weights":{"formId":3,"data.name":2}});
 
 		 	logger.info("processed");
 
@@ -152,7 +138,7 @@ async function initialize_database(db)
 			await db.collection("processed").createIndex({"insertion.user.user_id":1});
 
 
-			for(var c of ["componentForms","jobForms","testForms"]) {
+			for(var c of ["componentForms","actionForms"]) {
 			 	logger.info(c);
 
 				await db.collection(c).dropIndexes(); // often cruft in early versions.
@@ -174,12 +160,6 @@ async function initialize_database(db)
 		}
 	 
 
-
-	  if(status_obj.version < 5.0) {
-	  	logger.info("v5 jobs");
-			await db.collection('jobs').updateMany({jobId:{$exists:false}},{$set:{jobId: "$_id" }});
-	   	status_obj.version =5.0;
-		}
 
 	  if(status_obj.version < 6.0) {
 	  	logger.info("v6 jobs");

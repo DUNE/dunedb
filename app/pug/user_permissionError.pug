@@ -26,11 +26,13 @@ body
 
       p Your currently assigned roles are: 
         br
-        +arrayFormat(user.roles)
+        .monospace
+          +arrayFormat(user.roles)
 
       p These roles give you the following permissions: 
         br
-        +arrayFormat(user.permissions)
+        .monospace 
+          +arrayFormat(user.permissions)
 
         if(required_permission)
           p The following permissions are required in order to view this page or perform this action: 

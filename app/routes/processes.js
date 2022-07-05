@@ -5,7 +5,6 @@ const express = require('express');
 
 var Components = require('lib/Components.js');
 var Forms = require('lib/Forms.js');
-var Jobs = require('lib/Tests.js')('job');
 var Components = require('lib/Components.js');
 var permissions = require('lib/permissions.js');
 var Processes = require("lib/Processes.js");
@@ -23,9 +22,9 @@ router.get("/processjob/:jobId([A-Fa-f0-9]{24})/:formRecordId([A-Fa-f0-9]{24})/:
   // var job = await Jobs.retrieve(req.params.jobRecordId);
 
   var processId = decodeURIComponent(req.params.processId);
-  let [form,job,pastProcesses] = await Promise.all([
+  let [form,pastProcesses] = await Promise.all([
       Forms.retrieve("jobForms",null,{id:req.params.formRecordId}),
-      Jobs.retrieve(req.params.jobId),
+      null,
       Processes.findInputRecord(req.params.jobRecordId),
   ]);
 
@@ -88,7 +87,7 @@ router.get("/processRecord/:processRecordId([A-Fa-f0-9]{24})", permissions.check
     if(!result) return res.status(400).send("No such process record in database.");
     let [form,job,pastProcesses] = await Promise.all([
       Forms.retrieve(result.process.collection,result.process.formId,{id:result.process._id}),
-      Jobs.retrieve(result.input.jobId),
+      null,
       Processes.findInputRecord(result.input._id)
     ]); 
     res.render("processResult.pug",{result, form, job, pastProcesses});

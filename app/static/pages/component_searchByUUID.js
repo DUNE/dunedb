@@ -25,7 +25,7 @@ async function renderUUIDForm() {
     if (uuidForm.isValid()) {
       const uuid = uuidForm.submission.data.componentUuid;
 
-      if (uuid && uuid.length === 36) window.location.href = `/action/${actionTypeFormId}/${uuid}`;
+      if (uuid && uuid.length === 36) window.location.href = `/component/${uuid}`;
     }
   });
 }

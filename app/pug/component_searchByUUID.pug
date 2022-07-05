@@ -1,25 +1,25 @@
 extend default
 
 block vars
-  - var page_title = "Search Components by UUID";
+  - const page_title = 'Search for Component by UUID';
 
 block extrascripts
   block workscripts
-    script(src = '/pages/search_componentsByUUID.js')
+    script(src = '/pages/component_searchByUUID.js')
 
 block content
   .container-fluid
     div.vert-space-x2
-      h2 Search Components by UUID
-    
+      h2 Search for Component by UUID
+
     div.vert-space-x1
       p The input box below uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
         br
         | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
-    
+
     div.vert-space-x1
       .row
         .col-md-6
-          #builtform
-    
+          #uuidform
+
     div.vert-space-x2

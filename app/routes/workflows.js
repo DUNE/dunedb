@@ -1,6 +1,6 @@
 'use strict';
 
-const Components = require('lib/Components.js')('component');
+const Components = require('lib/Components.js');
 const express = require('express');
 const Forms = require('lib/Forms.js');
 const logger = require('../lib/logger');

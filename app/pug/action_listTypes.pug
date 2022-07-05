@@ -2,7 +2,7 @@ extend default
 include common.pug
 
 block vars
-  - var page_title = "All Action Types";
+  - const page_title = 'All Action Types';
 
 block extrascripts
   block workscripts
@@ -21,17 +21,17 @@ block content
             .modal-header
               h5#NewTypeLabel.modal-title Create New Action Type Form
               button.close(type = 'button', data-dismiss = 'modal', aria-label = 'Close')
-                span(aria-hidden = true) &times;
+                span(aria-hidden = 'true') &times;
             .modal-body
               div
                 | Enter the new action type form ID.
                 br
                 | NOTE: this ID must have only underscores and alphanumerics (no spaces, hyphens or special characters).  A human-readable name can be set on the next page.
               div.vert-space-x1
-                input.form-control(type = 'text', id = 'input')
+                input.form-control#formId(type = 'text')
             .modal-footer
               button.btn.btn-danger(type = 'button', data-dismiss = 'modal') Close
-              button.btn.btn-success.NewTypeButton(type = 'button') Create
+              button.btn.btn-success#NewTypeButton(type = 'button') Create
 
     div.vert-space-x2
       h2 Available Action Types
@@ -48,25 +48,26 @@ block content
 
         tbody
           each typeFormId in Object.keys(actionTypeForms).sort()
-            - var typeForm = actionTypeForms[typeFormId];
+            - const typeForm = actionTypeForms[typeFormId];
 
-            if(typeForm.tags && !typeForm.tags.includes("Trash")) 
+            if(typeForm.tags && !typeForm.tags.includes('Trash')) 
               tr
-                td #{typeFormId}        
+                td #{typeFormId}
                 td
-                  a(href = '/actions/' + typeFormId + '/list') #{typeForm.formName}
+                  a(href = `/actions/${typeFormId}/list`) #{typeForm.formName}
 
                 if(typeForm.componentTypes.length > 0)
-                  td #{JSON.stringify(typeForm.componentTypes).replace(/"/g, "").replace(/,/g, ", ").replace(/^\[|]/g, '')}
+                  td 
+                    +arrayFormat(typeForm.componentTypes)
                 else
                   td (none)
 
                 td
-                  a(href = '/action/' + typeFormId).btn-sm.btn-primary 
+                  a(href = `/action/${typeFormId}`).btn-sm.btn-primary 
                     img.small-icon(src = '/images/run_icon.svg')
                     | &nbsp; Perform Action on Component
                 td
-                  a(href = '/actionTypes/' + typeFormId + '/edit').btn-sm.btn-warning 
+                  a(href = `/actionTypes/${typeFormId}/edit`).btn-sm.btn-warning 
                     img.small-icon(src = '/images/edit_icon.svg')
                     | &nbsp; Edit Action Type Form
 
@@ -86,22 +87,23 @@ block content
 
           tbody
             each typeFormId in Object.keys(actionTypeForms).sort()
-              - var typeForm = actionTypeForms[typeFormId];
+              - const typeForm = actionTypeForms[typeFormId];
 
-              if(typeForm.tags && typeForm.tags.includes("Trash")) 
+              if(typeForm.tags && typeForm.tags.includes('Trash')) 
                 tr
                   td #{typeFormId}  
                   td
-                    a(href = '/actions/' + typeFormId + '/list') #{typeForm.formName}
+                    a(href = `/actions/${typeFormId}/list`) #{typeForm.formName}
 
                   if(typeForm.componentTypes.length > 0)
-                    td #{JSON.stringify(typeForm.componentTypes).replace(/"/g, "").replace(/,/g, ", ").replace(/^\[|]/g, '')}
+                    td
+                      +arrayFormat(typeForm.componentTypes)
                   else
                     td (none)
 
                   td
                   td
-                    a(href = '/actionTypes/' + typeFormId + '/edit').btn-sm.btn-warning 
+                    a(href = `/actionTypes/${typeFormId}/edit`).btn-sm.btn-warning 
                       img.small-icon(src = '/images/edit_icon.svg')
                       | &nbsp; Edit Action Type Form
 

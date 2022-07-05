@@ -48,10 +48,8 @@ $(async function()
         "values": [
           { "label": "components:edit",       "value": "components:edit" },
           { "label": "components:view",       "value": "components:view" },
-          { "label": "jobs:view",             "value": "jobs:view"       },
-          { "label": "jobs:submit",           "value": "jobs:submit"     },
-          { "label": "tests:view",            "value": "tests:view"      },
-          { "label": "tests:submit",          "value": "tests:submit"    },
+          { "label": "actions:perform",       "value": "actions:perform" },
+          { "label": "actions:view",          "value": "actions:view"    },
         ]
       },
       "selectThreshold": 0.3,

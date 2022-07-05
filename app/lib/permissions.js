@@ -5,7 +5,7 @@ const logger = require('./logger');
 
 // These are permissions granted to users who are not logged in.
 // TODO(micchickenburger): This was defined in global config but isn't being used anywhere!
-// const default_permissions = ['components:view', 'tests:view', 'jobs:view'];
+// const default_permissions = ['components:view', 'actions:view'];
 
 // route middleware to make sure a user is logged in
 // Now I know how to use these:

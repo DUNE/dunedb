@@ -1,7 +1,7 @@
 extend default
 
 block vars
-  - var page_title = "Type Form Tags";
+  - const page_title = 'Type Form Tags';
 
 block content
   .container-fluid
@@ -28,18 +28,18 @@ block content
         tbody
           each tag in typeFormTags
 
-            - var filteredComponentTypeIds = [];
-            - var filteredComponentTypeNames = [];
-            - var filteredActionTypeIds = [];
-            - var filteredActionTypeNames = [];
+            - let filteredComponentTypeIds = [];
+            - let filteredComponentTypeNames = [];
+            - let filteredActionTypeIds = [];
+            - let filteredActionTypeNames = [];
 
             each componentForm in componentTypeForms
-              if(componentForm.tags.includes(tag) && !componentForm.tags.includes("Trash"))
+              if(componentForm.tags.includes(tag) && !componentForm.tags.includes('Trash'))
                 - filteredComponentTypeIds.push(componentForm.formId)
                 - filteredComponentTypeNames.push(componentForm.formName)
 
             each actionForm in actionTypeForms
-              if(actionForm.tags.includes(tag) && !actionForm.tags.includes("Trash"))
+              if(actionForm.tags.includes(tag) && !actionForm.tags.includes('Trash'))
                 - filteredActionTypeIds.push(actionForm.formId)
                 - filteredActionTypeNames.push(actionForm.formName)
 
@@ -51,7 +51,7 @@ block content
                   div.form-inline 
                     each typeName, i in filteredComponentTypeNames 
                       | [
-                      a(href = '/components/' + filteredComponentTypeIds[i] + '/list')=typeName 
+                      a(href = `/components/${filteredComponentTypeIds[i]}/list`) #{typeName}
                       | ]
                       if(i != filteredComponentTypeNames.length - 1)
                         | &nbsp; &nbsp;
@@ -63,7 +63,7 @@ block content
                   div.form-inline 
                     each typeName, i in filteredActionTypeNames 
                       | [
-                      a(href = '/actions/' + filteredActionTypeIds[i] + '/list')=typeName 
+                      a(href = `/actions/${filteredActionTypeIds[i]}/list`) #{typeName}
                       | ]
                       if(i != filteredActionTypeNames.length - 1)
                         | &nbsp; &nbsp;

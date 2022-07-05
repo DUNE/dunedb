@@ -1,7 +1,3 @@
-.tagbutton {
-  margin: 4px;
-}
-    
 .copybutton {
   background-color: #008CBA;
   width: 45px;
@@ -13,3 +9,6 @@
   border: 2px solid #008CBA;
 }
 
+.tagbutton {
+  margin: 4px;
+}

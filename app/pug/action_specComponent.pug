@@ -1,13 +1,13 @@
 extend default
 
 block vars
-  - var page_title = "Perform Action (Specified Component)";
+  - const page_title = 'Perform Action (Specified Component)';
 
 block extrascripts
   script(type = 'text/javascript').
-    var action = !{JSON.stringify((action || {}), null, 4)}; 
-    var actionTypeForm = !{JSON.stringify(actionTypeForm || {}, null, 4)}; 
-    var componentUuid = !{JSON.stringify(componentUuid || null)};
+    const action = !{JSON.stringify((action || {}), null, 4)}; 
+    const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)}; 
+    const componentUuid = !{JSON.stringify(componentUuid)};
 
   block workscripts
     script(src = '/pages/action_specComponent.js')
@@ -20,11 +20,11 @@ block content
     div.vert-space-x1
       dl
         dt Action Type
-        dd=actionTypeForm.formName
+        dd #{actionTypeForm.formName}
 
         dt Component UUID
         dd
-          a(href = '/component/' + componentUuid)=componentUuid
+          a(href = `/component/${componentUuid}`) #{componentUuid}
 
     div.vert-space-x1
       hr

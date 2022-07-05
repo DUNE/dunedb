@@ -3,7 +3,7 @@ var trialform = null;
 var comps     = Formio.Components.components;
 
 let entityRoute = '';
-if(collection === 'componentForms') entityRoute = 'components/types';
+if(collection === 'componentForms') entityRoute = 'componentTypes/list';
 if(collection === 'actionForms') entityRoute = 'actiontypes/list';
 
 var builder_config = 
