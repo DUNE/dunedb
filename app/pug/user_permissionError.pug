@@ -1,7 +1,7 @@
 doctype html
 
 head
-  title Incorrect Permission / User
+  title Incorrect Permissions
 
 body
   p <strong>You do not have permission to view this page or perform this action.</strong>
@@ -18,12 +18,6 @@ body
         .monospace #{user.displayName}
         .monospace #{user.user_id}
 
-        if(required_user)
-          p Only the following user is allowed to view this page or perform this action: 
-            br
-            .monospace #{required_user.displayName}
-            .monospace #{required_user.user_id}
-
       p Your currently assigned roles are: 
         br
         .monospace
@@ -34,7 +28,6 @@ body
         .monospace 
           +arrayFormat(user.permissions)
 
-        if(required_permission)
-          p The following permissions are required in order to view this page or perform this action: 
-            br        
-            .monospace #{required_permission}
+      p The following permissions are required in order to view this page or perform this action: 
+        br        
+        .monospace #{required_permission}
