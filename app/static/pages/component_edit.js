@@ -2,12 +2,17 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let componentForm;
 
-// Declare a flag for if we are submitting a new batch-type component or not
-let newBatchComponent = false;
+// If we are editing an existing component, we do not want to increment the 'data.typeRecordNumber' field
+// In this case, the 'componentTypesAndCounts' object passed from 'component_edit.pug' will be empty (but populated if creating a new component)
+let newComponent = false;
 
-// Arrays called  'subComponent_fullUuids' and 'subComponent_shortUuids' are passed from 'component_edit.pug'
+if (Object.keys(componentTypesAndCounts).length > 0) newComponent = true;
+
+// Arrays called 'subComponent_fullUuids' and 'subComponent_shortUuids' are also passed from 'component_edit.pug'
 // If we are submitting a new batch-type component, these arrays will contain full and short sub-component UUIDs (and therefore have a size > 0)
 // If we are instead editing an existing batch-type component or dealing with a non-batch-type component, the arrays will be empty
+let newBatchComponent = false;
+
 if (subComponent_fullUuids.length > 0) newBatchComponent = true;
 
 
@@ -54,6 +59,21 @@ async function onPageLoad() {
     submission.formId = componentTypeForm.formId;
     submission.formName = componentTypeForm.formName;
 
+    // For an entirely new component ...
+    if (newComponent) {
+      // Find the number of already-existing components of the same type as the component
+      let numberOfExistingComponents = 0;
+
+      if (componentTypesAndCounts[componentTypeForm.formId].count) numberOfExistingComponents = componentTypesAndCounts[componentTypeForm.formId].count;
+
+      // If the component is a 'Geometry Board' type, we must offset the number of already-existing components
+      // This is to account for an unknown number of boards that might have previously been physically created but not added to the database
+      if (componentTypeForm.formId === 'GeometryBoard') numberOfExistingComponents += 5000;
+
+      // Then add a component type record number to the 'data' field of the submission
+      submission.data.typeRecordNumber = numberOfExistingComponents + 1;
+    }
+
     // If we are submitting a new batch-type component ...
     if (newBatchComponent) {
       // Retrieve the desired number of sub-components from the submission object (since it will have already been entered into the component type form by the user)
@@ -63,9 +83,21 @@ async function onPageLoad() {
       const slice_fullUuids = subComponent_fullUuids.slice(0, numberOfSubComponents);
       const slice_shortUuids = subComponent_shortUuids.slice(0, numberOfSubComponents);
 
+      // Set up an array to hold the sub-component type record numbers (this will be populated in the sub-component loop below)
+      let subComponent_typeRecordNumbers = [];
+
       // Save the full and short sub-component UUID sub-arrays into the submission object, under the 'data' field that contains the rest of the form-level information
       submission.data.subComponent_fullUuids = slice_fullUuids;
       submission.data.subComponent_shortUuids = slice_shortUuids;
+
+      // Find the number of already-existing components of the same type as the sub-components
+      let numberOfExistingSubComponents = 0;
+
+      if (componentTypesAndCounts[submission.data.subComponent_formId].count) numberOfExistingSubComponents = componentTypesAndCounts[submission.data.subComponent_formId].count;
+
+      // If the sub-component is a 'Geometry Board' type, we must offset the number of already-existing components
+      // This is to account for an unknown number of boards that might have previously been physically created but not added to the database
+      if (submission.data.subComponent_formId === 'GeometryBoard') numberOfExistingSubComponents += 5000;
 
       // For each sub-component ...
       for (let s = 0; s < numberOfSubComponents; s++) {
@@ -83,10 +115,19 @@ async function onPageLoad() {
         sub_submission.data.partString = submission.data.subComponent_partString;
         sub_submission.data.fromBatch = submission.componentUuid;
 
+        // Add a component type record number to the sub-component's 'data' field, and save it into the previously declared array
+        const subComponent_typeRecordNumber = numberOfExistingSubComponents + s + 1;
+
+        sub_submission.data.typeRecordNumber = subComponent_typeRecordNumber;
+        subComponent_typeRecordNumbers.push(subComponent_typeRecordNumber);
+
         // Since there is nothing more to be added to the sub-component submission data this point, immediately submit it to the DB
         // Do not redirect the user back to the sub-component's information page, since we still need to deal with any other sub-components and the main batch-type component
         SubmitData(sub_submission, false);
       }
+
+      // Save the sub-component type record number array into the submission object, under the 'data' field that contains the rest of the form-level information
+      submission.data.subComponent_typeRecordNumbers = subComponent_typeRecordNumbers;
     }
 
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database
