@@ -1,3 +1,4 @@
+const deepmerge = require('deepmerge');
 const { readFileSync } = require('fs');
 const router = require('express').Router();
 const shortuuid = require('short-uuid')();
@@ -162,12 +163,27 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
       }
     }
 
+    // Simultaneously retrieve the following information about the component types:
+    //  - a list of all component type forms that currently exist in the 'componentForms' collection
+    //  - a list of component counts by type, for all type forms that already have at least 1 recorded component
+    const [componentTypeForms, componentCountsByType] = await Promise.all([
+      Forms.list('componentForms'),
+      Components.componentCountsByTypes(),
+    ]);
+
+    // Merge the lists above, to create a single list of component counts by type that also includes types that do not have recorded components
+    const componentTypesAndCounts = deepmerge(componentCountsByType, componentTypeForms);
+
     // Render the interface page for editing an existing component
     res.render('component_edit.pug', {
-      component: { componentUuid, componentTypeFormId },
+      component: {
+        componentUuid,
+        componentTypeFormId,
+      },
       componentTypeForm,
       subComponent_fullUuids,
       subComponent_shortUuids,
+      componentTypesAndCounts,
     });
   } catch (err) {
     logger.info(err);
@@ -197,6 +213,7 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
       componentTypeForm,
       subComponent_fullUuids: [],
       subComponent_shortUuids: [],
+      componentTypesAndCounts: [],
     });
   } catch (err) {
     logger.error(err);
@@ -252,11 +269,19 @@ router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('form
 /// List all component types
 router.get('/componentTypes/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Retrieve a list of all component type forms that currently exist in the 'componentForms' collection
-    const componentTypeForms = await Forms.list('componentForms');
+    // Simultaneously retrieve the following information about the component types:
+    //  - a list of all component type forms that currently exist in the 'componentForms' collection
+    //  - a list of component counts by type, for all type forms that already have at least 1 recorded component
+    const [componentTypeForms, componentCountsByType] = await Promise.all([
+      Forms.list('componentForms'),
+      Components.componentCountsByTypes(),
+    ]);
+
+    // Merge the lists above, to create a single list of component counts by type that also includes types that do not have recorded components
+    const componentTypesAndCounts = deepmerge(componentCountsByType, componentTypeForms);
 
     // Render the interface page for listing all component types
-    res.render('component_listTypes.pug', { componentTypeForms });
+    res.render('component_listTypes.pug', { componentTypesAndCounts });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

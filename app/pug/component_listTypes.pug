@@ -40,20 +40,27 @@ block content
       table.table
         thead
           tr
-            th.col-md-3 Type ID
-            th.col-md-4 Type Name
+            th.col-md-2 Type ID
+            th.col-md-3 Type Name
+            th.col-md-2 Component Count
             th.col-md-3
             th.col-md-2
 
         tbody
-          each typeFormId in Object.keys(componentTypeForms).sort()
-            - const typeForm = componentTypeForms[typeFormId];
+          each typeFormId in Object.keys(componentTypesAndCounts).sort()
+            - const typeForm = componentTypesAndCounts[typeFormId];
 
             if(typeForm.tags && !typeForm.tags.includes('Trash'))
               tr
                 td #{typeFormId}
                 td
                   a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
+
+                if(typeForm.count)
+                  td #{typeForm.count}
+                else 
+                  td 0
+
                 td
                   a(href = `/component/${typeFormId}`).btn-sm.btn-primary
                     img.small-icon(src = '/images/run_icon.svg')
@@ -71,20 +78,27 @@ block content
         table.table
           thead
             tr
-              th.col-md-3 Type ID
-              th.col-md-4 Type Name
+              th.col-md-2 Type ID
+              th.col-md-3 Type Name
+              th.col-md-2 Component Count
               th.col-md-3
               th.col-md-2
 
           tbody
-            each typeFormId in Object.keys(componentTypeForms).sort()
-              - const typeForm = componentTypeForms[typeFormId];
+            each typeFormId in Object.keys(componentTypesAndCounts).sort()
+              - const typeForm = componentTypesAndCounts[typeFormId];
 
               if(typeForm.tags && typeForm.tags.includes('Trash'))
                 tr
                   td #{typeFormId}
                   td
                     a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
+
+                  if(typeForm.count)
+                    td #{typeForm.count}
+                  else 
+                    td 0
+
                   td
                   td
                     a(href = `/components/${typeFormId}/edit`).btn-sm.btn-warning

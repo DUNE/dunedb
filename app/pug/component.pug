@@ -63,6 +63,7 @@ block content
                     thead
                       tr
                         th.col-md-3 UUID
+                        th.col-md-2 UK ID
                         th.col-md-3 QR Code Link
 
                     tbody
@@ -70,9 +71,15 @@ block content
                         tr
                           td
                             a(href = `/component/${uuid}`, target = '_blank') #{uuid}
+
+                          if (component.data.subComponent_typeRecordNumbers)
+                            td #{component.data.subComponent_typeRecordNumbers[index]}
+                          else
+                            td (not retrievable)
+
                           td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
 
-                a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.name}.txt`, href = '') Download List of Links
+                a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
 
             if component.data.fromBatch
               dt Part of Batch:

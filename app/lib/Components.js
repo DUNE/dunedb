@@ -2,6 +2,7 @@ const Binary = require('mongodb').Binary;
 const MUUID = require('uuid-mongodb');
 const shortuuid = require('short-uuid')();
 
+const Cache = require('lib/Cache.js');
 const commonSchema = require('lib/commonSchema.js');
 const { db } = require('./db');
 const dbLock = require('lib/dbLock.js');
@@ -85,6 +86,8 @@ async function save(input, req) {
   // Make a copy of the inserted record, and convert the 'componentUuid' from binary to string format, for better readability and consistent display
   let record = { ...result.ops[0] };
   record.componentUuid = MUUID.from(newRecord.componentUuid).toString();
+
+  Cache.invalidate('componentCountsByType');
 
   // Return the record as proof that it has been saved successfully
   return record;
@@ -218,6 +221,58 @@ async function list(match_condition, options) {
 }
 
 
+/// (Re)generate the cache of component counts by type
+Cache.add('componentCountsByType', async function () {
+  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+  let aggregation_stages = [];
+
+  aggregation_stages.push({
+    $group: {
+      _id: {
+        formId: '$formId',
+        componentUuid: '$componentUuid',
+      },
+    },
+  });
+
+  aggregation_stages.push({
+    $group: {
+      _id: '$_id.formId',
+      count: { $sum: 1 },
+    },
+  });
+
+  aggregation_stages.push({
+    $project: {
+      formId: '$_id',
+      count: true,
+      _id: false,
+    },
+  });
+
+  // Query the 'components' records collection using the aggregation stages
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  let returnedValues = {};
+
+  for (var result of results) {
+    returnedValues[result.formId] = result;
+  }
+
+  // Return the final results
+  return returnedValues;
+});
+
+
+/// Get the currently cached component counts by type
+async function componentCountsByTypes() {
+  const currentCache = Cache.current('componentCountsByType');
+  return currentCache;
+}
+
+
 /// Search for component records
 /// The search can be performed via either a text search or specifying a record to match to
 async function search(textSearch, matchRecord, skip = 0, limit = 20) {
@@ -331,6 +386,7 @@ module.exports = {
   retrieve,
   versions,
   list,
+  componentCountsByTypes,
   search,
   autoCompleteUuid,
 }
