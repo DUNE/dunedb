@@ -118,7 +118,7 @@ router.get('/actions/' + utils.uuid_regex, permissions.checkPermissionJson('acti
 // Forms
 
 // API/Backend: Get a list of form schema
-router.get('/:collection(componentForms|actionForms)/:format(list|object)?', 
+router.get('/:collection(componentForms|actionForms|workflowForms)/:format(list|object)?', 
   async function(req,res,next){
     try {
       var obj = await Forms.list(req.params.collection)
@@ -137,7 +137,7 @@ router.get('/:collection(componentForms|actionForms)/:format(list|object)?',
 
 // API/Backend: Get a form schema
 
-router.get('/:collection(componentForms|actionForms)/:formId', 
+router.get('/:collection(componentForms|actionForms|workflowForms)/:formId', 
   async function(req,res,next){
     if(req.params.collection == 'componentForms') Cache.invalidate('componentTypes');  
 
@@ -151,7 +151,7 @@ router.get('/:collection(componentForms|actionForms)/:formId',
 
 
 // API/Backend: Update a form schema.
-router.post('/:collection(componentForms|actionForms)/:formId', 
+router.post('/:collection(componentForms|actionForms|workflowForms)/:formId', 
   async function(req,res,next){
     logger.info(chalk.blue("Schema submission","/json/"+req.params.collection));
 
@@ -169,43 +169,40 @@ router.post('/:collection(componentForms|actionForms)/:formId',
 );
 
 
-/// Workflows
-router.get("/workflows", permissions.checkPermissionJson('workflows:view'),
-async function (req,res,next) {
+////////////////////////////////////////////////////////
+// Workflows
+
+/// Retrieve the most recent version of a single workflow record
+router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('workflows:view'), async function (req, res, next) {
   try {
-    var record = await Workflows.list();
-    return res.json(record,null,2);
+    // Retrieve the most recent version of the record corresponding to the specified workflow ID
+    const workflow = await Workflows.retrieve(req.params.workflowId);
+
+    // Return the record in JSON format
+    return res.json(record, null, 2);
   } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
 });
 
 
-router.get("/workflow/:workflowId", permissions.checkPermissionJson('workflows:view'),
-async function (req,res,next) {
+/// Save a new or edited workflow record
+router.post('/workflow', permissions.checkPermissionJson('workflows:edit'), async function (req, res, next) {
   try {
-    logger.info("retrieve workflow data",req.params);
-    var record = await Workflows.retrieve(req.params.workflowId);
-    return res.json(record,null,2);
+    // Display a logger message indicating that a record is being saved via the '/workflow' route
+    logger.info(req.body, 'Submission to /workflow');
+
+    // Save the record
+    const workflow  = await Workflows.save(req.body, req);
+    res.json(workflow.workflowId);
   } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
 });
 
-router.post("/workflow/:workflowId", permissions.checkPermissionJson('workflows:view'),
-async function (req,res,next) {
-  try {
-    logger.info("save workflow data",req.params);
-    var outrec  = await Workflows.save(req.body, req);
-    if(req.body.workflowId !== req.params.workflowId) throw new Error("Mismatch between workflowId in route and posted object");
-    return res.json(outrec,null,2);
-  } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
-  }
-});
+
 
 router.get("/workflow/:workflowId/"+utils.uuid_regex, permissions.checkPermissionJson("workflows:view"),
   async function(req, res, rext) {

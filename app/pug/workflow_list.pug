@@ -1,0 +1,51 @@
+extend default
+include common.pug
+
+block vars
+  - const page_title = 'Performed Workflows';
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      if(singleType && workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash'))
+        a(href = `/workflow/${workflowTypeForm.formId}`).btn.btn-primary
+          img.small-icon(src = '/images/run_icon.svg')
+          | &nbsp; Perform a New Workflow of this Type
+
+        div.vert-space-x2
+
+      h2 #{title}
+
+    div.vert-space-x1
+      table.table
+        thead
+          tr
+            th.col-md-2 Type Name
+            th.col-md-2 Workflow ID
+            th.col-md-2 Workflow Name
+            th.col-md-2 Performed on Component:
+            th.col-md-2 Last Performed On:
+            th.col-md-1
+
+        tbody
+          each workflow in workflows
+            - const notSingleType_notTrashed = !singleType && !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash');
+
+            if(notSingleType_notTrashed || singleType)
+              - const uuid = MUUID.from(workflow.componentUuid).toString();
+
+              tr
+                td #{workflow.typeFormName}
+                td
+                  a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
+                td #{workflow.name}
+                td
+                  a(href = `/component/${uuid}`) #{uuid}
+                td
+                  +dateFormatAndAgo(workflow.lastEditDate)
+                td
+                  a(href = `/json/workflow/${workflow.workflowId}`, target = '_blank').btn-sm.btn-secondary
+                    img.small-icon(src = '/images/checklist_icon.svg')
+                    | &nbsp; JSON Record
+
+    div.vert-space-x2

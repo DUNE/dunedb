@@ -4,7 +4,9 @@ var comps     = Formio.Components.components;
 
 let entityRoute = '';
 if(collection === 'componentForms') entityRoute = 'componentTypes/list';
-if(collection === 'actionForms') entityRoute = 'actiontypes/list';
+if(collection === 'actionForms') entityRoute = 'actionTypes/list';
+if(collection === 'workflowForms') entityRoute = 'workflowTypes/list';
+
 
 var builder_config = 
 {

@@ -1,5 +1,3 @@
-'use strict';
-
 const Cache = require('lib/Cache.js');
 const commonSchema = require('lib/commonSchema.js');
 const Components = require('lib/Components.js');
@@ -8,15 +6,6 @@ const dbLock = require('lib/dbLock.js');
 const Forms = require('lib/Forms.js');
 const permissions = require('lib/permissions.js');
 
-module.exports = {
-    save, 
-    retrieve, 
-    list, 
-    evaluate, 
-    getWorkflowForComponentFormId, 
-    nextStep, 
-    tags
-}
 
 async function save(input, req) {
     if(!input) {
@@ -130,60 +119,56 @@ async function retrieve(workflowId, options) {
     return items[0];
 }
 
+
+/// Retrieve a list of workflow records matching a specified condition
 async function list(match_condition, options) {
-    var aggregation_stages = [];
+  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+  let aggregation_stages = [];
+  
+  // If a matching condition has been specified, this is the first aggregation stage
+  if(match_condition) {
+    aggregation_stages.push({ $match: match_condition });
+  }
     
-    if(match_condition) {
-        aggregation_stages.push({
-            $match: match_condition
-        });
-    }
-    
-    aggregation_stages.push({
-        $sort: {"validity.startDate" : -1}
-    });
-    
-    aggregation_stages.push({
-        $group: {
-            _id: {workflowId: "$workflowId"},
-            workflowId: { "$first": "$workflowId" },
-            formId: { "$first": "$formId" },
-            name: { "$first": "$name" },
-            componentFormId:{ "$first": "$componentFormId" },
-            tags: { "$first": "$tags" }
-        }
-    });
-    
-    aggregation_stages.push({
-        $sort: {last_edited : -1}
-    });
-    
-    if (options) {
-      if(options.second_selection) {
-        aggregation_stages.push({
-            $match: options.second_selection
-        });
-      }
-    
-      if(options.skip) {
-          aggregation_stages.push({
-              $skip: options.skip
-          });
-      }
-      
-      if(options.limit) {
-          aggregation_stages.push({
-              $limit: options.limit
-          });
-      }
-    }
-    
-    var items = await db.collection('workflows')
-                        .aggregate(aggregation_stages)
-                        .toArray();
-    
-    return items;
+  // Next we want to remove all but the most recent version of each matching record
+  // First sort the matching records by validity ... highest version first
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+
+  // Then group the records by whatever fields will be subsequently used
+  // For example, if the 'workflowId' of each returned record is to be used later on, it must be one of the groups defined here
+  aggregation_stages.push({
+    $group: {
+      _id: { workflowId: '$workflowId' },
+      workflowId: { '$first': '$workflowId' },
+      typeFormId: { '$first': '$typeFormId' },
+      typeFormName: { '$first': '$typeFormName' },
+      name: { '$first': '$workflowName' },
+      lastEditDate: { '$first': '$validity.startDate' },
+      creationDate: { '$last': '$validity.startDate' },
+    },
+  });
+  
+  // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+
+  // Add aggregation stages for any additionally specified options
+  if (options) {
+    if (options.skip) aggregation_stages.push({ $skip: options.skip });
+    if (options.limit) aggregation_stages.push({ $limit: options.limit });
+  }
+
+  // Query the 'workflows' records collection using the aggregation stages
+  let records = await db.collection('workflows')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the entire list of workflow records
+  return records;
 }
+
+
+
+
 
 async function evaluatePath(path, entityId) {
     var result  = [];
@@ -310,21 +295,15 @@ async function nextStep(workflowId, uuid, firstUnfinished) {
     return getNextStep(evaluatedPath, firstUnfinished);
 }
 
-Cache.add('workflowsTags', async function() {
-    var tagsList = await Promise.all([db.collection('workflows')
-                                        .distinct('tags')]);
-    
-    var tokens = {};
-    
-    for(var arr of tagsList) {
-        tokens = arr.reduce((acc, curr) => (acc[curr] = 1, acc), tokens);
-    }
-    
-    delete tokens.Trash;
-    return Object.keys(tokens);
-});
 
-async function tags() {
-    Cache.invalidate('workflowsTags');
-    return await Cache.current('workflowsTags');
+
+
+
+module.exports = {
+  save, 
+  retrieve, 
+  list, 
+  evaluate, 
+  getWorkflowForComponentFormId, 
+  nextStep,
 }
