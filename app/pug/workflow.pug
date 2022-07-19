@@ -1,0 +1,76 @@
+extend default
+include common.pug
+
+block vars
+  - const page_title = 'View Workflow Record';
+
+block extrascripts
+  script(type = 'text/javascript').
+    const workflow = !{JSON.stringify(workflow, null, 4)};
+    const workflowVersions = !{JSON.stringify(workflowVersions, null, 4)};
+    const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)};
+
+  block workscripts
+    script(src = '/pages/workflow.js')
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      h2 View Workflow Record
+
+    div.vert-space-x1
+      dl
+        dt Workflow Type
+        dd #{workflow.typeFormName}
+
+        dt Workflow Name
+
+        if workflow.data.name
+          dd #{workflow.data.name}
+        else
+          dd (none)
+
+        dt Workflow ID
+        dd
+          a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
+
+        dt Workflow Data:
+        dd This is version #{workflow.validity.version} of the workflow, and it was last edited on !{' '}
+          +dateFormatAndAgo(workflow.insertion.insertDate)
+
+          if workflow.insertion.user
+            |  by !{' '}
+            a(href = `mailto:${user_email(workflow.insertion.user)}`) #{workflow.insertion.user.displayName}
+
+          div.vert-space-x1.border-success.border.rounded.p-2
+            #typeform
+
+    div.vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
+        | All Versions: 
+        i.chevron.fa.fa-fw 
+
+      div#versionsBox.collapse
+        ul
+          each v in workflowVersions
+            li 
+              a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
+              |  on 
+              +dateFormatAndAgo(v.insertion.insertDate)
+
+              if v.insertion.user
+                |  by !{' '}
+                a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
+
+    div.vert-space-x2.form-inline
+      a(href = `/workflow/${workflow.workflowId}/edit`).btn.btn-warning
+        img.small-icon(src = '/images/edit_icon.svg')
+        | &nbsp; Edit Workflow
+
+      div.hori-space-x2
+        a(href = `/json/workflow/${workflow.workflowId}`, target = '_blank').btn.btn-secondary
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; View JSON Record
+
+    div.vert-space-x2

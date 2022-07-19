@@ -42,8 +42,9 @@ block content
           tr
             th.col-md-2 Type ID
             th.col-md-2 Type Name
-            th.col-md-3 Recommended Component Types
+            th.col-md-2 Recommended Component Types
             th.col-md-2 Short Description
+            th.col-md-2
             th.col-md-2
 
         tbody
@@ -63,6 +64,10 @@ block content
                   td (none)
 
                 td #{typeForm.description}
+                td
+                  a(href = `/workflow/${typeFormId}`).btn-sm.btn-primary 
+                    img.small-icon(src = '/images/run_icon.svg')
+                    | &nbsp; Create a New Workflow of this Type
                 td
                   a(href = `/workflowTypes/${typeFormId}/edit`).btn-sm.btn-warning 
                     img.small-icon(src = '/images/edit_icon.svg')

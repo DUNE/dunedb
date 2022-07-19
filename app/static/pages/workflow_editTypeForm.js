@@ -179,15 +179,43 @@ const metaschema = {
         tooltip: 'Tags that can be applied to this workflow type. Use the \'Trash\' tag to remove this type from use.',
         storeas: 'array',
       }],
+    },
+
+    {
+      width: 12,
+      size: 'md',
+      components: [{
+        type: 'textarea',
+        label: 'Workflow Description',
+        key: 'description',
+        input: true,
+        autoExpand: false,
+      }],
     }],
   },
 
   {
-    type: 'textarea',
-    label: 'Workflow Description',
-    key: 'description',
-    input: true,
-    autoExpand: false,
+    type: 'htmlelement',
+    label: 'formbuilder',
+    key: 'formbuilder',
+    validate: {
+      unique: false,
+      multiple: false,
+    },
+    input: false,
+    className: 'formbuilder_area',
+    tag: 'div',
+    attrs: [{
+      attr: '',
+      value: ''
+    }],
+    refreshOnChange: false,
+  },
+
+  {
+    components: [],
+    width: 12,
+    size: 'md',
   },
 
   {
@@ -215,13 +243,13 @@ const metaschema = {
       placeholder: 'Select a DB entity type for this step',
       data: {
         values: [{
-            label: 'Component',
-            value: 'component',
-          },
-          {
-            label: 'Action',
-            value: 'action',
-          }],
+          label: 'Component',
+          value: 'component',
+        },
+        {
+          label: 'Action',
+          value: 'action',
+        }],
       },
       selectThreshold: 0.3,
       indexeddb: { 'filter': {} },
@@ -233,7 +261,7 @@ const metaschema = {
       key: 'formId',
       validate: {
         required: true,
-        onlyAvailableItems: false
+        onlyAvailableItems: false,
       },
       input: true,
       widget: 'choicesjs',
@@ -246,8 +274,8 @@ const metaschema = {
         }],
         url: '/json/{{row.type}}Forms/list',
         headers: [{
-            key: '',
-            value: '',
+          key: '',
+          value: '',
         }],
       },
       idPath: 'formId',
@@ -259,7 +287,7 @@ const metaschema = {
       clearOnRefresh: true,
       disableLimit: false,
     },
-        
+
     {
       type: 'textfield',
       label: 'Step Advice',

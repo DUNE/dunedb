@@ -1,4 +1,3 @@
-
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let componentForm;
 
@@ -142,7 +141,7 @@ function SubmitData(submission, redirectToInfo = true) {
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: '/json/component/',
+    url: '/json/component',
     data: JSON.stringify(submission),
     dataType: 'json',
     success: postSuccess,

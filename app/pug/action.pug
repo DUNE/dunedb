@@ -45,8 +45,8 @@ block content
           br
           | Name: #{component.data.name}
 
-        dt Performance Data:
-        dd This is version #{action.validity.version} of the action, performed on !{' '}
+        dt Action Data:
+        dd This is version #{action.validity.version} of the action, and it was last performed on !{' '}
           +dateFormatAndAgo(action.insertion.insertDate)
 
           if action.insertion.user

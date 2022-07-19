@@ -2,7 +2,7 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'Performed Workflows';
+  - const page_title = 'Created / Edited Workflows';
 
 block content
   .container-fluid
@@ -10,7 +10,7 @@ block content
       if(singleType && workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash'))
         a(href = `/workflow/${workflowTypeForm.formId}`).btn.btn-primary
           img.small-icon(src = '/images/run_icon.svg')
-          | &nbsp; Perform a New Workflow of this Type
+          | &nbsp; Create a New Workflow of this Type
 
         div.vert-space-x2
 
@@ -23,8 +23,8 @@ block content
             th.col-md-2 Type Name
             th.col-md-2 Workflow ID
             th.col-md-2 Workflow Name
-            th.col-md-2 Performed on Component:
-            th.col-md-2 Last Performed On:
+            th.col-md-2 Primary Component
+            th.col-md-2 Last Edited On:
             th.col-md-1
 
         tbody
@@ -32,7 +32,6 @@ block content
             - const notSingleType_notTrashed = !singleType && !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash');
 
             if(notSingleType_notTrashed || singleType)
-              - const uuid = MUUID.from(workflow.componentUuid).toString();
 
               tr
                 td #{workflow.typeFormName}
@@ -40,7 +39,6 @@ block content
                   a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
                 td #{workflow.name}
                 td
-                  a(href = `/component/${uuid}`) #{uuid}
                 td
                   +dateFormatAndAgo(workflow.lastEditDate)
                 td

@@ -2,7 +2,7 @@
 const builder_wizard = false;
 
 // Set up the 'metaschema' block using Formio form components
-// This block will appear at the top of the 'Edit Action Type Form' page
+// This block will appear at the top of the 'Edit Component Type Form' page
 const metaschema = {
   components: [{
     type: 'columns',

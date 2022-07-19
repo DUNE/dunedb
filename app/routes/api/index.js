@@ -179,7 +179,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
     const workflow = await Workflows.retrieve(req.params.workflowId);
 
     // Return the record in JSON format
-    return res.json(record, null, 2);
+    return res.json(workflow, null, 2);
   } catch(err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

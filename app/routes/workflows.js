@@ -4,123 +4,97 @@ const router = require('express').Router();
 const Forms = require('lib/Forms.js');
 const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
-const Workflows = require('lib/Workflows.js');
-
-
-const Components = require('lib/Components.js');
 const utils = require('lib/utils.js');
-
+const Workflows = require('lib/Workflows.js');
 
 const default_form_schema = JSON.parse(readFileSync('./schemas/default_form_schema.json'));
 
 
+/// View a single workflow record
+router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission('workflows:view'), async function(req, res, next) {
+  try {
+    // Set up a database query that includes the specified workflow ID and a version number if also provided
+    let query = { workflowId: req.params.workflowId };
 
+    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
 
-/// View a workflow
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission("workflows:view"), async function(req, res, next) {
-    try {
-        // Retrieve the workflow's DB record using the specified workflow ID
-        // Throw an error if there is no record corresponding to this ID
-        var workflow = await Workflows.retrieve(req.params.workflowId);
-        
-        if(!workflow) {
-            return res.status(400).send("There is no DB record for a workflow with ID: " + req.params.workflowId);
-        }
-        
-        // Get the workflow's type form ID
-        // Throw an error if the form's ID cannot be found within the workflow's DB record
-        var formId = workflow.formId;
-        
-        if(!formId) {
-            return res.status(400).send("This workflow (ID: " + req.params.workflowId + ") has no type form ID!");
-        }
-        
-        // Retrieve the workflow's type form using its form ID
-        // Throw an error if there is no DB record corresponding to the form ID
-        var form = await Forms.retrieve('workflowForms', formId);
-        
-        if(!form) {
-            return res.status(400).send("There is no DB record for a workflow type with form ID: " + formId);
-        }
-        
-        // Retrieve a list of components that have the same type as that which is associated with the workflow
-        // This is done by matching against the component type form ID stored in the workflow's record
-        var components = await Components.list({'formId': workflow.componentFormId});
-        
-        // Retrieve a list of all existing component type forms
-        var componentTypeForms = await Forms.list('componentForms');
-        
-        // Render the page for viewing the workflow
-        res.render('workflow.pug', {
-            workflow, 
-            form, 
-            components, 
-            componentForms
-        });
-    } catch(err) {
-        logger.error(err);
-        res.status(400).send(err.toString());
-    }
+    // Retrieve the specified version of the record using the query
+    // Simultaneously, retrieve ALL versions of the same record
+    const [workflow, workflowVersions] = await Promise.all([
+      Workflows.retrieve(query),
+      Workflows.versions(req.params.workflowId),
+    ]);
+
+    // Throw an error if there is no record corresponding to the query
+    if (!workflow) return res.status(404).render(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
+
+    // Retrieve the workflow type form, using its type form ID (which is specified in the record)
+    const workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);
+
+    // Throw an error if there is no type form corresponding to the type form ID
+    if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
+
+    // Render the interface page for viewing a workflow record
+    res.render('workflow.pug', {
+      workflow,
+      workflowVersions,
+      workflowTypeForm, 
+    });
+  } catch(err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
 });
+
 
 /// Create a new workflow of a given type
-router.get('/workflow/:formId', permissions.checkPermission("workflows:edit"), async function(req, res, next) {
-    try {
-        // Retrieve the workflow type form corresponding to the specified form ID
-        // Set the retrieval (and therefore, workflow submission) timestamp to be the current date and time
-        // Throw an error if there is no DB record corresponding to the form ID
-        var form = await Forms.retrieve('workflowForms', req.params.formId, {onDate: new Date()});
-        
-        if(!form) {
-            return res.status(400).send("There is no DB record for a workflow type with form ID: " + req.params.formId);
-        }
-        
-        // Render the page for editing an existing new workflow
-        res.render('edit_workflow.pug', {form});
-    } catch(err) {
-        logger.error(err);
-        res.status(400).send(err.toString());
-    }
+router.get('/workflow/:typeFormId', permissions.checkPermission("workflows:edit"), async function(req, res, next) {
+  try {
+    // Retrieve the workflow type form corresponding to the specified type form ID
+    const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
+    
+    // Throw an error if there is no type form corresponding to the type form ID
+    if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${req.params.typeFormId}`);
+    
+    // Render the interface page for editing an existing workflow
+    res.render('workflow_edit.pug', { workflowTypeForm });
+  } catch(err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
 });
+
 
 /// Edit an existing workflow
 router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermission("workflows:edit"), async function(req, res, next) {
-    try {
-        // Retrieve the workflow's DB record using the specified workflow ID
-        // Throw an error if there is no record corresponding to this ID
-        var workflow = await Workflows.retrieve(req.params.workflowId);
-        
-        if(!workflow) {
-            return res.status(400).send("There is no DB record for a workflow with ID: " + req.params.workflowId);
-        }
-        
-        // Get the workflow's type form ID
-        // Throw an error if the form's ID cannot be found within the workflow's DB record
-        var formId = workflow.formId;
-        
-        if(!formId) {
-            return res.status(400).send("This workflow (ID: " + req.params.workflowId + ") has no type form ID!");
-        }
-        
-        // Retrieve the workflow's type form using its form ID
-        // Throw an error if there is no DB record corresponding to the form ID
-        var form = await Forms.retrieve('workflowForms', formId);
-        
-        if(!form) {
-            return res.status(400).send("There is no DB record for a workflow type with form ID: " + formId);
-        }
-        
-        // Render the page for editing an existing workflow
-        res.render('edit_workflow.pug', {
-            workflowId: req.params.workflowId, 
-            workflow, 
-            form
-        });
-    }  catch(err) {
-        logger.error(err);
-        res.status(400).send(err.toString());
+  try {
+     // Retrieve the most recent version of the record corresponding to the specified action ID
+    const workflow = await Workflows.retrieve(req.params.workflowId);
+    
+    // Throw an error if there is no record corresponding to the action ID
+    if (!workflow) return res.status(404).send(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
+    
+    // Retrieve the workflow type form, using its type form ID (which is specified in the record)
+    const workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);
+    
+    // Throw an error if there is no type form corresponding to the type form ID
+    if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
+    
+    // Render the interface page for editing an existing workflow
+    res.render('workflow_edit.pug', {
+      workflow, 
+      workflowTypeForm,
+    });
+  } catch(err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
     }
 });
+
+
+
+
+
 
 /// View the status of a specified component with respect to a workflow
 router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/' + utils.uuid_regex, permissions.checkPermission("workflows:view"), async function(req, res, next) {
@@ -263,7 +237,7 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
     res.render('workflow_list.pug', {
       workflows,
       singleType: false,
-      title: 'All Performed Workflows (All Types)',
+      title: 'All Created / Edited Workflows (All Types)',
       allWorkflowTypeForms,
     });
   } catch(err) {
@@ -293,7 +267,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     res.render('workflow_list.pug', {
       workflows,
       singleType: true,
-      title: 'All Performed Workflows (Single Type)',
+      title: 'All Created / Edited Workflows (Single Type)',
       workflowTypeForm,
       allWorkflowTypeForms,
     });
