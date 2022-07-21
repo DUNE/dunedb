@@ -58,6 +58,9 @@ async function onPageLoad() {
     submission.formId = componentTypeForm.formId;
     submission.formName = componentTypeForm.formName;
 
+    // If the component originates from a workflow (i.e. a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
+    if (!(workflowId === '')) submission.workflowId = workflowId;
+
     // For an entirely new component ...
     if (newComponent) {
       // Find the number of already-existing components of the same type as the component

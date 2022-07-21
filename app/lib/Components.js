@@ -59,6 +59,8 @@ async function save(input, req) {
   newRecord.formName = input.formName || typeForm.formName;
   newRecord.data = input.data;
 
+  if (input.workflowId) newRecord.workflowId = input.workflowId;
+
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
 

@@ -44,6 +44,9 @@ async function onPageLoad() {
     submission.typeFormName = actionTypeForm.formName;
     submission.componentUuid = componentUuid;
 
+    // If the action originates from a workflow (i.e. a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
+    if (!(workflowId === '')) submission.workflowId = workflowId;
+
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database
     SubmitData(submission);
   });

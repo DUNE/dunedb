@@ -43,6 +43,11 @@ block content
             dt Short UUID
             dd #{component.shortUuid}
 
+            if component.workflowId
+              dt Part of Workflow:
+              dd
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') #{component.workflowId}
+
             dt Component Data:
             dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
               +dateFormatAndAgo(component.insertion.insertDate)

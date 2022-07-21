@@ -6,7 +6,8 @@ block vars
 block extrascripts
   script(type = 'text/javascript').
     const workflow = !{JSON.stringify((workflow || {}), null, 4)}; 
-    const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)}; 
+    const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)};
+    const newWorkflow = !{JSON.stringify(newWorkflow, null, 4)};
 
   block workscripts
     script(src = '/pages/workflow_edit.js')

@@ -34,11 +34,19 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
     // Throw an error if there is no type form corresponding to the type form ID
     if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
 
+    // Simultaneously retrieve lists of all component and action type forms that currently exist in their respective collections
+    const [componentTypeForms, actionTypeForms] = await Promise.all([
+      Forms.list('componentForms'),
+      Forms.list('actionForms'),
+    ]);
+
     // Render the interface page for viewing a workflow record
     res.render('workflow.pug', {
       workflow,
       workflowVersions,
       workflowTypeForm, 
+      componentTypeForms,
+      actionTypeForms,
     });
   } catch(err) {
     logger.error(err);
@@ -57,7 +65,10 @@ router.get('/workflow/:typeFormId', permissions.checkPermission("workflows:edit"
     if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${req.params.typeFormId}`);
     
     // Render the interface page for editing an existing workflow
-    res.render('workflow_edit.pug', { workflowTypeForm });
+    res.render('workflow_edit.pug', {
+      workflowTypeForm,
+      newWorkflow: true,
+    });
   } catch(err) {
     logger.error(err);
     res.status(500).send(err.toString());
@@ -84,6 +95,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
     res.render('workflow_edit.pug', {
       workflow, 
       workflowTypeForm,
+      newWorkflow: false,
     });
   } catch(err) {
     logger.error(err);

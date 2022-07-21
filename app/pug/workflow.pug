@@ -9,6 +9,8 @@ block extrascripts
     const workflow = !{JSON.stringify(workflow, null, 4)};
     const workflowVersions = !{JSON.stringify(workflowVersions, null, 4)};
     const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)};
+    const componentTypeForms = !{JSON.stringify(componentTypeForms, null, 4)};
+    const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
 
   block workscripts
     script(src = '/pages/workflow.js')
@@ -44,6 +46,68 @@ block content
 
           div.vert-space-x1.border-success.border.rounded.p-2
             #typeform
+
+          div.vert-space-x1.border-success.border.rounded.p-2
+            table.table
+              thead
+                tr 
+                  th.col-md-1 Step
+                  th.col-md-1 Entity Type
+                  th.col-md-2 Type Form Name
+                  th.col-md-3 Advice 
+                  th.col-md-5 Status / Result
+
+              tbody
+                each step, index in workflow.path 
+                  tr 
+                    td #{index + 1}
+                    td #{step.type}
+                    td #{step.formName}
+                    td #{step.advice}
+
+                    - const componentUuid = workflow.path[0].result;
+                    - let stepFormId = '';
+
+                    if(index === 0)
+                      each typeFormId in Object.keys(componentTypeForms).sort()
+                        if(componentTypeForms[typeFormId].formName == step.formName)
+                          - stepFormId = componentTypeForms[typeFormId].formId
+
+                      if(componentUuid.length > 0)
+                        td
+                          a(href = `/component/${componentUuid}`, target = '_blank') #{componentUuid}
+                      else 
+                        td
+                          div.form-inline 
+                            | (step not yet performed)
+
+                            div.hori-space-x2
+                              a(href = `/component/${stepFormId}?workflowId=${workflow.workflowId}`).btn-sm.btn-primary
+                                img.small-icon(src = '/images/run_icon.svg')
+                                | &nbsp; Create Component 
+
+                    else
+                      each typeFormId in Object.keys(actionTypeForms).sort()
+                        if(actionTypeForms[typeFormId].formName == step.formName)
+                          - stepFormId = actionTypeForms[typeFormId].formId
+
+                      if(step.result.length > 0)
+                        td 
+                          a(href = `/action/${step.result}`, target = '_blank') #{step.result}
+                      else 
+                        td
+                          div.form-inline 
+                            | (step not yet performed)
+
+                            div.hori-space-x2
+                              if(workflow.path[index - 1].result.length > 0)
+                                a(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}`).btn-sm.btn-primary
+                                  img.small-icon(src = '/images/run_icon.svg')
+                                  | &nbsp; Perform Action
+                              else 
+                                a.btn-sm.btn-danger
+                                  img.small-icon(src = '/images/run_icon.svg')
+                                  | &nbsp; Perform Action
 
     div.vert-space-x1
       .panel.panel-default

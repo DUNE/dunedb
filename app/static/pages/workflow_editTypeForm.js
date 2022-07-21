@@ -229,6 +229,7 @@ const metaschema = {
       type: '',
       formId: '',
       advice: '',
+      result: '',
     }],
     components: [{
       type: 'select',
@@ -258,7 +259,7 @@ const metaschema = {
     {
       type: 'select',
       label: 'Type Form Name',
-      key: 'formId',
+      key: 'formName',
       validate: {
         required: true,
         onlyAvailableItems: false,
@@ -278,8 +279,8 @@ const metaschema = {
           value: '',
         }],
       },
-      idPath: 'formId',
-      valueProperty: 'formId',
+      idPath: 'formName',
+      valueProperty: 'formName',
       selectThreshold: 0.3,
       template: '<span>{{ item.formName }}</span>',
       indexeddb: { 'filter': {} },
@@ -293,6 +294,14 @@ const metaschema = {
       label: 'Step Advice',
       key: 'advice',
       input: true,
+    },
+
+    {
+      type: 'textfield',
+      label: 'Result',
+      key: 'result',
+      input: true,
+      disabled: true,
     }],
   },
 

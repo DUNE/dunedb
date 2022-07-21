@@ -45,6 +45,11 @@ block content
           br
           | Name: #{component.data.name}
 
+        if action.workflowId
+          dt Part of Workflow:
+          dd
+            a(href = `/workflow/${action.workflowId}`, target = '_blank') #{action.workflowId}
+
         dt Action Data:
         dd This is version #{action.validity.version} of the action, and it was last performed on !{' '}
           +dateFormatAndAgo(action.insertion.insertDate)

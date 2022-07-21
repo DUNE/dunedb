@@ -83,10 +83,16 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
     // Throw an error if there is no type form corresponding to the type form ID
     if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${req.params.typeFormId}`);
 
+    // Pass any provided workflow ID
+    let workflowId = '';
+
+    if (req.query.workflowId) workflowId = req.query.workflowId;
+
     // Render the interface page for performing an action on a specified component
     res.render('action_specComponent.pug', {
       actionTypeForm,
       componentUuid: req.params.uuid,
+      workflowId,
     });
   } catch (err) {
     logger.error(err);
@@ -116,6 +122,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
       action,
       actionTypeForm,
       componentUuid: action.componentUuid,
+      workflowId: '',
     });
   } catch (err) {
     logger.error(err);

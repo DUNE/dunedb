@@ -5,13 +5,13 @@ const logger = require('../../lib/logger');
 
 
 /// List all type forms in a specified type form collection
-router.get('/:collection(componentForms|actionForms|workflowForms)/:format(array|object)?', async function (req, res, next) {
+router.get('/:collection(componentForms|actionForms|workflowForms)/:format(list|object)?', async function (req, res, next) {
   try {
     // Retrieve a list of all type forms that currently exist in the specified collection
     const typeFormsObj = await Forms.list(req.params.collection);
 
-    // If the list is required as an array, generate and return the array from the list contents, in JSON format
-    if (req.params.format == 'array') {
+    // If the list is required as an actual list, generate and return it from the list contents, in JSON format
+    if (req.params.format == 'list') {
       let typeFormsArray = [];
 
       for (const key in typeFormsObj) typeFormsArray.push(typeFormsObj[key]);
@@ -19,7 +19,7 @@ router.get('/:collection(componentForms|actionForms|workflowForms)/:format(array
       return res.json(typeFormsArray);
     }
 
-    // Otherwise, return the raw type forms list object in JSON format
+    // Otherwise, return the raw type forms object in JSON format
     return res.json(typeFormsObj);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
@@ -36,7 +36,7 @@ router.get('/:collection(componentForms|actionForms|workflowForms)/:typeFormId',
 
     // Throw an error if there is no type form corresponding to the type form ID
     if (!typeForm) {
-      res.status(404).json({ error: `There is no type form with form ID = ${req.params.typeFormId} in the ${eq.params.collection} collection` });
+      res.status(404).json({ error: `There is no type form with form ID = ${req.params.typeFormId} in the ${req.params.collection} collection` });
       return next();
     }
 

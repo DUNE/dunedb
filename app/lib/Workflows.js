@@ -18,12 +18,12 @@ async function save(input, req) {
   // For workflow records, these are:
   //   - the workflow type form ID
   //   - user-provided data (may be empty of content, but must still exist)
-  //   - a workflow path (may be empty of content, but must still exist)
+  //   - a workflow path (the path steps will be checked later in this function)
   if(!(input instanceof Object)) throw new Error(`Workflows::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('typeFormId')) throw new Error(`Workflows::save() - the 'input.typeFormId' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Workflows::save() - the 'input.data' has not been specified!`);
-//  if (!input.hasOwnProperty('path')) throw new Error(`Workflows::save() - the 'input.path' has not been specified!`);
-  
+  if (!input.hasOwnProperty('path')) throw new Error(`Workflows::save() - the 'input.path' has not been specified!`);
+
   // Check that there is an existing type form corresponding to the the provided type form ID
   const typeFormsList = await Forms.list('workflowForms');
   const typeForm = typeFormsList[input.typeFormId];
@@ -31,13 +31,16 @@ async function save(input, req) {
   if (!typeForm) throw new Error(`Workflows:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known workflow type form!`);
 
   // Check that each step of the workflow path has the minimum required information:
-  //   - the type of the step ('component' or 'action')
-  //   - the type form ID of the step (named as 'formId' for each step)
-//  for (const step of input.path) {
-//    if (!step.type) throw new Error(`Workflows::save() - the 'step.type' has not been specified for one or more steps!`);
-    
-//    if (!step.formId) throw new Error(`Workflows::save() - the 'step.formId' has not been specified for one or more steps!`);
-//  }
+  //   - the type of the step (named as 'type' for each step, and taking either 'component' or 'action' as value)
+  //   - the type form name of the step (named as 'formName' for each step)
+  for (const step of input.path) {
+    if (!step.type) throw new Error(`Workflows::save() - the 'step.type' has not been specified for one or more steps!`);
+    if ((!(step.type === 'component')) && (!(step.type === 'action'))) throw new Error(`Workflows::save() - the 'step.type' is not valid for one or more steps (must be either 'component' or 'action'!`);
+    if (!step.formName) throw new Error(`Workflows::save() - the 'step.formName' has not been specified for one or more steps!`);
+  }
+
+  // Check that the first step of the workflow path is a 'component' type one (since component creation must always be performed first)
+  if (!(input.path[0].type === 'component')) throw new Error(`Workflows::save() - the 'step.type' of the first step is not 'component'!`);
 
   // Set up a new (initially empty) record object
   let newRecord = {};
@@ -49,8 +52,8 @@ async function save(input, req) {
   newRecord.typeFormId = input.typeFormId;
   newRecord.typeFormName = input.typeFormName || typeForm.formName;
   newRecord.data = input.data;
-//  newRecord.path = input.path;
-  
+  newRecord.path = input.path;
+
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
 
