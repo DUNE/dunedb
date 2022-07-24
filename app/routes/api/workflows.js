@@ -2,7 +2,6 @@ const router = require('express').Router();
 
 const logger = require('../../lib/logger');
 const permissions = require("lib/permissions.js");
-const utils = require("lib/utils.js");
 const Workflows = require("lib/Workflows.js");
 
 
@@ -35,20 +34,6 @@ router.post('/workflow', permissions.checkPermissionJson('workflows:edit'), asyn
     res.status(500).json({ error: err.toString() });
   }
 });
-
-
-
-router.get("/workflow/:workflowId/" + utils.uuid_regex, permissions.checkPermissionJson("workflows:view"),
-  async function (req, res, rext) {
-    try {
-
-      var outrec = await Workflows.evaluate(req.params.workflowId, req.params.uuid);
-      return res.json(outrec);
-    } catch (err) {
-      logger.info({ route: req.route.path }, err.message);
-      res.status(400).json({ error: err.toString() });
-    }
-  })
 
 
 module.exports = router;

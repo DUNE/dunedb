@@ -1,8 +1,6 @@
 const ObjectID = require('mongodb').ObjectID;
 
-const Actions = require('lib/Actions.js');
 const commonSchema = require('lib/commonSchema.js');
-const Components = require('lib/Components.js');
 const { db } = require('./db');
 const dbLock = require('lib/dbLock.js');
 const Forms = require('lib/Forms.js');
@@ -19,7 +17,7 @@ async function save(input, req) {
   //   - the workflow type form ID
   //   - user-provided data (may be empty of content, but must still exist)
   //   - a workflow path (the path steps will be checked later in this function)
-  if(!(input instanceof Object)) throw new Error(`Workflows::save() - the 'input' object has not been specified!`);
+  if (!(input instanceof Object)) throw new Error(`Workflows::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('typeFormId')) throw new Error(`Workflows::save() - the 'input.typeFormId' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Workflows::save() - the 'input.data' has not been specified!`);
   if (!input.hasOwnProperty('path')) throw new Error(`Workflows::save() - the 'input.path' has not been specified!`);
@@ -72,9 +70,9 @@ async function save(input, req) {
   // Insert the new record into the 'workflows' records collection
   const result = await db.collection('workflows')
     .insertOne(newRecord);
-  
+
   _lock.release();
-  
+
   // Throw an error if the insertion fails
   if (result.insertedCount !== 1) throw new Error(`Workflows::save() - failed to insert a new workflow record into the database!`);
 
@@ -148,12 +146,12 @@ async function versions(workflowId) {
 async function list(match_condition, options) {
   // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
-  
+
   // If a matching condition has been specified, this is the first aggregation stage
-  if(match_condition) {
+  if (match_condition) {
     aggregation_stages.push({ $match: match_condition });
   }
-    
+
   // Next we want to remove all but the most recent version of each matching record
   // First sort the matching records by validity ... highest version first
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
@@ -172,7 +170,7 @@ async function list(match_condition, options) {
       creationDate: { '$last': '$validity.startDate' },
     },
   });
-  
+
   // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
   aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
@@ -190,138 +188,6 @@ async function list(match_condition, options) {
   // Return the entire list of workflow records
   return records;
 }
-
-
-
-
-
-async function evaluatePath(path, entityId) {
-    var result  = [];
-    
-    for(var step of path) {
-        var item = {...step};
-        
-        item.result = [];
-        
-        if(step.type === 'component') {
-            var match = {};
-            
-            match[step.identifier] = entityId;
-            match.formId = step.formId;
-            
-            item.result = await Components.search(null, match);
-            item.meta = (await Forms.list('componentForms'))[step.formId];
-        }
-        
-        result.push(item);
-    }
-    
-    return result;
-}
-
-async function getNextStep(path, firstUnfinished) {
-    // TODO(nathanieltagg): does not deal correctly with recursive paths
-    
-    if(firstUnfinished) {
-        for(var step of path) {
-            if(!step.result || step.result.length == 0) {
-                return step;
-            }
-        }
-        
-        return {done: "All workflow path steps have been completed!"};
-
-    } else {
-        var next_step = null;
-        
-        for(var i = path.length - 1; i >= 0; i--) {
-            if(path[i].result.length == 0) {
-                if(i == 0) {
-                    return path[i];
-                }
-                
-                if(path[i - 1].result.length > 0) {
-                    return path[i];
-                }
-            }
-        }
-        
-        return {done: "All workflow path steps have been completed!"};
-    }
-}
-
-async function evaluate(workflowId, entityId) {
-    var workflow = await retrieve(workflowId);
-    
-    if(!workflow) {
-        throw new Error("Workflows::evaluate()  - there is no DB entry for a workflow with ID: " + workflowId);
-    }
-    
-    var result = {...workflow};
-    result.evaluation = await evaluatePath(workflow.path, entityId);
-    
-    var score = 0;
-    var denominator = 0;
-    var mostRecent = new Date(0);
-    
-    for(var step of result.evaluation) {
-        if(step.result && step.result.length > 0) {
-            score++;
-        }
-        
-        denominator++;
-        
-        for(var r of step.result) {
-            if(r.insertion.insertDate > most_recent) {
-                mostRecent = r.insertion.insertDate;
-            }
-        }
-    }
-    
-    result.score = score;
-    result.score_denominator = denominator;
-    result.most_recent = mostRecent;
-    result.next_step = getNextStep(result.evaluation);
-    result.recordType = 'evaluatedWorkflow';
-    
-    return result;
-}
-
-async function getWorkflowForComponentFormId(formId) {
-    var workflowsList = await list();
-    
-    for(var workflowId in workflowsList) {
-        if(workflowsList[workflowId].componentFormId === formId) {
-            return workflowId;
-        }
-    }
-    
-    return null;
-}
-
-async function nextStep(workflowId, uuid, firstUnfinished) {
-    if(!workflowId && uuid) {
-        var component = await Components.retrieve(uuid);
-        workflowId = getWorkflowForComponentFormId(component.formId);
-        
-        if(!workflowId) {
-            throw new Error("Workflows::nextStep() - no workflow ID has been specified or can be found via the specified component UUID!");
-        }
-    }
-    
-    var workflow = await retrieve(workflowId);
-    
-    if(workflowId && !uuid) {
-        return workflow.path[0];
-    }
-    
-    var evaluatedPath = await evaluatePath(workflow.path, uuid);
-    
-    return getNextStep(evaluatedPath, firstUnfinished);
-}
-
-
-
 
 
 /// Search for workflow records
@@ -422,13 +288,10 @@ async function autoCompleteId(inputString, typeFormId, limit = 10) {
 
 
 module.exports = {
-  save, 
+  save,
   retrieve,
   versions,
-  list, 
-//  evaluate, 
-//  getWorkflowForComponentFormId, 
-//  nextStep,
+  list,
   search,
   autoCompleteId,
 }

@@ -162,8 +162,16 @@ function SubmitData(submission, redirectToInfo = true) {
     // Display a 'submission complete' message
     typeForm.emit('submitDone');
 
-    // If desired, once the submission is complete redirect the user back to the component's information page ('result' is the component's component UUID)
-    if (redirectToInfo) window.location.href = `/component/${result}`;
+    // If desired, redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
+    // If the component originates from a workflow (i.e. a non-empty workflow ID has been provided), go to the page for updating the workflow path step results
+    // If this is a standalone component, go to the page for viewing a component record
+    if (redirectToInfo) {
+      if (!(workflowId === '')) {
+        window.location.href = `/workflow/${workflowId}/component/${result}`;
+      } else {
+        window.location.href = `/component/${result}`;
+      }
+    }
   }
 
 

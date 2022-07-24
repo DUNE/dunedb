@@ -47,6 +47,9 @@ async function onPageLoad() {
     // For an existing workflow that is being edited, we don't want to do this, since it would overwrite any existing path results
     if (newWorkflow) submission.path = workflowTypeForm.path;
 
+    // Only if a new path step result is being submitted, update the specified step result
+    if (newStepResult) submission.path[stepIndex].result = stepResult;
+
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database
     SubmitData(submission);
   });

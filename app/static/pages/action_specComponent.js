@@ -77,8 +77,14 @@ function SubmitData(submission) {
     // Display a 'submission complete' message
     typeForm.emit('submitDone');
 
-    // Redirect the user back to the page for viewing an action record ('result' is the action's action ID)
-    window.location.href = `/action/${result}`;
+    // Redirect the user to the appropriate post-submission page ('result' is the action's action ID)
+    // If the action originates from a workflow (i.e. a non-empty workflow ID has been provided), go to the page for updating the workflow path step results
+    // If this is a standalone action, go to the page for viewing an action record
+    if (!(workflowId === '')) {
+      window.location.href = `/workflow/${workflowId}/action/${result}`;
+    } else {
+      window.location.href = `/action/${result}`;
+    }
   }
 
 
