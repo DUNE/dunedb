@@ -153,7 +153,7 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
 
         // The sub-component UUIDs must be generated here, and not within the component editing page itself, because that page operates at browser level ...
         // ... meaning that it does not have access to the server-side library that actually generates UUIDs
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 250; i++) {
           const fullUuid = Components.newUuid().toString();
           const shortUuid = shortuuid.fromUUID(fullUuid);
 
