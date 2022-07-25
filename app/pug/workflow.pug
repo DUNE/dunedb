@@ -36,6 +36,9 @@ block content
         dd
           a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
 
+        dt Current Status 
+        dd #{workflow.status}
+
         dt Workflow Data:
         dd This is version #{workflow.validity.version} of the workflow, and it was last edited on !{' '}
           +dateFormatAndAgo(workflow.insertion.insertDate)

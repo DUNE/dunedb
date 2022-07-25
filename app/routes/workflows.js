@@ -124,7 +124,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permi
       }
     }
 
-    if (stepIndex === -99) return res.status(404).send(`There are no more incomplete steps in the path of this workflow (ID = ${req.params.workflowId})`);
+    if (stepIndex === -99) return res.status(404).send(`There are no more steps to perform in the path of this workflow (ID = ${req.params.workflowId})`);
 
     // Retrieve the workflow type form, using its type form ID (which is specified in the record)
     const workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);

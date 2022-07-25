@@ -17,8 +17,10 @@ async function save(input, req) {
   //   - the workflow type form ID
   //   - user-provided data (may be empty of content, but must still exist)
   //   - a workflow path (the path steps will be checked later in this function)
+  //   - the current status of the workflow (i.e. in progress, with steps still to be completed, or completed)
   if (!(input instanceof Object)) throw new Error(`Workflows::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('typeFormId')) throw new Error(`Workflows::save() - the 'input.typeFormId' has not been specified!`);
+  if (!input.hasOwnProperty('status')) throw new Error(`Workflows::save() - the 'input.status' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Workflows::save() - the 'input.data' has not been specified!`);
   if (!input.hasOwnProperty('path')) throw new Error(`Workflows::save() - the 'input.path' has not been specified!`);
 
@@ -49,6 +51,7 @@ async function save(input, req) {
   newRecord.workflowId = new ObjectID(input.workflowId);
   newRecord.typeFormId = input.typeFormId;
   newRecord.typeFormName = input.typeFormName || typeForm.formName;
+  newRecord.status = input.status;
   newRecord.data = input.data;
   newRecord.path = input.path;
 
@@ -166,8 +169,9 @@ async function list(match_condition, options) {
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       name: { '$first': '$data.name' },
+      component: { '$first': '$path.result' },
+      status: { '$first': '$status' },
       lastEditDate: { '$first': '$validity.startDate' },
-      creationDate: { '$last': '$validity.startDate' },
     },
   });
 

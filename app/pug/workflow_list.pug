@@ -23,8 +23,8 @@ block content
             th.col-md-2 Type Name
             th.col-md-2 Workflow ID
             th.col-md-2 Workflow Name
-            th.col-md-2 Primary Component
-            th.col-md-2 Last Edited On:
+            th.col-md-2 Component
+            th.col-md-1 Status
             th.col-md-1
 
         tbody
@@ -32,15 +32,19 @@ block content
             - const notSingleType_notTrashed = !singleType && !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash');
 
             if(notSingleType_notTrashed || singleType)
-
               tr
                 td #{workflow.typeFormName}
                 td
                   a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
                 td #{workflow.name}
-                td
-                td
-                  +dateFormatAndAgo(workflow.lastEditDate)
+
+                if(workflow.component[0] != '')
+                  td
+                    a(href = `/component/${workflow.component[0]}`) #{workflow.component[0]}
+                else 
+                  td (component not yet created)
+
+                td #{workflow.status}
                 td
                   a(href = `/json/workflow/${workflow.workflowId}`, target = '_blank').btn-sm.btn-secondary
                     img.small-icon(src = '/images/checklist_icon.svg')

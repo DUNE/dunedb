@@ -45,10 +45,19 @@ async function onPageLoad() {
 
     // Only if this is a completely new workflow, copy the 'path' object from the type form into the 'submission' object
     // For an existing workflow that is being edited, we don't want to do this, since it would overwrite any existing path results
-    if (newWorkflow) submission.path = workflowTypeForm.path;
+    // Also for a completely new workflow, set a 'status' field in the submission ... initially 'in progress'
+    if (newWorkflow) {
+      submission.path = workflowTypeForm.path;
+      submission.status = 'In Progress';
+    }
 
     // Only if a new path step result is being submitted, update the specified step result
-    if (newStepResult) submission.path[stepIndex].result = stepResult;
+    // Then check if this is the final step in the workflow path ... if so, update the workflow status accordingly
+    if (newStepResult) {
+      submission.path[stepIndex].result = stepResult;
+
+      if ((stepIndex + 1) === submission.path.length) submission.status = 'Complete';
+    }
 
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database
     SubmitData(submission);
