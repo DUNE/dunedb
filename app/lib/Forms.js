@@ -37,7 +37,6 @@ async function save(input,collection,req)
   //
   // collection is a string that indicates which collection this is.
 
-  collection = collection;
   if(!input) throw new Error("No input given to saveForm");
   if(!input.formId) throw new Error("No formId given to saveForm")
   if(!input.formName) throw new Error("No formName given to saveForm")
@@ -131,11 +130,14 @@ function getFormList(collection) {
                                     formName:       { "$first":  "$formName" },
                                     formObjectId:   { "$first": "$_id" },
                                     tags:           {"$first": "$tags"},
-                                    componentTypes: {"$first": "$componentTypes"}, // actions only
-                                    icon:           {"$first": {"$arrayElemAt": ["$icon.url", 0]}}
+                                    componentTypes: {"$first": "$componentTypes"}, // actions and workflows only
+                                    description: {"$first": "$description"},  // workflows only
+                                    path: {"$first": "$path"},  // workflows only
                                   }
                                 }
-        if((collection=='componentForms') || (collection=='workflowForms')) delete grouping["$group"].componentTypes;
+        if(collection=='componentForms') delete grouping["$group"].componentTypes;
+        if(collection!='workflowForms') delete grouping["$group"].description;
+        if(collection!='workflowForms') delete grouping["$group"].path;
         pipeline.push(grouping);
 
          var forms = await db.collection(collection)
@@ -153,11 +155,11 @@ function getFormList(collection) {
 
 Cache.add("formlist_componentForms",getFormList("componentForms")); 
 Cache.add("formlist_actionForms",getFormList("actionForms")); 
+Cache.add("formlist_workflowForms",getFormList("workflowForms")); 
 
 
 async function list(collection)
 { 
-  collection = collection;
   // Cache.invalidate("formlist_"+collection);
   var retval = await Cache.current("formlist_"+collection);
   // logger.info(retval,"Forms::list()"+collection);
@@ -173,8 +175,9 @@ Cache.add("all_tags",async function() {
     var tags_lists = await Promise.all([
           db.collection("componentForms").distinct("tags"),
           db.collection("actionForms").distinct("tags"),
+          db.collection("workflowForms").distinct("tags"),
         ]);
-    // This gives two arrays of results. we want to concatenate
+    // This gives three arrays of results. we want to concatenate
     // and take only unique values. Turn each array element into a key.
     var tokens = {};
     for(var arr of tags_lists)

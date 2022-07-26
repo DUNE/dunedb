@@ -48,7 +48,7 @@ router.get('/user', async function (req, res, next) {
 
 
 /// List all human users
-router.get('/users/list', permissions.checkPermission("users:view"), async function (req, res, next) {
+router.get('/users/list', permissions.checkPermission('users:view'), async function (req, res, next) {
   try {
     // Render the interface page for listing all human users
     res.render('user_list.pug');

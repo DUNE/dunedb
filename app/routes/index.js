@@ -1,4 +1,4 @@
-// Import routes
+// Frontend interface routes
 const routes = [
   require('./actions'),
   require('./components'),
@@ -10,8 +10,15 @@ const routes = [
   require('./workflows'),
 ];
 
-// Routes with prepended paths
-const api = require('./api');
+// Backend and API routes (with prepended paths)
+const api = [
+  require('./api/actions'),
+  require('./api/components'),
+  require('./api/forms'),
+  require('./api/search'),
+  require('./api/users'),
+  require('./api/workflows'),
+];
 
 const paths = [
   { path: '/autocomplete', route: require('./autocomplete') },

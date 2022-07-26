@@ -10,6 +10,7 @@ block extrascripts
     const subComponent_fullUuids = !{JSON.stringify(subComponent_fullUuids)};
     const subComponent_shortUuids = !{JSON.stringify(subComponent_shortUuids)};
     const componentTypesAndCounts = !{JSON.stringify(componentTypesAndCounts)};
+    const workflowId = !{JSON.stringify(workflowId, null, 4)};
 
   block workscripts
     script(src = '/pages/component_edit.js')
