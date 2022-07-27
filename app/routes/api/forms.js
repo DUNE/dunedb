@@ -1,7 +1,8 @@
 const router = require('express').Router();
 
-const Forms = require("lib/Forms.js");
+const Forms = require('lib/Forms.js');
 const logger = require('../../lib/logger');
+const permissions = require('lib/permissions.js');
 
 
 /// List all type forms in a specified type form collection
@@ -50,7 +51,7 @@ router.get('/:collection(componentForms|actionForms|workflowForms)/:typeFormId',
 
 
 /// Save a new or edit type form into the specified type form collection
-router.post('/:collection(componentForms|actionForms|workflowForms)/:typeFormId', async function (req, res, next) {
+router.post('/:collection(componentForms|actionForms|workflowForms)/:typeFormId', permissions.checkPermissionJson('forms:edit'), async function (req, res, next) {
   try {
     // Display a logger message indicating that a record is being saved via the '/typeForm' route
     logger.info(req.body, 'Submission to /typeForm');

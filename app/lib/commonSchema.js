@@ -1,64 +1,47 @@
-"use strict";
 
-const ObjectID = require('mongodb').ObjectID;
-var MUUID = require('uuid-mongodb');
-const logger = require('./logger');
+/// Insertion data for a single record
+function insertion(req) {
+  // Check that the minimum required information has been provided for a record's insertion data
+  // This is simply user profile information (stored in 'req.user')
+	if(!req) throw new Error(`commonSchema::insertion() - the 'req' object has not been specified!`);
+  if(!req.user) throw new Error(`commonSchema::insertion() - the 'req.user' has not been specified!`);
+
+  // Retrieve the specific user information fields
+	const {user_id, displayName, emails} = req.user;
+  
+  // Return the required information using the appropriate 'insertion.XXX' field names
+	return {
+		insertDate: new Date(),
+		ip: req.ip,
+		user:  {user_id, displayName, emails},
+	};
+}
+
+
+/// Validity data for a single record
+function validity(old_record) {
+  // Set up a variable to hold the new validity object
+	let v = {};
+	
+  // Retrieve the validity object of an old record, if one has been provided
+  // If there is no old record (i.e. 'old_record' = null), this is just empty
+	const v_old = (old_record || {}).validity || {};
+
+  // Set the new validity start date to be the current date
+	v.startDate = new Date();
+
+  // Set the new validity version number to be either:
+  //   - 'old version number + 1' if an old record's validity has been provided
+  //   - '1' if no old record validity is available
+	v.version = (parseInt(v_old.version) || 0) + 1;
+
+  // Return the (partially complete) new validity object
+	// The third 'validity' field ('ancestor_id') is set explicitly in the record's 'save()' function
+	return v;
+}
 
 
 module.exports = {
 	insertion,
 	validity,
-};
-
-
-function insertion(req) 
-{
-	if(!req) throw new Error("No request object in commenSchema/insertion");
-	if(!req.user) throw new Error("No user info");
-	const {user_id, displayName, emails} = req.user;  // equivalent to user_id = user.user_id, etc
-    
-	return {
-		insertDate: new Date(),
-		ip: req.ip,
-		user:  {user_id, displayName, emails}
-	};
 }
-
-
-//
-//
-// Ideas:
-// This doesn't track heredity.
-// Maybe instead of supplying a validity object, the client should supply the
-// old record validity, and then add a 'new validity' object.
-// need:
-// requested start date
-// ancestor version
-// biggest existing version number.
-
-
-function validity(supplied_validity, old_record) 
-{
-	var v = {};
-	var vnew = supplied_validity || {};
-	var vold = (old_record||{}).validity || {};
-
-	v.startDate = (vnew.startDate) ? new Date(vnew.startDate) : new Date();
-
-	logger.info("old version ", vold.version, "supplied version",vnew.version);
-	if(vnew.version && vnew.version <= vold.version)
-		 throw new Error("Supplied version is smaller than existing version. Someone else may be editing this document right now.");
-	// version number will be the newly supplied version if present. If not present,
-	// it will be the old version plus one.
-	// If no old version number, assign 1
-	v.version = vnew.version || ( (parseInt(vold.version)||0) +1);
-	if(vnew && vnew.startDate) 
-		v.startDate = new Date(vnew.startDate);
-	else 
-		v.startDate = new Date(); // default to now.
-
-	return v;
-}
-
-
-

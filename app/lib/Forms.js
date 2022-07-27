@@ -58,7 +58,7 @@ async function save(input,collection,req)
   record.recordType = "form"; // required
   record.collection = collection;
   record.insertion = commonSchema.insertion(req);
-  record.validity = commonSchema.validity(record.validity, old);
+  record.validity = commonSchema.validity(old);
   record.validity.ancestor_id = record._id;
   record.tags = record.tags || [];
   delete record._id;
