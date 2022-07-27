@@ -223,6 +223,7 @@ const metaschema = {
     label: 'Workflow Path',
     key: 'path',
     input: true,
+    reorder: true,
     addAnother: 'Add New Step',
     addAnotherPosition: 'bottom',
     defaultValue: [{
