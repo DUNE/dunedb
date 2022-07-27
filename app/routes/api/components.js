@@ -1,9 +1,9 @@
 const router = require('express').Router();
 
-const Components = require("lib/Components.js");
+const Components = require('lib/Components.js');
 const logger = require('../../lib/logger');
-const permissions = require("lib/permissions.js");
-const utils = require("lib/utils.js");
+const permissions = require('lib/permissions.js');
+const utils = require('lib/utils.js');
 
 
 /// Retrieve the most recent version of a single component record

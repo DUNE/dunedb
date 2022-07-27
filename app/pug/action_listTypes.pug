@@ -56,7 +56,7 @@ block content
                 td
                   a(href = `/actions/${typeFormId}/list`) #{typeForm.formName}
 
-                if(typeForm.componentTypes.length > 0)
+                if((typeForm.componentTypes) && (typeForm.componentTypes.length > 0))
                   td 
                     +arrayFormat(typeForm.componentTypes)
                 else

@@ -36,18 +36,6 @@ block content
 
   .container-fluid
     div.vert-space-x1.border-success.border.rounded.p-2
-      h5 Messages from the Development Team:
-      ul
-        li <strong>2022-06-23</strong> - We have replaced the 'tests' and 'jobs' database entities with 'actions'.  These are designed to serve the same purpose as the former, but in a less restrictive manner, and in a way that has more parity with component entities.  Tests and jobs will shortly be removed entirely from the database interface, and all such records will be deleted.
-        li <strong>2022-04-07</strong> - We have moved all internal database documentation to the 
-          a(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank') Github Wiki
-          | .  Additionally, files can no longer be uploaded to the database - they must now be stored in the 
-          a(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank') APA area
-          |  of CERN's EDMS system.  Users are welcome to provided links to EDMS files within DB entries.
-        li <strong>2022-03-29</strong> - The 'production' deployment is now live and accessible from outside the Fermilab firewall by any user with an appropriate Auth0 account.  (Access using a Fermilab SSO will be added soon.)  The development team will conduct some initial testing to confirm that the basic functionality and interface are working correctly, but please do report any issues that we may have missed.  The 'staging' deployment will be rolled out at a later date, and access to that will be restricted to only a select group of users for the time being (this may change in the future).
-        li <strong>2022-03-18</strong> - Welcome to version 2 of the DUNE APA Construction Database!  This database was previously known as <strong>Sietch</strong>, and initially developed by Nathaniel Tagg.  The current development team have now completed a major refactoring of the entire database code, as well as streamlining the Docker environment setup and OKD configuration.  This should not significantly change the web interface, but will considerably improve the stability, reliability and long-term ease-of-use of the code itself.
-
-    div.vert-space-x1.border-danger.border.rounded.p-2
       h5 Useful Links, Bugs and Other Issues
       ul
         li For documentation relating to the database itself (i.e. descriptions of the functionality, overviews of common usage, etc.), please see our 

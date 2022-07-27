@@ -55,7 +55,7 @@ async function save(input, req) {
 
   // Generate and add a 'validity' field to the new record
   // This may be generated from scratch (for a new record), or via incrementing that of the existing record (if editing)
-  newRecord.validity = commonSchema.validity(null, oldRecord);
+  newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
   // Insert the new record into the 'actions' records collection
