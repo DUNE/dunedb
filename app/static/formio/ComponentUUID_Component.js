@@ -154,21 +154,19 @@ class ComponentUUID_Component extends QR_Component{
   }
 
 
-  setValueAt(index, value,flags) {
-    // flags = flags || {};
+  setValueAt(index, value, flags) {
     const changed = super.setValueAt.call(this, index, value);
 
-    // if(this.refs.linkToComponent && value && value.length==36) {
-    //   $(this.refs.linkToComponent).show().prop('href','/'+value).text('link');
-    // }
-    if(this.refs.compUuidInfo && value && value.length==36) {
-      $.get('/json/component/'+value);
+    if (this.refs.compUuidInfo && value && value.length === 36) {
+      $.get(`/json/component/${value}`);
+
+      if (window.location.pathname === '/search/componentByUUID') window.location.href = `/component/${value}`;
     }
 
     return changed;
   }
-
 }
+
 
 // ComponentUUID_Component.editForm = TextFieldComponent.editForm;
 ComponentUUID_Component.editForm = function(a,b,c)
