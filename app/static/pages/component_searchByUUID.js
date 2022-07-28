@@ -20,7 +20,7 @@ async function renderUUIDForm() {
   const uuidForm = await Formio.createForm(document.getElementById('uuidform'), schema);
 
   // The form operates via auto-complete, allowing the user to type in a component UUID
-  // If a valid UUID is provided, create the URL for performing the action on the corresponding component, and then go to that page
+  // If a valid UUID is provided, create the URL for the corresponding component's information page, and then go to that page
   uuidForm.on('change', function () {
     if (uuidForm.isValid()) {
       const uuid = uuidForm.submission.data.componentUuid;

@@ -98,19 +98,62 @@ class ComponentUUID_Component extends QR_Component{
     return superattach;
   }
 
-  cameraCallback(index,qrcode)
-  {
-    var match_address = qrcode.match(".*/([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ-]{22})");
-    if(match_address) {
-      var shortuuid = match_address[1].match('[^\-]*')[0];
-      var uuid = ShortUUID().toUUID(shortuuid);
-      this.setValueAt(index,uuid);
-      return true;
+
+  cameraCallback(index, qrcode) {
+    const match_address = qrcode.match('.*/([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ-]{22})');
+
+    if (match_address) {
+      const shortuuid = match_address[1].match('[^\-]*')[0];
+      const uuid58 = ShortUUID().toUUID(shortuuid);
+      const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(shortuuid);
+
+      const thisClass = this;
+      let uuid, foundMatchingComponent58 = false, foundMatchingComponent57 = false;
+
+      function checkUuid(uuid, base) {
+        return $.ajax({
+          type: 'GET',
+          url: `/json/component/${uuid}`,
+          dataType: 'json',
+          success: function(data) {
+            if (data) {
+              if (base === 58) foundMatchingComponent58 = true;
+              else foundMatchingComponent57 = true;
+            }
+          },
+        })
+      }
+
+      jQuery.when(checkUuid(uuid58, 58), checkUuid(uuid57, 57)).done(function () {
+        if (foundMatchingComponent58 && !foundMatchingComponent57) {
+          uuid = uuid58;
+          console.log('Found component matching only base58 UUID: ', uuid);
+        }
+
+        if (foundMatchingComponent57 && !foundMatchingComponent58) {
+          uuid = uuid57;
+          console.log('Found component matching only base57 UUID: ', uuid);
+        }
+
+        if (foundMatchingComponent57 && foundMatchingComponent58) {
+          uuid = uuid58;
+          console.log('Found components matching both base58 and base57 UUIDs ... using base58 as default query');
+        }
+
+        if (!foundMatchingComponent57 && !foundMatchingComponent58) {
+          uuid = uuid58;
+          console.log('Found no components matching either base58 and base57 UUIDs ... using base58 for query to fail');
+        }
+
+        thisClass.setValueAt(index, uuid);
+        return true;
+      });
     }
 
     return true;
   }
- 
+
+
   setValueAt(index, value,flags) {
     // flags = flags || {};
     const changed = super.setValueAt.call(this, index, value);
