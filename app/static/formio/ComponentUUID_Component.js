@@ -105,7 +105,9 @@ class ComponentUUID_Component extends QR_Component{
     if (match_address) {
       const shortuuid = match_address[1].match('[^\-]*')[0];
       const uuid58 = ShortUUID().toUUID(shortuuid);
+      console.log('Base58 UUID', uuid58);
       const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(shortuuid);
+      console.log('Base57 UUID', uuid57);
 
       const thisClass = this;
       let uuid, foundMatchingComponent58 = false, foundMatchingComponent57 = false;
