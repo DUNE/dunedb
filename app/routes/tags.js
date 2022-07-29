@@ -9,10 +9,11 @@ router.get('/tags', async function (req, res, next) {
   try {
     // Retrieve a list of all type form tags that are currently cached
     // Simultaneously, retrieve lists of all component and action type forms that currently exist in the respective collections    
-    let [typeFormTags, componentTypeForms, actionTypeForms] = await Promise.all([
+    let [typeFormTags, componentTypeForms, actionTypeForms, workflowTypeForms] = await Promise.all([
       Forms.tags(),
       Forms.list('componentForms'),
       Forms.list('actionForms'),
+      Forms.list('workflowForms'),
     ]);
 
     // Render the interface page for listing the tags which are associated with specific entity type forms
@@ -21,6 +22,7 @@ router.get('/tags', async function (req, res, next) {
       typeFormTags,
       componentTypeForms,
       actionTypeForms,
+      workflowTypeForms,
     });
   } catch (err) {
     logger.error(err);
