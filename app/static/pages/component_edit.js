@@ -1,4 +1,3 @@
-
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let componentForm;
 
@@ -58,6 +57,9 @@ async function onPageLoad() {
     submission.componentUuid = component.componentUuid;
     submission.formId = componentTypeForm.formId;
     submission.formName = componentTypeForm.formName;
+
+    // If the component originates from a workflow (i.e. a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
+    if (!(workflowId === '')) submission.workflowId = workflowId;
 
     // For an entirely new component ...
     if (newComponent) {
@@ -142,7 +144,7 @@ function SubmitData(submission, redirectToInfo = true) {
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: '/json/component/',
+    url: '/json/component',
     data: JSON.stringify(submission),
     dataType: 'json',
     success: postSuccess,
@@ -160,8 +162,16 @@ function SubmitData(submission, redirectToInfo = true) {
     // Display a 'submission complete' message
     typeForm.emit('submitDone');
 
-    // If desired, once the submission is complete redirect the user back to the component's information page ('result' is the component's component UUID)
-    if (redirectToInfo) window.location.href = `/component/${result}`;
+    // If desired, redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
+    // If the component originates from a workflow (i.e. a non-empty workflow ID has been provided), go to the page for updating the workflow path step results
+    // If this is a standalone component, go to the page for viewing a component record
+    if (redirectToInfo) {
+      if (!(workflowId === '')) {
+        window.location.href = `/workflow/${workflowId}/component/${result}`;
+      } else {
+        window.location.href = `/component/${result}`;
+      }
+    }
   }
 
 

@@ -1,0 +1,53 @@
+extend default
+include common.pug
+
+block vars
+  - const page_title = 'Created / Edited Workflows';
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      if(singleType && workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash'))
+        a(href = `/workflow/${workflowTypeForm.formId}`).btn.btn-primary
+          img.small-icon(src = '/images/run_icon.svg')
+          | &nbsp; Create a New Workflow of this Type
+
+        div.vert-space-x2
+
+      h2 #{title}
+
+    div.vert-space-x1
+      table.table
+        thead
+          tr
+            th.col-md-2 Type Name
+            th.col-md-2 Workflow ID
+            th.col-md-2 Workflow Name
+            th.col-md-2 Component
+            th.col-md-1 Status
+            th.col-md-1
+
+        tbody
+          each workflow in workflows
+            - const notSingleType_notTrashed = !singleType && !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash');
+
+            if(notSingleType_notTrashed || singleType)
+              tr
+                td #{workflow.typeFormName}
+                td
+                  a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
+                td #{workflow.name}
+
+                if(workflow.component[0] != '')
+                  td
+                    a(href = `/component/${workflow.component[0]}`) #{workflow.component[0]}
+                else 
+                  td (component not yet created)
+
+                td #{workflow.status}
+                td
+                  a(href = `/json/workflow/${workflow.workflowId}`, target = '_blank').btn-sm.btn-secondary
+                    img.small-icon(src = '/images/checklist_icon.svg')
+                    | &nbsp; JSON Record
+
+    div.vert-space-x2

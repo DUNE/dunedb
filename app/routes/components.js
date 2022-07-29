@@ -174,6 +174,11 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
     // Merge the lists above, to create a single list of component counts by type that also includes types that do not have recorded components
     const componentTypesAndCounts = deepmerge(componentCountsByType, componentTypeForms);
 
+    // Pass any provided workflow ID
+    let workflowId = '';
+
+    if (req.query.workflowId) workflowId = req.query.workflowId;
+
     // Render the interface page for editing an existing component
     res.render('component_edit.pug', {
       component: {
@@ -184,6 +189,7 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
       subComponent_fullUuids,
       subComponent_shortUuids,
       componentTypesAndCounts,
+      workflowId,
     });
   } catch (err) {
     logger.info(err);
@@ -214,6 +220,7 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
       subComponent_fullUuids: [],
       subComponent_shortUuids: [],
       componentTypesAndCounts: [],
+      workflowId: '',
     });
   } catch (err) {
     logger.error(err);

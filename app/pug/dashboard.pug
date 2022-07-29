@@ -100,10 +100,15 @@ body(class = `deployment-${NODE_ENV}`)
                     |      Action Types
 
             li.nav-item
-              +navlink(href = '/courses')
+              +navlink(href = '/workflows/list')
                 i.fa.fa-graduation-cap(aria-hidden = 'true')
-                | Courses
+                | Workflows
 
+              ul.nav.flex-column.ml-3.sub-bar
+                li.nav-item
+                  +navlink(href = '/workflowTypes/list')
+                    |      Workflow Types
+                    
             //- [KRISH] Leave this sidebar item commented out for now ... will enable it once we know more about type form tags usage
             //- li.nav-item
             //-   +navlink(href = '/tags')

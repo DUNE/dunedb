@@ -1,195 +1,203 @@
-"use strict";
-
-const chalk = require('chalk');
-var express = require('express');
-//const { db } = require('lib/db'); // Exports global 'db' variable
+const Cache = require('lib/Cache.js');
+const commonSchema = require('lib/commonSchema.js');
 const { db } = require('./db');
-const logger = require('./logger');
-var permissions = require('lib/permissions.js');
-var commonSchema = require('lib/commonSchema.js');
-var MUUID = require('uuid-mongodb');
-var {ObjectID} = require('mongodb');
-var jsondiffpatch = require('jsondiffpatch');
-var moment = require('moment');
-var dbLock = require("lib/dbLock.js");
-
-module.exports = {
-  retrieve,
-  save,
-  list,
-  getFormVersions,
-  tags
-}
-
-//
-// Form_i
-async function save(input,collection,req)
-{
-  // required:
-  // input: {
-  //   formId: <string>,
-  //   formName: <string>
-  //   schema: <string>,
-  //   validity: {} // optional
-  // }
-  //
-  // req must contain user and ip fields.
-  //
-  // collection is a string that indicates which collection this is.
-
-  collection = collection;
-  if(!input) throw new Error("No input given to saveForm");
-  if(!input.formId) throw new Error("No formId given to saveForm")
-  if(!input.formName) throw new Error("No formName given to saveForm")
-  if(!input.schema) throw new Error("No schema given to saveForm")
-
-  // Esure permissions.
-  if(!permissions.hasPermission(req,'forms:edit'))  throw new Error("You don't have permission to edit forms.");
+const dbLock = require('lib/dbLock.js');
+const permissions = require('lib/permissions.js');
 
 
-  var formId = input.formId;
+/// Save a new or edited type form record
+async function save(input, collection, req) {
+  // Check that the user has permission to create and edit type forms
+  if (!permissions.hasPermission(req, 'forms:edit')) throw new Error(`Forms::save() - you do not have permission [forms:edit] to create and/or edit type forms!`);
 
+  // Check that the minimum required information has been provided for a record to be saved
+  // For type form records, these are:
+  //   - the form ID
+  //   - the form name
+  //   - the schema, i.e. Formio components and layout (may be empty of content, but must still exist)
+  if (!(input instanceof Object)) throw new Error(`Forms::save() - the 'input' object has not been specified!`);
+  if (!input.hasOwnProperty('formId')) throw new Error(`Forms::save() - the 'input.formId' has not been specified!`);
+  if (!input.hasOwnProperty('formName')) throw new Error(`Forms::save() - the 'input.formName' has not been specified!`);
+  if (!input.hasOwnProperty('schema')) throw new Error(`Forms::save() - the 'input.schema' has not been specified!`);
 
-  var _lock = await dbLock("saveForm-"+formId,1000);
-  var old = await retrieve(collection,formId);
+  // Set up a new (initially empty) record object
+  let newRecord = {};
 
+  // Add information to the new record, either directly or from the 'input' object
+  newRecord.recordType = 'form';
+  newRecord.formId = input.formId;
+  newRecord.formName = input.formName;
+  newRecord.collection = collection;
+  newRecord.tags = input.tags || [];
+  newRecord.schema = input.schema;
+  newRecord.isBatch = input.isBatch || false;
 
-  var record = {...input};
-  record.formId = formId;
-  record.recordType = "form"; // required
-  record.collection = collection;
-  record.insertion = commonSchema.insertion(req);
-  record.validity = commonSchema.validity(record.validity, old);
-  record.validity.ancestor_id = record._id;
-  record.tags = record.tags || [];
-  delete record._id;
+  // Generate and add an 'insertion' field to the new record
+  newRecord.insertion = commonSchema.insertion(req);
 
+  let _lock = await dbLock(`saveTypeForm_${newRecord.formId}`, 1000);
 
-  var result = await db.collection(collection).insertOne(record);
+  // Attempt to retrieve an existing record with the same form ID as the specified one (relevant if we are editing an existing record)
+  let oldRecord = await retrieve(collection, input.formId);
+
+  // Generate and add a 'validity' field to the new record
+  // This may be generated from scratch (for a new record), or via incrementing that of the existing record (if editing)
+  newRecord.validity = commonSchema.validity(oldRecord);
+  newRecord.validity.ancestor_id = input._id;
+
+  // Insert the new record into the specified records collection
+  const result = await db.collection(collection)
+    .insertOne(newRecord);
+
   _lock.release();
-  // logger.info('new form record result',result);
-    // Get it from the DB afresh.
-  if(result.insertedCount !== 1) throw new Error("Could not insert new form record.");
-  logger.info('new form record',result.ops[0]);
-  Cache.invalidate("formlist_"+collection);
-  Cache.invalidate("all_tags");
 
+  // Throw an error if the insertion fails
+  if (result.insertedCount !== 1) throw new Error(`Forms::save() - failed to insert a new type form record into the database!`);
+
+  Cache.invalidate(`formlist_${collection}`);
+  Cache.invalidate('typeFormTags');
+
+  // Return the record as proof that it has been saved successfully
   return result.ops[0];
 }
 
-// Get current form. Caller must have try/catch block.
-async function retrieve(collection,formId,options){ 
-	// options can have:
-	// rollbackDate: <Date object> rollback to things inserted before this date 
-	// 	i.e. show me results as though DB had not been touched since that date
-	// onDate - Rollback to things that happened before this time 
-	//	 i.e. show me results that should be valid on that date (although data may have been retroactively entered)
-	// version - roll form back to this version
-	// logger.info("Forms::retrieve()",...arguments);
-	// collection = collection; // collection no longer optional
 
-	var col  = db.collection(collection);
+/// Retrieve a single version of a type form record (either the most recent, or a specified one)
+async function retrieve(collection, formId, projection) {
+  // Throw an error if no collection has been specified
+  if (!collection) throw new Error(`Forms::retrieve(): the 'collection' has not been specified!`);
 
-	options = options || {}; // blank object.
-  if(!formId && !options.id) throw new Error("No formId or formRecordId provided to Forms::retrieve()");
-  var query = {};
-  if(formId) query.formId = formId;
+  // Throw an error if no form ID has been specified
+  if (!collection) throw new Error(`Forms::retrieve(): the 'formId' has not been specified!`);
 
-	if(options.rollbackDate) query["insertion.insertDate"] = {$lt: options.rollbackDate};  // rollback to things inserted before this time
-	if(options.onDate) query["validity.startDate"] = {$lt: new Date(options.onDate)}; // rollback to things that happened before this time
-	// else               query["validity.startDate"] = {$lt: new Date()}; // rollback to things that happened before this time
-  if(options.version) query["validity.version"] = options.version; // rollback to things that happened before this time
-  if(options.id) query["_id"] = ObjectID(options.id); // A specific instance.
+  // Construct the 'match_condition' to be used as the database query
+  // For this function, it is that a record's form ID must match the specified one
+  let match_condition = { formId };
 
-  logger.info(chalk.blue("Forms::retrieve()  Requesting schema for",...arguments,JSON.stringify(query,null,2)));
+  // Set up any additional options that have been specified via the 'projection'
+  // For this function, the only additional option will be a specified record version number
+  let options = {};
 
-	var rec = await col.find(query).sort({"validity.version":-1}).limit(1).toArray();
-	// logger.info("rec",rec);
-	if(rec.length<1) return null;
-	// if(rec) logger.info(chalk.blue("Found it"));
-	return rec[0];
-}
+  if (projection) options.projection = projection;
 
-async function getFormVersions(collection,formId)
-{
-  // Return list of versions of this form.  
-  var vs = await db.collection(collection)
-                         .find({"formId":formId, version: {$exists: true}})
-                         .project({version:1}).toArray();
-  return vs.map(a=>a.version);
+  // Query the specified records collection for records matching the condition and additional options
+  // Then sort any matching records such that the most recent version is first in the list
+  let records = await db.collection(collection)
+    .find(match_condition, options)
+    .sort({ 'validity.version': -1 })
+    .toArray();
+
+  // If there is at least one matching record ...
+  if (records.length > 0) {
+    // Return the first matching record
+    return records[0];
+  }
+
+  return null;
 }
 
 
-const Cache = require("lib/Cache.js");
+/// Retrieve a list of all type forms in a specified collection
+function getTypeFormList(collection) {
+  return async function () {
+    // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+    let aggregation_stages = [];
 
-function getFormList(collection) {
-  return async function() {
-        var pipeline = [];
-        pipeline.push({ $sort:{  "validity.version" : -1 } });
-        var grouping =     { $group: {_id: "$formId" ,
-                                    formId:         { "$first":  "$formId" },
-                                    formName:       { "$first":  "$formName" },
-                                    formObjectId:   { "$first": "$_id" },
-                                    tags:           {"$first": "$tags"},
-                                    componentTypes: {"$first": "$componentTypes"}, // actions only
-                                    icon:           {"$first": {"$arrayElemAt": ["$icon.url", 0]}}
-                                  }
-                                }
-        if((collection=='componentForms') || (collection=='workflowForms')) delete grouping["$group"].componentTypes;
-        pipeline.push(grouping);
+    // First we want to remove all but the most recent version of each matching record
+    // Sort the matching records by validity ... highest version first
+    aggregation_stages.push({ $sort: { 'validity.version': -1 } });
 
-         var forms = await db.collection(collection)
-                            .aggregate(pipeline)
-                            .toArray();
+    // Set up a set of groupings, which will group the records by whatever fields will be subsequently used
+    // For example, if the 'formId' of each returned record is to be used later on, it must be one of the groups defined here
+    // Note that to start with, this must cover ALL possible groupings across ALL type form collections
+    let grouping = {
+      $group: {
+        _id: '$formId',
+        formId: { '$first': '$formId' },
+        formName: { '$first': '$formName' },
+        tags: { '$first': '$tags' },
+        componentTypes: { '$first': '$componentTypes' },
+        description: { '$first': '$description' },
+        path: { '$first': '$path' },
+      }
+    }
 
-        var o = {};
-        for(var item of forms)  {
-          o[item.formId] = item;
-        }
+    // Certain groupings do not apply to certain collections, so remove them as necessary
+    if (collection === 'componentForms') delete grouping['$group'].componentTypes;
 
-        return o;
+    if (collection !== 'workflowForms') {
+      delete grouping['$group'].description;
+      delete grouping['$group'].path;
+    }
+
+    // Add the groupings as the next aggregation stage
+    aggregation_stages.push(grouping);
+
+    // Query the specified records collection using the aggregation stages
+    let records = await db.collection(collection)
+      .aggregate(aggregation_stages)
+      .toArray();
+
+    // Flatten the set of matching records
+    let results = {};
+
+    for (var record of records) {
+      results[record.formId] = record;
+    }
+
+    // Return the flattened list of type form records
+    return results;
   }
 }
 
-Cache.add("formlist_componentForms",getFormList("componentForms")); 
-Cache.add("formlist_actionForms",getFormList("actionForms")); 
+
+/// (Re)generate the cache of type forms in a specified collection
+Cache.add('formlist_componentForms', getTypeFormList('componentForms'));
+Cache.add('formlist_actionForms', getTypeFormList('actionForms'));
+Cache.add('formlist_workflowForms', getTypeFormList('workflowForms'));
 
 
-async function list(collection)
-{ 
-  collection = collection;
-  // Cache.invalidate("formlist_"+collection);
-  var retval = await Cache.current("formlist_"+collection);
-  // logger.info(retval,"Forms::list()"+collection);
-  //   );
-  return retval;
+/// Get the current cached type forms in the specified collection
+async function list(collection) {
+  const currentCache = Cache.current(`formlist_${collection}`);
+  return currentCache;
 }
 
 
+/// (Re)generate the cache of type form tags
+Cache.add('typeFormTags', async function () {
+  // Simultaneously get lists of type form tags from each type form collection
+  // This returns a list containing three sub-lists, one for each collection
+  const tags_lists = await Promise.all([
+    db.collection('componentForms').distinct('tags'),
+    db.collection('actionForms').distinct('tags'),
+    db.collection('workflowForms').distinct('tags'),
+  ]);
 
+  // Concatenate the three lists, and keep hold of only the unique tags across the concatenation (apart from the 'Trash' tag, which we don't care about)
+  let tokens = {};
 
-Cache.add("all_tags",async function() {
-    // Simultaneous queries. Fun!
-    var tags_lists = await Promise.all([
-          db.collection("componentForms").distinct("tags"),
-          db.collection("actionForms").distinct("tags"),
-        ]);
-    // This gives two arrays of results. we want to concatenate
-    // and take only unique values. Turn each array element into a key.
-    var tokens = {};
-    for(var arr of tags_lists)
-      tokens = arr.reduce((acc,curr)=> (acc[curr]=1,acc),tokens);
-    delete tokens.Trash;
-    logger.info("all_tags run");
-    logger.info("all_tags",JSON.stringify(tags_lists));
-    logger.info("tags:",Object.keys(tokens))
-    return Object.keys(tokens);
+  for (const tags_list of tags_lists) {
+    tokens = tags_list.reduce((acc, curr) => (acc[curr] = 1, acc), tokens);
+  }
+
+  delete tokens.Trash;
+
+  // Return an object containing the set of tags, but as keys that can be more easily utilised than a simple array of them
+  return Object.keys(tokens);
 });
 
 
-async function tags()
-{
-  return await Cache.current("all_tags");
+/// Get the currently cached type form tags
+async function tags() {
+  const currentCache = Cache.current('typeFormTags');
+  return currentCache;
 }
 
 
+module.exports = {
+  save,
+  retrieve,
+  list,
+  tags,
+}

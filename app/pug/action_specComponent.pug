@@ -8,6 +8,7 @@ block extrascripts
     const action = !{JSON.stringify((action || {}), null, 4)}; 
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)}; 
     const componentUuid = !{JSON.stringify(componentUuid)};
+    const workflowId = !{JSON.stringify(workflowId, null, 4)};
 
   block workscripts
     script(src = '/pages/action_specComponent.js')

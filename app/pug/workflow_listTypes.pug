@@ -2,29 +2,29 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'All Action Types';
+  - const page_title = 'All Workflow Types';
 
 block extrascripts
   block workscripts
-    script(src = '/pages/action_listTypes.js')
+    script(src = '/pages/workflow_listTypes.js')
 
 block content
   .container-fluid
     div.vert-space-x2
       a(href = '#', data-toggle = 'modal' data-target = '#NewTypeModal').btn.btn-warning
         img.small-icon(src = '/images/edit_icon.svg')
-        | &nbsp; Create New Action Type Form
+        | &nbsp; Create New Workflow Type Form
 
       #NewTypeModal.modal.fade(tabindex = '-1' role = 'dialog' aria-labelledby = 'NewTypeLabel' aria-hidden = 'true')
         .modal-dialog(role = 'document')
           .modal-content
             .modal-header
-              h5#NewTypeLabel.modal-title Create New Action Type Form
+              h5#NewTypeLabel.modal-title Create New Workflow Type Form
               button.close(type = 'button', data-dismiss = 'modal', aria-label = 'Close')
                 span(aria-hidden = 'true') &times;
             .modal-body
               div
-                | Enter the new action type form ID.
+                | Enter the new workflow type form ID.
                 br
                 | NOTE: this ID must have only underscores and alphanumerics (no spaces, hyphens or special characters).  A human-readable name can be set on the next page.
               div.vert-space-x1
@@ -34,7 +34,7 @@ block content
               button.btn.btn-success#NewTypeButton(type = 'button') Create
 
     div.vert-space-x2
-      h2 Available Action Types
+      h2 Available Workflow Types
 
     div.vert-space-x1
       table.table
@@ -42,19 +42,20 @@ block content
           tr
             th.col-md-2 Type ID
             th.col-md-2 Type Name
-            th.col-md-3 Recommended Component Types
+            th.col-md-2 Recommended Component Types
+            th.col-md-2 Short Description
             th.col-md-2
             th.col-md-2
 
         tbody
-          each typeFormId in Object.keys(actionTypeForms).sort()
-            - const typeForm = actionTypeForms[typeFormId];
+          each typeFormId in Object.keys(workflowTypeForms).sort()
+            - const typeForm = workflowTypeForms[typeFormId];
 
             if(typeForm.tags && !typeForm.tags.includes('Trash')) 
               tr
                 td #{typeFormId}
                 td
-                  a(href = `/actions/${typeFormId}/list`) #{typeForm.formName}
+                  a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
 
                 if((typeForm.componentTypes) && (typeForm.componentTypes.length > 0))
                   td 
@@ -62,18 +63,19 @@ block content
                 else
                   td (none)
 
+                td #{typeForm.description}
                 td
-                  a(href = `/action/${typeFormId}`).btn-sm.btn-primary 
+                  a(href = `/workflow/${typeFormId}`).btn-sm.btn-primary 
                     img.small-icon(src = '/images/run_icon.svg')
-                    | &nbsp; Perform Action on Component
+                    | &nbsp; Create a New Workflow of this Type
                 td
-                  a(href = `/actionTypes/${typeFormId}/edit`).btn-sm.btn-warning 
+                  a(href = `/workflowTypes/${typeFormId}/edit`).btn-sm.btn-warning 
                     img.small-icon(src = '/images/edit_icon.svg')
-                    | &nbsp; Edit Action Type Form
+                    | &nbsp; Edit Workflow Type Form
 
     if(permissions.userHas(user, 'forms:edit'))
       div.vert-space-x2
-        h2 Trashed Action Types
+        h2 Trashed Workflow Types
 
       div.vert-space-x1
         table.table
@@ -82,18 +84,18 @@ block content
               th.col-md-2 Type ID
               th.col-md-2 Type Name
               th.col-md-3 Recommended Component Types
-              th.col-md-2
+              th.col-md-2 Short Description
               th.col-md-2
 
           tbody
-            each typeFormId in Object.keys(actionTypeForms).sort()
-              - const typeForm = actionTypeForms[typeFormId];
+            each typeFormId in Object.keys(workflowTypeForms).sort()
+              - const typeForm = workflowTypeForms[typeFormId];
 
               if(typeForm.tags && typeForm.tags.includes('Trash')) 
                 tr
                   td #{typeFormId}  
                   td
-                    a(href = `/actions/${typeFormId}/list`) #{typeForm.formName}
+                    a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
 
                   if(typeForm.componentTypes.length > 0)
                     td
@@ -101,10 +103,10 @@ block content
                   else
                     td (none)
 
+                  td #{typeForm.description}
                   td
-                  td
-                    a(href = `/actionTypes/${typeFormId}/edit`).btn-sm.btn-warning 
+                    a(href = `/workflowTypes/${typeFormId}/edit`).btn-sm.btn-warning 
                       img.small-icon(src = '/images/edit_icon.svg')
-                      | &nbsp; Edit Action Type Form
+                      | &nbsp; Edit Workflow Type Form
 
     div.vert-space-x2
