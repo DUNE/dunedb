@@ -9,7 +9,7 @@ block content
       h2 Type Form Tags
 
     div.vert-space-x1 
-      p Tags may be assigned to component, action or workflow type forms using their respective 'Edit [entity] Type Form' pages.
+      p Tags may be assigned to component, action or workflow type forms using their respective 'Edit Type Form' pages.
         br
         | Please note that you must have the correct user permission [forms:edit] to add and modify tags.
       p The table below lists all currently cached type form tags (apart from the 'Trash' tag), and which component, action and/or workflow type forms each tag is associated with.
@@ -20,7 +20,7 @@ block content
       table.table
         thead
           tr
-            th.col-md-2 Type Form Tag
+            th.col-md-1 Type Form Tag
             th.col-md-3 Component Types
             th.col-md-3 Action Types
             th.col-md-3 Workflow Types
@@ -32,6 +32,8 @@ block content
             - let filteredComponentTypeNames = [];
             - let filteredActionTypeIds = [];
             - let filteredActionTypeNames = [];
+            - let filteredWorkflowTypeIds = [];
+            - let filteredWorkflowTypeNames = [];
 
             each componentForm in componentTypeForms
               if(componentForm.tags.includes(tag) && !componentForm.tags.includes('Trash'))
@@ -42,6 +44,11 @@ block content
               if(actionForm.tags.includes(tag) && !actionForm.tags.includes('Trash'))
                 - filteredActionTypeIds.push(actionForm.formId)
                 - filteredActionTypeNames.push(actionForm.formName)
+
+            each workflowForm in workflowTypeForms
+              if(workflowForm.tags.includes(tag) && !workflowForm.tags.includes('Trash'))
+                - filteredWorkflowTypeIds.push(workflowForm.formId)
+                - filteredWorkflowTypeNames.push(workflowForm.formName)
 
             tr 
               td #{tag}
@@ -70,6 +77,16 @@ block content
               else
                 td (none)
 
-              td 
+              if(filteredWorkflowTypeNames.length > 0)
+                td
+                  div.form-inline 
+                    each typeName, i in filteredWorkflowTypeNames 
+                      | [
+                      a(href = `/workflows/${filteredWorkflowTypeIds[i]}/list`) #{typeName}
+                      | ]
+                      if(i != filteredWorkflowTypeNames.length - 1)
+                        | &nbsp; &nbsp;
+              else
+                td (none)
 
     div.vert-space-x2                
