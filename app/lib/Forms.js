@@ -28,6 +28,9 @@ async function save(input, collection, req) {
   newRecord.formId = input.formId;
   newRecord.formName = input.formName;
   newRecord.collection = collection;
+
+  if (collection !== 'componentForms') newRecord.componentTypes = input.componentTypes || [];
+
   newRecord.tags = input.tags || [];
   newRecord.schema = input.schema;
   newRecord.isBatch = input.isBatch || false;
