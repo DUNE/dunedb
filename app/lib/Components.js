@@ -2,7 +2,6 @@ const Binary = require('mongodb').Binary;
 const MUUID = require('uuid-mongodb');
 const shortuuid = require('short-uuid')();
 
-const Cache = require('lib/Cache.js');
 const commonSchema = require('lib/commonSchema.js');
 const { db } = require('./db');
 const dbLock = require('lib/dbLock.js');
@@ -88,8 +87,6 @@ async function save(input, req) {
   // Make a copy of the inserted record, and convert the 'componentUuid' from binary to string format, for better readability and consistent display
   let record = { ...result.ops[0] };
   record.componentUuid = MUUID.from(newRecord.componentUuid).toString();
-
-  Cache.invalidate('componentCountsByType');
 
   // Return the record as proof that it has been saved successfully
   return record;
@@ -223,8 +220,8 @@ async function list(match_condition, options) {
 }
 
 
-/// (Re)generate the cache of component counts by type
-Cache.add('componentCountsByType', async function () {
+/// Get the currently cached component counts by type
+async function componentCountsByTypes() {
   // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
 
@@ -265,13 +262,6 @@ Cache.add('componentCountsByType', async function () {
 
   // Return the final results
   return returnedValues;
-});
-
-
-/// Get the currently cached component counts by type
-async function componentCountsByTypes() {
-  const currentCache = Cache.current('componentCountsByType');
-  return currentCache;
 }
 
 

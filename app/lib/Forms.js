@@ -58,7 +58,6 @@ async function save(input, collection, req) {
   if (result.insertedCount !== 1) throw new Error(`Forms::save() - failed to insert a new type form record into the database!`);
 
   Cache.invalidate(`formlist_${collection}`);
-  Cache.invalidate('typeFormTags');
 
   // Return the record as proof that it has been saved successfully
   return result.ops[0];
@@ -167,8 +166,8 @@ async function list(collection) {
 }
 
 
-/// (Re)generate the cache of type form tags
-Cache.add('typeFormTags', async function () {
+/// Get a list of all currently used type form tags
+async function tags() {
   // Simultaneously get lists of type form tags from each type form collection
   // This returns a list containing three sub-lists, one for each collection
   const tags_lists = await Promise.all([
@@ -188,13 +187,6 @@ Cache.add('typeFormTags', async function () {
 
   // Return an object containing the set of tags, but as keys that can be more easily utilised than a simple array of them
   return Object.keys(tokens);
-});
-
-
-/// Get the currently cached type form tags
-async function tags() {
-  const currentCache = Cache.current('typeFormTags');
-  return currentCache;
 }
 
 
