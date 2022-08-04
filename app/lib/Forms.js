@@ -30,6 +30,10 @@ async function save(input, collection, req) {
   newRecord.collection = collection;
 
   if (collection !== 'componentForms') newRecord.componentTypes = input.componentTypes || [];
+  if (collection === 'workflowForms') {
+    newRecord.description = input.description || '';
+    newRecord.path = input.path || [];
+  }
 
   newRecord.tags = input.tags || [];
   newRecord.schema = input.schema;
