@@ -4,3 +4,4 @@ testTools/inspirehep/cache/
 .gitinfo
 db/mongo
 m2m/__pycache__
+m2m/client_credentials.py
