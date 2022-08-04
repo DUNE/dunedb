@@ -37,4 +37,22 @@ router.post('/component', permissions.checkPermissionJson('components:edit'), as
 });
 
 
+/// Generate a new component UUID
+router.get('/newComponentUUID', async function (req, res, next) {
+  try {
+    // Display a logger message indicating that a new UUID is being requested via the '/newComponentUUID' route
+    logger.info(req.body, 'Request for new UUID from /newComponentUUID');
+
+    // Create a new full UUID
+    const componentUuid = Components.newUuid().toString();
+
+    // Set the route response to be the UUID
+    res.json(componentUuid);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 module.exports = router;

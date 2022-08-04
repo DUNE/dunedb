@@ -1,10 +1,11 @@
 const logger = require('./logger');
 
-/// For human users (logged in via Auth0 and the passport), look for the correct permission in 'req.user.permissions'
-/// Individual user permissions are granted based on the user's role ... this can ONLY be modified through the Auth0 dashboard -> Users -> Roles
+/// For human users (logged in via Auth0 and the passport), look for the correct permission in the 'req.user.permissions' object
+/// Individual user permissions are granted based on the user's role ... this can ONLY be modified through the Auth0 Dashboard -> Users -> Roles
 ///
-/// For m2m users, look for the correct permission in 'req.user.scopes'
-/// Edit this through the Auth0 dashboard -> APIs -> machine2machine -> dropdown menu on the right, next to 'authorized'
+/// For M2M clients, the permissions are found in the DECODED access token (decoding is performed via the middleware function in 'auth.js')
+/// Once decoded and extracted, the client permissions are also saved into the 'req.user.permissions' object
+/// Client permissions can be edited through the Auth0 Dashboard -> Applications -> 'DUNE DB M2M' -> APIs -> 'DUNE DB API' -> dropdown menu on the right
 ///
 /// NB. In the API, set RBAC to 'on', add user permissions to access token, and allow for skipping user consent
 
