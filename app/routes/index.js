@@ -2,7 +2,6 @@
 const routes = [
   require('./actions'),
   require('./components'),
-  require('./processes'),
   require('./search'),
   require('./start'),
   require('./tags'),

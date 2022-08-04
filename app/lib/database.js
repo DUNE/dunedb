@@ -90,9 +90,7 @@ async function initialize_database(db)
 	  	var collections = [
 	  		"components",
 				"actions",
-				"processed",
 	  		"componentForms","actionForms",
-		  	"m2mUsers",
 	  	];
 
 	  	var existing = await db.listCollections().toArray();
@@ -129,15 +127,6 @@ async function initialize_database(db)
 			// await db.collection("actions").createIndex({"data.$**": 1});
 		 	await db.collection("actions").createIndex({"$**": "text"},{"weights":{"formId":3,"data.name":2}});
 
-		 	logger.info("processed");
-
-			// await db.createCollection('processed'); // in case it doesn't exist already
-			await db.collection("processed").dropIndexes(); // often cruft in early versions.
-			await db.collection("processed").createIndex({"input._id":1});
-			await db.collection("processed").createIndex({"insertion.insertDate":1});
-			await db.collection("processed").createIndex({"insertion.user.user_id":1});
-
-
 			for(var c of ["componentForms","actionForms"]) {
 			 	logger.info(c);
 
@@ -148,12 +137,6 @@ async function initialize_database(db)
 				await db.collection(c).createIndex({"insertion.insertDate":1});
 				await db.collection(c).createIndex({"insertion.user.user_id":1});
 			}
-
-		 	logger.info("m2mUsers");
-
-			await db.collection("m2mUsers").dropIndexes(); // often cruft in early versions.
-			await db.collection("m2mUsers").createIndex({user_id:1});
-
 
 			status_obj.version =4.9;
 			log_to_db('initialize DB to version '+status_obj.version);

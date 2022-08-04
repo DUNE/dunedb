@@ -34,20 +34,3 @@ mixin qr-panel(text, desc)
       div #{desc}
     .canvas-holder
       canvas.qr-code(data-QR-text = text, data-QR-desc = desc)      
-
-mixin short_user(user)
-  //- This mixin only used by 'processResult.pug' ... delete if no longer needed
-  if (!user)
-    span [Please login to see!]
-  else
-    a(href = 'mailto:' + user_email(user)) = user.displayName || user_email(user)
-
-mixin createdFrom(created_from)
-  //- This mixin related to processes ... delete if no longer needed
-  if(created_from && created_from.processRecordId)
-    div.createdFrom.alert.alert-info
-      span This DB entry was created by an automated process:
-      br
-      a(href = '/processRecord/' + created_from.processRecordId.toString()) Process Record
-      br
-      a(href = '/' + created_from.inputRecordType + '/' + created_from.inputRecordId.toString()) Input Record
