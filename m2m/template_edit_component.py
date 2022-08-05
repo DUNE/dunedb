@@ -10,14 +10,14 @@ if __name__ == '__main__':
     #   - the names of any data fields to be edited
     #   - the new values of any data fields to be edited
 
-    # Set the UUID of the component to be edited, as a string
+    # Set the UUID of the component to be edited
     componentUUID = 'da820f60-130e-11ed-bf0a-f3cd78f73f46'
 
-    # Set the names of any data fields to be edited, as a list of strings
+    # Set the names of any data fields to be edited
     componentData_fields = ['textField']
 
-    # Set the new values of any data fields to be edited, as a list of equal length to the field names list above
-    componentData_values = ['Moving edit values to main function']
+    # Set the new values of any data fields to be edited
+    componentData_values = ['This component has been edited through the M2M application']
 
     # Edit and submit the component
     EditComponent(componentUUID, componentData_fields, componentData_values)

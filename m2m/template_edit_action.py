@@ -10,14 +10,14 @@ if __name__ == '__main__':
     #   - the names of any data fields to be edited
     #   - the new values of any data fields to be edited
 
-    # Set the ID of the action to be edited, as a string
+    # Set the ID of the action to be edited
     actionID = '62ea52ad08d4250014a0afe7'
 
-    # Set the names of any data fields to be edited, as a list of strings
+    # Set the names of any data fields to be edited
     actionData_fields = ['name', 'measurement']
 
-    # Set the new values of any data fields to be edited, as a list of equal length to the field names list above
-    actionData_values = ['Hardcoded client audience', 1.357911]
+    # Set the new values of any data fields to be edited
+    actionData_values = ['Edited M2M Action', 1.12358]
 
     # Edit and submit the action
     EditAction(actionID, actionData_fields, actionData_values)

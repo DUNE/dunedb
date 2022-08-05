@@ -10,17 +10,17 @@ if __name__ == '__main__':
     #   - the UUID of the component on which the action is being performed (which must already exist in the DB)
     #   - the action data (corresponding to the data to be entered into the type form)
 
-    # Set the action type form ID, as a string
+    # Set the action type form ID
     typeFormID = 'my_action'
 
-    # Set the component UUID, as a string
+    # Set the component UUID
     componentUUID = 'da820f60-130e-11ed-bf0a-f3cd78f73f46'
 
-    # Set the action data, as a Python dictionary where each field's name corresponds exactly to the corresponding type form input field name
+    # Set the action data
     data = {
-        'name': 'm2m Action Test 3',
+        'name': 'M2M Action',
         'actionPerformedAfterFormsCleanup': True,
-        'measurement': 1.12358
+        'measurement': 1.123
     }
 
     # Perform and submit the new action

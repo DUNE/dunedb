@@ -9,13 +9,13 @@ if __name__ == '__main__':
     #   - the component type form ID (for which a corresponding type form must already exist in the DB)
     #   - the component data (corresponding to the data to be entered into the type form)
 
-    # Set the component type form ID, as a string
+    # Set the component type form ID
     typeFormID = 'basic_component'
 
-    # Set the component data, as a Python dictionary where each field's name corresponds exactly to the corresponding type form input field name
+    # Set the component data
     data = {
-        'name': 'm2m Component 8',
-        'textField': 'Showing Brian component creation'
+        'name': 'M2M Component',
+        'textField': 'This is a component created through the M2M application'
     }
 
     # Create and submit the new component
