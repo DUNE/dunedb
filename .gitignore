@@ -1,6 +1,5 @@
 **/node_modules
 *.log
-testTools/inspirehep/cache/
 .gitinfo
 db/mongo
 m2m/__pycache__
