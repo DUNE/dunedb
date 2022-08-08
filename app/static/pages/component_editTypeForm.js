@@ -165,6 +165,12 @@ const metaschema = {
   },
 
   {
+    width: 12,
+    size: 'md',
+    components: [],
+  },
+
+  {
     type: 'htmlelement',
     label: 'formbuilder',
     key: 'formbuilder',

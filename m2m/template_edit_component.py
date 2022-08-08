@@ -17,7 +17,8 @@ if __name__ == '__main__':
     componentData_fields = ['textField']
 
     # Set the new values of any data fields to be edited
-    componentData_values = ['This component has been edited through the M2M application']
+    componentData_values = [
+        'This component has been edited through the M2M application']
 
     # Edit and submit the component
     EditComponent(componentUUID, componentData_fields, componentData_values)
