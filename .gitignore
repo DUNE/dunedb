@@ -1,16 +1,5 @@
-files/
-shib/
-sessions/
 **/node_modules
-config.js
-api_config.json
-api2_config.json
-local/
-app/static/css/local.css
-pm2*.config.js
 *.log
-**/credentials*json
-testTools/insiprehep/cache/
-config/**
 .gitinfo
 db/mongo
+m2m/__pycache__

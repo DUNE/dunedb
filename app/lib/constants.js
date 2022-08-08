@@ -20,7 +20,6 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   BASE_URL: process.env.BASE_URL || `http://localhost:${APP_PORT}`,
   SESSION_SECRET: process.env.SESSION_SECRET || crypto.randomBytes(128).toString('hex'),
-  M2M_SECRET: process.env.M2M_SECRET || crypto.randomBytes(256).toString('hex'),
 
   // Auth0 Constants
   AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,

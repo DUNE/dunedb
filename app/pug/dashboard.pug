@@ -108,7 +108,7 @@ body(class = `deployment-${NODE_ENV}`)
                 li.nav-item
                   +navlink(href = '/workflowTypes/list')
                     |      Workflow Types
-                    
+
             //- [KRISH] Leave this sidebar item commented out for now ... will enable it once we know more about type form tags usage
             //- li.nav-item
             //-   +navlink(href = '/tags')
@@ -119,11 +119,6 @@ body(class = `deployment-${NODE_ENV}`)
               +navlink(href = '/users/list')
                 i.fa.fa-user(aria-hidden = 'true')
                 | Users
-
-              ul.nav.flex-column.ml-3.sub-bar
-                li.nav-item
-                  +navlink(href = '/users/m2m')
-                    | m2m Users
 
             li.nav-item
               +navlink(href = '/search')
