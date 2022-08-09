@@ -1,6 +1,7 @@
 # General Python imports
 import http.client
 import json
+import socket
 import sys
 
 # Local Python imports and variables
@@ -57,8 +58,13 @@ def ConnectToAPI():
 
     # If the access token string is not empty, set up and return a connection to the database API, as well as the headers defined above
     # Otherwise, exit out now since there's no point in continuing (although even if the token is fine here, further checks will be performed by the API middleware)
+    # Note that locally hosted APIs will need to use the non-SSL HTTP client (HTTP), whereas the staging and production instances will need the SSL one (HTTPS)
     if access_token is not '':
-        connection = http.client.HTTPConnection(db_domain)
+        if (db_domain == 'localhost:12313'):
+            connection = http.client.HTTPConnection(db_domain, timeout=10)
+        else:
+            connection = http.client.HTTPSConnection(db_domain, timeout=10)
+
         return connection, headers
     else:
         sys.exit(" ConnectToAPI() - ERROR: could not get a valid access token! \n")
@@ -110,15 +116,21 @@ def CreateComponent(typeFormID, data):
 
             if submissionResponse.status == 200:
                 print(
-                    f" CreateNewComponent() - successfully submitted component with UUID: {submissionResponse.read().decode('utf-8')}")
+                    f" CreateComponent() - successfully submitted component with UUID: {submissionResponse.read().decode('utf-8')}")
             else:
                 print(submissionResponse.status, submissionResponse.reason)
         except http.client.HTTPException as e2:
             print(
-                f" CreateNewComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+                f" CreateComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+        except socket.timeout as s2:
+            print(
+                f" CreateComponent() [POST /api/component] - SOCKET TIMEOUT: {s2} \n")
     except http.client.HTTPException as e1:
         print(
-            f" CreateNewComponent() [GET /api/newComponentUUID] - HTTP EXCEPTION: {e1} \n")
+            f" CreateComponent() [GET /api/newComponentUUID] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" CreateComponent() [GET /api/newComponentUUID] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()
 
@@ -145,7 +157,7 @@ def EditComponent(componentUUID, componentData_fields, componentData_values):
         # If the provided UUID doesn't match with an existing component record, print an error and exit the function immediately
         if component == None:
             sys.exit(
-                f" EditExistingComponent() - ERROR: there is no component record with component UUID = {componentUUID} \n")
+                f" EditComponent() - ERROR: there is no component record with component UUID = {componentUUID} \n")
 
         # For each component information field to be edited, assign the new value
         # Note that only existing fields in the 'component.data' object should be edited
@@ -168,15 +180,21 @@ def EditComponent(componentUUID, componentData_fields, componentData_values):
 
             if submissionResponse.status == 200:
                 print(
-                    f" EditExistingComponent() - successfully edited component with UUID: {submissionResponse.read().decode('utf-8')}")
+                    f" EditComponent() - successfully edited component with UUID: {submissionResponse.read().decode('utf-8')}")
             else:
                 print(submissionResponse.status, submissionResponse.reason)
         except http.client.HTTPException as e2:
             print(
-                f" EditExistingComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+                f" EditComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+        except socket.timeout as s2:
+            print(
+                f" EditComponent() [POST /api/component] - SOCKET TIMEOUT: {s2} \n")
     except http.client.HTTPException as e1:
         print(
-            f" EditExistingComponent() [GET /api/component/componentUuid] - HTTP EXCEPTION: {e1} \n")
+            f" EditComponent() [GET /api/component/componentUuid] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" EditComponent() [GET /api/component/componentUuid] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()
 
@@ -216,12 +234,15 @@ def PerformAction(typeFormID, componentUUID, data):
 
         if submissionResponse.status == 200:
             print(
-                f" PerformNewAction() - successfully submitted action with ID: {submissionResponse.read().decode('utf-8')}")
+                f" PerformAction() - successfully submitted action with ID: {submissionResponse.read().decode('utf-8')}")
         else:
             print(submissionResponse.status, submissionResponse.reason)
     except http.client.HTTPException as e1:
         print(
-            f" PerformNewAction() [POST /api/action] - HTTP EXCEPTION: {e1} \n")
+            f" PerformAction() [POST /api/action] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" PerformAction() [POST /api/action] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()
 
@@ -247,7 +268,7 @@ def EditAction(actionID, actionData_fields, actionData_values):
         # If the provided ID doesn't match with an existing action record, print an error and exit the function immediately
         if action == None:
             sys.exit(
-                f" EditExistingAction() - ERROR: there is no action record with action ID = {actionID} \n")
+                f" EditAction() - ERROR: there is no action record with action ID = {actionID} \n")
 
         # For each action information field to be edited, assign the new value
         # Note that only existing fields in the 'action.data' object should be edited
@@ -270,14 +291,20 @@ def EditAction(actionID, actionData_fields, actionData_values):
 
             if submissionResponse.status == 200:
                 print(
-                    f" EditExistingAction() - successfully edited action with ID: {submissionResponse.read().decode('utf-8')}")
+                    f" EditAction() - successfully edited action with ID: {submissionResponse.read().decode('utf-8')}")
             else:
                 print(submissionResponse.status, submissionResponse.reason)
         except http.client.HTTPException as e2:
             print(
-                f" EditExistingAction() [POST /api/action] - HTTP EXCEPTION: {e2} \n")
+                f" EditAction() [POST /api/action] - HTTP EXCEPTION: {e2} \n")
+        except socket.timeout as s2:
+            print(
+                f" EditAction() [POST /api/action] - SOCKET TIMEOUT: {s2} \n")
     except http.client.HTTPException as e1:
         print(
-            f" EditExistingAction() [GET /api/action/actionId] - HTTP EXCEPTION: {e1} \n")
+            f" EditAction() [GET /api/action/actionId] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" EditAction() [GET /api/action/actionId] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()
