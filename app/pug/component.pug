@@ -109,29 +109,29 @@ block content
                       |  by !{' '}
                       a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-          div.vert-space-x2.form-inline
-            a(href = `/component/${component.componentUuid}/edit`).btn.btn-warning
-              img.small-icon(src = '/images/edit_icon.svg')
-              | &nbsp; Edit Component
-
-            div.hori-space-x2
-              a(href = `/json/component/${component.componentUuid}`, target = '_blank').btn.btn-secondary
-                img.small-icon(src = '/images/checklist_icon.svg')
-                | &nbsp; View JSON Record
-
-            div.hori-space-x2
-              a(href = `/component/${component.componentUuid}/qrCodes`).btn.btn-primary
-                img.small-icon(src = '/images/checklist_icon.svg')
-                | &nbsp; Print a set of the component's QR codes
-
-            div.hori-space-x2
-              a(href = `/component/${component.componentUuid}/summary`).btn.btn-primary
-                img.small-icon(src = '/images/checklist_icon.svg')
-                | &nbsp; View and print the component's summary
-
         .col-md-3
           div#qr-code
             +qr-panel(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
+
+    div.vert-space-x2.form-inline
+      a(href = `/component/${component.componentUuid}/edit`).btn.btn-warning
+        img.small-icon(src = '/images/edit_icon.svg')
+        | &nbsp; Edit Component
+
+      div.hori-space-x2
+        a(href = `/json/component/${component.componentUuid}`, target = '_blank').btn.btn-secondary
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; View JSON Record
+
+      div.hori-space-x2
+        a(href = `/component/${component.componentUuid}/qrCodes`).btn.btn-primary
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; Print a set of the component's QR codes
+
+      div.hori-space-x2
+        a(href = `/component/${component.componentUuid}/summary`).btn.btn-primary
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; View and print the component's summary
 
     div.vert-space-x2
       hr
@@ -151,7 +151,7 @@ block content
                 tr
                   th.col-md-2 Action Type Name
                   th.col-md-2 Action Name
-                  th.col-md-2 Date Performed
+                  th.col-md-2 Last Performed On:
 
               tbody
                 each action in actions

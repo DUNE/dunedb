@@ -21,9 +21,9 @@ block content
         thead
           tr
             th.col-md-2 Type Name
-            th.col-md-2 Action ID
+            th.col-md-1 Action ID
             th.col-md-2 Action Name
-            th.col-md-2 Performed on Component:
+            th.col-md-3 Performed on Component:
             th.col-md-2 Last Performed On:
             th.col-md-1
 
@@ -42,10 +42,9 @@ block content
                 td
                   a(href = `/component/${uuid}`) #{uuid}
                 td
-                  +dateFormatAndAgo(action.lastEditDate)
+                  +dateFormat(action.lastEditDate)
                 td
                   a(href = `/json/action/${action.actionId}`, target = '_blank').btn-sm.btn-secondary
                     img.small-icon(src = '/images/checklist_icon.svg')
-                    | &nbsp; JSON Record
-
+                    | &nbsp; JSON
     div.vert-space-x2

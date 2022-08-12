@@ -21,9 +21,9 @@ block content
         thead
           tr
             th.col-md-2 Type Name
-            th.col-md-2 Workflow ID
+            th.col-md-1 Workflow ID
             th.col-md-2 Workflow Name
-            th.col-md-2 Component
+            th.col-md-3 Component
             th.col-md-1 Status
             th.col-md-1
 
@@ -44,10 +44,14 @@ block content
                 else 
                   td (component not yet created)
 
-                td #{workflow.status}
+                if(workflow.status === 'Complete')
+                  td.text-success.font-weight-bold #{workflow.status}
+                else
+                  td.text-danger.font-weight-bold #{workflow.status}
+
                 td
                   a(href = `/json/workflow/${workflow.workflowId}`, target = '_blank').btn-sm.btn-secondary
                     img.small-icon(src = '/images/checklist_icon.svg')
-                    | &nbsp; JSON Record
+                    | &nbsp; JSON
 
     div.vert-space-x2

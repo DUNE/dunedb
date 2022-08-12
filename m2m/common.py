@@ -1,6 +1,7 @@
 # General Python imports
 import http.client
 import json
+import socket
 import sys
 
 # Local Python imports and variables
@@ -17,12 +18,12 @@ def ConnectToAPI():
     # Set the payload to be delivered via the connection to Auth0, containing all of the information required to identify this M2M client
     payload = (
         f'{{'
-        f'"client_id": "{client_id}", ' 
-        f'"client_secret": "{client_secret}", ' 
-        f'"audience": "https://apa.dunedb.org/api/", ' 
+        f'"client_id": "{client_id}", '
+        f'"client_secret": "{client_secret}", '
+        f'"audience": "https://apa.dunedb.org/api/", '
         f'"grant_type": "client_credentials"'
         f'}}'
-        )
+    )
 
     # Set up a connection to the Auth0 domain
     connection = http.client.HTTPSConnection(auth0_domain)
@@ -30,7 +31,8 @@ def ConnectToAPI():
     # Attempt to request a response from the domain, using the provided credentials payload and specified headers, and print any raised exceptions
     # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
-        connection.request('POST', '/oauth/token', body = payload, headers = { 'content-type': 'application/json' })
+        connection.request('POST', '/oauth/token', body=payload,
+                           headers={'content-type': 'application/json'})
 
         # Decode the response ... this will be a string containing the following information:
         #   - the client access token
@@ -52,15 +54,50 @@ def ConnectToAPI():
     headers = {
         'content-type': 'application/json',
         'authorization': f"{token_type} {access_token}"
-        }
+    }
 
     # If the access token string is not empty, set up and return a connection to the database API, as well as the headers defined above
     # Otherwise, exit out now since there's no point in continuing (although even if the token is fine here, further checks will be performed by the API middleware)
+    # Note that locally hosted APIs will need to use the non-SSL HTTP client (HTTP), whereas the staging and production instances will need the SSL one (HTTPS)
     if access_token is not '':
-        connection = http.client.HTTPConnection(db_domain)
+        if (db_domain == 'localhost:12313'):
+            connection = http.client.HTTPConnection(db_domain, timeout=10)
+        else:
+            connection = http.client.HTTPSConnection(db_domain, timeout=10)
+
         return connection, headers
     else:
         sys.exit(" ConnectToAPI() - ERROR: could not get a valid access token! \n")
+
+
+#########################################
+## Convert a short UUID to a full UUID ##
+#########################################
+def ConvertShortUUID(shortUUID):
+    # Set up a connection to the database API and the connection request headers
+    connection, headers = ConnectToAPI()
+
+    # Attempt to request a response from the API route for converting a short UUID, using the passed headers
+    # If the request is successful, continue with the function ... otherwise print any raised exceptions
+    # Regardless of the success or failure of the request, make sure to close the connection cleanly
+    try:
+        connection.request('GET', '/api/convertShortUUID/' +
+                           shortUUID, headers=headers)
+
+        # The route returns the UUID as a JSON formatted string (i.e. the UUID string within a JSON string), so slice it to get only the UUID string
+        uuidResponse = connection.getresponse()
+        fullUUID = uuidResponse.read().decode('utf-8')[1: -1]
+
+        # Return the full UUID
+        return fullUUID
+    except http.client.HTTPException as e1:
+        print(
+            f" ConvertShortUUID() [GET /api/convertShortUUID/shortUuid] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" ConvertShortUUID() [GET /api/convertShortUUID/shortUuid] - SOCKET TIMEOUT: {s1} \n")
+    finally:
+        connection.close()
 
 
 ############################
@@ -74,11 +111,11 @@ def CreateComponent(typeFormID, data):
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
-        connection.request('GET', '/api/newComponentUUID', headers = headers)
+        connection.request('GET', '/api/newComponentUUID', headers=headers)
 
         # The route returns the UUID as a JSON formatted string (i.e. the UUID string within a JSON string), so slice it to get only the UUID string
         uuidResponse = connection.getresponse()
-        componentUUID = uuidResponse.read().decode('utf-8')[1 : -1]
+        componentUUID = uuidResponse.read().decode('utf-8')[1: -1]
 
         # Declare a new empty Python dictionary to hold the component information to be uploaded
         # Then populate it with the absolutely critical information (component UUID and type form ID) and the 'data' object defined by the user
@@ -100,20 +137,30 @@ def CreateComponent(typeFormID, data):
         # Attempt to request a response from the API route for submitting a component record, using the JSON string as the request body and the passed headers
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
-            connection.request('POST', '/api/component', body = componentJSON, headers = headers)
+            connection.request('POST', '/api/component',
+                               body=componentJSON, headers=headers)
 
             # Depending on the submission response (success = 200, or failure = anything else), print an appropriate message to screen
             # The success response from the route is simply the submitted component's UUID
             submissionResponse = connection.getresponse()
 
             if submissionResponse.status == 200:
-                print(f" CreateNewComponent() - successfully submitted component with UUID: {submissionResponse.read().decode('utf-8')}")
+                print(
+                    f" CreateComponent() - successfully submitted component with UUID: {submissionResponse.read().decode('utf-8')}")
             else:
                 print(submissionResponse.status, submissionResponse.reason)
         except http.client.HTTPException as e2:
-            print(f" CreateNewComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+            print(
+                f" CreateComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+        except socket.timeout as s2:
+            print(
+                f" CreateComponent() [POST /api/component] - SOCKET TIMEOUT: {s2} \n")
     except http.client.HTTPException as e1:
-        print(f" CreateNewComponent() [GET /api/newComponentUUID] - HTTP EXCEPTION: {e1} \n")
+        print(
+            f" CreateComponent() [GET /api/newComponentUUID] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" CreateComponent() [GET /api/newComponentUUID] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()
 
@@ -129,7 +176,8 @@ def EditComponent(componentUUID, componentData_fields, componentData_values):
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
-        connection.request('GET', '/api/component/' + componentUUID, headers = headers)
+        connection.request('GET', '/api/component/' +
+                           componentUUID, headers=headers)
 
         # The route response is the component record as a JSON document, but when decoded it becomes a standard string containing the JSON document
         # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
@@ -138,7 +186,8 @@ def EditComponent(componentUUID, componentData_fields, componentData_values):
 
         # If the provided UUID doesn't match with an existing component record, print an error and exit the function immediately
         if component == None:
-            sys.exit(f" EditExistingComponent() - ERROR: there is no component record with component UUID = {componentUUID} \n")
+            sys.exit(
+                f" EditComponent() - ERROR: there is no component record with component UUID = {componentUUID} \n")
 
         # For each component information field to be edited, assign the new value
         # Note that only existing fields in the 'component.data' object should be edited
@@ -152,20 +201,30 @@ def EditComponent(componentUUID, componentData_fields, componentData_values):
         # Attempt to request a response from the API route for submitting a component record, using the JSON string as the request body and the passed headers
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
-            connection.request('POST', '/api/component', body = componentJSON, headers = headers)
+            connection.request('POST', '/api/component',
+                               body=componentJSON, headers=headers)
 
             # Depending on the submission response (success = 200, or failure = anything else), print an appropriate message to screen
             # The success response from the route is simply the submitted component's UUID
             submissionResponse = connection.getresponse()
 
             if submissionResponse.status == 200:
-                print(f" EditExistingComponent() - successfully edited component with UUID: {submissionResponse.read().decode('utf-8')}")
+                print(
+                    f" EditComponent() - successfully edited component with UUID: {submissionResponse.read().decode('utf-8')}")
             else:
                 print(submissionResponse.status, submissionResponse.reason)
         except http.client.HTTPException as e2:
-            print(f" EditExistingComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+            print(
+                f" EditComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
+        except socket.timeout as s2:
+            print(
+                f" EditComponent() [POST /api/component] - SOCKET TIMEOUT: {s2} \n")
     except http.client.HTTPException as e1:
-        print(f" EditExistingComponent() [GET /api/component/componentUuid] - HTTP EXCEPTION: {e1} \n")
+        print(
+            f" EditComponent() [GET /api/component/componentUuid] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" EditComponent() [GET /api/component/componentUuid] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()
 
@@ -196,18 +255,24 @@ def PerformAction(typeFormID, componentUUID, data):
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
-        connection.request('POST', '/api/action', body = actionJSON, headers = headers)
+        connection.request('POST', '/api/action',
+                           body=actionJSON, headers=headers)
 
         # Depending on the submission response (success = 200, or failure = anything else), print an appropriate message to screen
         # The success response from the route is simply the submitted action's ID
         submissionResponse = connection.getresponse()
 
         if submissionResponse.status == 200:
-            print(f" PerformNewAction() - successfully submitted action with ID: {submissionResponse.read().decode('utf-8')}")
+            print(
+                f" PerformAction() - successfully submitted action with ID: {submissionResponse.read().decode('utf-8')}")
         else:
             print(submissionResponse.status, submissionResponse.reason)
     except http.client.HTTPException as e1:
-        print(f" PerformNewAction() [POST /api/action] - HTTP EXCEPTION: {e1} \n")
+        print(
+            f" PerformAction() [POST /api/action] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" PerformAction() [POST /api/action] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()
 
@@ -223,7 +288,7 @@ def EditAction(actionID, actionData_fields, actionData_values):
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
-        connection.request('GET', '/api/action/' + actionID, headers = headers)
+        connection.request('GET', '/api/action/' + actionID, headers=headers)
 
         # The route response is the action record as a JSON document, but when decoded it becomes a standard string containing the JSON document
         # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
@@ -232,7 +297,8 @@ def EditAction(actionID, actionData_fields, actionData_values):
 
         # If the provided ID doesn't match with an existing action record, print an error and exit the function immediately
         if action == None:
-            sys.exit(f" EditExistingAction() - ERROR: there is no action record with action ID = {actionID} \n")
+            sys.exit(
+                f" EditAction() - ERROR: there is no action record with action ID = {actionID} \n")
 
         # For each action information field to be edited, assign the new value
         # Note that only existing fields in the 'action.data' object should be edited
@@ -246,19 +312,29 @@ def EditAction(actionID, actionData_fields, actionData_values):
         # Attempt to request a response from the API route for submitting an action record, using the JSON string as the request body and the passed headers
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
-            connection.request('POST', '/api/action', body = actionJSON, headers = headers)
+            connection.request('POST', '/api/action',
+                               body=actionJSON, headers=headers)
 
             # Depending on the submission response (success = 200, or failure = anything else), print an appropriate message to screen
             # The success response from the route is simply the submitted action's ID
             submissionResponse = connection.getresponse()
 
             if submissionResponse.status == 200:
-                print(f" EditExistingAction() - successfully edited action with ID: {submissionResponse.read().decode('utf-8')}")
+                print(
+                    f" EditAction() - successfully edited action with ID: {submissionResponse.read().decode('utf-8')}")
             else:
                 print(submissionResponse.status, submissionResponse.reason)
         except http.client.HTTPException as e2:
-            print(f" EditExistingAction() [POST /api/action] - HTTP EXCEPTION: {e2} \n")
+            print(
+                f" EditAction() [POST /api/action] - HTTP EXCEPTION: {e2} \n")
+        except socket.timeout as s2:
+            print(
+                f" EditAction() [POST /api/action] - SOCKET TIMEOUT: {s2} \n")
     except http.client.HTTPException as e1:
-        print(f" EditExistingAction() [GET /api/action/actionId] - HTTP EXCEPTION: {e1} \n")
+        print(
+            f" EditAction() [GET /api/action/actionId] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" EditAction() [GET /api/action/actionId] - SOCKET TIMEOUT: {s1} \n")
     finally:
         connection.close()

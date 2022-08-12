@@ -21,9 +21,8 @@ block content
         thead
           tr
             th.col-md-2 Type Name
-            th.col-md-2 Component UUID
-            th.col-md-2 Component Name
-            th.col-md-2 Created On:
+            th.col-md-3 Component UUID
+            th.col-md-4 Component Name
             th.col-md-2 Last Edited On:
             th.col-md-1
 
@@ -40,12 +39,10 @@ block content
                   a(href = `/component/${uuid}`) #{uuid}
                 td #{component.name} 
                 td
-                  +dateFormat(component.creationDate)
-                td
-                  +dateFormatAndAgo(component.lastEditDate)
+                  +dateFormat(component.lastEditDate)
                 td
                   a(href = `/json/component/${uuid}`, target = '_blank').btn-sm.btn-secondary
                     img.small-icon(src = '/images/checklist_icon.svg')
-                    | &nbsp; JSON Record
+                    | &nbsp; JSON
 
     div.vert-space-x2

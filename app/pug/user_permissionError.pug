@@ -4,7 +4,7 @@ head
   title Incorrect Permissions
 
 body
-  p <strong>You do not have permission to view this page or perform this action.</strong>
+  p <strong>You do not have permission to view this page.</strong>
 
     if(!user)
       br 
@@ -28,6 +28,6 @@ body
         .monospace 
           +arrayFormat(user.permissions)
 
-      p The following permissions are required in order to view this page or perform this action: 
+      p The following permissions are required in order to view this page: 
         br        
         .monospace #{required_permission}

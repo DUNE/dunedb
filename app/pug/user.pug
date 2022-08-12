@@ -7,49 +7,55 @@ block vars
 block content
   .container-fluid
     div.vert-space-x2
-      img.avatar_image.border(src = userProfile.picture)
+      h2 User Profile
+    
+    div.vert-space-x1
+      .row
+        .col
+          dl
+            dt Display Name
+            dd #{userProfile.name}
+
+            dt User ID
+            dd
+              .monospace #{userProfile.user_id}
+
+            dt Email
+            dd 
+              a(href = `mailto:${userProfile.email}`) #{userProfile.email} 
+
+              if(userProfile.email_verified)
+                span (Verified)
+
+            dt Created On:
+            dd
+              +dateFormatAndAgo(userProfile.created_at)
+
+            dt Last Login:
+            dd
+              +dateFormatAndAgo(userProfile.last_login)
+
+            dt Last IP Address
+            dd
+              .monospace #{userProfile.last_ip}
+
+            dt Total Logins Count
+            dd #{userProfile.logins_count}
+
+        .col-md-3
+          img.avatar_image.border(src = userProfile.picture)
 
     div.vert-space-x1
-      dl
-        dt Display Name
-        dd #{userProfile.name}
+      hr
 
-        dt User ID
-        dd
-          .monospace #{userProfile.user_id}
+      dt Roles
+      dd
+        .monospace
+          +arrayFormat(user.roles)
 
-        dt Email
-        dd 
-          a(href = `mailto:${userProfile.email}`) #{userProfile.email} 
-
-          if(userProfile.email_verified)
-            span (Verified)
-
-        dt Created On:
-        dd
-          +dateFormat(userProfile.created_at)
-
-        dt Last Login:
-        dd
-          +dateFormat(userProfile.last_login)
-
-        dt Last IP Address
-        dd
-          .monospace #{userProfile.last_ip}
-
-        dt Total Logins Count
-        dd #{userProfile.logins_count}
-
-        hr
-
-        dt Roles
-        dd
-          .monospace
-            +arrayFormat(user.roles)
-
-        dt Permissions granted by these Roles:
-        dd
-          .monospace
-            +arrayFormat(user.permissions)
+      dt Permissions granted by these Roles:
+      dd
+        .monospace
+          +arrayFormat(user.permissions)
 
     div.vert-space-x2
