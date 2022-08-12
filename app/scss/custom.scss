@@ -19,14 +19,15 @@
     	color: red;
     }
 }
-/* uuid component */
-div.componentUuidComponent {
+
+/* ComponentUUID Formio component */
+div.componentuuid {
   display:flex;
 
   .main-input {
     flex: 1 1 auto;
   }
-  .runQrCameraModel {
+  .runQRCameraModal {
     @extend .btn;
     @extend .btn-secondary ;
     @extend .btn-sm;
@@ -40,7 +41,57 @@ div.componentUuidComponent {
 
 }
 
-.componentUuid-info {
+.componentuuid-info {
+  @extend .text-right;
+  @extend .small;
+  color: #00F;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow:hidden;
+}
+
+/* ActionID Formio component */
+div.actionid {
+  display:flex;
+
+  .main-input {
+    flex: 1 1 auto;
+  }
+  .actionid-link {
+    display:none;
+    flex: 0 0 auto;
+    padding: 5px;
+    @extend .align-middle
+  }
+
+}
+
+.actionid-info {
+  @extend .text-right;
+  @extend .small;
+  color: #00F;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow:hidden;
+}
+
+/* WorkflowID Formio component */
+div.workflowid {
+  display:flex;
+
+  .main-input {
+    flex: 1 1 auto;
+  }
+  .workflowid-link {
+    display:none;
+    flex: 0 0 auto;
+    padding: 5px;
+    @extend .align-middle
+  }
+
+}
+
+.workflowid-info {
   @extend .text-right;
   @extend .small;
   color: #00F;

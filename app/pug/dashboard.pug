@@ -49,10 +49,7 @@ body(class = `deployment-${NODE_ENV}`)
         a.navbar-brand.col-sm-3.col-md-2.mr-0.align-middle#navbar-brand(href = '/')
           span.pagename.text-capitalize #{NODE_ENV}
 
-          div.pull-right(style = 'height: 1.3em; display: inline-block')
-            img(src = '/images/noun_cave_1842206.svg', style = 'height: 100%; width: auto; fill: black;')
-
-        input.form-control.form-control-dark#navbar-search(type = 'search' placeholder = 'Search ...' aria-label = 'Search')
+        input.form-control.form-control-dark#navbar-search(type = 'search' placeholder = 'Basic Text Search ...' aria-label = 'Search')
 
         if locals.user
           .navbar-nav.px-3
@@ -85,9 +82,6 @@ body(class = `deployment-${NODE_ENV}`)
                 li.nav-item
                   +navlink(href = '/componentTypes/list')
                     |      Component Types
-                li.nav-item
-                  +navlink(href = '/search/componentByUUID')
-                    |      Search by UUID
 
             li.nav-item
               +navlink(href = '/actions/list')
@@ -121,9 +115,14 @@ body(class = `deployment-${NODE_ENV}`)
                 | Users
 
             li.nav-item
-              +navlink(href = '/search')
+              +navlink(href = '/search/general')
                 i.fa.fa-search(aria-hidden = 'true')
-                | Advanced Search
+                | General Search
+
+              ul.nav.flex-column.ml-3.sub-bar
+                li.nav-item
+                  +navlink(href = '/search/byUUIDorID')
+                    |      Search by UUID or ID
 
           hr
 
@@ -172,9 +171,9 @@ script(type = 'text/javascript', src = '/ext/qrcodegen.js')
 script(type = 'text/javascript', src = '/js/generate_qr_code.js')
 script(type = 'text/javascript', src = '/dist/short-uuid/short-uuid.min.js')
 script(src = '/formio/ComponentGeoTag.js')
-script(src = '/formio/QR_Component.js')
-script(src = '/formio/ComponentUUID_Component.js')
-script(src = '/formio/TestId.js')
+script(src = '/formio/ComponentUUID.js')
+script(src = '/formio/ActionID.js')
+script(src = '/formio/WorkflowID.js')
 script(src = '/formio/ComponentWorkStep.js')
 script(src = '/formio/ComponentArray.js')
 script(src = '/formio/ComponentSpecNumber.js')
