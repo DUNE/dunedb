@@ -1,9 +1,16 @@
 # Local Python imports
-from common import CreateComponent
+from common import ConvertShortUUID, CreateComponent
 
 
 # Main script function
 if __name__ == '__main__':
+
+    # If a short UUID is already known, the corresponding full UUID can be determined
+    shortUUID = 'sYYtwWFURzCyHVYavMrQDd'
+
+    fullUUID = ConvertShortUUID(shortUUID)
+    print(f" Full UUID: {fullUUID}")
+    print()
 
     # Creating a new component requires 2 pieces of information:
     #   - the component type form ID (for which a corresponding type form must already exist in the DB)

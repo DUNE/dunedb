@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const shortuuid = require('short-uuid')();
 
 const Components = require('lib/Components.js');
 const logger = require('../../lib/logger');
@@ -47,6 +48,21 @@ router.get('/newComponentUUID', async function (req, res, next) {
     const componentUuid = Components.newUuid().toString();
 
     // Set the route response to be the UUID
+    res.json(componentUuid);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Convert a short UUID to a full UUID
+router.get('/convertShortUUID/' + utils.short_uuid_regex, async function (req, res, next) {
+  try {
+    // Reconstruct the full UUID from the shortened UUID
+    const componentUuid = shortuuid.toUUID(req.params.shortuuid);
+
+    // Set the route response to be the full UUID
     res.json(componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);

@@ -70,6 +70,36 @@ def ConnectToAPI():
         sys.exit(" ConnectToAPI() - ERROR: could not get a valid access token! \n")
 
 
+#########################################
+## Convert a short UUID to a full UUID ##
+#########################################
+def ConvertShortUUID(shortUUID):
+    # Set up a connection to the database API and the connection request headers
+    connection, headers = ConnectToAPI()
+
+    # Attempt to request a response from the API route for converting a short UUID, using the passed headers
+    # If the request is successful, continue with the function ... otherwise print any raised exceptions
+    # Regardless of the success or failure of the request, make sure to close the connection cleanly
+    try:
+        connection.request('GET', '/api/convertShortUUID/' +
+                           shortUUID, headers=headers)
+
+        # The route returns the UUID as a JSON formatted string (i.e. the UUID string within a JSON string), so slice it to get only the UUID string
+        uuidResponse = connection.getresponse()
+        fullUUID = uuidResponse.read().decode('utf-8')[1: -1]
+
+        # Return the full UUID
+        return fullUUID
+    except http.client.HTTPException as e1:
+        print(
+            f" ConvertShortUUID() [GET /api/convertShortUUID/shortUuid] - HTTP EXCEPTION: {e1} \n")
+    except socket.timeout as s1:
+        print(
+            f" ConvertShortUUID() [GET /api/convertShortUUID/shortUuid] - SOCKET TIMEOUT: {s1} \n")
+    finally:
+        connection.close()
+
+
 ############################
 ## Create a new component ##
 ############################
