@@ -17,7 +17,7 @@ $(function () {
 
   if (typeof navbarElement !== 'undefined' && navbarElement !== null) {
     navbarElement.addEventListener('keyup', function (e) {
-      if (e.key === 'Enter') window.location.href = `/search?${JsonURL.stringify({ search: this.value })}`;
+      if (e.key === 'Enter') window.location.href = `/search/general/?${JsonURL.stringify({ search: this.value })}`;
     });
   }
 

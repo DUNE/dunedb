@@ -1,6 +1,7 @@
 // Frontend interface routes
 const routes = [
   require('./actions'),
+  require('./autocomplete'),
   require('./components'),
   require('./search'),
   require('./start'),
@@ -20,7 +21,6 @@ const api = [
 ];
 
 const paths = [
-  { path: '/autocomplete', route: require('./autocomplete') },
   { path: '/json', route: api },
   { path: '/api', route: api },
 ];

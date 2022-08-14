@@ -351,12 +351,4 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
 });
 
 
-/// Search for a component using its UUID
-/// Keep this route in this file, rather than 'searchRoutes.js', so that it doesn't conflict with the other search route (they both template as '/search/<text>')
-router.get('/search/componentByUUID', async function (req, res, next) {
-  // Render the interface page for searching for a component using its UUID
-  res.render('component_searchByUUID.pug');
-});
-
-
 module.exports = router;

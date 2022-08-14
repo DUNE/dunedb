@@ -330,11 +330,12 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
 
 /// Auto-complete a component UUID string as it is being typed
 /// This actually returns the records of all components with a matching component UUID to that being typed
-async function autoCompleteUuid(inputString, typeFormId, limit = 10) {
-  // The component UUID is 32 alphanumeric characters long, so pad the input string out to this length
-  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
+async function autoCompleteUuid(inputString, limit = 10) {
+  // Remove any underscores and dashes from the input string
   let q = inputString.replace(/[_-]/g, '');
 
+  // The component UUID is up to 32 alphanumeric characters long (excluding dashes), so pad the input string out to this length
+  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
   const bitlow = Binary(Buffer.from(q.padEnd(32, '0'), 'hex'), Binary.SUBTYPE_UUID);
   const bithigh = Binary(Buffer.from(q.padEnd(32, 'F'), 'hex'), Binary.SUBTYPE_UUID);
 
@@ -347,16 +348,12 @@ async function autoCompleteUuid(inputString, typeFormId, limit = 10) {
     },
   };
 
-  // If an component type form ID has also been specified, add it to the condition
-  // This means that as well as the binary value match above, the corresponding component record must also contain the specified type form ID
-  if (typeFormId) match_condition.formId = typeFormId;
-
   // Query the 'component' records collection for records matching the condition
   let records = await db.collection('components')
     .find(match_condition)
     .project({
       'componentUuid': 1,
-      'formId': 1,
+      'formName': 1,
       'data.name': 1,
     })
     .limit(limit)

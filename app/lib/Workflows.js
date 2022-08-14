@@ -254,16 +254,17 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
 
 /// Auto-complete a workflow ID string as it is being typed
 /// This actually returns the records of all workflows with a matching workflow ID to that being typed
-async function autoCompleteId(inputString, typeFormId, limit = 10) {
-  // The workflow ID is 24 alphanumeric characters long, so pad the input string out to this length
-  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
+async function autoCompleteId(inputString, limit = 10) {
+  // Remove any underscores and dashes from the input string
   let q = inputString.replace(/[_-]/g, '');
 
+  // The workflow ID is 24 alphanumeric characters long, so pad the input string out to this length
+  // Then set up objects representing the minimum and maximum hexadecimal values that are possible for the current input string
   const bitlow = ObjectID(q.padEnd(24, '0'));
   const bithigh = ObjectID(q.padEnd(24, 'F'));
 
   // Construct a 'match_condition' to be used as the database query
-  // For this function, it is that the workflow ID's binary value is between the minimum and maximum binary values defined above
+  // For this function, it is that the workflow ID's hexadecimal value is between the minimum and maximum hexadecimal values defined above
   let match_condition = {
     workflowId: {
       $gte: bitlow,
@@ -271,17 +272,12 @@ async function autoCompleteId(inputString, typeFormId, limit = 10) {
     },
   };
 
-  // If a workflow type form ID has also been specified, add it to the condition
-  // This means that as well as the binary value match above, the corresponding workflow record must also contain the specified type form ID
-  if (typeFormId) match_condition.typeFormId = typeFormId;
-
   // Query the 'workflows' records collection for records matching the condition
   let records = await db.collection('workflows')
     .find(match_condition)
     .project({
       'workflowId': 1,
-      'typeFormId': 1,
-      'data.name': 1,
+      'typeFormName': 1,
     })
     .limit(limit)
     .toArray();

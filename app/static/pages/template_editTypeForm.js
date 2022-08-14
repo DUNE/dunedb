@@ -48,9 +48,9 @@ const builder_config = {
       weight: 20,
       components: {
         ComponentUUID: true,
-        TestIdComponent: true,
+        ActionID: true,
+        WorkflowID: true,
         url: true,
-        qrCode: true,
         datetime: true,
         ImageAnnotator: true,
         image: deepmerge(formioComponents.file.builderInfo, {

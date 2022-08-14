@@ -264,16 +264,17 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
 
 /// Auto-complete an action ID string as it is being typed
 /// This actually returns the records of all actions with a matching action ID to that being typed
-async function autoCompleteId(inputString, typeFormId, limit = 10) {
-  // The action ID is 24 alphanumeric characters long, so pad the input string out to this length
-  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
+async function autoCompleteId(inputString, limit = 10) {
+  // Remove any underscores and dashes from the input string
   let q = inputString.replace(/[_-]/g, '');
 
+  // The action ID is 24 alphanumeric characters long, so pad the input string out to this length
+  // Then set up objects representing the minimum and maximum hexadecimal values that are possible for the current input string
   const bitlow = ObjectID(q.padEnd(24, '0'));
   const bithigh = ObjectID(q.padEnd(24, 'F'));
 
   // Construct a 'match_condition' to be used as the database query
-  // For this function, it is that the action ID's binary value is between the minimum and maximum binary values defined above
+  // For this function, it is that the action ID's hexadecimal value is between the minimum and maximum hexadecimal values defined above
   let match_condition = {
     actionId: {
       $gte: bitlow,
@@ -281,25 +282,15 @@ async function autoCompleteId(inputString, typeFormId, limit = 10) {
     },
   };
 
-  // If an action type form ID has also been specified, add it to the condition
-  // This means that as well as the binary value match above, the corresponding action record must also contain the specified type form ID
-  if (typeFormId) match_condition.typeFormId = typeFormId;
-
   // Query the 'actions' records collection for records matching the condition
   let records = await db.collection('actions')
     .find(match_condition)
     .project({
       'actionId': 1,
-      'typeFormId': 1,
-      'data.name': 1,
+      'typeFormName': 1,
     })
     .limit(limit)
     .toArray();
-
-  // Convert the 'componentUuid' of each matching record from binary to string format, for better readability
-  for (let record of records) {
-    record.componentUuid = MUUID.from(record.componentUuid).toString();
-  }
 
   // Return the entire list of action records
   return records;
