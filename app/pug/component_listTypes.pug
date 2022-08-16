@@ -42,13 +42,15 @@ block content
           tr
             th.col-md-2 Type ID
             th.col-md-3 Type Name
-            th.col-md-2 Component Count
+            th.col-md-1 Component Count
+            th.col-md-1 Max. TRN
             th.col-md-3
             th.col-md-2
 
         tbody
-          each typeFormId in Object.keys(componentTypesAndCounts).sort()
-            - const typeForm = componentTypesAndCounts[typeFormId];
+          each typeFormId in Object.keys(componentCountsByType).sort()
+            - const typeForm = componentCountsByType[typeFormId];
+            - const maxTRNResult = maxComponentTRNByType[typeFormId];
 
             if(typeForm.tags && !typeForm.tags.includes('Trash'))
               tr
@@ -58,6 +60,11 @@ block content
 
                 if(typeForm.count)
                   td #{typeForm.count}
+                else 
+                  td 0
+
+                if(maxTRNResult.maxValue)
+                  td #{maxTRNResult.maxValue}
                 else 
                   td 0
 
@@ -80,13 +87,15 @@ block content
             tr
               th.col-md-2 Type ID
               th.col-md-3 Type Name
-              th.col-md-2 Component Count
+              th.col-md-1 Component Count
+              th.col-md-1 Max. TRN
               th.col-md-3
               th.col-md-2
 
           tbody
-            each typeFormId in Object.keys(componentTypesAndCounts).sort()
-              - const typeForm = componentTypesAndCounts[typeFormId];
+            each typeFormId in Object.keys(componentCountsByType).sort()
+              - const typeForm = componentCountsByType[typeFormId];
+              - const maxTRNResult = maxComponentTRNByType[typeFormId];
 
               if(typeForm.tags && typeForm.tags.includes('Trash'))
                 tr
@@ -96,6 +105,11 @@ block content
 
                   if(typeForm.count)
                     td #{typeForm.count}
+                  else 
+                    td 0
+
+                  if(maxTRNResult.maxValue)
+                    td #{maxTRNResult.maxValue}
                   else 
                     td 0
 
