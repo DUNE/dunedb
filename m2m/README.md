@@ -28,7 +28,7 @@ The *backend* code, located in the `common.py` file, governs the general functio
 However, users will still need to call the various backend functions in their own user-created scripts.  The available functions and required arguments are as follows:
 
 * `ConvertShortUUID(shortUUID)` : convert a short UUID into a full one, returning the full UUID as a string
-    * `shortUUID` (string) : an existing short UUID, must be 22 alphanumeric characters
+    * `shortUUID` (string) : an existing short UUID, must be between 20 and 22 alphanumeric characters
 
 * `CreateComponent(typeFormID, data)` : create a new component
     * `typeFormID` (string) : the type form ID of the component to be created
