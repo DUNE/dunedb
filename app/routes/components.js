@@ -277,18 +277,15 @@ router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('form
 router.get('/componentTypes/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Simultaneously retrieve the following information about the component types:
-    //  - a list of all component type forms that currently exist in the 'componentForms' collection
-    //  - a list of component counts by type, for all type forms that already have at least 1 recorded component
-    const [componentTypeForms, componentCountsByType] = await Promise.all([
-      Forms.list('componentForms'),
+    //  - a list of component counts by type, for all type forms
+    //  - a list of maximum component 'typeRecordNumber' by type, for all type forms
+    const [componentCountsByType, maxComponentTRNByType] = await Promise.all([
       Components.componentCountsByTypes(),
+      Components.maxComponentTRNByTypes(),
     ]);
 
-    // Merge the lists above, to create a single list of component counts by type that also includes types that do not have recorded components
-    const componentTypesAndCounts = deepmerge(componentCountsByType, componentTypeForms);
-
     // Render the interface page for listing all component types
-    res.render('component_listTypes.pug', { componentTypesAndCounts });
+    res.render('component_listTypes.pug', { componentCountsByType, maxComponentTRNByType });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

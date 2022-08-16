@@ -1,4 +1,5 @@
 const Binary = require('mongodb').Binary;
+const deepmerge = require('deepmerge');
 const MUUID = require('uuid-mongodb');
 const shortuuid = require('short-uuid')();
 
@@ -220,7 +221,7 @@ async function list(match_condition, options) {
 }
 
 
-/// Get the currently cached component counts by type
+/// Get a list of the current component count per type across all existing component types
 async function componentCountsByTypes() {
   // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
@@ -254,14 +255,64 @@ async function componentCountsByTypes() {
     .aggregate(aggregation_stages)
     .toArray();
 
-  let returnedValues = {};
+  // Reform the results such that each one can be accessed via a key (i.e. the type form name) directly, rather than needing to know the index corresponding to a particular type form
+  let keyedResults = {};
 
-  for (var result of results) {
-    returnedValues[result.formId] = result;
+  for (const result of results) {
+    keyedResults[result.formId] = result;
   }
 
+  // Retrieve a full list of all component type forms
+  const typeFormsList = await Forms.list('componentForms');
+
+  // Merge the full type forms list and the queried results, to create a single list of component counts by type that also includes types that do not have recorded components
+  const mergedList = deepmerge(keyedResults, typeFormsList);
+
   // Return the final results
-  return returnedValues;
+  return mergedList;
+}
+
+
+/// Get a list of the current maximum component 'typeRecordNumber' per type across all existing component types
+async function maxComponentTRNByTypes() {
+  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+  let aggregation_stages = [];
+
+  aggregation_stages.push({
+    $group: {
+      _id: '$formId',
+      maxValue: { $max: '$data.typeRecordNumber' },
+    }
+  });
+
+  aggregation_stages.push({
+    $project: {
+      formId: '$_id',
+      maxValue: true,
+      _id: false,
+    },
+  });
+
+  // Query the 'components' records collection using the aggregation stages
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Reform the results such that each one can be accessed via a key (i.e. the type form name) directly, rather than needing to know the index corresponding to a particular type form
+  let keyedResults = {};
+
+  for (const result of results) {
+    keyedResults[result.formId] = result;
+  }
+
+  // Retrieve a full list of all component type forms
+  const typeFormsList = await Forms.list('componentForms');
+
+  // Merge the full type forms list and the queried results, to create a single list of component counts by type that also includes types that do not have recorded components
+  const mergedList = deepmerge(keyedResults, typeFormsList);
+
+  // Return the final results
+  return mergedList;
 }
 
 
@@ -376,6 +427,7 @@ module.exports = {
   versions,
   list,
   componentCountsByTypes,
+  maxComponentTRNByTypes,
   search,
   autoCompleteUuid,
 }
