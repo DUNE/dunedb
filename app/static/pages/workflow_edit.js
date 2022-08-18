@@ -51,14 +51,6 @@ async function onPageLoad() {
       submission.status = 'In Progress';
     }
 
-    // Only if a new path step result is being submitted, update the specified step result
-    // Then check if this is the final step in the workflow path ... if so, update the workflow status accordingly
-    if (newStepResult) {
-      submission.path[stepIndex].result = stepResult;
-
-      if ((stepIndex + 1) === submission.path.length) submission.status = 'Complete';
-    }
-
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database
     SubmitData(submission);
   });

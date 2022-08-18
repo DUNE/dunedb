@@ -67,7 +67,6 @@ router.get('/workflow/:typeFormId', permissions.checkPermission("workflows:edit"
     res.render('workflow_edit.pug', {
       workflowTypeForm,
       newWorkflow: true,
-      newStepResult: false,
     });
   } catch (err) {
     logger.error(err);
@@ -96,7 +95,6 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
       workflow,
       workflowTypeForm,
       newWorkflow: false,
-      newStepResult: false,
     });
   } catch (err) {
     logger.error(err);
@@ -126,11 +124,10 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permi
 
     if (stepIndex === -99) return res.status(404).send(`There are no more steps to perform in the path of this workflow (ID = ${req.params.workflowId})`);
 
-    // Retrieve the workflow type form, using its type form ID (which is specified in the record)
-    const workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);
+    // Check if this is the final step in the workflow, i.e. it will be complete after this step's result is saved
+    let workflowStatus = 'In Progress';
 
-    // Throw an error if there is no type form corresponding to the type form ID
-    if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
+    if ((stepIndex + 1) === workflow.path.length) workflowStatus = 'Complete';
 
     // Get the specified step type from the URL
     const stepType = req.params.stepType;
@@ -150,15 +147,12 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permi
 
     if (!matchedComponent && !matchedAction) return res.status(404).send(`The provided step result (${stepResult}) is not valid for this step type ('${stepType}'')`);
 
-    // Render the interface page for updating a single step result in the path of an existing workflow
-    res.render('workflow_update.pug', {
-      workflow,
-      workflowTypeForm,
-      newWorkflow: false,
-      newStepResult: true,
-      stepIndex,
-      stepResult,
-    });
+    // Update the step result
+    // This function returns the updated workflow record, but we don't actually need to use it
+    const updatedWorkflow = await Workflows.updatePathStep(req.params.workflowId, stepIndex, stepResult, workflowStatus);
+
+    // Redirect the user to the interface page for viewing the workflow record
+    res.redirect(`/workflow/${req.params.workflowId}`);
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
