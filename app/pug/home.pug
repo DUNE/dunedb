@@ -7,7 +7,7 @@ block content
   if NODE_ENV == 'development'
     .alert.alert-warning
       br
-      p This is a <strong>DEVELOPMENT</strong> deployment of the DUNE APA Construction Database, hosted locally on your computer.  It is <strong>not</strong> connected to either the 
+      p This is a <b>DEVELOPMENT</b> deployment of the DUNE APA Construction Database, hosted locally on your computer.  It is <b>not</b> connected to either the 
         a(href = 'https://apa-dev.dunedb.org') staging
         |  or 
         a(href = 'https://apa.dunedb.org') production
@@ -21,9 +21,9 @@ block content
   if NODE_ENV == 'staging'
     .alert.alert-danger
       br
-      p This is the <strong>STAGING</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
+      p This is the <b>STAGING</b> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
         a(href = 'https://apa.dunedb.org') production
-        |  database, and is to be used <strong>only</strong> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
+        |  database, and is to be used <b>only</b> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
         br
         | Changes to the underlying code made by the developers will be automatically pushed to the production deployment, but it up to individual users to copy over any additions and/or alterations to database records that they make through this deployment's web interface.
       p
@@ -31,7 +31,7 @@ block content
   if NODE_ENV == 'production'
     .alert.alert-success 
       br
-      p This is the <strong>PRODUCTION</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.
+      p This is the <b>PRODUCTION</b> deployment of the DUNE APA Construction Database, hosted at Fermilab.
       p
 
   .container-fluid

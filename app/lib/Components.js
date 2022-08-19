@@ -76,6 +76,8 @@ async function save(input, req) {
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
+  if (input.reception) newRecord.reception = input.reception;
+
   // Insert the new record into the 'components' records collection
   const result = await db.collection('components')
     .insertOne(newRecord);
@@ -91,6 +93,41 @@ async function save(input, req) {
 
   // Return the record as proof that it has been saved successfully
   return record;
+}
+
+
+/// Update the most recently logged reception location and date of a single component
+async function updateLocation(componentUuid, location, date) {
+  // Construct the 'match_condition' to be used as the database query
+  // For this function, it is that a record's component UUID must match the specified one
+  let match_condition = { componentUuid };
+
+  if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+  match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record
+  // Perform the record update
+  const result = db.collection('components')
+    .findOneAndUpdate(
+      match_condition,
+      {
+        $set: {
+          'reception.location': location,
+          'reception.date': date,
+        }
+      },
+      {
+        sort: { 'validity.version': -1 },
+        returnNewDocument: true,
+      },
+      function (err, res) {
+        if (err) throw new Error(`Components::updateLocation() - failed to update the component record ... ${err}`);
+      }
+    );
+
+  // Return the updated record as proof that it has been updated successfully
+  return result;
 }
 
 
@@ -423,6 +460,7 @@ async function autoCompleteUuid(inputString, limit = 10) {
 module.exports = {
   newUuid,
   save,
+  updateLocation,
   retrieve,
   versions,
   list,

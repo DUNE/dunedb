@@ -70,7 +70,14 @@ async function onPageLoad() {
 
       // If the component is a 'Geometry Board' type, we must offset the number of already-existing components
       // This is to account for an unknown number of boards that might have previously been physically created but not added to the database
-      if (componentTypeForm.formId === 'GeometryBoard') numberOfExistingComponents += 5000;
+      // Additionally, we can set up and fill a 'Reception' field in the submission (relevant only for new 'Geometry Board' type components)
+      if (componentTypeForm.formId === 'GeometryBoard') {
+        numberOfExistingComponents += 5000;
+
+        submission.reception = {};
+        submission.reception.location = 'lancaster';
+        submission.reception.date = (new Date()).toString().slice(0, 10);
+      }
 
       // Then add a component type record number to the 'data' field of the submission
       submission.data.typeRecordNumber = numberOfExistingComponents + 1;
@@ -109,6 +116,13 @@ async function onPageLoad() {
         // Add all required sub-component information
         sub_submission.componentUuid = slice_fullUuids[s];
         sub_submission.formId = submission.data.subComponent_formId;
+
+        if (submission.data.subComponent_formId === 'GeometryBoard') {
+          sub_submission.reception = {};
+          sub_submission.reception.location = 'lancaster';
+          sub_submission.reception.date = (new Date()).toISOString().slice(0, 10);
+        }
+
         sub_submission.data = Object.create(submission.data);
 
         // Add information to the sub-component's 'data' field indicating the fields and values that are inherited from the batch component
@@ -116,6 +130,7 @@ async function onPageLoad() {
         sub_submission.data.partNumber = submission.data.subComponent_partNumber;
         sub_submission.data.partString = submission.data.subComponent_partString;
         sub_submission.data.fromBatch = submission.componentUuid;
+        sub_submission.data.submit = true;
 
         // Add a component type record number to the sub-component's 'data' field, and save it into the previously declared array
         const subComponent_typeRecordNumber = numberOfExistingSubComponents + s + 1;

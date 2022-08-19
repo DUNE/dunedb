@@ -84,6 +84,35 @@ async function save(input, req) {
 }
 
 
+/// Update the result of a single step in a workflow path
+async function updatePathStep(workflowId, stepIndex, stepResult, workflowStatus) {
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the workflow record
+  // Preset a dictionary of the variables to be updated using the operator
+  // We have to do this separately because the step index is a variable, but the '$set' operator cannot use inline constructed strings as arguments
+  let update = { '$set': {} };
+
+  update['$set']['path.' + stepIndex + '.result'] = stepResult;
+  update['$set']['status'] = workflowStatus;
+
+  // Perform the record update
+  const result = db.collection('workflows')
+    .findOneAndUpdate(
+      { 'workflowId': ObjectID(workflowId) },
+      update,
+      {
+        sort: { 'validity.version': -1 },
+        returnNewDocument: true,
+      },
+      function (err, res) {
+        if (err) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record ... ${err}`);
+      }
+    );
+
+  // Return the updated record as proof that it has been updated successfully
+  return result;
+}
+
+
 /// Retrieve a single version of a workflow record (either the most recent, or a specified one)
 async function retrieve(workflowId, projection) {
   // Construct the 'match_condition' to be used as the database query
@@ -194,35 +223,6 @@ async function list(match_condition, options) {
 }
 
 
-/// Update the result of a single step in a workflow path
-async function updatePathStep(workflowId, stepIndex, stepResult, workflowStatus) {
-  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the workflow record
-  // Preset a dictionary of the variables to be updated using the operator
-  // We have to do this separately because the step index is a variable, but the '$set' operator cannot use inline constructed strings as arguments
-  let update = { '$set': {} };
-
-  update['$set']['path.' + stepIndex + '.result'] = stepResult;
-  update['$set']['status'] = workflowStatus;
-
-  // Perform the record update
-  const result = db.collection('workflows')
-    .findOneAndUpdate(
-      { 'workflowId': ObjectID(workflowId) },
-      update,
-      {
-        sort: { 'validity.version': -1 },
-        returnOriginal: false,
-      },
-      function (err, res) {
-        if (err) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record ... ${err}`);
-      }
-    );
-
-  // Return the updated record as proof that it has been updated successfully
-  return result;
-}
-
-
 /// Search for workflow records
 /// The search can be performed via either a text search or specifying a record to match to
 async function search(textSearch, matchRecord, skip = 0, limit = 20) {
@@ -318,10 +318,10 @@ async function autoCompleteId(inputString, limit = 10) {
 
 module.exports = {
   save,
+  updatePathStep,
   retrieve,
   versions,
   list,
-  updatePathStep,
   search,
   autoCompleteId,
 }

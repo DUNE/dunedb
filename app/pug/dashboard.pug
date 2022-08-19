@@ -122,7 +122,11 @@ body(class = `deployment-${NODE_ENV}`)
               ul.nav.flex-column.ml-3.sub-bar
                 li.nav-item
                   +navlink(href = '/search/byUUIDorID')
-                    |      Search by UUID or ID
+                    |      By UUID / ID
+
+                li.nav-item
+                  +navlink(href = '/search/byLocationOrPartNumber')
+                    |      By Location / Part Number
 
           hr
 
