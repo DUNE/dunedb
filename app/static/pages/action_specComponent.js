@@ -78,12 +78,27 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user to the appropriate post-submission page ('result' is the action's action ID)
-    // If the action originates from a workflow (i.e. a non-empty workflow ID has been provided), go to the page for updating the workflow path step results
-    // If this is a standalone action, go to the page for viewing an action record
-    if (!(workflowId === '')) {
-      window.location.href = `/workflow/${workflowId}/action/${result}`;
+    // If the action is a 'Board Reception' type, we must first redirect to update the board information (and further redirection will be handled from there)
+    // If not, then we can simply proceed with standard post-submission redirection:
+    //   - if the action originates from a workflow (i.e. a non-empty workflow ID has been provided), go to the page for updating the workflow path step results
+    //   - on the other hand, if this is a standalone action, go to the page for viewing an action record 
+    if (submission.typeFormId === 'BoardReception') {
+      const shipmentUUID = submission.componentUuid;
+      const receptionLocation = submission.data.receptionLocation;
+      const receptionDate = (submission.data.receptionDate).toString().slice(0, 10);
+
+      let url = window.location.href = `/component/${shipmentUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
+      url += `?actionId=${result}`;
+
+      if (!(workflowId === '')) url += `?workflowId=${workflowId}`;
+
+      window.location.href = url;
     } else {
-      window.location.href = `/action/${result}`;
+      if (!(workflowId === '')) {
+        window.location.href = `/workflow/${workflowId}/action/${result}`;
+      } else {
+        window.location.href = `/action/${result}`;
+      }
     }
   }
 

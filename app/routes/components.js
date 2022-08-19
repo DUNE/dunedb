@@ -229,6 +229,42 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 });
 
 
+/// Update the most recently logged reception locations and dates of all geometry boards in a board shipment
+/// This is a highly specialised route, to be used ONLY for geometry boards and via a 'Board Reception' type action submission
+/// If other component locations are required to be updated, this can be added to the code in the future
+router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
+  try {
+    // Retrieve the most recent version of the board shipment record corresponding to the specified component UUID
+    const shipment = await Components.retrieve(req.params.uuid);
+
+    // Throw an error if there is no record corresponding to the component UUID
+    if (!shipment) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
+
+    // Isolate the part of the record that holds the individual board UUIDs
+    const boardData = shipment.data.boardUuiDs;
+
+    // For each individual board, extract the board UUID and update the reception location and date to those passed from the 'Board Reception' action
+    // The updating function returns the updated board component record, but we don't actually need to use it
+    for (const board of boardData) {
+      const updatedBoard = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+    }
+
+    // Depending on if the originating 'Board Reception' action was part of a workflow or not, redirect to an appropriate location
+    // If the action originated from a workflow (i.e. a workflow ID has been provided), go to the page for updating the workflow path step results
+    // On the other hand, if it was a standalone action, go to the page for viewing an action record
+    // Note that these redirections are identical to those performed after submitting ANY action (see 'static/pages/action_specComponent.js')
+    if (req.query.workflowId) {
+      res.redirect(`/workflow/${req.query.workflowId}/action/${req.query.actionId}`);
+    } else {
+      res.redirect(`/action/${req.query.actionId}`);
+    }
+  } catch (err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+
 /// Create a new component type form
 router.get('/componentTypes/:typeFormId/new', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
