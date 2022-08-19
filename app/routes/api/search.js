@@ -1,14 +1,11 @@
-"use strict";
-const express = require("express");
+const router = require('express').Router();
+
+const ComponentSearch = require('lib/ComponentSearch.js');
+
 const Components = require("lib/Components.js");
 const permissions = require("lib/permissions.js");
 const logger = require('../../lib/logger');
-const pretty = require('express-prettify');
 
-var router = express.Router();
-module.exports = router;
-
-router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer json.
 
 // searching via POST parameters
 // 
@@ -55,3 +52,34 @@ router.post("/search/:recordType(component)?/:formId?",  permissions.checkPermis
     res.status(400).json({error:err.toString()});
   }
 });
+
+
+router.get('/search/byLocation/:location', async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry boards that have been received at the specified location
+    const boardsByPartNumber = await ComponentSearch.listBoardsByLocation(req.params.location);
+
+    // Return the list in JSON format
+    return res.json(boardsByPartNumber);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+router.get('/search/byPartNumber/:partNumber', async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry boards of the specified part number that have been received at any location
+    const boardsByLocation = await ComponentSearch.listBoardsByPartNumber(req.params.partNumber);
+
+    // Return the list in JSON format
+    return res.json(boardsByLocation);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+module.exports = router;
