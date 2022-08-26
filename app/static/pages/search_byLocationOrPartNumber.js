@@ -94,7 +94,7 @@ function postSuccess_location(result) {
       for (const i in boardGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '${base_url}/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
             <td>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
           </tr>`;
@@ -122,7 +122,7 @@ function formatBoardLocation(rawLocationString) {
   }
 
   return location;
-}
+};
 
 
 /// Function to run for a successful search query by part number
@@ -176,7 +176,7 @@ function postSuccess_partNumber(result) {
       for (const i in boardGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '${base_url}/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
             <td>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
           </tr>`;

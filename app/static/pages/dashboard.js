@@ -11,16 +11,6 @@ if (localStorage.getItem('sidebar') === '0') {
 
 // Functions for user interaction on the homepage
 $(function () {
-  // Execute a search from the navigation bar by entering a search term and then pressing the 'Enter' key
-  // Note that on some pages, the navigation bar has been removed, so we must first check that the page element exists
-  let navbarElement = document.getElementById('navbar-search');
-
-  if (typeof navbarElement !== 'undefined' && navbarElement !== null) {
-    navbarElement.addEventListener('keyup', function (e) {
-      if (e.key === 'Enter') window.location.href = `/search/general/?${JsonURL.stringify({ search: this.value })}`;
-    });
-  }
-
   // Collapse / expand the sidebar on button click
   // Note that on some pages, the sidebar has been removed, so we must first check that the page element exists
   let sidebarElement = document.getElementById('sidebarCollapse');

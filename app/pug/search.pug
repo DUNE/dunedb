@@ -1,0 +1,56 @@
+extend default
+
+block vars
+  - const page_title = 'Search Page Descriptions';
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      h2 Search Page Descriptions
+
+    div.vert-space-x1
+      p The following dedicated search pages can be accessed from this page, as well as through the links under the <b>Search</b> section of the sidebar.
+        br
+        | Users do not need any particular permission to perform a search, but they will require the appropriate permission(s) to access the various component, action and workflow information pages linked from the search results.
+
+      hr
+
+    div.vert-space-x2
+      h4
+        a(href = '/search/byUUIDOrID') By UUID / ID
+
+      p This page may be used to search for a <b>component, action or workflow record</b> by providing either a full 36-character UUID (for components) or 24-character ID (for actions and workflows).
+        br
+        | Each respective input box uses auto-complete, so users may begin manually entering a UUID or ID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the input is entered.
+        br
+        |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.
+        br
+        br
+        | In all cases, if the entered UUID or ID corresponds to a record in the database, the user will be automatically redirected to the page for viewing the record.  If there is no corresponding record, an error will be displayed.
+
+      hr
+
+    div.vert-space-x2
+      h4
+        a(href = '/search/byLocationOrPartNumber') By Location / Part Number
+
+      p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios: 
+        ul
+          li <b>either</b> all geometry boards of any board part number that have been received at a <u>specified location</u>
+          li <b>or</b> all geometry boards of a <u>specified board part number</u> that have been received at any location
+
+      p Users may select one of the available board reception locations or part numbers from the appropriate list, and a summary of information about each found board will be displayed in the search results panel on the right side of the page.
+
+      p Please note that a geometry board is only deemed to be at a given location if it has been recorded as being received there via a successfully submitted <b>Board Reception</b> action.
+
+      hr
+
+    div.vert-space-x2
+      h4
+        a(href = '/search/byVisualInspection') By Visual Inspection
+
+      p This page may be used to search specifically for <b>geometry boards</b> that have a <u>specified visual inspection disposition</u>.
+        br
+        | Users may select one of the available dispositions from the list, and a summary of information about each found board and its visual inspection will be displayed in the search results panel below the list.
+
+      p Please note that a geometry board will only have a disposition if a <b>Visual Inspection</b> action has been performed on it.

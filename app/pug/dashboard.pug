@@ -41,27 +41,25 @@ block layoutDefinitions
 body(class = `deployment-${NODE_ENV}`)
   block allbody
     block navbar
-      nav.navbar.navbar-dark.bg-dark.flex-nowrap.p-0.shadow
+      nav.navbar.navbar-expand-sm.navbar-dark.bg-dark.p-0
 
         button#sidebarCollapse.btn-btn-info(type = 'button')
           i.fa.fa-align-left
 
-        a.navbar-brand.col-sm-3.col-md-2.mr-0.align-middle#navbar-brand(href = '/')
-          span.pagename.text-capitalize #{NODE_ENV}
-
-        input.form-control.form-control-dark#navbar-search(type = 'search' placeholder = 'Basic Text Search ...' aria-label = 'Search')
+        nav.navbar-brand.pl-2#navbar-brand(style = 'width: 100%')
+          span.text-capitalize #{NODE_ENV}
 
         if locals.user
-          .navbar-nav.px-3
-            .nav-item.text-nowrap
-              +navlink(href = '/user') Profile
-          .navbar-nav.px-3
-            .nav-item.text-nowrap
-              +navlink(href = '/logout') Logout
+          .navbar-nav.ml-n1
+            .nav-item
+              a.btn.btn-dark(href = '/user') Profile
+          .navbar-nav.mr-1
+            .nav-item
+              a.btn.btn-dark(href = '/logout') Logout
         else
-          .navbar-nav.px-3
-            .nav-item.text-nowrap
-              +navlink(href = '/login') Login / Sign Up
+          .navbar-nav.ml-n1.mr-1
+            .nav-item
+              a.btn.btn-dark(href = '/login') Login / Sign Up
 
     .wrapper
       block sidebar
@@ -115,18 +113,22 @@ body(class = `deployment-${NODE_ENV}`)
                 | Users
 
             li.nav-item
-              +navlink(href = '/search/general')
+              +navlink(href = '/search')
                 i.fa.fa-search(aria-hidden = 'true')
-                | General Search
+                | Search
 
               ul.nav.flex-column.ml-3.sub-bar
                 li.nav-item
-                  +navlink(href = '/search/byUUIDorID')
+                  +navlink(href = '/search/byUUIDOrID')
                     |      By UUID / ID
 
                 li.nav-item
                   +navlink(href = '/search/byLocationOrPartNumber')
                     |      By Location / Part Number
+
+                li.nav-item
+                  +navlink(href = '/search/byVisualInspection')
+                    |      By Visual Inspection
 
           hr
 
