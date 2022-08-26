@@ -1,0 +1,42 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Geometry Boards by Visual Inspection Disposition';
+
+block extrascripts
+  block workscripts 
+    script(src = '/pages/search_byVisualInspection.js')
+
+block content
+  .container-fluid
+    div.vert-space-x2
+      h2 Search for Geometry Boards by Visual Inspection Disposition
+
+    div.vert-space-x2 
+      hr
+
+      .row
+        .col-md-4
+          h4 Select Disposition
+
+          div.vert-space-x1
+            p Select a visual inspection disposition from the options below.
+
+          select.form-control#dispositionSelection
+            option(value = '')          
+            option(value = 'useAsIs') Use As Is 
+            option(value = 'repair') Repair 
+            option(value = 'return') Return 
+            option(value = 'scrap') Scrap 
+            option(value = 'toBeDetermined') To be determined 
+            option(value = 'boardIsConformant') Board Is Conformant
+
+    div.vert-space-x2
+      hr
+
+      h4 Search Results
+
+      div.vert-space-x1
+        table#results
+
+    div.vert-space-x2

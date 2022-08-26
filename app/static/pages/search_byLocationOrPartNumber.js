@@ -84,9 +84,9 @@ function postSuccess_location(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' style = 'width: 50%'>Board UUID</th>
-          <th scope = 'col' style = 'width: 15%'>UKID</th>
-          <th scope = 'col' style = 'width: 35%'>Received On:</th>
+          <th scope = 'col' width = '50%'>Board UUID</th>
+          <th scope = 'col' width = '15%'>UKID</th>
+          <th scope = 'col' width = '35%'>Received On:</th>
         </tr>`;
 
       $('#results').append(tableStart);

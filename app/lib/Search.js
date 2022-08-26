@@ -1,5 +1,6 @@
 const MUUID = require('uuid-mongodb');
 
+const Components = require('lib/Components.js');
 const { db } = require('./db');
 
 
@@ -228,6 +229,7 @@ async function listBoardsByVisualInspection(disposition) {
       partString: { '$first': '$data.partString' },
       componentUuid: { '$first': '$componentUuid' },
       ukid: { '$first': '$data.typeRecordNumber' },
+      batchUuid: { '$first': '$data.fromBatch' },
     },
   });
 
@@ -242,6 +244,7 @@ async function listBoardsByVisualInspection(disposition) {
       },
       componentUuid: { $push: '$componentUuid' },
       ukid: { $push: '$ukid' },
+      batchUuid: { $push: '$batchUuid' },
     }
   });
 
@@ -271,6 +274,15 @@ async function listBoardsByVisualInspection(disposition) {
     }
 
     cleanedBoardGroup.ukids = boardGroup.ukid;
+    cleanedBoardGroup.batchUuids = boardGroup.batchUuid;
+
+    cleanedBoardGroup.orderNumbers = [];
+
+    for (const batchUuid of boardGroup.batchUuid) {
+      const batch = await Components.retrieve(batchUuid);
+
+      cleanedBoardGroup.orderNumbers.push(batch.data.orderNumber);
+    }
 
     cleanedResults.push(cleanedBoardGroup);
   }
