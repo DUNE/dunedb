@@ -47,10 +47,13 @@ block content
 
     div.vert-space-x2
       h4
-        a(href = '/search/byVisualInspection') By Visual Inspection
+        a(href = '/search/byVisInspectOrOrderNumber') By Visual Inspection / Order Number
 
-      p This page may be used to search specifically for <b>geometry boards</b> that have a <u>specified visual inspection disposition</u>.
-        br
-        | Users may select one of the available dispositions from the list, and a summary of information about each found board and its visual inspection will be displayed in the search results panel below the list.
+      p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios:
+        ul
+          li <b>either</b> all geometry boards of any batch order number that have a <u>specified visual inspection disposition</u>
+          li <b>or</b> all geometry boards of a <u>specified batch order number</u> that have any visual inspection disposition
+      
+      p Users may select one of the available dispositions from the list, or manually enter an order number, and a summary of information about each found board will be displayed in the search results panel below the selection boxes.
 
-      p Please note that a geometry board will only have a disposition if a <b>Visual Inspection</b> action has been performed on it.
+      p Please note that a geometry board will only be displayed in either scenario if a <b>Visual Inspection</b> action has been performed on it.

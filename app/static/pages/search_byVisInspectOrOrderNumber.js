@@ -1,5 +1,6 @@
-// Declare a variable to hold the (initially empty) user-specified visual inspection disposition
+// Declare variables to hold the (initially empty) user-specified visual inspection disposition and/or order number
 let disposition = null;
+let orderNumber = null;
 
 
 /// Main function
@@ -19,6 +20,26 @@ $(function () {
         dataType: 'json',
         success: postSuccess_disposition,
       }).fail(postFail);
+    }
+  });
+
+  // When the selected order number is changed and the 'Enter' key is pressed ...
+  document.getElementById('orderNumberSelection').addEventListener('keyup', function (e) {
+    if (e.key === 'Enter') {
+      // Get the newly selected order number from the corresponding page element
+      orderNumber = $('#orderNumberSelection').val();
+
+      // If the order number is valid ...
+      if (orderNumber) {
+        // Perform a jQuery 'ajax' call to make the search via the URL
+        $.ajax({
+          contentType: 'application/json',
+          method: 'GET',
+          url: `/json/search/byOrderNumber/${orderNumber}`,
+          dataType: 'json',
+          success: postSuccess_orderNumber,
+        }).fail(postFail);
+      }
     }
   });
 });
@@ -143,6 +164,87 @@ function postSuccess_disposition(result) {
             <td>${inspectionData.repairsDescription}</td>
           </tr>`;
 
+        $('#results').append(boardText);
+      }
+
+      $('#results').append('<br>');
+    }
+  }
+};
+
+
+// Set up a dictionary containing the visual inspection disposition [key, string] pairs (taken from the 'Visual Inspection' action type form)
+const dispositionsDictionary = {
+  useAsIs: 'Use As Is',
+  repair: 'Repair',
+  return: 'Return',
+  scrap: 'Scrap',
+  toBeDetermined: 'To be determined',
+  boardIsConformant: 'Board Is Conformant',
+};
+
+
+/// Function to run for a successful search query by order number
+function postSuccess_orderNumber(result) {
+  // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
+  $('#results').empty();
+
+  const resultsStart = `
+    <tr>
+      <td colspan = "5">The following geometry boards with order number: <b>${$('#orderNumberSelection').val()}</b> and at least one recorded visual inspection have been found.</td>
+    </tr>
+    <tr>
+      <td colspan = "5">They are grouped by visual inspection disposition, and then ordered by last DB record edit (most recent at the top).
+        <br>
+        <hr>
+      </td>
+    </tr>`;
+
+  $('#results').append(resultsStart);
+
+  // If there are no search results, i.e. no geometry boards of any disposition with the specified order number, display a message to indicate this
+  // Otherwise, set up a table of the search results, displaying any relevant and useful geometry board information
+  if (Object.keys(result).length === 0) {
+    $('#results').append('<b>There are no geometry boards with the specified order number and at least one recorded visual inspection</b>');
+  } else {
+    for (const boardGroup of result) {
+      const groupCount = `
+        <tr>
+          <td colspan = "3">Found ${boardGroup.actionIds.length} boards with visual inspection disposition: ${dispositionsDictionary[boardGroup.disposition]}</td>
+        </tr>`;
+
+      $('#results').append(groupCount);
+    }
+
+    $('#results').append('<br>');
+
+    for (const boardGroup of result) {
+      const groupTitle = `<b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b>`;
+
+      $('#results').append(groupTitle);
+
+      const tableStart = `
+        <tr>
+          <th scope = 'col' width = '28%'>Board UUID</th>
+          <th scope = 'col' width = '5%'>UKID</th>
+          <th scope = 'col' width = '20%'>Visual Inspection Record</th>
+          <th scope = 'col' width = '25%'>Issue(s) Identified</th>
+          <th scope = 'col' width = '21%'>Repairs Description (if applicable)</th>
+        </tr>`;
+
+      $('#results').append(tableStart);
+
+      for (const i in boardGroup.actionIds) {
+        const inspectionData = formatInspectionResults(boardGroup.inspectionData[i]);
+
+        const boardText = `
+          <tr>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
+            <td>${boardGroup.ukids[i]}</td>
+            <td><a href = '/action/${boardGroup.actionIds[i]}' target = '_blank'</a>${boardGroup.actionIds[i]}</td>
+            <td>${inspectionData.issues}</td>
+            <td>${inspectionData.repairsDescription}</td>
+          </tr>`;
 
         $('#results').append(boardText);
       }
@@ -153,7 +255,7 @@ function postSuccess_disposition(result) {
 };
 
 
-/// Function to run for a failed search query
+/// Function to run for a failed search query of either scenario
 function postFail(result, statusCode, statusMsg) {
   // If the query result contains a response message, display it
   // Otherwise, display any status message and error code instead

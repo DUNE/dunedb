@@ -5,7 +5,7 @@ block vars
 
 block extrascripts
   block workscripts 
-    script(src = '/pages/search_byVisualInspection.js')
+    script(src = '/pages/search_byVisInspectOrOrderNumber.js')
 
 block content
   .container-fluid
@@ -30,6 +30,16 @@ block content
             option(value = 'scrap') Scrap 
             option(value = 'toBeDetermined') To be determined 
             option(value = 'boardIsConformant') Board Is Conformant
+
+        .col-md-1 
+
+        .col-md-5
+          h4 Enter Order Number
+
+          div.vert-space-x1
+            p Enter a board order number below and press the 'Enter' key.
+
+          input.form-control#orderNumberSelection
 
     div.vert-space-x2
       hr

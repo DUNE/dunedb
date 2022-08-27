@@ -22,10 +22,10 @@ router.get('/search/byLocationOrPartNumber', async function (req, res, next) {
 });
 
 
-/// Search for geometry boards that have a specified visual inspection disposition
-router.get('/search/byVisualInspection', async function (req, res, next) {
-  // Render the interface page for searching for geometry boards by visual inspection disposition
-  res.render('search_byVisualInspection.pug');
+/// Search for geometry boards that have a specified visual inspection disposition, or have a specified order number
+router.get('/search/byVisInspectOrOrderNumber', async function (req, res, next) {
+  // Render the interface page for searching for geometry boards by visual inspection disposition or order number
+  res.render('search_byVisInspectOrOrderNumber.pug');
 });
 
 
