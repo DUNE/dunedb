@@ -84,9 +84,9 @@ function postSuccess_location(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' style = 'width: 50%'>Board UUID</th>
-          <th scope = 'col' style = 'width: 15%'>UKID</th>
-          <th scope = 'col' style = 'width: 35%'>Received On:</th>
+          <th scope = 'col' width = '50%'>Board UUID</th>
+          <th scope = 'col' width = '15%'>UKID</th>
+          <th scope = 'col' width = '35%'>Received On:</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -94,7 +94,7 @@ function postSuccess_location(result) {
       for (const i in boardGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '${base_url}/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
             <td>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
           </tr>`;
@@ -122,7 +122,7 @@ function formatBoardLocation(rawLocationString) {
   }
 
   return location;
-}
+};
 
 
 /// Function to run for a successful search query by part number
@@ -176,7 +176,7 @@ function postSuccess_partNumber(result) {
       for (const i in boardGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '${base_url}/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
             <td>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
           </tr>`;

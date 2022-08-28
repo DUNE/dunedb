@@ -4,9 +4,6 @@ block vars
   - const page_title = 'Search for Geometry Boards by Location or Part Number';
 
 block extrascripts
-  script(type = 'text/javascript').
-    const base_url = '!{base_url}';
-
   block workscripts 
     script(src = '/pages/search_byLocationOrPartNumber.js')
 
@@ -15,34 +12,28 @@ block content
     div.vert-space-x2
       h2 Search for Geometry Boards by Location or Part Number
 
-      div.vert-space-x1 
-        p This page may be used to list geometry boards under <b>one</b> of the following scenarios: 
-        ul
-          li <b>either</b> all geometry boards of any board part number that have been received at a <u>specified location</u>
-          li <b>or</b> all geometry boards of a <u>specified board part number</u> that have been received at any location
+    div.vert-space-x2
+      hr
 
       .row
         .col-md-4
-          div.vert-space-x2
-            hr
+          h4 Select Location
 
-            h4 Select Location
+          div.vert-space-x1
+            p Select a location from the options below.
 
-            div.vert-space-x1
-              p Select a location from the options below.
-
-            select.form-control#locationSelection
-              option(value = '')          
-              option(value = 'cambridge') Cambridge 
-              option(value = 'daresbury') Daresbury 
-              option(value = 'lancaster') Lancaster 
-              option(value = 'manchester') Manchester 
-              option(value = 'merlin') Merlin 
-              option(value = 'sheffield') Sheffield 
-              option(value = 'sussex') Sussex 
-              option(value = 'williamAndMary') William and Mary 
-              option(value = 'uwPsl') UW / PSL 
-              option(value = 'chicago') Chicago
+          select.form-control#locationSelection
+            option(value = '')          
+            option(value = 'cambridge') Cambridge 
+            option(value = 'daresbury') Daresbury 
+            option(value = 'lancaster') Lancaster 
+            option(value = 'manchester') Manchester 
+            option(value = 'merlin') Merlin 
+            option(value = 'sheffield') Sheffield 
+            option(value = 'sussex') Sussex 
+            option(value = 'williamAndMary') William and Mary 
+            option(value = 'uwPsl') UW / PSL 
+            option(value = 'chicago') Chicago
 
           div.vert-space-x2
             hr
@@ -87,12 +78,9 @@ block content
         .col-md-1
 
         .col-md-7
-          div.vert-space-x2
-            hr
+          h4 Search Results
 
-            h4 Search Results
-
-            div.vert-space-x1
-              table#results
+          div.vert-space-x1
+            table#results
 
     div.vert-space-x2
