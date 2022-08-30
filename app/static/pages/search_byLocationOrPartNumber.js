@@ -3,7 +3,7 @@ let receptionLocation = null;
 let partNumber = null;
 
 
-/// Main function
+// Main function
 $(function () {
   // When the selected location is changed ...
   $('#locationSelection').on('change', async function () {
@@ -43,7 +43,7 @@ $(function () {
 });
 
 
-/// Function to run for a successful search query by location
+// Function to run for a successful search query by location
 function postSuccess_location(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
@@ -108,7 +108,7 @@ function postSuccess_location(result) {
 };
 
 
-/// Function to correctly format a board location string
+// Function to correctly format a board location string
 function formatBoardLocation(rawLocationString) {
   let location = '';
 
@@ -125,7 +125,7 @@ function formatBoardLocation(rawLocationString) {
 };
 
 
-/// Function to run for a successful search query by part number
+// Function to run for a successful search query by part number
 function postSuccess_partNumber(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
@@ -190,7 +190,7 @@ function postSuccess_partNumber(result) {
 };
 
 
-/// Function to run for a failed search query of either scenario
+// Function to run for a failed search query of either scenario
 function postFail(result, statusCode, statusMsg) {
   // If the query result contains a response message, display it
   // Otherwise, display any status message and error code instead

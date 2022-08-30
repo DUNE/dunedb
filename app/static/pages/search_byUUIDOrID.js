@@ -2,7 +2,7 @@
 window.addEventListener('load', renderSearchForms);
 
 
-/// Function to run when the page is loaded
+// Function to run when the page is loaded
 async function renderSearchForms() {
   // Create a Formio form consisting of a component UUID input box
   const componentUuidSchema = {

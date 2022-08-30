@@ -23,9 +23,4 @@ $(function () {
       localStorage.setItem('sidebar', state);
     });
   }
-
-  $(document).on('click', '[data-toggle = "lightbox"]', function (e) {
-    e.preventDefault();
-    $(this).ekkoLightbox({ alwaysShowClose: true });
-  });
 });

@@ -137,7 +137,6 @@ const builder_config = {
   }
 };
 
-
 // Declare a variable to hold the (initially empty) Formio form builder object
 let builder = null;
 
@@ -152,7 +151,7 @@ if (collection === 'actionForms') entityRoute = 'actionTypes/list';
 if (collection === 'workflowForms') entityRoute = 'workflowTypes/list';
 
 
-/// Main function
+// Main function
 $(function () {
   // Render the metadata form in the page element called 'metaform' ...
   Formio.createForm(document.getElementById('metaform'), metaschema)
@@ -177,7 +176,7 @@ $(function () {
 });
 
 
-/// Function for populating and changing the metadata and type forms
+// Function for populating and changing the metadata and type forms
 function ChangeRecordData(record) {
   // If no type form name is already present (i.e. if creating a new type form), set it to be the same as the type form ID
   if (!record.formName || (record.formName.length == 0)) record.formName = record.formId;
@@ -218,7 +217,7 @@ function ChangeRecordData(record) {
 }
 
 
-/// Function to build (or rebuild) the type form
+// Function to build (or rebuild) the type form
 function BuildTypeForm() {
   // Populate the metadata form's submission 'schema' field with the currently defined type form schema
   metaForm.submission.data.schema = builder.instance.schema;
@@ -289,7 +288,7 @@ function PasteSchemaFromClipboard() {
 };
 
 
-/// Function to submit the completed 'submission' object to the database
+// Function to submit the completed 'submission' object to the database
 function SubmitData(submission) {
   // Submit the 'submission' object via a jQuery 'ajax' call, with the success and failure functions as defined below
   $.ajax({
@@ -302,7 +301,7 @@ function SubmitData(submission) {
   }).fail(postFail);
 
 
-  /// Function to run for a successful submission
+  // Function to run for a successful submission
   function postSuccess(result) {
     // If the submission result contains an error (even with a successful submission), display it along with the appropriate Formio alert type
     if (result.error) {
@@ -318,7 +317,7 @@ function SubmitData(submission) {
   }
 
 
-  /// Function to run for a failed submission
+  // Function to run for a failed submission
   function postFail(result, statusCode, statusMsg) {
     // If the submission result contains a response message, display it along with the appropriate Formio alert type
     // Otherwise, display any status message and error code instead

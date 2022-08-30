@@ -3,7 +3,7 @@ let disposition = null;
 let orderNumber = null;
 
 
-/// Main function
+// Main function
 $(function () {
   // When the selected disposition is changed ...
   $('#dispositionSelection').on('change', async function () {
@@ -62,7 +62,7 @@ const issuesDictionary = {
 };
 
 
-/// Function to better format geometry board visual inspection results for display
+// Function to better format geometry board visual inspection results for display
 function formatInspectionResults(results) {
   // First, extract the entire list of possible issue keys (including both 'true' and 'false' ones) from the inspection results
   const allIssueKeys = Object.keys(results.visualInspectionIssues);
@@ -100,7 +100,7 @@ function formatInspectionResults(results) {
 }
 
 
-/// Function to run for a successful search query by disposition
+// Function to run for a successful search query by disposition
 function postSuccess_disposition(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
@@ -184,7 +184,7 @@ const dispositionsDictionary = {
 };
 
 
-/// Function to run for a successful search query by order number
+// Function to run for a successful search query by order number
 function postSuccess_orderNumber(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
@@ -195,6 +195,9 @@ function postSuccess_orderNumber(result) {
     </tr>
     <tr>
       <td colspan = "5">They are grouped by visual inspection disposition, and then ordered by last DB record edit (most recent at the top).
+    </tr>
+    <tr>
+      <td colspan = "5"><b>Please note that only boards which have had a visual inspection performed on them are displayed here - there may be additional boards with this order number that have not had inspections performed.</b>
         <br>
         <hr>
       </td>
@@ -255,7 +258,7 @@ function postSuccess_orderNumber(result) {
 };
 
 
-/// Function to run for a failed search query of either scenario
+// Function to run for a failed search query of either scenario
 function postFail(result, statusCode, statusMsg) {
   // If the query result contains a response message, display it
   // Otherwise, display any status message and error code instead

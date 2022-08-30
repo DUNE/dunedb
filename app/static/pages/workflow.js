@@ -2,7 +2,7 @@
 window.addEventListener('load', populateTypeForm);
 
 
-/// Function to run when the page is loaded
+// Function to run when the page is loaded
 async function populateTypeForm() {
   // Render the workflow type form in the page element called 'typeform'
   let typeForm = await Formio.createForm(document.getElementById('typeform'), workflowTypeForm.schema, { readOnly: true, });

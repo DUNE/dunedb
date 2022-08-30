@@ -2,7 +2,7 @@
 window.addEventListener('load', populateSummarySections);
 
 
-/// Function to run when the page is loaded
+// Function to run when the page is loaded
 async function populateSummarySections() {
   // First, deal with the component section
   // Render the component type form in the page element called 'componenttypeform'

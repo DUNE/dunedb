@@ -1,5 +1,4 @@
 const deepmerge = require('deepmerge');
-const { readFileSync } = require('fs');
 const router = require('express').Router();
 const shortuuid = require('short-uuid')();
 
@@ -9,8 +8,6 @@ const Forms = require('lib/Forms.js');
 const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
 const utils = require('lib/utils.js');
-
-const default_form_schema = JSON.parse(readFileSync('./schemas/default_form_schema.json'));
 
 
 /// View a single component record
@@ -272,14 +269,14 @@ router.get('/componentTypes/:typeFormId/new', permissions.checkPermission('forms
     // Attempt to retrieve any and all existing type forms with this type form ID
     let typeForm = await Forms.retrieve('componentForms', req.params.typeFormId);
 
-    // If there are no existing type forms, set up a new one using the specified type form ID and the default form schema
+    // If there are no existing type forms, set up a new one using the specified type form ID and an initially empty form schema
     // Then save the new type form into the 'componentForms' collection of records
     // Initially, use the form ID as the form name as well - the user will have the option of changing the name later
     if (!typeForm) {
       typeForm = {
         formId: req.params.typeFormId,
         formName: req.params.typeFormId,
-        schema: default_form_schema,
+        schema: { components: [] },
       };
 
       Forms.save(typeForm, 'componentForms', req);

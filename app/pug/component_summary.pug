@@ -14,16 +14,16 @@ block extrascripts
     script(src = '/pages/component_summary.js')
 
 block allbody
-  div.vert-space-x2.hori-space-x1.noprint
+  .vert-space-x2.hori-space-x1.noprint
     a.btn.btn-primary(onclick = 'window.print(); return false;' href = '#print') Print Summary
 
-    div.vert-space-x1
+    .vert-space-x1
       p For best display, please print <b>without headers and footers</b> and <b>with backgrounds</b>.
 
-  div.vert-space-x2
+  .vert-space-x2
     hr
 
-  div.vert-space-x2
+  .vert-space-x2
     .container-fluid
       .row
         .col-md-9
@@ -34,29 +34,29 @@ block allbody
           p Printed: 
             +dateFormat(moment())
 
-          div.vert-space-x1
-          dl
-            dt Current Version:
-            dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
-              +dateFormat(component.insertion.insertDate)
+          .vert-space-x1
+            dl
+              dt Current Version:
+              dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
+                +dateFormat(component.insertion.insertDate)
 
-              if component.insertion.user
-                |  by !{' '} #{component.insertion.user.displayName}
+                if component.insertion.user
+                  |  by !{' '} #{component.insertion.user.displayName}
 
-              div.vert-space-x1.border-success.border.rounded.p-2
-                #componenttypeform
+                .vert-space-x1.border-success.border.rounded.p-2
+                  #componenttypeform
 
         .col-md-3
-          div#qr-code
+          #qr-code
             +qr-panel(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
 
-      div.pagebreak
+      .pagebreak
 
       each action in actions
-        div.section.actionSection
-          div.section-side.formName action
+        .section.actionSection
+          .section-side.formName action
 
-          div.vert-space-x1
+          .vert-space-x1
             dl
               dt Action Type
               dd #{action.typeFormName}
@@ -75,7 +75,7 @@ block allbody
               dd This is version #{action.validity.version} of the action, performed on !{' '}
                 +dateFormat(action.insertion.insertDate)
 
-                div.vert-space-x1.border-success.border.rounded.p-2
+                .vert-space-x1.border-success.border.rounded.p-2
                   .actiontypeform(data-record = action)
 
-        div.pagebreak
+        .pagebreak

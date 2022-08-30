@@ -5,10 +5,10 @@ block vars
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       h2 Type Form Tags
 
-    div.vert-space-x1 
+    .vert-space-x1 
       p Tags may be assigned to component, action or workflow type forms using their respective 'Edit Type Form' pages.
         br
         | Please note that you must have the correct user permission <b>[forms:edit]</b> to add and modify tags.
@@ -16,7 +16,7 @@ block content
 
       hr
 
-    div.vert-space-x2
+    .vert-space-x2
       table.table
         thead
           tr
@@ -55,7 +55,7 @@ block content
 
               if(filteredComponentTypeNames.length > 0)
                 td
-                  div.form-inline 
+                  .form-inline 
                     each typeName, i in filteredComponentTypeNames 
                       | [
                       a(href = `/components/${filteredComponentTypeIds[i]}/list`) #{typeName}
@@ -67,7 +67,7 @@ block content
 
               if(filteredActionTypeNames.length > 0)
                 td
-                  div.form-inline 
+                  .form-inline 
                     each typeName, i in filteredActionTypeNames 
                       | [
                       a(href = `/actions/${filteredActionTypeIds[i]}/list`) #{typeName}
@@ -79,7 +79,7 @@ block content
 
               if(filteredWorkflowTypeNames.length > 0)
                 td
-                  div.form-inline 
+                  .form-inline 
                     each typeName, i in filteredWorkflowTypeNames 
                       | [
                       a(href = `/workflows/${filteredWorkflowTypeIds[i]}/list`) #{typeName}
@@ -89,4 +89,4 @@ block content
               else
                 td (none)
 
-    div.vert-space-x2                
+    .vert-space-x2                

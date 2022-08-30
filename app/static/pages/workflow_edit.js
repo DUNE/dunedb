@@ -1,11 +1,12 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let typeForm;
 
+
 // Run a specified function when the page is loaded
 window.addEventListener('load', onPageLoad);
 
 
-/// Function to run when the page is loaded
+// Function to run when the page is loaded
 async function onPageLoad() {
   // Set up a new type form based on the schema of the workflow type form
   let schema = workflowTypeForm.schema;
@@ -57,7 +58,7 @@ async function onPageLoad() {
 }
 
 
-/// Function to submit the completed 'submission' object to the database
+// Function to submit the completed 'submission' object to the database
 function SubmitData(submission) {
   // Submit the 'submission' object via a jQuery 'ajax' call, with the success and failure functions as defined below
   $.ajax({
@@ -70,7 +71,7 @@ function SubmitData(submission) {
   }).fail(postFail);
 
 
-  /// Function to run for a successful submission
+  // Function to run for a successful submission
   function postSuccess(result) {
     // If the submission result contains an error (even with a successful submission), display it along with the appropriate Formio alert type
     if (result.error) {
@@ -86,7 +87,7 @@ function SubmitData(submission) {
   }
 
 
-  /// Function to run for a failed submission
+  // Function to run for a failed submission
   function postFail(result, statusCode, statusMsg) {
     // If the submission result contains a response message, display it along with the appropriate Formio alert type
     // Otherwise, display any status message and error code instead

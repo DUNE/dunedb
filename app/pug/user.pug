@@ -6,10 +6,10 @@ block vars
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       h2 User Profile
-    
-    div.vert-space-x1
+
+    .vert-space-x1
       .row
         .col
           dl
@@ -45,7 +45,7 @@ block content
         .col-md-3
           img.avatar_image.border(src = userProfile.picture)
 
-    div.vert-space-x1
+    .vert-space-x1
       hr
 
       dt Roles
@@ -58,4 +58,4 @@ block content
         .monospace
           +arrayFormat(user.permissions)
 
-    div.vert-space-x2
+    .vert-space-x2
