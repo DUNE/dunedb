@@ -5,14 +5,12 @@ let partNumber = null;
 
 // Main function
 $(function () {
-  // When the selected location is changed ...
+  // When the selected location is changed, get the newly selected location from the corresponding page element
+  // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    // Get the newly selected location from the corresponding page element
     receptionLocation = $('#locationSelection').val();
 
-    // If the location is valid ...
     if (receptionLocation) {
-      // Perform a jQuery 'ajax' call to make the search via the URL
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -23,14 +21,12 @@ $(function () {
     }
   });
 
-  // When the selected board part number is changed ...
+  // When the selected board part number is changed, get the newly selected part number from the corresponding page element
+  // If the part number is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#partNumberSelection').on('change', async function () {
-    // Get the newly selected part number from the corresponding page element
     partNumber = $('#partNumberSelection').val();
 
-    // If the part number is valid ...
     if (partNumber) {
-      // Perform a jQuery 'ajax' call to make the search via the URL
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -61,8 +57,7 @@ function postSuccess_location(result) {
 
   $('#results').append(resultsStart);
 
-  // If there are no search results, i.e. no geometry boards of any part number received at the specified location, display a message to indicate this
-  // Otherwise, set up a table of the search results, displaying any relevant and useful geometry board information
+  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
     $('#results').append('<b>There are no geometry boards at the specified location</b>');
   } else {
@@ -143,8 +138,7 @@ function postSuccess_partNumber(result) {
 
   $('#results').append(resultsStart);
 
-  // If there are no search results, i.e. no geometry boards of the given part number have been received at any location, display a message to indicate this
-  // Otherwise, set up a table of the search results, displaying any relevant and useful geometry board information
+  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
     $('#results').append('<b>No geometry boards of the given part number have been received at any location</b>');
   } else {
@@ -192,8 +186,7 @@ function postSuccess_partNumber(result) {
 
 // Function to run for a failed search query of either scenario
 function postFail(result, statusCode, statusMsg) {
-  // If the query result contains a response message, display it
-  // Otherwise, display any status message and error code instead
+  // If the query result contains a response message, display it, and if not, display any status message and error code instead
   if (result.responseText) {
     console.log('POSTFAIL: ', result.responseText);
   } else {

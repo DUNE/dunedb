@@ -25,7 +25,7 @@ router.get('/users/list', permissions.checkPermissionJson('users:view'), async f
     // Get a list of all available roles in the Auth0 tenant
     const all_user_roles = await manager.getRoles(req.query);
 
-    // Set up a matrix of which roles belong to which users
+    // Set up a matrix of which users have which roles
     let promises = [];
 
     for (const role of all_user_roles) {
@@ -37,17 +37,14 @@ router.get('/users/list', permissions.checkPermissionJson('users:view'), async f
 
     const role_results = await Promise.all(promises);
 
-    // Collect and collate all information and roles for each user
+    // Collect and collate all information and roles into an object, with one entry per user and each entry keyed by user ID
     let user_data = {};
 
     for (let i = 0; i < all_user_roles.length; i++) {
-      const role = all_user_roles[i];
-      const users_with_role = role_results[i];
-
-      for (const u of users_with_role) {
+      for (const u of role_results[i]) {
         user_data[u.user_id] = user_data[u.user_id] || u;
         user_data[u.user_id].roles = user_data[u.user_id].roles || [];
-        user_data[u.user_id].roles.push(role.name);
+        user_data[u.user_id].roles.push(all_user_roles[i].name);
       }
     }
 

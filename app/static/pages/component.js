@@ -7,15 +7,13 @@ async function populateTypeForm() {
   // Render the component type form in the page element called 'typeform'
   let typeForm = await Formio.createForm(document.getElementById('typeform'), componentTypeForm.schema, { readOnly: true, });
 
-  // Populate the type form with data from the component record
+  // Populate the type form with data from the component record and disable the submission functionality (since the form is only to be displayed, not used)
   typeForm.submission = component;
-
-  // Disable the submission functionality (since the form is only to be displayed, not used)
   typeForm.nosubmit = true;
 };
 
 
-// When the 'Copy UUID' button is pressed, perform the copy to clipboard, and then change the button appearance to confirm
+// When the 'Copy UUID' button is pressed, copy the UUID to the device's clipboard, and change the button's appearance to confirm success
 function CopyUUID(componentUUID) {
   navigator.clipboard.writeText(componentUUID).then(function () {
     document.getElementById('copy_uuid').innerHTML = 'Copied';
@@ -29,7 +27,7 @@ function CopyUUID(componentUUID) {
 };
 
 
-// When the 'Download List of Links' button is pressed, write a list of QR code links to a file and then download the file
+// When the 'Download List of Links' button is pressed, write a list of QR code URLs to a file and then download the file
 function DownloadLinks(shortUuids) {
   let links_text = '';
 

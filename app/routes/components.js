@@ -13,23 +13,21 @@ const utils = require('lib/utils.js');
 /// View a single component record
 router.get('/component/' + utils.uuid_regex, permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Set up a database query that includes the specified component UUID and a version number if also provided
+    // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { componentUuid: req.params.uuid };
 
     if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
 
-    // Retrieve the specified version of the record using the query
-    // Simultaneously, retrieve ALL versions of the same record
+    // Simultaneously retrieve the specified version and all versions of the record, and throw an error if there is no record corresponding to the component UUID
     const [component, componentVersions] = await Promise.all([
       Components.retrieve(query),
       Components.versions(req.params.uuid),
     ]);
 
-    // Throw an error if there is no record corresponding to the query
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
-    // Get other information relating to this component:
-    //  - the component type form, using its type form ID (which is specified in the record)
+    // Retrieve other information relating to this component:
+    //  - the component type form corresponding to the type form ID in the component record (and throw an error if there is no such type form)
     //  - records of all actions that have already been performed on this component
     //  - all currently available action type forms
     const [componentTypeForm, actions, actionTypeForms] = await Promise.all([
@@ -38,10 +36,9 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       Forms.list('actionForms'),
     ]);
 
-    // Throw an error if there is no type form corresponding to the type form ID
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
 
-    // Render the interface page for viewing a component record
+    // Render the interface page
     res.render('component.pug', {
       component,
       componentVersions,
@@ -56,7 +53,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
 });
 
 
-/// Redirect a shortened record page URL (used by a component's QR code) to the full record page URL
+/// Redirect a shortened component record page URL (used by a component's QR code) to the full URL
 router.get('/c/' + utils.short_uuid_regex, async function (req, res, next) {
   try {
     // Reconstruct the full UUID from the shortened UUID
@@ -74,13 +71,12 @@ router.get('/c/' + utils.short_uuid_regex, async function (req, res, next) {
 /// View and print a single component's QR codes
 router.get('/component/' + utils.uuid_regex + '/qrCodes', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified component UUID
+    // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
     const component = await Components.retrieve(req.params.uuid);
 
-    // Throw an error if there is no record corresponding to the component UUID
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
-    // Render the interface page for viewing and printing a component's QR codes
+    // Render the interface page
     res.render('component_qrCodes.pug', { component });
   } catch (err) {
     logger.error(err);
@@ -92,26 +88,29 @@ router.get('/component/' + utils.uuid_regex + '/qrCodes', permissions.checkPermi
 /// View and print a single component's summary
 router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the component record
+    // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
     const component = await Components.retrieve({ componentUuid: req.params.uuid });
 
-    // Get other information relating to this component:
-    //  - the component type form, using its type form ID (which is specified in the record)
+    if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
+
+    // Retrieve other information relating to this component:
+    //  - the component type form corresponding to the type form ID in the component record (and throw an error if there is no such type form)
     //  - records of all actions that have already been performed on this component
     const [componentTypeForm, actions] = await Promise.all([
       Forms.retrieve('componentForms', component.formId),
       Actions.list({ componentUuid: req.params.uuid }),
     ]);
 
-    // Each record returned by the 'Actions.list' function contains only the bare minimum of information about that action
-    // However, we want more than this for the component summary, so for each returned action, retrieve and store the full record
+    if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
+
+    // Each action record contains only the bare minimum of information about that action, so for each one, retrieve and store the full record
     let fullActions = [];
 
     for (let i = 0; i < actions.length; i++) {
       fullActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));
     }
 
-    // Render the interface page for viewing and printing a component's summary
+    // Render the interface page
     res.render('component_summary.pug', {
       component,
       componentTypeForm,
@@ -127,13 +126,12 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
 /// Create a new component of a given type
 router.get('/component/:typeFormId', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
-    // Retrieve the component type form corresponding to the specified type form ID
+    // Retrieve the component type form corresponding to the specified type form ID, and throw an error if there is no such type form
     const componentTypeForm = await Forms.retrieve('componentForms', req.params.typeFormId);
 
-    // Throw an error if there is no type form corresponding to the type form ID
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${req.params.typeFormId}`);
 
-    // Generate a new full UUID
+    // Generate a new full UUID and set the type form ID equal to the provided one
     const componentUuid = Components.newUuid().toString();
     const componentTypeFormId = req.params.typeFormId;
 
@@ -162,21 +160,21 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
 
     // Simultaneously retrieve the following information about the component types:
     //  - a list of all component type forms that currently exist in the 'componentForms' collection
-    //  - a list of component counts by type, for all type forms that already have at least 1 recorded component
+    //  - a list of component counts by type, for all type forms that already have at least one recorded component
     const [componentTypeForms, componentCountsByType] = await Promise.all([
       Forms.list('componentForms'),
       Components.componentCountsByTypes(),
     ]);
 
-    // Merge the lists above, to create a single list of component counts by type that also includes types that do not have recorded components
+    // Merge the lists above, to create a single list of component counts by type that now also includes types that do not have any recorded components
     const componentTypesAndCounts = deepmerge(componentCountsByType, componentTypeForms);
 
-    // Pass any provided workflow ID
+    // Set the workflow ID if one is provided
     let workflowId = '';
 
     if (req.query.workflowId) workflowId = req.query.workflowId;
 
-    // Render the interface page for editing an existing component
+    // Render the interface page
     res.render('component_edit.pug', {
       component: {
         componentUuid,
@@ -198,19 +196,17 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
 /// Edit an existing component
 router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified component UUID
+    // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
     const component = await Components.retrieve(req.params.uuid);
 
-    // Throw an error if there is no record corresponding to the component UUID
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
-    // Retrieve the component type form, using its type form ID (which is specified in the record)
+    // Retrieve the component type form corresponding to the type form ID in the component record, and throw an error if there is no such type form
     const componentTypeForm = await Forms.retrieve('componentForms', component.formId);
 
-    // Throw an error if there is no type form corresponding to the type form ID
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
 
-    // Render the interface page for editing an existing component
+    // Render the interface page
     res.render('component_edit.pug', {
       component,
       componentTypeForm,
@@ -226,30 +222,25 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 });
 
 
-/// Update the most recently logged reception locations and dates of all geometry boards in a board shipment
-/// This is a highly specialised route, to be used ONLY for geometry boards and via a 'Board Reception' type action submission
-/// If other component locations are required to be updated, this can be added to the code in the future
+/// Update the most recently recorded reception location and date of all geometry boards in a geometry board shipment
+/// This is a highly specialised route, to be used ONLY for geometry boards and accessed via submission of a 'Board Reception' action 
 router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the board shipment record corresponding to the specified component UUID
+    // Retrieve the most recent version of the board shipment record corresponding to the specified component UUID, and throw an error if there is no such record
     const shipment = await Components.retrieve(req.params.uuid);
 
-    // Throw an error if there is no record corresponding to the component UUID
-    if (!shipment) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
+    if (!shipment) return res.status(404).send(`There is no geometry board shipment with component UUID = ${req.params.uuid}`);
 
-    // Isolate the part of the record that holds the individual board UUIDs
-    const boardData = shipment.data.boardUuiDs;
-
-    // For each individual board, extract the board UUID and update the reception location and date to those passed from the 'Board Reception' action
+    // For each board in the shipment, extract the board UUID and update the reception location and date to those inherited from the 'Board Reception' action
     // The updating function returns the updated board component record, but we don't actually need to use it
-    for (const board of boardData) {
+    for (const board of shipment.data.boardUuiDs) {
       const updatedBoard = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
     }
 
-    // Depending on if the originating 'Board Reception' action was part of a workflow or not, redirect to an appropriate location
-    // If the action originated from a workflow (i.e. a workflow ID has been provided), go to the page for updating the workflow path step results
-    // On the other hand, if it was a standalone action, go to the page for viewing an action record
-    // Note that these redirections are identical to those performed after submitting ANY action (see 'static/pages/action_specComponent.js')
+    // Depending on if the originating 'Board Reception' action was part of a workflow or not, redirect to an appropriate page
+    // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
+    // On the other hand, if it was a standalone action, go to the page for viewing the action record
+    // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
     if (req.query.workflowId) {
       res.redirect(`/workflow/${req.query.workflowId}/action/${req.query.actionId}`);
     } else {
@@ -265,13 +256,11 @@ router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:
 /// Create a new component type form
 router.get('/componentTypes/:typeFormId/new', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
-    // Check that the specified type form ID is not already being used
-    // Attempt to retrieve any and all existing type forms with this type form ID
+    // Check that the specified type form ID is not already being used - attempt to retrieve any and all existing type forms with this type form ID
     let typeForm = await Forms.retrieve('componentForms', req.params.typeFormId);
 
-    // If there are no existing type forms, set up a new one using the specified type form ID and an initially empty form schema
-    // Then save the new type form into the 'componentForms' collection of records
-    // Initially, use the form ID as the form name as well - the user will have the option of changing the name later
+    // If there are no existing type forms, set up a new one using the specified type form ID and an initially empty form schema, and save it into the 'componentForms' collection
+    // Use the form ID as the form name to start with - the user will have the option of changing the name later via the interface
     if (!typeForm) {
       typeForm = {
         formId: req.params.typeFormId,
@@ -294,7 +283,7 @@ router.get('/componentTypes/:typeFormId/new', permissions.checkPermission('forms
 /// Edit an existing component type form
 router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
-    // Render the interface page for editing an existing component type form
+    // Render the interface page
     res.render('component_editTypeForm.pug', {
       collection: 'componentForms',
       formId: req.params.typeFormId,
@@ -310,14 +299,14 @@ router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('form
 router.get('/componentTypes/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Simultaneously retrieve the following information about the component types:
-    //  - a list of component counts by type, for all type forms
-    //  - a list of maximum component 'typeRecordNumber' by type, for all type forms
+    //  - a list of component counts by type, for all type forms that already have at least one recorded component
+    //  - a list of maximum component 'typeRecordNumber' value by component type, for all type forms
     const [componentCountsByType, maxComponentTRNByType] = await Promise.all([
       Components.componentCountsByTypes(),
       Components.maxComponentTRNByTypes(),
     ]);
 
-    // Render the interface page for listing all component types
+    // Render the interface page
     res.render('component_listTypes.pug', { componentCountsByType, maxComponentTRNByType });
   } catch (err) {
     logger.error(err);
@@ -330,13 +319,13 @@ router.get('/componentTypes/list', permissions.checkPermission('components:view'
 router.get('/components/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Retrieve records of all components across all component types
-    // The first argument ('match_condition') should be 'null' in roder to match to any record
+    // The first argument should be 'null' in order to match to any type form ID
     const components = await Components.list(null, { limit: 100 });
 
     // Retrieve a list of all component type forms that currently exist in the 'componentForms' collection
     const allComponentTypeForms = await Forms.list('componentForms');
 
-    // Render the interface page for showing a generic list of components
+    // Render the interface page
     res.render('component_list.pug', {
       components,
       singleType: false,
@@ -353,12 +342,9 @@ router.get('/components/list', permissions.checkPermission('components:view'), a
 /// List all components of a single component type
 router.get('/components/:typeFormId/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Construct the 'match_condition' to be used for querying the database
-    // For this route, it is that a record's component type form ID must match the specified one
-    const match_condition = { formId: req.params.typeFormId };
-
-    // Retrieve a list of records that match the specified condition
-    const components = await Components.list(match_condition, { limit: 100 });
+    // Retrieve records of all components with the specified component type
+    // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
+    const components = await Components.list({ formId: req.params.typeFormId }, { limit: 100 });
 
     // Retrieve the component type form corresponding to the specified type form ID
     const componentTypeForm = await Forms.retrieve('componentForms', req.params.typeFormId);
@@ -366,7 +352,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
     // Retrieve a list of all component type forms that currently exist in the 'componentForms' collection
     const allComponentTypeForms = await Forms.list('componentForms');
 
-    // Render the interface page for showing a generic list of components
+    // Render the interface page
     res.render('component_list.pug', {
       components,
       singleType: true,

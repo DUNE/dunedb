@@ -1,8 +1,7 @@
 // Set the flag for whether to use the built-in Formio form builder or not
 const builder_wizard = false;
 
-// Set up the 'metaschema' block using Formio form components
-// This block will appear at the top of the 'Edit Action Type Form' page
+// Set up the 'metaschema' block using Formio form components - this block will appear at the top of the page
 const metaschema = {
   components: [{
     type: 'columns',

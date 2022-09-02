@@ -22,19 +22,17 @@ const manager = new ManagementClient({
 /// View the profile of the currently logged in user
 router.get('/user', async function (req, res, next) {
   try {
-    // Retrieve the user's information and roles via the connection to Auth0 and the user ID taken from the session information
+    // Retrieve the user's information and roles via the Auth0 manager and the user ID taken from the session information
     const [userProfile, userRoles] = await Promise.all([
       manager.getUser({ id: req.user.user_id }),
       manager.getUserRoles({ id: req.user.user_id }),
     ]);
 
-    // Throw an error if there is more than one user with the provided ID
+    // Throw an appropriate error if there is not exactly one user with the provided ID
+    if (!userProfile) return res.status(404).send(`There is no user profile with user ID = ${req.user.user_id}`);
     if (Array.isArray(userProfile)) return res.status(404).send(`There is more than one user profile with user ID = ${req.user.user_id}`);
 
-    // Throw an error if there is no user corresponding to the provided ID
-    if (!userProfile) return res.status(404).send(`There is no user profile with user ID = ${req.user.user_id}`);
-
-    // Render the interface page for viewing a user's profile
+    // Render the interface page
     res.render('user.pug', {
       userProfile,
       userRoles,
@@ -49,7 +47,7 @@ router.get('/user', async function (req, res, next) {
 /// List all human users
 router.get('/users/list', permissions.checkPermission('users:view'), async function (req, res, next) {
   try {
-    // Render the interface page for listing all human users
+    // Render the interface page
     res.render('user_list.pug');
   } catch (err) {
     logger.error(err);

@@ -25,7 +25,7 @@ $(function () {
     let tbody = $('#users_table tbody');
     tbody.empty();
 
-    // Sort the list of users alphabetically
+    // Sort the list of users alphabetically by name
     data.sort(sortBy('name'));
 
     // For each user in the list ...

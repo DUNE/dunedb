@@ -4,6 +4,7 @@ const logger = require('../../lib/logger');
 const Search = require('lib/Search.js');
 
 
+/// Search for geometry boards that have been received at a specified location
 router.get('/search/byLocation/:location', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have been received at the specified location
@@ -18,6 +19,7 @@ router.get('/search/byLocation/:location', async function (req, res, next) {
 });
 
 
+/// Search for geometry boards of a specified part number
 router.get('/search/byPartNumber/:partNumber', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by reception location, of the specified part number
@@ -32,6 +34,7 @@ router.get('/search/byPartNumber/:partNumber', async function (req, res, next) {
 });
 
 
+/// Search for geometry boards that have a specified visual inspection disposition
 router.get('/search/byVisualInspection/:disposition', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition
@@ -46,9 +49,10 @@ router.get('/search/byVisualInspection/:disposition', async function (req, res, 
 });
 
 
+/// Search for geometry boards that came from a batch with a specified order number
 router.get('/search/byOrderNumber/:orderNumber', async function (req, res, next) {
   try {
-    // Retrieve a list of geometry boards, grouped by visual inspection disposition, that have the specified order number
+    // Retrieve a list of geometry boards, grouped by visual inspection disposition, that came from a batch with the specified order number
     const boardsByDisposition = await Search.boardsByOrderNumber(req.params.orderNumber);
 
     // Return the list in JSON format

@@ -1,8 +1,7 @@
 // Retrieve the pre-defined Formio components
 const formioComponents = Formio.Components.components;
 
-// Set up the Formio form builder GUI
-// This is the red-outlined box appearing on all 'Edit Type Form' pages that allows the user to build a specific type form
+// Set up the Formio form builder GUI - this is the red-outlined box appearing on all 'Edit Type Form' pages
 const builder_config = {
   noDefaultSubmitButton: true,
 
@@ -137,18 +136,16 @@ const builder_config = {
   }
 };
 
-// Declare a variable to hold the (initially empty) Formio form builder object
+// Declare variables to hold the (initially empty) Formio form builder object and the completed metadata and type forms that will eventually be submitted to the database
 let builder = null;
-
-// Declare variables to hold the completed metadata and type forms that will eventually be submitted to the database
 let metaForm, typeForm;
 
-// Define the URL that the user will be redirected to after type form submission (dependent on which collection is specified)
-let entityRoute = '';
+// Define the URL that the user will be redirected to after type form submission (this is dependent on which collection is specified)
+let redirectURL = '';
 
-if (collection === 'componentForms') entityRoute = 'componentTypes/list';
-if (collection === 'actionForms') entityRoute = 'actionTypes/list';
-if (collection === 'workflowForms') entityRoute = 'workflowTypes/list';
+if (collection === 'componentForms') redirectURL = '/componentTypes/list';
+if (collection === 'actionForms') redirectURL = '/actionTypes/list';
+if (collection === 'workflowForms') redirectURL = '/workflowTypes/list';
 
 
 // Main function
@@ -159,32 +156,30 @@ $(function () {
       // ... then set the to-be-submitted metadata form to be equal to the rendered metadata form
       metaForm = createdForm;
 
-      // When the metadata form is submitted (via clicking on the 'Submit' button), run the appropriate event handler callback function
-      // This is a Formio event handler, NOT a jQuery one (the code syntax '.on' is identical, but the input argument and callback structure are different)
-      metaForm.on('submit', function (submission) {
-        // No additions or changes need to be made to the 'submission' object, so just submit it to the database
-        SubmitData(submission);
-      });
-
       // Attempt to retrieve the current type form record for the specified type form ID in the specified record collection, and throw an error if no such type form exists
       // If the retrieval is successful, continue to the function that deals with changes to the metadata and type forms
       $.get(`/json/${collection}/${formId}`, ChangeRecordData)
         .fail(function () {
           $('#builder').html(`Error - no type form currently exists for type form ID = ${formId}`);
         });
+
+      // When the 'Submit' button is pressed, run the appropriate event handler callback function
+      // This is a Formio event handler, NOT a jQuery one (the code syntax '.on' is identical, but the input argument and callback structure are different)
+      metaForm.on('submit', function (submission) {
+        // No additions or changes need to be made to the 'submission' object, so just submit it to the database
+        SubmitData(submission);
+      });
     });
 });
 
 
 // Function for populating and changing the metadata and type forms
 function ChangeRecordData(record) {
-  // If no type form name is already present (i.e. if creating a new type form), set it to be the same as the type form ID
+  // If no type form name is present (i.e. if creating a new type form), set it to be the same as the type form ID
   if (!record.formName || (record.formName.length == 0)) record.formName = record.formId;
 
-  // Increment the type form's version number
+  // Increment the type form's version number and set the type form's validity start date to be now
   record.validity.version += 1;
-
-  // Set the type form's validity start date to be now
   record.validity.startDate = moment().toISOString();
 
   // Populate the metadata form's submission object with the current form's contents
@@ -208,7 +203,7 @@ function ChangeRecordData(record) {
       if (builder_wizard) builder.setDisplay('wizard').then(BuildTypeForm);
       else BuildTypeForm();
 
-      // Set which actions are to be taken on specific Formio event handlers
+      // Set what should be done on specific Formio event handlers
       builder.instance.on('change', BuildTypeForm);
       builder.instance.on('saveComponent', BuildTypeForm);
       builder.instance.on('editComponent', BuildTypeForm);
@@ -222,16 +217,15 @@ function BuildTypeForm() {
   // Populate the metadata form's submission 'schema' field with the currently defined type form schema
   metaForm.submission.data.schema = builder.instance.schema;
 
-  // Update the 'View JSON Schema' box with the current type form schema
+  // Update the JSON schema box with the current type form schema
   $('#schema').val(JSON.stringify(builder.instance.schema, null, 2));
 
-  // Set up an empty page element called 'typeform'
+  // Make sure that the 'typeform' page element is empty, then render the currently defined type form in the page element ...
   $('#typeform').empty();
 
-  // Render the currently defined type form in the page element ...
   new Formio.createForm(document.getElementById('typeform'), builder.instance.form)
     .then(function (renderedTypeForm) {
-      // ... then set the to-be-submitted type form to be equal to the rendered type form
+      // ... and set the to-be-submitted type form to be equal to the rendered type form
       typeForm = renderedTypeForm;
 
       // When the type form is changed, set the type form data equal to the current submission object of the rendered form
@@ -243,7 +237,7 @@ function BuildTypeForm() {
 };
 
 
-// Automatically update the rendered type form to reflect changes made to the contents of the 'View JSON Schema' text box
+// Automatically update the rendered type form to reflect changes made to the contents of the JSON schema box
 $('#schema').change(function () {
   // Set the builder object's form data equal to the contents of the text box
   builder.form = JSON.parse($('#schema').val());
@@ -253,7 +247,7 @@ $('#schema').change(function () {
 });
 
 
-// When the 'Download Schema' link is clicked, write the schema to a file and then download the file
+// When the 'Download Schema' link is clicked, write the contents of the JSON schema box to a file and then download the file
 function DownloadSchema() {
   const schema = $('#schema').val();
   const schema_obj = window.URL.createObjectURL(new Blob([schema], { type: 'application/JSON' }));
@@ -262,7 +256,7 @@ function DownloadSchema() {
 }
 
 
-// When the 'Copy Schema to Clipboard' button is pressed, perform the copy to clipboard
+// When the 'Copy Schema to Clipboard' button is pressed, copy the contents of the JSON schema box to the device's clipboard
 function CopySchemaToClipboard() {
   navigator.clipboard.writeText($('#schema').val()).then({
   }, function (err) {
@@ -271,7 +265,7 @@ function CopySchemaToClipboard() {
 };
 
 
-// When the 'Paste Schema from Clipboard' button is pressed, perform the paste from clipboard
+// When the 'Paste Schema from Clipboard' button is pressed, paste the current contents of the device's clipboard into the JSON schema box
 // NOTE: by default, this does not work in Firefox (which does not allow the 'readText' function to be called from websites, only via browser extensions)
 // To get around this, please do the following:
 //   - navigate to 'about:config' and 'accept the risk and continue'
@@ -288,9 +282,8 @@ function PasteSchemaFromClipboard() {
 };
 
 
-// Function to submit the completed 'submission' object to the database
+// Function to submit the record to the database
 function SubmitData(submission) {
-  // Submit the 'submission' object via a jQuery 'ajax' call, with the success and failure functions as defined below
   $.ajax({
     contentType: 'application/json',
     method: 'post',
@@ -309,11 +302,11 @@ function SubmitData(submission) {
       metaForm.emit('error', result.error);
     }
 
-    // Display a 'submission complete' message
+    // Display a message to indicate successful submission
     metaForm.emit('submitDone');
 
-    // Redirect the user back to the page for viewing a list of entity type forms
-    window.location.href = `/${entityRoute}`;
+    // Redirect the user back to the page for viewing a list of type forms
+    window.location.href = redirectURL;
   }
 
 
@@ -327,7 +320,7 @@ function SubmitData(submission) {
       metaForm.setAlert('danger', `${statusMsg} (${statusCode})`);
     }
 
-    // Display a 'submission error' message
+    // Display a message to indicate that there was an error in submission
     metaForm.emit('submitError');
   }
 };
