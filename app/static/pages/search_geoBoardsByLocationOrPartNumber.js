@@ -14,7 +14,7 @@ $(function () {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/byLocation/${receptionLocation}`,
+        url: `/json/search/geoBoardsByLocation/${receptionLocation}`,
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
@@ -30,7 +30,7 @@ $(function () {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/byPartNumber/${partNumber}`,
+        url: `/json/search/geoBoardsByPartNumber/${partNumber}`,
         dataType: 'json',
         success: postSuccess_partNumber,
       }).fail(postFail);
