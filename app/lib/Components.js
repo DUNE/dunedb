@@ -436,15 +436,37 @@ async function autoCompleteUuid(inputString, limit = 10) {
     },
   };
 
-  // Query the 'component' records collection for records matching the condition
+  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+  let aggregation_stages = [];
+
+  aggregation_stages.push({ $match: match_condition });
+
+  // Next we want to remove all but the most recent version of each matching record
+  // First sort the matching records by validity ... highest version first
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+
+  // Then group the records by whatever fields will be subsequently used
+  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
+  // Note that this changes some field access via dot notation - i.e. in the returned records, 'component.data.name' becomes 'component.name'
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      typeFormName: { '$first': '$formName' },
+      name: { '$first': '$data.name' },
+      lastEditDate: { '$first': '$validity.startDate' },
+    },
+  });
+
+  // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+
+  // Add aggregation stages for any additionally specified options
+  aggregation_stages.push({ $limit: limit });
+
+  // Query the 'components' records collection using the aggregation stages
   let records = await db.collection('components')
-    .find(match_condition)
-    .project({
-      'componentUuid': 1,
-      'formName': 1,
-      'data.name': 1,
-    })
-    .limit(limit)
+    .aggregate(aggregation_stages)
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability
