@@ -283,16 +283,27 @@ class ComponentUUID extends TextFieldComponent {
     return true;
   }
 
-  // Set the input field to a provided string, and if it is a valid UUID string, automatically redirect to the component information page
-  // Note that the redirect should only be performed if this Formio component is being used on the 'Search for Record by UUID or ID' page ...
-  // ... if not, i.e. if it is part of a type form, then do not redirect if an UUID is inputted
+  // Set the input field to a provided string, and if it is a valid UUID string, do the appropriate action based on the current page URL
+  //   - if on the 'Search for Record by UUID or ID' page, redirect to the component information page
+  //   - if on the 'Search for Workflows by UUID' page, retrieve the relevant workflow information and redirect to the workflow information page
+  //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by UUID' page)
+  //   - in any other situation, i.e. if this Formio component is just part of a type form, then do not redirect anywhere
   setValueAt(index, value, flags) {
     const changed = super.setValueAt.call(this, index, value);
 
     if (this.refs.compUuidInfo && value && value.length === 36) {
       $.get(`/json/component/${value}`);
 
-      if (window.location.pathname === '/search/byUUIDorID') window.location.href = `/component/${value}`;
+      if (window.location.pathname === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
+      if (window.location.pathname === '/search/workflowsByUUID') {
+        $.ajax({
+          contentType: 'application/json',
+          method: 'GET',
+          url: `/json/search/workflowsByUUID/${value}`,
+          dataType: 'json',
+          success: postSuccess,
+        }).fail(postFail);
+      }
     }
 
     return changed;
@@ -307,7 +318,7 @@ ComponentUUID.editForm = function (a, b, c) {
   let dataTab = tabs.components.find(obj => { return obj.key == 'data' });
 
   dataTab.components.splice(dataTab.components.findIndex(obj => { return obj.key = 'multiple' }), 1);
-  
+
   return form;
 }
 

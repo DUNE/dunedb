@@ -2,6 +2,7 @@ const router = require('express').Router();
 
 const logger = require('../../lib/logger');
 const Search = require('lib/Search.js');
+const utils = require('lib/utils.js');
 
 
 /// Search for geometry boards that have been received at a specified location
@@ -57,6 +58,21 @@ router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, r
 
     // Return the list in JSON format
     return res.json(boardsByDisposition);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for workflows that involve a particular component, specified by its UUID
+router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
+  try {
+    // Retrieve a list of workflows that involve the component corresponding to the specified UUID
+    const workflows = await Search.workflowsByUUID(req.params.uuid);
+
+    // Return the list in JSON format
+    return res.json(workflows);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

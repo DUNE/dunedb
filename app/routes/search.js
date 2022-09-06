@@ -29,4 +29,11 @@ router.get('/search/geoBoardsByVisInspectOrOrderNumber', async function (req, re
 });
 
 
+/// Search for workflows that involve a particular component, specified by its UUID
+router.get('/search/workflowsByUUID', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_workflowsByUUID.pug');
+});
+
+
 module.exports = router;

@@ -390,9 +390,44 @@ async function boardsByOrderNumber(orderNumber) {
 }
 
 
+/// Retrieve a list of workflows that involve a particular component, specified by its UUID
+async function workflowsByUUID(componentUUID) {
+  let aggregation_stages = [];
+
+  // Retrieve all workflows (across all types) that have the same component UUID as the specified one
+  // For all workflows, the component UUID will always be set in the 'result' field of the first step in the path
+  aggregation_stages.push({
+    $match: { 'path.0.result': componentUUID }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the  workflow ID (i.e. each group contains all versions of the same workflow), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { workflowId: '$workflowId' },
+      workflowId: { '$first': '$workflowId' },
+      typeFormName: { '$first': '$typeFormName' },
+      status: { '$first': '$status' },
+    },
+  });
+
+  // Query the 'workflows' records collection using the aggregation stages defined above
+  let results = await db.collection('workflows')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of workflows
+  return results;
+}
+
+
 module.exports = {
   boardsByLocation,
   boardsByPartNumber,
   boardsByVisualInspection,
   boardsByOrderNumber,
+  workflowsByUUID,
 }
