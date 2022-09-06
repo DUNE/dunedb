@@ -10,33 +10,32 @@ block extrascripts
 
 block content
   .container-fluid
-    div.vert-space-x2
-      a(href = '#', data-toggle = 'modal' data-target = '#NewTypeModal').btn.btn-warning
+    .vert-space-x2
+      a.btn.btn-warning(href = '#', data-toggle = 'modal' data-target = '#NewTypeModal')
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Create New Component Type Form
 
-      #NewTypeModal.modal.fade(tabindex = '-1' role = 'dialog' aria-labelledby = 'NewTypeLabel' aria-hidden = 'true')
+      .modal.fade#NewTypeModal(tabindex = '-1' role = 'dialog' aria-labelledby = 'NewTypeLabel' aria-hidden = 'true')
         .modal-dialog(role = 'document')
           .modal-content
             .modal-header
-              h5#NewTypeLabel.modal-title Create New Component Type Form
+              h5.modal-title#NewTypeLabel Create New Component Type Form
               button.close(type = 'button', data-dismiss = 'modal', aria-label = 'Close')
                 span(aria-hidden = 'true') &times;
             .modal-body
-              div
-                | Enter the new component type form ID.
+              p Enter the new component type form ID.
                 br
                 | NOTE: this ID must have only underscores and alphanumerics (no spaces, hyphens or special characters).  A human-readable name can be set on the next page.
-              div.vert-space-x1
+              .vert-space-x1
                 input.form-control#formId(type = 'text')
             .modal-footer
               button.btn.btn-danger(type = 'button', data-dismiss = 'modal') Close
               button.btn.btn-success#NewTypeButton(type = 'button') Create
 
-    div.vert-space-x2
+    .vert-space-x2
       h2 Available Component Types
 
-    div.vert-space-x1
+    .vert-space-x1
       table.table
         thead
           tr
@@ -69,19 +68,19 @@ block content
                   td 0
 
                 td
-                  a(href = `/component/${typeFormId}`).btn-sm.btn-primary
+                  a.btn-sm.btn-primary(href = `/component/${typeFormId}`)
                     img.small-icon(src = '/images/run_icon.svg')
                     | &nbsp; Create New Component of this Type
                 td
-                  a(href = `/componentTypes/${typeFormId}/edit`).btn-sm.btn-warning
+                  a.btn-sm.btn-warning(href = `/componentTypes/${typeFormId}/edit`)
                     img.small-icon(src = '/images/edit_icon.svg')
                     | &nbsp; Edit Component Type Form
 
     if(permissions.userHas(user, 'forms:edit'))
-      div.vert-space-x2
+      .vert-space-x2
         h2 Trashed Component Types
 
-      div.vert-space-x1
+      .vert-space-x1
         table.table
           thead
             tr
@@ -115,8 +114,8 @@ block content
 
                   td
                   td
-                    a(href = `/componentTypes/${typeFormId}/edit`).btn-sm.btn-warning
+                    a.btn-sm.btn-warning(href = `/componentTypes/${typeFormId}/edit`)
                       img.small-icon(src = '/images/edit_icon.svg')
                       | &nbsp; Edit Component Type Form
 
-    div.vert-space-x2
+    .vert-space-x2

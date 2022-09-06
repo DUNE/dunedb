@@ -23,7 +23,6 @@ head
   link(rel = 'preload', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap', as = 'style')
   link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap')
 
-  //- Perform the 'jquery' early, since it's used in lots of scripts, possibly defined in body
   script(src = '/dist/jquery/jquery.min.js')
 
 mixin navlink
@@ -34,16 +33,12 @@ mixin navlink
     a.nav-link&attributes(attributes)
       block
 
-block layoutDefinitions
-//-  sidebar = 'inactive'    // Comment this back in to disable the sidebar
-//-                          // Alternatively, pass {sidebar: inactive} to pug
-
 body(class = `deployment-${NODE_ENV}`)
   block allbody
     block navbar
       nav.navbar.navbar-expand-sm.navbar-dark.bg-dark.p-0
 
-        button#sidebarCollapse.btn-btn-info(type = 'button')
+        button.btn-btn-info#sidebarCollapse(type = 'button')
           i.fa.fa-align-left
 
         nav.navbar-brand.pl-2#navbar-brand(style = 'width: 100%')
@@ -63,7 +58,7 @@ body(class = `deployment-${NODE_ENV}`)
 
     .wrapper
       block sidebar
-        nav#sidebar.transition.bg-light(class = sidebar)  
+        nav.transition.bg-light#sidebar(class = sidebar)  
 
           ul.nav.flex-column
             li.nav-item
@@ -101,7 +96,7 @@ body(class = `deployment-${NODE_ENV}`)
                   +navlink(href = '/workflowTypes/list')
                     |      Workflow Types
 
-            //- [KRISH] Leave this sidebar item commented out for now ... will enable it once we know more about type form tags usage
+            //- Leave this sidebar item commented out for now ... will re-enable it once we know more about type form tags usage
             //- li.nav-item
             //-   +navlink(href = '/tags')
             //-     i.fa.fa-list-ol(aria-hidden = 'true')
@@ -148,7 +143,7 @@ body(class = `deployment-${NODE_ENV}`)
 
 
 //- Bootstrap core JavaScript
-//- ==================================================
+//- ==========================================================
 //- Placed at the end of the document so the pages load faster
 
 script(src = '/pages/dashboard.js')
@@ -166,15 +161,15 @@ script(src = '/dist/moment/moment.min.js')
 script(src = '/dist/ekko-lightbox/ekko-lightbox.min.js')
 
 script(src = '/dist/jsqr/jsQR.js') 
-script(src = '/ext/qrcodegen.js')
+script(src = '/js/qrcodegen.js')
 
 script(src = '/js/jsonpath.min.js')
 script(src = '/dist/fabric/fabric.min.js')
 script(src = '/dist/fabric-history/index.min.js')
 script(type = 'text/javascript', src = '/dist/jsonurl/jsonurl.min.js')
 
-script(type = 'text/javascript', src = '/ext/qrcodegen.js')
-script(type = 'text/javascript', src = '/js/generate_qr_code.js')
+script(type = 'text/javascript', src = '/js/qrcodegen.js')
+script(type = 'text/javascript', src = '/js/DrawQRCode.js')
 script(type = 'text/javascript', src = '/dist/short-uuid/short-uuid.min.js')
 script(src = '/formio/ComponentGeoTag.js')
 script(src = '/formio/ComponentUUID.js')
@@ -191,7 +186,6 @@ script(src = '/formio/ImageAnnotator.js')
 script(src = '/formio/AnnotatedImage.js')
 script(src = '/formio/BetterDataGrid.js')
 
-script(src = '/js/uuid_autocomplete.js')
 script(src = '/js/ABoundObject.js')
 script(src = '/js/Pad.js')
 script(src = '/js/Histogram.js')

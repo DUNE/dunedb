@@ -3,16 +3,14 @@ let disposition = null;
 let orderNumber = null;
 
 
-/// Main function
+// Main function
 $(function () {
-  // When the selected disposition is changed ...
+  // When the selected disposition is changed, get the newly selected disposition from the corresponding page element
+  // If the disposition is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#dispositionSelection').on('change', async function () {
-    // Get the newly selected disposition from the corresponding page element
     disposition = $('#dispositionSelection').val();
-
-    // If the disposition is valid ...
-    if (disposition) {
-      // Perform a jQuery 'ajax' call to make the search via the URL
+   
+    if (disposition) { 
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -23,15 +21,13 @@ $(function () {
     }
   });
 
-  // When the selected order number is changed and the 'Enter' key is pressed ...
+  // When the selected order number is changed and the 'Enter' key is pressed, get the newly selected order number from the corresponding page element
+  // If the order number is valid, perform the appropriate jQuery 'ajax' call to make the search
   document.getElementById('orderNumberSelection').addEventListener('keyup', function (e) {
-    if (e.key === 'Enter') {
-      // Get the newly selected order number from the corresponding page element
+    if (e.key === 'Enter') { 
       orderNumber = $('#orderNumberSelection').val();
 
-      // If the order number is valid ...
       if (orderNumber) {
-        // Perform a jQuery 'ajax' call to make the search via the URL
         $.ajax({
           contentType: 'application/json',
           method: 'GET',
@@ -45,7 +41,7 @@ $(function () {
 });
 
 
-// Set up a dictionary containing the inspection issue [key, string] pairs (taken from the 'Visual Inspection' action type form)
+// Set up a dictionary containing the visual inspection issue [key, string] pairs (taken directly from the 'Visual Inspection' action type form)
 const issuesDictionary = {
   packagingDamaged: 'Packaging damaged',
   scratches: 'Scratches',
@@ -62,7 +58,7 @@ const issuesDictionary = {
 };
 
 
-/// Function to better format geometry board visual inspection results for display
+// Function to better format geometry board visual inspection results for display
 function formatInspectionResults(results) {
   // First, extract the entire list of possible issue keys (including both 'true' and 'false' ones) from the inspection results
   const allIssueKeys = Object.keys(results.visualInspectionIssues);
@@ -70,7 +66,7 @@ function formatInspectionResults(results) {
   // Filter the list to only include those keys which are 'true'
   let issueKeys = allIssueKeys.filter(function (issueKey) { return results.visualInspectionIssues[issueKey] });
 
-  // Create a list of corresponding issue strings to the 'true' keys (using the [key, string] dictionary define above)
+  // Create a list of corresponding issue strings to the 'true' keys (using the issues dictionary defined above)
   let issueStrings = [];
 
   for (const issueKey of issueKeys) {
@@ -90,7 +86,7 @@ function formatInspectionResults(results) {
     fullIssuesString += `[${issue}]  `;
   }
 
-  // Create and return an overall object of the now-formatted results
+  // Create and return an overall object of the formatted results
   const formattedResults = {
     issues: fullIssuesString,
     repairsDescription: results.descriptionOfAnyRepairs,
@@ -100,7 +96,7 @@ function formatInspectionResults(results) {
 }
 
 
-/// Function to run for a successful search query by disposition
+// Function to run for a successful search query by disposition
 function postSuccess_disposition(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
@@ -118,8 +114,7 @@ function postSuccess_disposition(result) {
 
   $('#results').append(resultsStart);
 
-  // If there are no search results, i.e. no geometry boards of any part number with the specified disposition, display a message to indicate this
-  // Otherwise, set up a table of the search results, displaying any relevant and useful geometry board information
+  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
     $('#results').append('<b>There are no geometry boards with the specified disposition</b>');
   } else {
@@ -173,7 +168,7 @@ function postSuccess_disposition(result) {
 };
 
 
-// Set up a dictionary containing the visual inspection disposition [key, string] pairs (taken from the 'Visual Inspection' action type form)
+// Set up a dictionary containing the visual inspection disposition [key, string] pairs (taken directly from the 'Visual Inspection' action type form)
 const dispositionsDictionary = {
   useAsIs: 'Use As Is',
   repair: 'Repair',
@@ -184,7 +179,7 @@ const dispositionsDictionary = {
 };
 
 
-/// Function to run for a successful search query by order number
+// Function to run for a successful search query by order number
 function postSuccess_orderNumber(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
@@ -195,6 +190,9 @@ function postSuccess_orderNumber(result) {
     </tr>
     <tr>
       <td colspan = "5">They are grouped by visual inspection disposition, and then ordered by last DB record edit (most recent at the top).
+    </tr>
+    <tr>
+      <td colspan = "5"><b>Please note that only boards which have had a visual inspection performed on them are displayed here - there may be additional boards with this order number that have not had inspections performed.</b>
         <br>
         <hr>
       </td>
@@ -202,8 +200,7 @@ function postSuccess_orderNumber(result) {
 
   $('#results').append(resultsStart);
 
-  // If there are no search results, i.e. no geometry boards of any disposition with the specified order number, display a message to indicate this
-  // Otherwise, set up a table of the search results, displaying any relevant and useful geometry board information
+  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
     $('#results').append('<b>There are no geometry boards with the specified order number and at least one recorded visual inspection</b>');
   } else {
@@ -255,10 +252,9 @@ function postSuccess_orderNumber(result) {
 };
 
 
-/// Function to run for a failed search query of either scenario
+// Function to run for a failed search query of either scenario
 function postFail(result, statusCode, statusMsg) {
-  // If the query result contains a response message, display it
-  // Otherwise, display any status message and error code instead
+  // If the query result contains a response message, display it, and if not, display any status message and error code instead
   if (result.responseText) {
     console.log('POSTFAIL: ', result.responseText);
   } else {

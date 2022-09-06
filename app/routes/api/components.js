@@ -11,10 +11,11 @@ const utils = require('lib/utils.js');
 router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID
+    // If there is no record corresponding to the UUID, this returns 'null'
     const component = await Components.retrieve(req.params.uuid);
 
     // Return the record in JSON format
-    return res.json(component, null, 2);
+    return res.json(component);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -28,9 +29,11 @@ router.post('/component', permissions.checkPermissionJson('components:edit'), as
     // Display a logger message indicating that a record is being saved via the '/component' route
     logger.info(req.body, 'Submission to /component');
 
-    // Save the record
+    // Save the record ... if successful, this returns the complete component record
     const component = await Components.save(req.body, req);
-    res.json(component.componentUuid);
+
+    // Return the record's component UUID
+    return res.json(component.componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -41,14 +44,11 @@ router.post('/component', permissions.checkPermissionJson('components:edit'), as
 /// Generate a new component UUID
 router.get('/newComponentUUID', async function (req, res, next) {
   try {
-    // Display a logger message indicating that a new UUID is being requested via the '/newComponentUUID' route
-    logger.info(req.body, 'Request for new UUID from /newComponentUUID');
-
     // Create a new full UUID
     const componentUuid = Components.newUuid().toString();
 
-    // Set the route response to be the UUID
-    res.json(componentUuid);
+    // Return the newly generated UUID
+    return res.json(componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -62,8 +62,8 @@ router.get('/convertShortUUID/' + utils.short_uuid_regex, async function (req, r
     // Reconstruct the full UUID from the shortened UUID
     const componentUuid = shortuuid.toUUID(req.params.shortuuid);
 
-    // Set the route response to be the full UUID
-    res.json(componentUuid);
+    // Return the full UUID
+    return res.json(componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

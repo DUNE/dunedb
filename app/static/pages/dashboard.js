@@ -1,4 +1,4 @@
-// Set up sidebar animations before page load, since waiting creates an annoyingly slow flicker
+// Set up sidebar animations before the page loads, since waiting for page loading creates an annoyingly slow flicker
 if (localStorage.getItem('sidebar') === '0') {
   document.getElementById('body').classList.add('disable-animations');
   document.getElementById('sidebar').classList.add('inactive');
@@ -23,9 +23,4 @@ $(function () {
       localStorage.setItem('sidebar', state);
     });
   }
-
-  $(document).on('click', '[data-toggle = "lightbox"]', function (e) {
-    e.preventDefault();
-    $(this).ekkoLightbox({ alwaysShowClose: true });
-  });
 });

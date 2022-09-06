@@ -5,17 +5,17 @@ block vars
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       h2 Search Page Descriptions
 
-    div.vert-space-x1
+    .vert-space-x1
       p The following dedicated search pages can be accessed from this page, as well as through the links under the <b>Search</b> section of the sidebar.
         br
         | Users do not need any particular permission to perform a search, but they will require the appropriate permission(s) to access the various component, action and workflow information pages linked from the search results.
 
       hr
 
-    div.vert-space-x2
+    .vert-space-x2
       h4
         a(href = '/search/byUUIDOrID') By UUID / ID
 
@@ -30,7 +30,7 @@ block content
 
       hr
 
-    div.vert-space-x2
+    .vert-space-x2
       h4
         a(href = '/search/byLocationOrPartNumber') By Location / Part Number
 
@@ -45,7 +45,7 @@ block content
 
       hr
 
-    div.vert-space-x2
+    .vert-space-x2
       h4
         a(href = '/search/byVisInspectOrOrderNumber') By Visual Inspection / Order Number
 
@@ -53,7 +53,7 @@ block content
         ul
           li <b>either</b> all geometry boards of any batch order number that have a <u>specified visual inspection disposition</u>
           li <b>or</b> all geometry boards of a <u>specified batch order number</u> that have any visual inspection disposition
-      
+
       p Users may select one of the available dispositions from the list, or manually enter an order number, and a summary of information about each found board will be displayed in the search results panel below the selection boxes.
 
-      p Please note that a geometry board will only be displayed in either scenario if a <b>Visual Inspection</b> action has been performed on it.
+      p Please note that, in either scenario, <b>a geometry board will only be displayed in the search results if a <u>Visual Inspection</u> action has been performed on it</b>.

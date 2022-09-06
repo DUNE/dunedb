@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const router = require('express').Router();
 
 const Forms = require('lib/Forms.js');
@@ -6,31 +5,26 @@ const logger = require('../lib/logger');
 const permissions = require('lib/permissions.js');
 const Workflows = require('lib/Workflows.js');
 
-const default_form_schema = JSON.parse(readFileSync('./schemas/default_form_schema.json'));
-
 
 /// View a single workflow record
 router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission('workflows:view'), async function (req, res, next) {
   try {
-    // Set up a database query that includes the specified workflow ID and a version number if also provided
+    // Set up a query object consisting of the specified workflow ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { workflowId: req.params.workflowId };
 
     if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
 
-    // Retrieve the specified version of the record using the query
-    // Simultaneously, retrieve ALL versions of the same record
+    // Simultaneously retrieve the specified version and all versions of the record, and throw an error if there is no record corresponding to the workflow ID
     const [workflow, workflowVersions] = await Promise.all([
       Workflows.retrieve(query),
       Workflows.versions(req.params.workflowId),
     ]);
 
-    // Throw an error if there is no record corresponding to the query
     if (!workflow) return res.status(404).render(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
 
-    // Retrieve the workflow type form, using its type form ID (which is specified in the record)
+    // Retrieve the workflow type form corresponding to the type form ID in the workflow record, and throw an error if there is no such type form
     const workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);
 
-    // Throw an error if there is no type form corresponding to the type form ID
     if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
 
     // Simultaneously retrieve lists of all component and action type forms that currently exist in their respective collections
@@ -39,7 +33,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
       Forms.list('actionForms'),
     ]);
 
-    // Render the interface page for viewing a workflow record
+    // Render the interface page
     res.render('workflow.pug', {
       workflow,
       workflowVersions,
@@ -54,16 +48,15 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
 });
 
 
-/// Create a new workflow of a given type
+/// Create a new workflow
 router.get('/workflow/:typeFormId', permissions.checkPermission("workflows:edit"), async function (req, res, next) {
   try {
-    // Retrieve the workflow type form corresponding to the specified type form ID
+    // Retrieve the workflow type form corresponding to the specified type form ID, and throw an error if there is no such type form
     const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
 
-    // Throw an error if there is no type form corresponding to the type form ID
     if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${req.params.typeFormId}`);
 
-    // Render the interface page for editing an existing workflow
+    // Render the interface page
     res.render('workflow_edit.pug', {
       workflowTypeForm,
       newWorkflow: true,
@@ -78,19 +71,17 @@ router.get('/workflow/:typeFormId', permissions.checkPermission("workflows:edit"
 /// Edit an existing workflow
 router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermission("workflows:edit"), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified workflow ID
+    // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
     const workflow = await Workflows.retrieve(req.params.workflowId);
 
-    // Throw an error if there is no record corresponding to the workflow ID
     if (!workflow) return res.status(404).send(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
 
-    // Retrieve the workflow type form, using its type form ID (which is specified in the record)
+    // Retrieve the workflow type form corresponding to the type form ID in the workflow record, and throw an error if there is no such type form
     const workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);
 
-    // Throw an error if there is no type form corresponding to the type form ID
     if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
 
-    // Render the interface page for editing an existing workflow
+    // Render the interface page
     res.render('workflow_edit.pug', {
       workflow,
       workflowTypeForm,
@@ -106,10 +97,9 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
 /// Update a single step result in the path of an existing workflow
 router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permissions.checkPermission("workflows:edit"), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified workflow ID
+    // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
     const workflow = await Workflows.retrieve(req.params.workflowId);
 
-    // Throw an error if there is no record corresponding to the workflow ID
     if (!workflow) return res.status(404).send(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
 
     // Retrieve the index of the first incomplete step in the workflow path (this is the step whose result will be updated)
@@ -124,21 +114,19 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permi
 
     if (stepIndex === -99) return res.status(404).send(`There are no more steps to perform in the path of this workflow (ID = ${req.params.workflowId})`);
 
-    // Check if this is the final step in the workflow, i.e. it will be complete after this step's result is saved
+    // Check if this is the final step in the workflow, i.e. if the workflow is complete after this step's result is saved
     let workflowStatus = 'In Progress';
 
     if ((stepIndex + 1) === workflow.path.length) workflowStatus = 'Complete';
 
-    // Get the specified step type from the URL
+    // Get the specified step type from the URL, and throw an error if it is not valid
     const stepType = req.params.stepType;
 
-    // Throw an error if the step type is not valid
     if ((!(stepType === 'component')) && (!(stepType === 'action'))) return res.status(404).send(`The provided step type (${stepType}) is not valid (must be 'component' or 'action')`);
 
-    // Get the specified step result from the URL
+    // Get the specified step result from the URL, and throw an error if the step result does not match the corresponding regular expression
     const stepResult = req.params.stepResult;
 
-    // Throw an error if the step result does not match the required regular expression for the given step type
     const matches_componentUuid = stepResult.match(/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/g);
     const matchedComponent = (stepType === 'component') && matches_componentUuid;
 
@@ -163,18 +151,16 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permi
 /// Create a new workflow type form
 router.get('/workflowTypes/:typeFormId/new', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
-    // Check that the specified type form ID is not already being used
-    // Attempt to retrieve any and all existing type forms with this type form ID
+    // Check that the specified type form ID is not already being used - attempt to retrieve any and all existing type forms with this type form ID
     let typeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
 
-    // If there are no existing type forms, set up a new one using the specified type form ID and the default form schema
-    // Then save the new type form into the 'actionForms' collection of records
-    // Initially, use the form ID as the form name as well - the user will have the option of changing the name later
+    // If there are no existing type forms, set up a new one using the specified type form ID and an initially empty form schema, and save it into the 'workflowForms' collection of records
+    // Use the form ID as the form name to start with - the user will have the option of changing the name later via the interface
     if (!typeForm) {
       typeForm = {
         formId: req.params.typeFormId,
         formName: req.params.typeFormId,
-        schema: default_form_schema,
+        schema: { components: [] },
       };
 
       Forms.save(typeForm, 'workflowForms', req);
@@ -192,7 +178,7 @@ router.get('/workflowTypes/:typeFormId/new', permissions.checkPermission('forms:
 /// Edit an existing workflow type form
 router.get('/workflowTypes/:typeFormId/edit', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
-    // Render the interface page for editing an existing workflow type form
+    // Render the interface page
     res.render('workflow_editTypeForm.pug', {
       collection: 'workflowForms',
       formId: req.params.typeFormId,
@@ -210,7 +196,7 @@ router.get('/workflowTypes/list', permissions.checkPermission('workflows:view'),
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
     const workflowTypeForms = await Forms.list('workflowForms');
 
-    // Render the interface page for listing all workflow types
+    // Render the interface page
     res.render('workflow_listTypes.pug', { workflowTypeForms });
   } catch (err) {
     logger.error(err);
@@ -224,13 +210,13 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
   try {
 
     // Retrieve records of all workflows across all workflow types
-    // The first argument ('match_condition') should be 'null' in order to match to any record
+    // The first argument should be 'null' in order to match to any type form ID
     const workflows = await Workflows.list(null, { limit: 100 });
 
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
     const allWorkflowTypeForms = await Forms.list('workflowForms');
 
-    // Render the interface page for showing a generic list of workflows
+    // Render the interface page
     res.render('workflow_list.pug', {
       workflows,
       singleType: false,
@@ -247,12 +233,9 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
 /// List all workflows of a single workflow type
 router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows:view'), async function (req, res, next) {
   try {
-    // Construct the 'match_condition' to be used for querying the database
-    // For this route, it is that a record's workflow type form ID must match the specified one
-    const match_condition = { typeFormId: req.params.typeFormId };
-
-    // Retrieve a list of records that match the specified condition
-    const workflows = await Workflows.list(match_condition, { limit: 100 });
+    // Retrieve records of all workflows with the specified workflow type
+    // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
+    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, { limit: 100 });
 
     // Retrieve the workflow type form corresponding to the specified type form ID
     const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
@@ -260,7 +243,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
     const allWorkflowTypeForms = await Forms.list('workflowForms');
 
-    // Render the interface page for showing a generic list of workflows
+    // Render the interface page
     res.render('workflow_list.pug', {
       workflows,
       singleType: true,

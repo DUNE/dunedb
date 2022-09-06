@@ -6,17 +6,17 @@ block vars
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       if(singleType && componentTypeForm.tags && !componentTypeForm.tags.includes('Trash'))
-        a(href = `/component/${componentTypeForm.formId}`).btn.btn-primary
+        a.btn.btn-primary(href = `/component/${componentTypeForm.formId}`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Create a New Component of this Type
 
-        div.vert-space-x2
+        .vert-space-x2
 
       h2 #{title}
 
-    div.vert-space-x1
+    .vert-space-x1
       table.table
         thead
           tr
@@ -41,8 +41,8 @@ block content
                 td
                   +dateFormat(component.lastEditDate)
                 td
-                  a(href = `/json/component/${uuid}`, target = '_blank').btn-sm.btn-secondary
+                  a.btn-sm.btn-secondary(href = `/json/component/${uuid}`, target = '_blank')
                     img.small-icon(src = '/images/checklist_icon.svg')
                     | &nbsp; JSON
 
-    div.vert-space-x2
+    .vert-space-x2

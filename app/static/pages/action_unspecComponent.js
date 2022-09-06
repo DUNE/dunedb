@@ -2,7 +2,7 @@
 window.addEventListener('load', renderUUIDForm);
 
 
-/// Function to run when the page is loaded
+// Function to run when the page is loaded
 async function renderUUIDForm() {
   // Create a Formio form consisting of a component UUID box
   const schema = {

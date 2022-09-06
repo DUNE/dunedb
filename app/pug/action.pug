@@ -16,10 +16,10 @@ block extrascripts
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       h2 View Action Record
 
-    div.vert-space-x1
+    .vert-space-x1
       dl
         dt Action Type
         dd #{action.typeFormName}
@@ -58,16 +58,16 @@ block content
             |  by !{' '}
             a(href = `mailto:${user_email(action.insertion.user)}`) #{action.insertion.user.displayName}
 
-          div.vert-space-x1.border-success.border.rounded.p-2
+          .vert-space-x1.border-success.border.rounded.p-2
             #typeform
 
-    div.vert-space-x1
+    .vert-space-x1
       .panel.panel-default
       .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
         | All Versions: 
         i.chevron.fa.fa-fw 
 
-      div#versionsBox.collapse
+      .collapse#versionsBox
         ul
           each v in actionVersions
             li 
@@ -79,22 +79,22 @@ block content
                 |  by !{' '}
                 a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-    div.vert-space-x2.form-inline
-      a(href = `/action/${action.actionId}/edit`).btn.btn-warning
+    .vert-space-x2.form-inline
+      a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Edit Action
 
-      div.hori-space-x2
-        a(href = `/json/action/${action.actionId}`, target = '_blank').btn.btn-secondary
+      .hori-space-x2
+        a.btn.btn-secondary(href = `/json/action/${action.actionId}`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View JSON Record
 
-    div.vert-space-x2
+    .vert-space-x2
       hr
 
-    div.vert-space-x2
-      a(href = `/action/${action.typeFormId}`).btn.btn-primary
+    .vert-space-x2
+      a.btn.btn-primary(href = `/action/${action.typeFormId}`)
         img.small-icon(src = '/images/run_icon.svg')
         | &nbsp; Perform a New Action of this Type
 
-    div.vert-space-x2
+    .vert-space-x2
