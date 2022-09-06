@@ -6,11 +6,9 @@ const { db } = require('./db');
 
 /// Retrieve a list of geometry boards that have been received at a specified location across all part numbers
 async function boardsByLocation(location) {
-  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
 
-  // First, we must retrieve a list of all boards that have the same reception location as the specified one
-  // So set up a match stage covering both the type form and the reception location
+  // Retrieve all 'Geometry Board' records that have the same reception location as the specified one
   aggregation_stages.push({
     $match: {
       'formId': 'GeometryBoard',
@@ -18,12 +16,11 @@ async function boardsByLocation(location) {
     }
   });
 
-  // Next we want to remove all but the most recent version of each matching record
+  // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-  // Then group the records by whatever fields will be subsequently used
-  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -35,9 +32,8 @@ async function boardsByLocation(location) {
     },
   });
 
-  // We want to display the matched boards grouped by the board part numbers
-  // So set up second group stage for this (i.e. the '$group' operator's '_id' field is now the board's part number field)
-  // Then add the remaining fields to be preserved for each board in each group
+  // We want to actually display the matched boards grouped by the board part numbers
+  // So group the records according to the board part number and corresponding string, and then add the fields to be returned for each board in each group
   aggregation_stages.push({
     $group: {
       _id: {
@@ -50,13 +46,12 @@ async function boardsByLocation(location) {
     }
   });
 
-  // Query the 'components' records collection using the aggregation stages
+  // Query the 'components' records collection using the aggregation stages defined above
   let results = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // The query results are a bit of a mess at this point ... unnecessarily nested, board UUIDs in binary format, etc.
-  // Clean them up to make it easier to display them on the search results page
+  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
   let cleanedResults = [];
 
   for (const boardGroup of results) {
@@ -84,11 +79,9 @@ async function boardsByLocation(location) {
 
 /// Retrieve a list of geometry boards of a specified part number across all board reception locations
 async function boardsByPartNumber(partNumber) {
-  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
 
-  // First, we must retrieve a list of all boards that have the same part number as the specified one
-  // So set up a match stage covering both the type form and the part number
+  // Retrieve all 'Geometry Board' records that have the same part number as the specified one
   aggregation_stages.push({
     $match: {
       'formId': 'GeometryBoard',
@@ -96,12 +89,11 @@ async function boardsByPartNumber(partNumber) {
     }
   });
 
-  // Next we want to remove all but the most recent version of each matching record
+  // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-  // Then group the records by whatever fields will be subsequently used
-  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -112,9 +104,8 @@ async function boardsByPartNumber(partNumber) {
     },
   });
 
-  // We want to display the matched boards grouped by the reception location
-  // So set up second group stage for this (i.e. the '$group' operator's '_id' field is now the board's reception location field)
-  // Then add the remaining fields to be preserved for each board in each group
+  // We want to actually display the matched boards grouped by the reception location
+  // So group the records according to the reception location, and then add the fields to be returned for each board in each group
   aggregation_stages.push({
     $group: {
       _id: { receptionLocation: '$receptionLocation' },
@@ -124,13 +115,12 @@ async function boardsByPartNumber(partNumber) {
     }
   });
 
-  // Query the 'components' records collection using the aggregation stages
+  // Query the 'components' records collection using the aggregation stages defined above
   let results = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // The query results are a bit of a mess at this point ... unnecessarily nested, board UUIDs in binary format, etc.
-  // Clean them up to make it easier to display them on the search results page
+  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
   let cleanedResults = [];
 
   for (const boardGroup of results) {
@@ -157,11 +147,9 @@ async function boardsByPartNumber(partNumber) {
 
 /// Retrieve a list of geometry boards that have a specified visual inspection disposition across all order numbers
 async function boardsByVisualInspection(disposition) {
-  // Set up the 'aggregation stages' of the 'actions' database query - these are the query steps in sequence
   let action_aggregation_stages = [];
 
-  // First, we must retrieve a list of all 'Visual Inspection' action records that have the same disposition result as the specified one
-  // So set up a match stage covering both the type form and the disposition
+  // Retrieve all 'Visual Inspection' action records that have the same disposition result as the specified one
   action_aggregation_stages.push({
     $match: {
       'typeFormId': 'BoardVisualInspection',
@@ -169,12 +157,11 @@ async function boardsByVisualInspection(disposition) {
     }
   });
 
-  // Next we want to remove all but the most recent version of each matching record
+  // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-  // Then group the records by whatever fields will be subsequently used
-  // For example, if the 'actionId' of each returned record is to be used later on, it must be one of the groups defined here
   action_aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -184,7 +171,7 @@ async function boardsByVisualInspection(disposition) {
     },
   });
 
-  // Query the 'actions' records collection using the aggregation stages
+  // Query the 'actions' records collection using the aggregation stages defined above
   let action_results = await db.collection('actions')
     .aggregate(action_aggregation_stages)
     .toArray();
@@ -204,11 +191,9 @@ async function boardsByVisualInspection(disposition) {
     uuidsAndData[action_results[index].componentUuid] = action_results[index].data;
   }
 
-  // Set up a new set of 'aggregation stages' for the 'components' database query
   let comp_aggregation_stages = [];
 
-  // First, we must retrieve a list of all geometry board component records with UUIDs matching those from the action records
-  // We can do this by directly matching against any entries in the UUIDs list above
+  // Retrieve all 'Geometry Board' records with UUIDs matching those from the action records
   comp_aggregation_stages.push({
     $match: {
       'formId': 'GeometryBoard',
@@ -216,12 +201,11 @@ async function boardsByVisualInspection(disposition) {
     }
   });
 
-  // Next we want to remove all but the most recent version of each matching record
+  // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-  // Then group the records by whatever fields will be subsequently used
-  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -233,9 +217,8 @@ async function boardsByVisualInspection(disposition) {
     },
   });
 
-  // We want to display the matched boards grouped by the board part numbers
-  // So set up second group stage for this (i.e. the '$group' operator's '_id' field is now the board's part number field)
-  // Then add the remaining fields to be preserved for each board in each group
+  // We want to actually display the matched boards grouped by the board part numbers
+  // So group the records according to the board part number and correponding string, and then add the fields to be returned for each board in each group
   comp_aggregation_stages.push({
     $group: {
       _id: {
@@ -248,13 +231,12 @@ async function boardsByVisualInspection(disposition) {
     }
   });
 
-  // Query the 'components' records collection using the aggregation stages
+  // Query the 'components' records collection using the aggregation stages defined above
   let component_results = await db.collection('components')
     .aggregate(comp_aggregation_stages)
     .toArray();
 
-  // The query results are a bit of a mess at this point ... unnecessarily nested, board UUIDs in binary format, unconnected action information, etc.
-  // Clean them up to make it easier to display them on the search results page
+  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
   let cleanedResults = [];
 
   for (const boardGroup of component_results) {
@@ -294,11 +276,9 @@ async function boardsByVisualInspection(disposition) {
 
 /// Retrieve a list of geometry boards of a specified order number across all visual inspection dispositions
 async function boardsByOrderNumber(orderNumber) {
-  // Set up the 'aggregation stages' of the first 'components' database query - these are the query steps in sequence
   let comp_aggregation_stages = [];
 
-  // First, we must retrieve the most recent version of the 'Geometry Board Batch' component record that corresponds to the specified order number
-  // So set up a match stage covering both the type form and the order number
+  // Retrieve all 'Geometry Board Batch' records that have the same order number as the specified one
   comp_aggregation_stages.push({
     $match: {
       'formId': 'GeometryBoardBatch',
@@ -306,11 +286,11 @@ async function boardsByOrderNumber(orderNumber) {
     }
   });
 
-  // In case there are multiple versions of the record, sort the matching records by validity ... highest version first
+  // Each batch has a unique order number, but there may be multiple versions of this batch, so select only the latest version
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-  // Then group the records by whatever fields will be subsequently used
-  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -318,27 +298,24 @@ async function boardsByOrderNumber(orderNumber) {
     },
   });
 
-  // Query the 'components' records collection using the aggregation stages
+  // Query the 'components' records collection using the aggregation stages defined above
+  // For geometry board batches, this should return either no records, or just one
   let batch_results = await db.collection('components')
     .aggregate(comp_aggregation_stages)
     .toArray();
 
   if (batch_results.length > 0) {
-
     // At this stage we have a single geometry board batch record containing a list of the individual board UUIDs
     // But what we actually want is the visual inspection action record for each individual board
-
     let boardUUIDs = [];
 
     for (const boardUUID of batch_results[0].boardUuids) {
       boardUUIDs.push(MUUID.from(boardUUID));
     }
 
-    // Set up a new set of 'aggregation stages' for the 'actions' database query
     let action_aggregation_stages = [];
 
-    // First, we must retrieve a list of all 'Visual Inspection' action records with UUIDs matching those from the batch record
-    // We can do this by directly matching against any entries in the UUIDs list above
+    // Retrieve all 'Visual Inspection' action records with UUIDs matching those from the batch record
     action_aggregation_stages.push({
       $match: {
         'typeFormId': 'BoardVisualInspection',
@@ -346,12 +323,11 @@ async function boardsByOrderNumber(orderNumber) {
       }
     });
 
-    // Next we want to remove all but the most recent version of each matching record
+    // Select only the latest version of each record
     // First sort the matching records by validity ... highest version first
+    // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+    // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
     action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-    // Then group the records by whatever fields will be subsequently used
-    // For example, if the 'actionId' of each returned record is to be used later on, it must be one of the groups defined here
     action_aggregation_stages.push({
       $group: {
         _id: { actionId: '$actionId' },
@@ -362,27 +338,23 @@ async function boardsByOrderNumber(orderNumber) {
       },
     });
 
-    // We want to display the matched boards grouped by the disposition
-    // So set up second group stage for this (i.e. the '$group' operator's '_id' field is now the board's disposition field)
-    // Then add the remaining fields to be preserved for each board in each group
+    // We want to actually display the matched boards grouped by the disposition
+    // So group the records according to the disposition, and then add the fields to be returned for each board in each group
     action_aggregation_stages.push({
       $group: {
-        _id: {
-          disposition: '$disposition',
-        },
+        _id: { disposition: '$disposition' },
         actionId: { $push: '$actionId' },
         componentUuid: { $push: '$componentUuid' },
         data: { $push: '$data' },
       }
     });
 
-    // Query the 'actions' records collection using the aggregation stages
+    // Query the 'actions' records collection using the aggregation stages defined above
     let action_results = await db.collection('actions')
       .aggregate(action_aggregation_stages)
       .toArray();
 
-    // The query results are a bit of a mess at this point ... unnecessarily nested, board UUIDs in binary format, etc.
-    // Clean them up to make it easier to display them on the search results page
+    // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
     let cleanedResults = [];
 
     for (const dispositionGroup of action_results) {
@@ -413,7 +385,42 @@ async function boardsByOrderNumber(orderNumber) {
     return cleanedResults;
   }
 
+  // If no matching geometry board batches are found (i.e. the whole of the 'if' statement above is skipped), return an empty list
   return [];
+}
+
+
+/// Retrieve a list of workflows that involve a particular component, specified by its UUID
+async function workflowsByUUID(componentUUID) {
+  let aggregation_stages = [];
+
+  // Retrieve all workflows (across all types) that have the same component UUID as the specified one
+  // For all workflows, the component UUID will always be set in the 'result' field of the first step in the path
+  aggregation_stages.push({
+    $match: { 'path.0.result': componentUUID }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the  workflow ID (i.e. each group contains all versions of the same workflow), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { workflowId: '$workflowId' },
+      workflowId: { '$first': '$workflowId' },
+      typeFormName: { '$first': '$typeFormName' },
+      status: { '$first': '$status' },
+    },
+  });
+
+  // Query the 'workflows' records collection using the aggregation stages defined above
+  let results = await db.collection('workflows')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of workflows
+  return results;
 }
 
 
@@ -422,4 +429,5 @@ module.exports = {
   boardsByPartNumber,
   boardsByVisualInspection,
   boardsByOrderNumber,
+  workflowsByUUID,
 }

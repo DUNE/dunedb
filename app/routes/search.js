@@ -9,23 +9,30 @@ router.get('/search', async function (req, res, next) {
 
 
 /// Search for a record using its UUID (components) or ID (actions or workflows)
-router.get('/search/byUUIDOrID', async function (req, res, next) {
+router.get('/search/recordByUUIDOrID', async function (req, res, next) {
   // Render the interface page
-  res.render('search_byUUIDOrID.pug');
+  res.render('search_recordByUUIDOrID.pug');
 });
 
 
 /// Search for geometry boards that have been received at a specific location, or are of a specified part number
-router.get('/search/byLocationOrPartNumber', async function (req, res, next) {
+router.get('/search/geoBoardsByLocationOrPartNumber', async function (req, res, next) {
   // Render the interface page
-  res.render('search_byLocationOrPartNumber.pug');
+  res.render('search_geoBoardsByLocationOrPartNumber.pug');
 });
 
 
 /// Search for geometry boards that have a specified visual inspection disposition, or have a specified order number
-router.get('/search/byVisInspectOrOrderNumber', async function (req, res, next) {
+router.get('/search/geoBoardsByVisInspectOrOrderNumber', async function (req, res, next) {
   // Render the interface page
-  res.render('search_byVisInspectOrOrderNumber.pug');
+  res.render('search_geoBoardsByVisInspectOrOrderNumber.pug');
+});
+
+
+/// Search for workflows that involve a particular component, specified by its UUID
+router.get('/search/workflowsByUUID', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_workflowsByUUID.pug');
 });
 
 

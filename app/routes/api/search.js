@@ -2,10 +2,11 @@ const router = require('express').Router();
 
 const logger = require('../../lib/logger');
 const Search = require('lib/Search.js');
+const utils = require('lib/utils.js');
 
 
 /// Search for geometry boards that have been received at a specified location
-router.get('/search/byLocation/:location', async function (req, res, next) {
+router.get('/search/geoBoardsByLocation/:location', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have been received at the specified location
     const boardsByPartNumber = await Search.boardsByLocation(req.params.location);
@@ -20,7 +21,7 @@ router.get('/search/byLocation/:location', async function (req, res, next) {
 
 
 /// Search for geometry boards of a specified part number
-router.get('/search/byPartNumber/:partNumber', async function (req, res, next) {
+router.get('/search/geoBoardsByPartNumber/:partNumber', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by reception location, of the specified part number
     const boardsByLocation = await Search.boardsByPartNumber(req.params.partNumber);
@@ -35,7 +36,7 @@ router.get('/search/byPartNumber/:partNumber', async function (req, res, next) {
 
 
 /// Search for geometry boards that have a specified visual inspection disposition
-router.get('/search/byVisualInspection/:disposition', async function (req, res, next) {
+router.get('/search/geoBoardsByVisualInspection/:disposition', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition
     const boardsByLocation = await Search.boardsByVisualInspection(req.params.disposition);
@@ -50,13 +51,28 @@ router.get('/search/byVisualInspection/:disposition', async function (req, res, 
 
 
 /// Search for geometry boards that came from a batch with a specified order number
-router.get('/search/byOrderNumber/:orderNumber', async function (req, res, next) {
+router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by visual inspection disposition, that came from a batch with the specified order number
     const boardsByDisposition = await Search.boardsByOrderNumber(req.params.orderNumber);
 
     // Return the list in JSON format
     return res.json(boardsByDisposition);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for workflows that involve a particular component, specified by its UUID
+router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
+  try {
+    // Retrieve a list of workflows that involve the component corresponding to the specified UUID
+    const workflows = await Search.workflowsByUUID(req.params.uuid);
+
+    // Return the list in JSON format
+    return res.json(workflows);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

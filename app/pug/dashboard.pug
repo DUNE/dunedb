@@ -110,20 +110,24 @@ body(class = `deployment-${NODE_ENV}`)
             li.nav-item
               +navlink(href = '/search')
                 i.fa.fa-search(aria-hidden = 'true')
-                | Search
+                | Search for ...
 
               ul.nav.flex-column.ml-3.sub-bar
                 li.nav-item
-                  +navlink(href = '/search/byUUIDOrID')
-                    |      By UUID / ID
+                  +navlink(href = '/search/recordByUUIDOrID')
+                    |      Record By UUID / ID
 
                 li.nav-item
-                  +navlink(href = '/search/byLocationOrPartNumber')
-                    |      By Location / Part Number
+                  +navlink(href = '/search/geoBoardsByLocationOrPartNumber')
+                    |      Geometry Boards by Location / Part Number
 
                 li.nav-item
-                  +navlink(href = '/search/byVisInspectOrOrderNumber')
-                    |      By Visual Inspection / Order Number
+                  +navlink(href = '/search/geoBoardsByVisInspectOrOrderNumber')
+                    |      Geometry Boards by Visual Inspection / Order Number
+
+                li.nav-item
+                  +navlink(href = '/search/workflowsByUUID')
+                    |      Workflows by UUID
 
           hr
 
