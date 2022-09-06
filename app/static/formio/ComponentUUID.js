@@ -228,7 +228,7 @@ class ComponentUUID extends TextFieldComponent {
   // ... get the QR code, extract the short UUID, decode the full UUID, and populate the component input field
   // Please keep the console log statements in this function ... they are very useful for debugging the (notoriously unreliable!) QR code scanning
   cameraCallback(index, qrCode) {
-    const matchedURL = qrCode.match('.*/([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ-]{22})');
+    const matchedURL = qrCode.match('.*/([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{20,22})');
 
     if (matchedURL) {
       const shortuuid = matchedURL[1].match('[^\-]*')[0];
