@@ -9,7 +9,7 @@ block content
       h2 Search Page Descriptions
 
     .vert-space-x1
-      p The following dedicated search pages can be accessed from this page, as well as through the links under the <b>Search</b> section of the sidebar.
+      p The following dedicated search pages can be accessed from this page, as well as through the links under the <b>Search for ...</b> section of the sidebar.
         br
         | Users do not need any particular permission to perform a search, but they will require the appropriate permission(s) to access the various component, action and workflow information pages linked from the search results.
 
@@ -17,7 +17,7 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/byUUIDOrID') By UUID / ID
+        a(href = '/search/recordByUUIDOrID') Record By UUID or ID
 
       p This page may be used to search for a <b>component, action or workflow record</b> by providing either a full 36-character UUID (for components) or 24-character ID (for actions and workflows).
         br
@@ -32,7 +32,7 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/byLocationOrPartNumber') By Location / Part Number
+        a(href = '/search/geoBoardsByLocationOrPartNumber') Geometry Boards By Location or Part Number
 
       p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios: 
         ul
@@ -47,7 +47,7 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/byVisInspectOrOrderNumber') By Visual Inspection / Order Number
+        a(href = '/search/geoBoardsByVisInspectOrOrderNumber') Geometry Boards By Visual Inspection Disposition or Order Number
 
       p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios:
         ul
@@ -57,3 +57,23 @@ block content
       p Users may select one of the available dispositions from the list, or manually enter an order number, and a summary of information about each found board will be displayed in the search results panel below the selection boxes.
 
       p Please note that, in either scenario, <b>a geometry board will only be displayed in the search results if a <u>Visual Inspection</u> action has been performed on it</b>.
+
+      hr
+
+    .vert-space-x2
+      h4
+        a(href = '/search/workflowsByUUID') Workflows by UUID
+
+      p This page may be used to search specifically for <b>workflows</b> that involve a particular component, specified by its full 36-character UUID.
+        br
+        |  The UUID input box uses auto-complete, so users may begin manually entering a UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.
+        br
+        |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.:
+
+      p If an existing workflow that involves the specified component is successfully found in the database, the user will be automatically redirected to the page for viewing the workflow record.
+        br
+        |  If there is no such workflow, i.e. the specified component is not part of any existing workflow, a message will be displayed below the input box to that effect.
+
+      p It should not be possible for multiple workflows to involve the same component, since each individual workflow begins with the creation of a new, unique component.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
+
+    .vert-space-x2

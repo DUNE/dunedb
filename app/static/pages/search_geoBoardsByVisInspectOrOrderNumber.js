@@ -9,12 +9,12 @@ $(function () {
   // If the disposition is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#dispositionSelection').on('change', async function () {
     disposition = $('#dispositionSelection').val();
-   
-    if (disposition) { 
+
+    if (disposition) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/byVisualInspection/${disposition}`,
+        url: `/json/search/geoBoardsByVisualInspection/${disposition}`,
         dataType: 'json',
         success: postSuccess_disposition,
       }).fail(postFail);
@@ -24,14 +24,14 @@ $(function () {
   // When the selected order number is changed and the 'Enter' key is pressed, get the newly selected order number from the corresponding page element
   // If the order number is valid, perform the appropriate jQuery 'ajax' call to make the search
   document.getElementById('orderNumberSelection').addEventListener('keyup', function (e) {
-    if (e.key === 'Enter') { 
+    if (e.key === 'Enter') {
       orderNumber = $('#orderNumberSelection').val();
 
       if (orderNumber) {
         $.ajax({
           contentType: 'application/json',
           method: 'GET',
-          url: `/json/search/byOrderNumber/${orderNumber}`,
+          url: `/json/search/geoBoardsByOrderNumber/${orderNumber}`,
           dataType: 'json',
           success: postSuccess_orderNumber,
         }).fail(postFail);

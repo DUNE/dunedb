@@ -16,7 +16,7 @@ router.get('/autocomplete/uuid', async function (req, res, next) {
   // For each retrieved record, construct a string consisting of the component's UUID, name and type form name
   for (let m of matches) {
     m.val = m.componentUuid;
-    m.text = `${m.componentUuid} (${m.formName}) [${m.data.name}]`;
+    m.text = `${m.componentUuid} (${m.typeFormName}) [${m.name}]`;
   }
 
   // Return a JSON document containing the retrieved records, including the newly constructed strings
