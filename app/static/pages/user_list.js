@@ -16,6 +16,7 @@ function sortBy(keyName) {
   }
 }
 
+
 // Function for populating the table of users with information, with the users listed in alphabetical order
 $(function () {
   // Retrieve a list of the users for this Auth0 tenant, and then ...
@@ -24,7 +25,7 @@ $(function () {
     let tbody = $('#users_table tbody');
     tbody.empty();
 
-    // Sort the list of users alphabetically
+    // Sort the list of users alphabetically by name
     data.sort(sortBy('name'));
 
     // For each user in the list ...

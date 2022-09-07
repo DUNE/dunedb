@@ -1,57 +1,83 @@
-"use strict";
-const express = require("express");
-const Components = require("lib/Components.js");
-const permissions = require("lib/permissions.js");
+const router = require('express').Router();
+
 const logger = require('../../lib/logger');
-const pretty = require('express-prettify');
+const Search = require('lib/Search.js');
+const utils = require('lib/utils.js');
 
-var router = express.Router();
-module.exports = router;
 
-router.use(pretty({query:'pretty'})); // allows you to use ?pretty to see nicer json.
-
-// searching via POST parameters
-// 
-// /search/<recordType>/<type>?search=<textsearch>&insertAfter=<date>&insertBefore=<date>
-router.post("/search/:recordType(component)?/:formId?",  permissions.checkPermissionJson('tests:view'), 
-  async function retrieve_test_data(req,res,next) {
+/// Search for geometry boards that have been received at a specified location
+router.get('/search/geoBoardsByLocation/:location', async function (req, res, next) {
   try {
-    logger.info("search request",req.params,req.body);
-    var searchterms = null;
-    var matchobj = {...req.body};
-    var formId = null;
-    var limit, skip;
-    if(req.query.limit) limit = parseInt(req.query.limit);
-    if(req.query.skip) limit = parseInt(req.query.limit);
-    var skip = req.query.skip;
-    if(req.params.formId) formId = decodeURIComponent(req.params.formId);
+    // Retrieve a list of geometry boards, grouped by part number, that have been received at the specified location
+    const boardsByPartNumber = await Search.boardsByLocation(req.params.location);
 
-    if(matchobj.search) {
-      searchterms = decodeURIComponent(matchobj.search);
-      delete matchobj.search;
-    }
-    if(matchobj.insertionAfter) {
-      matchobj["insertion.insertDate"] = {...matchobj["insertion.insertDate"],$gte: new Date(matchobj.insertionAfter)};
-      delete matchobj.insertionAfter;
-    }
-    if(matchobj.insertionBefore) {
-      matchobj["insertion.insertDate"] = {...matchobj["insertion.insertDate"],$lte: new Date(matchobj.insertionBefore)};
-      delete matchobj.insertionBefore;
-    }
-
-    if(Object.keys(matchobj).length<1 && !searchterms) throw new Error("No search parameter specified.")
-
-    var result = [];
-    if(!req.params.recordType || req.params.recordType === 'component') {
-      if(formId) matchobj.type = formId;
-      result.push(...await Components.search(searchterms,matchobj,limit,skip));
-      // logger.info("result",result);
-    }
-    return res.json(result);
-
-
-  } catch(err) {
-    logger.info({route:req.route.path},err.message);
-    res.status(400).json({error:err.toString()});
+    // Return the list in JSON format
+    return res.json(boardsByPartNumber);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
 });
+
+
+/// Search for geometry boards of a specified part number
+router.get('/search/geoBoardsByPartNumber/:partNumber', async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry boards, grouped by reception location, of the specified part number
+    const boardsByLocation = await Search.boardsByPartNumber(req.params.partNumber);
+
+    // Return the list in JSON format
+    return res.json(boardsByLocation);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for geometry boards that have a specified visual inspection disposition
+router.get('/search/geoBoardsByVisualInspection/:disposition', async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition
+    const boardsByLocation = await Search.boardsByVisualInspection(req.params.disposition);
+
+    // Return the list in JSON format
+    return res.json(boardsByLocation);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for geometry boards that came from a batch with a specified order number
+router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry boards, grouped by visual inspection disposition, that came from a batch with the specified order number
+    const boardsByDisposition = await Search.boardsByOrderNumber(req.params.orderNumber);
+
+    // Return the list in JSON format
+    return res.json(boardsByDisposition);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for workflows that involve a particular component, specified by its UUID
+router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
+  try {
+    // Retrieve a list of workflows that involve the component corresponding to the specified UUID
+    const workflows = await Search.workflowsByUUID(req.params.uuid);
+
+    // Return the list in JSON format
+    return res.json(workflows);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+module.exports = router;

@@ -16,31 +16,31 @@ block extrascripts
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       block content_header
 
-      div#metaform
+      #metaform
 
-    div.vert-space-x1
+    .vert-space-x2
       hr 
 
-    div.vert-space-x1
+    .vert-space-x1
       .row
         .col
           .panel.panel-default
           .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#json-holder')
             | View JSON Schema: 
             i.chevron.fa.fa-fw    
-          div#json-holder.collapse
-            textarea#schema.form-control(rows = 20)
+          .collapse#json-holder
+            textarea.form-control#schema(rows = 20)
 
         .col
           a#download_schema(onclick = 'DownloadSchema()', download = `${formId}.json`, href = '') Download Schema
 
-          div.vert-space-x1
+          .vert-space-x1
             a.button.btn.btn-primary(onclick = 'CopySchemaToClipboard()') Copy Schema to Clipboard
 
-          div.vert-space-x1
+          .vert-space-x1
             a.button.btn.btn-primary(onclick = 'PasteSchemaFromClipboard()') Paste Schema from Clipboard
 
-    div.vert-space-x2
+    .vert-space-x2

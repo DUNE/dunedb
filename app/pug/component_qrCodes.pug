@@ -5,16 +5,16 @@ block vars
   - const page_title = 'Component QR Codes';
 
 block allbody
-  div.vert-space-x2.hori-space-x1.noprint
+  .vert-space-x2.hori-space-x1.noprint
     a.btn.btn-primary(onclick = 'window.print(); return false;' href = '#print') Print QR Codes
 
-    div.vert-space-x1
-      p For best display, please print <strong>without headers and footers</strong>, <strong>without backgrounds</strong> and <strong>with no top and bottom margins</strong>.
+    .vert-space-x1
+      p For best display, please print <b>without headers and footers</b>, <b>without backgrounds</b> and <b>with no top and bottom margins</b>.
 
-  div.vert-space-x2
+  .vert-space-x2
     hr
 
-  div.vert-space-x2
+  .vert-space-x2
     .container.fluid
       - const qrCodeText = `${base_url}/c/${component.shortUuid.toString()}`;
       - const qrCodeDesc = component.data.name;
@@ -40,4 +40,4 @@ block allbody
         .col-sm-6.qr-col
           +qr-panel(qrCodeText, qrCodeDesc)
 
-  div.vert-space-x2
+  .vert-space-x2

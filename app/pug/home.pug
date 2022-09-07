@@ -7,23 +7,23 @@ block content
   if NODE_ENV == 'development'
     .alert.alert-warning
       br
-      p This is a <strong>DEVELOPMENT</strong> deployment of the DUNE APA Construction Database, hosted locally on your computer.  It is <strong>not</strong> connected to either the 
+      p This is a <b>DEVELOPMENT</b> deployment of the DUNE APA Construction Database, hosted locally on your computer.  It is <b>not</b> connected to either the 
         a(href = 'https://apa-dev.dunedb.org') staging
         |  or 
         a(href = 'https://apa.dunedb.org') production
         |  deployments, so any additions and/or alterations to database records that are made through this web interface will not be reflected outside of this deployment.
         br
         | If you have any such content here that you wish moved to the staging and/or production deployments, please contact 
-        a(href = 'mailto:majumdar@liverpool.ac.uk') Krish Majumdar. 
+        a(href = 'mailto:brebel@wisc.edu') Brian Rebel. 
         |  Otherwise, this deployment is your own personal playground.
       p
 
   if NODE_ENV == 'staging'
     .alert.alert-danger
       br
-      p This is the <strong>STAGING</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
+      p This is the <b>STAGING</b> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
         a(href = 'https://apa.dunedb.org') production
-        |  database, and is to be used <strong>only</strong> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
+        |  database, and is to be used <b>only</b> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
         br
         | Changes to the underlying code made by the developers will be automatically pushed to the production deployment, but it up to individual users to copy over any additions and/or alterations to database records that they make through this deployment's web interface.
       p
@@ -31,11 +31,11 @@ block content
   if NODE_ENV == 'production'
     .alert.alert-success 
       br
-      p This is the <strong>PRODUCTION</strong> deployment of the DUNE APA Construction Database, hosted at Fermilab.
+      p This is the <b>PRODUCTION</b> deployment of the DUNE APA Construction Database, hosted at Fermilab.
       p
 
   .container-fluid
-    div.vert-space-x1.border-success.border.rounded.p-2
+    .vert-space-x1.border-success.border.rounded.p-3
       h5 Useful Links, Bugs and Other Issues
       ul
         li For documentation relating to the database itself (i.e. descriptions of the functionality, overviews of common usage, etc.), please see our 
@@ -54,4 +54,4 @@ block content
           |  (a Github account is required to report issues).  Please give as much information as you can - an example page or link to where the bug occurs, how to reproduce the error (if appropriate), etc.
         li Requests for new and/or additional features and functionality can also be made on the Issues page, but please first check if the addition and/or change can be made by users directly through the web interface.
 
-    div.vert-space-x2
+    .vert-space-x2

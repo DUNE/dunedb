@@ -84,6 +84,35 @@ async function save(input, req) {
 }
 
 
+/// Update the result of a single step in a workflow path
+async function updatePathStep(workflowId, stepIndex, stepResult, workflowStatus) {
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the workflow record
+  // Preset a dictionary of the variables to be updated using the operator
+  // We have to do this separately because the step index is a variable, but the '$set' operator cannot use inline constructed strings as arguments
+  let update = { '$set': {} };
+
+  update['$set']['path.' + stepIndex + '.result'] = stepResult;
+  update['$set']['status'] = workflowStatus;
+
+  // Perform the record update
+  const result = db.collection('workflows')
+    .findOneAndUpdate(
+      { 'workflowId': ObjectID(workflowId) },
+      update,
+      {
+        sort: { 'validity.version': -1 },
+        returnNewDocument: true,
+      },
+      function (err, res) {
+        if (err) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record ... ${err}`);
+      }
+    );
+
+  // Return the updated record as proof that it has been updated successfully
+  return result;
+}
+
+
 /// Retrieve a single version of a workflow record (either the most recent, or a specified one)
 async function retrieve(workflowId, projection) {
   // Construct the 'match_condition' to be used as the database query
@@ -254,16 +283,17 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
 
 /// Auto-complete a workflow ID string as it is being typed
 /// This actually returns the records of all workflows with a matching workflow ID to that being typed
-async function autoCompleteId(inputString, typeFormId, limit = 10) {
-  // The workflow ID is 24 alphanumeric characters long, so pad the input string out to this length
-  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
+async function autoCompleteId(inputString, limit = 10) {
+  // Remove any underscores and dashes from the input string
   let q = inputString.replace(/[_-]/g, '');
 
+  // The workflow ID is 24 alphanumeric characters long, so pad the input string out to this length
+  // Then set up objects representing the minimum and maximum hexadecimal values that are possible for the current input string
   const bitlow = ObjectID(q.padEnd(24, '0'));
   const bithigh = ObjectID(q.padEnd(24, 'F'));
 
   // Construct a 'match_condition' to be used as the database query
-  // For this function, it is that the workflow ID's binary value is between the minimum and maximum binary values defined above
+  // For this function, it is that the workflow ID's hexadecimal value is between the minimum and maximum hexadecimal values defined above
   let match_condition = {
     workflowId: {
       $gte: bitlow,
@@ -271,19 +301,36 @@ async function autoCompleteId(inputString, typeFormId, limit = 10) {
     },
   };
 
-  // If a workflow type form ID has also been specified, add it to the condition
-  // This means that as well as the binary value match above, the corresponding workflow record must also contain the specified type form ID
-  if (typeFormId) match_condition.typeFormId = typeFormId;
+  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+  let aggregation_stages = [];
 
-  // Query the 'workflows' records collection for records matching the condition
+  aggregation_stages.push({ $match: match_condition });
+
+  // Next we want to remove all but the most recent version of each matching record
+  // First sort the matching records by validity ... highest version first
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+
+  // Then group the records by whatever fields will be subsequently used
+  // For example, if the 'workflowId' of each returned record is to be used later on, it must be one of the groups defined here
+  // Note that this changes some field access via dot notation - i.e. in the returned records, 'workflow.data.name' becomes 'workflow.name'
+  aggregation_stages.push({
+    $group: {
+      _id: { workflowId: '$workflowId' },
+      workflowId: { '$first': '$workflowId' },
+      typeFormName: { '$first': '$typeFormName' },
+      lastEditDate: { '$first': '$validity.startDate' },
+    },
+  });
+
+  // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+
+  // Add aggregation stages for any additionally specified options
+  aggregation_stages.push({ $limit: limit });
+
+  // Query the 'workflows' records collection using the aggregation stages
   let records = await db.collection('workflows')
-    .find(match_condition)
-    .project({
-      'workflowId': 1,
-      'typeFormId': 1,
-      'data.name': 1,
-    })
-    .limit(limit)
+    .aggregate(aggregation_stages)
     .toArray();
 
   // Return the entire list of workflow records
@@ -293,6 +340,7 @@ async function autoCompleteId(inputString, typeFormId, limit = 10) {
 
 module.exports = {
   save,
+  updatePathStep,
   retrieve,
   versions,
   list,

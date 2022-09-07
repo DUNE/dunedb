@@ -2,10 +2,6 @@ html {
   font-size: 14px;
 }
 
-pre {
-  white-space: pre-wrap;
-}
-
 .monospace {
   /* A note on Monospace Fonts
      Some browsers tend to automatically reduce the displayed size of monospace fonts, regardless of any explicit size that the user may have set.
@@ -31,10 +27,6 @@ pre {
 
 .hori-space-x2 {
   margin-left: 2em
-}
-
-.hidden {
-  display: none;
 }
 
 .workstep-img {

@@ -17,10 +17,10 @@ block extrascripts
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       h2 View Workflow Record
 
-    div.vert-space-x1
+    .vert-space-x1
       dl
         dt Workflow Type
         dd #{workflow.typeFormName}
@@ -47,10 +47,10 @@ block content
             |  by !{' '}
             a(href = `mailto:${user_email(workflow.insertion.user)}`) #{workflow.insertion.user.displayName}
 
-          div.vert-space-x1.border-success.border.rounded.p-2
+          .vert-space-x1.border-success.border.rounded.p-2
             #typeform
 
-          div.vert-space-x1.border-success.border.rounded.p-2
+          .vert-space-x1.border-success.border.rounded.p-2
             table.table
               thead
                 tr 
@@ -81,11 +81,11 @@ block content
                           a(href = `/component/${componentUuid}`, target = '_blank') #{componentUuid}
                       else 
                         td
-                          div.form-inline 
+                          .form-inline 
                             | (step not yet performed)
 
-                            div.hori-space-x2
-                              a(href = `/component/${stepFormId}?workflowId=${workflow.workflowId}`).btn-sm.btn-primary
+                            .hori-space-x2
+                              a.btn-sm.btn-primary(href = `/component/${stepFormId}?workflowId=${workflow.workflowId}`)
                                 img.small-icon(src = '/images/run_icon.svg')
                                 | &nbsp; Create Component 
 
@@ -99,25 +99,25 @@ block content
                           a(href = `/action/${step.result}`, target = '_blank') #{step.result}
                       else 
                         td
-                          div.form-inline 
+                          .form-inline 
                             | (step not yet performed)
 
-                            div.hori-space-x2
+                            .hori-space-x2
                               if(workflow.path[index - 1].result.length > 0)
-                                a(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}`).btn-sm.btn-primary
+                                a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}`)
                                   img.small-icon(src = '/images/run_icon.svg')
                                   | &nbsp; Perform Action
                               else 
                                 a.btn-sm.btn-danger
                                   | Perform Previous Steps First
 
-    div.vert-space-x1
+    .vert-space-x1
       .panel.panel-default
       .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
         | All Versions: 
         i.chevron.fa.fa-fw 
 
-      div#versionsBox.collapse
+      .collapse#versionsBox
         ul
           each v in workflowVersions
             li 
@@ -129,14 +129,14 @@ block content
                 |  by !{' '}
                 a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-    div.vert-space-x2.form-inline
-      a(href = `/workflow/${workflow.workflowId}/edit`).btn.btn-warning
+    .vert-space-x2.form-inline
+      a.btn.btn-warning(href = `/workflow/${workflow.workflowId}/edit`)
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Edit Workflow
 
-      div.hori-space-x2
-        a(href = `/json/workflow/${workflow.workflowId}`, target = '_blank').btn.btn-secondary
+      .hori-space-x2
+        a.btn.btn-secondary(href = `/json/workflow/${workflow.workflowId}`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View JSON Record
 
-    div.vert-space-x2
+    .vert-space-x2

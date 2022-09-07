@@ -1,8 +1,7 @@
-// Frontend interface routes
 const routes = [
   require('./actions'),
+  require('./autocomplete'),
   require('./components'),
-  require('./processes'),
   require('./search'),
   require('./start'),
   require('./tags'),
@@ -10,7 +9,6 @@ const routes = [
   require('./workflows'),
 ];
 
-// Backend and API routes (with prepended paths)
 const api = [
   require('./api/actions'),
   require('./api/components'),
@@ -21,7 +19,6 @@ const api = [
 ];
 
 const paths = [
-  { path: '/autocomplete', route: require('./autocomplete') },
   { path: '/json', route: api },
   { path: '/api', route: api },
 ];

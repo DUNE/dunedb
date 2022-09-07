@@ -1,4 +1,5 @@
 const Binary = require('mongodb').Binary;
+const deepmerge = require('deepmerge');
 const MUUID = require('uuid-mongodb');
 const shortuuid = require('short-uuid')();
 
@@ -75,6 +76,8 @@ async function save(input, req) {
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
+  if (input.reception) newRecord.reception = input.reception;
+
   // Insert the new record into the 'components' records collection
   const result = await db.collection('components')
     .insertOne(newRecord);
@@ -90,6 +93,41 @@ async function save(input, req) {
 
   // Return the record as proof that it has been saved successfully
   return record;
+}
+
+
+/// Update the most recently logged reception location and date of a single component
+async function updateLocation(componentUuid, location, date) {
+  // Construct the 'match_condition' to be used as the database query
+  // For this function, it is that a record's component UUID must match the specified one
+  let match_condition = { componentUuid };
+
+  if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+  match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record
+  // Perform the record update
+  const result = db.collection('components')
+    .findOneAndUpdate(
+      match_condition,
+      {
+        $set: {
+          'reception.location': location,
+          'reception.date': date,
+        }
+      },
+      {
+        sort: { 'validity.version': -1 },
+        returnNewDocument: true,
+      },
+      function (err, res) {
+        if (err) throw new Error(`Components::updateLocation() - failed to update the component record ... ${err}`);
+      }
+    );
+
+  // Return the updated record as proof that it has been updated successfully
+  return result;
 }
 
 
@@ -220,7 +258,7 @@ async function list(match_condition, options) {
 }
 
 
-/// Get the currently cached component counts by type
+/// Get a list of the current component count per type across all existing component types
 async function componentCountsByTypes() {
   // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
@@ -254,14 +292,64 @@ async function componentCountsByTypes() {
     .aggregate(aggregation_stages)
     .toArray();
 
-  let returnedValues = {};
+  // Reform the results such that each one can be accessed via a key (i.e. the type form name) directly, rather than needing to know the index corresponding to a particular type form
+  let keyedResults = {};
 
-  for (var result of results) {
-    returnedValues[result.formId] = result;
+  for (const result of results) {
+    keyedResults[result.formId] = result;
   }
 
+  // Retrieve a full list of all component type forms
+  const typeFormsList = await Forms.list('componentForms');
+
+  // Merge the full type forms list and the queried results, to create a single list of component counts by type that also includes types that do not have recorded components
+  const mergedList = deepmerge(keyedResults, typeFormsList);
+
   // Return the final results
-  return returnedValues;
+  return mergedList;
+}
+
+
+/// Get a list of the current maximum component 'typeRecordNumber' per type across all existing component types
+async function maxComponentTRNByTypes() {
+  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+  let aggregation_stages = [];
+
+  aggregation_stages.push({
+    $group: {
+      _id: '$formId',
+      maxValue: { $max: '$data.typeRecordNumber' },
+    }
+  });
+
+  aggregation_stages.push({
+    $project: {
+      formId: '$_id',
+      maxValue: true,
+      _id: false,
+    },
+  });
+
+  // Query the 'components' records collection using the aggregation stages
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Reform the results such that each one can be accessed via a key (i.e. the type form name) directly, rather than needing to know the index corresponding to a particular type form
+  let keyedResults = {};
+
+  for (const result of results) {
+    keyedResults[result.formId] = result;
+  }
+
+  // Retrieve a full list of all component type forms
+  const typeFormsList = await Forms.list('componentForms');
+
+  // Merge the full type forms list and the queried results, to create a single list of component counts by type that also includes types that do not have recorded components
+  const mergedList = deepmerge(keyedResults, typeFormsList);
+
+  // Return the final results
+  return mergedList;
 }
 
 
@@ -330,11 +418,12 @@ async function search(textSearch, matchRecord, skip = 0, limit = 20) {
 
 /// Auto-complete a component UUID string as it is being typed
 /// This actually returns the records of all components with a matching component UUID to that being typed
-async function autoCompleteUuid(inputString, typeFormId, limit = 10) {
-  // The component UUID is 32 alphanumeric characters long, so pad the input string out to this length
-  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
+async function autoCompleteUuid(inputString, limit = 10) {
+  // Remove any underscores and dashes from the input string
   let q = inputString.replace(/[_-]/g, '');
 
+  // The component UUID is up to 32 alphanumeric characters long (excluding dashes), so pad the input string out to this length
+  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
   const bitlow = Binary(Buffer.from(q.padEnd(32, '0'), 'hex'), Binary.SUBTYPE_UUID);
   const bithigh = Binary(Buffer.from(q.padEnd(32, 'F'), 'hex'), Binary.SUBTYPE_UUID);
 
@@ -347,19 +436,37 @@ async function autoCompleteUuid(inputString, typeFormId, limit = 10) {
     },
   };
 
-  // If an component type form ID has also been specified, add it to the condition
-  // This means that as well as the binary value match above, the corresponding component record must also contain the specified type form ID
-  if (typeFormId) match_condition.formId = typeFormId;
+  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
+  let aggregation_stages = [];
 
-  // Query the 'component' records collection for records matching the condition
+  aggregation_stages.push({ $match: match_condition });
+
+  // Next we want to remove all but the most recent version of each matching record
+  // First sort the matching records by validity ... highest version first
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+
+  // Then group the records by whatever fields will be subsequently used
+  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
+  // Note that this changes some field access via dot notation - i.e. in the returned records, 'component.data.name' becomes 'component.name'
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      typeFormName: { '$first': '$formName' },
+      name: { '$first': '$data.name' },
+      lastEditDate: { '$first': '$validity.startDate' },
+    },
+  });
+
+  // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+
+  // Add aggregation stages for any additionally specified options
+  aggregation_stages.push({ $limit: limit });
+
+  // Query the 'components' records collection using the aggregation stages
   let records = await db.collection('components')
-    .find(match_condition)
-    .project({
-      'componentUuid': 1,
-      'formId': 1,
-      'data.name': 1,
-    })
-    .limit(limit)
+    .aggregate(aggregation_stages)
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability
@@ -375,10 +482,12 @@ async function autoCompleteUuid(inputString, typeFormId, limit = 10) {
 module.exports = {
   newUuid,
   save,
+  updateLocation,
   retrieve,
   versions,
   list,
   componentCountsByTypes,
+  maxComponentTRNByTypes,
   search,
   autoCompleteUuid,
 }

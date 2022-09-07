@@ -13,9 +13,9 @@ objects:
         git:
           uri: https://github.com/DUNE/dunedb.git
           ref: ${RELEASE_BRANCH}
-        contextDir: "./"
+        contextDir: "./app"
         dockerfile: |-
-          FROM node:lts-alpine
+          FROM node:16.15.0-alpine
 
           WORKDIR /app
           COPY . .
@@ -24,7 +24,7 @@ objects:
           # Install node-gyp and dependencies
           RUN apk add --no-cache --virtual .gyp python3 make g++
           USER node
-          RUN npm ci --only=production
+          RUN ls -al && npm ci --only=production
           USER root
           RUN apk del .gyp
 

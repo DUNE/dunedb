@@ -4,11 +4,11 @@ const Forms = require('lib/Forms.js');
 const logger = require('../lib/logger');
 
 
-/// List the type form tags which are associated with specific entity type forms
+/// View a table of which tags are associated with specific type forms
 router.get('/tags', async function (req, res, next) {
   try {
     // Retrieve a list of all type form tags that are currently cached
-    // Simultaneously, retrieve lists of all component and action type forms that currently exist in the respective collections    
+    // Simultaneously, retrieve lists of all component, action and workflow type forms that currently exist in the respective collections    
     let [typeFormTags, componentTypeForms, actionTypeForms, workflowTypeForms] = await Promise.all([
       Forms.tags(),
       Forms.list('componentForms'),
@@ -16,8 +16,7 @@ router.get('/tags', async function (req, res, next) {
       Forms.list('workflowForms'),
     ]);
 
-    // Render the interface page for listing the tags which are associated with specific entity type forms
-    // The 'filtering' of the entity type forms with respect to individual tags is performed on the interface page itself
+    // Render the interface page ... note that the 'matching' of the type forms to their respective tags is performed on the interface page itself
     res.render('tags.pug', {
       typeFormTags,
       componentTypeForms,

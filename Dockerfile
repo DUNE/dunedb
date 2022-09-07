@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM node:16.15.0-alpine
 
 # Install node-gyp and dependencies
 WORKDIR /build

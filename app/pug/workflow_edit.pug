@@ -8,25 +8,24 @@ block extrascripts
     const workflow = !{JSON.stringify((workflow || {}), null, 4)}; 
     const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)};
     const newWorkflow = !{JSON.stringify(newWorkflow, null, 4)};
-    const newStepResult = !{JSON.stringify(newStepResult, null, 4)};
 
   block workscripts
     script(src = '/pages/workflow_edit.js')
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       h2 Create or Edit Workflow
 
-    div.vert-space-x1
+    .vert-space-x1
       dl
         dt Workflow Type
         dd #{workflowTypeForm.formName}
 
-    div.vert-space-x1
+    .vert-space-x1
       hr
 
-    div.vert-space-x1.formbuilder_area
+    .vert-space-x1.formbuilder_area
       #typeform
 
-    div.vert-space-x2
+    .vert-space-x2

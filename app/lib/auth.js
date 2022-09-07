@@ -6,7 +6,6 @@ var util = require('util');
 var url = require('url');
 var querystring = require('querystring');
 var Auth0Strategy = require('passport-auth0');
-var m2m = require('lib/m2m.js');
 var jsonwebtoken = require('jsonwebtoken');
 // var jwt = require('express-jwt');
 // var jwks = require('jwks-rsa');
@@ -14,7 +13,7 @@ var jsonwebtoken = require('jsonwebtoken');
 var Permissions = require("lib/permissions.js");
 var chalk = require("chalk");
 
-const { BASE_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, M2M_SECRET, AUTH0_CLIENT_SECRET } = require('./constants');
+const { BASE_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('./constants');
 const logger = require('./logger');
 
 // routes.
@@ -72,63 +71,27 @@ router.get('/logout', (req, res) => {
 });
 
 
-// My homebrew m2m authentication
 
-// rate limiting
-// var limiter = require('express-limiter-mongo')(
-//   {mongoUrl: global.config.mongo_uri,
-//   lookup: ['connection.remoteAddress','headers.x-forwarded-for'],
-//   total: 3,
-//   expire: 1000 * 60 * 60,
-//   onRateLimited: (req,res,next) => { res.status(429).send(`Too many tries. You are locked out for ${(res.get("Retry-After")/60.).toFixed()} minutes; try again then.`); },
-//   }
-// );
+/// Set user information based on a provided m2m client access token
+function set_m2m_user(req, res, next) {
+  // Retrieve the authorization header from the provided 'req.headers' object
+  const authString = req.header('authorization');
 
-var FailLimiter = require("lib/fail_limiter.js");
-var limiter = new FailLimiter(
-  {
-    lookup: ['connection.remoteAddress','headers.x-forwarded-for'],
-    total: 5,
-    expire: 1000 * 60 * 60,
-  });
+  // Check that the access token in the header is of 'Bearer' type
+  if (!(authString.startsWith('Bearer '))) return res.status(401).send('The access token in the /"authorization/" header is not of /"Bearer/" type!');
 
+  // Extract and decode the access token from the header
+  const decodedToken = jsonwebtoken.decode(authString.split(' ')[1]);
 
-// // test with curl --head "localhost:12313/testlimit"
-// router.get('/testlimit', limiter, (req,res)=>{
-//   res.status(200).send("ok");
-// });
+  // Set the current user information equal to the decoded token (in order to store the M2M client's permissions information)
+  // We also need to explicitly set the user information fields, so that they make at least some kind of sense when displayed!
+  req.user = decodedToken;
+  req.user.user_id = req.user.azp;      // This is the M2M client ID ... no idea why it's under the 'azp' field in the user object!
+  req.user.displayName = 'M2M Client';  // Set the display name so that it is clear that a record was not inserted or edited by a human
+  req.user.emails = ['none'];           // The 'emails' list must have length > 0, but the M2M client obviously doesn't have an email address
 
-router.post('/machineAuthenticate', limiter.limitChecker(), async (req,res,next)=>{
-  var user_id = req.body.user_id;
-  var secret = req.body.secret;
-  logger.info("checking secret...");
-  if(!user_id) return res.status(401).send("No user_id in json body");
-  if(!secret) return res.status(401).send("No secret in json body");
-  var token = await m2m.AuthenticateMachineUser(user_id,secret);
-  if(!token){
-    await limiter.registerFail(req,res);
-    return res.status(401).send("No such user_id/secret pair registered.");
-  }
-  // logger.info("sending token",token);
-  res.status(200).send(token);
-}); 
-
-// requires JWT token.
-function verify_m2m_middleware(req,res,next) {
-  const authstring = req.header('authorization');
-  if(! authstring.startsWith('Bearer ')) return res.status(401).send("JWT token required");
-  var token = authstring.split(' ')[1];
-  // logger.info("got authstring ",authstring);
-  jsonwebtoken.verify(token,M2M_SECRET,{audience: "dunedb-m2m"},
-      (err,decoded)=>{
-        if(err) return res.status(401).send("Token not verified... " + err);
-        req.user = decoded;   // Verified! Copy user info into the req.user
-        // logger.info('req.user',req.user);
-        res.locals.user = decoded;
-        next();
-      }
-  );
-
+  // Continue with the next function in whatever sequence this one was called from
+  next();
 }
 
 
@@ -176,32 +139,8 @@ module.exports = function(app) {
     });
 
 
-    // // Machine-to-machine authentication via auth0
-    // var jwtCheck = jwt({
-    //   secret: jwks.expressJwtSecret({
-    //       cache: true,
-    //       rateLimit: true,
-    //       jwksRequestsPerMinute: 5,
-    //       jwksUri: 'https://' + config.auth0_domain + '/.well-known/jwks.json'
-    // }),
-    // audience: `${BASE_URL}/api`,
-    // issuer: 'https://' + config.auth0_domain + '/',
-    // algorithms: ['RS256'],
-    // credentialsRequired: false,
-    // });
-
-    // app.use('/api',jwtCheck);
-
-    // FIXME - this is too crude. It works only on this process, and doesn't 
-    // discriminate users.
-    // var rate_limiter = require("express-rate-limit")({
-    //   windowMs: 60 * 60 * 1000, // 1 hour window
-    //   max: 5, // start blocking after 5 requests
-    //   message:
-    //     "Too many tries - you are blocked from trying again for 1 hour."
-    // });
-
-    app.use('/api',verify_m2m_middleware);
+    // Whenever a route with the '/api' prepend is requested, first call the 'set_m2m_user' function above
+    app.use('/api', set_m2m_user);
 
 
     app.use(function (req, res, next) {

@@ -1,15 +1,15 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
-let componentForm;
+let typeForm;
 
-// If we are editing an existing component, we do not want to increment the 'data.typeRecordNumber' field
-// In this case, the 'componentTypesAndCounts' object passed from 'component_edit.pug' will be empty (but populated if creating a new component)
+// If we are creating a new component, we need to fill in the 'data.typeRecordNumber' value using the 'componentTypesAndCounts' object passed through the route to this page
+// Therefore, that object will NOT be empty for a new component, but will be if editing an existing component (when we do not want to increment the 'data.typeRecordNumber' value)
 let newComponent = false;
 
 if (Object.keys(componentTypesAndCounts).length > 0) newComponent = true;
 
-// Arrays called 'subComponent_fullUuids' and 'subComponent_shortUuids' are also passed from 'component_edit.pug'
+// Arrays called 'subComponent_fullUuids' and 'subComponent_shortUuids' are also always passed through the route to this page
 // If we are submitting a new batch-type component, these arrays will contain full and short sub-component UUIDs (and therefore have a size > 0)
-// If we are instead editing an existing batch-type component or dealing with a non-batch-type component, the arrays will be empty
+// If we are instead just editing an existing batch-type component, or creating or editing a non-batch-type component, the arrays will be empty
 let newBatchComponent = false;
 
 if (subComponent_fullUuids.length > 0) newBatchComponent = true;
@@ -19,12 +19,11 @@ if (subComponent_fullUuids.length > 0) newBatchComponent = true;
 window.addEventListener('load', onPageLoad);
 
 
-/// Function to run when the page is loaded
+// Function to run when the page is loaded
 async function onPageLoad() {
-  // Set up a new type form based on the schema of the component type form
+  // Set up a new type form based on the schema of the component type form, and add a 'Submit' button (this is only in the scope of this script)
   let schema = componentTypeForm.schema;
 
-  // Add a 'Submit' button to the type form (this is temporary, only in the scope of this script)
   schema.components.push({
     type: 'button',
     theme: 'btn btn-success',
@@ -45,70 +44,82 @@ async function onPageLoad() {
   });
 
   // Populate the type form with the contents of the component itself
-  // If we are creating a new component, this won't make any changes
-  // If we are editing an existing component, this is where the existing information is filled in
+  //   - if we are creating a new component, this won't make any changes
+  //   - if we are editing an existing component, this is where the existing information is filled in
   typeForm.submission = Object.assign(typeForm.submission, component);
 
-  // When the populated type form is submitted (via clicking on the 'Submit' button), run the appropriate event handler callback function
+  // When the 'Submit' button is pressed, run the appropriate event handler callback function
   // This is a Formio event handler, NOT a jQuery one (the code syntax '.on' is identical, but the input argument and callback structure are different)
   typeForm.on('submit', function (submission) {
-    // At this point, the 'submission' object contains ONLY the information that has been entered into the type form by the user (the 'data' field)
-    // Now add all other required information from the passed variables to the 'submission' object
+    // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' field)
+    // Add all other required information, inheriting from the variables that were passed through the route to this page
     submission.componentUuid = component.componentUuid;
     submission.formId = componentTypeForm.formId;
     submission.formName = componentTypeForm.formName;
 
-    // If the component originates from a workflow (i.e. a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
+    // If the component originates from a workflow (and therefore a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
     if (!(workflowId === '')) submission.workflowId = workflowId;
 
-    // For an entirely new component ...
+    // When creating a new component ...
     if (newComponent) {
-      // Find the number of already-existing components of the same type as the component
+      // Get the count of existing components of the same type as the new one from the 'componentTypesAndCounts' object
       let numberOfExistingComponents = 0;
 
       if (componentTypesAndCounts[componentTypeForm.formId].count) numberOfExistingComponents = componentTypesAndCounts[componentTypeForm.formId].count;
 
-      // If the component is a 'Geometry Board' type, we must offset the number of already-existing components
-      // This is to account for an unknown number of boards that might have previously been physically created but not added to the database
-      if (componentTypeForm.formId === 'GeometryBoard') numberOfExistingComponents += 5000;
+      // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
+      // Additionally, we can set up and fill a 'Reception' field in the submission (which is relevant only for new 'Geometry Board' type components)
+      if (componentTypeForm.formId === 'GeometryBoard') {
+        numberOfExistingComponents += 5000;
 
-      // Then add a component type record number to the 'data' field of the submission
+        submission.reception = {};
+        submission.reception.location = 'lancaster';
+        submission.reception.date = (new Date()).toString().slice(0, 10);
+      }
+
+      // Add a component type record number to the 'data' field - this is equivalent to the 'UKID' for geometry boards, and just semi-useful information for other component types
       submission.data.typeRecordNumber = numberOfExistingComponents + 1;
     }
 
-    // If we are submitting a new batch-type component ...
+    // When creating a new batch-type component ...
     if (newBatchComponent) {
-      // Retrieve the desired number of sub-components from the submission object (since it will have already been entered into the component type form by the user)
+      // Retrieve the desired number of sub-components from the submission object (since it will have already been entered into the type form by the user)
       const numberOfSubComponents = submission.data.subComponent_count;
 
       // Get sub-arrays of the full and short sub-component UUIDs by taking slices of the corresponding full arrays, of length equal to the desired number of sub-components
+      // Save the sub-arrays into the submission object, under the 'data' field
       const slice_fullUuids = subComponent_fullUuids.slice(0, numberOfSubComponents);
       const slice_shortUuids = subComponent_shortUuids.slice(0, numberOfSubComponents);
 
-      // Set up an array to hold the sub-component type record numbers (this will be populated in the sub-component loop below)
-      let subComponent_typeRecordNumbers = [];
-
-      // Save the full and short sub-component UUID sub-arrays into the submission object, under the 'data' field that contains the rest of the form-level information
       submission.data.subComponent_fullUuids = slice_fullUuids;
       submission.data.subComponent_shortUuids = slice_shortUuids;
 
-      // Find the number of already-existing components of the same type as the sub-components
+      // Get the count of existing components of the same type as the sub-components from the 'componentTypesAndCounts' object
       let numberOfExistingSubComponents = 0;
 
       if (componentTypesAndCounts[submission.data.subComponent_formId].count) numberOfExistingSubComponents = componentTypesAndCounts[submission.data.subComponent_formId].count;
 
-      // If the sub-component is a 'Geometry Board' type, we must offset the number of already-existing components
-      // This is to account for an unknown number of boards that might have previously been physically created but not added to the database
+      // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
       if (submission.data.subComponent_formId === 'GeometryBoard') numberOfExistingSubComponents += 5000;
+
+      // Set up an array to hold the sub-component type record numbers (this will be populated in the sub-component loop below)
+      let subComponent_typeRecordNumbers = [];
 
       // For each sub-component ...
       for (let s = 0; s < numberOfSubComponents; s++) {
-        // Set up a new empty 'sub-submission' object, using the existing 'submission' object as a template
+        // Set up a new empty 'sub-submission' object, using the existing 'submission' object as a template, and immediately add all required sub-component information
+        // For 'Geometry Board' type sub-components, this will include a 'Reception' field
         let sub_submission = Object.create(submission);
 
-        // Add all required sub-component information
         sub_submission.componentUuid = slice_fullUuids[s];
         sub_submission.formId = submission.data.subComponent_formId;
+
+        if (submission.data.subComponent_formId === 'GeometryBoard') {
+          sub_submission.reception = {};
+          sub_submission.reception.location = 'lancaster';
+          sub_submission.reception.date = (new Date()).toISOString().slice(0, 10);
+        }
+
         sub_submission.data = Object.create(submission.data);
 
         // Add information to the sub-component's 'data' field indicating the fields and values that are inherited from the batch component
@@ -116,14 +127,14 @@ async function onPageLoad() {
         sub_submission.data.partNumber = submission.data.subComponent_partNumber;
         sub_submission.data.partString = submission.data.subComponent_partString;
         sub_submission.data.fromBatch = submission.componentUuid;
+        sub_submission.data.submit = true;
 
-        // Add a component type record number to the sub-component's 'data' field, and save it into the previously declared array
-        const subComponent_typeRecordNumber = numberOfExistingSubComponents + s + 1;
+        // Add a component type record number to the sub-component's 'data' field - this is equivalent to the 'UKID' for geometry boards, and just semi-useful information for other component types
+        // Additionally save this number into the previously declared array
+        sub_submission.data.typeRecordNumber = numberOfExistingSubComponents + s + 1;
+        subComponent_typeRecordNumbers.push(numberOfExistingSubComponents + s + 1);
 
-        sub_submission.data.typeRecordNumber = subComponent_typeRecordNumber;
-        subComponent_typeRecordNumbers.push(subComponent_typeRecordNumber);
-
-        // Since there is nothing more to be added to the sub-component submission data this point, immediately submit it to the DB
+        // Since there is nothing more to be added to the sub-component submission object, immediately submit it to the DB
         // Do not redirect the user back to the sub-component's information page, since we still need to deal with any other sub-components and the main batch-type component
         SubmitData(sub_submission, false);
       }
@@ -138,9 +149,8 @@ async function onPageLoad() {
 }
 
 
-/// Function to submit the completed 'submission' object to the database
+// Function to submit the record to the database
 function SubmitData(submission, redirectToInfo = true) {
-  // Submit the 'submission' object via a jQuery 'ajax' call, with the success and failure functions as defined below
   $.ajax({
     contentType: 'application/json',
     method: 'post',
@@ -151,7 +161,7 @@ function SubmitData(submission, redirectToInfo = true) {
   }).fail(postFail);
 
 
-  /// Function to run for a successful submission
+  // Function to run for a successful submission
   function postSuccess(result) {
     // If the submission result contains an error (even with a successful submission), display it along with the appropriate Formio alert type
     if (result.error) {
@@ -159,12 +169,12 @@ function SubmitData(submission, redirectToInfo = true) {
       typeForm.emit('error', result.error);
     }
 
-    // Display a 'submission complete' message
+    // Display a message to indicate successful submission
     typeForm.emit('submitDone');
 
-    // If desired, redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
-    // If the component originates from a workflow (i.e. a non-empty workflow ID has been provided), go to the page for updating the workflow path step results
-    // If this is a standalone component, go to the page for viewing a component record
+    // If required, redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
+    //   - if the component originates from a workflow, go to the page for updating the workflow path step results
+    //   - if this is a standalone component, go to the page for viewing the component record
     if (redirectToInfo) {
       if (!(workflowId === '')) {
         window.location.href = `/workflow/${workflowId}/component/${result}`;
@@ -175,7 +185,7 @@ function SubmitData(submission, redirectToInfo = true) {
   }
 
 
-  /// Function to run for a failed submission
+  // Function to run for a failed submission
   function postFail(result, statusCode, statusMsg) {
     // If the submission result contains a response message, display it along with the appropriate Formio alert type
     // Otherwise, display any status message and error code instead
@@ -185,7 +195,7 @@ function SubmitData(submission, redirectToInfo = true) {
       typeForm.setAlert('danger', `${statusMsg} (${statusCode})`);
     }
 
-    // Display a 'submission error' message
+    // Display a message to indicate that there was an error in submission
     typeForm.emit('submitError');
   }
 };

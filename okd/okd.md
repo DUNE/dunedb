@@ -17,6 +17,6 @@ respective services so that they are Internet-routeable.  These assume the secre
 already been created.
 
 ```bash
-oc process -f deploymentconfig.yaml -p DEPLOYMENT=staging -p EXTERNAL_IP=$(dig +short apa-dev.dunedb.org | tail -1) | oc create -f -
+oc process -f deploymentconfig.yaml -p DEPLOYMENT=staging -p EXTERNAL_IP=$(dig +short apa-staging.dunedb.org | tail -1) | oc create -f -
 oc process -f deploymentconfig.yaml -p DEPLOYMENT=production -p EXTERNAL_IP=$(dig +short apa.dunedb.org | tail -1) | oc create -f -
 ```

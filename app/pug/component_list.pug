@@ -6,24 +6,23 @@ block vars
 
 block content
   .container-fluid
-    div.vert-space-x2
+    .vert-space-x2
       if(singleType && componentTypeForm.tags && !componentTypeForm.tags.includes('Trash'))
-        a(href = `/component/${componentTypeForm.formId}`).btn.btn-primary
+        a.btn.btn-primary(href = `/component/${componentTypeForm.formId}`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Create a New Component of this Type
 
-        div.vert-space-x2
+        .vert-space-x2
 
       h2 #{title}
 
-    div.vert-space-x1
+    .vert-space-x1
       table.table
         thead
           tr
             th.col-md-2 Type Name
-            th.col-md-2 Component UUID
-            th.col-md-2 Component Name
-            th.col-md-2 Created On:
+            th.col-md-3 Component UUID
+            th.col-md-4 Component Name
             th.col-md-2 Last Edited On:
             th.col-md-1
 
@@ -40,12 +39,10 @@ block content
                   a(href = `/component/${uuid}`) #{uuid}
                 td #{component.name} 
                 td
-                  +dateFormat(component.creationDate)
+                  +dateFormat(component.lastEditDate)
                 td
-                  +dateFormatAndAgo(component.lastEditDate)
-                td
-                  a(href = `/json/component/${uuid}`, target = '_blank').btn-sm.btn-secondary
+                  a.btn-sm.btn-secondary(href = `/json/component/${uuid}`, target = '_blank')
                     img.small-icon(src = '/images/checklist_icon.svg')
-                    | &nbsp; JSON Record
+                    | &nbsp; JSON
 
-    div.vert-space-x2
+    .vert-space-x2

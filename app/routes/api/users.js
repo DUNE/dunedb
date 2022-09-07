@@ -1,15 +1,14 @@
 const ManagementClient = require('auth0').ManagementClient;
 const router = require('express').Router();
 
-const { BASE_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require("../../lib/constants");
+const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../../lib/constants');
 const logger = require('../../lib/logger');
-const m2m = require('lib/m2m.js');
 const permissions = require('lib/permissions.js');
 
 /// To ensure the manager below works:
 ///    - go to Auth0 Dashboard -> Applications -> APIs -> Auth0ManagementAPI
-///    - go to the "Machine to Machine Applications" tab
-///    - set the application to "Authorized"
+///    - go to the 'Machine to Machine Applications' tab
+///    - set the "DUNE DB" application to 'Authorized' (NOT the one with 'M2M' in the application name)
 ///    - using the pulldown arrow on the right to authorise the scopes given below
 /// There is no issue using the same 'clientId' and 'clientSecret' that we use for the main authentication
 const manager = new ManagementClient({
@@ -26,7 +25,7 @@ router.get('/users/list', permissions.checkPermissionJson('users:view'), async f
     // Get a list of all available roles in the Auth0 tenant
     const all_user_roles = await manager.getRoles(req.query);
 
-    // Set up a matrix of which roles belong to which users
+    // Set up a matrix of which users have which roles
     let promises = [];
 
     for (const role of all_user_roles) {
@@ -38,17 +37,14 @@ router.get('/users/list', permissions.checkPermissionJson('users:view'), async f
 
     const role_results = await Promise.all(promises);
 
-    // Collect and collate all information and roles for each user
+    // Collect and collate all information and roles into an object, with one entry per user and each entry keyed by user ID
     let user_data = {};
 
     for (let i = 0; i < all_user_roles.length; i++) {
-      const role = all_user_roles[i];
-      const users_with_role = role_results[i];
-
-      for (const u of users_with_role) {
+      for (const u of role_results[i]) {
         user_data[u.user_id] = user_data[u.user_id] || u;
         user_data[u.user_id].roles = user_data[u.user_id].roles || [];
-        user_data[u.user_id].roles.push(role.name);
+        user_data[u.user_id].roles.push(all_user_roles[i].name);
       }
     }
 
@@ -59,62 +55,6 @@ router.get('/users/list', permissions.checkPermissionJson('users:view'), async f
     res.status(500).json({ error: err.toString() });
   }
 });
-
-
-
-
-
-
-router.get("/m2mUsers", permissions.checkPermissionJson("users:edit"),
-  async (req, res, next) => {
-    try {
-      res.json(await m2m.ListMachineUsers());
-    } catch (err) {
-      logger.info({ route: req.route.path }, err.message);
-      res.status(400).json({ error: err.toString() });
-    }
-  }
-)
-
-router.post("/m2mUser/delete", permissions.checkPermissionJson("users:edit"),
-  async (req, res, next) => {
-    try {
-      return res.json(await m2m.DeleteMachineUser(req.body.user_id));
-    } catch (err) {
-      logger.info({ route: req.route.path }, err.message);
-      res.status(400).json({ error: err.toString() });
-    }
-  }
-);
-
-// Modify or add a machine user.
-router.post("/m2mUser", permissions.checkPermissionJson("users:edit"),
-  async (req, res, next) => {
-    try {
-
-      var rec = await m2m.AddMachineUser(
-        {
-          user_id: req.body.user_id,
-          displayName: req.body.displayName,
-          email: req.body.email,
-          permissions: req.body.permissions
-        }
-      );
-      var output_record = {
-        url: BASE_URL,
-        client_credentials: {
-          user_id: rec.user_id,
-          secret: rec.secret,
-        }
-      };
-      return res.json(output_record);
-
-    } catch (err) {
-      logger.info({ route: req.route.path }, err.message);
-      res.status(400).json({ error: err.toString() });
-    }
-  }
-)
 
 
 module.exports = router;

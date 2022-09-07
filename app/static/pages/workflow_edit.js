@@ -1,16 +1,16 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let typeForm;
 
+
 // Run a specified function when the page is loaded
 window.addEventListener('load', onPageLoad);
 
 
-/// Function to run when the page is loaded
+// Function to run when the page is loaded
 async function onPageLoad() {
-  // Set up a new type form based on the schema of the workflow type form
+  // Set up a new type form based on the schema of the action type form, and add a 'Submit' button (this is only in the scope of this script)
   let schema = workflowTypeForm.schema;
 
-  // Add a 'Submit' button to the type form (this is temporary, only in the scope of this script)
   schema.components.push({
     type: 'button',
     theme: 'btn btn-success',
@@ -30,33 +30,25 @@ async function onPageLoad() {
     }
   });
 
-  // Populate the type form with the contents of the workflow itself
-  // If we are creating a new workflow, this won't make any changes
-  // If we are editing an existing workflow, this is where the existing information is filled in
+  // Populate the type form with the contents of the workflow object
+  //   - if we are creating a new workflow, this won't make any changes
+  //   - if we are editing an existing workflow, this is where the existing information is filled in
   typeForm.submission = Object.assign(typeForm.submission, workflow);
 
-  // When the populated type form is submitted (via clicking on the 'Submit' button), run the appropriate event handler callback function
+  // When the 'Submit' button is pressed, run the appropriate event handler callback function
   // This is a Formio event handler, NOT a jQuery one (the code syntax '.on' is identical, but the input argument and callback structure are different)
   typeForm.on('submit', function (submission) {
-    // At this point, the 'submission' object contains ONLY the information that has been entered into the type form by the user (the 'data' field)
-    // Now add all other required information from the passed variables to the 'submission' object
+    // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' field)
+    // Add all other required information, inheriting from the variables that were passed through the route to this page
     submission.typeFormId = workflowTypeForm.formId;
     submission.typeFormName = workflowTypeForm.formName;
 
-    // Only if this is a completely new workflow, copy the 'path' object from the type form into the 'submission' object
+    // If this is a completely new workflow, copy the 'path' object from the workflow type form into the 'submission' object
     // For an existing workflow that is being edited, we don't want to do this, since it would overwrite any existing path results
-    // Also for a completely new workflow, set a 'status' field in the submission ... initially 'in progress'
+    // Also for a completely new workflow, set a 'status' field in the submission ... initially with a value of 'In Progress'
     if (newWorkflow) {
       submission.path = workflowTypeForm.path;
       submission.status = 'In Progress';
-    }
-
-    // Only if a new path step result is being submitted, update the specified step result
-    // Then check if this is the final step in the workflow path ... if so, update the workflow status accordingly
-    if (newStepResult) {
-      submission.path[stepIndex].result = stepResult;
-
-      if ((stepIndex + 1) === submission.path.length) submission.status = 'Complete';
     }
 
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database
@@ -65,9 +57,8 @@ async function onPageLoad() {
 }
 
 
-/// Function to submit the completed 'submission' object to the database
+// Function to submit the record to the database
 function SubmitData(submission) {
-  // Submit the 'submission' object via a jQuery 'ajax' call, with the success and failure functions as defined below
   $.ajax({
     contentType: 'application/json',
     method: 'post',
@@ -78,7 +69,7 @@ function SubmitData(submission) {
   }).fail(postFail);
 
 
-  /// Function to run for a successful submission
+  // Function to run for a successful submission
   function postSuccess(result) {
     // If the submission result contains an error (even with a successful submission), display it along with the appropriate Formio alert type
     if (result.error) {
@@ -86,15 +77,15 @@ function SubmitData(submission) {
       typeForm.emit('error', result.error);
     }
 
-    // Display a 'submission complete' message
+    // Display a message to indicate successful submission
     typeForm.emit('submitDone');
 
-    // Redirect the user back to the page for viewing a workflow record ('result' is the workflow's workflow ID)
+    // Redirect the user back to the page for viewing a workflow record (where 'result' is the workflow's workflow ID)
     window.location.href = `/workflow/${result}`;
   }
 
 
-  /// Function to run for a failed submission
+  // Function to run for a failed submission
   function postFail(result, statusCode, statusMsg) {
     // If the submission result contains a response message, display it along with the appropriate Formio alert type
     // Otherwise, display any status message and error code instead
@@ -104,7 +95,7 @@ function SubmitData(submission) {
       typeForm.setAlert('danger', `${statusMsg} (${statusCode})`);
     }
 
-    // Display a 'submission error' message
+    // Display a message to indicate that there was an error in submission
     typeForm.emit('submitError');
   }
 };

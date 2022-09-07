@@ -1,70 +1,106 @@
-/* 1. import only the necessary Bootstrap files */
-@import "../node_modules/bootstrap/scss/_functions.scss"; 
-@import "../node_modules/bootstrap/scss/_variables.scss"; 
+/* 1. Import only the necessary Bootstrap files */
+@import "../node_modules/bootstrap/scss/_functions.scss";
+@import "../node_modules/bootstrap/scss/_variables.scss";
 
-/* 2. begin customization ---- */
-// (variable changes as before here...)
+/* 2. Declare any custom changes to the variables in the Bootstrap files, e.g. */
 // $font-size-base: 8;
 
-/* --- end customization ------ */
-/* 3. import Bootstrap to set the changes! */
-@import "../node_modules/bootstrap/scss/bootstrap.scss"; 
-/* 4. add @mixin or @extend customizations here */
-/* create new custom classes from existing classes */
+/* 3. Import the main Bootstrap .scss file to set the changes declared above */
+@import "../node_modules/bootstrap/scss/bootstrap.scss";
+
+/* 4. Write any additional @mixin or @extend customisations here
+      Write new custom classes, which must be based on existing classes */
+
 .specification-label {
-    @extend .text-right;
-    @extend .small;
-    color: #777;
-    .specification-warning {
-    	color: red;
-    }
+  @extend .text-right;
+  @extend .small;
+  color: #777;
+
+  .specification-warning {
+    color: red;
+  }
 }
-/* uuid component */
-div.componentUuidComponent {
-  display:flex;
+
+// ComponentUUID Formio component display
+div.componentuuid {
+  display: flex;
 
   .main-input {
     flex: 1 1 auto;
   }
-  .runQrCameraModel {
+
+  .runQRCameraModal {
     @extend .btn;
-    @extend .btn-secondary ;
+    @extend .btn-secondary;
     @extend .btn-sm;
   }
+
   .uuid-link {
-    display:none;
+    display: none;
     flex: 0 0 auto;
     padding: 5px;
-    @extend .align-middle
+    @extend .align-middle;
   }
-
 }
 
-.componentUuid-info {
+// ComponentUUID Formio component text
+.componentuuid-info {
   @extend .text-right;
   @extend .small;
   color: #00F;
   white-space: nowrap;
   text-overflow: ellipsis;
-  overflow:hidden;
+  overflow: hidden;
 }
 
-/* use @mixins */
-.btn-custom {
-  @include button-variant(red, white, red, red);
+// ActionID Formio component display
+div.actionid {
+  display: flex;
+
+  .main-input {
+    flex: 1 1 auto;
+  }
+
+  .actionid-link {
+    display: none;
+    flex: 0 0 auto;
+    padding: 5px;
+    @extend .align-middle;
+  }
 }
 
-/* array component */
-.array-component-readonly-text::-webkit-scrollbar {
-  display:none;
-}
-.array-component-readonly-text {
+// ActionID Formio component text
+.actionid-info {
+  @extend .text-right;
   @extend .small;
-  width: 100%;
-  // max-width:400px;
+  color: #00F;
   white-space: nowrap;
-  overflow:scroll;
-  scrollbar-height: none;
-  -ms-overflow-style:none;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
 
+// WorkflowID Formio component display
+div.workflowid {
+  display: flex;
+
+  .main-input {
+    flex: 1 1 auto;
+  }
+
+  .workflowid-link {
+    display: none;
+    flex: 0 0 auto;
+    padding: 5px;
+    @extend .align-middle;
+  }
+}
+
+// WorkflowID Formio component text
+.workflowid-info {
+  @extend .text-right;
+  @extend .small;
+  color: #00F;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

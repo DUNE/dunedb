@@ -6,50 +6,56 @@ block vars
 
 block content
   .container-fluid
-    div.vert-space-x2
-      img.avatar_image.border(src = userProfile.picture)
+    .vert-space-x2
+      h2 User Profile
 
-    div.vert-space-x1
-      dl
-        dt Display Name
-        dd #{userProfile.name}
+    .vert-space-x1
+      .row
+        .col
+          dl
+            dt Display Name
+            dd #{userProfile.name}
 
-        dt User ID
-        dd
-          .monospace #{userProfile.user_id}
+            dt User ID
+            dd
+              .monospace #{userProfile.user_id}
 
-        dt Email
-        dd 
-          a(href = `mailto:${userProfile.email}`) #{userProfile.email} 
+            dt Email
+            dd 
+              a(href = `mailto:${userProfile.email}`) #{userProfile.email} 
 
-          if(userProfile.email_verified)
-            span (Verified)
+              if(userProfile.email_verified)
+                span (Verified)
 
-        dt Created On:
-        dd
-          +dateFormat(userProfile.created_at)
+            dt Created On:
+            dd
+              +dateFormatAndAgo(userProfile.created_at)
 
-        dt Last Login:
-        dd
-          +dateFormat(userProfile.last_login)
+            dt Last Login:
+            dd
+              +dateFormatAndAgo(userProfile.last_login)
 
-        dt Last IP Address
-        dd
-          .monospace #{userProfile.last_ip}
+            dt Last IP Address
+            dd
+              .monospace #{userProfile.last_ip}
 
-        dt Total Logins Count
-        dd #{userProfile.logins_count}
+            dt Total Logins Count
+            dd #{userProfile.logins_count}
 
-        hr
+        .col-md-3
+          img.avatar_image.border(src = userProfile.picture)
 
-        dt Roles
-        dd
-          .monospace
-            +arrayFormat(user.roles)
+    .vert-space-x1
+      hr
 
-        dt Permissions granted by these Roles:
-        dd
-          .monospace
-            +arrayFormat(user.permissions)
+      dt Roles
+      dd
+        .monospace
+          +arrayFormat(user.roles)
 
-    div.vert-space-x2
+      dt Permissions granted by these Roles:
+      dd
+        .monospace
+          +arrayFormat(user.permissions)
+
+    .vert-space-x2
