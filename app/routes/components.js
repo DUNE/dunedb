@@ -298,16 +298,11 @@ router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('form
 /// List all component types
 router.get('/componentTypes/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Simultaneously retrieve the following information about the component types:
-    //  - a list of component counts by type, for all type forms that already have at least one recorded component
-    //  - a list of maximum component 'typeRecordNumber' value by component type, for all type forms
-    const [componentCountsByType, maxComponentTRNByType] = await Promise.all([
-      Components.componentCountsByTypes(),
-      Components.maxComponentTRNByTypes(),
-    ]);
+    // Retrieve a list of component counts by type across all type forms
+    const componentCountsByType = await Components.componentCountsByTypes();
 
     // Render the interface page
-    res.render('component_listTypes.pug', { componentCountsByType, maxComponentTRNByType });
+    res.render('component_listTypes.pug', { componentCountsByType });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

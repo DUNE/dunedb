@@ -7,7 +7,7 @@ const logger = require('../lib/logger');
 /// View a table of which tags are associated with specific type forms
 router.get('/tags', async function (req, res, next) {
   try {
-    // Retrieve a list of all type form tags that are currently cached
+    // Retrieve a list of all type form tags that exist across all type forms
     // Simultaneously, retrieve lists of all component, action and workflow type forms that currently exist in the respective collections    
     let [typeFormTags, componentTypeForms, actionTypeForms, workflowTypeForms] = await Promise.all([
       Forms.tags(),
