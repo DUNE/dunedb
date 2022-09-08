@@ -1,8 +1,6 @@
-
 /// Insertion data for a single record
 function insertion(req) {
-  // Check that the minimum required information has been provided for a record's insertion data
-  // This is simply user profile information (stored in 'req.user')
+  // Check that the currently logged in user's profile information (stored in 'req.user') has been provided
   if (!req) throw new Error(`commonSchema::insertion() - the 'req' object has not been specified!`);
   if (!req.user) throw new Error(`commonSchema::insertion() - the 'req.user' has not been specified!`);
 
@@ -23,20 +21,17 @@ function validity(old_record) {
   // Set up a variable to hold the new validity object
   let v = {};
 
-  // Retrieve the validity object of an old record, if one has been provided
-  // If there is no old record (i.e. 'old_record' = null), this is just empty
+  // If an old record has been provided, retrieve its validity object
+  // If no old record has been provided (i.e. 'old_record' = null), the corresponding validity object is just empty
   const v_old = (old_record || {}).validity || {};
 
-  // Set the new validity start date to be the current date
+  // Set the new validity information:
+  //   - start date is the current date
+  //   - new version number to be either 'old version number + 1' if an old validity has been provided, or '1' if not
   v.startDate = new Date();
-
-  // Set the new validity version number to be either:
-  //   - 'old version number + 1' if an old record's validity has been provided
-  //   - '1' if no old record validity is available
   v.version = (parseInt(v_old.version) || 0) + 1;
 
-  // Return the (partially complete) new validity object
-  // The third 'validity' field ('ancestor_id') is set explicitly in the record's 'save()' function
+  // Return the (partially complete) new validity object ... the third 'validity' field ('ancestor_id') is set explicitly in the record's 'save()' function
   return v;
 }
 
