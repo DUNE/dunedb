@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const shortuuid = require('short-uuid')();
+const ShortUUID = require('short-uuid')();
 
 const Components = require('lib/Components.js');
 const logger = require('../../lib/logger');
@@ -15,11 +15,15 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('co
     // check on the server side for whether we have a base 57 or base 58 shortuuid
     // TODO: clean this up to avoid 3 queries in rapid succession when short uuids are passed or component doesn't exist
     const {uuid} = req.params;
-    const uuid58 = ShortUUID().toUUID(uuid);
-    const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
     let component = await Components.retrieve(uuid);
-    if( !component ) component = await Components.retrieve(uuid58);
-    if( !component ) component = await Components.retrieve(uuid57);
+    if( !component ){
+      const uuid58 = ShortUUID().toUUID(uuid);
+      component = await Components.retrieve(uuid58);
+    }
+    if( !component ){
+      const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
+      component = await Components.retrieve(uuid57);
+    }
     if( !component ) return res.status(404).json({error: "Component not found" });
     
     // Return the record in JSON format
