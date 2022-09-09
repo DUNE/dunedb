@@ -96,7 +96,6 @@ async function createApp(app) {
   app.use('/dist/fabric-history',express.static(`${__dirname}/node_modules/fabric-history/src`));
   app.use('/dist/moment',express.static(`${__dirname}/node_modules/moment/min`));
   app.use('/dist/jsonurl',express.static(`${__dirname}/node_modules/@jsonurl/jsonurl/dist`));
-  app.use('/dist/short-uuid',express.static(`${__dirname}/node_modules/short-uuid/dist`));  
 
   // CSS precompiler. needs to come before /static call
   var compileSass = require('express-compile-sass');
