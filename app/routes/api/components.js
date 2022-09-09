@@ -13,10 +13,12 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('co
     // Retrieve the most recent version of the record corresponding to the specified component UUID
     // If there is no record corresponding to the UUID, this returns 'null'
     // check on the server side for whether we have a base 57 or base 58 shortuuid
+    // TODO: clean this up to avoid 3 queries in rapid succession when short uuids are passed or component doesn't exist
     const {uuid} = req.params;
     const uuid58 = ShortUUID().toUUID(uuid);
     const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
-    let component = await Components.retrieve(uuid58);
+    let component = await Components.retrieve(uuid);
+    if( !component ) component = await Components.retrieve(uuid58);
     if( !component ) component = await Components.retrieve(uuid57);
     if( !component ) return res.status(404).json({error: "Component not found" });
     
