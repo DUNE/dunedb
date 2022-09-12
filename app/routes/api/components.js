@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const ShortUUID = require('short-uuid')();
+const ShortUUID = require('short-uuid');
 
 const Components = require('lib/Components.js');
 const logger = require('../../lib/logger');
@@ -7,9 +7,7 @@ const permissions = require('lib/permissions.js');
 const utils = require('lib/utils.js');
 
 
-/// Retrieve the most recent version of a single component record
-/// Removing regex validation in the route entirely; the mongodb library does proper input validation 
-/// and the input value is of type string, so there aren't any security risk.  Anything that doesn't match will just return a 404.
+// Retrieve the most recent version of a single component record
 router.get('/component/:uuid', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID
@@ -18,15 +16,22 @@ router.get('/component/:uuid', permissions.checkPermissionJson('components:view'
     // TODO: clean this up to avoid 3 queries in rapid succession when short uuids are passed or component doesn't exist
     const {uuid} = req.params;
     let component = await Components.retrieve(uuid);
-    if( !component ){
-      const uuid58 = ShortUUID().toUUID(uuid);
-      component = await Components.retrieve(uuid58);
+
+    if (!component) {
+      try {
+        const uuid58 = ShortUUID().toUUID(uuid);
+        component = await Components.retrieve(uuid58);
+      } catch (e) {}
     }
-    if( !component ){
-      const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
-      component = await Components.retrieve(uuid57);
+
+    if (!component) {
+      try {
+        const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
+        component = await Components.retrieve(uuid57);
+      } catch (e) {}
     }
-    if( !component ) return res.status(404).json({error: "Component not found" });
+
+    if (!component) return res.status(404).json({ error: 'Component not found' });
     
     // Return the record in JSON format
     return res.json(component);
@@ -74,7 +79,7 @@ router.get('/newComponentUUID', async function (req, res, next) {
 router.get('/convertShortUUID/' + utils.short_uuid_regex, async function (req, res, next) {
   try {
     // Reconstruct the full UUID from the shortened UUID
-    const componentUuid = shortuuid.toUUID(req.params.shortuuid);
+    const componentUuid = ShortUUID().toUUID(req.params.shortuuid);
 
     // Return the full UUID
     return res.json(componentUuid);
