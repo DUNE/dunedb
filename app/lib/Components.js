@@ -134,7 +134,9 @@ async function retrieve(componentUuid, projection) {
 
   if (!match_condition.componentUuid) throw new Error(`Components::retrieve(): the 'componentUuid' has not been specified!`);
 
-  match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+  try {
+    match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+  } catch (e) { return null; }
 
   // Set up any additional options that have been specified via the 'projection' argument
   let options = {};
