@@ -31,8 +31,7 @@ async function save(input, req) {
   // Check that the user has permission to create and edit components
   if (!permissions.hasPermission(req, 'components:edit')) throw new Error(`Components::save() - you do not have permission [components:edit] to create and/or edit components!`);
 
-  // Check that the minimum required information has been provided for a record to be saved
-  // For component records, these are:
+  // Check that the minimum required component information has been provided
   //   - the component UUID
   //   - the component type form ID
   //   - user-provided data (may be empty of content, but must still exist)
@@ -47,11 +46,10 @@ async function save(input, req) {
 
   if (!typeForm) throw new Error(`Components:save() - the specified 'input.formId' (${input.formId}) does not match a known component type form!`);
 
-  // Set up a new (initially empty) record object
+  // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
+  // If no type form name has been specified in the 'input' object, use the value from the type form instead
   let newRecord = {};
 
-  // Add information to the new record, either directly or from the 'input' object
-  // If no type form name has been specified in the 'input' object, use the value from the type form instead
   newRecord.recordType = 'component';
   newRecord.componentUuid = MUUID.from(input.componentUuid);
   newRecord.shortUuid = shortuuid.fromUUID(input.componentUuid);
@@ -71,35 +69,32 @@ async function save(input, req) {
 
   if (input.componentUuid) oldRecord = await retrieve(input.componentUuid);
 
-  // Generate and add a 'validity' field to the new record
-  // This may be generated from scratch (for a new record), or via incrementing that of the existing record (if editing)
+  // Generate and add a 'validity' field to the new record, either from scratch (for a new record), or via incrementing that of the existing record (if editing)
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
   if (input.reception) newRecord.reception = input.reception;
 
-  // Insert the new record into the 'components' records collection
+  // Insert the new record into the 'components' records collection, and throw an error if the insertion fails
   const result = await db.collection('components')
     .insertOne(newRecord);
 
   _lock.release();
 
-  // Throw an error if the insertion fails
   if (result.insertedCount !== 1) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
   // Make a copy of the inserted record, and convert the 'componentUuid' from binary to string format, for better readability and consistent display
   let record = { ...result.ops[0] };
   record.componentUuid = MUUID.from(newRecord.componentUuid).toString();
 
-  // Return the record as proof that it has been saved successfully
+  // Return the copy as proof that it has been saved successfully
   return record;
 }
 
 
 /// Update the most recently logged reception location and date of a single component
 async function updateLocation(componentUuid, location, date) {
-  // Construct the 'match_condition' to be used as the database query
-  // For this function, it is that a record's component UUID must match the specified one
+  // Set up the DB query match condition to be that a record's component UUID must match the specified one
   let match_condition = { componentUuid };
 
   if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
@@ -107,7 +102,6 @@ async function updateLocation(componentUuid, location, date) {
   match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
   // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record
-  // Perform the record update
   const result = db.collection('components')
     .findOneAndUpdate(
       match_condition,
@@ -126,31 +120,30 @@ async function updateLocation(componentUuid, location, date) {
       }
     );
 
-  // Return the updated record as proof that it has been updated successfully
+  // Return the record as proof that it has been updated successfully
   return result;
 }
 
 
 /// Retrieve a single version of a component record (either the most recent, or a specified one)
 async function retrieve(componentUuid, projection) {
-  // Construct the 'match_condition' to be used as the database query
-  // For this function, it is that a record's component UUID must match the specified one
+  // Set up the DB query match condition to be that a record's component UUID must match the specified one, and throw an error if no component UUID has been specified
   let match_condition = { componentUuid };
 
   if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
 
-  // Throw an error if no component UUID has been specified
   if (!match_condition.componentUuid) throw new Error(`Components::retrieve(): the 'componentUuid' has not been specified!`);
 
-  match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+  try {
+    match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+  } catch (e) { return null; }
 
-  // Set up any additional options that have been specified via the 'projection'
-  // For this function, the only additional option will be a specified record version number
+  // Set up any additional options that have been specified via the 'projection' argument
   let options = {};
 
   if (projection) options.projection = projection;
 
-  // Query the 'components' records collection for records matching the condition and additional options
+  // Query the 'components' records collection for records matching the match condition and additional options
   // Then sort any matching records such that the most recent version is first in the list
   let records = await db.collection('components')
     .find(match_condition, options)
@@ -166,14 +159,14 @@ async function retrieve(componentUuid, projection) {
     return records[0];
   }
 
+  // If there are no matching records (i.e. the whole of the 'if' statement above is skipped), simply return 'null'
   return null;
 }
 
 
 /// Retrieve all versions of a component record
 async function versions(componentUuid) {
-  // Construct the 'match_condition' to be used as the database query
-  // For this function, it is that a record's component UUID must match the specified one
+  // Set up the DB query match condition to be that a record's component UUID must match the specified one
   let match_condition = { componentUuid };
 
   if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
@@ -183,7 +176,7 @@ async function versions(componentUuid) {
 
   match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
-  // Query the 'components' records collection for records matching the condition
+  // Query the 'components' records collection for records matching the match condition
   // Then sort any matching records such that the most recent version is first in the list
   let records = await db.collection('components')
     .find(match_condition)
@@ -202,11 +195,10 @@ async function versions(componentUuid) {
 
 /// Retrieve a list of component records matching a specified condition
 async function list(match_condition, options) {
-  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
 
-  // If a matching condition has been specified, this is the first aggregation stage
-  // If the matching condition contains a component UUID, make sure that it is in binary format first
+  // If a matching condition has been specified, set it as the first aggregation stage
+  // If the matching condition additionally contains a (string format) component UUID, first convert it to binary format
   if (match_condition) {
     if (match_condition.componentUuid) {
       if (match_condition.componentUuid['$in']) match_condition.componentUuid['$in'] = match_condition.componentUuid['$in'].map(x => MUUID.from(x));
@@ -215,13 +207,11 @@ async function list(match_condition, options) {
     aggregation_stages.push({ $match: match_condition });
   }
 
-  // Next we want to remove all but the most recent version of each matching record
+  // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-  // Then group the records by whatever fields will be subsequently used
-  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
-  // Note that this changes some field access via dot notation - i.e. in the returned records, 'component.data.name' becomes 'component.name'
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -234,7 +224,7 @@ async function list(match_condition, options) {
     },
   });
 
-  // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
+  // Re-sort the records by most last edit date ... most recent first
   aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
   // Add aggregation stages for any additionally specified options
@@ -243,24 +233,23 @@ async function list(match_condition, options) {
     if (options.limit) aggregation_stages.push({ $limit: options.limit });
   }
 
-  // Query the 'components' records collection using the aggregation stages
+  // Query the 'components' records collection using the aggregation stages defined above
   let records = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Convert the 'componentUuid' of each matching record from binary to string format, for better readability
+  // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
   for (let record of records) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
   }
 
-  // Return the entire list of component records
+  // Return the entire list of matching records
   return records;
 }
 
 
 /// Get a list of the current component count per type across all existing component types
 async function componentCountsByTypes() {
-  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
   let aggregation_stages = [];
 
   aggregation_stages.push({
@@ -287,148 +276,42 @@ async function componentCountsByTypes() {
     },
   });
 
-  // Query the 'components' records collection using the aggregation stages
-  let results = await db.collection('components')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  // Reform the results such that each one can be accessed via a key (i.e. the type form name) directly, rather than needing to know the index corresponding to a particular type form
-  let keyedResults = {};
-
-  for (const result of results) {
-    keyedResults[result.formId] = result;
-  }
-
-  // Retrieve a full list of all component type forms
-  const typeFormsList = await Forms.list('componentForms');
-
-  // Merge the full type forms list and the queried results, to create a single list of component counts by type that also includes types that do not have recorded components
-  const mergedList = deepmerge(keyedResults, typeFormsList);
-
-  // Return the final results
-  return mergedList;
-}
-
-
-/// Get a list of the current maximum component 'typeRecordNumber' per type across all existing component types
-async function maxComponentTRNByTypes() {
-  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
-  let aggregation_stages = [];
-
-  aggregation_stages.push({
-    $group: {
-      _id: '$formId',
-      maxValue: { $max: '$data.typeRecordNumber' },
-    }
-  });
-
-  aggregation_stages.push({
-    $project: {
-      formId: '$_id',
-      maxValue: true,
-      _id: false,
-    },
-  });
-
-  // Query the 'components' records collection using the aggregation stages
-  let results = await db.collection('components')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  // Reform the results such that each one can be accessed via a key (i.e. the type form name) directly, rather than needing to know the index corresponding to a particular type form
-  let keyedResults = {};
-
-  for (const result of results) {
-    keyedResults[result.formId] = result;
-  }
-
-  // Retrieve a full list of all component type forms
-  const typeFormsList = await Forms.list('componentForms');
-
-  // Merge the full type forms list and the queried results, to create a single list of component counts by type that also includes types that do not have recorded components
-  const mergedList = deepmerge(keyedResults, typeFormsList);
-
-  // Return the final results
-  return mergedList;
-}
-
-
-/// Search for component records
-/// The search can be performed via either a text search or specifying a record to match to
-async function search(textSearch, matchRecord, skip = 0, limit = 20) {
-  // Construct the 'match_condition' to be used as the database query
-  // If no record to match to is specified (i.e. we are doing a text search), the condition will remain empty for now
-  // Otherwise, it is that a record must match the specified one
-  let match_condition = matchRecord || {};
-
-  // If the condition contains a component UUID, set it to binary format
-  if (match_condition.componentUuid) match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
-
-  // If we are doing a text search, set the 'text' field of the condition
-  if (textSearch) match_condition['$text'] = { $search: textSearch };
-
-  // Set up the 'aggregation stages' of the query - these are the query steps in sequence
-  let aggregation_stages = [];
-
-  aggregation_stages.push({ $match: match_condition });
-
-  if (textSearch) aggregation_stages.push({ $sort: { score: { $meta: 'textScore' } } });
-
-  aggregation_stages.push({ $sort: { 'validity.startDate': -1 } });
-  aggregation_stages.push({ $skip: skip });
-  aggregation_stages.push({ $limit: limit });
-
-  aggregation_stages.push({
-    $group: {
-      _id: { componentUuid: '$componentUuid' },
-      componentUuid: { '$first': '$componentUuid' },
-      typeFormId: { '$first': '$formId' },
-      typeFormName: { '$first': '$formName' },
-      name: { '$first': '$data.name' },
-      creationDate: { '$last': '$validity.startDate' },
-      lastEditDate: { '$last': '$insertion.insertDate' },
-    },
-  });
-
-  if (textSearch) {
-    aggregation_stages.push({
-      $group: { score: { '$max': { $meta: 'textScore' } } },
-      $sort: { score: -1 },
-    });
-  }
-
-  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
-
-  // Query the 'components' records collection for records matching the condition and additionally defined aggregation stages
+  // Query the 'components' records collection using the aggregation stages defined above
   let records = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Convert the 'componentUuid' of each matching record from binary to string format, for better readability
-  // Additionally, add a 'route' field to each record, which is the URL of that record's information page
-  for (let record of records) {
-    record.componentUuid = MUUID.from(record.componentUuid).toString();
-    record.route = `/component/${record.componentUuid}`;
+  // Reform the query results into an object, with each entry keyed by the type form name
+  let keyedRecords = {};
+
+  for (const record of records) {
+    keyedRecords[record.formId] = record;
   }
 
-  // Return the entire list of component records
-  return records;
+  // Retrieve a full list of all component type forms
+  // Then merge this with the results object, to create a single object containing component counts by type that now also includes types that have a count of zero
+  const typeFormsList = await Forms.list('componentForms');
+  const mergedList = deepmerge(keyedRecords, typeFormsList);
+
+  // Return the merged object
+  return mergedList;
 }
 
 
 /// Auto-complete a component UUID string as it is being typed
-/// This actually returns the records of all components with a matching component UUID to that being typed
+/// This function actually returns a list of component records with matching component UUIDs to that being typed
 async function autoCompleteUuid(inputString, limit = 10) {
   // Remove any underscores and dashes from the input string
   let q = inputString.replace(/[_-]/g, '');
 
-  // The component UUID is up to 32 alphanumeric characters long (excluding dashes), so pad the input string out to this length
-  // Then set up objects representing the minimum and maximum binary values that are possible for the current input string
+  // Calculate the minimum and maximum possible binary values of the input string
+  // The component UUID is 32 alphanumeric characters long (excluding dashes), so the minimum value is given by the input string padded out to this length with '0' characters, and the maximum by padding using 'F' characters
   const bitlow = Binary(Buffer.from(q.padEnd(32, '0'), 'hex'), Binary.SUBTYPE_UUID);
   const bithigh = Binary(Buffer.from(q.padEnd(32, 'F'), 'hex'), Binary.SUBTYPE_UUID);
 
-  // Construct a 'match_condition' to be used as the database query
-  // For this function, it is that the component UUID's binary value is between the minimum and maximum binary values defined above
+  let aggregation_stages = [];
+
+  /// Set up the DB query match condition to be that a record's component UUID must have a binary value between the minimum and maximum values calculated above
   let match_condition = {
     componentUuid: {
       $gte: bitlow,
@@ -436,18 +319,13 @@ async function autoCompleteUuid(inputString, limit = 10) {
     },
   };
 
-  // Set up the 'aggregation stages' of the database query - these are the query steps in sequence
-  let aggregation_stages = [];
-
   aggregation_stages.push({ $match: match_condition });
 
-  // Next we want to remove all but the most recent version of each matching record
+  // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-
-  // Then group the records by whatever fields will be subsequently used
-  // For example, if the 'componentUuid' of each returned record is to be used later on, it must be one of the groups defined here
-  // Note that this changes some field access via dot notation - i.e. in the returned records, 'component.data.name' becomes 'component.name'
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -458,23 +336,23 @@ async function autoCompleteUuid(inputString, limit = 10) {
     },
   });
 
-  // Finally re-sort the remaining matching records by most recent editing date first (now called 'lastEditDate' as per the group name)
+  // Re-sort the records by last edit date ... most recent first
   aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
-  // Add aggregation stages for any additionally specified options
+  // Limit the number of returned matching records, just so the interface doesn't get too busy
   aggregation_stages.push({ $limit: limit });
 
-  // Query the 'components' records collection using the aggregation stages
+  // Query the 'components' records collection using the aggregation stages defined above
   let records = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Convert the 'componentUuid' of each matching record from binary to string format, for better readability
+  // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
   for (let record of records) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
   }
 
-  // Return the entire list of component records
+  // Return the entire list of matching records
   return records;
 }
 
@@ -487,7 +365,5 @@ module.exports = {
   versions,
   list,
   componentCountsByTypes,
-  maxComponentTRNByTypes,
-  search,
   autoCompleteUuid,
 }

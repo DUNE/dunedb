@@ -4,16 +4,15 @@ const DB_NAME = process.env.DATABASE_NAME || 'dunedb';
 const APP_PORT = process.env.APP_PORT || 12313;
 
 /**
- * Here we set project-wide constants, pulling from the environment
- * and defaulting to safe values where applicable.
+ * Here we set project-wide constants, pulling from the environment and defaulting to safe values where applicable
  * @constant
  */
 module.exports = {
   // Database Constants
   DB_NAME,
   DB_URL: process.env.DATABASE_URL || `mongodb://localhost:27017/${DB_NAME}`,
-  DB_CA: process.env.DATABASE_CA, // Certificate Authority and Intermediate certs for trust
-  DB_CERTKEY: process.env.DATABASE_CERTKEY, // Cert & Key in PEM format
+  DB_CA: process.env.DATABASE_CA,            // Certificate authority and intermediate certificates for trust
+  DB_CERTKEY: process.env.DATABASE_CERTKEY,  // Certificate and key in PEM format
 
   // App Constants
   APP_PORT,
@@ -25,19 +24,4 @@ module.exports = {
   AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
   AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
   AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-
-  // Email Constants
-  EMAIL: {
-    CONFIGURATION: {
-      host: process.env.EMAIL_HOST,
-      secure: true, // true to use SMTPS
-      requireTLS: true,  // no cleartext
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    },
-    FROM: process.env.EMAIL_FROM_ADDRESS || 'support@dunedb.org',
-    ADMIN_RECIPIENTS: process.env.EMAIL_ADMIN_RECIPIENTS,
-  },
 };

@@ -1,6 +1,6 @@
 const deepmerge = require('deepmerge');
 const router = require('express').Router();
-const shortuuid = require('short-uuid')();
+const ShortUUID = require('short-uuid');
 
 const Actions = require('lib/Actions.js');
 const Components = require('lib/Components.js');
@@ -11,28 +11,41 @@ const utils = require('lib/utils.js');
 
 
 /// View a single component record
-router.get('/component/' + utils.uuid_regex, permissions.checkPermission('components:view'), async function (req, res, next) {
+router.get(`/component/${utils.short_combined_regex}`, permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
-    let query = { componentUuid: req.params.uuid };
-
+    let { uuid } = req.params;
+    let query = { componentUuid: uuid };
     if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
 
-    // Simultaneously retrieve the specified version and all versions of the record, and throw an error if there is no record corresponding to the component UUID
-    const [component, componentVersions] = await Promise.all([
-      Components.retrieve(query),
-      Components.versions(req.params.uuid),
-    ]);
+    let component = await Components.retrieve(query);
+
+    if (!component) {
+      try {
+        uuid = ShortUUID().toUUID(uuid);
+        query.componentUuid = uuid;
+        component = await Components.retrieve(query);
+      } catch (e) {}
+    }
+
+    if (!component) {
+      try {
+        uuid = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
+        query.componentUuid = uuid;
+        component = await Components.retrieve(query);
+      } catch (e) {}
+    }
 
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
-
+    
     // Retrieve other information relating to this component:
     //  - the component type form corresponding to the type form ID in the component record (and throw an error if there is no such type form)
     //  - records of all actions that have already been performed on this component
     //  - all currently available action type forms
+    const componentVersions = await Components.versions(uuid);
     const [componentTypeForm, actions, actionTypeForms] = await Promise.all([
       Forms.retrieve('componentForms', component.formId),
-      Actions.list({ componentUuid: req.params.uuid }),
+      Actions.list({ componentUuid: uuid }),
       Forms.list('actionForms'),
     ]);
 
@@ -57,7 +70,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
 router.get('/c/' + utils.short_uuid_regex, async function (req, res, next) {
   try {
     // Reconstruct the full UUID from the shortened UUID
-    const componentUuid = shortuuid.toUUID(req.params.shortuuid);
+    const componentUuid = ShortUUID().toUUID(req.params.shortuuid);
 
     // Redirect the user to the interface page for viewing a component record
     res.redirect(`/component/${componentUuid}`);
@@ -150,7 +163,7 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
         // ... meaning that it does not have access to the server-side library that actually generates UUIDs
         for (let i = 0; i < 250; i++) {
           const fullUuid = Components.newUuid().toString();
-          const shortUuid = shortuuid.fromUUID(fullUuid);
+          const shortUuid = ShortUUID().fromUUID(fullUuid);
 
           subComponent_fullUuids.push(fullUuid);
           subComponent_shortUuids.push(shortUuid);
@@ -298,16 +311,11 @@ router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('form
 /// List all component types
 router.get('/componentTypes/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Simultaneously retrieve the following information about the component types:
-    //  - a list of component counts by type, for all type forms that already have at least one recorded component
-    //  - a list of maximum component 'typeRecordNumber' value by component type, for all type forms
-    const [componentCountsByType, maxComponentTRNByType] = await Promise.all([
-      Components.componentCountsByTypes(),
-      Components.maxComponentTRNByTypes(),
-    ]);
+    // Retrieve a list of component counts by type across all type forms
+    const componentCountsByType = await Components.componentCountsByTypes();
 
     // Render the interface page
-    res.render('component_listTypes.pug', { componentCountsByType, maxComponentTRNByType });
+    res.render('component_listTypes.pug', { componentCountsByType });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

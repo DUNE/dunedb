@@ -125,11 +125,10 @@ class ComponentUUID extends TextFieldComponent {
       label: 'Component UUID',
       placeholder: 'Example: 123e4567-e89b-12d3-a456-426655440000',
       tooltip: 'Component UUID ... enter manually or scan component QR code',
-      inputMask: '********-****-****-****-************',
       validateOn: 'change',
       validate: {
-        pattern: '^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})',
-        customMessage: 'Must be a string in the format: [8]-[4]-[4]-[4]-[12] characters',
+        pattern: '^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})|[A-Za-z0-9]{20,22}',
+        customMessage: 'Must be a valid full-length [8]-[4]-[4]-[4]-[12] or shortened [22] character long UUID',
         unique: false,
         multiple: false,
       },
@@ -228,56 +227,23 @@ class ComponentUUID extends TextFieldComponent {
   // ... get the QR code, extract the short UUID, decode the full UUID, and populate the component input field
   // Please keep the console log statements in this function ... they are very useful for debugging the (notoriously unreliable!) QR code scanning
   cameraCallback(index, qrCode) {
-    const matchedURL = qrCode.match('.*/([123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ]{20,22})');
+    const matchedURL = qrCode.match('.*/([0-9a-zA-Z]{20,22})');
 
     if (matchedURL) {
-      const shortuuid = matchedURL[1].match('[^\-]*')[0];
-      const uuid58 = ShortUUID().toUUID(shortuuid);
-      console.log('Base58 UUID', uuid58);
-      const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(shortuuid);
-      console.log('Base57 UUID', uuid57);
+      const uuid = matchedURL[1].match('[^\-]*')[0];
+      const that = this;
+      
+      $.ajax({
+        type: 'GET',
+        url: `/json/component/${uuid}`,
+        dataType: 'json',
+        success: function (data) {
+          if (data) {
+            that.setValueAt(index, uuid);
+          }
+        },
+      })
 
-      const thisClass = this;
-      let uuid, foundMatchingComponent58 = false, foundMatchingComponent57 = false;
-
-      function checkUuid(uuid, base) {
-        return $.ajax({
-          type: 'GET',
-          url: `/json/component/${uuid}`,
-          dataType: 'json',
-          success: function (data) {
-            if (data) {
-              if (base === 58) foundMatchingComponent58 = true;
-              else foundMatchingComponent57 = true;
-            }
-          },
-        })
-      }
-
-      jQuery.when(checkUuid(uuid58, 58), checkUuid(uuid57, 57)).done(function () {
-        if (foundMatchingComponent58 && !foundMatchingComponent57) {
-          uuid = uuid58;
-          console.log('Found component matching only base58 UUID: ', uuid);
-        }
-
-        if (foundMatchingComponent57 && !foundMatchingComponent58) {
-          uuid = uuid57;
-          console.log('Found component matching only base57 UUID: ', uuid);
-        }
-
-        if (foundMatchingComponent57 && foundMatchingComponent58) {
-          uuid = uuid58;
-          console.log('Found components matching both base58 and base57 UUIDs ... using base58 as default query');
-        }
-
-        if (!foundMatchingComponent57 && !foundMatchingComponent58) {
-          uuid = uuid58;
-          console.log('Found no components matching either base58 and base57 UUIDs ... using base58 for query to fail');
-        }
-
-        thisClass.setValueAt(index, uuid);
-        return true;
-      });
     }
 
     return true;
@@ -291,25 +257,27 @@ class ComponentUUID extends TextFieldComponent {
   setValueAt(index, value, flags) {
     const changed = super.setValueAt.call(this, index, value);
 
-    if (this.refs.compUuidInfo && value && value.length === 36) {
-      $.get(`/json/component/${value}`);
+    if (this.refs.compUuidInfo && value) {
+      const { length } = value;
+      if (length === 36 || (length >= 20 && length <= 22)) {
+        $.get(`/json/component/${value}`);
 
-      if (window.location.pathname === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
-      if (window.location.pathname === '/search/workflowsByUUID') {
-        $.ajax({
-          contentType: 'application/json',
-          method: 'GET',
-          url: `/json/search/workflowsByUUID/${value}`,
-          dataType: 'json',
-          success: postSuccess,
-        }).fail(postFail);
+        if (window.location.pathname === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
+        if (window.location.pathname === '/search/workflowsByUUID') {
+          $.ajax({
+            contentType: 'application/json',
+            method: 'GET',
+            url: `/json/search/workflowsByUUID/${value}`,
+            dataType: 'json',
+            success: postSuccess,
+          }).fail(postFail);
+        }
       }
     }
 
     return changed;
   }
 }
-
 
 /// Function for updating the selection of available Formio components to include this one (on any 'Edit Type Form' page)
 ComponentUUID.editForm = function (a, b, c) {
@@ -321,7 +289,6 @@ ComponentUUID.editForm = function (a, b, c) {
 
   return form;
 }
-
 
 /// Register this custom Formio component with the overall list of components that are available to use in Formio forms
 Formio.Components.addComponent('ComponentUUID', ComponentUUID);

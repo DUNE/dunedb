@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const shortuuid = require('short-uuid')();
+const ShortUUID = require('short-uuid');
 
 const Components = require('lib/Components.js');
 const logger = require('../../lib/logger');
@@ -7,13 +7,32 @@ const permissions = require('lib/permissions.js');
 const utils = require('lib/utils.js');
 
 
-/// Retrieve the most recent version of a single component record
-router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function (req, res, next) {
+// Retrieve the most recent version of a single component record
+router.get('/component/:uuid', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID
     // If there is no record corresponding to the UUID, this returns 'null'
-    const component = await Components.retrieve(req.params.uuid);
+    // check on the server side for whether we have a base 57 or base 58 shortuuid
+    // TODO: clean this up to avoid 3 queries in rapid succession when short uuids are passed or component doesn't exist
+    const {uuid} = req.params;
+    let component = await Components.retrieve(uuid);
 
+    if (!component) {
+      try {
+        const uuid58 = ShortUUID().toUUID(uuid);
+        component = await Components.retrieve(uuid58);
+      } catch (e) {}
+    }
+
+    if (!component) {
+      try {
+        const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
+        component = await Components.retrieve(uuid57);
+      } catch (e) {}
+    }
+
+    if (!component) return res.status(404).json({ error: 'Component not found' });
+    
     // Return the record in JSON format
     return res.json(component);
   } catch (err) {
@@ -60,7 +79,7 @@ router.get('/newComponentUUID', async function (req, res, next) {
 router.get('/convertShortUUID/' + utils.short_uuid_regex, async function (req, res, next) {
   try {
     // Reconstruct the full UUID from the shortened UUID
-    const componentUuid = shortuuid.toUUID(req.params.shortuuid);
+    const componentUuid = ShortUUID().toUUID(req.params.shortuuid);
 
     // Return the full UUID
     return res.json(componentUuid);

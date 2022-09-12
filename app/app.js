@@ -14,7 +14,6 @@ const { db } = require('./lib/db');
 const logger = require('./lib/logger');
 const { DB_NAME, BASE_URL, NODE_ENV, SESSION_SECRET } = require('./lib/constants');
 const routes = require('./routes');
-var Cache    = require('lib/Cache.js');
 
 var permissions = require('lib/permissions.js');
 
@@ -98,7 +97,6 @@ async function createApp(app) {
   app.use('/dist/moment',express.static(`${__dirname}/node_modules/moment/min`));
   app.use('/dist/jsonurl',express.static(`${__dirname}/node_modules/@jsonurl/jsonurl/dist`));
 
-
   // CSS precompiler. needs to come before /static call
   var compileSass = require('express-compile-sass');
   app.use('/css',compileSass({
@@ -165,8 +163,6 @@ async function createApp(app) {
   // Setup all routes
   routes.routes.forEach(route => app.use(route));
   routes.paths.forEach(({ path, route }) => app.use(path, route));
-
-  await Cache.regenerateAllPromise();
 
   return app;
 }
