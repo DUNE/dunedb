@@ -10,7 +10,7 @@ const utils = require('lib/utils.js');
 /// Retrieve the most recent version of a single component record
 /// Removing regex validation in the route entirely; the mongodb library does proper input validation 
 /// and the input value is of type string, so there aren't any security risk.  Anything that doesn't match will just return a 404.
-router.get('/component/', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
+router.get('/component/:uuid', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID
     // If there is no record corresponding to the UUID, this returns 'null'
