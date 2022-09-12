@@ -22,7 +22,11 @@ async function renderSearchForms() {
     if (componentUuidForm.isValid()) {
       const componentUuid = componentUuidForm.submission.data.componentUuid;
 
-      if (componentUuid && componentUuid.length === 36) window.location.href = `/component/${componentUuid}`;
+      if (componentUuid) {
+        const { length } = componentUuid;
+        if (length === 36 || length === 22)
+          window.location.href = `/component/${componentUuid}`;
+      }
     }
   });
 
