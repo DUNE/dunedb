@@ -47,7 +47,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
 
 
 /// Perform a new action on an unspecified component
-router.get('/action/:typeFormId', permissions.checkPermission('actions:perform'), async function (req, res, next) {
+router.get('/action/:typeFormId/unspec', permissions.checkPermission('actions:perform'), async function (req, res, next) {
   try {
     // Retrieve the action type form corresponding to the specified type form ID, and throw an error if there is no such type form
     const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);

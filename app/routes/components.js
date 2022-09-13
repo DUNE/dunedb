@@ -11,41 +11,28 @@ const utils = require('lib/utils.js');
 
 
 /// View a single component record
-router.get(`/component/${utils.short_combined_regex}`, permissions.checkPermission('components:view'), async function (req, res, next) {
+router.get('/component/' + utils.uuid_regex, permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
-    let { uuid } = req.params;
-    let query = { componentUuid: uuid };
+    let query = { componentUuid: req.params.uuid };
+
     if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
 
-    let component = await Components.retrieve(query);
-
-    if (!component) {
-      try {
-        uuid = ShortUUID().toUUID(uuid);
-        query.componentUuid = uuid;
-        component = await Components.retrieve(query);
-      } catch (e) {}
-    }
-
-    if (!component) {
-      try {
-        uuid = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
-        query.componentUuid = uuid;
-        component = await Components.retrieve(query);
-      } catch (e) {}
-    }
+    // Simultaneously retrieve the specified version and all versions of the record, and throw an error if there is no record corresponding to the component UUID
+    const [component, componentVersions] = await Promise.all([
+      Components.retrieve(query),
+      Components.versions(req.params.uuid),
+    ]);
 
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
-    
+
     // Retrieve other information relating to this component:
     //  - the component type form corresponding to the type form ID in the component record (and throw an error if there is no such type form)
     //  - records of all actions that have already been performed on this component
     //  - all currently available action type forms
-    const componentVersions = await Components.versions(uuid);
     const [componentTypeForm, actions, actionTypeForms] = await Promise.all([
       Forms.retrieve('componentForms', component.formId),
-      Actions.list({ componentUuid: uuid }),
+      Actions.list({ componentUuid: req.params.uuid }),
       Forms.list('actionForms'),
     ]);
 

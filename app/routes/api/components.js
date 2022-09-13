@@ -7,34 +7,42 @@ const permissions = require('lib/permissions.js');
 const utils = require('lib/utils.js');
 
 
-// Retrieve the most recent version of a single component record
-router.get('/component/:uuid', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
+/// Retrieve the most recent version of a single component record
+router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID
     // If there is no record corresponding to the UUID, this returns 'null'
-    // check on the server side for whether we have a base 57 or base 58 shortuuid
-    // TODO: clean this up to avoid 3 queries in rapid succession when short uuids are passed or component doesn't exist
-    const {uuid} = req.params;
-    let component = await Components.retrieve(uuid);
+    const component = await Components.retrieve(req.params.uuid);
 
-    if (!component) {
-      try {
-        const uuid58 = ShortUUID().toUUID(uuid);
-        component = await Components.retrieve(uuid58);
-      } catch (e) {}
-    }
-
-    if (!component) {
-      try {
-        const uuid57 = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
-        component = await Components.retrieve(uuid57);
-      } catch (e) {}
-    }
-
-    if (!component) return res.status(404).json({ error: 'Component not found' });
-    
     // Return the record in JSON format
     return res.json(component);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Confirm that a specified short UUID corresponds to the full UUID in an existing component record
+router.get('/confirmShortUUID/' + utils.short_uuid_regex, async function (req, res, next) {
+  try {
+    // A short UUID may be encoded in one of two formats: base 58 (the default encoding alphabet used by the 'short-uuid' library), or base 57
+
+    // First, decode a full UUID from the specified short one using the base 58 alphabet, and attempt to find a corresponding component record
+    let uuid = ShortUUID().toUUID(req.params.shortuuid);
+    let component = await Components.retrieve(uuid);
+
+    // If there is no component record found, do the same again but now using the base 57 alphabet to decode the full UUID
+    if (!component) {
+      uuid = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
+      component = await Components.retrieve(uuid);
+    }
+
+    // If there is still no record found, return an appropriate error message
+    if (!component) return res.status(404).json({ error: 'Component not found' });
+
+    // Otherwise, return the full UUID that corresponded to an existing component record
+    return res.json(uuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

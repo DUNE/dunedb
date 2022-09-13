@@ -8,7 +8,7 @@ block content
   .container-fluid
     .vert-space-x2
       if(singleType && actionTypeForm.tags && !actionTypeForm.tags.includes('Trash'))
-        a.btn.btn-primary(href = `/action/${actionTypeForm.formId}`)
+        a.btn.btn-primary(href = `/action/${actionTypeForm.formId}/unspec`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Perform a New Action of this Type
 

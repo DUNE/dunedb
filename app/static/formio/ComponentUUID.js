@@ -127,8 +127,8 @@ class ComponentUUID extends TextFieldComponent {
       tooltip: 'Component UUID ... enter manually or scan component QR code',
       validateOn: 'change',
       validate: {
-        pattern: '^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})|[A-Za-z0-9]{20,22}',
-        customMessage: 'Must be a valid full-length [8]-[4]-[4]-[4]-[12] or shortened [22] character long UUID',
+        pattern: '^$|([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})',
+        customMessage: 'Must be a string in the format: [8]-[4]-[4]-[4]-[12] characters',
         unique: false,
         multiple: false,
       },
@@ -224,21 +224,21 @@ class ComponentUUID extends TextFieldComponent {
   }
 
   // If the camera icon is pressed, i.e. if the user is scanning a QR code ...
-  // ... get the QR code, extract the short UUID, decode the full UUID, and populate the component input field
-  // Please keep the console log statements in this function ... they are very useful for debugging the (notoriously unreliable!) QR code scanning
+  // ... get the QR code, extract the short UUID, confirm that the short UUID corresponds to the full UUID of an existing component ...
+  // ... and populate the component input field with the corresponding full UUID (which is returned from the 'ajax' call)
   cameraCallback(index, qrCode) {
     const matchedURL = qrCode.match('.*/([0-9a-zA-Z]{20,22})');
 
     if (matchedURL) {
-      const uuid = matchedURL[1].match('[^\-]*')[0];
+      const shortuuid = matchedURL[1].match('[^\-]*')[0];
       const that = this;
-      
+
       $.ajax({
         type: 'GET',
-        url: `/json/component/${uuid}`,
+        url: `/json/confirmShortUUID/${shortuuid}`,
         dataType: 'json',
-        success: function (data) {
-          if (data) {
+        success: function (uuid) {
+          if (uuid) {
             that.setValueAt(index, uuid);
           }
         },
@@ -253,31 +253,36 @@ class ComponentUUID extends TextFieldComponent {
   //   - if on the 'Search for Record by UUID or ID' page, redirect to the component information page
   //   - if on the 'Search for Workflows by UUID' page, retrieve the relevant workflow information and redirect to the workflow information page
   //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by UUID' page)
+  //   - if on any 'Perform Action on Unspecified Component' page, redirect to the page for performing the action on the specified component
   //   - in any other situation, i.e. if this Formio component is just part of a type form, then do not redirect anywhere
   setValueAt(index, value, flags) {
     const changed = super.setValueAt.call(this, index, value);
 
-    if (this.refs.compUuidInfo && value) {
-      const { length } = value;
-      if (length === 36 || (length >= 20 && length <= 22)) {
-        $.get(`/json/component/${value}`);
+    if (this.refs.compUuidInfo && value && value.length === 36) {
+      $.get(`/json/component/${value}`);
 
-        if (window.location.pathname === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
-        if (window.location.pathname === '/search/workflowsByUUID') {
-          $.ajax({
-            contentType: 'application/json',
-            method: 'GET',
-            url: `/json/search/workflowsByUUID/${value}`,
-            dataType: 'json',
-            success: postSuccess,
-          }).fail(postFail);
-        }
+      const currentURL = window.location.pathname;
+
+      if (currentURL === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
+      if (currentURL === '/search/workflowsByUUID') {
+        $.ajax({
+          contentType: 'application/json',
+          method: 'GET',
+          url: `/json/search/workflowsByUUID/${value}`,
+          dataType: 'json',
+          success: postSuccess,
+        }).fail(postFail);
+      }
+      if ((currentURL.substring(0, 8) === '/action/') && (currentURL.substring(currentURL.length - 7) === '/unspec')) {
+        const baseURL = currentURL.substring(0, currentURL.length - 7);
+        window.location.href = `${baseURL}/${value}`;
       }
     }
 
     return changed;
   }
 }
+
 
 /// Function for updating the selection of available Formio components to include this one (on any 'Edit Type Form' page)
 ComponentUUID.editForm = function (a, b, c) {
@@ -289,6 +294,7 @@ ComponentUUID.editForm = function (a, b, c) {
 
   return form;
 }
+
 
 /// Register this custom Formio component with the overall list of components that are available to use in Formio forms
 Formio.Components.addComponent('ComponentUUID', ComponentUUID);
