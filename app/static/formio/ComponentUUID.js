@@ -253,6 +253,7 @@ class ComponentUUID extends TextFieldComponent {
   //   - if on the 'Search for Record by UUID or ID' page, redirect to the component information page
   //   - if on the 'Search for Workflows by UUID' page, retrieve the relevant workflow information and redirect to the workflow information page
   //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by UUID' page)
+  //   - if on any 'Perform Action on Unspecified Component' page, redirect to the page for performing the action on the specified component
   //   - in any other situation, i.e. if this Formio component is just part of a type form, then do not redirect anywhere
   setValueAt(index, value, flags) {
     const changed = super.setValueAt.call(this, index, value);
@@ -260,8 +261,10 @@ class ComponentUUID extends TextFieldComponent {
     if (this.refs.compUuidInfo && value && value.length === 36) {
       $.get(`/json/component/${value}`);
 
-      if (window.location.pathname === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
-      if (window.location.pathname === '/search/workflowsByUUID') {
+      const currentURL = window.location.pathname;
+
+      if (currentURL === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
+      if (currentURL === '/search/workflowsByUUID') {
         $.ajax({
           contentType: 'application/json',
           method: 'GET',
@@ -269,6 +272,10 @@ class ComponentUUID extends TextFieldComponent {
           dataType: 'json',
           success: postSuccess,
         }).fail(postFail);
+      }
+      if ((currentURL.substring(0, 8) === '/action/') && (currentURL.substring(currentURL.length - 7) === '/unspec')) {
+        const baseURL = currentURL.substring(0, currentURL.length - 7);
+        window.location.href = `${baseURL}/${value}`;
       }
     }
 
