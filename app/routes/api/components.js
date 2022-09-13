@@ -34,12 +34,12 @@ router.get('/confirmShortUUID/' + utils.short_uuid_regex, async function (req, r
 
     // If there is no component record found, do the same again but now using the base 57 alphabet to decode the full UUID
     if (!component) {
-      uuid = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(uuid);
+      uuid = ShortUUID('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').toUUID(req.params.shortuuid);
       component = await Components.retrieve(uuid);
     }
 
     // If there is still no record found, return an appropriate error message
-    if (!component) return res.status(404).json({ error: 'Component not found' });
+    if (!component) return res.status(404).json({ error: `There is no component record with component UUID = ${uuid}` });
 
     // Otherwise, return the full UUID that corresponded to an existing component record
     return res.json(uuid);
