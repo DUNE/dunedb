@@ -1,7 +1,7 @@
 const Binary = require('mongodb').Binary;
 const deepmerge = require('deepmerge');
 const MUUID = require('uuid-mongodb');
-const shortuuid = require('short-uuid')();
+const ShortUUID = require('short-uuid');
 
 const commonSchema = require('lib/commonSchema.js');
 const { db } = require('./db');
@@ -52,7 +52,7 @@ async function save(input, req) {
 
   newRecord.recordType = 'component';
   newRecord.componentUuid = MUUID.from(input.componentUuid);
-  newRecord.shortUuid = shortuuid.fromUUID(input.componentUuid);
+  newRecord.shortUuid = ShortUUID().fromUUID(input.componentUuid);
   newRecord.formId = input.formId;
   newRecord.formName = input.formName || typeForm.formName;
   newRecord.data = input.data;
@@ -134,6 +134,7 @@ async function retrieve(componentUuid, projection) {
 
   if (!match_condition.componentUuid) throw new Error(`Components::retrieve(): the 'componentUuid' has not been specified!`);
 
+  // Attempt to set the match condition to the specified UUID (in binary format), and return 'null' if the string-to-binary conversion fails
   try {
     match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
   } catch (e) { return null; }
@@ -166,15 +167,17 @@ async function retrieve(componentUuid, projection) {
 
 /// Retrieve all versions of a component record
 async function versions(componentUuid) {
-  // Set up the DB query match condition to be that a record's component UUID must match the specified one
+  // Set up the DB query match condition to be that a record's component UUID must match the specified one, and throw an error if no component UUID has been specified
   let match_condition = { componentUuid };
 
   if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
 
-  // Throw an error if no component UUID has been specified
   if (!match_condition.componentUuid) throw new Error(`Components::versions(): the 'componentUuid' has not been specified!`);
 
-  match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+  // Attempt to set the match condition to the specified UUID (in binary format), and return 'null' if the string-to-binary conversion fails
+  try {
+    match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+  } catch (e) { return null; }
 
   // Query the 'components' records collection for records matching the match condition
   // Then sort any matching records such that the most recent version is first in the list
