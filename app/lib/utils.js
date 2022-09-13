@@ -4,6 +4,4 @@ module.exports = {
 
   // A 20 to 22 character long shortened UUID
   short_uuid_regex: ':shortuuid([0-9a-bA-Z-]{20,22})',
-
-  short_combined_regex: ':uuid([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}|[0-9a-bA-Z-]{20,22})',
 }
