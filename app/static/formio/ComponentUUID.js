@@ -1,5 +1,5 @@
-let TextFieldComponent = Formio.Components.components.textfield;
-let gComponentUUIDComponent = null;
+var TextFieldComponent = Formio.Components.components.textfield;
+var gComponentUUIDComponent = null;
 
 
 /// Define the modal that is displayed when the camera button is pressed

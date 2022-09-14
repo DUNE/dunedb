@@ -1,5 +1,5 @@
-let TextFieldComponent = Formio.Components.components.textfield;
-let gWorkflowIDComponent = null;
+var TextFieldComponent = Formio.Components.components.textfield;
+var gWorkflowIDComponent = null;
 
 
 /// This class describes a custom Formio component for inputting a workflow ID
