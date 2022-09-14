@@ -45,9 +45,16 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
 
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
-        const boardRecord = await Components.retrieve(info.component_uuid);
+        let uuid = info.component_uuid;
+        let ukid = 'none';
 
-        shipmentDetails.push([info.component_uuid, boardRecord.data.typeRecordNumber]);
+        if (uuid === '') uuid = 'none';
+        else {
+          const boardRecord = await Components.retrieve(uuid);
+          ukid = boardRecord.data.typeRecordNumber;
+        }
+
+        shipmentDetails.push([uuid, ukid]);
       }
     }
 
@@ -131,9 +138,16 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
 
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
-        const boardRecord = await Components.retrieve(info.component_uuid);
+        let uuid = info.component_uuid;
+        let ukid = 'none';
 
-        shipmentDetails.push([info.component_uuid, boardRecord.data.typeRecordNumber]);
+        if (uuid === '') uuid = 'none';
+        else {
+          const boardRecord = await Components.retrieve(uuid);
+          ukid = boardRecord.data.typeRecordNumber;
+        }
+
+        shipmentDetails.push([uuid, ukid]);
       }
     }
 
