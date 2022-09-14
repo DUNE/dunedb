@@ -11,6 +11,7 @@
 /* 4. Write any additional @mixin or @extend customisations here
       Write new custom classes, which must be based on existing classes */
 
+// Formio component label: "Number with Tolerance"
 .specification-label {
   @extend .text-right;
   @extend .small;
@@ -21,7 +22,7 @@
   }
 }
 
-// ComponentUUID Formio component display
+// Formio component display: "Component UUID"
 div.componentuuid {
   display: flex;
 
@@ -43,7 +44,7 @@ div.componentuuid {
   }
 }
 
-// ComponentUUID Formio component text
+// Formio component text: "Component UUID"
 .componentuuid-info {
   @extend .text-right;
   @extend .small;
@@ -53,7 +54,7 @@ div.componentuuid {
   overflow: hidden;
 }
 
-// ActionID Formio component display
+// Formio component display: "Action ID"
 div.actionid {
   display: flex;
 
@@ -69,7 +70,7 @@ div.actionid {
   }
 }
 
-// ActionID Formio component text
+// Formio component text: "Action ID"
 .actionid-info {
   @extend .text-right;
   @extend .small;
@@ -79,7 +80,7 @@ div.actionid {
   overflow: hidden;
 }
 
-// WorkflowID Formio component display
+// Formio component display: "Workflow ID"
 div.workflowid {
   display: flex;
 
@@ -95,7 +96,7 @@ div.workflowid {
   }
 }
 
-// WorkflowID Formio component text
+// Formio component text: "Workflow ID"
 .workflowid-info {
   @extend .text-right;
   @extend .small;
