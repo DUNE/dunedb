@@ -82,8 +82,12 @@ block content
                     tbody
                       each info in shipmentDetails
                         tr
-                          td
-                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+                          if info[0] == 'none'
+                            td  #{info[0]}
+                          else
+                            td
+                              a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
                           td #{info[1]}
 
             if component.data.subComponent_fullUuids
