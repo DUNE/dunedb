@@ -1,5 +1,5 @@
-let TextFieldComponent = Formio.Components.components.textfield;
-let gActionIDComponent = null;
+var TextFieldComponent = Formio.Components.components.textfield;
+var gActionIDComponent = null;
 
 
 /// This class describes a custom Formio component for inputting an action ID
