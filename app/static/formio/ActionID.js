@@ -1,5 +1,5 @@
-var TextFieldComponent = Formio.Components.components.textfield;
-var gActionIDComponent = null;
+let TextFieldComponent = Formio.Components.components.textfield;
+let gActionIDComponent = null;
 
 
 /// This class describes a custom Formio component for inputting an action ID
@@ -120,7 +120,7 @@ ActionID.editForm = function (a, b, c) {
   let dataTab = tabs.components.find(obj => { return obj.key == 'data' });
 
   dataTab.components.splice(dataTab.components.findIndex(obj => { return obj.key = 'multiple' }), 1);
-  
+
   return form;
 }
 

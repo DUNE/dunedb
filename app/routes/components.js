@@ -38,11 +38,25 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
 
+    // For 'Geometry Board Shipment' type components, set up an array containing more detailed information about each board in the shipment
+    // This is required for this particular type of component, because by itself it only contains the UUIDs of the related boards
+    // (Contrast with 'Geometry Board Batch' type components, which natively contain both the UUIDs and UKIDs of the related boards)
+    let shipmentDetails = [];
+
+    if (component.formId === 'BoardShipment') {
+      for (const info of component.data.boardUuiDs) {
+        const boardRecord = await Components.retrieve(info.component_uuid);
+
+        shipmentDetails.push([info.component_uuid, boardRecord.data.typeRecordNumber]);
+      }
+    }
+
     // Render the interface page
     res.render('component.pug', {
       component,
       componentVersions,
       componentTypeForm,
+      shipmentDetails,
       actions,
       actionTypeForms,
     });
@@ -110,10 +124,24 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
       fullActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));
     }
 
+    // For 'Geometry Board Shipment' type components, set up an array containing more detailed information about each board in the shipment
+    // This is required for this particular type of component, because by itself it only contains the UUIDs of the related boards
+    // (Contrast with 'Geometry Board Batch' type components, which natively contain both the UUIDs and UKIDs of the related boards)
+    let shipmentDetails = [];
+
+    if (component.formId === 'BoardShipment') {
+      for (const info of component.data.boardUuiDs) {
+        const boardRecord = await Components.retrieve(info.component_uuid);
+
+        shipmentDetails.push([info.component_uuid, boardRecord.data.typeRecordNumber]);
+      }
+    }
+
     // Render the interface page
     res.render('component_summary.pug', {
       component,
       componentTypeForm,
+      shipmentDetails,
       actions: fullActions,
     });
   } catch (err) {

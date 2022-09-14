@@ -9,6 +9,7 @@ block extrascripts
     const component = !{JSON.stringify(component, null, 4)};
     const componentVersions = !{JSON.stringify(componentVersions, null, 4)};
     const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
+    const shipmentDetails = !{JSON.stringify(shipmentDetails, null, 4)};
     const actions = !{JSON.stringify(actions, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
     const base_url = '!{base_url}';
@@ -28,9 +29,6 @@ block content
             dt Component Type
             dd #{component.formName}
 
-            dt Component Name
-            dd #{component.data.name}
-
             dt Component UUID
             dd
               .form-inline
@@ -40,6 +38,13 @@ block content
 
                 a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
 
+            dt Component Name
+
+            if component.data.name
+              dd #{component.data.name}
+            else
+              dd (none)
+
             dt Short UUID
             dd #{component.shortUuid}
 
@@ -47,6 +52,11 @@ block content
               dt Part of Workflow:
               dd
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') #{component.workflowId}
+
+            if component.data.fromBatch
+              dt Part of Batch:
+              dd
+                a(href = `/component/${component.data.fromBatch}`, target = '_blank') #{component.data.fromBatch}
 
             dt Component Data:
             dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
@@ -59,10 +69,26 @@ block content
               .vert-space-x1.border-success.border.rounded.p-2
                 #typeform
 
+            if(component.formId == 'BoardShipment')
+              .vert-space-x1.border-success.border.rounded.p-2
+                dt Boards in Shipment
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-3 UUID
+                        th.col-md-2 UK ID
+
+                    tbody
+                      each info in shipmentDetails
+                        tr
+                          td
+                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+                          td #{info[1]}
+
             if component.data.subComponent_fullUuids
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Sub Components
-
                 dd
                   table.table
                     thead
@@ -85,11 +111,6 @@ block content
                           td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
 
                 a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
-
-            if component.data.fromBatch
-              dt Part of Batch:
-              dd
-                a(href = `/component/${component.data.fromBatch}`, target = '_blank') #{component.data.fromBatch}
 
           .vert-space-x1
             .panel.panel-default
