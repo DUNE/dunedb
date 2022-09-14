@@ -33,4 +33,9 @@ mixin qr-panel(text, desc)
       div #{text}
       div #{desc}
     .canvas-holder
-      canvas.qr-code(data-QR-text = text, data-QR-desc = desc)      
+      canvas.qr-code(data-QR-text = text, data-QR-desc = desc)
+
+mixin qr-panel-noText(text, desc)
+  .qr&attributes(attributes)
+    .canvas-holder
+      canvas.qr-code(data-QR-text = text, data-QR-desc = desc)

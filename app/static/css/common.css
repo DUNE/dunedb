@@ -123,6 +123,6 @@ img.small-icon {
 
 @media print {
   .noprint {
-    visibility: hidden;
+    display: none;
   }
 }
