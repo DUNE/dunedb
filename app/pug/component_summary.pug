@@ -8,6 +8,7 @@ block extrascripts
   script(type = 'text/javascript').
     const component = !{JSON.stringify(component, null, 4)};
     const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
+    const shipmentDetails = !{JSON.stringify(shipmentDetails, null, 4)};
     const actions = !{JSON.stringify(actions, null, 4)};
 
   block workscripts
@@ -20,37 +21,73 @@ block allbody
     .vert-space-x1
       p For best display, please print <b>without headers and footers</b> and <b>with backgrounds</b>.
 
-  .vert-space-x2
-    hr
+    .vert-space-x2
+      hr
 
   .vert-space-x2
     .container-fluid
       .row
-        .col-md-9
+        .col-sm-7
           h1 Component Summary
-          h4 Type: #{component.formName}
-          h4 Name: #{component.data.name}
-          h4 UUID: #{component.componentUuid}
-          p Printed: 
-            +dateFormat(moment())
 
-          .vert-space-x1
+          .vert-space-x1.hori-space-x1.h4
             dl
-              dt Current Version:
-              dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
-                +dateFormat(component.insertion.insertDate)
+              dt Type
+              dd #{component.formName}
 
-                if component.insertion.user
-                  |  by !{' '} #{component.insertion.user.displayName}
+              dt Component UUID
+              dd #{component.componentUuid}
 
-                .vert-space-x1.border-success.border.rounded.p-2
-                  #componenttypeform
+              dt Name
 
-        .col-md-3
+              if component.data.name
+                dd #{component.data.name}
+              else
+                dd (none)
+
+              if(component.formId == 'BoardShipment')
+                dt Number of Boards in Shipment
+                dd #{component.data.boardUuiDs.length}
+
+          .vert-space-x1.hori-space-x1
+            p &nbsp; Printed: 
+              +dateFormat(moment())
+
+        .col-sm-5
           #qr-code
-            +qr-panel(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
+            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, 'component.data.name')
+
+      .vert-space-x1
+        dl
+          dt Current Version:
+          dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
+            +dateFormat(component.insertion.insertDate)
+
+            if component.insertion.user
+              |  by !{' '} #{component.insertion.user.displayName}
+
+            .vert-space-x1.border-success.border.rounded.p-2
+              #componenttypeform
 
       .pagebreak
+
+      if(component.formId == 'BoardShipment')
+        .vert-space-x1.border-success.border.rounded.p-2
+          dt Boards in Shipment
+          dd
+            table.table
+              thead
+                tr
+                  th.col-sm-3 UUID
+                  th.col-sm-2 UK ID
+
+              tbody
+                each info in shipmentDetails
+                  tr
+                    td #{info[0]}
+                    td #{info[1]}
+
+        .pagebreak
 
       each action in actions
         .section.actionSection
