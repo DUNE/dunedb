@@ -29,10 +29,6 @@ html {
   margin-left: 2em
 }
 
-.workstep-img {
-  max-height: 90vh;
-}
-
 .foldable-heading {
   font-weight: bold;
   cursor: pointer;

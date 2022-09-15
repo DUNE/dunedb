@@ -6,133 +6,62 @@ const builder_config = {
   noDefaultSubmitButton: true,
 
   builder: {
-    dataentry: {
-      title: 'Data entry',
+    single: {
+      title: 'Single Data Value',
       default: true,
       weight: 0,
       components: {
         textfield: true,
         textarea: true,
         number: true,
-        SpecNumberComponent: true,
-        ArrayComponent: true,
+        NumberTolerance: true,
       },
     },
 
-    dataentryLeft:
-    {
-      title: "Data / label left",
-      default: false,
-      weight: 5,
-      components: {
-        textfield_left: deepmerge(formioComponents.textfield.builderInfo, { schema: { labelPosition: 'left-right' } }),
-        specnumber_left: deepmerge(SpecNumberComponent.builderInfo, { schema: { labelPosition: 'left-right' } }),
-      }
-    },
-
-    enumerated: {
-      title: 'Enumerations',
-      default: false,
+    multiple: {
+      title: 'Multiple Data Values',
       weight: 10,
       components: {
-        radio: true,
+        datamap: true,
+        datagrid: true,
+        editgrid: true,
+        NumberArray: true,
+        tree: true,
+      },
+    },
+
+    enumeration: {
+      title: 'Enumerations',
+      default: false,
+      weight: 20,
+      components: {
         checkbox: true,
+        radio: true,
         select: true,
         selectboxes: true,
       }
     },
 
-    specialized: {
-      title: 'Specialized',
-      weight: 20,
+    other: {
+      title: 'Other',
+      weight: 30,
       components: {
         ComponentUUID: true,
         ActionID: true,
         WorkflowID: true,
-        url: true,
-        datetime: true,
-        ImageAnnotator: true,
-        image: deepmerge(formioComponents.file.builderInfo, {
-          title: 'Image upload',
-          schema: {
-            label: 'Picture upload',
-            key: 'picture',
-            image: true,
-          },
-        }),
-        CustomGeoTagComponent: true,
-      }
-    },
-
-    multiple: {
-      title: 'Multiple',
-      weight: 30,
-      components: {
-        datamap: true,
-        datagrid: true,
-        editgrid: true,
-        tree: true,
-      },
-    },
-
-    layout: {
-      title: 'Layout',
-      default: false,
-      weight: 40,
-      components: {
-        htmlelement: {
-          title: 'HTML',
-          icon: 'code',
-          weight: 1000,
-          schema: { type: 'htmlelement' }
-        },
         content: true,
         columns: true,
-        fieldset: true,
-        panel: true,
+        datetime: true,
+        htmlelement: true,
         table: true,
-        tabs: true,
-        well: true,
-        container: true,
-        DatabaseImage: true,
-        AnnotatedImage: true,
       }
-    },
-
-    misc: {
-      title: 'Little-used',
-      default: false,
-      weight: 1000,
-      components: {
-        hidden: true,
-        tags: true,
-        email: true,
-        phoneNumber: true,
-        address: true,
-        day: true,
-        time: true,
-        signature: true,
-        button: true,
-        saveDraftButton: {
-          title: 'Save Draft button',
-          icon: 'button',
-          weight: 1000,
-          schema: {
-            type: 'button',
-            action: 'saveState',
-            state: 'draft',
-            theme: 'secondary',
-            key: 'saveAsDraft',
-            label: 'Save Draft'
-          },
-        },
-      },
     },
 
     basic: false,
     advanced: false,
     data: false,
     premium: false,
+    layout: false,
   }
 };
 
