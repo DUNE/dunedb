@@ -1,17 +1,17 @@
 /* 1. Import only the necessary Bootstrap files */
-@import "../node_modules/bootstrap/scss/_functions.scss";
-@import "../node_modules/bootstrap/scss/_variables.scss";
+@import '../node_modules/bootstrap/scss/_functions.scss';
+@import '../node_modules/bootstrap/scss/_variables.scss';
 
 /* 2. Declare any custom changes to the variables in the Bootstrap files, e.g. */
 // $font-size-base: 8;
 
 /* 3. Import the main Bootstrap .scss file to set the changes declared above */
-@import "../node_modules/bootstrap/scss/bootstrap.scss";
+@import '../node_modules/bootstrap/scss/bootstrap.scss';
 
 /* 4. Write any additional @mixin or @extend customisations here
       Write new custom classes, which must be based on existing classes */
 
-// Formio component label: "Number with Tolerance"
+// Formio component label: 'Number with Tolerance'
 .specification-label {
   @extend .text-right;
   @extend .small;
@@ -22,7 +22,7 @@
   }
 }
 
-// Formio component display: "Component UUID"
+// Formio component display: 'Component UUID'
 div.componentuuid {
   display: flex;
 
@@ -44,7 +44,7 @@ div.componentuuid {
   }
 }
 
-// Formio component text: "Component UUID"
+// Formio component text: 'Component UUID'
 .componentuuid-info {
   @extend .text-right;
   @extend .small;
@@ -54,7 +54,7 @@ div.componentuuid {
   overflow: hidden;
 }
 
-// Formio component display: "Action ID"
+// Formio component display: 'Action ID'
 div.actionid {
   display: flex;
 
@@ -70,7 +70,7 @@ div.actionid {
   }
 }
 
-// Formio component text: "Action ID"
+// Formio component text: 'Action ID'
 .actionid-info {
   @extend .text-right;
   @extend .small;
@@ -80,7 +80,7 @@ div.actionid {
   overflow: hidden;
 }
 
-// Formio component display: "Workflow ID"
+// Formio component display: 'Workflow ID'
 div.workflowid {
   display: flex;
 
@@ -96,7 +96,7 @@ div.workflowid {
   }
 }
 
-// Formio component text: "Workflow ID"
+// Formio component text: 'Workflow ID'
 .workflowid-info {
   @extend .text-right;
   @extend .small;

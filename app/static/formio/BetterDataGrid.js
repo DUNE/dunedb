@@ -8,7 +8,7 @@ class BetterDataGrid extends DataGridComponent {
   static schema(...extend) {
     return DataGridComponent.schema({
       type: 'BetterDataGrid',
-      label: "Better Data Grid",
+      label: 'Better Data Grid',
     }, ...extend);
   }
 

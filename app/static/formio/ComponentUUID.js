@@ -105,7 +105,7 @@ function runQRCameraModal(cb) {
           stop();
           $('#qrCameraModal').modal('hide');
         } else {
-          (outputMessage).text(`QR code data: "${code.data}" does not match expected format!`);
+          (outputMessage).text(`QR code data: '${code.data}' does not match expected format!`);
         }
       }
     }

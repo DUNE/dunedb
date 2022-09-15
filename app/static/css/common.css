@@ -35,11 +35,11 @@ html {
 }
 
 .foldable-heading .chevron:after {
-  content: "\f078";
+  content: '\f078';
 }
 
 .foldable-heading.collapsed .chevron:after {
-  content: "\f054";
+  content: '\f054';
 }
 
 img.small-icon {
@@ -54,7 +54,7 @@ img.small-icon {
 }
 
 .qr:before {
-  content: "";
+  content: '';
   display: inline-block;
   padding-top: 100%;
   width: 100%;
