@@ -16,7 +16,6 @@ head
   link(rel = 'stylesheet', href = '/css/custom.scss')
   link(rel = 'stylesheet', href = '/dist/formiojs/formio.full.min.css')
   link(rel = 'stylesheet', href = '/css/common.css')
-  link(rel = 'stylesheet', href = '/css/AnnotationCanvas.css')
   link(rel = 'stylesheet', href = '/css/component.css')
   link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
   link(rel = 'stylesheet', href = '/css/component_summary.css')
@@ -159,40 +158,23 @@ script(src = '/dist/formiojs/formio.full.js')
 script.
   Formio.setBaseUrl('!{base_url}');
 
-script(src = '/dist/deepmerge/umd.js')
+script(src = '/dist/jsqr/jsQR.js')
 script(src = '/dist/moment/moment.min.js')
-script(src = '/dist/ekko-lightbox/ekko-lightbox.min.js')
 
-script(src = '/dist/jsqr/jsQR.js') 
-script(src = '/js/qrcodegen.js')
-
-script(src = '/js/jsonpath.min.js')
-script(src = '/dist/fabric/fabric.min.js')
-script(src = '/dist/fabric-history/index.min.js')
-script(type = 'text/javascript', src = '/dist/jsonurl/jsonurl.min.js')
-
-script(type = 'text/javascript', src = '/js/qrcodegen.js')
-script(type = 'text/javascript', src = '/js/DrawQRCode.js')
-script(src = '/formio/ComponentGeoTag.js')
-script(src = '/formio/ComponentUUID.js')
 script(src = '/formio/ActionID.js')
-script(src = '/formio/WorkflowID.js')
-script(src = '/formio/ComponentWorkStep.js')
-script(src = '/formio/ComponentArray.js')
-script(src = '/formio/ComponentSpecNumber.js')
-script(src = '/formio/Components_misc.js')
-script(src = '/formio/DatabaseImage.js')
-
-script(src = '/js/AnnotationCanvas.js')
-script(src = '/formio/ImageAnnotator.js')
-script(src = '/formio/AnnotatedImage.js')
 script(src = '/formio/BetterDataGrid.js')
+script(src = '/formio/ComponentUUID.js')
+script(src = '/formio/NumberArray.js')
+script(src = '/formio/NumberTolerance.js')
+script(src = '/formio/WorkflowID.js')
 
 script(src = '/js/ABoundObject.js')
 script(src = '/js/Pad.js')
-script(src = '/js/Histogram.js')
-script(src = '/js/HistCanvas.js')
 script(src = '/js/ColorScale.js')
+script(src = '/js/HistCanvas.js')
+script(src = '/js/Histogram.js')
+script(src = '/js/qrcodegen.js')
+script(src = '/js/DrawQRCode.js')
 
 style.
   li.nav-item img {height: 40px;}

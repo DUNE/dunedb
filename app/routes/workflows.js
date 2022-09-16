@@ -49,7 +49,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
 
 
 /// Create a new workflow
-router.get('/workflow/:typeFormId', permissions.checkPermission("workflows:edit"), async function (req, res, next) {
+router.get('/workflow/:typeFormId', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
     // Retrieve the workflow type form corresponding to the specified type form ID, and throw an error if there is no such type form
     const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
@@ -69,7 +69,7 @@ router.get('/workflow/:typeFormId', permissions.checkPermission("workflows:edit"
 
 
 /// Edit an existing workflow
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermission("workflows:edit"), async function (req, res, next) {
+router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
     const workflow = await Workflows.retrieve(req.params.workflowId);
@@ -95,7 +95,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
 
 
 /// Update a single step result in the path of an existing workflow
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permissions.checkPermission("workflows:edit"), async function (req, res, next) {
+router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
     const workflow = await Workflows.retrieve(req.params.workflowId);
