@@ -357,7 +357,7 @@ router.get('/components/list', permissions.checkPermission('components:view'), a
   try {
     // Retrieve records of all components across all component types
     // The first argument should be 'null' in order to match to any type form ID
-    const components = await Components.list(null, { limit: 100 });
+    const components = await Components.list(null, { limit: 200 });
 
     // Retrieve a list of all component type forms that currently exist in the 'componentForms' collection
     const allComponentTypeForms = await Forms.list('componentForms');
@@ -381,7 +381,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
   try {
     // Retrieve records of all components with the specified component type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const components = await Components.list({ formId: req.params.typeFormId }, { limit: 100 });
+    const components = await Components.list({ formId: req.params.typeFormId }, { limit: 200 });
 
     // Retrieve the component type form corresponding to the specified type form ID
     const componentTypeForm = await Forms.retrieve('componentForms', req.params.typeFormId);

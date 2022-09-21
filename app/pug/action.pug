@@ -22,7 +22,14 @@ block content
     .vert-space-x1
       dl
         dt Action Type
-        dd #{action.typeFormName}
+        dd 
+          .form-inline
+            a #{action.typeFormName}
+
+            .hori-space-x1
+              a.btn-sm.btn-primary(href = `/action/${action.typeFormId}/unspec`)
+                img.small-icon(src = '/images/run_icon.svg')
+                | &nbsp; Perform a New Action of this Type
 
         dt Action Name
 
@@ -88,13 +95,5 @@ block content
         a.btn.btn-secondary(href = `/json/action/${action.actionId}`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View JSON Record
-
-    .vert-space-x2
-      hr
-
-    .vert-space-x2
-      a.btn.btn-primary(href = `/action/${action.typeFormId}/unspec`)
-        img.small-icon(src = '/images/run_icon.svg')
-        | &nbsp; Perform a New Action of this Type
 
     .vert-space-x2
