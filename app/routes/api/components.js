@@ -1,10 +1,10 @@
 const router = require('express').Router();
 const ShortUUID = require('short-uuid');
 
-const Components = require('lib/Components.js');
+const Components = require('../../lib/Components');
 const logger = require('../../lib/logger');
-const permissions = require('lib/permissions.js');
-const utils = require('lib/utils.js');
+const permissions = require('../../lib/permissions');
+const utils = require('../../lib/utils');
 
 
 /// Retrieve the most recent version of a single component record

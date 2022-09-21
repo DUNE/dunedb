@@ -11,18 +11,35 @@ head
   <meta http-equiv = 'X-UA-Compatible' content = 'IE=edge'>
   <meta name = 'viewport' content = 'width = device-width, initial-scale = 1, shrink-to-fit = no'>
 
+  //- Load internal stylesheets
+  //- Note that internal libraries are loaded at the end of the page, so as to not slow down the page rendering
   link(rel = 'icon', href = '/images/browser_icon.png', type = 'image/png')
   link(rel = 'stylesheet', href = '/css/dashboard.css')
   link(rel = 'stylesheet', href = '/css/custom.scss')
-  link(rel = 'stylesheet', href = '/dist/formiojs/formio.full.min.css')
   link(rel = 'stylesheet', href = '/css/common.css')
   link(rel = 'stylesheet', href = '/css/component.css')
   link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
   link(rel = 'stylesheet', href = '/css/component_summary.css')
+
+  //- Load external stylesheets and libraries
+  //- Note that for the libraries, the 'jQuery' one must be loaded first, since some of the others depend on it
+  link(rel = 'preload', href = 'https://cdn.jsdelivr.net/npm/formiojs@4.13.3/dist/formio.full.min.css', as = 'style', 
+    integrity = 'sha256-s29fAUUeOwl+ddJh9Syk/WJ5CjZiAI6BWG4uPhtKlps=', crossorigin = 'anonymous')
+  link(rel = 'stylesheet', href = 'https://cdn.jsdelivr.net/npm/formiojs@4.13.3/dist/formio.full.min.css', 
+    integrity = 'sha256-s29fAUUeOwl+ddJh9Syk/WJ5CjZiAI6BWG4uPhtKlps=', crossorigin = 'anonymous')
   link(rel = 'preload', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap', as = 'style')
   link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap')
 
-  script(src = '/dist/jquery/jquery.min.js')
+  script(src = 'https://code.jquery.com/jquery-3.6.0.min.js', 
+    integrity = 'sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=', crossorigin = 'anonymous')
+  script(src = 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js', 
+    integrity = 'sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct', crossorigin = 'anonymous')
+  script(src = 'https://cdn.jsdelivr.net/npm/bootstrap-autocomplete@2.3.5/dist/latest/bootstrap-autocomplete.min.js', 
+    integrity = 'sha256-2CNWY27yrzaMaN0z20KTdau9frXTl5aBOZ3E7rSGOSo=', crossorigin = 'anonymous')
+  script(src = 'https://cdn.jsdelivr.net/npm/formiojs@4.13.3/dist/formio.full.min.js', 
+    integrity = 'sha256-VvJv52ezJBJcslMJon3iRdmJAUZjNXqcm8S+smOYhho=', crossorigin = 'anonymous')
+  script(src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js', 
+    integrity = 'sha384-2EBe4bOCAHoiyZtAsgW2cgo3crpM072svgIIV2pYxOQWejDaa1rMJA9NH6LCkVQb', crossorigin = 'anonymous')
 
 mixin navlink
   if(attributes.href == route)
@@ -145,21 +162,11 @@ body(class = `deployment-${NODE_ENV}`)
         block content 
 
 
-//- Bootstrap core JavaScript
-//- ==========================================================
-//- Placed at the end of the document so the pages load faster
-
+//- Load internal libraries and set any global parameters and settings
 script(src = '/pages/dashboard.js')
-
-script(src = '/dist/bootstrap/js/bootstrap.bundle.min.js')
-script(src = '/dist/bootstrap-autocomplete/latest/bootstrap-autocomplete.min.js')
-script(src = '/dist/formiojs/formio.full.js')
 
 script.
   Formio.setBaseUrl('!{base_url}');
-
-script(src = '/dist/jsqr/jsQR.js')
-script(src = '/dist/moment/moment.min.js')
 
 script(src = '/formio/ActionID.js')
 script(src = '/formio/BetterDataGrid.js')

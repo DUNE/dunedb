@@ -1,9 +1,9 @@
 const router = require('express').Router();
 
-const Forms = require('lib/Forms.js');
+const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
-const permissions = require('lib/permissions.js');
-const Workflows = require('lib/Workflows.js');
+const permissions = require('../lib/permissions');
+const Workflows = require('../lib/Workflows');
 
 
 /// View a single workflow record

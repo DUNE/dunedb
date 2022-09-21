@@ -1,11 +1,11 @@
 const router = require('express').Router();
 
-const Actions = require('lib/Actions.js');
-const Components = require('lib/Components.js');
-const Forms = require('lib/Forms.js');
+const Actions = require('../lib/Actions');
+const Components = require('../lib/Components');
+const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
-const permissions = require('lib/permissions.js');
-const utils = require('lib/utils.js');
+const permissions = require('../lib/permissions');
+const utils = require('../lib/utils');
 
 
 /// View a single action record

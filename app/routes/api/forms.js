@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const Forms = require('lib/Forms.js');
+const Forms = require('../../lib/Forms');
 const logger = require('../../lib/logger');
-const permissions = require('lib/permissions.js');
+const permissions = require('../../lib/permissions');
 
 
 /// List all type forms in a specified type form collection
