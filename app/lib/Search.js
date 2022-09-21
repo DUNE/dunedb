@@ -1,6 +1,6 @@
 const MUUID = require('uuid-mongodb');
 
-const Components = require('lib/Components.js');
+const Components = require('./Components');
 const { db } = require('./db');
 
 

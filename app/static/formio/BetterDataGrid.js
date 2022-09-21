@@ -1,16 +1,18 @@
+var DataGridComponent = Formio.Components.components.datagrid;
 
+/// This class describes a custom Formio component for a data grid
+/// It extends the built-in 'datagrid' Formio component by adding the ability to cycle through entries via keyboard input
+class BetterDataGrid extends DataGridComponent {
 
-
-class BetterDataGrid extends Formio.Components.components.datagrid
-{
-
+  // Base schema for the component (the built-in 'datagrid' Formio component)
   static schema(...extend) {
-    return super.schema({
-              type: 'BetterDataGrid',
-              label: "BETTER Data Grid",
+    return DataGridComponent.schema({
+      type: 'BetterDataGrid',
+      label: 'Better Data Grid',
     }, ...extend);
   }
 
+  // Getter functions
   static get builderInfo() {
     return {
       title: 'Better Data Grid',
@@ -19,93 +21,61 @@ class BetterDataGrid extends Formio.Components.components.datagrid
       documentation: 'http://help.form.io/userguide/#datagrid',
       weight: 30,
       schema: BetterDataGrid.schema()
-     };
+    };
   }
 
   constructor(...args) {
     super(...args);
     this.type = 'BetterDataGrid';
   }
-  
-  attach(element)
-  {
-    console.log("BetterDataGrid attach",this)
-    // post-hoc some stuff:
-    $('.formio-component-BetterDataGrid',element).addClass('formio-component-datagrid');
-    var superattach = super.attach(element);
-    console.log('element',element);
-    // var tbody = this.refs[`${this.datagridKey}-tbody`];
-    // var trows = this.refs[`${this.datagridKey}-row`];
-    // var parent_tabindex = this.component.tabindex || 1;
-    // // tabindex will got down columns, not across rows.
-    // for(var tr of trows) {
-    //   $('input',tr).each(function(index){
 
-    //     $(this).prop('tabindex',parent_tabindex+index);
-    //   });
-    // }
-    // $(tbody).css('overflow-x','scroll');
-    return superattach;
- }
+  // After rendering the Formio component, attach it to an element of the page
+  attach(element) {
+    $('.formio-component-BetterDataGrid', element).addClass('formio-component-datagrid');
 
+    return super.attach(element);
+  }
 }
 
 
-// Register the component to the Formio.Components registry.
+/// Register this custom Formio component with the overall list of components that are available to use in Formio forms
 Formio.Components.addComponent('BetterDataGrid', BetterDataGrid);
 
 
-// Allow the enter and shift-enter keys to cyle through entries.
-$(document).on('keydown', 'input, select', function(e) {
+// Allow the 'Enter' and 'Shift + Enter' keyboard inputs to cycle through entries in the data grid
+$(document).on('keydown', 'input, select', function (e) {
+  if (e.key === 'Enter') {
+    self = $(this);
 
-    if (e.key === "Enter") {
-      console.log("my key handler");
-      self = $(this);
+    const form = $('body');
 
-      var form = $('body');//self.parents('form:eq(0)');
+    //  Sort elements in the data grid by tab indices (if they exist)
+    const tab_index = parseInt(self.attr('tabindex'));
+    let input_array;
 
-      //  Sort by tab indexes if they exist
-      var tab_index = parseInt(self.attr('tabindex'));
-      console.log(this);
-      var input_array;
-
-      if (tab_index) {
-        input_array = form.find("[tabindex]").filter(':visible').sort(function(a, b) {
-          return parseInt($(a).attr('tabindex')) - parseInt($(b).attr('tabindex'));
-        });
-      } else {
-        input_array = form.find(['input','select','textarea','button']).filter(':visible');
-      }
-
-      // reverse the direction if using shift
-      var move_direction = e.shiftKey ? -1 : 1;
-      var new_index = input_array.index(this) + move_direction;
-
-      // wrap around the controls
-      if (new_index === input_array.length) {
-        new_index = 0;
-      } else if (new_index === -1) {
-        new_index = input_array.length - 1;
-      }
-
-      var move_to = input_array.eq(new_index);
-      move_to.focus();
-      move_to.select();
-      return false;
+    if (tab_index) {
+      input_array = form.find('[tabindex]').filter(':visible').sort(function (a, b) {
+        return parseInt($(a).attr('tabindex')) - parseInt($(b).attr('tabindex'));
+      });
+    } else {
+      input_array = form.find(['input', 'select', 'textarea', 'button']).filter(':visible');
     }
 
+    // Reverse the cycling direction if the 'Shift' key is also pressed
+    const move_direction = e.shiftKey ? -1 : 1;
+    let new_index = input_array.index(this) + move_direction;
+
+    // Wrap around the elements in the data grid
+    if (new_index === input_array.length) {
+      new_index = 0;
+    } else if (new_index === -1) {
+      new_index = input_array.length - 1;
+    }
+
+    let move_to = input_array.eq(new_index);
+    move_to.focus();
+    move_to.select();
+
+    return false;
+  }
 });
-// $(document).on('keydown', 'input, select', function(e) {
-//     console.log(e.key,'my key handler');
-//     if (e.key === "Enter") {
-//         var self = $(this), form = self.parents('form:eq(0)'), focusable, next;
-//         focusable = form.find('input,a,select,button,textarea').filter(':visible');
-//         next = focusable.eq(focusable.index(this)+1);
-//         if (next.length) {
-//             next.focus();
-//         } else {
-//             form.submit();
-//         }
-//         return false;
-//     }
-// });

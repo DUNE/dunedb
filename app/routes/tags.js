@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const Forms = require('lib/Forms.js');
+const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 
 

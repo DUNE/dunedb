@@ -3,12 +3,12 @@ const router = require('express').Router();
 
 const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../../lib/constants');
 const logger = require('../../lib/logger');
-const permissions = require('lib/permissions.js');
+const permissions = require('../../lib/permissions');
 
 /// To ensure the manager below works:
 ///    - go to Auth0 Dashboard -> Applications -> APIs -> Auth0ManagementAPI
 ///    - go to the 'Machine to Machine Applications' tab
-///    - set the "DUNE DB" application to 'Authorized' (NOT the one with 'M2M' in the application name)
+///    - set the 'DUNE DB' application to 'Authorized' (NOT the one with 'M2M' in the application name)
 ///    - using the pulldown arrow on the right to authorise the scopes given below
 /// There is no issue using the same 'clientId' and 'clientSecret' that we use for the main authentication
 const manager = new ManagementClient({

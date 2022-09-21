@@ -3,7 +3,7 @@ const router = require('express').Router();
 
 const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../lib/constants');
 const logger = require('../lib/logger');
-const permissions = require('lib/permissions.js');
+const permissions = require('../lib/permissions');
 
 /// To ensure the manager below works:
 ///    - go to Auth0 Dashboard -> Applications -> APIs -> Auth0ManagementAPI

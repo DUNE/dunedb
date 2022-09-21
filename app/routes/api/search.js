@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
 const logger = require('../../lib/logger');
-const Search = require('lib/Search.js');
-const utils = require('lib/utils.js');
+const Search = require('../../lib/Search');
+const utils = require('../../lib/utils');
 
 
 /// Search for geometry boards that have been received at a specified location

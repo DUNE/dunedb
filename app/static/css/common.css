@@ -29,21 +29,17 @@ html {
   margin-left: 2em
 }
 
-.workstep-img {
-  max-height: 90vh;
-}
-
 .foldable-heading {
   font-weight: bold;
   cursor: pointer;
 }
 
 .foldable-heading .chevron:after {
-  content: "\f078";
+  content: '\f078';
 }
 
 .foldable-heading.collapsed .chevron:after {
-  content: "\f054";
+  content: '\f054';
 }
 
 img.small-icon {
@@ -58,7 +54,7 @@ img.small-icon {
 }
 
 .qr:before {
-  content: "";
+  content: '';
   display: inline-block;
   padding-top: 100%;
   width: 100%;
