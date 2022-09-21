@@ -27,16 +27,22 @@ block content
         .col
           dl
             dt Component Type
-            dd #{component.formName}
+            dd
+              .form-inline
+                a #{component.formName}
+
+                .hori-space-x1
+                  a.btn-sm.btn-primary(href = `/component/${component.formId}`)
+                    img.small-icon(src = '/images/run_icon.svg')
+                    | &nbsp; Create a New Component of this Type
 
             dt Component UUID
             dd
               .form-inline
                 a(href = `/component/${component.componentUuid}`) #{component.componentUuid}
 
-                p &nbsp; &nbsp;
-
-                a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
+                .hori-space-x1
+                  a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
 
             dt Component Name
 
@@ -47,6 +53,10 @@ block content
 
             dt Short UUID
             dd #{component.shortUuid}
+
+            if(component.formId == 'GroundingMeshPanel')
+              dt Factory ID
+              dd #{component.data.typeRecordNumber}
 
             if component.workflowId
               dt Part of Workflow:

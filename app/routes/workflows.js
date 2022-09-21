@@ -1,9 +1,9 @@
 const router = require('express').Router();
 
-const Forms = require('lib/Forms.js');
+const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
-const permissions = require('lib/permissions.js');
-const Workflows = require('lib/Workflows.js');
+const permissions = require('../lib/permissions');
+const Workflows = require('../lib/Workflows');
 
 
 /// View a single workflow record
@@ -211,7 +211,7 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
 
     // Retrieve records of all workflows across all workflow types
     // The first argument should be 'null' in order to match to any type form ID
-    const workflows = await Workflows.list(null, { limit: 100 });
+    const workflows = await Workflows.list(null, { limit: 200 });
 
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
     const allWorkflowTypeForms = await Forms.list('workflowForms');
@@ -235,7 +235,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
   try {
     // Retrieve records of all workflows with the specified workflow type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, { limit: 100 });
+    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
 
     // Retrieve the workflow type form corresponding to the specified type form ID
     const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);

@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const Actions = require('lib/Actions.js');
-const Components = require('lib/Components.js');
-const Workflows = require('lib/Workflows.js');
+const Actions = require('../lib/Actions');
+const Components = require('../lib/Components');
+const Workflows = require('../lib/Workflows');
 
 
 /// Autocomplete a component UUID as it is being typed

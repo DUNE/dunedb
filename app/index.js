@@ -2,9 +2,6 @@ const { NODE_ENV, APP_PORT } = require('./lib/constants');
 const { db } = require('./lib/db');
 const logger = require('./lib/logger');
 
-// Set the current directory (from the '__dirname' environment variable) as the base for all future 'require' lines
-require('app-module-path').addPath(__dirname);
-
 var createApp = require('./app');
 let http;
 const options = {};

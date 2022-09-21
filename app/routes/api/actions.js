@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const Actions = require('lib/Actions.js');
+const Actions = require('../../lib/Actions');
 const logger = require('../../lib/logger');
-const permissions = require('lib/permissions.js');
+const permissions = require('../../lib/permissions');
 
 
 /// Retrieve the most recent version of a single action record

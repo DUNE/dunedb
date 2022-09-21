@@ -3,12 +3,13 @@ const express = require('express');
 const glob = require('glob');
 const MUUID = require('uuid-mongodb');
 const MongoStore = require('connect-mongo');
+const moment = require('moment');
 const session = require('express-session');
 
 const { DB_NAME, BASE_URL, NODE_ENV, SESSION_SECRET } = require('./lib/constants');
 const { db } = require('./lib/db');
 const logger = require('./lib/logger');
-const permissions = require('lib/permissions.js');
+const permissions = require('./lib/permissions');
 const routes = require('./routes');
 
 
@@ -54,28 +55,7 @@ async function createApp(app) {
 
   app.use(my_express_logger);
 
-  // Set up static routes to specific installed modules
-  // Any installed module with a 'dist/' directory gets that directory exposed on a '/dist/<module>/' route 
-  // First, list all modules
-  var matches = glob.sync(`${__dirname}/node_modules/*/dist`);
-  var list = [];
-
-  for (const pathname of matches) {
-    var modname = pathname.match(/node_modules\/(.+)\//)[1];
-    list.push(modname);
-
-    app.use(`/dist/${modname}`, express.static(pathname));
-  }
-
-  logger.info(`Added /dist/ paths on modules: ${list.join(', ')}`)
-
-  // Then add some explicit static routes
-  // TODO(micchickenburger):  WTF
-  app.use('/dist/fabric-history', express.static(`${__dirname}/node_modules/fabric-history/src`));
-  app.use('/dist/moment', express.static(`${__dirname}/node_modules/moment/min`));
-  app.use('/dist/jsonurl', express.static(`${__dirname}/node_modules/@jsonurl/jsonurl/dist`));
-
-  // Set the CSS precompiler ... this must come before any 'express.static' calls
+  // Set the Sass/Scss precompiler
   var compileSass = require('express-compile-sass');
 
   app.use('/css', compileSass({
@@ -100,8 +80,6 @@ async function createApp(app) {
   app.use(bodyParser.urlencoded({ extended: true }));
 
   // Make certain (normally only server-side) functionality available in all (client-side) .pug renders
-  const moment = require('moment');
-
   app.use(function (req, res, next) {
     res.locals.moment = moment;
     res.locals.MUUID = MUUID;
@@ -140,7 +118,7 @@ async function createApp(app) {
   delete session_config.saveUninitialized;
 
   // Configure the authorisation passport and other authentication measures
-  require('lib/auth.js')(app, session_config);
+  require('./lib/auth.js')(app, session_config);
 
   // Set up all routes
   routes.routes.forEach(route => app.use(route));

@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
 const logger = require('../../lib/logger');
-const permissions = require('lib/permissions.js');
-const Workflows = require('lib/Workflows.js');
+const permissions = require('../../lib/permissions');
+const Workflows = require('../../lib/Workflows');
 
 
 /// Retrieve the most recent version of a single workflow record

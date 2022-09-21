@@ -109,7 +109,7 @@ function ChangeRecordData(record) {
 
   // Increment the type form's version number and set the type form's validity start date to be now
   record.validity.version += 1;
-  record.validity.startDate = moment().toISOString();
+  record.validity.startDate = (new Date()).toISOString();
 
   // Populate the metadata form's submission object with the current form's contents
   metaForm.submission = { data: record };

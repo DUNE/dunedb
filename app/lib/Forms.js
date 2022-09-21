@@ -1,7 +1,7 @@
-const commonSchema = require('lib/commonSchema.js');
+const commonSchema = require('./commonSchema');
 const { db } = require('./db');
-const dbLock = require('lib/dbLock.js');
-const permissions = require('lib/permissions.js');
+const dbLock = require('./dbLock');
+const permissions = require('./permissions');
 
 
 /// Save a new or edited type form record
