@@ -181,7 +181,7 @@ router.get('/actions/list', permissions.checkPermission('actions:view'), async f
   try {
     // Retrieve records of all actions across all action types
     // The first argument should be 'null' in order to match to any type form ID
-    const actions = await Actions.list(null, { limit: 100 });
+    const actions = await Actions.list(null, { limit: 200 });
 
     // Retrieve a list of all action type forms that currently exist in the 'actionForms' collection
     const allActionTypeForms = await Forms.list('actionForms');
@@ -205,7 +205,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
   try {
     // Retrieve records of all actions with the specified action type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const actions = await Actions.list({ typeFormId: req.params.typeFormId }, { limit: 100 });
+    const actions = await Actions.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
 
     // Retrieve the action type form corresponding to the specified type form ID
     const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
