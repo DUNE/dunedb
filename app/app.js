@@ -1,6 +1,5 @@
 const bodyParser = require('body-parser');
 const express = require('express');
-const glob = require('glob');
 const MUUID = require('uuid-mongodb');
 const MongoStore = require('connect-mongo');
 const moment = require('moment');
