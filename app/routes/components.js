@@ -1,4 +1,3 @@
-const deepmerge = require('deepmerge');
 const router = require('express').Router();
 const ShortUUID = require('short-uuid');
 
@@ -200,16 +199,8 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
       }
     }
 
-    // Simultaneously retrieve the following information about the component types:
-    //  - a list of all component type forms that currently exist in the 'componentForms' collection
-    //  - a list of component counts by type, for all type forms that already have at least one recorded component
-    const [componentTypeForms, componentCountsByType] = await Promise.all([
-      Forms.list('componentForms'),
-      Components.componentCountsByTypes(),
-    ]);
-
-    // Merge the lists above, to create a single list of component counts by type that now also includes types that do not have any recorded components
-    const componentTypesAndCounts = deepmerge(componentCountsByType, componentTypeForms);
+    // Get a list of the current component count per type across all existing component types
+    const componentTypesAndCounts = await Components.componentCountsByTypes();
 
     // Set the workflow ID if one is provided
     let workflowId = '';

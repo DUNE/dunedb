@@ -1,5 +1,4 @@
 const Binary = require('mongodb').Binary;
-const deepmerge = require('deepmerge');
 const MUUID = require('uuid-mongodb');
 const ShortUUID = require('short-uuid');
 
@@ -284,20 +283,23 @@ async function componentCountsByTypes() {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Reform the query results into an object, with each entry keyed by the type form name
+  // Reform the query results into an object, with each entry keyed by the type form ID
   let keyedRecords = {};
 
   for (const record of records) {
     keyedRecords[record.formId] = record;
   }
 
-  // Retrieve a full list of all component type forms
-  // Then merge this with the results object, to create a single object containing component counts by type that now also includes types that have a count of zero
-  const typeFormsList = await Forms.list('componentForms');
-  const mergedList = deepmerge(keyedRecords, typeFormsList);
+  // Retrieve an object containing all component type forms, with each entry keyed by the type form ID
+  // Then, for each type form, copy the component count from the entry in the results object (if it exists) into the corresponding entry in the type forms object
+  let typeFormsList = await Forms.list('componentForms');
 
-  // Return the merged object
-  return mergedList;
+  for (const formId of Object.keys(typeFormsList)) {
+    if (keyedRecords.hasOwnProperty(formId)) typeFormsList[formId].count = keyedRecords[formId].count;
+  }
+
+  // Return the type forms object
+  return typeFormsList;
 }
 
 

@@ -2,7 +2,6 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const MUUID = require('uuid-mongodb');
 const MongoStore = require('connect-mongo');
-const moment = require('moment');
 const session = require('express-session');
 
 const { DB_NAME, BASE_URL, NODE_ENV, SESSION_SECRET } = require('./lib/constants');
@@ -80,7 +79,6 @@ async function createApp(app) {
 
   // Make certain (normally only server-side) functionality available in all (client-side) .pug renders
   app.use(function (req, res, next) {
-    res.locals.moment = moment;
     res.locals.MUUID = MUUID;
     res.locals.route = req.originalUrl;
     res.locals.base_url = BASE_URL;
