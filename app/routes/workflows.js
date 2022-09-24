@@ -136,8 +136,8 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permi
     if (!matchedComponent && !matchedAction) return res.status(404).send(`The provided step result (${stepResult}) is not valid for this step type ('${stepType}'')`);
 
     // Update the step result
-    // This function returns the updated workflow record, but we don't actually need to use it
-    const updatedWorkflow = await Workflows.updatePathStep(req.params.workflowId, stepIndex, stepResult, workflowStatus);
+    // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
+    const result = await Workflows.updatePathStep(req.params.workflowId, stepIndex, stepResult, workflowStatus);
 
     // Redirect the user to the interface page for viewing the workflow record
     res.redirect(`/workflow/${req.params.workflowId}`);

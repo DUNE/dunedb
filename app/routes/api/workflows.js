@@ -27,11 +27,11 @@ router.post('/workflow', permissions.checkPermissionJson('workflows:edit'), asyn
     // Display a logger message indicating that a record is being saved via the '/workflow' route
     logger.info(req.body, 'Submission to /workflow');
 
-    // Save the record ... if successful, this returns the complete workflow record
-    const workflow = await Workflows.save(req.body, req);
+    // Save the record ... if successful, this returns the workflow ID
+    const workflowId = await Workflows.save(req.body, req);
 
     // Return the record's workflow ID
-    return res.json(workflow.workflowId);
+    return res.json(workflowId);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

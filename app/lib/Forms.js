@@ -54,10 +54,10 @@ async function save(input, collection, req) {
 
   _lock.release();
 
-  if (result.insertedCount !== 1) throw new Error(`Forms::save() - failed to insert a new type form record into the database!`);
+  if (!result.acknowledged) throw new Error(`Forms::save() - failed to insert a new type form record into the database!`);
 
-  // Return the record as proof that it has been saved successfully
-  return result.ops[0];
+  // If the insertion is successful, return the record's type form ID as confirmation
+  return newRecord.formId;
 }
 
 

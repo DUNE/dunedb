@@ -265,9 +265,9 @@ router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:
     if (!shipment) return res.status(404).send(`There is no geometry board shipment with component UUID = ${req.params.uuid}`);
 
     // For each board in the shipment, extract the board UUID and update the reception location and date to those inherited from the 'Board Reception' action
-    // The updating function returns the updated board component record, but we don't actually need to use it
+    // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
     for (const board of shipment.data.boardUuiDs) {
-      const updatedBoard = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
     }
 
     // Depending on if the originating 'Board Reception' action was part of a workflow or not, redirect to an appropriate page
