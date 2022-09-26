@@ -57,11 +57,11 @@ router.post('/:collection(componentForms|actionForms|workflowForms)/:typeFormId'
     // Display a logger message indicating that a record is being saved via the '/typeForm' route
     logger.info(req.body, 'Submission to /typeForm');
 
-    // Save the record ... if successful, this returns the complete type form record
-    const typeForm = await Forms.save(req.body, req.params.collection, req);
+    // Save the record ... if successful, this returns the type form ID
+    const typeFormId = await Forms.save(req.body, req.params.collection, req);
 
     // Return the record's type form ID
-    return res.json(typeForm.formId);
+    return res.json(typeFormId);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

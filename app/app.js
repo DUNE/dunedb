@@ -1,9 +1,6 @@
-const bodyParser = require('body-parser');
 const express = require('express');
-const glob = require('glob');
 const MUUID = require('uuid-mongodb');
 const MongoStore = require('connect-mongo');
-const moment = require('moment');
 const session = require('express-session');
 
 const { DB_NAME, BASE_URL, NODE_ENV, SESSION_SECRET } = require('./lib/constants');
@@ -76,12 +73,11 @@ async function createApp(app) {
   app.use(express.static('/persistent/static'));
 
   // Parse incoming JSON objects, but set a maximum allowed size of 10MB
-  app.use(bodyParser.json({ limit: '10000kb' }));
-  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(express.json({ limit: '10000kb' }));
+  app.use(express.urlencoded({ extended: true }));
 
   // Make certain (normally only server-side) functionality available in all (client-side) .pug renders
   app.use(function (req, res, next) {
-    res.locals.moment = moment;
     res.locals.MUUID = MUUID;
     res.locals.route = req.originalUrl;
     res.locals.base_url = BASE_URL;
