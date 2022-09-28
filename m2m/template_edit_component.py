@@ -1,26 +1,33 @@
 # Local Python imports
-from common import EditComponent
+from common import ConnectToAPI, EditComponent
 
 
 # Main script function
 if __name__ == '__main__':
+    # Set up a connection to the database API and get the connection request headers
+    # This must be done at the beginning of this main script function, but ONLY ONCE
+    connection, headers = ConnectToAPI()
 
-    # Editing an existing component requires 3 pieces of information:
+    ########################################
+    # User-defined script functionality goes here
+
+    # Editing of an existing component requires three pieces of information to be pre-defined:
     #   - the UUID of the component to be edited
     #   - the names of any data fields to be edited
     #   - the new values of any data fields to be edited
-
-    # Set the UUID of the component to be edited
-    componentUUID = 'da820f60-130e-11ed-bf0a-f3cd78f73f46'
-
-    # Set the names of any data fields to be edited
+    componentUUID = '5f9ea420-3e88-11ed-9114-03f8483882ff'
     componentData_fields = ['textField']
-
-    # Set the new values of any data fields to be edited
     componentData_values = [
         'This component has been edited through the M2M application']
 
-    # Edit and submit the component
-    EditComponent(componentUUID, componentData_fields, componentData_values)
+    # Call the component editing function, which takes the UUID, data field names and new field values as its first three arguments
+    # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
+    EditComponent(componentUUID, componentData_fields,
+                  componentData_values, connection, headers)
+
+    ########################################
 
     print()
+
+    # Once all components have been edited and submitted, close the connection to the database API
+    connection.close()

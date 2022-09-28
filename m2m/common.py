@@ -28,7 +28,8 @@ def ConnectToAPI():
     # Set up a connection to the Auth0 domain
     connection = http.client.HTTPSConnection(auth0_domain)
 
-    # Attempt to request a response from the domain, using the provided credentials payload and specified headers, and print any raised exceptions
+    # Request a response from the domain, using the provided credentials payload and specified headers
+    # If the request is successful, continue with the function ... otherwise print any raised exceptions
     # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
         connection.request('POST', '/oauth/token', body=payload,
@@ -47,6 +48,8 @@ def ConnectToAPI():
         access_token, token_type = data_splits[3], data_splits[13]
     except http.client.HTTPException as e:
         print(f" ConnectToAPI() [POST /oauth/token] - HTTP EXCEPTION: {e} \n")
+    except socket.timeout as s:
+        print(f" ConnectToAPI() [POST /oauth/token] - SOCKET TIMEOUT: {s} \n")
     finally:
         connection.close()
 
@@ -73,60 +76,54 @@ def ConnectToAPI():
 #########################################
 ## Convert a short UUID to a full UUID ##
 #########################################
-def ConvertShortUUID(shortUUID):
-    # Set up a connection to the database API and the connection request headers
-    connection, headers = ConnectToAPI()
-
-    # Attempt to request a response from the API route for converting a short UUID, using the passed headers
+def ConvertShortUUID(shortUUID, connection, headers):
+    # Request a response from the API route that converts a short UUID to a full UUID and then checks that it corresponds to an existing component record
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
-    # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
-        connection.request('GET', '/api/convertShortUUID/' +
+        connection.request('GET', '/api/confirmShortUUID/' +
                            shortUUID, headers=headers)
 
-        # The route returns the UUID as a JSON formatted string (i.e. the UUID string within a JSON string), so slice it to get only the UUID string
-        uuidResponse = connection.getresponse()
-        fullUUID = uuidResponse.read().decode('utf-8')[1: -1]
+        # The route returns a different string based on success or failure of the conversion from short to full UUID:
+        #   - if successful (i.e. the full UUID corresponds to an existing component record), the full UUID is returned as a JSON formatted string (i.e. the UUID string within a JSON string)
+        #   - if not successful, an error message is returned
+        responseText = connection.getresponse().read().decode('utf-8')
+        result = 'No matching component record!'
 
-        # Return the full UUID
-        return fullUUID
-    except http.client.HTTPException as e1:
+        if len(responseText) == 38:
+            result = responseText[1: -1]
+
+        # Return the result string
+        return result
+    except http.client.HTTPException as e:
         print(
-            f" ConvertShortUUID() [GET /api/convertShortUUID/shortUuid] - HTTP EXCEPTION: {e1} \n")
-    except socket.timeout as s1:
+            f" ConvertShortUUID() [GET /api/confirmShortUUID/shortUuid] - HTTP EXCEPTION: {e} \n")
+    except socket.timeout as s:
         print(
-            f" ConvertShortUUID() [GET /api/convertShortUUID/shortUuid] - SOCKET TIMEOUT: {s1} \n")
-    finally:
-        connection.close()
+            f" ConvertShortUUID() [GET /api/confirmShortUUID/shortUuid] - SOCKET TIMEOUT: {s} \n")
 
 
 ############################
 ## Create a new component ##
 ############################
-def CreateComponent(typeFormID, data):
-    # Set up a connection to the database API and the connection request headers
-    connection, headers = ConnectToAPI()
-
-    # Attempt to request a response from the API route for generating a new component UUID, using the passed headers
+def CreateComponent(componentTypeFormID, componentData, connection, headers):
+    # Request a response from the API route that generates new component UUID
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
-    # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
         connection.request('GET', '/api/newComponentUUID', headers=headers)
 
-        # The route returns the UUID as a JSON formatted string (i.e. the UUID string within a JSON string), so slice it to get only the UUID string
-        uuidResponse = connection.getresponse()
-        componentUUID = uuidResponse.read().decode('utf-8')[1: -1]
+        # The route returns the UUID as a JSON formatted string (i.e. the UUID string within a JSON string)
+        componentUUID = connection.getresponse().read().decode('utf-8')[1: -1]
 
         # Declare a new empty Python dictionary to hold the component information to be uploaded
-        # Then populate it with the absolutely critical information (component UUID and type form ID) and the 'data' object defined by the user
+        # Then populate it with the absolutely critical information (the component's UUID and type form ID), as well as the 'data' object defined by the user
         # All other component record fields are added on the server side at submission
         component = {}
         component['componentUuid'] = componentUUID
-        component['formId'] = typeFormID
-        component['data'] = data
+        component['formId'] = componentTypeFormID
+        component['data'] = componentData
 
-        # For components submitted by human users, an additional 'submit' field is always automatically added to the 'component.data' object (and set to 'true') by Formio
-        # In order to keep the component records as consistent as possible between human user and M2M client submissions, add this field in explicitly
+        # An additional 'submit: true' field is always automatically added to the 'component.data' object by Formio for components submitted via the web interface
+        # In order to keep the component records as consistent as possible between web interface and M2M client submissions, add this field in explicitly
         component['data']['submit'] = True
 
         ### TOFIX (krishmaj) 'component.data.typeRecordNumber' is not set when using M2M client script to create a new component ###
@@ -134,7 +131,7 @@ def CreateComponent(typeFormID, data):
         # Serialise the component dictionary to a JSON formatted string (since it must be uploaded as such)
         componentJSON = json.dumps(component)
 
-        # Attempt to request a response from the API route for submitting a component record, using the JSON string as the request body and the passed headers
+        # Request a response from the API route that submits a component record, using the serialised dictionary as the request body
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
             connection.request('POST', '/api/component',
@@ -161,30 +158,23 @@ def CreateComponent(typeFormID, data):
     except socket.timeout as s1:
         print(
             f" CreateComponent() [GET /api/newComponentUUID] - SOCKET TIMEOUT: {s1} \n")
-    finally:
-        connection.close()
 
 
 ################################
 ## Edit an existing component ##
 ################################
-def EditComponent(componentUUID, componentData_fields, componentData_values):
-    # Set up a connection to the database API and the connection request headers
-    connection, headers = ConnectToAPI()
-
-    # Attempt to request a response from the API route for retrieving the record of an existing component via its UUID, using the passed headers
+def EditComponent(componentUUID, componentData_fields, componentData_values, connection, headers):
+    # Request a response from the API route that retrieves the record of an existing component via its UUID
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
-    # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
         connection.request('GET', '/api/component/' +
                            componentUUID, headers=headers)
 
         # The route response is the component record as a JSON document, but when decoded it becomes a standard string containing the JSON document
         # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
-        componentResponse = connection.getresponse()
-        component = json.loads(componentResponse.read().decode('utf-8'))
+        component = json.loads(connection.getresponse().read().decode('utf-8'))
 
-        # If the provided UUID doesn't match with an existing component record, print an error and exit the function immediately
+        # If the provided UUID doesn't correspond to an existing component record, print an error and exit the function immediately
         if component == None:
             sys.exit(
                 f" EditComponent() - ERROR: there is no component record with component UUID = {componentUUID} \n")
@@ -198,7 +188,7 @@ def EditComponent(componentUUID, componentData_fields, componentData_values):
         # Serialise the edited component dictionary back to a JSON formatted string (since it must be uploaded as such)
         componentJSON = json.dumps(component)
 
-        # Attempt to request a response from the API route for submitting a component record, using the JSON string as the request body and the passed headers
+        # Request a response from the API route that submits a component record, using the serialised dictionary as the request body
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
             connection.request('POST', '/api/component',
@@ -225,35 +215,29 @@ def EditComponent(componentUUID, componentData_fields, componentData_values):
     except socket.timeout as s1:
         print(
             f" EditComponent() [GET /api/component/componentUuid] - SOCKET TIMEOUT: {s1} \n")
-    finally:
-        connection.close()
 
 
 ##########################
 ## Perform a new action ##
 ##########################
-def PerformAction(typeFormID, componentUUID, data):
+def PerformAction(actionTypeFormID, componentUUID, actionData, connection, headers):
     # Declare a new empty Python dictionary to hold the action information to be uploaded
-    # Then populate it with the absolutely critical information (type form ID and component UUID) and the 'data' object defined by the user
+    # Then populate it with the absolutely critical information (type form ID and component UUID) as well as the 'data' object defined by the user
     # All other action record fields are added on the server side at submission
     action = {}
-    action['typeFormId'] = typeFormID
+    action['typeFormId'] = actionTypeFormID
     action['componentUuid'] = componentUUID
-    action['data'] = data
+    action['data'] = actionData
 
-    # For actions submitted by human users, an additional 'submit' field is always automatically added to the 'action.data' object (and set to 'true') by Formio
-    # In order to keep the action records as consistent as possible between human user and M2M client submissions, add this field in explicitly
+    # An additional 'submit: true' field is always automatically added to the 'action.data' object by Formio for actions submitted via the web interface
+    # In order to keep the action records as consistent as possible between web interface and M2M client submissions, add this field in explicitly
     action['data']['submit'] = True
 
     # Serialise the action dictionary to a JSON formatted string (since it must be uploaded as such)
     actionJSON = json.dumps(action)
 
-    # Set up a connection to the database API and the connection request headers
-    connection, headers = ConnectToAPI()
-
-    # Attempt to request a response from the API route for submitting an action record, using the JSON string as the request body and the passed headers
+    # Request a response from the API route that submits an action record, using the serialised dictionary as the request body
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
-    # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
         connection.request('POST', '/api/action',
                            body=actionJSON, headers=headers)
@@ -267,35 +251,28 @@ def PerformAction(typeFormID, componentUUID, data):
                 f" PerformAction() - successfully submitted action with ID: {submissionResponse.read().decode('utf-8')}")
         else:
             print(submissionResponse.status, submissionResponse.reason)
-    except http.client.HTTPException as e1:
+    except http.client.HTTPException as e:
         print(
-            f" PerformAction() [POST /api/action] - HTTP EXCEPTION: {e1} \n")
-    except socket.timeout as s1:
+            f" PerformAction() [POST /api/action] - HTTP EXCEPTION: {e} \n")
+    except socket.timeout as s:
         print(
-            f" PerformAction() [POST /api/action] - SOCKET TIMEOUT: {s1} \n")
-    finally:
-        connection.close()
+            f" PerformAction() [POST /api/action] - SOCKET TIMEOUT: {s} \n")
 
 
 #############################
 ## Edit an existing action ##
 #############################
-def EditAction(actionID, actionData_fields, actionData_values):
-    # Set up a connection to the database API and the connection request headers
-    connection, headers = ConnectToAPI()
-
-    # Attempt to request a response from the API route for retrieving the record of an existing action via its ID, using the passed headers
+def EditAction(actionID, actionData_fields, actionData_values, connection, headers):
+    # Request a response from the API route that retrieves the record of an existing action via its ID
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
-    # Regardless of the success or failure of the request, make sure to close the connection cleanly
     try:
         connection.request('GET', '/api/action/' + actionID, headers=headers)
 
         # The route response is the action record as a JSON document, but when decoded it becomes a standard string containing the JSON document
         # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
-        actionResponse = connection.getresponse()
-        action = json.loads(actionResponse.read().decode('utf-8'))
+        action = json.loads(connection.getresponse().read().decode('utf-8'))
 
-        # If the provided ID doesn't match with an existing action record, print an error and exit the function immediately
+        # If the provided ID doesn't correspond to an existing action record, print an error and exit the function immediately
         if action == None:
             sys.exit(
                 f" EditAction() - ERROR: there is no action record with action ID = {actionID} \n")
@@ -309,7 +286,7 @@ def EditAction(actionID, actionData_fields, actionData_values):
         # Serialise the edited action dictionary back to a JSON formatted string (since it must be uploaded as such)
         actionJSON = json.dumps(action)
 
-        # Attempt to request a response from the API route for submitting an action record, using the JSON string as the request body and the passed headers
+        # Request a response from the API route that submits an action record, using the serialised dictionary as the request body
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
             connection.request('POST', '/api/action',
@@ -336,5 +313,3 @@ def EditAction(actionID, actionData_fields, actionData_values):
     except socket.timeout as s1:
         print(
             f" EditAction() [GET /api/action/actionId] - SOCKET TIMEOUT: {s1} \n")
-    finally:
-        connection.close()

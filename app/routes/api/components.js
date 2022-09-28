@@ -83,19 +83,4 @@ router.get('/newComponentUUID', async function (req, res, next) {
 });
 
 
-/// Convert a short UUID to a full UUID
-router.get('/convertShortUUID/' + utils.short_uuid_regex, async function (req, res, next) {
-  try {
-    // Reconstruct the full UUID from the shortened UUID
-    const componentUuid = ShortUUID().toUUID(req.params.shortuuid);
-
-    // Return the full UUID
-    return res.json(componentUuid);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
 module.exports = router;
