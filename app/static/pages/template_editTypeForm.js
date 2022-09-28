@@ -194,23 +194,6 @@ function CopySchemaToClipboard() {
 };
 
 
-// When the 'Paste Schema from Clipboard' button is pressed, paste the current contents of the device's clipboard into the JSON schema box
-// NOTE: by default, this does not work in Firefox (which does not allow the 'readText' function to be called from websites, only via browser extensions)
-// To get around this, please do the following:
-//   - navigate to 'about:config' and 'accept the risk and continue'
-//   - search for 'dom.events.testing.asyncClipboard', and set it to 'true'
-//   - refresh the 'Edit Type Form' page
-function PasteSchemaFromClipboard() {
-  navigator.clipboard.readText().then((schema) => {
-    $('#schema').val(schema);
-    $('#schema').trigger('change');
-  })
-    .catch((err) => {
-      console.error('Error - could not paste schema', err);
-    });
-};
-
-
 // Function to submit the record to the database
 function SubmitData(submission) {
   $.ajax({

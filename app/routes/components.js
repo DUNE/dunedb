@@ -50,7 +50,8 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         if (uuid === '') uuid = 'none';
         else {
           const boardRecord = await Components.retrieve(uuid);
-          ukid = boardRecord.data.typeRecordNumber;
+
+          if (boardRecord) ukid = boardRecord.data.typeRecordNumber;
         }
 
         shipmentDetails.push([uuid, ukid]);
