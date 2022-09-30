@@ -21,8 +21,10 @@ if __name__ == '__main__':
 
     # Call the action editing function, which takes the ID, data field names and new field values as its first three arguments
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
-    EditAction(actionID, actionData_fields,
-               actionData_values, connection, headers)
+    # If successful, the function returns the ID of the edited action (if not, an error message is automatically displayed)
+    id = EditAction(actionID, actionData_fields,
+                    actionData_values, connection, headers)
+    print(f" Successfully edited action with ID: {id}")
 
     ########################################
 

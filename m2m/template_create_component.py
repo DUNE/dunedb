@@ -22,7 +22,10 @@ if __name__ == '__main__':
 
     # Call the component creation function, which takes the type form ID and data as its first two arguments
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
-    CreateComponent(componentTypeFormID, componentData, connection, headers)
+    # If successful, the function returns the UUID of the created component (if not, an error message is automatically displayed)
+    uuid = CreateComponent(componentTypeFormID,
+                           componentData, connection, headers)
+    print(f" Successfully submitted component with UUID: {uuid}")
 
     ########################################
 

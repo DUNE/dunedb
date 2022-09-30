@@ -32,24 +32,32 @@ However, users will still need to call the various backend functions in their ow
     * `shortUUID` (string) : an existing short UUID, must be between 20 and 22 alphanumeric characters
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `CreateComponent(componentTypeFormID, componentData, connection, headers)` : create a new component
+* `CreateComponent(componentTypeFormID, componentData, connection, headers)` : create a new component, returning the full UUID as a string
     * `componentTypeFormID` (string) : the type form ID of the component to be created
     * `componentData` (Python dictionary) : the data to be entered into the new component record's `component.data` section, arranged as a dictionary of `field: value` pairs  ... this is the same data that would be entered into the component's type form through the web interface
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `EditComponent(componentUUID, componentData_fields, componentData_values, connection, headers)` : edit an existing component
+* `GetComponent(componentUUID, connection, headers)` : get the latest version of an existing component record, returning the record as a Python dictionary
+    * `componentUUID` (string) : the UUID of the component to be retrieved
+    * `connection, headers` : objects returned by the `ConnectToAPI()` function
+
+* `EditComponent(componentUUID, componentData_fields, componentData_values, connection, headers)` : edit an existing component record, returning the component's full UUID as a string
     * `componentUUID` (string) : the UUID of the component to be edited
     * `componentData_fields` (list of strings) : the component's type form field names which will have their values edited
     * `componentData_values` (list) : the new values of the fields specified in the `componentData_fields` list
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `PerformAction(actionTypeFormID, componentUUID, actionData, connection, headers)` : perform a new action on a specified component
+* `PerformAction(actionTypeFormID, componentUUID, actionData, connection, headers)` : perform a new action on a specified component, returning the action ID as a string
     * `actionTypeFormID` (string) : the type form ID of the action to be created
     * `componentUUID` (string) : the UUID of the component on which the new action is to be performed
     * `actionData` (Python dictionary) : the data to be entered into the new action record's `action.data` section, arranged as a dictionary of `field: value` pairs  ... this is the same data that would be entered into the action's type form through the web interface
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `EditAction(actionID, actionData_fields, actionData_values, connection, headers)` : edit an existing action
+* `GetAction(actionID, connection, headers)` : get the latest version of an existing action record, returning the record as a Python dictionary
+    * `actionID` (string) : the ID of the action to be retrieved
+    * `connection, headers` : objects returned by the `ConnectToAPI()` function
+
+* `EditAction(actionID, actionData_fields, actionData_values, connection, headers)` : edit an existing action record, returning the action ID as a string
     * `actionID` (string) : the ID of the action to be edited
     * `actionData_fields` (list of strings) : the action's type form field names which will have their values edited
     * `actionData_values` (list) : the new values of the fields specified in the `actionData_fields` list

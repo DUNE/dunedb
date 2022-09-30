@@ -25,8 +25,10 @@ if __name__ == '__main__':
 
     # Call the action performance function, which takes the action type form ID, component UUID and action data as its first three arguments
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
-    PerformAction(actionTypeFormID, componentUUID,
-                  actionData, connection, headers)
+    # If successful, the function returns the ID of the performed action (if not, an error message is automatically displayed)
+    id = PerformAction(actionTypeFormID, componentUUID,
+                       actionData, connection, headers)
+    print(f" Successfully performed action with ID: {id}")
 
     ########################################
 
