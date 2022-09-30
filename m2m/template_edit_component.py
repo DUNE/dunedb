@@ -22,8 +22,10 @@ if __name__ == '__main__':
 
     # Call the component editing function, which takes the UUID, data field names and new field values as its first three arguments
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
-    EditComponent(componentUUID, componentData_fields,
-                  componentData_values, connection, headers)
+    # If successful, the function returns the UUID of the edited component (if not, an error message is automatically displayed)
+    uuid = EditComponent(componentUUID, componentData_fields,
+                         componentData_values, connection, headers)
+    print(f" Successfully edited component with UUID: {uuid}")
 
     ########################################
 
