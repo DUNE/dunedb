@@ -56,11 +56,11 @@ router.post('/component', permissions.checkPermissionJson('components:edit'), as
     // Display a logger message indicating that a record is being saved via the '/component' route
     logger.info(req.body, 'Submission to /component');
 
-    // Save the record ... if successful, this returns the complete component record
-    const component = await Components.save(req.body, req);
+    // Save the record ... if successful, this returns the component UUID
+    const componentUuid = await Components.save(req.body, req);
 
     // Return the record's component UUID
-    return res.json(component.componentUuid);
+    return res.json(componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -75,21 +75,6 @@ router.get('/newComponentUUID', async function (req, res, next) {
     const componentUuid = Components.newUuid().toString();
 
     // Return the newly generated UUID
-    return res.json(componentUuid);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// Convert a short UUID to a full UUID
-router.get('/convertShortUUID/' + utils.short_uuid_regex, async function (req, res, next) {
-  try {
-    // Reconstruct the full UUID from the shortened UUID
-    const componentUuid = ShortUUID().toUUID(req.params.shortuuid);
-
-    // Return the full UUID
     return res.json(componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);

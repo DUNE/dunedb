@@ -1,5 +1,5 @@
 const MUUID = require('uuid-mongodb');
-const ObjectID = require('mongodb').ObjectID;
+const ObjectID = require('mongodb').ObjectId;
 
 const commonSchema = require('./commonSchema');
 const { db } = require('./db');
@@ -61,10 +61,10 @@ async function save(input, req) {
 
   _lock.release();
 
-  if (result.insertedCount !== 1) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
+  if (!result.acknowledged) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
 
-  // Return the record as proof that it has been saved successfully
-  return result.ops[0];
+  // If the insertion is successful, return the record's action ID as confirmation
+  return newRecord.actionId;
 }
 
 

@@ -1,4 +1,4 @@
-const ObjectID = require('mongodb').ObjectID;
+const ObjectID = require('mongodb').ObjectId;
 
 const commonSchema = require('./commonSchema');
 const { db } = require('./db');
@@ -73,16 +73,16 @@ async function save(input, req) {
 
   _lock.release();
 
-  if (result.insertedCount !== 1) throw new Error(`Workflows::save() - failed to insert a new workflow record into the database!`);
+  if (!result.acknowledged) throw new Error(`Workflows::save() - failed to insert a new workflow record into the database!`);
 
-  // Return the record as proof that it has been saved successfully
-  return result.ops[0];
+  // If the insertion is successful, return the record's workflow ID as confirmation
+  return newRecord.workflowId;
 }
 
 
 /// Update the result of a single step in a workflow path
 async function updatePathStep(workflowId, stepIndex, stepResult, workflowStatus) {
-  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the workflow record
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the workflow record, and throw an error if the edit fails
   // Preset a dictionary of the variables to be updated using the operator
   // We have to do this separately because the step index is a variable, but the '$set' operator cannot use inline constructed strings as arguments
   let update = { '$set': {} };
@@ -98,13 +98,12 @@ async function updatePathStep(workflowId, stepIndex, stepResult, workflowStatus)
         sort: { 'validity.version': -1 },
         returnNewDocument: true,
       },
-      function (err, res) {
-        if (err) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record ... ${err}`);
-      }
     );
 
-  // Return the record as proof that it has been updated successfully
-  return result;
+  if (result.ok === 0) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record ... ${err}`);
+
+  // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
+  return result.ok;
 }
 
 

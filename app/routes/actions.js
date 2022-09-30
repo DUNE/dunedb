@@ -74,6 +74,11 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
 
     if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${req.params.typeFormId}`);
 
+    // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
+    const component = await Components.retrieve(req.params.uuid);
+
+    if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
+
     // Set the workflow ID if one is provided
     let workflowId = '';
 
@@ -83,6 +88,7 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
     res.render('action_specComponent.pug', {
       actionTypeForm,
       componentUuid: req.params.uuid,
+      componentName: component.data.name,
       workflowId,
     });
   } catch (err) {
@@ -105,11 +111,15 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
 
     if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${action.typeFormId}`);
 
+    // Retrieve the record of the component that the action was performed on, using its component UUID (found in the action record)
+    const component = await Components.retrieve(action.componentUuid);
+
     // Render the interface page
     res.render('action_specComponent.pug', {
       action,
       actionTypeForm,
       componentUuid: action.componentUuid,
+      componentName: component.data.name,
       workflowId: '',
     });
   } catch (err) {

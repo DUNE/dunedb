@@ -28,24 +28,23 @@ async function lock(name, timeout_ms) {
   const currentDateTime = new Date();
 
   // Insert a new lock record into the collection ... if successful, return the 'Lock' object, or otherwise throw an error
-  try {
-    const insertion = await lockCollection.updateOne(
-      {
+  const insertion = await lockCollection.updateOne(
+    {
+      name: name,
+      expiry: { $lte: currentDateTime },
+    },
+    {
+      $set: {
         name: name,
-        expiry: { $lte: currentDateTime },
-      },
-      {
-        $set: {
-          name: name,
-          expiry: new Date(currentDateTime.getTime() + timeout_ms)
-        }
-      },
-      { upsert: true });
+        expiry: new Date(currentDateTime.getTime() + timeout_ms)
+      }
+    },
+    { upsert: true },
+  );
 
-    if (insertion.result.ok) return new Lock(name);
-  } catch (err) {
-    throw new Error(`dbLock::lock() - failed to insert a new lock into the database!`);
-  }
+  if (!insertion.acknowledged) throw new Error(`dbLock::lock() - failed to insert a new lock into the database!`);
+
+  return new Lock(name);
 }
 
 

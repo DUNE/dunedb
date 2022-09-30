@@ -8,12 +8,13 @@ block pugscripts
   //- Return the user's display name if the user is authenticated (or the email address if no display name has been set), or an error message if not
   - function user_shortname(user) { if (isAuthenticated()) return (user.displayName || user_email(user)); return '[Login to see!]' };
 
-mixin dateFormat(date)
-  span.date(data - date = date) #{moment(date).format('MMMM Do YYYY, h:mm:ss a')}
+  //- Return the ordinal of a given number when provided with the remainders of that number divided by 10 and 100
+  - function get_ordinal(r10, r100) { if (r10 === 1 && r100 !== 100) return 'st'; if (r10 === 2 && r100 !== 12) return 'nd'; if (r10 === 3 && r100 !== 13) return 'rd'; return 'th'; }
 
-mixin dateFormatAndAgo(date)
-  span.date(data - date = date) #{moment(date).format('MMMM Do YYYY, h:mm:ss a')}
-    =` (${moment(date).fromNow()})`
+mixin dateFormat(date)
+  - const fullDate = new Date(date);
+  - const ordinal = get_ordinal(fullDate.getDate() % 10, fullDate.getDate() % 100);
+  span.date(data - date = date) #{`${fullDate.toLocaleString('default', { month: 'long' })} ${fullDate.getDate()}${ordinal} ${fullDate.getFullYear()}, ${fullDate.toLocaleTimeString()}`}
 
 mixin arrayFormat(array)
   span #{JSON.stringify(array).replace(/["\[\]]/g, '').replace(/,/g, ', ')}

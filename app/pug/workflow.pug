@@ -41,7 +41,7 @@ block content
 
         dt Workflow Data:
         dd This is version #{workflow.validity.version} of the workflow, and it was last edited on !{' '}
-          +dateFormatAndAgo(workflow.insertion.insertDate)
+          +dateFormat(workflow.insertion.insertDate)
 
           if workflow.insertion.user
             |  by !{' '}
@@ -123,7 +123,7 @@ block content
             li 
               a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
               |  on 
-              +dateFormatAndAgo(v.insertion.insertDate)
+              +dateFormat(v.insertion.insertDate)
 
               if v.insertion.user
                 |  by !{' '}

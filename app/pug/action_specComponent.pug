@@ -8,6 +8,7 @@ block extrascripts
     const action = !{JSON.stringify((action || {}), null, 4)}; 
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)}; 
     const componentUuid = !{JSON.stringify(componentUuid)};
+    const componentName = !{JSON.stringify(componentName), null, 4};
     const workflowId = !{JSON.stringify(workflowId, null, 4)};
 
   block workscripts
@@ -26,6 +27,13 @@ block content
         dt Component UUID
         dd
           a(href = `/component/${componentUuid}`) #{componentUuid}
+
+        dt Component Name
+
+        if componentName
+          dd #{componentName}
+        else
+          dd (none)
 
     .vert-space-x1
       hr

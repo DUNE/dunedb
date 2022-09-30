@@ -1,5 +1,4 @@
 const Binary = require('mongodb').Binary;
-const deepmerge = require('deepmerge');
 const MUUID = require('uuid-mongodb');
 const ShortUUID = require('short-uuid');
 
@@ -81,14 +80,10 @@ async function save(input, req) {
 
   _lock.release();
 
-  if (result.insertedCount !== 1) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
+  if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
-  // Make a copy of the inserted record, and convert the 'componentUuid' from binary to string format, for better readability and consistent display
-  let record = { ...result.ops[0] };
-  record.componentUuid = MUUID.from(newRecord.componentUuid).toString();
-
-  // Return the copy as proof that it has been saved successfully
-  return record;
+  // If the insertion is successful, return the record's component UUID (in string format) as confirmation
+  return MUUID.from(newRecord.componentUuid).toString();
 }
 
 
@@ -101,7 +96,7 @@ async function updateLocation(componentUuid, location, date) {
 
   match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
-  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
   const result = db.collection('components')
     .findOneAndUpdate(
       match_condition,
@@ -115,13 +110,12 @@ async function updateLocation(componentUuid, location, date) {
         sort: { 'validity.version': -1 },
         returnNewDocument: true,
       },
-      function (err, res) {
-        if (err) throw new Error(`Components::updateLocation() - failed to update the component record ... ${err}`);
-      }
     );
 
-  // Return the record as proof that it has been updated successfully
-  return result;
+  if (result.ok === 0) throw new Error(`Components::updateLocation() - failed to update the component record!`);
+
+  // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
+  return result.ok;
 }
 
 
@@ -284,20 +278,23 @@ async function componentCountsByTypes() {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Reform the query results into an object, with each entry keyed by the type form name
+  // Reform the query results into an object, with each entry keyed by the type form ID
   let keyedRecords = {};
 
   for (const record of records) {
     keyedRecords[record.formId] = record;
   }
 
-  // Retrieve a full list of all component type forms
-  // Then merge this with the results object, to create a single object containing component counts by type that now also includes types that have a count of zero
-  const typeFormsList = await Forms.list('componentForms');
-  const mergedList = deepmerge(keyedRecords, typeFormsList);
+  // Retrieve an object containing all component type forms, with each entry keyed by the type form ID
+  // Then, for each type form, copy the component count from the entry in the results object (if it exists) into the corresponding entry in the type forms object
+  let typeFormsList = await Forms.list('componentForms');
 
-  // Return the merged object
-  return mergedList;
+  for (const formId of Object.keys(typeFormsList)) {
+    if (keyedRecords.hasOwnProperty(formId)) typeFormsList[formId].count = keyedRecords[formId].count;
+  }
+
+  // Return the type forms object
+  return typeFormsList;
 }
 
 

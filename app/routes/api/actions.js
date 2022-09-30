@@ -27,11 +27,11 @@ router.post('/action', permissions.checkPermissionJson('actions:perform'), async
     // Display a logger message indicating that a record is being saved via the '/action' route
     logger.info(req.body, 'Submission to /action');
 
-    // Save the record ... if successful, this returns the complete action record
-    const action = await Actions.save(req.body, req);
+    // Save the record ... if successful, this returns the action ID
+    const actionId = await Actions.save(req.body, req);
 
     // Return the record's action ID
-    return res.json(action.actionId);
+    return res.json(actionId);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
