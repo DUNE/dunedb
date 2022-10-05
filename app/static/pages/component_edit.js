@@ -78,7 +78,11 @@ async function onPageLoad() {
       }
 
       // Add a component type record number to the 'data' field - this is equivalent to the 'UKID' for geometry boards, and just semi-useful information for other component types
-      submission.data.typeRecordNumber = numberOfExistingComponents + 1;
+      const typeRecordNumber = numberOfExistingComponents + 1;
+      submission.data.typeRecordNumber = typeRecordNumber;
+
+      // If the component is a 'Grounding Mesh Panel' type, the component name is set by some fixed prefix and suffix, plus the type record number padded to 5 digits
+      if (componentTypeForm.formId === 'GroundingMeshPanel') submission.data.name = `D00300200004-${String(typeRecordNumber).padStart(5, '0')}-UK106-01-00-00`
     }
 
     // When creating a new batch-type component ...
