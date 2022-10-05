@@ -1,53 +1,55 @@
-# DUNE DB
+# The DUNE APA Construction Database
 
-The Quality Assurance app for the Deep Underground Neutrino Experiment frame manufacturing process.
+This repository contains all of the code required for the DUNE APA Construction Database (referred to as the 'APA DB' for short).  This database is designed to store all records relating to the manufacture, testing, quality assurance and transport of the DUNE APA frames and their constituent components.
 
-## Machine-to-Machine (m2m) interface
+Please note that this README is intended for <u>**database developers**</u> - for user documentation, please consult the [Github Wiki](https://github.com/DUNE/dunedb/wiki).
 
-To submit a database record, use the `client/upload_to_db2.py` script.  You will need a small configuration file `api_config2.json` to make it work; talk to Nathaniel to get such an authentication file.
-
-## API
-
-To use the m2m api, see [docs/api.md](api.md)
-To see metadata schemas used, see [docs/schemas.md](schemas.md)
 
 ## Getting Started
 
-Have a recent version of Docker installed and execute:
+The DB code is designed to run on a **docker** system, so you will need to have a (relatively) recent version of Docker installed on the computer or server on which you intend to run the DB.  Once this is done, and you have performed a `git clone` of this (`dunedb`) repository, executing the following command when in the `app` directory will set up and start a new DB instance:
 
-```bash
-$ docker compose up
+```
+docker compose up -d
 ```
 
-## Contributing
+Note that the `-d` flag above indicates that the DB will run in 'detached' mode, i.e. the live logs will not be shown.  To access the logs once the DB is running, please run the following command in the `app` directory:
 
-Join the `apa_db` channel on the DUNE Slack.
+```
+docker compose logs -f app
+```
 
-### Design principles
+To stop the DB instance at any point, simply run the following command in the `app` directory:
 
-In general, I try to make the URL routes human-readable and explicable.  The only hard-to-type things should be ID numbers for specific entries or components.
+```
+docker compose down
+```
 
-Human-usable routes and API routes have similar structure.  For example:
-https://apa.dunedb.org/component/abcd123...  yields a view of the component
-https://apa.dunedb.org/json/component/abcd123...  can be gotten from the browser, for a JSON document with the component info
-https://apa.dunedb.org/api/component/abcd123...  gets the JSON document using an machine-to-machine authentication suitable for scripts.
 
-## Code organization
+## Code Organisation
 
-The app is located in the `/app` directory.  Brief outline:
+The code in this respository is organised as follows (for simplicity, normally hidden directories and files are not listed here):
 
-* `/app/index.js` is the launch point. (Also the home page. FIXME)
-* `/app/lib` contains app logic
-* `/app/pug` contains only Pug templates, which are used to render web pages.
-* `/app/routes` contains the Express route functions, which in turn mostly call the Pug render routines.
-* `/app/routes/api` has all the low-level API calls accessible, see [docs/api.md](api.md)
-* `/app/schemas` are some JSON forms used to set up defaults in first-time intialization of the entire database 
-* `/app/static` contains static files accessible to the UI, and SCSS files that are rendered into CSS files dynamicaly.
-* `/client` contains example files showing how to use the API.js
-* `/dbTools` are some scripts used in development and for schema evolution
+* `/app` : contains all of the code required for the APA DB app
+    * `/lib` : JavaScript functions that operate directly on and with the MongoDB database
+    * `/pug` : Pug-based templates for the various web interface pages
+    * `/routes` : JavaScript functions that dictate which `lib` function (or functions) are called when a user accesses a specific web interface URL, and which Pug template is then displayed
+    * `/scss` : static CSS styling, compiled at DB startup
+    * `/static` : various functions that operate at the web interface page level
+        * `/css` : additional CSS style guides for specific pages
+        * `/formio` : JavaScript code that governs the behaviour and appearance of the various Formio form components used in the DB
+        * `/images` : images that are used by the web interface
+        * `/js` : non-specific page-level JavaScript functions, as well as external third-party libraries
+        * `/pages` : JavaScript code that governs the behaviour of specific pages (with each file corresponding to the same-named Pug template)
+    * `app.js` : the main APA DB app
+    * `index.js` : the 'launch point' for starting, connecting to and stopping the APA DB app
+* `/m2m` : contains standalone Python code for the machine-to-machine ('M2M') client scripts ... please see the [dedicated README](https://github.com/DUNE/dunedb/tree/staging/m2m#readme) for full details
+* `/okd` : files required for deployment of the APA DB on the OKD system at Fermilab
+
 
 ## Authors
 
-* **Nathaniel Tagg** - https://github.com/nathanieltagg
-* **Krish Majumdar** - https://github.com/krishmaj
-* **Micah Henning** - https://micah.soy
+* [**Krish Majumdar**](https://github.com/krishmaj)
+* [**Micah Henning**](https://micah.soy)
+* [**Brian Rebel**](https://github.com/bjrebel)
+* [**Nathaniel Tagg**](https://github.com/nathanieltagg) (former)
