@@ -424,10 +424,47 @@ async function workflowsByUUID(componentUUID) {
 }
 
 
+/// Retrieve a list of assembled APAs that match the specified record details
+async function apasByRecordDetails(location, configuration, locationNumber) {
+  let aggregation_stages = [];
+
+  // Retrieve all assembled APAs records that have the same location, configuration and location number as the specified values
+  aggregation_stages.push({
+    $match: {
+      'formId': 'AssembledAPA',
+      'data.apaAssemblyLocation': location,
+      'data.apaConfiguration': configuration,
+      'data.apaNumberAtLocation': parseInt(locationNumber, 10),
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+    },
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of assembled APAs
+  return results;
+}
+
+
 module.exports = {
   boardsByLocation,
   boardsByPartNumber,
   boardsByVisualInspection,
   boardsByOrderNumber,
   workflowsByUUID,
+  apasByRecordDetails,
 }

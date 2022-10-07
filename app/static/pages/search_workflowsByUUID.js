@@ -46,7 +46,7 @@ function postSuccess(result) {
   $('#messages').empty();
 
   // If there are no search results, display a message to indicate this
-  // Similarly, if there is more than search result (i.e. the specified component is involved in multiple workflows), also display a message
+  // Similarly, if there is more than one search result (i.e. the specified component is involved in multiple workflows), also display a message
   // Otherwise (i.e. there is exactly one workflow in the search results), redirect the user to the page for viewing the workflow record
   if (result.length === 0) {
     $('#messages').append('<b>The specified component is not part of an existing workflow.</b>');
@@ -54,7 +54,7 @@ function postSuccess(result) {
     const output = `
       <b>The specified component is part of <u>multiple</u> workflows.</b>
       <br>This should not happen, since each workflow should be uniquely related to a single component.
-      <br>Please bring this to the attention of one of the database development team, indicating the component UUID you specified above.`;
+      <br>Please bring this to the attention of one of the database development team, indicating the component UUID that you specified above.`;
 
     $('#messages').append(output);
   } else {

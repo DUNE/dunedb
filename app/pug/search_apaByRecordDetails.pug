@@ -1,0 +1,56 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Assembled APA by Record Details';
+
+block extrascripts
+  block workscripts 
+    script(src = '/pages/search_apaByRecordDetails.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Assembled APA by Record Details
+
+    .vert-space-x2
+      hr
+
+      .row
+        .col-md-4
+          h4 Select Location
+
+          .vert-space-x1
+            p Select a location from the options below.
+
+          select.form-control#locationSelection
+            option(value = '')          
+            option(value = 'daresbury') Daresbury 
+            option(value = 'chicago') Chicago
+            option(value = 'wisconsin') Wisconsin 
+
+          .vert-space-x2
+            h4 Select Configuration
+
+            .vert-space-x1
+              p Select a configuration from the options below.
+
+            select.form-control#configurationSelection
+              option(value = '')          
+              option(value = 'top') Top 
+              option(value = 'bottom') Bottom 
+
+          .vert-space-x2
+            h4 Enter Location Number
+
+            .vert-space-x1
+              p Enter a location number below and press the 'Enter' key.
+
+            input.form-control#locationNumberSelection
+
+        .col-md-1
+
+        .col-md-7
+          .vert-space-x1
+            #messages
+
+    .vert-space-x2

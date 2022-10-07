@@ -68,12 +68,32 @@ block content
         br
         |  The UUID input box uses auto-complete, so users may begin manually entering a UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.
         br
-        |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.:
+        |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.
 
       p If an existing workflow that involves the specified component is successfully found in the database, the user will be automatically redirected to the page for viewing the workflow record.
         br
         |  If there is no such workflow, i.e. the specified component is not part of any existing workflow, a message will be displayed below the input box to that effect.
 
       p It should not be possible for multiple workflows to involve the same component, since each individual workflow begins with the creation of a new, unique component.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
+
+      hr
+
+    .vert-space-x2
+      h4
+        a(href = '/search/apaByRecordDetails') Assembled APA by Record Details
+
+      p This page may be used to search specifically for <b>assembled APAs</b> that match <b>all</b> of the following user-specified record details:
+        ul
+          li <b>location</b>: the location at which the APA is being assembled
+          li <b>configuration</b>: the configuration of the APA ('top' or 'bottom')
+          li <b>location number</b>: the number of the APA, out of all APAs being assembled at the specified location
+
+      p Users may select one of the locations and configurations from the respective lists, and manually enter an (integer) location number.  Please note that <b>all three pieces of information must be provided</b> for the search to be performed.
+
+      p If an existing assembled APA record that matches all three pieces of information is successfully found in the database, the user will be automatically redirected to the page for viewing the APA component record.
+        br
+        |  If there is no such APA, i.e. the information does not match an existing APA record, a message will be displayed to the right of the input boxes to that effect.
+
+      p It should not be possible for multiple APA records to match against all three provided pieces of information, since they should uniquely identify a single APA.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 
     .vert-space-x2
