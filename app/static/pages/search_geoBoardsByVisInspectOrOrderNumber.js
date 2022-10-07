@@ -21,7 +21,7 @@ $(function () {
     }
   });
 
-  // When the selected order number is changed and the 'Enter' key is pressed, get the newly selected order number from the corresponding page element
+  // When the entered order number is changed and the 'Enter' key is pressed, get the newly entered order number from the corresponding page element
   // If the order number is valid, perform the appropriate jQuery 'ajax' call to make the search
   document.getElementById('orderNumberSelection').addEventListener('keyup', function (e) {
     if (e.key === 'Enter') {
