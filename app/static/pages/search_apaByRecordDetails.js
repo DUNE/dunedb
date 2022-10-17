@@ -7,27 +7,27 @@ let apaLocationNumber = null;
 // Main function
 $(function () {
   // When the selected APA location is changed, get the newly selected location from the corresponding page element
+  // If all three user-specified search criteria are valid, then perform the search
   $('#locationSelection').on('change', async function () {
     apaLocation = $('#locationSelection').val();
 
-    // If all three user-specified search criteria are valid, perform the search
     if (apaLocation && apaConfiguration && apaLocationNumber) performSearch();
   });
 
   // When the selected APA configuration is changed, get the newly selected configuration from the corresponding page element
+  // If all three user-specified search criteria are valid, then perform the search
   $('#configurationSelection').on('change', async function () {
     apaConfiguration = $('#configurationSelection').val();
 
-    // If all three user-specified search criteria are valid, perform the search
     if (apaLocation && apaConfiguration && apaLocationNumber) performSearch();
   });
 
   // When the entered APA location number is changed and the 'Enter' key is pressed, get the newly entered location number from the corresponding page element
+  // If all three user-specified search criteria are valid, then perform the search
   document.getElementById('locationNumberSelection').addEventListener('keyup', function (e) {
     if (e.key === 'Enter') {
       apaLocationNumber = $('#locationNumberSelection').val();
 
-      // If all three user-specified search criteria are valid, perform the search
       if (apaLocation && apaConfiguration && apaLocationNumber) performSearch();
     }
   });

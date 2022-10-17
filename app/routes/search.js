@@ -22,6 +22,13 @@ router.get('/search/geoBoardsByLocationOrPartNumber', async function (req, res, 
 });
 
 
+/// Search for geometry board shipments using various shipment reception details
+router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_boardShipmentsByReceptionDetails.pug');
+});
+
+
 /// Search for geometry boards that have a specified visual inspection disposition, or have a specified order number
 router.get('/search/geoBoardsByVisInspectOrOrderNumber', async function (req, res, next) {
   // Render the interface page
