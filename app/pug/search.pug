@@ -62,6 +62,23 @@ block content
 
     .vert-space-x2
       h4
+        a(href = '/search/boardShipmentsByReceptionDetails') Geometry Board Shipments by Reception Details
+
+      p This page may be used to search specifically for <b>geometry board shipments</b> that match <b>one or more</b> of the following user-specified record details:
+        ul
+          li <b>origin location</b>: the location from which the shipment was sent
+          li <b>destination location</b>: the location at which the shipment is to be (or has been) received
+          li <b>earliest reception date</b>: the earliest date on which the shipment could have been received (if not specified, 1st of January 2000 is used)
+          li <b>latest reception date</b>: the latest date on which the shipment could have been received (if not specified, today's date is used)
+
+      p Users may select any combination of the locations and dates from the respective lists (all four pieces of information are <b>not</b> required for the search to be performed), and a summary of information about each found shipment will be displayed in the search results panel below the selection boxes.
+
+      p Please note that <b>all</b> shipments in the database may be queried using this search, regardless of if they have been recorded as received at a particular location or not.  In the case of shipments that have not yet been received, a reception date will of course not be displayed, but all other information will still be shown.
+
+      hr
+
+    .vert-space-x2
+      h4
         a(href = '/search/workflowsByUUID') Workflows by UUID
 
       p This page may be used to search specifically for <b>workflows</b> that involve a particular component, specified by its full 36-character UUID.

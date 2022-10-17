@@ -390,6 +390,129 @@ async function boardsByOrderNumber(orderNumber) {
 }
 
 
+/// Retrieve a list of geometry board shipments that match the specified reception details
+async function boardShipmentsByReceptionDetails(origin, destination, earliest, latest) {
+  // Set up 'matching' strings that can be used by MongoDB to match against specific record field values
+  // For each potential location (origin or destination), if it has been specified, just use it as the matching string ... otherwise use a fully wildcard regular expression
+  const originString = (origin) ? origin : /(.*?)/;
+  const destinationString = (destination) ? destination : /(.*?)/;
+
+  let comp_aggregation_stages = [];
+
+  // Retrieve all shipment component records that match the origin and destination location matching strings
+  comp_aggregation_stages.push({
+    $match: {
+      'formId': 'BoardShipment',
+      'data.originOfShipment': originString,
+      'data.destinationOfShipment': destinationString,
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  comp_aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      data: { '$first': '$data' },
+    },
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let component_results = await db.collection('components')
+    .aggregate(comp_aggregation_stages)
+    .toArray();
+
+  // At this stage we have a list of 'Board Shipment' component records that:
+  //   - originated at the specified origin location (if one was specified), or at any location (if not)
+  //   - were supposed to end up at the specified destination location (if one was specified), or at any location (if not)
+  // But what we actually want is a combination of some information from both the shipment component record and the corresponding reception action record (if the shipment has been received)
+  let shipments = [];
+
+  // For each shipment record ...
+  for (const shipmentRecord of component_results) {
+    // Set up a query to the 'actions' records collection to retrieve the record of the most recent 'Board Shipment Reception' action performed on this shipment (match by shipment UUID)
+    let action_aggregation_stages = [];
+
+    action_aggregation_stages.push({
+      $match: {
+        'typeFormId': 'BoardReception',
+        'componentUuid': shipmentRecord.componentUuid,
+      }
+    });
+
+    action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+    action_aggregation_stages.push({
+      $group: {
+        _id: { actionId: '$actionId' },
+        actionId: { '$first': '$actionId' },
+        componentUuid: { '$first': '$componentUuid' },
+        data: { '$first': '$data' },
+      },
+    });
+
+    let action_results = await db.collection('actions')
+      .aggregate(action_aggregation_stages)
+      .toArray();
+
+    // Set up the single shipment object that will contain the combination of component and action information
+    let shipment = {
+      uuid: shipmentRecord.componentUuid,
+      numberOfBoards: shipmentRecord.data.boardUuiDs.length,
+      origin: shipmentRecord.data.originOfShipment,
+      destination: shipmentRecord.data.destinationOfShipment,
+      receptionDate: '(none)',
+      receptionActionId: '(none)',
+      receptionComment: '',
+      searchComment: 'No reception record found!',
+    }
+
+    // Now set up some logic to handling matching the shipment reception date against any specified earliest or latest date query (or a combination of both)
+    // First set up the JavaScript 'Date' objects for use in the comparison, with values dependent on if the earliest and/or latest dates were specified or not
+    const earliestDate = (earliest) ? new Date(earliest) : new Date('2000-01-01');
+    const latestDate = (latest) ? new Date(latest) : new Date();
+
+    // If there are no matching reception action records, this indicates that this shipment has not yet been recorded as received (i.e. it may still be in transit)
+    //   - if a date range query has not been specified, save the shipment object for return as-is (since it's fine that it hasn't yet been received - we're evidently not requiring it to have been)
+    //   - if a date range query has been specified, DO NOT save the shipment object (since it cannot possibly match the specified date range)
+    if (action_results.length === 0) {
+      if (!earliest && !latest) shipments.push(shipment);
+    }
+
+    // If there is exactly one matching reception action record, this indicates that this shipment has been recorded as received
+    //   - if a date range query has not been specified, add the recorded reception date to the shipment object and save it for return
+    //   - if a date range query has been specified, add the reception date to the shipment object and save it for return only if the record matches to the former
+    // The same logic can be used for if there is more than one matching reception action record
+    // ... this would appear to indicate that this shipment has been received more than once, which shouldn't happen, but technicially speaking there is nothing preventing it
+    // In such a situation, an additional comment should be put in the returned shipment object to notify the user
+    else {
+      const receptionDate = new Date(((action_results[0].data.receptionDate).split('T'))[0]);
+
+      if ((!earliest && !latest) || ((earliest || latest) && (receptionDate >= earliestDate) && (receptionDate <= latestDate))) {
+        shipment.receptionDate = (receptionDate.toISOString().split('T'))[0];
+        shipment.receptionActionId = action_results[0].actionId;
+        shipment.receptionComment = action_results[0].data.comments;
+
+        if (action_results.length === 1) {
+          shipment.searchComment = '';
+        }
+        else {
+          shipment.searchComment = 'Multiple reception records found!';
+        }
+
+        shipments.push(shipment);
+      }
+    }
+  }
+
+  // Return the list of shipments
+  return shipments;
+}
+
+
 /// Retrieve a list of workflows that involve a particular component, specified by its UUID
 async function workflowsByUUID(componentUUID) {
   let aggregation_stages = [];
@@ -465,6 +588,7 @@ module.exports = {
   boardsByPartNumber,
   boardsByVisualInspection,
   boardsByOrderNumber,
+  boardShipmentsByReceptionDetails,
   workflowsByUUID,
   apasByRecordDetails,
 }
