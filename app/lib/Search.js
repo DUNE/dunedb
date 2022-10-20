@@ -483,11 +483,13 @@ async function boardShipmentsByReceptionDetails(origin, destination, earliest, l
     }
 
     // If there is exactly one matching reception action record, this indicates that this shipment has been recorded as received
-    //   - if a date range query has not been specified, add the recorded reception date to the shipment object and save it for return
-    //   - if a date range query has been specified, add the reception date to the shipment object and save it for return only if the record matches to the former
-    // The same logic can be used for if there is more than one matching reception action record
-    // ... this would appear to indicate that this shipment has been received more than once, which shouldn't happen, but technicially speaking there is nothing preventing it
+    // Add the recorded reception date to the shipment object and save it for return if:
+    //   - either a date range query has not been specified, 
+    //   - or a date range query has been specified, and the record's reception date matches to it
+    // The same logic can be used for if there is more than one matching reception action record ...
+    // ... such a scenario would indicate that this shipment has been received more than once, which shouldn't happen, but technically speaking there is nothing preventing it
     // In such a situation, an additional comment should be put in the returned shipment object to notify the user
+    // Also, check that the actual reception location matches the intended destination ... if not, add a comment to notify the user
     else {
       const receptionDate = new Date(((action_results[0].data.receptionDate).split('T'))[0]);
 
@@ -502,6 +504,8 @@ async function boardShipmentsByReceptionDetails(origin, destination, earliest, l
         else {
           shipment.searchComment = 'Multiple reception records found!';
         }
+
+        if (shipment.destination !== action_results[0].data.receptionLocation) shipment.searchComment = 'Reception destination mismatch!';
 
         shipments.push(shipment);
       }
