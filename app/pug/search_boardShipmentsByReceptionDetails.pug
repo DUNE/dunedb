@@ -1,0 +1,89 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Geometry Board Shipments by Reception Details';
+
+block extrascripts
+  block workscripts 
+    script(src = '/pages/search_boardShipmentsByReceptionDetails.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Geometry Board Shipments by Reception Details
+
+    .vert-space-x2
+      hr
+
+      .row
+        .col-md-3
+          h4 Select Origin Location
+
+          .vert-space-x1
+            p Select a location from the options below.
+              br
+              | &nbsp 
+
+          select.form-control#originLocationSelection
+            option(value = '') (any)
+            option(value = 'cambridge') Cambridge 
+            option(value = 'daresbury') Daresbury 
+            option(value = 'lancaster') Lancaster 
+            option(value = 'manchester') Manchester 
+            option(value = 'merlin') Merlin 
+            option(value = 'sheffield') Sheffield 
+            option(value = 'sussex') Sussex 
+            option(value = 'williamAndMary') William and Mary 
+            option(value = 'uwPsl') UW / PSL 
+            option(value = 'chicago') Chicago
+
+        .col-md-3
+          h4 Select Destination Location
+
+          .vert-space-x1
+            p Select a location from the options below.
+              br
+              | &nbsp
+
+          select.form-control#destinationLocationSelection
+            option(value = '') (any)
+            option(value = 'cambridge') Cambridge 
+            option(value = 'daresbury') Daresbury 
+            option(value = 'lancaster') Lancaster 
+            option(value = 'manchester') Manchester 
+            option(value = 'merlin') Merlin 
+            option(value = 'sheffield') Sheffield 
+            option(value = 'sussex') Sussex 
+            option(value = 'williamAndMary') William and Mary 
+            option(value = 'uwPsl') UW / PSL 
+            option(value = 'chicago') Chicago
+
+        .col-md-3
+          h4 Select Earliest Reception Date
+
+          .vert-space-x1
+            p Select a date by clicking the box below.
+              br
+              | The search will match reception <b><u>on and after</u></b> this date.
+
+            #earliestdateform
+
+        .col-md-3
+          h4 Select Latest Reception Date
+
+          .vert-space-x1
+            p Select a date by clicking the box below.
+              br
+              | The search match reception <b><u>on and before</u></b> this date.
+
+            #latestdateform
+
+    .vert-space-x2
+      hr
+
+      h4 Search Results
+
+      .vert-space-x1
+        table#results
+
+    .vert-space-x2
