@@ -1,6 +1,7 @@
 const ObjectID = require('mongodb').ObjectId;
 
 const commonSchema = require('./commonSchema');
+const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
@@ -183,7 +184,7 @@ async function list(match_condition, options) {
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       name: { '$first': '$data.name' },
-      component: { '$first': '$path.result' },
+      stepResultIDs: { '$first': '$path.result' },
       status: { '$first': '$status' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
@@ -202,6 +203,15 @@ async function list(match_condition, options) {
   let records = await db.collection('workflows')
     .aggregate(aggregation_stages)
     .toArray();
+
+  // Add the corresponding component name to each matching record
+  for (let record of records) {
+    if (record.stepResultIDs[0] != '') {
+      const component = await Components.retrieve(record.stepResultIDs[0]);
+
+      record.componentName = component.data.name;
+    }
+  }
 
   // Return the entire list of matching records
   return records;
