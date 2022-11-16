@@ -38,9 +38,9 @@ block content
                   a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
                 td #{workflow.name}
 
-                if(workflow.component[0] != '')
+                if(workflow.stepResultIDs[0] != '')
                   td
-                    a(href = `/component/${workflow.component[0]}`) #{workflow.component[0]}
+                    a(href = `/component/${workflow.stepResultIDs[0]}`) #{workflow.componentName}
                 else 
                   td (component not yet created)
 

@@ -391,7 +391,7 @@ async function boardsByOrderNumber(orderNumber) {
 
 
 /// Retrieve a list of geometry board shipments that match the specified reception details
-async function boardShipmentsByReceptionDetails(origin, destination, earliest, latest) {
+async function boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment) {
   // Set up 'matching' strings that can be used by MongoDB to match against specific record field values
   // For each potential location (origin or destination), if it has been specified, just use it as the matching string ... otherwise use a fully wildcard regular expression
   const originString = (origin) ? origin : /(.*?)/;
@@ -458,16 +458,16 @@ async function boardShipmentsByReceptionDetails(origin, destination, earliest, l
       .aggregate(action_aggregation_stages)
       .toArray();
 
-    // Set up the single shipment object that will contain the combination of component and action information
+    // Set up the single shipment object that will contain the component information and any additional action information
     let shipment = {
       uuid: shipmentRecord.componentUuid,
       numberOfBoards: shipmentRecord.data.boardUuiDs.length,
       origin: shipmentRecord.data.originOfShipment,
       destination: shipmentRecord.data.destinationOfShipment,
-      receptionDate: '(none)',
-      receptionActionId: '(none)',
-      receptionComment: '',
-      searchComment: 'No reception record found!',
+      receptionDate: '[n.a.]',
+      receptionActionId: '[n.a.]',
+      receptionComment: '[n.a.]',
+      searchComment: '[n.a.]',
     }
 
     // Now set up some logic to handling matching the shipment reception date against any specified earliest or latest date query (or a combination of both)
@@ -475,39 +475,50 @@ async function boardShipmentsByReceptionDetails(origin, destination, earliest, l
     const earliestDate = (earliest) ? new Date(earliest) : new Date('2000-01-01');
     const latestDate = (latest) ? new Date(latest) : new Date();
 
-    // If there are no matching reception action records, this indicates that this shipment has not yet been recorded as received (i.e. it may still be in transit)
-    //   - if a date range query has not been specified, save the shipment object for return as-is (since it's fine that it hasn't yet been received - we're evidently not requiring it to have been)
-    //   - if a date range query has been specified, DO NOT save the shipment object (since it cannot possibly match the specified date range)
+    // If there are no matching reception action records, this indicates that this shipment has not yet been received (i.e. perhaps it is still in transit)
+    // If the search query is for unreceived shipments, we can save this shipment object for return as-is
+    // If the search query is not for unreceived shipments (i.e. it is for received shipments), we don't care about this shipment
     if (action_results.length === 0) {
-      if (!earliest && !latest) shipments.push(shipment);
+      if (status === 'unreceived') shipments.push(shipment);
     }
 
-    // If there is exactly one matching reception action record, this indicates that this shipment has been recorded as received
-    // Add the recorded reception date to the shipment object and save it for return if:
+    // If there is (at least) one matching reception action record, this indicates that this shipment has been recorded as being received somewhere
+    // If the search query is for received shipments, add the reception information to the shipment object if:
     //   - either a date range query has not been specified, 
     //   - or a date range query has been specified, and the record's reception date matches to it
+
     // The same logic can be used for if there is more than one matching reception action record ...
     // ... such a scenario would indicate that this shipment has been received more than once, which shouldn't happen, but technically speaking there is nothing preventing it
-    // In such a situation, an additional comment should be put in the returned shipment object to notify the user
+    // In such a situation, an additional comment should be added to the returned shipment object to notify the user
     // Also, check that the actual reception location matches the intended destination ... if not, add a comment to notify the user
     else {
-      const receptionDate = new Date(((action_results[0].data.receptionDate).split('T'))[0]);
+      if (status === 'received') {
+        const receptionDate = new Date(((action_results[0].data.receptionDate).split('T'))[0]);
 
-      if ((!earliest && !latest) || ((earliest || latest) && (receptionDate >= earliestDate) && (receptionDate <= latestDate))) {
-        shipment.receptionDate = (receptionDate.toISOString().split('T'))[0];
-        shipment.receptionActionId = action_results[0].actionId;
-        shipment.receptionComment = action_results[0].data.comments;
+        if ((!earliest && !latest) || ((earliest || latest) && (receptionDate >= earliestDate) && (receptionDate <= latestDate))) {
+          shipment.receptionDate = (receptionDate.toISOString().split('T'))[0];
+          shipment.receptionActionId = action_results[0].actionId;
+          shipment.receptionComment = action_results[0].data.comments;
 
-        if (action_results.length === 1) {
-          shipment.searchComment = '';
+          if (action_results.length === 1) {
+            shipment.searchComment = '';
+          }
+          else {
+            shipment.searchComment = 'Multiple reception records!';
+          }
+
+          if (shipment.destination !== action_results[0].data.receptionLocation) shipment.searchComment = 'Reception destination mismatch!';
+
+          // Once the shipment object is fully populated with reception information, we can check against any specified reception comment query ... there are three scenarios to consider:
+          //   - if the query is 'null', this indicates that we don't care what the reception comment is, so just save the shipment object for return
+          //   - if the query is a 'noComment' string, save the shipment object only if the reception comment is explicitly an empty string
+          //   - if the query is a 'comment' string, save the shipment object only if the reception comment is explicitly NOT an empty string
+          if (!comment) shipments.push(shipment);
+          else {
+            if (((comment === 'noComment') && (shipment.receptionComment === ''))
+              || ((comment === 'comment') && (shipment.receptionComment !== ''))) shipments.push(shipment);
+          }
         }
-        else {
-          shipment.searchComment = 'Multiple reception records found!';
-        }
-
-        if (shipment.destination !== action_results[0].data.receptionLocation) shipment.searchComment = 'Reception destination mismatch!';
-
-        shipments.push(shipment);
       }
     }
   }

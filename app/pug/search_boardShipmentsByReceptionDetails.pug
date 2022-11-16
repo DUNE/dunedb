@@ -16,6 +16,19 @@ block content
       hr
 
       .row
+        .col-md-3 
+          h4 Select Shipment Status
+
+          .vert-space-x1
+            p Select a status from the options below.
+              br
+              | <b>This selection is a <u>required</u> search parameter.</b>
+
+          select.form-control#shipmentStatusSelection
+            option(value = '') (please select)
+            option(value = 'unreceived') Unreceived Shipments
+            option(value = 'received') Received Shipments
+
         .col-md-3
           h4 Select Origin Location
 
@@ -58,6 +71,11 @@ block content
             option(value = 'uwPsl') UW / PSL 
             option(value = 'chicago') Chicago
 
+        .col-md-3 
+
+      .row.vert-space-x2
+        .col-md-3 
+
         .col-md-3
           h4 Select Earliest Reception Date
 
@@ -77,6 +95,19 @@ block content
               | The search match reception <b><u>on and before</u></b> this date.
 
             #latestdateform
+
+        .col-md-3
+          h4 Select Reception Comment
+
+          .vert-space-x1
+            p Indicate if you would like to query against reception comments.
+              br
+              | &nbsp 
+
+          select.form-control#receptionCommentSelection
+            option(value = '') All shipments 
+            option(value = 'noComment') Only shipments received with no comments 
+            option(value = 'comment') Only shipments received with comments 
 
     .vert-space-x2
       hr

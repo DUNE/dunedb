@@ -68,12 +68,15 @@ router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, r
 /// Search for geometry board shipments using various shipment reception details
 router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
   try {
-    // This search query can take up to 4 query strings, any or all of which are optional
+    // This search query can multiple query strings, most of which are optional
     // So first, parse out the strings which have actually been provided (as non-empty strings), and set the rest to 'null'
+    // The only required query string is the 'shipment status', which will always have a valid value provided
+    const status = req.query.shipmentStatus;
     const origin = (req.query.originLocation !== '') ? req.query.originLocation : null;
     const destination = (req.query.destinationLocation !== '') ? req.query.destinationLocation : null;
     let earliest = (req.query.earliestDate !== '') ? req.query.earliestDate : null;
     let latest = (req.query.latestDate !== '') ? req.query.latestDate : null;
+    const comment = (req.query.receptionComment !== '') ? req.query.receptionComment : null;
 
     // The timestamp part of both date/time strings is supposed to be of the format: 'T00:00:00+01:00', but the '+' character is replaced with a space when they are passed as query strings
     // So replace the space in each string with a '+' to recover the original, correctly formatted timestamp (so that the format matches that of the timestamps in the shipment records)
@@ -81,7 +84,7 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
     if (latest) latest = latest.replace(' ', '+');
 
     // Retrieve a list of geometry boards shipments that match the specified reception details
-    const shipments = await Search.boardShipmentsByReceptionDetails(origin, destination, earliest, latest);
+    const shipments = await Search.boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
 
     // Return the list in JSON format
     return res.json(shipments);

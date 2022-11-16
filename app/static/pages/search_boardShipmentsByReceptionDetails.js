@@ -1,8 +1,10 @@
 // Declare variables to hold the (initially empty) user-specified board shipment reception details
+let shipmentStatus = '';
 let originLocation = '';
 let destinationLocation = '';
 let earliestDate = '';
 let latestDate = '';
+let receptionComment = '';
 
 
 // Run a specific function when the page is loaded
@@ -11,6 +13,14 @@ window.addEventListener('load', renderSearchForms);
 
 // Function to run when the page is loaded
 async function renderSearchForms() {
+  // When the selected shipment status is changed, get the newly selected status
+  // If the status has a non-empty value (i.e. an option has actually been selected), perform the search using the current values of the reception details variables
+  $('#shipmentStatusSelection').on('change', async function () {
+    shipmentStatus = $('#shipmentStatusSelection').val();
+
+    if (shipmentStatus !== '') performSearch();
+  });
+
   // When the selected origin location is changed, get the newly selected location if it has a value, or otherwise reset the string
   // Then perform the search using the current values of the reception details variables
   $('#originLocationSelection').on('change', async function () {
@@ -86,6 +96,18 @@ async function renderSearchForms() {
 
     performSearch();
   });
+
+  // When the shipment reception comment is changed, get the newly indicated comment if it has a value, or otherwise reset the string
+  // Then perform the search using the current values of the reception details variables
+  $('#receptionCommentSelection').on('change', async function () {
+    if ($('#receptionCommentSelection').val()) {
+      receptionComment = $('#receptionCommentSelection').val();
+    } else {
+      receptionComment = '';
+    }
+
+    performSearch();
+  });
 }
 
 
@@ -94,7 +116,7 @@ function performSearch() {
   $.ajax({
     contentType: 'application/json',
     method: 'GET',
-    url: `/json/search/boardShipmentsByReceptionDetails?originLocation=${originLocation}&destinationLocation=${destinationLocation}&earliestDate=${earliestDate}&latestDate=${latestDate}`,
+    url: `/json/search/boardShipmentsByReceptionDetails?shipmentStatus=${shipmentStatus}&originLocation=${originLocation}&destinationLocation=${destinationLocation}&earliestDate=${earliestDate}&latestDate=${latestDate}&receptionComment=${receptionComment}`,
     dataType: 'json',
     success: postSuccess,
   }).fail(postFail);
@@ -146,9 +168,9 @@ function postSuccess(result) {
         <th scope = 'col' width = '7%'>Boards</th>
         <th scope = 'col' width = '9%'>Origin</th>
         <th scope = 'col' width = '9%'>Destination</th>
-        <th scope = 'col' width = '8%'>Date</th>
-        <th scope = 'col' width = '36%'>Comments</th>
-        <th scope = 'col' width = '13%'>Search Comments</th>
+        <th scope = 'col' width = '9%'>Reception Date</th>
+        <th scope = 'col' width = '36%'>Shipment Reception Comment</th>
+        <th scope = 'col' width = '12%'>Search Comment</th>
       </tr>`;
 
     $('#results').append(tableStart);
