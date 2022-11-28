@@ -2,6 +2,7 @@ const MUUID = require('uuid-mongodb');
 const ObjectID = require('mongodb').ObjectId;
 
 const commonSchema = require('./commonSchema');
+const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
@@ -178,8 +179,14 @@ async function list(match_condition, options) {
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
+  // Then add the corresponding component name to each matching record
   for (let record of records) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
+
+    const component = await Components.retrieve(record.componentUuid);
+
+    if (component.data.name) record.componentName = component.data.name;
+    else record.componentName = record.componentUuid;
   }
 
   // Return the entire list of matching records
