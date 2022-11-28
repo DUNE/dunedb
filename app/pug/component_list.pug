@@ -21,7 +21,6 @@ block content
         thead
           tr
             th.col-md-2 Type Name
-            th.col-md-3 Component UUID
             th.col-md-4 Component Name
             th.col-md-2 Last Edited On:
             th.col-md-1
@@ -36,8 +35,7 @@ block content
               tr          
                 td #{component.typeFormName}
                 td
-                  a(href = `/component/${uuid}`) #{uuid}
-                td #{component.name} 
+                  a(href = `/component/${uuid}`) #{component.name}
                 td
                   +dateFormat(component.lastEditDate)
                 td

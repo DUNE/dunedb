@@ -36,10 +36,9 @@ block content
       h2 Available Component Types
 
     .vert-space-x1
-      table.table
+      table.table 
         thead
           tr
-            th.col-md-2 Type ID
             th.col-md-3 Type Name
             th.col-md-2 Component Count
             th.col-md-3
@@ -51,7 +50,6 @@ block content
 
             if(typeForm.tags && !typeForm.tags.includes('Trash'))
               tr
-                td #{typeFormId}
                 td
                   a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
 
@@ -77,7 +75,6 @@ block content
         table.table
           thead
             tr
-              th.col-md-2 Type ID
               th.col-md-3 Type Name
               th.col-md-2 Component Count
               th.col-md-3
@@ -89,7 +86,6 @@ block content
 
               if(typeForm.tags && typeForm.tags.includes('Trash'))
                 tr
-                  td #{typeFormId}
                   td
                     a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
 
