@@ -39,7 +39,6 @@ block content
       table.table
         thead
           tr
-            th.col-md-2 Type ID
             th.col-md-2 Type Name
             th.col-md-3 Recommended Component Types
             th.col-md-2
@@ -51,7 +50,6 @@ block content
 
             if(typeForm.tags && !typeForm.tags.includes('Trash')) 
               tr
-                td #{typeFormId}
                 td
                   a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
 
@@ -78,10 +76,9 @@ block content
         table.table
           thead
             tr
-              th.col-md-2 Type ID
               th.col-md-2 Type Name
               th.col-md-3 Recommended Component Types
-              th.col-md-2 Short Description
+              th.col-md-2
               th.col-md-2
 
           tbody
@@ -90,17 +87,16 @@ block content
 
               if(typeForm.tags && typeForm.tags.includes('Trash')) 
                 tr
-                  td #{typeFormId}  
                   td
                     a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
 
-                  if(typeForm.componentTypes.length > 0)
+                  if((typeForm.componentTypes) && (typeForm.componentTypes.length > 0))
                     td
                       +arrayFormat(typeForm.componentTypes)
                   else
                     td (none)
 
-                  td #{typeForm.description}
+                  td 
                   td
                     a.btn-sm.btn-warning(href = `/workflowTypes/${typeFormId}/edit`)
                       img.small-icon(src = '/images/edit_icon.svg')
