@@ -34,8 +34,14 @@ block content
 
               tr          
                 td #{component.typeFormName}
-                td
-                  a(href = `/component/${uuid}`) #{component.name}
+
+                if (component.name)
+                  td
+                    a(href = `/component/${uuid}`) #{component.name}
+                else 
+                  td 
+                    a(href = `/component/${uuid}`) #{uuid}
+
                 td
                   +dateFormat(component.lastEditDate)
                 td
