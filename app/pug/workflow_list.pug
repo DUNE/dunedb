@@ -20,10 +20,9 @@ block content
       table.table
         thead
           tr
-            th.col-md-2 Type Name
+            th.col-md-1 Type Name
             th.col-md-1 Workflow ID
-            th.col-md-2 Workflow Name
-            th.col-md-3 Component
+            th.col-md-3 Associated Component
             th.col-md-1 Status
             th.col-md-1
 
@@ -36,7 +35,6 @@ block content
                 td #{workflow.typeFormName}
                 td
                   a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
-                td #{workflow.name}
 
                 if(workflow.stepResultIDs[0] != '')
                   td

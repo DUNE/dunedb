@@ -22,7 +22,6 @@ block content
           tr
             th.col-md-2 Type Name
             th.col-md-1 Action ID
-            th.col-md-2 Action Name
             th.col-md-3 Performed on Component:
             th.col-md-2 Last Performed On:
             th.col-md-1
@@ -38,9 +37,8 @@ block content
                 td #{action.typeFormName}
                 td
                   a(href = `/action/${action.actionId}`) #{action.actionId}
-                td #{action.name}
                 td
-                  a(href = `/component/${uuid}`) #{uuid}
+                  a(href = `/component/${uuid}`) #{action.componentName}
                 td
                   +dateFormat(action.lastEditDate)
                 td

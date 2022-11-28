@@ -209,7 +209,10 @@ async function list(match_condition, options) {
     if (record.stepResultIDs[0] != '') {
       const component = await Components.retrieve(record.stepResultIDs[0]);
 
-      record.componentName = component.data.name;
+      if (component) {
+        if (component.data.name) record.componentName = component.data.name;
+        else record.componentName = record.stepResultIDs[0];
+      }
     }
   }
 
