@@ -55,18 +55,14 @@ block content
               thead
                 tr 
                   th.col-md-1 Step
-                  th.col-md-1 Entity Type
-                  th.col-md-2 Type Form Name
-                  th.col-md-3 Advice 
+                  th.col-md-5 Type Form Name
                   th.col-md-5 Status / Result
 
               tbody
                 each step, index in workflow.path 
                   tr 
                     td #{index + 1}
-                    td #{step.type}
                     td #{step.formName}
-                    td #{step.advice}
 
                     - const componentUuid = workflow.path[0].result;
                     - let stepFormId = '';
