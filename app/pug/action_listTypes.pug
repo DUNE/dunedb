@@ -36,70 +36,80 @@ block content
       h2 Available Action Types
 
     .vert-space-x1
-      table.table
-        thead
-          tr
-            th.col-md-2 Type Name
-            th.col-md-3 Recommended Component Types
-            th.col-md-2
-            th.col-md-2
+      each actionFormsGroup, index in actionTypeForms
+        - let allComponentTypesTrashed = true;
 
-        tbody
-          each typeFormId in Object.keys(actionTypeForms).sort()
-            - const typeForm = actionTypeForms[typeFormId];
+        each typeFormTags in actionFormsGroup.tags
+          if(typeFormTags && !typeFormTags.includes('Trash')) 
+            - allComponentTypesTrashed = false;
 
-            if(typeForm.tags && !typeForm.tags.includes('Trash')) 
-              tr
-                td
-                  a(href = `/actions/${typeFormId}/list`) #{typeForm.formName}
+        if(!allComponentTypesTrashed)
+          - const collapseId = `avail_actionTypeGroup_${index}`;
 
-                if((typeForm.componentTypes) && (typeForm.componentTypes.length > 0))
-                  td 
-                    +arrayFormat(typeForm.componentTypes)
-                else
-                  td (none)
+          .panel.panel-default
+          .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = `#${collapseId}`)
+            h5 #{actionFormsGroup._id.componentType}: 
+              i.chevron.fa.fa-fw 
 
-                td
-                  a.btn-sm.btn-primary(href = `/action/${typeFormId}/unspec`)
-                    img.small-icon(src = '/images/run_icon.svg')
-                    | &nbsp; Perform Action on Component
-                td
-                  a.btn-sm.btn-warning(href = `/actionTypes/${typeFormId}/edit`)
-                    img.small-icon(src = '/images/edit_icon.svg')
-                    | &nbsp; Edit Action Type Form
+          .collapse(id = `${collapseId}`)
+            table.table
+              tbody
+                each typeFormName, i in actionFormsGroup.formName
+                  - const typeFormId = actionFormsGroup.formId[i];
+                  - const typeFormTags = actionFormsGroup.tags[i];
+
+                  if(typeFormTags && !typeFormTags.includes('Trash')) 
+                    tr
+                      td.col-md-4
+                        a(href = `/actions/${typeFormId}/list`) #{typeFormName}
+                      td.col-md-2
+                        a.btn-sm.btn-primary(href = `/action/${typeFormId}/unspec`)
+                          img.small-icon(src = '/images/run_icon.svg')
+                          | &nbsp; Perform Action on Component
+                      td.col-md-2
+                        a.btn-sm.btn-warning(href = `/actionTypes/${typeFormId}/edit`)
+                          img.small-icon(src = '/images/edit_icon.svg')
+                          | &nbsp; Edit Action Type Form
+
+        .vert-space-x1
 
     if(permissions.userHas(user, 'forms:edit'))
       .vert-space-x2
         h2 Trashed Action Types
 
       .vert-space-x1
-        table.table
-          thead
-            tr
-              th.col-md-2 Type Name
-              th.col-md-3 Recommended Component Types
-              th.col-md-2
-              th.col-md-2
+        each actionFormsGroup, index in actionTypeForms
+          - let someComponentTypesTrashed = false;
 
-          tbody
-            each typeFormId in Object.keys(actionTypeForms).sort()
-              - const typeForm = actionTypeForms[typeFormId];
+          each typeFormTags in actionFormsGroup.tags
+            if(typeFormTags && typeFormTags.includes('Trash')) 
+              - someComponentTypesTrashed = true;
 
-              if(typeForm.tags && typeForm.tags.includes('Trash')) 
-                tr
-                  td
-                    a(href = `/actions/${typeFormId}/list`) #{typeForm.formName}
+          if(someComponentTypesTrashed)
+            - const collapseId = `trash_actionTypeGroup_${index}`;
 
-                  if((typeForm.componentTypes) && (typeForm.componentTypes.length > 0))
-                    td
-                      +arrayFormat(typeForm.componentTypes)
-                  else
-                    td (none)
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = `#${collapseId}`)
+              h5 #{actionFormsGroup._id.componentType}: 
+                i.chevron.fa.fa-fw 
 
-                  td
-                  td
-                    a.btn-sm.btn-warning(href = `/actionTypes/${typeFormId}/edit`)
-                      img.small-icon(src = '/images/edit_icon.svg')
-                      | &nbsp; Edit Action Type Form
+            .collapse(id = `${collapseId}`)
+              table.table
+                tbody
+                  each typeFormName, i in actionFormsGroup.formName
+                    - const typeFormId = actionFormsGroup.formId[i];
+                    - const typeFormTags = actionFormsGroup.tags[i];
+
+                    if(typeFormTags && typeFormTags.includes('Trash')) 
+                      tr
+                        td.col-md-4
+                          a(href = `/actions/${typeFormId}/list`) #{typeFormName}
+                        td.col-md-2
+                        td.col-md-2
+                          a.btn-sm.btn-warning(href = `/actionTypes/${typeFormId}/edit`)
+                            img.small-icon(src = '/images/edit_icon.svg')
+                            | &nbsp; Edit Action Type Form
+
+          .vert-space-x1
 
     .vert-space-x2

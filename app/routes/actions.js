@@ -174,8 +174,8 @@ router.get('/actionTypes/:typeFormId/edit', permissions.checkPermission('forms:e
 /// List all action types
 router.get('/actionTypes/list', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
-    // Retrieve a list of all action type forms that currently exist in the 'actionForms' collection
-    const actionTypeForms = await Forms.list('actionForms');
+    // Retrieve a list of all action type forms that currently exist in the 'actionForms' collection, grouped by their 'recommended component type'
+    const actionTypeForms = await Forms.listGrouped('actionForms');
 
     // Render the interface page
     res.render('action_listTypes.pug', { actionTypeForms });
