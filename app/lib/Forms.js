@@ -111,14 +111,12 @@ async function list(collection) {
       formName: { '$first': '$formName' },
       tags: { '$first': '$tags' },
       componentTypes: { '$first': '$componentTypes' },
-      description: { '$first': '$description' },
       path: { '$first': '$path' },
     }
   }
 
   if (collection === 'componentForms') delete grouping['$group'].componentTypes;
   if (collection !== 'workflowForms') {
-    delete grouping['$group'].description;
     delete grouping['$group'].path;
   }
 
@@ -138,6 +136,72 @@ async function list(collection) {
 
   // Return the keyed results object
   return keyedRecords;
+}
+
+
+/// Retrieve a list of all type forms in a specified collection, grouped by some field present in each record in the collection
+async function listGrouped(collection) {
+  let aggregation_stages = [];
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the type form ID (i.e. each group contains all versions of the same type form), and select only the first (highest version number) entry in each group
+  // Note that to start with, this must cover ALL possible groupings across ALL type form collections, but certain groupings do not apply to certain collections, so remove them as necessary
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+
+  let grouping = {
+    $group: {
+      _id: '$formId',
+      formId: { '$first': '$formId' },
+      formName: { '$first': '$formName' },
+      tags: { '$first': '$tags' },
+      componentTypes: { '$first': '$componentTypes' },
+      path: { '$first': '$path' },
+    }
+  }
+
+  if (collection === 'componentForms') delete grouping['$group'].componentTypes;
+  if (collection !== 'workflowForms') {
+    delete grouping['$group'].path;
+  }
+
+  aggregation_stages.push(grouping);
+
+  // For the 'actionForms' collection specifically, we want to return the list of type forms grouped by the 'recommended component type'
+  // Note that because the 'recommended component type' field is an ARRAY in the action type form, we must first 'unwind' it before grouping the records against its contents
+  // For each group of action type forms, the '_id' will be returned (i.e. the recommended component type that this group is defined by), as well as additional fields from the type form records
+  if (collection === 'actionForms') {
+    aggregation_stages.push({ $unwind: '$componentTypes' });
+
+    aggregation_stages.push({
+      $group: {
+        _id: { componentType: '$componentTypes' },
+        formId: { $push: '$formId' },
+        formName: { $push: '$formName' },
+        tags: { $push: '$tags' },
+      }
+    });
+  }
+
+  // Query the specified records collection using the aggregation stages defined above
+  let records = await db.collection(collection)
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // For all collections except the (grouped) action type forms, reform the query results into an object, with each entry keyed by the type form ID, and then returned the keyed results object
+  // For the action type forms collection, simply return the grouped records ... they will be reworked into a more easily displayed format on the interface page itself
+  if (collection !== 'actionForms') {
+    let keyedRecords = {};
+
+    for (const record of records) {
+      keyedRecords[record.formId] = record;
+    }
+
+    return keyedRecords;
+  } else {
+    return records;
+  }
 }
 
 
@@ -168,5 +232,6 @@ module.exports = {
   save,
   retrieve,
   list,
+  listGrouped,
   tags,
 }
