@@ -45,13 +45,17 @@ block content
 
         if(!allComponentTypesTrashed)
           - const collapseId = `avail_actionTypeGroup_${index}`;
+          - let startingDisplay = 'show';
+
+          if ((actionFormsGroup._id.componentType === 'Assembled APA') || (actionFormsGroup._id.componentType === 'APA Frame'))
+            - startingDisplay = ''
 
           .panel.panel-default
           .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = `#${collapseId}`)
             h5 #{actionFormsGroup._id.componentType}: 
               i.chevron.fa.fa-fw 
 
-          .collapse(id = `${collapseId}`)
+          .collapse(id = `${collapseId}`, class = `${startingDisplay}`)
             table.table
               tbody
                 each typeFormName, i in actionFormsGroup.formName
