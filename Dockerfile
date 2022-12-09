@@ -8,8 +8,10 @@ RUN npm ci
 
 VOLUME /app
 WORKDIR /app
-COPY ./app /
+COPY ./app .
 
-COPY entrypoint.sh /usr/bin/
-RUN chmod +x /usr/bin/entrypoint.sh
+COPY entrypoint.sh /bin/
+RUN chmod +x /bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
+
+CMD npm start

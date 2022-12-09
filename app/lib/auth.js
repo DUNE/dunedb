@@ -22,11 +22,13 @@ router.get('/login', passport.authenticate('auth0', {
 /// Perform the final stage of authentication, and then redirect the user to either the previously requested URL or the home page
 router.get('/callback', function (req, res, next) {
   passport.authenticate('auth0', function (err, user, info) {
-    if (err) return next(err);
-    if (!user) return res.send(`${JSON.stringify(err)} \n \n ${JSON.stringify(user)}`);
+    // if (err) return next(err);
+    if (err) return res.send(`ERROR:\n\n${JSON.stringify(err)}\n\n${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
+    if (!user) return res.send(`NO USER:\n\n${JSON.stringify(err)} \n \n ${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
 
     req.logIn(user, function (err) {
-      if (err) return next(err);
+      // if (err) return next(err);
+      if (err) return res.send(`ERROR LOGGING IN:\n\n${JSON.stringify(err)}\n\n${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
 
       const returnTo = req.session.returnTo;
       delete req.session.returnTo;
