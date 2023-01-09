@@ -2,7 +2,7 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'View Component';
+  - const page_title = 'View Component Information';
 
 block extrascripts
   script(type = 'text/javascript').
@@ -20,7 +20,7 @@ block extrascripts
 block content
   .container-fluid
     .vert-space-x2
-      h2 View Component Record
+      h2 View Component Information
 
     .vert-space-x1
       .row
@@ -34,7 +34,7 @@ block content
                 .hori-space-x1
                   a.btn-sm.btn-primary(href = `/component/${component.formId}`)
                     img.small-icon(src = '/images/run_icon.svg')
-                    | &nbsp; Create a New Component of this Type
+                    | &nbsp; Create New Component of This Type
 
             dt Component UUID
             dd
