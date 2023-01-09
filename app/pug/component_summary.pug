@@ -98,19 +98,15 @@ block allbody
               dt Action Type
               dd #{action.typeFormName}
 
-              dt Action Name
-
-              if action.data.name
-                dd #{action.data.name}
-              else
-                dd (none)
-
               dt Action ID
               dd #{action.actionId}
 
               dt Performance Data:
               dd This is version #{action.validity.version} of the action, performed on !{' '}
                 +dateFormat(action.insertion.insertDate)
+
+                if action.insertion.user
+                  |  by !{' '} #{action.insertion.user.displayName}
 
                 .vert-space-x1.border-success.border.rounded.p-2
                   .actiontypeform(data-record = action)
