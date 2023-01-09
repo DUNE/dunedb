@@ -2,7 +2,7 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'View Action Record';
+  - const page_title = 'View Action Information';
 
 block extrascripts
   script(type = 'text/javascript').
@@ -17,7 +17,7 @@ block extrascripts
 block content
   .container-fluid
     .vert-space-x2
-      h2 View Action Record
+      h2 View Action Information
 
     .vert-space-x1
       dl
@@ -29,14 +29,7 @@ block content
             .hori-space-x1
               a.btn-sm.btn-primary(href = `/action/${action.typeFormId}/unspec`)
                 img.small-icon(src = '/images/run_icon.svg')
-                | &nbsp; Perform a New Action of this Type
-
-        dt Action Name
-
-        if action.data.name
-          dd #{action.data.name}
-        else
-          dd (none)
+                | &nbsp; Perform New Action of This Type
 
         dt Action ID
         dd

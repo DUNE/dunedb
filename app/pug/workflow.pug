@@ -2,7 +2,7 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'View Workflow Record';
+  - const page_title = 'View Workflow Information';
 
 block extrascripts
   script(type = 'text/javascript').
@@ -18,19 +18,12 @@ block extrascripts
 block content
   .container-fluid
     .vert-space-x2
-      h2 View Workflow Record
+      h2 View Workflow Information
 
     .vert-space-x1
       dl
         dt Workflow Type
         dd #{workflow.typeFormName}
-
-        dt Workflow Name
-
-        if workflow.data.name
-          dd #{workflow.data.name}
-        else
-          dd (none)
 
         dt Workflow ID
         dd
