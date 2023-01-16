@@ -125,4 +125,19 @@ router.get('/search/apaByRecordDetails/:apaLocation/:apaConfiguration/:apaLocati
 });
 
 
+/// Search for APA non-conformance actions that have a specified non-conformance type
+router.get('/search/apasByNonConformance/:nonConformance', async function (req, res, next) {
+  try {
+    // Retrieve a list of APA non-conformance actions that match the specified non-conformance type
+    const apaActions = await Search.apasByNonConformance(req.params.nonConformance);
+
+    // Return the list in JSON format
+    return res.json(apaActions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 module.exports = router;
