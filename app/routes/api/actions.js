@@ -39,4 +39,20 @@ router.post('/action', permissions.checkPermissionJson('actions:perform'), async
 });
 
 
+/// Add one or more base64-encoded strings, each one representing a single image, to an action record
+router.post('/action/:actionId([A-Fa-f0-9]{24})/addImages', permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
+  try {
+    // Add the encoded strings to the action record corresponding to the specified action ID ... if successful, the function returns the action ID
+    // The encoded strings are contained as an array in the 'req.body.image' parameter (it is passed as a [key, value] pair, with the key being 'images' and the value being the array)
+    const result = await Actions.addImageStrings(req.params.actionId, req.body.images);
+
+    // Return the record's action ID
+    return res.json(result);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 module.exports = router;
