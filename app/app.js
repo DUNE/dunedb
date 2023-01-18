@@ -72,9 +72,12 @@ async function createApp(app) {
   // For a container deployment, monitor '/persistent/static'
   app.use(express.static('/persistent/static'));
 
-  // Parse incoming JSON objects, but set a maximum allowed size of 10MB
+  // Parse incoming JSON and encoded URL objects, and set a maximum allowed size of 10MB for each type of object
   app.use(express.json({ limit: '10000kb' }));
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({
+    extended: true,
+    limit: '10000kb',
+  }));
 
   // Make certain (normally only server-side) functionality available in all (client-side) .pug renders
   app.use(function (req, res, next) {

@@ -257,7 +257,7 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 
 
 /// Update the most recently recorded reception location and date of all geometry boards in a geometry board shipment
-/// This is a highly specialised route, to be used ONLY for geometry boards and accessed via submission of a 'Board Reception' action 
+/// This is an internal route - it should not be accessed directly by a user through their browser, but only via submission of a 'Board Reception' action 
 router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the board shipment record corresponding to the specified component UUID, and throw an error if there is no such record

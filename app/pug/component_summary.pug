@@ -111,4 +111,9 @@ block allbody
                 .vert-space-x1.border-success.border.rounded.p-2
                   .actiontypeform(data-record = action)
 
+          if action.images
+            .vert-space-x1
+              each imageString in action.images
+                img.in-gallery(src = imageString)
+
         .pagebreak

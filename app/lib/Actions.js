@@ -69,6 +69,35 @@ async function save(input, req) {
 }
 
 
+/// Add one or more base64-encoded strings, each one representing a single image, to a specified action record
+async function addImageStrings(actionId, imageStringsArray) {
+  // Set up the DB query match condition to be that a record's action ID must match the specified one
+  let match_condition = { actionId };
+
+  if (typeof actionId === 'object' && !(actionId instanceof ObjectID)) match_condition = actionId;
+
+  match_condition.actionId = new ObjectID(match_condition.actionId);
+
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the action record, and throw an error if the edit fails
+  const result = db.collection('actions')
+    .findOneAndUpdate(
+      match_condition,
+      {
+        $push: { 'images': { $each: imageStringsArray } }
+      },
+      {
+        sort: { 'validity.version': -1 },
+        returnNewDocument: true,
+      },
+    );
+
+  if (result.ok === 0) throw new Error(`Actions::addImageStrings() - failed to update the action record!`);
+
+  // If the edit is successful, return the record's action ID as confirmation
+  return actionId;
+}
+
+
 /// Retrieve a single version of an action record (either the most recent, or a specified one)
 async function retrieve(actionId, projection) {
   // Set up the DB query match condition to be that a record's action ID must match the specified one, and throw an error if no action ID has been specified
@@ -249,6 +278,7 @@ async function autoCompleteId(inputString, limit = 10) {
 
 module.exports = {
   save,
+  addImageStrings,
   retrieve,
   versions,
   list,
