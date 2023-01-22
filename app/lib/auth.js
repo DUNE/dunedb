@@ -22,8 +22,15 @@ router.get('/login', passport.authenticate('auth0', {
 /// Perform the final stage of authentication, and then redirect the user to either the previously requested URL or the home page
 router.get('/callback', function (req, res, next) {
   passport.authenticate('auth0', function (err, user, info) {
+    // There is an ongoing issue on the Staging and Production instances where a user's first login after any extended period of time results in a callback error
+    // This happens AFTER authentication is successful, i.e. the user is correctly logged in, but instead of being redirected back to the homepage, and error is encountered
+    // See Github issue #25: https://github.com/DUNE/dunedb/issues/25
+    // The correct solution would really be a refactoring of the entire authentication system, to make it more robust against such issues
+    // However, a simple workaround is to simply force the redirect manually when an error is encountered (and this is in fact what users have to do anyway to get past the error)
+    // We should also return a '302' response code, to indicate that this redirection is only temporary until we figure out the correct solution
+
     // if (err) return next(err);
-    if (err) return res.send(`ERROR:\n\n${JSON.stringify(err)}\n\n${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
+    if (err) return res.status(302).location('/').send();
     if (!user) return res.send(`NO USER:\n\n${JSON.stringify(err)} \n \n ${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
 
     req.logIn(user, function (err) {
