@@ -16,6 +16,7 @@ head
   link(rel = 'icon', href = '/images/browser_icon.png', type = 'image/png')
   link(rel = 'stylesheet', href = '/css/dashboard.css')
   link(rel = 'stylesheet', href = '/css/custom.scss')
+  link(rel = 'stylesheet', href = '/css/action.css')
   link(rel = 'stylesheet', href = '/css/common.css')
   link(rel = 'stylesheet', href = '/css/component.css')
   link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
@@ -152,6 +153,10 @@ body(class = `deployment-${NODE_ENV}`)
                 li.nav-item
                   +navlink(href = '/search/apaByRecordDetails')
                     |      Assembled APA by Record Details
+
+                li.nav-item
+                  +navlink(href = '/search/apasByNonConformance')
+                    |      Assembled APAs by Non-Conformance
 
           hr
 

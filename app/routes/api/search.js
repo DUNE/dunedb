@@ -38,8 +38,12 @@ router.get('/search/geoBoardsByPartNumber/:partNumber', async function (req, res
 /// Search for geometry boards that have a specified visual inspection disposition
 router.get('/search/geoBoardsByVisualInspection/:disposition', async function (req, res, next) {
   try {
-    // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition
-    const boardsByLocation = await Search.boardsByVisualInspection(req.params.disposition);
+    // This search query can have an optional query string for a specific inspection issue
+    // Parse out the string if it has been provided (as a non-empty string), or otherwise set it to 'null'
+    const issue = (req.query.issue !== '') ? req.query.issue : null;
+
+    // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition and optional issue
+    const boardsByLocation = await Search.boardsByVisualInspection(req.params.disposition, issue);
 
     // Return the list in JSON format
     return res.json(boardsByLocation);
@@ -68,7 +72,7 @@ router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, r
 /// Search for geometry board shipments using various shipment reception details
 router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
   try {
-    // This search query can multiple query strings, most of which are optional
+    // This search query can have multiple query strings, most of which are optional
     // So first, parse out the strings which have actually been provided (as non-empty strings), and set the rest to 'null'
     // The only required query string is the 'shipment status', which will always have a valid value provided
     const status = req.query.shipmentStatus;
@@ -118,6 +122,21 @@ router.get('/search/apaByRecordDetails/:apaLocation/:apaConfiguration/:apaLocati
 
     // Return the list in JSON format
     return res.json(assembledAPAs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for APA non-conformance actions that have a specified non-conformance type
+router.get('/search/apasByNonConformance/:nonConformance', async function (req, res, next) {
+  try {
+    // Retrieve a list of APA non-conformance actions that match the specified non-conformance type
+    const apaActions = await Search.apasByNonConformance(req.params.nonConformance);
+
+    // Return the list in JSON format
+    return res.json(apaActions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

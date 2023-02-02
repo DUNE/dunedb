@@ -1,12 +1,11 @@
 kind: Template
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 metadata:
   name: dunedb-build
 objects:
   - kind: BuildConfig
     apiVersion: build.openshift.io/v1
     metadata:
-      labels:
       name: dunedb-${RELEASE_BRANCH}
     spec:
       source:

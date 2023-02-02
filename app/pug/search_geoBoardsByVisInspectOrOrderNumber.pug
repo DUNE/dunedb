@@ -41,6 +41,30 @@ block content
 
           input.form-control#orderNumberSelection
 
+      .row.vert-space-x2
+        .col-md-4
+          h4 Select Issue
+
+          .vert-space-x1
+            p Select a visual inspection issue from the options below.
+
+          select.form-control#issueSelection
+            option(value = '') (all)         
+            option(value = 'packagingDamaged') Packaging damaged 
+            option(value = 'scratches') Scratches 
+            option(value = 'exposedCopper') Exposed copper 
+            option(value = 'interruptedTraces') Copper trace(s) interrupted 
+            option(value = 'chipped') PCB chipped 
+            option(value = 'notFlat') PCB not flat
+            option(value = 'incorrectGeometry') Incorrect geometry 
+            option(value = 'incorrectThickness') Incorrect thickness
+            option(value = 'qrCodeProblem') QR code problem 
+            option(value = 'millMaxHolePlating') Issues with mill-max hole plating
+            option(value = 'extraneousMaterialOnBoard') Extraneous material on board 
+            option(value = 'other') Other
+
+        .col-md-6
+
     .vert-space-x2
       hr
 

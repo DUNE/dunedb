@@ -1,24 +1,29 @@
-// Declare variables to hold the (initially empty) user-specified visual inspection disposition and/or order number
+// Declare variables to hold the (initially empty) user-specified visual inspection disposition, issue and/or order number
 let disposition = null;
+let issue = '';
 let orderNumber = null;
 
 
 // Main function
 $(function () {
   // When the selected disposition is changed, get the newly selected disposition from the corresponding page element
-  // If the disposition is valid, perform the appropriate jQuery 'ajax' call to make the search
+  // If the disposition is valid, perform the disposition search using the current values of the disposition details variables
   $('#dispositionSelection').on('change', async function () {
     disposition = $('#dispositionSelection').val();
 
-    if (disposition) {
-      $.ajax({
-        contentType: 'application/json',
-        method: 'GET',
-        url: `/json/search/geoBoardsByVisualInspection/${disposition}`,
-        dataType: 'json',
-        success: postSuccess_disposition,
-      }).fail(postFail);
-    }
+    if (disposition) performDispositionSearch();
+  });
+
+  // When the selected issue is changed, get the newly selected issue if it has a value, or otherwise reset the string
+  // Then perform the disposition search using the current values of the disposition details variables
+  $('#issueSelection').on('change', async function () {
+    if ($('#issueSelection').val()) {
+      issue = $('#issueSelection').val();
+    } else {
+      issue = '';
+    };
+
+    performDispositionSearch();
   });
 
   // When the entered order number is changed and the 'Enter' key is pressed, get the newly entered order number from the corresponding page element
@@ -39,6 +44,18 @@ $(function () {
     }
   });
 });
+
+
+// Function to perform the appropriate jQuery 'ajax' call to make the disposition search
+function performDispositionSearch() {
+  $.ajax({
+    contentType: 'application/json',
+    method: 'GET',
+    url: `/json/search/geoBoardsByVisualInspection/${disposition}?issue=${issue}`,
+    dataType: 'json',
+    success: postSuccess_disposition,
+  }).fail(postFail);
+}
 
 
 // Set up a dictionary containing the visual inspection issue [key, string] pairs (taken directly from the 'Visual Inspection' action type form)
@@ -103,7 +120,7 @@ function postSuccess_disposition(result) {
 
   const resultsStart = `
     <tr>
-      <td colspan = "5">The following geometry boards have been visually inspected and found to have the disposition: <b>${$('#dispositionSelection option:selected').text()}</b>.</td>
+      <td colspan = "5">The following geometry boards have been visually inspected and found to have the disposition: <b>${$('#dispositionSelection option:selected').text()}</b> and the issue: <b>${$('#issueSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
       <td colspan = "5">They are grouped by board part number, and then ordered by last DB record edit (most recent at the top).
@@ -116,7 +133,7 @@ function postSuccess_disposition(result) {
 
   // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>There are no geometry boards with the specified disposition</b>');
+    $('#results').append('<b>There are no geometry boards with the specified disposition and issue</b>');
   } else {
     for (const boardGroup of result) {
       const groupCount = `
