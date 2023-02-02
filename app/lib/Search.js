@@ -146,16 +146,23 @@ async function boardsByPartNumber(partNumber) {
 
 
 /// Retrieve a list of geometry boards that have a specified visual inspection disposition across all order numbers
-async function boardsByVisualInspection(disposition) {
+async function boardsByVisualInspection(disposition, issue) {
+  // Set up a dictionary of match conditions ... this includes the two required fields (matching against 'Visual Inspection' actions with the specified disposition), and also an optional field
+  // The optional field has a variable name, since it depends on the specific issue being queried ... the string to match against must be first set separately, and then added to the dictionary
+  let matchConditions = {
+    'typeFormId': 'BoardVisualInspection',
+    'data.nonConformingDisposition': disposition,
+  };
+
+  if (issue) {
+    const issueFieldString = `data.visualInspectionIssues.${issue}`;
+    matchConditions[issueFieldString] = true;
+  }
+
   let action_aggregation_stages = [];
 
-  // Retrieve all 'Visual Inspection' action records that have the same disposition result as the specified one
-  action_aggregation_stages.push({
-    $match: {
-      'typeFormId': 'BoardVisualInspection',
-      'data.nonConformingDisposition': disposition,
-    }
-  });
+  // Retrieve all action records that match the specified matching conditions
+  action_aggregation_stages.push({ $match: matchConditions });
 
   // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
@@ -276,6 +283,7 @@ async function boardsByVisualInspection(disposition) {
 
 /// Retrieve a list of geometry boards of a specified order number across all visual inspection dispositions
 async function boardsByOrderNumber(orderNumber) {
+  let queryResult_componentType = 'GeometryBoardBatch';
   let comp_aggregation_stages = [];
 
   // Retrieve all 'Geometry Board Batch' records that have the same order number as the specified one
@@ -304,13 +312,48 @@ async function boardsByOrderNumber(orderNumber) {
     .aggregate(comp_aggregation_stages)
     .toArray();
 
+  // If no results have been found, it could be that the specified order number is related to a 'Returned Geometry Boards Batch' record
+  // Repeat the same query as above, but now for records that match that type of component type (and corresponding field names, which are also different)
+/*
+  if (batch_results.length == 0) {
+    queryResult_componentType = 'ReturnedGeometryBoardBatch';
+    comp_aggregation_stages = [];
+
+    comp_aggregation_stages.push({
+      $match: {
+        'formId': 'ReturnedGeometryBoardBatch',
+        'data.orderNumber': orderNumber,
+      }
+    });
+
+    comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+    comp_aggregation_stages.push({
+      $group: {
+        _id: { componentUuid: '$componentUuid' },
+        boardUuids: { '$first': '$data.boardUuids' },
+      },
+    });
+
+    batch_results = await db.collection('components')
+      .aggregate(comp_aggregation_stages)
+      .toArray();
+  }
+*/
   if (batch_results.length > 0) {
-    // At this stage we have a single geometry board batch record containing a list of the individual board UUIDs
+    // At this stage we have a single geometry board batch record containing (among other values) a list of the individual board UUIDs
     // But what we actually want is the visual inspection action record for each individual board
+
+    // Extract an array of the individual board UUIDs ... the structure is slightly different depending on the component type of the query result
     let boardUUIDs = [];
 
-    for (const boardUUID of batch_results[0].boardUuids) {
-      boardUUIDs.push(MUUID.from(boardUUID));
+    if (queryResult_componentType === 'GeometryBoardBatch') {
+      for (const boardUUID of batch_results[0].boardUuids) {
+        boardUUIDs.push(MUUID.from(boardUUID));
+      }
+    } else {
+      for (const boardUUID of batch_results[0].boardUuids) {
+        boardUUIDs.push(MUUID.from(boardUUID.component_uuid));
+      }
     }
 
     let action_aggregation_stages = [];
@@ -337,7 +380,18 @@ async function boardsByOrderNumber(orderNumber) {
         data: { '$first': '$data' },
       },
     });
-
+/*
+    action_aggregation_stages.push({ $sort: { 'validity.startDate': 1 } });
+    action_aggregation_stages.push({
+      $group: {
+        _id: { componentUuid: '$componentUuid' },
+        actionId: { '$first': '$actionId' },
+        componentUuid: { '$first': '$componentUuid' },
+        disposition: { '$first': '$data.nonConformingDisposition' },
+        data: { '$first': '$data' },
+      },
+    });
+*/
     // We want to actually display the matched boards grouped by the disposition
     // So group the records according to the disposition, and then add the fields to be returned for each board in each group
     action_aggregation_stages.push({
