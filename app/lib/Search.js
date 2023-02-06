@@ -313,8 +313,7 @@ async function boardsByOrderNumber(orderNumber) {
     .toArray();
 
   // If no results have been found, it could be that the specified order number is related to a 'Returned Geometry Boards Batch' record
-  // Repeat the same query as above, but now for records that match that type of component type (and corresponding field names, which are also different)
-/*
+  // Repeat the same query as above, but now for records that match that component type (with corresponding grouping field names, which are slightly different)
   if (batch_results.length == 0) {
     queryResult_componentType = 'ReturnedGeometryBoardBatch';
     comp_aggregation_stages = [];
@@ -338,10 +337,10 @@ async function boardsByOrderNumber(orderNumber) {
       .aggregate(comp_aggregation_stages)
       .toArray();
   }
-*/
+
   if (batch_results.length > 0) {
     // At this stage we have a single geometry board batch record containing (among other values) a list of the individual board UUIDs
-    // But what we actually want is the visual inspection action record for each individual board
+    // But what we actually want is the single latest visual inspection action record for each individual board
 
     // Extract an array of the individual board UUIDs ... the structure is slightly different depending on the component type of the query result
     let boardUUIDs = [];
@@ -380,8 +379,13 @@ async function boardsByOrderNumber(orderNumber) {
         data: { '$first': '$data' },
       },
     });
-/*
-    action_aggregation_stages.push({ $sort: { 'validity.startDate': 1 } });
+
+    // At this point we have a list of the latest versions of every 'Visual Inspection' action performed on the board ... now select the single latest one
+    // First sort the matching records by the '_id' field ... highest value first (this ObjectID is generated sequentially for each record, so higher ones should correspond to newer records ...
+    // ... this is a work-around for the fact that we don't save the record insertion dates as actual date objects which can be sorted, but instead as strings which are more tricky to order)
+    // Then group the records by the component UUID (i.e. each group contains all actions performed on the same component), and select only the first (latest) entry in each group
+    // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+    action_aggregation_stages.push({ $sort: { _id: -1 } });
     action_aggregation_stages.push({
       $group: {
         _id: { componentUuid: '$componentUuid' },
@@ -391,7 +395,7 @@ async function boardsByOrderNumber(orderNumber) {
         data: { '$first': '$data' },
       },
     });
-*/
+
     // We want to actually display the matched boards grouped by the disposition
     // So group the records according to the disposition, and then add the fields to be returned for each board in each group
     action_aggregation_stages.push({
