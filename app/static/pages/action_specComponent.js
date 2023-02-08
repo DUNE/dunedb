@@ -86,7 +86,7 @@ function SubmitData(submission) {
       const receptionLocation = submission.data.receptionLocation;
       const receptionDate = (submission.data.receptionDate).toString().slice(0, 10);
 
-      let url = window.location.href = `/component/${shipmentUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
+      let url = `/component/${shipmentUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
       url += `?actionId=${result}`;
 
       if (!(workflowId === '')) url += `?workflowId=${workflowId}`;
