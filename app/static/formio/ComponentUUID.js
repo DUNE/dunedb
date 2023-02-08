@@ -255,6 +255,7 @@ class ComponentUUID extends TextFieldComponent {
   //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by UUID' page)
   //   - if on any 'Perform Action on Unspecified Component' page, redirect to the page for performing the action on the specified component
   //   - in any other situation, i.e. if this Formio component is just part of a type form, then do not redirect anywhere
+  // In any case, also display a link to allow users to directly access the component's information page from the current page
   setValueAt(index, value, flags) {
     const changed = super.setValueAt.call(this, index, value);
 
@@ -277,6 +278,11 @@ class ComponentUUID extends TextFieldComponent {
         const baseURL = currentURL.substring(0, currentURL.length - 7);
         window.location.href = `${baseURL}/${value}`;
       }
+
+      let info_target = $(this.refs.compUuidInfo[index]);
+      info_target.prop('href', `/component/${value}`).text('link');
+      info_target.text(`\xa0 Click here for this component's information page`);
+      info_target.show()
     }
 
     return changed;
