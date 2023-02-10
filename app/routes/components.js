@@ -256,29 +256,46 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 });
 
 
-/// Update the most recently recorded reception location and date of all geometry boards in a geometry board shipment
-/// This is an internal route - it should not be accessed directly by a user through their browser, but only via submission of a 'Board Reception' action 
+/// Update the most recently recorded reception location and date of all geometry boards in a shipment of new geometry boards or batch of returned geometry boards
+/// This is an internal route - it should not be accessed directly by a user through their browser ...
+/// ... instead, it is automatically called during submission of a 'Board Reception' action or 'Returned Geometry Board Batch' component 
 router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the board shipment record corresponding to the specified component UUID, and throw an error if there is no such record
-    const shipment = await Components.retrieve(req.params.uuid);
+    // Retrieve the most recent version of the board shipment or batch record corresponding to the specified component UUID
+    const boardCollection = await Components.retrieve(req.params.uuid);
 
-    if (!shipment) return res.status(404).send(`There is no geometry board shipment with component UUID = ${req.params.uuid}`);
+    // Because the board UUIDs are stored differently in 'Board Shipment' and 'Returned Geometry Board Batch' type components, set up separate (but annoyingly similar!) scenarios for each one
+    if (boardCollection.formId === 'BoardShipment') {
+      // Throw an error if there is no record corresponding to the specified UUID
+      if (!boardCollection) return res.status(404).send(`There is no geometry board shipment with component UUID = ${req.params.uuid}`);
 
-    // For each board in the shipment, extract the board UUID and update the reception location and date to those inherited from the 'Board Reception' action
-    // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-    for (const board of shipment.data.boardUuiDs) {
-      const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
-    }
+      // For each board in the shipment, extract the board UUID and update the reception location and date to those inherited from the 'Board Reception' action
+      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
+      for (const board of boardCollection.data.boardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      }
 
-    // Depending on if the originating 'Board Reception' action was part of a workflow or not, redirect to an appropriate page
-    // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
-    // On the other hand, if it was a standalone action, go to the page for viewing the action record
-    // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
-    if (req.query.workflowId) {
-      res.redirect(`/workflow/${req.query.workflowId}/action/${req.query.actionId}`);
-    } else {
-      res.redirect(`/action/${req.query.actionId}`);
+      // Depending on if the originating 'Board Reception' action was part of a workflow or not, redirect to an appropriate page
+      // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
+      // On the other hand, if it was a standalone action, go to the page for viewing the action record
+      // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
+      if (req.query.workflowId) {
+        res.redirect(`/workflow/${req.query.workflowId}/action/${req.query.actionId}`);
+      } else {
+        res.redirect(`/action/${req.query.actionId}`);
+      }
+    } else if (boardCollection.formId === 'ReturnedGeometryBoardBatch') {
+      // Throw an error if there is no record corresponding to the specified UUID
+      if (!boardCollection) return res.status(404).send(`There is no returned geometry board batch with component UUID = ${req.params.uuid}`);
+
+      // For each board in the batch, extract the board UUID and update the reception location and date to those passed from the batch's submission
+      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
+      for (const board of boardCollection.data.boardUuids) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      }
+
+      // Once all boards have been updated, redirect to the page for viewing the component record
+      res.redirect(`/component/${req.params.uuid}`);
     }
   } catch (err) {
     logger.error(err);
