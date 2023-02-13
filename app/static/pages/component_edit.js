@@ -177,14 +177,27 @@ function SubmitData(submission, redirectToInfo = true) {
     typeForm.emit('submitDone');
 
     // If required, redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
+    // If the component is a 'Returned Geometry Board Batch' type, we must first update the board information (and further redirection will be handled from there)
+    // If not, then we can simply proceed with standard post-submission redirection:
     //   - if the component originates from a workflow, go to the page for updating the workflow path step results
     //   - if this is a standalone component, go to the page for viewing the component record
     if (redirectToInfo) {
-      if (!(workflowId === '')) {
-        window.location.href = `/workflow/${workflowId}/component/${result}`;
+      if (submission.formId === 'ReturnedGeometryBoardBatch') {
+        const batchUUID = submission.componentUuid;
+        const receptionLocation = 'lancaster';
+        const receptionDate = (new Date()).toISOString().slice(0, 10);
+
+        let url = `/component/${batchUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
+
+        window.location.href = url;
       } else {
-        window.location.href = `/component/${result}`;
+        if (!(workflowId === '')) {
+          window.location.href = `/workflow/${workflowId}/component/${result}`;
+        } else {
+          window.location.href = `/component/${result}`;
+        }
       }
+
     }
   }
 
