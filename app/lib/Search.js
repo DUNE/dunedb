@@ -255,22 +255,48 @@ async function boardsByVisualInspection(disposition, issue) {
     cleanedBoardGroup.componentUuids = [];
     cleanedBoardGroup.actionIds = [];
     cleanedBoardGroup.inspectionData = [];
-
-    for (const boardUuid of boardGroup.componentUuid) {
-      cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
-      cleanedBoardGroup.actionIds.push(uuidsAndIds[boardUuid]);
-      cleanedBoardGroup.inspectionData.push(uuidsAndData[boardUuid]);
-    }
-
-    cleanedBoardGroup.ukids = boardGroup.ukid;
-    cleanedBoardGroup.batchUuids = boardGroup.batchUuid;
-
+    cleanedBoardGroup.ukids = [];
+    cleanedBoardGroup.batchUuids = [];
     cleanedBoardGroup.orderNumbers = [];
 
-    for (const batchUuid of boardGroup.batchUuid) {
-      const batch = await Components.retrieve(batchUuid);
+    for (let [index, boardUuid] of boardGroup.componentUuid.entries()) {
+      // Any given board may have had multiple visual inspections performed on it (i.e. one at initial intake, and then another after being returned from repairs by the manufacturer)
+      // However, only the latest inspection matters - i.e. if the first inspection of a particular board matches the originally queried disposition, but the second inspection doesn't ...
+      // ... we DO NOT want that board to be included in the search results
 
-      cleanedBoardGroup.orderNumbers.push(batch.data.orderNumber);
+      // Retrieve all 'Visual Inspection' action records that have the same component UUID as the board
+      let perBoard_aggregation_stages = [];
+
+      perBoard_aggregation_stages.push({
+        $match: {
+          'typeFormId': 'BoardVisualInspection',
+          'componentUuid': MUUID.from(boardUuid),
+        }
+      });
+
+      // Sort the matching records such that the most recent one is first
+      // Do this by sorting by the '_id' field ... highest value first (this ObjectID is generated sequentially for each record, so higher ones should correspond to newer records ...
+      // ... this is a work-around for the fact that we don't save the record insertion dates as actual date objects which can be sorted, but instead as strings which are more tricky to order)
+      perBoard_aggregation_stages.push({ $sort: { _id: -1 } });
+
+      // Query the 'actions' records collection using the aggregation stages defined above
+      let perBoard_results = await db.collection('actions')
+        .aggregate(perBoard_aggregation_stages)
+        .toArray();
+
+      // Compare the action IDs of the two visual inspection records for this board: a) the one that matched the queried disposition, and b) the latest performed one
+      // ONLY if the action IDs are identical, i.e. the latest visual inspection is the one that matches the queried disposition, then include this board in the search results
+      if (perBoard_results[0].actionId.toString() === uuidsAndIds[boardUuid].toString()) {
+        cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+        cleanedBoardGroup.actionIds.push(uuidsAndIds[boardUuid]);
+        cleanedBoardGroup.inspectionData.push(uuidsAndData[boardUuid]);
+        cleanedBoardGroup.ukids.push(boardGroup.ukid[index]);
+        cleanedBoardGroup.batchUuids.push(boardGroup.batchUuid[index]);
+
+        const batch = await Components.retrieve(boardGroup.batchUuid[index]);
+
+        cleanedBoardGroup.orderNumbers.push(batch.data.orderNumber);
+      }
     }
 
     cleanedResults.push(cleanedBoardGroup);
