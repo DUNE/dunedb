@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const MUUID = require('uuid-mongodb');
 const ShortUUID = require('short-uuid');
 
 const Components = require('../../lib/Components');
@@ -76,6 +77,29 @@ router.get('/newComponentUUID', async function (req, res, next) {
 
     // Return the newly generated UUID
     return res.json(componentUuid);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Retrieve a list of all components of a single component type
+router.get('/components/:typeFormId/list', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
+  try {
+    // Retrieve records of all components with the specified component type
+    // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
+    const components = await Components.list({ formId: req.params.typeFormId }, { limit: 200 });
+
+    // Extract only the UUID field (in string format) from each component record, and save it into a list to be returned
+    let componentUUIDs = [];
+
+    for (const component of components) {
+      componentUUIDs.push(MUUID.from(component.componentUuid).toString());
+    }
+
+    // Return the list of UUIDs
+    return res.json(componentUUIDs);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
