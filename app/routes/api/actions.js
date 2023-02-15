@@ -55,4 +55,27 @@ router.post('/action/:actionId([A-Fa-f0-9]{24})/addImages', permissions.checkPer
 });
 
 
+/// Retrieve a list of all actions of a single action type
+router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Retrieve records of all actions with the specified action type
+    // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
+    const actions = await Actions.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
+
+    // Extract only the ID field (in string format) from each action record, and save it into a list to be returned
+    let actionIDs = [];
+
+    for (const action of actions) {
+      actionIDs.push(action.actionId);
+    }
+
+    // Return the list of action IDs
+    return res.json(actionIDs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 module.exports = router;
