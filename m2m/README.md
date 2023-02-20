@@ -47,6 +47,10 @@ However, users will still need to call the various backend functions in their ow
     * `componentData_values` (list) : the new values of the fields specified in the `componentData_fields` list
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
+* `GetListOfComponents(componentTypeFormID, connection, headers)` : get a list of the UUIDs of all components of the specified component type, returning a Python list of the UUIDs
+    * `componentTypeFormID` (string) : the type form ID of the components to be listed
+    * `connection, headers` : objects returned by the `ConnectToAPI()` function
+
 * `PerformAction(actionTypeFormID, componentUUID, actionData, connection, headers)` : perform a new action on a specified component, returning the action ID as a string
     * `actionTypeFormID` (string) : the type form ID of the action to be created
     * `componentUUID` (string) : the UUID of the component on which the new action is to be performed
@@ -63,6 +67,10 @@ However, users will still need to call the various backend functions in their ow
     * `actionData_values` (list) : the new values of the fields specified in the `actionData_fields` list
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
+* `GetListOfActions(actionTypeFormID, connection, headers)` : get a list of the action IDs of all actions of the specified action type, returning a Python list of the IDs
+    * `actionTypeFormID` (string) : the type form ID of the actions to be listed
+    * `connection, headers` : objects returned by the `ConnectToAPI()` function
+
 
 ## User-Created Scripts
 
@@ -70,4 +78,4 @@ Users should write their own dedicated Python scripts that are suited for whatev
 
 Apart from `ConnectToAPI()`, the backend functions may be combined in any order and/or number as required by the user.  For example, if multiple short UUIDs need to be converted and then new components created and submitted using the returned full UUIDs, a single user-created script containing a `for` loop may be used to cover the entire procedure.
 
-This directory contains template scripts that show simple examples of how to convert one and multiple short UUIDs, create a new component, edit an existing component, perform a new action, and edit an existing action.
+This directory contains template scripts that show simple examples of how to use the various backend functions.

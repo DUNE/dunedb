@@ -17,6 +17,20 @@ async function populateTypeForm() {
 }
 
 
+// When the 'Copy ID' button is pressed, copy the action ID to the device's clipboard, and change the button's appearance to confirm success
+function CopyID(actionID) {
+  navigator.clipboard.writeText(actionID).then(function () {
+    document.getElementById('copy_id').innerHTML = 'Copied';
+    document.getElementById('copy_id').style.backgroundColor = 'green';
+  }, function (err) {
+    document.getElementById('copy_id').innerHTML = 'ERROR';
+    document.getElementById('copy_id').style.backgroundColor = 'red';
+
+    console.error('Error - could not copy action ID', err);
+  })
+};
+
+
 // When one or more images is selected, display their name(s) in the space between the selection and confirmation buttons
 // Also change the colour and text of the confirmation button to indicate that at least one image has been selected
 function DisplayFileNames(element) {

@@ -254,6 +254,32 @@ def EditComponent(componentUUID, componentData_fields, componentData_values, con
             f" EditComponent() [GET /api/component/componentUuid] - SOCKET TIMEOUT: {s1} \n")
 
 
+###################################################
+## Get a list of all components of a single type ##
+###################################################
+def GetListOfComponents(componentTypeFormID, connection, headers):
+    # Request a response from the API route that gets a list of component UUIDs for a given component type form ID
+    # If the request is successful, continue with the function ... otherwise print any raised exceptions
+    try:
+        connection.request('GET', '/api/components/' +
+                           componentTypeFormID + '/list', headers=headers)
+
+        # The route response is the list of component UUIDs as a JSON formatted string (i.e. a string within a string)
+        responseText = connection.getresponse().read().decode('utf-8')
+
+        # Split the inner string by commas ... this will create an actual Python list of the UUID strings
+        componentUUIDs = responseText[1: -1].split(',')
+
+        # Return the list of UUIDs
+        return componentUUIDs
+    except http.client.HTTPException as e:
+        print(
+            f" GetListOfComponents() [GET /api/components/typeFormId/list] - HTTP EXCEPTION: {e} \n")
+    except socket.timeout as s:
+        print(
+            f" GetListOfComponents() [GET /api/components/typeFormId/list] - SOCKET TIMEOUT: {s} \n")
+
+
 ##########################
 ## Perform a new action ##
 ##########################
@@ -386,3 +412,29 @@ def EditAction(actionID, actionData_fields, actionData_values, connection, heade
     except socket.timeout as s1:
         print(
             f" EditAction() [GET /api/action/actionId] - SOCKET TIMEOUT: {s1} \n")
+
+
+################################################
+## Get a list of all actions of a single type ##
+################################################
+def GetListOfActions(actionTypeFormID, connection, headers):
+    # Request a response from the API route that gets a list of action IDs for a given action type form ID
+    # If the request is successful, continue with the function ... otherwise print any raised exceptions
+    try:
+        connection.request('GET', '/api/actions/' +
+                           actionTypeFormID + '/list', headers=headers)
+
+        # The route response is the list of action IDs as a JSON formatted string (i.e. a string within a string)
+        responseText = connection.getresponse().read().decode('utf-8')
+
+        # Split the inner string by commas ... this will create an actual Python list of the ID strings
+        actionIDs = responseText[1: -1].split(',')
+
+        # Return the list of IDs
+        return actionIDs
+    except http.client.HTTPException as e:
+        print(
+            f" GetListOfActions() [GET /api/actions/typeFormId/list] - HTTP EXCEPTION: {e} \n")
+    except socket.timeout as s:
+        print(
+            f" GetListOfActions() [GET /api/actions/typeFormId/list] - SOCKET TIMEOUT: {s} \n")

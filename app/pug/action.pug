@@ -33,7 +33,11 @@ block content
 
         dt Action ID
         dd
-          a(href = `/action/${action.actionId}`) #{action.actionId}
+          .form-inline
+            a(href = `/action/${action.actionId}`) #{action.actionId}
+
+            .hori-space-x1
+              a.copybutton.btn-sm#copy_id(onclick = 'CopyID(action.actionId)') Copy
 
         - const uuid = MUUID.from(action.componentUuid).toString();
 
