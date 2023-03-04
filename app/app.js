@@ -86,6 +86,11 @@ async function createApp(app) {
     res.locals.base_url = BASE_URL;
     res.locals.NODE_ENV = NODE_ENV;
     res.locals.permissions = permissions;
+    
+    // Set HSTS
+    if (req.secure) {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
 
     next();
   });
