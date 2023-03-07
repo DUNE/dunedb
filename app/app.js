@@ -88,7 +88,7 @@ async function createApp(app) {
     res.locals.permissions = permissions;
     next();
   });
-  
+
   // Set HSTS
   app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');

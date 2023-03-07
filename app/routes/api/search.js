@@ -1,7 +1,8 @@
 const router = require('express').Router();
 
 const logger = require('../../lib/logger');
-const Search = require('../../lib/Search');
+const Search_GeoBoards = require('../../lib/Search_GeoBoards');
+const Search_Other = require('../../lib/Search_Other');
 const utils = require('../../lib/utils');
 
 
@@ -9,7 +10,7 @@ const utils = require('../../lib/utils');
 router.get('/search/geoBoardsByLocation/:location', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have been received at the specified location
-    const boardsByPartNumber = await Search.boardsByLocation(req.params.location);
+    const boardsByPartNumber = await Search_GeoBoards.boardsByLocation(req.params.location);
 
     // Return the list in JSON format
     return res.json(boardsByPartNumber);
@@ -24,7 +25,7 @@ router.get('/search/geoBoardsByLocation/:location', async function (req, res, ne
 router.get('/search/geoBoardsByPartNumber/:partNumber', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by reception location, of the specified part number
-    const boardsByLocation = await Search.boardsByPartNumber(req.params.partNumber);
+    const boardsByLocation = await Search_GeoBoards.boardsByPartNumber(req.params.partNumber);
 
     // Return the list in JSON format
     return res.json(boardsByLocation);
@@ -43,7 +44,7 @@ router.get('/search/geoBoardsByVisualInspection/:disposition', async function (r
     const issue = (req.query.issue !== '') ? req.query.issue : null;
 
     // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition and optional issue
-    const boardsByLocation = await Search.boardsByVisualInspection(req.params.disposition, issue);
+    const boardsByLocation = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, issue);
 
     // Return the list in JSON format
     return res.json(boardsByLocation);
@@ -58,7 +59,7 @@ router.get('/search/geoBoardsByVisualInspection/:disposition', async function (r
 router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by visual inspection disposition, that came from a batch with the specified order number
-    const boardsByDisposition = await Search.boardsByOrderNumber(req.params.orderNumber);
+    const boardsByDisposition = await Search_GeoBoards.boardsByOrderNumber(req.params.orderNumber);
 
     // Return the list in JSON format
     return res.json(boardsByDisposition);
@@ -88,7 +89,7 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
     if (latest) latest = latest.replace(' ', '+');
 
     // Retrieve a list of geometry boards shipments that match the specified reception details
-    const shipments = await Search.boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
+    const shipments = await Search_Other.boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
 
     // Return the list in JSON format
     return res.json(shipments);
@@ -103,7 +104,7 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
   try {
     // Retrieve a list of workflows that involve the component corresponding to the specified UUID
-    const workflows = await Search.workflowsByUUID(req.params.uuid);
+    const workflows = await Search_Other.workflowsByUUID(req.params.uuid);
 
     // Return the list in JSON format
     return res.json(workflows);
@@ -118,7 +119,7 @@ router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, r
 router.get('/search/apaByRecordDetails/:apaLocation/:apaConfiguration/:apaLocationNumber', async function (req, res, next) {
   try {
     // Retrieve a list of assembled APAs that match the specified record details
-    const assembledAPAs = await Search.apasByRecordDetails(req.params.apaLocation, req.params.apaConfiguration, req.params.apaLocationNumber);
+    const assembledAPAs = await Search_Other.apasByRecordDetails(req.params.apaLocation, req.params.apaConfiguration, req.params.apaLocationNumber);
 
     // Return the list in JSON format
     return res.json(assembledAPAs);
@@ -133,7 +134,7 @@ router.get('/search/apaByRecordDetails/:apaLocation/:apaConfiguration/:apaLocati
 router.get('/search/apasByNonConformance/:nonConformance', async function (req, res, next) {
   try {
     // Retrieve a list of APA non-conformance actions that match the specified non-conformance type
-    const apaActions = await Search.apasByNonConformance(req.params.nonConformance);
+    const apaActions = await Search_Other.apasByNonConformance(req.params.nonConformance);
 
     // Return the list in JSON format
     return res.json(apaActions);
