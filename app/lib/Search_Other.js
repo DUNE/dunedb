@@ -210,13 +210,23 @@ async function apasByRecordDetails(location, configuration, locationNumber) {
 }
 
 
-/// Retrieve a list of APA non-conformance actions that matched the specified non-conformance type
-async function apasByNonConformance(nonConformance) {
+/// Retrieve a list of non-conformance actions that match the specified record details
+async function nonConformanceByRecordDetails(componentType, disposition, status) {
+  // Set up 'matching' strings that can be used by MongoDB to match against specific record field values
+  // For the disposition and status, if it has been specified, just use it as the matching string ... otherwise use a fully wildcard regular expression
+  const dispositionString = (disposition) ? disposition : /(.*?)/;
+  const statusString = (status) ? status : /(.*?)/;
+
   let aggregation_stages = [];
 
-  // Retrieve all 'APA Non-Conformance' action records
+  // Retrieve all 'APA Non-Conformance' action records that match the provided component type and disposition and status matching strings
   aggregation_stages.push({
-    $match: { 'typeFormId': 'APANonConformance' }
+    $match: {
+      'typeFormId': 'APANonConformance',
+      'data.componentType': componentType,
+      'data.disposition': dispositionString,
+      'data.status': statusString,
+    }
   });
 
   // Select only the latest version of each record
@@ -229,7 +239,9 @@ async function apasByNonConformance(nonConformance) {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
       componentUuid: { '$first': '$componentUuid' },
-      data: { '$first': '$data' },
+      componentType: { '$first': '$data.componentType' },
+      disposition: { '$first': '$data.disposition' },
+      status: { '$first': '$data.status' },
     },
   });
 
@@ -238,29 +250,8 @@ async function apasByNonConformance(nonConformance) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // At this stage we have a list of all 'APA Non-Conformance' action records
-  // We now want to refine this list to only include those records which match the specified non-conformance type
-  // This matching could not be done as part of the query above, because the non-conformance types are stored as a dictionary of [key, value] pairs in the record ...
-  // ... and MongoDB does not have functionality for matching against specific dictionary [key, value] pairs within the aggregation stages
-  let nonConformanceResults = [];
-
-  // For each action record ...
-  for (let result of results) {
-    // If the dictionary key corresponding to the specified non-conformance type has a value of 'true' ...
-    if (result.data.nonConformanceType[nonConformance] === true) {
-      // Retrieve the component record of the corresponding assembled APA
-      const assembledAPA = await Components.retrieve(result.componentUuid);
-
-      // Save the APA's name (i.e. DUNE PID) into the results to be returned
-      result.componentName = assembledAPA.data.name;
-
-      // Save the finalised result object for return      
-      nonConformanceResults.push(result);
-    }
-  }
-
   // Return the list of actions
-  return nonConformanceResults;
+  return results;
 }
 
 
@@ -268,5 +259,5 @@ module.exports = {
   boardShipmentsByReceptionDetails,
   workflowsByUUID,
   apasByRecordDetails,
-  apasByNonConformance,
+  nonConformanceByRecordDetails,
 }

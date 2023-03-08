@@ -50,10 +50,10 @@ router.get('/search/apaByRecordDetails', async function (req, res, next) {
 });
 
 
-/// Search for APA non-conformance actions that have a specified non-conformance type
-router.get('/search/apasByNonConformance', async function (req, res, next) {
+/// Search for non-conformance actions using various details from their records
+router.get('/search/nonConformanceByRecordDetails', async function (req, res, next) {
   // Render the interface page
-  res.render('search_apasByNonConformance.pug');
+  res.render('search_nonConformanceByRecordDetails.pug');
 });
 
 
