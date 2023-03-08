@@ -119,12 +119,14 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/apasByNonConformance') Assembled APAs by Non-Conformance 
+        a(href = '/search/nonConformanceByRecordDetails') Non-Conformance by Record Details
 
-      p This page may be used to search specifically for <b>assembled APAs that have a specified type of non-conformance</b>.
+      p This page may be used to search specifically for <b>non-conformance actions</b> that match <b>one or more</b> of the following user-specified record details:
+        ul
+          li <b>component type</b>: the type of component on which the non-conformance action has been performed
+          li <b>disposition</b>: the non-conformance disposition, as recorded on the action
+          li <b>status</b>: the current status of the non-conformance
 
-      p Users may select one of the available non-conformance types from the list, and a summary of information about each found APA will be displayed in the search results panel below the selection box.
-
-      p Please note that <b>an assembled APA will only be displayed in the search results if an <u>APA Non-Conformance</u> action has been performed on it</b>.
+      p The 'component type' is the only <b>required</b> parameter for any search - users may use any combination of the other two parameters from their respective lists, and a summary of information about each found non-conformance action will be displayed in the search results panel below the selection boxes.
 
     .vert-space-x2 
