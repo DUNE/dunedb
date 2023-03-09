@@ -9,7 +9,9 @@ block extrascripts
     const component = !{JSON.stringify(component, null, 4)};
     const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
     const shipmentDetails = !{JSON.stringify(shipmentDetails, null, 4)};
-    const actions = !{JSON.stringify(actions, null, 4)};
+    const nonConformActions = !{JSON.stringify(nonConformActions, null, 4)};
+    const workflowActions = !{JSON.stringify(workflowActions, null, 4)};
+    const otherActions = !{JSON.stringify(otherActions, null, 4)};
 
   block workscripts
     script(src = '/pages/component_summary.js')
@@ -89,7 +91,65 @@ block allbody
 
         .pagebreak
 
-      each action in actions
+      each action in nonConformActions
+        .section.actionSection
+          .section-side.formName non-conformance action
+
+          .vert-space-x1
+            dl
+              dt Action Type
+              dd #{action.typeFormName}
+
+              dt Action ID
+              dd #{action.actionId}
+
+              dt Performance Data:
+              dd This is version #{action.validity.version} of the action, performed on !{' '}
+                +dateFormat(action.insertion.insertDate)
+
+                if action.insertion.user
+                  |  by !{' '} #{action.insertion.user.displayName}
+
+                .vert-space-x1.border-success.border.rounded.p-2
+                  .actiontypeform(data-record = action)
+
+          if action.images
+            .vert-space-x1
+              each imageString in action.images
+                img.in-gallery(src = imageString)
+
+        .pagebreak
+
+      each action in workflowActions
+        .section.actionSection
+          .section-side.formName workflow action
+
+          .vert-space-x1
+            dl
+              dt Action Type
+              dd #{action.typeFormName}
+
+              dt Action ID
+              dd #{action.actionId}
+
+              dt Performance Data:
+              dd This is version #{action.validity.version} of the action, performed on !{' '}
+                +dateFormat(action.insertion.insertDate)
+
+                if action.insertion.user
+                  |  by !{' '} #{action.insertion.user.displayName}
+
+                .vert-space-x1.border-success.border.rounded.p-2
+                  .actiontypeform(data-record = action)
+
+          if action.images
+            .vert-space-x1
+              each imageString in action.images
+                img.in-gallery(src = imageString)
+
+        .pagebreak
+
+      each action in otherActions
         .section.actionSection
           .section-side.formName action
 
