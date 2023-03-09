@@ -119,14 +119,15 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/nonConformanceByRecordDetails') Non-Conformance by Record Details
+        a(href = '/search/nonConformanceByComponentTypeOrUUID') Non-Conformance by Component Type or UUID
 
-      p This page may be used to search specifically for <b>non-conformance actions</b> that match <b>one or more</b> of the following user-specified record details:
+      p This page may be used to search specifically for <b>non-conformance actions</b> under one of the following scenarios:
         ul
-          li <b>component type</b>: the type of component on which the non-conformance action has been performed
-          li <b>disposition</b>: the non-conformance disposition, as recorded on the action
-          li <b>status</b>: the current status of the non-conformance
+          li <b>either</b> all non-conformance actions performed on a specified <u>component type</u>, with options to additionally specify a particular non-conformance disposition and/or status
+          li <b>or</b> all non-conformance actions performed on a <u>single component</u>, specified by its UUID
 
-      p The 'component type' is the only <b>required</b> parameter for any search - users may use any combination of the other two parameters from their respective lists, and a summary of information about each found non-conformance action will be displayed in the search results panel below the selection boxes.
+      p In the first scenario, users <b>must</b> select a 'component type' from the list, but the other two available parameters are optional.  In the second scenario, the only required information is the UUID of the component being queried - there are no additional optional search arguments.
+        br
+        | In either scenario, a summary of the found non-conformance actions will be displayed in the search results panel below the selection boxes.
 
     .vert-space-x2 

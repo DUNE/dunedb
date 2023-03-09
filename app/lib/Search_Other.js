@@ -1,4 +1,5 @@
-const Components = require('./Components');
+const MUUID = require('uuid-mongodb');
+
 const { db } = require('./db');
 
 
@@ -210,8 +211,8 @@ async function apasByRecordDetails(location, configuration, locationNumber) {
 }
 
 
-/// Retrieve a list of non-conformance actions that match the specified record details
-async function nonConformanceByRecordDetails(componentType, disposition, status) {
+/// Retrieve a list of non-conformance actions that have been performed on a specified component type
+async function nonConformanceByComponentType(componentType, disposition, status) {
   // Set up 'matching' strings that can be used by MongoDB to match against specific record field values
   // For the disposition and status, if it has been specified, just use it as the matching string ... otherwise use a fully wildcard regular expression
   const dispositionString = (disposition) ? disposition : /(.*?)/;
@@ -255,9 +256,48 @@ async function nonConformanceByRecordDetails(componentType, disposition, status)
 }
 
 
+/// Retrieve a list of non-conformance actions that have been performed on a single component, specified by its UUID
+async function nonConformanceByComponentUUID(componentUUID) {
+  let aggregation_stages = [];
+
+  // Retrieve all 'APA Non-Conformance' action records that have the same component UUID as the specified one
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'APANonConformance',
+      'componentUuid': MUUID.from(componentUUID),
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      componentUuid: { '$first': '$componentUuid' },
+      componentType: { '$first': '$data.componentType' },
+      disposition: { '$first': '$data.disposition' },
+      status: { '$first': '$data.status' },
+    },
+  });
+
+  // Query the 'actions' records collection using the aggregation stages defined above
+  let results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of actions
+  return results;
+}
+
+
 module.exports = {
   boardShipmentsByReceptionDetails,
   workflowsByUUID,
   apasByRecordDetails,
-  nonConformanceByRecordDetails,
+  nonConformanceByComponentType,
+  nonConformanceByComponentUUID,
 }

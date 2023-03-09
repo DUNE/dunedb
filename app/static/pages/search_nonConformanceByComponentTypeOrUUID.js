@@ -2,6 +2,7 @@
 let componentType = '';
 let disposition = '';
 let nonConformStatus = '';
+let componentUuid = '';
 
 
 // Run a specific function when the page is loaded
@@ -11,15 +12,15 @@ window.addEventListener('load', renderSearchForms);
 // Function to run when the page is loaded
 async function renderSearchForms() {
   // When the selected component type is changed, get the newly selected type
-  // If the type has a non-empty value (i.e. an option has actually been selected), perform the search using the current values of the non-conformance details variables
+  // If the type has a non-empty value (i.e. an option has actually been selected), perform the search by type using the current values of the non-conformance details variables
   $('#componentTypeSelection').on('change', async function () {
     componentType = $('#componentTypeSelection').val();
 
-    if (componentType !== '') performSearch();
+    if (componentType !== '') performSearch_byType();
   });
 
   // When the selected disposition is changed, get the newly selected disposition if it has a value, or otherwise reset the string
-  // Then perform the search using the current values of the non-conformance details variables
+  // Then perform the search by type using the current values of the non-conformance details variables
   $('#dispositionSelection').on('change', async function () {
     if ($('#dispositionSelection').val()) {
       disposition = $('#dispositionSelection').val();
@@ -27,11 +28,11 @@ async function renderSearchForms() {
       disposition = '';
     }
 
-    performSearch();
+    performSearch_byType();
   });
 
   // When the selected status is changed, get the newly selected status if it has a value, or otherwise reset the string
-  // Then perform the search using the current values of the non-conformance details variables
+  // Then perform the search by type using the current values of the non-conformance details variables
   $('#statusSelection').on('change', async function () {
     if ($('#statusSelection').val()) {
       nonConformStatus = $('#statusSelection').val();
@@ -39,17 +40,51 @@ async function renderSearchForms() {
       nonConformStatus = '';
     }
 
-    performSearch();
+    performSearch_byType();
+  });
+
+  // Create a Formio form consisting of a component UUID input box, and render it in the page element called 'componentUuidSelection'
+  const componentUuidSchema = {
+    components: [{
+      type: 'ComponentUUID',
+      label: 'Component UUID',
+      key: 'componentUuid',
+      input: true,
+      hideLabel: true,
+    }],
+  }
+
+  const componentUuidForm = await Formio.createForm(document.getElementById('componentUuidSelection'), componentUuidSchema);
+
+  // If a valid UUID is entered, perform the search by UUID
+  componentUuidForm.on('change', function () {
+    if (componentUuidForm.isValid()) {
+      componentUuid = componentUuidForm.submission.data.componentUuid;
+
+      if (componentUuid && componentUuid.length === 36) performSearch_byUUID();
+    }
   });
 }
 
 
-// Function to perform the appropriate jQuery 'ajax' call to make the search
-function performSearch() {
+// Function to perform the appropriate jQuery 'ajax' call to make the search by type
+function performSearch_byType() {
   $.ajax({
     contentType: 'application/json',
     method: 'GET',
-    url: `/json/search/nonConformanceByRecordDetails?componentType=${componentType}&disposition=${disposition}&status=${nonConformStatus}`,
+    url: `/json/search/nonConformanceByComponentType?componentType=${componentType}&disposition=${disposition}&status=${nonConformStatus}`,
+    dataType: 'json',
+    success: postSuccess,
+  }).fail(postFail);
+}
+
+
+// Function to perform the appropriate jQuery 'ajax' call to make the search by UUID
+function performSearch_byUUID() {
+  $.ajax({
+    contentType: 'application/json',
+    method: 'GET',
+    url: `/json/search/nonConformanceByComponentUUID/${componentUuid}`,
     dataType: 'json',
     success: postSuccess,
   }).fail(postFail);
@@ -78,7 +113,7 @@ const statusDictionary = {
 };
 
 
-// Function to run for a successful search query by non-conformance
+// Function to run for a successful search query of either scenario
 function postSuccess(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
@@ -109,7 +144,6 @@ function postSuccess(result) {
     $('#results').append(tableStart);
 
     for (const action of result) {
-      console.log(action);
       const actionText = `
         <tr>
           <td>${componentTypesDictionary[action.componentType]}</td>
@@ -125,7 +159,7 @@ function postSuccess(result) {
 };
 
 
-// Function to run for a failed search query
+// Function to run for a failed search query of either scenario
 function postFail(result, statusCode, statusMsg) {
   // If the query result contains a response message, display it, and if not, display any status message and error code instead
   if (result.responseText) {

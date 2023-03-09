@@ -50,10 +50,10 @@ router.get('/search/apaByRecordDetails', async function (req, res, next) {
 });
 
 
-/// Search for non-conformance actions using various details from their records
-router.get('/search/nonConformanceByRecordDetails', async function (req, res, next) {
+/// Search for non-conformance actions performed on a specified component type, or on a single component, specified by its UUID
+router.get('/search/nonConformanceByComponentTypeOrUUID', async function (req, res, next) {
   // Render the interface page
-  res.render('search_nonConformanceByRecordDetails.pug');
+  res.render('search_nonConformanceByComponentTypeOrUUID.pug');
 });
 
 
