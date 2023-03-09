@@ -130,8 +130,8 @@ router.get('/search/apaByRecordDetails/:apaLocation/:apaConfiguration/:apaLocati
 });
 
 
-/// Search for non-conformance actions using various details from their records
-router.get('/search/nonConformanceByRecordDetails', async function (req, res, next) {
+/// Search for non-conformance actions performed on a specified component type
+router.get('/search/nonConformanceByComponentType', async function (req, res, next) {
   try {
     // This search query can have multiple query strings, some of which are optional
     // So first, parse out the strings which have actually been provided (as non-empty strings), and set the rest to 'null'
@@ -141,7 +141,22 @@ router.get('/search/nonConformanceByRecordDetails', async function (req, res, ne
     const status = (req.query.status !== '') ? req.query.status : null;
 
     // Retrieve a list of non-conformance actions that match the specified non-conformance details
-    const actions = await Search_Other.nonConformanceByRecordDetails(componentType, disposition, status);
+    const actions = await Search_Other.nonConformanceByComponentType(componentType, disposition, status);
+
+    // Return the list in JSON format
+    return res.json(actions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for non-conformance actions performed on a single component, specified by its UUID
+router.get('/search/nonConformanceByComponentUUID/' + utils.uuid_regex, async function (req, res, next) {
+  try {
+    // Retrieve a list of non-conformance actions that have been performed on the component corresponding to the specified UUID
+    const actions = await Search_Other.nonConformanceByComponentUUID(req.params.uuid);
 
     // Return the list in JSON format
     return res.json(actions);
