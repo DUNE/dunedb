@@ -131,6 +131,34 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
       fullActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));
     }
 
+    // We would like the actions to be ordered in a specific way in the summary document, to make it easier to find any given action (particularly when there are a lot of actions):
+    //   - first, all non-conformance actions
+    //   - then, all other workflow-originating actions
+    //   - and finally, any other remaining actions
+    // with the actions in each section ordered chronologically, i.e. earliest first
+    let nonConformActions = [];
+    let workflowActions = [];
+    let otherActions = [];
+
+    // Loop through the action records, and save them into separate arrays based on the action type form and whether or not the record has a 'workflowId' field or not
+    // Note that because the retrieved actions are natively in reverse chronological order (i.e. most recent first), this will be the ordering in the separated arrays as well
+    for (let i = 0; i < fullActions.length; i++) {
+      if (fullActions[i].typeFormId === 'APANonConformance') {
+        nonConformActions.push(fullActions[i]);
+      } else {
+        if (fullActions[i].hasOwnProperty('workflowId')) {
+          workflowActions.push(fullActions[i])
+        } else {
+          otherActions.push(fullActions[i]);
+        }
+      }
+    }
+
+    // Reverse the separated arrays to get the actions in chronological order
+    const chrono_nonConformActions = nonConformActions.reverse();
+    const chrono_workflowActions = workflowActions.reverse();
+    const chrono_otherActions = otherActions.reverse();
+
     // For 'Geometry Board Shipment' type components, set up an array containing more detailed information about each board in the shipment
     // This is required for this particular type of component, because by itself it only contains the UUIDs of the related boards
     // (Contrast with 'Geometry Board Batch' type components, which natively contain both the UUIDs and UKIDs of the related boards)
@@ -156,7 +184,9 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
       component,
       componentTypeForm,
       shipmentDetails,
-      actions: fullActions,
+      nonConformActions: chrono_nonConformActions,
+      workflowActions: chrono_workflowActions,
+      otherActions: chrono_otherActions,
     });
   } catch (err) {
     logger.error(err);
