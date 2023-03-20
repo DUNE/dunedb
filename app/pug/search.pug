@@ -32,6 +32,37 @@ block content
 
     .vert-space-x2
       h4
+        a(href = '/search/workflowsByUUID') Workflows by UUID
+
+      p This page may be used to search specifically for <b>workflows</b> that involve a particular component, specified by its full 36-character UUID.
+        br
+        |  The UUID input box uses auto-complete, so users may begin manually entering a UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.
+        br
+        |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.
+
+      p If an existing workflow that involves the specified component is successfully found in the database, the user will be automatically redirected to the page for viewing the workflow record.
+        br
+        |  If there is no such workflow, i.e. the specified component is not part of any existing workflow, a message will be displayed below the input box to that effect.
+
+      p It should not be possible for multiple workflows to involve the same component, since each individual workflow begins with the creation of a new, unique component.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
+
+      hr
+
+    .vert-space-x2
+      h4
+        a(href = '/search/nonConformanceByComponentTypeOrUUID') Non-Conformance by Component Type or UUID
+
+      p This page may be used to search specifically for <b>non-conformance actions</b> under one of the following scenarios:
+        ul
+          li <b>either</b> all non-conformance actions performed on a specified <u>component type</u>, with options to additionally specify a particular non-conformance disposition and/or status
+          li <b>or</b> all non-conformance actions performed on a <u>single component</u>, specified by its UUID
+
+      p In the first scenario, users <b>must</b> select a 'component type' from the list, but the other two available parameters are optional.  In the second scenario, the only required information is the UUID of the component being queried - there are no additional optional search arguments.
+        br
+        | In either scenario, a summary of the found non-conformance actions will be displayed in the search results panel below the selection boxes.
+
+    .vert-space-x2
+      h4
         a(href = '/search/geoBoardsByLocationOrPartNumber') Geometry Boards By Location or Part Number
 
       p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios: 
@@ -81,24 +112,6 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/workflowsByUUID') Workflows by UUID
-
-      p This page may be used to search specifically for <b>workflows</b> that involve a particular component, specified by its full 36-character UUID.
-        br
-        |  The UUID input box uses auto-complete, so users may begin manually entering a UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.
-        br
-        |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.
-
-      p If an existing workflow that involves the specified component is successfully found in the database, the user will be automatically redirected to the page for viewing the workflow record.
-        br
-        |  If there is no such workflow, i.e. the specified component is not part of any existing workflow, a message will be displayed below the input box to that effect.
-
-      p It should not be possible for multiple workflows to involve the same component, since each individual workflow begins with the creation of a new, unique component.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
-
-      hr
-
-    .vert-space-x2
-      h4
         a(href = '/search/apaByRecordDetails') Assembled APA by Record Details
 
       p This page may be used to search specifically for <b>assembled APAs</b> that match <b>all</b> of the following user-specified record details:
@@ -116,18 +129,5 @@ block content
       p It should not be possible for multiple APA records to match against all three provided pieces of information, since they should uniquely identify a single APA.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 
       hr
-
-    .vert-space-x2
-      h4
-        a(href = '/search/nonConformanceByComponentTypeOrUUID') Non-Conformance by Component Type or UUID
-
-      p This page may be used to search specifically for <b>non-conformance actions</b> under one of the following scenarios:
-        ul
-          li <b>either</b> all non-conformance actions performed on a specified <u>component type</u>, with options to additionally specify a particular non-conformance disposition and/or status
-          li <b>or</b> all non-conformance actions performed on a <u>single component</u>, specified by its UUID
-
-      p In the first scenario, users <b>must</b> select a 'component type' from the list, but the other two available parameters are optional.  In the second scenario, the only required information is the UUID of the component being queried - there are no additional optional search arguments.
-        br
-        | In either scenario, a summary of the found non-conformance actions will be displayed in the search results panel below the selection boxes.
 
     .vert-space-x2 
