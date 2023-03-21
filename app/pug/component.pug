@@ -76,7 +76,7 @@ block content
               .vert-space-x1.border-success.border.rounded.p-2
                 #typeform
 
-            if(component.formId == 'BoardShipment')
+            if component.formId == 'BoardShipment'
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Boards in Shipment
                 dd
@@ -98,6 +98,15 @@ block content
                           td #{info[1]}
 
             if component.data.subComponent_fullUuids
+              - let columnHeader = ''
+
+              if component.data.subComponent_formId == 'GeometryBoard'
+                - columnHeader = 'UK ID'
+              else if component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
+                - columnHeader = 'UW ID'
+              else 
+                - columnHeader = 'Factory ID'
+
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Sub Components
                 dd
@@ -105,7 +114,7 @@ block content
                     thead
                       tr
                         th.col-md-3 UUID
-                        th.col-md-2 UK ID
+                        th.col-md-2 #{columnHeader}
                         th.col-md-3 QR Code Link
 
                     tbody
