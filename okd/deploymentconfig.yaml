@@ -30,13 +30,13 @@ objects:
                 - secretRef:
                     name: ${DEPLOYMENT}
               ports: 
-                - containerPort: 12313
+                - containerPort: 8443
                   protocol: TCP
               livenessProbe:
                   failureThreshold: 3
                   httpGet:
                     path: /
-                    port: 12313
+                    port: 8443
                     scheme: HTTPS
                   initialDelaySeconds: 5
                   periodSeconds: 10
@@ -46,7 +46,7 @@ objects:
                 failureThreshold: 3
                 httpGet:
                   path: /
-                  port: 12313
+                  port: 8443
                   scheme: HTTPS
                 initialDelaySeconds: 5
                 periodSeconds: 10
@@ -75,7 +75,7 @@ objects:
           - name: 443-tcp
             port: 443
             protocol: TCP
-            targetPort: 12313
+            targetPort: 8443
         externalIPs:
           - ${EXTERNAL_IP}
         selector:
