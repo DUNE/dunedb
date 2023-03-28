@@ -81,8 +81,20 @@ async function onPageLoad() {
       const typeRecordNumber = numberOfExistingComponents + 1;
       submission.data.typeRecordNumber = typeRecordNumber;
 
-      // If the component is a 'Grounding Mesh Panel' type, the component name is set by some fixed prefix and suffix, plus the type record number padded to 5 digits
-      if (componentTypeForm.formId === 'GroundingMeshPanel') submission.data.name = `D00300200004-${String(typeRecordNumber).padStart(5, '0')}-UK106-01-00-00`
+      // Components of certain types must have a specifically formatted name, consisting of some fixed prefix and suffix, plus the type record number padded to 5 digits
+      if (componentTypeForm.formId === 'GroundingMeshPanel') {
+        submission.data.name = `D00300200004-${String(typeRecordNumber).padStart(5, '0')}-UK106-01-00-00`;
+      } else if (componentTypeForm.formId === 'CRBoard') {
+        submission.data.name = `D00300400001-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      } else if (componentTypeForm.formId === 'GBiasBoard') {
+        submission.data.name = `D00300400002-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      } else if (componentTypeForm.formId === 'CEAdapterBoard') {
+        submission.data.name = `D00300400003-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      } else if (componentTypeForm.formId === 'SHVBoard') {
+        submission.data.name = `D00300500001-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      } else if (componentTypeForm.formId === 'CableHarness') {
+        submission.data.name = `D00300500002-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      }
     }
 
     // When creating a new batch-type component ...
@@ -127,7 +139,6 @@ async function onPageLoad() {
         sub_submission.data = Object.create(submission.data);
 
         // Add information to the sub-component's 'data' field indicating the fields and values that are inherited from the batch component
-        sub_submission.data.name = `Created from ${submission.data.name}`;
         sub_submission.data.partNumber = submission.data.subComponent_partNumber;
         sub_submission.data.partString = submission.data.subComponent_partString;
         sub_submission.data.fromBatch = submission.componentUuid;
@@ -137,6 +148,21 @@ async function onPageLoad() {
         // Additionally save this number into the previously declared array
         sub_submission.data.typeRecordNumber = numberOfExistingSubComponents + s + 1;
         subComponent_typeRecordNumbers.push(numberOfExistingSubComponents + s + 1);
+
+        // Add a name to the sub-component 'data' field ... the format of this name will be different depending on the sub-component's component type
+        if (submission.data.subComponent_formId === 'CRBoard') {
+          sub_submission.data.name = `D00300400001-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+        } else if (submission.data.subComponent_formId === 'GBiasBoard') {
+          sub_submission.data.name = `D00300400002-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+        } else if (submission.data.subComponent_formId === 'CEAdapterBoard') {
+          sub_submission.data.name = `D00300400003-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+        } else if (submission.data.subComponent_formId === 'SHVBoard') {
+          sub_submission.data.name = `D00300500001-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+        } else if (submission.data.subComponent_formId === 'CableHarness') {
+          sub_submission.data.name = `D00300500002-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+        } else {
+          sub_submission.data.name = `Created from ${submission.data.name}`;
+        }
 
         // Since there is nothing more to be added to the sub-component submission object, immediately submit it to the DB
         // Do not redirect the user back to the sub-component's information page, since we still need to deal with any other sub-components and the main batch-type component
