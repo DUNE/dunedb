@@ -93,7 +93,7 @@ block allbody
 
       each action in nonConformActions
         .section.actionSection
-          .section-side.formName non-conformance action
+          .section-side.formName #{action.typeFormName}
 
           .vert-space-x1
             dl
@@ -122,7 +122,7 @@ block allbody
 
       each action in workflowActions
         .section.actionSection
-          .section-side.formName workflow action
+          .section-side.formName (workflow) #{action.typeFormName}
 
           .vert-space-x1
             dl
@@ -151,7 +151,7 @@ block allbody
 
       each action in otherActions
         .section.actionSection
-          .section-side.formName other action
+          .section-side.formName (other) #{action.typeFormName}
 
           .vert-space-x1
             dl
