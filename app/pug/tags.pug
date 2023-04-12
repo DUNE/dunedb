@@ -36,55 +36,55 @@ block content
             - let filteredWorkflowTypeNames = [];
 
             each componentForm in componentTypeForms
-              if(componentForm.tags.includes(tag) && !componentForm.tags.includes('Trash'))
+              if componentForm.tags.includes(tag) && !componentForm.tags.includes('Trash')
                 - filteredComponentTypeIds.push(componentForm.formId)
                 - filteredComponentTypeNames.push(componentForm.formName)
 
             each actionForm in actionTypeForms
-              if(actionForm.tags.includes(tag) && !actionForm.tags.includes('Trash'))
+              if actionForm.tags.includes(tag) && !actionForm.tags.includes('Trash')
                 - filteredActionTypeIds.push(actionForm.formId)
                 - filteredActionTypeNames.push(actionForm.formName)
 
             each workflowForm in workflowTypeForms
-              if(workflowForm.tags.includes(tag) && !workflowForm.tags.includes('Trash'))
+              if workflowForm.tags.includes(tag) && !workflowForm.tags.includes('Trash')
                 - filteredWorkflowTypeIds.push(workflowForm.formId)
                 - filteredWorkflowTypeNames.push(workflowForm.formName)
 
             tr 
               td #{tag}
 
-              if(filteredComponentTypeNames.length > 0)
+              if filteredComponentTypeNames.length > 0
                 td
                   .form-inline 
                     each typeName, i in filteredComponentTypeNames 
                       | [
                       a(href = `/components/${filteredComponentTypeIds[i]}/list`) #{typeName}
                       | ]
-                      if(i != filteredComponentTypeNames.length - 1)
+                      if i != filteredComponentTypeNames.length - 1
                         | &nbsp; &nbsp;
               else
                 td (none)
 
-              if(filteredActionTypeNames.length > 0)
+              if filteredActionTypeNames.length > 0
                 td
                   .form-inline 
                     each typeName, i in filteredActionTypeNames 
                       | [
                       a(href = `/actions/${filteredActionTypeIds[i]}/list`) #{typeName}
                       | ]
-                      if(i != filteredActionTypeNames.length - 1)
+                      if i != filteredActionTypeNames.length - 1
                         | &nbsp; &nbsp;
               else
                 td (none)
 
-              if(filteredWorkflowTypeNames.length > 0)
+              if filteredWorkflowTypeNames.length > 0
                 td
                   .form-inline 
                     each typeName, i in filteredWorkflowTypeNames 
                       | [
                       a(href = `/workflows/${filteredWorkflowTypeIds[i]}/list`) #{typeName}
                       | ]
-                      if(i != filteredWorkflowTypeNames.length - 1)
+                      if i != filteredWorkflowTypeNames.length - 1
                         | &nbsp; &nbsp;
               else
                 td (none)

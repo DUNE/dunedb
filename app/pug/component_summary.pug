@@ -47,7 +47,7 @@ block allbody
               else
                 dd (none)
 
-              if(component.formId == 'BoardShipment')
+              if component.formId == 'BoardShipment'
                 dt Number of Boards in Shipment
                 dd #{component.data.boardUuiDs.length}
 
@@ -73,7 +73,7 @@ block allbody
 
       .pagebreak
 
-      if(component.formId == 'BoardShipment')
+      if component.formId == 'BoardShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Boards in Shipment
           dd

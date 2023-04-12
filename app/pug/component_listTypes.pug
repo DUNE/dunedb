@@ -48,12 +48,12 @@ block content
           each typeFormId in Object.keys(componentCountsByType).sort()
             - const typeForm = componentCountsByType[typeFormId];
 
-            if(typeForm.tags && !typeForm.tags.includes('Trash'))
+            if typeForm.tags && !typeForm.tags.includes('Trash')
               tr
                 td
                   a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
 
-                if(typeForm.count)
+                if typeForm.count
                   td #{typeForm.count}
                 else 
                   td 0
@@ -67,7 +67,7 @@ block content
                     img.small-icon(src = '/images/edit_icon.svg')
                     | &nbsp; Edit Component Type Form
 
-    if(permissions.userHas(user, 'forms:edit'))
+    if permissions.userHas(user, 'forms:edit')
       .vert-space-x2
         h2 Trashed Component Types
 
@@ -84,12 +84,12 @@ block content
             each typeFormId in Object.keys(componentCountsByType).sort()
               - const typeForm = componentCountsByType[typeFormId];
 
-              if(typeForm.tags && typeForm.tags.includes('Trash'))
+              if typeForm.tags && typeForm.tags.includes('Trash')
                 tr
                   td
                     a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
 
-                  if(typeForm.count)
+                  if typeForm.count
                     td #{typeForm.count}
                   else 
                     td 0

@@ -43,7 +43,7 @@ head
     integrity = 'sha384-2EBe4bOCAHoiyZtAsgW2cgo3crpM072svgIIV2pYxOQWejDaa1rMJA9NH6LCkVQb', crossorigin = 'anonymous')
 
 mixin navlink
-  if(attributes.href == route)
+  if attributes.href == route
     a.nav-link.active&attributes(attributes)
       block
   else

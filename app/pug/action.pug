@@ -67,7 +67,7 @@ block content
 
           .vert-space-x1
 
-        if((action.typeFormId == 'action_test') || (action.typeFormId == 'APANonConformance'))
+        if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance'
           dt Add Images to Action Record:
           dd Please use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, please use the 'Confirm Images' button to finalise the upload.
             br
@@ -114,9 +114,15 @@ block content
                 a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
     .vert-space-x2.form-inline
-      a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
-        img.small-icon(src = '/images/edit_icon.svg')
-        | &nbsp; Edit Action
+
+      if action.typeFormId != 'tensionTesting'
+        a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
+          img.small-icon(src = '/images/edit_icon.svg')
+          | &nbsp; Edit Action
+      else 
+        a.btn.btn-outline-secondary.disabled
+          img.small-icon(src = '/images/edit_icon.svg')
+          | &nbsp; Edit Action
 
       .hori-space-x2
         a.btn.btn-secondary(href = `/json/action/${action.actionId}`, target = '_blank')
