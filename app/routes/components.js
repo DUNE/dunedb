@@ -195,6 +195,47 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
 });
 
 
+/// View and print an assembled APA's executive summary
+/// Note that this is different from an assembled APA's more general component summary, and executive summaries are only generated for assembled APAs 
+router.get('/component/' + utils.uuid_regex + '/execSummary', permissions.checkPermission('components:view'), async function (req, res, next) {
+  try {
+    // Retrieve the most recent version of the record corresponding to the specified APA's component UUID, and throw an error if there is no such record
+    const component = await Components.retrieve({ componentUuid: req.params.uuid });
+
+    if (!component) return res.status(404).send(`There is no assembled APA record with component UUID = ${req.params.uuid}`);
+
+    // Retrieve the collated information about the APA - since this requires extracting specific field values from a number of DB records related to the APA ...
+    // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
+    let collatedInformation = await Components.collateExecSummaryInfo(req.params.uuid);
+
+    // Add relevant information from the APA's component record to the collated information
+    const dictionary_productionSites = {
+      chicago: 'Chicago',
+      daresbury: 'Daresbury',
+      wisconsin: 'Wisconsin',
+    };
+
+    const dictionary_topOrBottom = {
+      top: 'Top',
+      bottom: 'Bottom',
+    };
+
+    collatedInformation.dunePID = component.data.name;
+    collatedInformation.productionSite = dictionary_productionSites[component.data.apaAssemblyLocation];
+    collatedInformation.topOrBottom = dictionary_topOrBottom[component.data.apaConfiguration];
+
+    // Render the interface page
+    res.render('component_execSummary.pug', {
+      component,
+      collatedInformation,
+    });
+  } catch (err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+
 /// Create a new component of a given type
 router.get('/component/:typeFormId', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {

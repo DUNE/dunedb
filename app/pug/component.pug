@@ -51,7 +51,7 @@ block content
             else
               dd (none)
 
-            if(component.formId == 'GroundingMeshPanel')
+            if component.formId == 'GroundingMeshPanel'
               dt Factory ID
               dd #{component.data.typeRecordNumber}
 
@@ -123,7 +123,7 @@ block content
                           td
                             a(href = `/component/${uuid}`, target = '_blank') #{uuid}
 
-                          if (component.data.subComponent_typeRecordNumbers)
+                          if component.data.subComponent_typeRecordNumbers
                             td #{component.data.subComponent_typeRecordNumbers[index]}
                           else
                             td (not retrievable)
@@ -174,6 +174,12 @@ block content
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View and print the component's summary
 
+      if component.formId == 'AssembledAPA'
+        .hori-space-x2
+          a.btn.btn-primary(href = `/component/${component.componentUuid}/execSummary`)
+            img.small-icon(src = '/images/checklist_icon.svg')
+            | &nbsp; View and print this APA's executive summary
+
     .vert-space-x2
       hr
 
@@ -184,7 +190,7 @@ block content
 
           hr
 
-          if(!actions || actions.length == 0)
+          if !actions || actions.length == 0
             p None
           else
             table.table
@@ -211,7 +217,7 @@ block content
           hr
 
           each typeForm in actionTypeForms
-            if(typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash'))
+            if typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash')
               a.actionbutton.btn.btn-success(href = `/action/${typeForm.formId}/${component.componentUuid}`) #{typeForm.formName}
 
     .vert-space-x2

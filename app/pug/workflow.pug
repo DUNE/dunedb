@@ -60,12 +60,12 @@ block content
                     - const componentUuid = workflow.path[0].result;
                     - let stepFormId = '';
 
-                    if(index === 0)
+                    if index === 0
                       each typeFormId in Object.keys(componentTypeForms).sort()
-                        if(componentTypeForms[typeFormId].formName == step.formName)
+                        if componentTypeForms[typeFormId].formName == step.formName
                           - stepFormId = componentTypeForms[typeFormId].formId
 
-                      if(componentUuid.length > 0)
+                      if componentUuid.length > 0
                         td
                           a(href = `/component/${componentUuid}`, target = '_blank') #{componentUuid}
                       else 
@@ -80,10 +80,10 @@ block content
 
                     else
                       each typeFormId in Object.keys(actionTypeForms).sort()
-                        if(actionTypeForms[typeFormId].formName == step.formName)
+                        if actionTypeForms[typeFormId].formName == step.formName
                           - stepFormId = actionTypeForms[typeFormId].formId
 
-                      if(step.result.length > 0)
+                      if step.result.length > 0
                         td 
                           a(href = `/action/${step.result}`, target = '_blank') #{step.result}
                       else 
@@ -92,7 +92,7 @@ block content
                             | (step not yet performed)
 
                             .hori-space-x2
-                              if(workflow.path[index - 1].result.length > 0)
+                              if workflow.path[index - 1].result.length > 0
                                 a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}`)
                                   img.small-icon(src = '/images/run_icon.svg')
                                   | &nbsp; Perform Action

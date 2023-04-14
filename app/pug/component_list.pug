@@ -7,7 +7,7 @@ block vars
 block content
   .container-fluid
     .vert-space-x2
-      if(singleType && componentTypeForm.tags && !componentTypeForm.tags.includes('Trash'))
+      if singleType && componentTypeForm.tags && !componentTypeForm.tags.includes('Trash')
         a.btn.btn-primary(href = `/component/${componentTypeForm.formId}`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Create New Component of This Type
@@ -29,13 +29,13 @@ block content
           each component in components
             - const notSingleType_notTrashed = !singleType && !allComponentTypeForms[component.typeFormId].tags.includes('Trash');
 
-            if(notSingleType_notTrashed || singleType)
+            if notSingleType_notTrashed || singleType
               - const uuid = MUUID.from(component.componentUuid).toString();
 
               tr          
                 td #{component.typeFormName}
 
-                if (component.name)
+                if component.name
                   td
                     a(href = `/component/${uuid}`) #{component.name}
                 else 

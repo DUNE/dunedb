@@ -245,6 +245,153 @@ async function list(match_condition, options) {
 }
 
 
+/// Retrieve collated information about a single assembled APA that will be displayed in its executive summary
+async function collateExecSummaryInfo(componentUUID) {
+  // Set up an empty dictionary to store the collated information ... it will be saved as [key, value] pairs for easier access on the executive summary interface page
+  let collatedInfo = {};
+
+  // For each (component or action) record that needs to be retrieved and information extracted from, the same series of steps should be performed:
+  //   - get all versions of the record that matches the component UUID and specified component or action type form ID
+  //   - get the single most recent version of the matching record (sort by validity, group by component UUID or action ID [there should only be one group], and select the first entry in the group)
+  //   - extract only the required information from the record and save it into the dictionary under the appropriate key
+
+  // Get information about the temperature sensors
+  let aggregation_stages = [];
+  let results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'pd_cable_temp_sensor_install',
+      'componentUuid': MUUID.from(componentUUID),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      data: { '$first': '$data' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  if (results.length > 0) {
+    collatedInfo.tempSensors_config = results[0].data.configuration;
+    collatedInfo.tempSensors_serials = [results[0].data.tempSensorSerialNumber, results[0].data.tempSensorSerialNumber1, results[0].data.tempSensorSerialNumber2, results[0].data.tempSensorSerialNumber3];
+  } else {
+    collatedInfo.tempSensors_config = 'none';
+    collatedInfo.tempSensors_serials = ['none', 'none', 'none', 'none'];
+  }
+
+  // Get information about any missing or misplaced wire segments
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'APANonConformance',
+      'componentUuid': MUUID.from(componentUUID),
+      'data.nonConformanceType.missingWireSegment': true,
+      ///      $or: [{
+      ///        'data.nonConformanceType.missingWireSegment': true
+      ///      }, {
+      ///        'data.nonConformanceType.misplacedWireSegment': true
+      ///      }]
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      wireData: { '$first': '$data.dataGrid' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  collatedInfo.wireNonConformances = [];
+
+  if (results.length > 0) {
+    for (const result of results) {
+      for (const entry of result.wireData) {
+        dictionary = {
+          layerSide: entry.wireLayer.toUpperCase(),
+          boardPad: entry.headBoardAndPad,
+          channel: entry.coldElectronicsChannel,
+          actionId: result.actionId,
+        }
+
+        collatedInfo.wireNonConformances.push(dictionary);
+      }
+    }
+  }
+
+  // Get information about any non-wire related non-conformances
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'APANonConformance',
+      'componentUuid': MUUID.from(componentUUID),
+      'data.nonConformanceType.missingWireSegment': false,
+      'data.nonConformanceType.misplacedWireSegment': false,
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      nonConf_type: { '$first': '$data.nonConformanceType' },
+      nonConf_description: { '$first': '$data.nonConformanceDescription' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  dictionary_nonConformanceIssues = {
+    geometryBoardIssue: 'Geometry Board Issue',
+    combIssue: 'Comb Issue',
+    machiningIssue: 'Machining Issue',
+    conduitIssue: 'Conduit Issue',
+  };
+
+  collatedInfo.otherNonConformances = [];
+
+  if (results.length > 0) {
+    for (const result of results) {
+      let nonConfType = '';
+
+      for (const [key, value] of Object.entries(result.nonConf_type)) {
+        if (value) nonConfType = key;
+      }
+
+      dictionary = {
+        type: dictionary_nonConformanceIssues[nonConfType],
+        description: result.nonConf_description,
+        actionId: result.actionId,
+      }
+
+      collatedInfo.otherNonConformances.push(dictionary);
+    }
+  }
+
+  // Return the completed dictionary of collated information
+  return collatedInfo;
+}
+
+
 /// Get a list of the current component count per type across all existing component types
 async function componentCountsByTypes() {
   let aggregation_stages = [];
@@ -364,6 +511,7 @@ module.exports = {
   retrieve,
   versions,
   list,
+  collateExecSummaryInfo,
   componentCountsByTypes,
   autoCompleteUuid,
 }
