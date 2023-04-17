@@ -7,7 +7,7 @@ block vars
 block content
   .container-fluid
     .vert-space-x2
-      if(singleType && actionTypeForm.tags && !actionTypeForm.tags.includes('Trash'))
+      if singleType && actionTypeForm.tags && !actionTypeForm.tags.includes('Trash')
         a.btn.btn-primary(href = `/action/${actionTypeForm.formId}/unspec`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Perform New Action of This Type
@@ -30,7 +30,7 @@ block content
           each action in actions
             - const notSingleType_notTrashed = !singleType && !allActionTypeForms[action.typeFormId].tags.includes('Trash');
 
-            if(notSingleType_notTrashed || singleType)
+            if notSingleType_notTrashed || singleType
               - const uuid = MUUID.from(action.componentUuid).toString();
 
               tr

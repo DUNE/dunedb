@@ -7,7 +7,7 @@ block vars
 block content
   .container-fluid
     .vert-space-x2
-      if(singleType && workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash'))
+      if singleType && workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash')
         a.btn.btn-primary(href = `/workflow/${workflowTypeForm.formId}`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Create New Workflow of This Type
@@ -30,19 +30,19 @@ block content
           each workflow in workflows
             - const notSingleType_notTrashed = !singleType && !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash');
 
-            if(notSingleType_notTrashed || singleType)
+            if notSingleType_notTrashed || singleType
               tr
                 td #{workflow.typeFormName}
                 td
                   a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
 
-                if(workflow.stepResultIDs[0] != '')
+                if workflow.stepResultIDs[0] != ''
                   td
                     a(href = `/component/${workflow.stepResultIDs[0]}`) #{workflow.componentName}
                 else 
                   td (component not yet created)
 
-                if(workflow.status === 'Complete')
+                if workflow.status === 'Complete'
                   td.text-success.font-weight-bold #{workflow.status}
                 else
                   td.text-danger.font-weight-bold #{workflow.status}

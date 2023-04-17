@@ -48,12 +48,12 @@ block content
           each typeFormId in Object.keys(workflowTypeForms).sort()
             - const typeForm = workflowTypeForms[typeFormId];
 
-            if(typeForm.tags && !typeForm.tags.includes('Trash')) 
+            if typeForm.tags && !typeForm.tags.includes('Trash')
               tr
                 td
                   a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
 
-                if((typeForm.componentTypes) && (typeForm.componentTypes.length > 0))
+                if typeForm.componentTypes && typeForm.componentTypes.length > 0
                   td 
                     +arrayFormat(typeForm.componentTypes)
                 else
@@ -68,7 +68,7 @@ block content
                     img.small-icon(src = '/images/edit_icon.svg')
                     | &nbsp; Edit Workflow Type Form
 
-    if(permissions.userHas(user, 'forms:edit'))
+    if permissions.userHas(user, 'forms:edit')
       .vert-space-x2
         h2 Trashed Workflow Types
 
@@ -85,12 +85,12 @@ block content
             each typeFormId in Object.keys(workflowTypeForms).sort()
               - const typeForm = workflowTypeForms[typeFormId];
 
-              if(typeForm.tags && typeForm.tags.includes('Trash')) 
+              if typeForm.tags && typeForm.tags.includes('Trash') 
                 tr
                   td
                     a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
 
-                  if((typeForm.componentTypes) && (typeForm.componentTypes.length > 0))
+                  if typeForm.componentTypes && typeForm.componentTypes.length > 0
                     td
                       +arrayFormat(typeForm.componentTypes)
                   else

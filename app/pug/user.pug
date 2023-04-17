@@ -24,7 +24,7 @@ block content
             dd 
               a(href = `mailto:${userProfile.email}`) #{userProfile.email} 
 
-              if(userProfile.email_verified)
+              if userProfile.email_verified
                 span (Verified)
 
             dt Created On:

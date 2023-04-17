@@ -1,0 +1,66 @@
+extend default
+include common.pug
+
+block vars
+  - const page_title = 'Assembled APA Executive Summary';
+
+block extrascripts
+  script(type = 'text/javascript').
+    const component = !{JSON.stringify(component, null, 4)};
+    const collatedInformation = !{JSON.stringify(collatedInformation, null, 4)};
+
+  block workscripts
+    script(src = '/pages/component_execSummary.js')
+
+block allbody
+  .vert-space-x2.hori-space-x1.noprint
+    a.btn.btn-primary(onclick = 'window.print(); return false;' href = '#print') Print Executive Summary
+
+    .vert-space-x1
+      p For best display, please print <b>without headers and footers</b> and <b>with backgrounds</b>.
+
+    .vert-space-x2
+      hr
+
+  .vert-space-x2
+    .container-fluid
+      .row
+        .col-sm-8
+          h1 DUNE APA Final Check List Summary
+
+          .vert-space-x1.hori-space-x1.h4
+            dl
+              dt Component UUID
+              dd #{component.componentUuid}
+
+              dt DUNE PID
+              dd #{component.data.name}
+
+          .vert-space-x1.hori-space-x1
+            p &nbsp; This summary generated on: 
+              +dateFormat(new Date())
+
+        .col-sm-4
+          #qr-code
+            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, 'component.data.name')
+
+    hr
+
+  .vert-space-x2
+    #form_sectionA
+
+  .vert-space-x2
+    each wireInfo, index in collatedInformation.wireNonConformances
+      - let hideHeader = true;
+      - if (index == 0) hideHeader = false;
+
+      .wireEntry
+        .form_sectionB(data-record = [wireInfo, hideHeader])
+
+  .vert-space-x1
+    each nonConformanceInfo, index in collatedInformation.otherNonConformances
+      - let hideHeader = true;
+      - if (index == 0) hideHeader = false;
+
+      .nonConformanceEntry.vert-space-x1
+        .form_sectionC(data-record = [nonConformanceInfo, hideHeader])
