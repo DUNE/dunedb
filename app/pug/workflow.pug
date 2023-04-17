@@ -9,6 +9,7 @@ block extrascripts
     const workflow = !{JSON.stringify(workflow, null, 4)};
     const workflowVersions = !{JSON.stringify(workflowVersions, null, 4)};
     const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)};
+    const componentName = !{JSON.stringify(componentName, null, 4)};
     const componentTypeForms = !{JSON.stringify(componentTypeForms, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
 
@@ -67,7 +68,7 @@ block content
 
                       if componentUuid.length > 0
                         td
-                          a(href = `/component/${componentUuid}`, target = '_blank') #{componentUuid}
+                          a(href = `/component/${componentUuid}`, target = '_blank') #{componentName}
                       else 
                         td
                           .form-inline 
