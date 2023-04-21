@@ -58,7 +58,7 @@ block content
           .collapse(id = `${collapseId}`, class = `${startingDisplay}`)
             table.table
               tbody
-                each typeFormName, i in actionFormsGroup.formName
+                each typeFormName, i in actionFormsGroup.formName.sort()
                   - const typeFormId = actionFormsGroup.formId[i];
                   - const typeFormTags = actionFormsGroup.tags[i];
 

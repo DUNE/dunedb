@@ -171,6 +171,7 @@ async function listGrouped(collection) {
   // For the 'actionForms' collection specifically, we want to return the list of type forms grouped by the 'recommended component type'
   // Note that because the 'recommended component type' field is an ARRAY in the action type form, we must first 'unwind' it before grouping the records against its contents
   // For each group of action type forms, the '_id' will be returned (i.e. the recommended component type that this group is defined by), as well as additional fields from the type form records
+  // Sort the groups alphabetically by the recommended component type
   if (collection === 'actionForms') {
     aggregation_stages.push({ $unwind: '$componentTypes' });
 
@@ -182,6 +183,8 @@ async function listGrouped(collection) {
         tags: { $push: '$tags' },
       }
     });
+
+    aggregation_stages.push({ $sort: { '_id.componentType': 1 } });
   }
 
   // Query the specified records collection using the aggregation stages defined above
