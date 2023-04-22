@@ -55,13 +55,14 @@ class NumberArray extends TextFieldComponent {
     tpl += `
       <div class = 'd-flex justify-content-around border'>
         <div class = 'align-self-center p-2'>
-          <div>Entries Count: <span class = 'numberArrayLength'></span></div>
+          <div>Entries: <span class = 'numberArrayLength'></span></div>
           <div>Min.: <span class = 'numberArrayMin'></span></div>
           <div>Max.: <span class = 'numberArrayMax'></span></div>
           <div>Mean: <span class = 'numberArrayMean'></span></div>
           <div>RMS: <span class = 'numberArrayRMS'></span></div>
-          ${isNaN(bounds.lo) ? '' : '<div>OoB Low: <span class = "numberArrayOoBLo">n/a</span></div>'}
-          ${isNaN(bounds.hi) ? '' : '<div>OoB High: <span class = "numberArrayOoBHi">n/a</span></div>'}
+          ${isNaN(bounds.lo) ? '' : '<div>OoB(L): <span class = "numberArrayOoBLo">n/a</span></div>'}
+          ${isNaN(bounds.hi) ? '' : '<div>OoB(H): <span class = "numberArrayOoBHi">n/a</span></div>'}
+          <div>NaNs: <span class = 'numberArrayNaNCount'></span></div>
         </div>
         <div class = 'flex-grow-1 p-4 numberArrayGraph' style = 'height: 200px; width: 240px;'></div>
         <div class = 'flex-grow-1 p-4 numberArrayHistogram' style = 'height: 200px; width: 240px;'></div>
@@ -136,28 +137,28 @@ class NumberArray extends TextFieldComponent {
     $('span.numberArrayLength', this.element).text(numberOfEntries);
     $('span.numberArrayMin', this.element).text(min.toFixed(2));
     $('span.numberArrayMax', this.element).text(max.toFixed(2));
-    $('span.numberArrayOoBHi', this.element).text(oobHi.toFixed(2));
-    $('span.numberArrayOoBLo', this.element).text(oobLo.toFixed(2));
+    $('span.numberArrayOoBHi', this.element).text(oobHi);
+    $('span.numberArrayOoBLo', this.element).text(oobLo);
+    $('span.numberArrayNaNCount', this.element).text(count_nans);
 
     // Draw the graph
     let graph = new Histogram(numberOfEntries, 0, numberOfEntries);
     graph.data = arr;
     graph.min_content = min;
     graph.max_content = max;
-    const blackscale = new ColorScaleRGB(50, 50, 100);
 
-    this.LizardGraph.SetHist(graph, blackscale);
+    let colorscale = new ColorScaleRGB(50, 50, 100);
+    colorscale.min = min;
+    colorscale.max = max;
+
+    this.LizardGraph.SetHist(graph, colorscale);
     this.LizardGraph.ResetDefaultRange();
     this.LizardGraph.Draw();
 
     // Draw the histogram
-    let hist = new Histogram(Math.round(numberOfEntries / 10) + 10, min, max);
+    let hist = new CreateGoodHistogram(Math.round((max - min) / 0.1) + 1, min, max);
 
     for (const x of arr) { hist.Fill(x); }
-
-    let colorscale = new ColorScaleRGB(50, 50, 50);
-    colorscale.min = min;
-    colorscale.max = max;
 
     this.LizardHistogram.SetHist(hist, colorscale);
     this.LizardHistogram.SetMarkers([bounds.lo, bounds.hi]);
@@ -177,12 +178,12 @@ class NumberArray extends TextFieldComponent {
     this.LizardGraph = new HistCanvas($('div.numberArrayGraph', this.element));
     this.LizardGraph.default_options.doDots = true;
     this.LizardGraph.default_options.doFill = false;
-    this.LizardGraph.xlabel = 'Entry Number';
+    this.LizardGraph.xlabel = 'Wire Index';
     this.LizardGraph.ylabel = this.component.units;
 
     this.LizardHistogram = new HistCanvas($('div.numberArrayHistogram', this.element));
     this.LizardHistogram.xlabel = this.component.units;
-    this.LizardHistogram.ylabel = 'Entries Count';
+    this.LizardHistogram.ylabel = 'Entries';
 
     let readOnlyDisplay = this.refs.readonly_display;
 
@@ -197,13 +198,6 @@ class NumberArray extends TextFieldComponent {
     }
 
     if (this.arrayValue) this.updateExtras(this.arrayValue);
-
-    if (this.disabled && this.arrayValue) {
-      $(this.refs.input[0]).hide();
-
-      let d = $(this.refs.readonly_display);
-      d.html(this.arrayValue.map(x => `<span>${x}</span>`).join(','));
-    }
 
     let self = this;
 
@@ -228,7 +222,7 @@ class NumberArray extends TextFieldComponent {
     const input = this.performInputMapping(this.refs.input[0]);
     input.value = this.textValue;
 
-    return super.setValue(value, flags);
+    return super.setValue(this.textValue, flags);
   }
 
   getValueAt(index) {
@@ -255,21 +249,21 @@ NumberArray.editForm = function (a, b, c) {
       key: 'specification_nominal',
       label: 'Nominal Value',
       placeholder: 'Nominal Value',
-      tooltip: 'The nominal value that each entered value should be reasonably close to',
+      tooltip: 'Use either [nominal +/- tolerance] or [minimum -> maximum] to indicate the expected range of entered values',
       input: true,
     },
     {
       type: 'number',
       key: 'specification_tolerance',
       label: 'Tolerance',
-      tooltip: 'The allowed range (plus and minus) around the nominal value.  If the entered values are outside this range, a warning will be displayed',
+      tooltip: 'If using [nominal +/- tolerance] to indicate the expected range of entered values, any values outside this limit will be counted and indicated',
       input: true,
     },
     {
       type: 'number',
       key: 'specification_minimum',
       label: 'Minimum Value',
-      tooltip: 'If the entered values are less than this, a warning will be displayed',
+      tooltip: 'If using [minimum -> maximum] to indicate the expected range of entered values, any values below [this] will be counted and indicated',
       input: true,
 
     },
@@ -277,14 +271,14 @@ NumberArray.editForm = function (a, b, c) {
       type: 'number',
       key: 'specification_maximum',
       label: 'Maximum Value',
-      tooltip: 'If the entered values are greater than this, a warning will be displayed',
+      tooltip: 'If using [minimum -> maximum] to indicate the expected range of entered values, any values above [this] will be counted and indicated',
       input: true,
     },
     {
       type: 'textfield',
       key: 'units',
       label: 'Units',
-      tooltip: 'Units of the entered values, or vertical axis label',
+      tooltip: 'This is used as the scatter plot\'s vertical axis label, and the bar graph\'s horizontal axis label',
       input: true,
     },
   );

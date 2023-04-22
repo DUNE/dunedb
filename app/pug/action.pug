@@ -115,14 +115,9 @@ block content
 
     .vert-space-x2.form-inline
 
-      if action.typeFormId != 'tensionTesting'
-        a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
-          img.small-icon(src = '/images/edit_icon.svg')
-          | &nbsp; Edit Action
-      else 
-        a.btn.btn-outline-secondary.disabled
-          img.small-icon(src = '/images/edit_icon.svg')
-          | &nbsp; Edit Action
+      a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
+        img.small-icon(src = '/images/edit_icon.svg')
+        | &nbsp; Edit Action
 
       .hori-space-x2
         a.btn.btn-secondary(href = `/json/action/${action.actionId}`, target = '_blank')
