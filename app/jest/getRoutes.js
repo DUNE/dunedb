@@ -1,5 +1,9 @@
+// 
+// Code for getting all available routes from an Express application
+// Adapted from https://github.com/thenativeweb/get-routes/blob/main/lib/getRoutes.ts
+//
+
 "use strict";
-// Stolen from https://github.com/thenativeweb/get-routes
 
 // Disable naming convention because fast_slash comes from Express.
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -18,7 +22,6 @@ const regexPrefixToString = (path) => {
 };
 
 const getRoutes = function (app) {
-    console.log("getRoutes");
     const routes = {
         all: [],
         get: [],

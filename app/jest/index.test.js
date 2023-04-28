@@ -1,894 +1,779 @@
-// app-module-path doesn't work in this context...
-// require('app-module-path').addPath('./');
-const request = require('supertest');
 const express = require('express');
-const session = require('supertest-session');
-const { getRoutes } = require('./getRoutes.js');
-const fs = require("fs");
+const fs = require('fs');
+const pino = require('pino');
+const supertest = require('supertest');
 
-const App= require("../lib/app.js");
-const { db } = require("../lib/db");
+const App = require('../lib/app');
+const { db } = require('../lib/db');
+const { getRoutes } = require('./getRoutes');
+
 global.BaseDir = process.cwd();
-
-
-var appPublic = express();
-var appAuthorized = express();
-
-var suffix = "-THIS-IS-AN-AUTOMATED-UNIT-TEST";
-
-var user =  {
-         displayName: 'JEST '+process.env.USER,
-         id: 'jest|'+process.env.USER,
-         user_id: 'jest|'+process.env.USER,
-         emails: [ { value:  process.env.USER+'@'+process.env.HOST} ],
-         nickname: 'JEST',
-         permissions:
-         [ 'components:edit',
-           'components:view',
-           'forms:edit',
-           'tests:submit',
-           'tests:view' ,
-           'users:view',
-           // 'users:edit'
-           ],
-           roles:
-         [ 'component editor',
-           'tester' ]
-        };
-
-var uuid, testId, jobId;
-var draftTestId;
-
-var routes_unfinished ={};
-
-function checkRouteOffChecklist(method,route) {
-  // console.log("checking off route",method,route);
-
-  routes_unfinished.all = routes_unfinished.all.filter(
-    function(entry){
-      // console.log("compare",entry,method,route);
-      if(method !== entry.method) return true;
-      if(entry.prefix && !route.startsWith(entry.prefix)) return true;
-      var trimmed = route.replace(entry.prefix,'');
-      var m = trimmed.match(entry.regexp);
-      if(m) {
-        return false;
-      }
-      return true;
-    }
-  );
-}
-
-function myrequest(app){
-  var r = request(app);
-  return new function() {
-    this.get = function(...args)  { checkRouteOffChecklist('get',args[0]); return r.get(...args); }
-    this.post = function(...args) { checkRouteOffChecklist('post',args[0]); return r.post(...args); }
- }
-}
-
-pino = require("pino");
-  var pino_opts = {
-    customLevels: {
-        http: 29
-    },
-    level: 'http', 
-  };
-var dest = pino.destination("jest.log");
-const logger = pino(pino_opts, pino.destination('jest.log') );
-
-
-beforeAll(async () => {
-  try{
-  console.log("beforeAll");
-  
-  await db.open();
-  console.log("attached");
- 
-  await App.create_app(appPublic);
-
-  // user data is injected into the application stack first.
-  // Putting it between these causes issues downstream.
-  appAuthorized.use((req,res,next)=>{ req.user = user; next();});
-  await App.create_app(appAuthorized);
-
-  // Get a list of all routes that this application CAN use. 
-  // This is used to check that we are actually testing most of the routes.
-  routes_unfinished = getRoutes(appAuthorized);
-  // remove some.
-  routes_unfinished.all = routes_unfinished.all.filter(function(e){
-      if(e.route == "/login") return false;
-      if(e.route == "/logout") return false;
-      if(e.route == "/callback") return false;
-      if(e.route == "/machineAuthenticate") return false;
-      if(e.route.startsWith("/api")) return false;
-      return true;
-    });
-   console.log("found ",routes_unfinished.all.length," routes to check");
-
-  } catch(err) {
-    console.log(err);
-  }
-
-});
-
-afterAll( async () => {
-    // console.log("afterAll()");
-    var not_checked = [];
-    for(var entry of routes_unfinished.all) { not_checked.push(entry.route) }
-    console.log(not_checked.length+" unchecked routes in unchecked.log");
-    require('fs').writeFileSync("unchecked.log",not_checked.join('\n'));
-    await db.collection("componentForms").deleteMany({formId:"cform"+suffix});
-    await db.collection("testForms").deleteMany({formId:"test"+suffix});
-    await db.collection("jobForms").deleteMany({formId:"job"+suffix});
-    await db.collection("components").deleteMany({type:"cform"+suffix});
-    await db.collection("tests").deleteMany({formId:"test"+suffix});
-    await db.collection("jobs").deleteMany({formId:"job"+suffix});
-    await db.close();
-} );
-
-// inject a custom user authorization here.
-describe("public functions",function() {
-  test('route /',function(done) {
-    myrequest(appPublic).get('/').expect(200,done);
-  });
-  test('route /components/type',function(done) {
-    myrequest(appPublic).get('/components/type').expect(400,done);
-  });
-});
-
-
-
-/// Some sample form
-var dummyschema = {
-  "components": [
-    {
-      "label": "Dummy Field",
-      "placeholder": "example: apa 10",
-      "tooltip": "Dummy tooltip",
-      "tableView": true,
-      "key": "name",
-      "type": "textfield",
-      "validate": {
-        "required": true
-      },
-      "input": true
-    }
-  ]
+const appPublic = express();
+const appAuthorized = express();
+const pino_opts = {
+  customLevels: {
+    http: 29,
+  },
+  level: 'http',
 };
 
-// inject a custom user authorization here.
-describe("private routes",function() {
+// Declare and initialise variables
+let uuid, actionId, workflowId;
+let routes_toBeTested = {};
+
+// Set up a logger using the defined 'pino' settings and a destination file (in the same directory as this script)
+const logger = pino(pino_opts, pino.destination('logger.log'));
+
+// Set a string to append to all information to be set and get in the unit tests
+const suffix = '_UnitTest';
+
+// Set up a temporary user with full access permissions, to be used only within the unit tests ... this user will inherit some information from the currently logged in human user
+const user = {
+  email: `${process.env.USER}@${process.env.HOST}`,
+  name: `[JEST] ${process.env.USER}`,
+  nickname: `JEST`,
+  user_id: `jest|${process.env.USER}`,
+  permissions: [
+    'actions:perform',
+    'actions:view',
+    'components:edit',
+    'components:view',
+    'forms:edit',
+    'users:view',
+    'workflows:edit',
+    'workflows:view',
+  ],
+  roles: [
+    'admin',
+  ],
+};
+
+logger.info(`Set up 'user': ${user}`);
+console.log(`Set up 'user': ${user}`);
+
+// Set up a dummy type form (the actual schema doesn't matter ... there just has to be something!)
+const dummySchema = {
+  components: [{
+    type: 'textfield',
+    label: 'Dummy Text Field',
+    key: 'name',
+    placeholder: 'Enter some text here',
+    tooltip: 'This is a dummy tooltip',
+    validate: { required: true, },
+    input: true,
+  }]
+};
 
 
-  // test('route /',function(done) {
-  //   myrequest(appAuthorized).get('/').expect(200,done);
-  // });
-  // test('route /components/type',function(done) {
-  //   myrequest(appAuthorized).get('/components/type').expect(200,done);
-  // });
+//////////////////////////
+/// INTERNAL FUNCTIONS ///
+//////////////////////////
 
-  // // describe("API/JSON routes")
+/// Function for removing a tested [method, route] combination from the global list of routes remaining to be tested
+function checkRouteOffChecklist(method, route) {
+  routes_toBeTested.all = routes_toBeTested.all.filter(function (entry) {
+    if (method !== entry.method) return true;
+    if (entry.prefix && !route.startsWith(entry.prefix)) return true;
+    if (route.replace(entry.prefix, '').match(entry.regexp)) return false;
 
-  // describe("job routes",()=>{
-  //   test('route /workflows (job types)',function(done) { myrequest(appAuthorized).get('/jobs/workflows').expect(200,done); });
-
-  //   test('route /jobs (recent jobs)',function(done) { myrequest(appAuthorized).get('/jobs').expect(200,done); });
-  //   test('route /jobs/4by4workflow (recent 4by4)',function(done) { myrequest(appAuthorized).get('/jobs/4by4_workflow').expect(200,done); });
-  //   test('route /job/4by4workflow (run 4by4)',function(done) { myrequest(appAuthorized).get('/job/4by4_workflow').expect(200,done); });
-  //   test('route /EditWorkflowForm/4by4_workflow',function(done) { myrequest(appAuthorized).get('/EditWorkflowForm/4by4_workflow').expect(200,done); });
-  // });
-
-
-
-  // nontrivial tests. Insert and query API, then check GUI routes
-
-
-  describe("API/JSON",()=>{
-    test('POST /json/componentForms/<type>',function(done){
-      expect.assertions(0);
-      return myrequest(appAuthorized)
-        .post('/json/componentForms/cform'+suffix)
-        .send({
-          formId: "cform"+suffix,
-          formName: "Compnent Type "+suffix,
-          schema: dummyschema
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(()=>done());
-    });
-
-    test('GET /json/componentForms/<type>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/componentForms/cform'+suffix)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(response => {
-          expect(response.body).toBeTruthy();
-          expect(response.body.formId).toBe("cform"+suffix);
-        })
-      r.then(done)
-    });
-
-    test('POST /json/testForms/<type>',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/testForms/test'+suffix)
-        .send({
-          formId: "test"+suffix,
-          formName: "Test"+suffix,
-          schema: dummyschema
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(response => {
-          expect(response.body).toBeTruthy();
-          expect(response.body.formId).toBe("test"+suffix);
-        });
-    });
-
-    test('GET /json/testForms/<type>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/testForms/test'+suffix)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(response => {
-          expect(response.body).toBeTruthy();
-          expect(response.body.formId).toBe("test"+suffix);
-        });
-    });
-
-    test('POST /json/jobForms/<type>',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/jobForms/job'+suffix)
-        .send({
-          formId: "job"+suffix,
-          formName: "Job"+suffix,
-          schema: dummyschema
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(response => {
-          expect(response.body).toBeTruthy();
-          expect(response.body.formId).toBe("job"+suffix);
-        });
-    });
-
-    test('GET /json/jobForms/<type>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/jobForms/job'+suffix)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(response => {
-          expect(response.body).toBeTruthy();
-          expect(response.body.formId).toBe("job"+suffix);
-        });
-    });
-
-
-    // insert some data
-    test('GET /json/generateComponentUuid',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/generateComponentUuid')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(response=>{
-          uuid = response.body;
-          logger.info("GOT UUID",uuid);
-        })
-    });
-
-    test('POST /json/component/<uuid>',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/component/'+uuid)
-        .send({
-          type: 'cform'+suffix,
-          data: {
-            name: "Dummy Test Object by JEST",
-            dummyVal: 999,
-          },
-          metadata: { deleteme: true },
-          validity: { startDate: new Date() }
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-    });
-
-    test('GET /json/component/<uuid>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/component/'+uuid)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body.type).toBe('cform'+suffix);
-          expect(r.body.data.name).toBe("Dummy Test Object by JEST");
-          expect(r.body.validity).toBeTruthy();
-          expect(r.body.insertion).toBeTruthy();
-        })
-    });
-
-    test('GET /json/component/<uuid>/simple',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/component/'+uuid+"/simple")
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body.type).toBe('cform'+suffix);
-          expect(r.body.data.name).toBe("Dummy Test Object by JEST");
-          expect(r.body.data.dummyVal).toBeUndefined(); // Shoudl remove detail
-          expect(r.body.validity).toBeTruthy();
-          expect(r.body.insertion).toBeTruthy();
-        })
-    });
-
-    test('GET /json/component/<uuid>/relationships',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/component/'+uuid+"/simple")
-        .expect('Content-Type', /json/)
-        .expect(200);
-        // FIXME do more here, include relationships in above object.
-    });
-
-    // Test data
-     test('POST /json/test',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/test')
-        .send({
-          formId: 'test'+suffix,
-          componentUuid: uuid,
-          data: {
-            name: "Dummy Test Object by JEST",
-            dummyVal: 999,
-          },
-          metadata: { deleteme: true },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          logger.info('/json/test',r.body);
-          expect(r.body).toBeDefined();
-          testId = r.body;
-        });
-    });
-
-    // Test data as draft
-     test('POST /json/test draft',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/test')
-        .send({
-          formId: 'test'+suffix,
-          componentUuid: uuid,
-          data: {
-            name: "DRAFT Dummy Test Object by JEST",
-            dummyVal: 999,
-          },
-          state: "draft",
-          metadata: { deleteme: true },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          logger.info('/json/test',r.body);
-          expect(r.body).toBeDefined();
-          draftTestId = r.body;
-        })
-      });
-
-    // get test data back.
-    test('GET /json/test/<id>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/test/'+testId)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body.formId).toBe('test'+suffix);
-          expect(r.body.data.name).toBe("Dummy Test Object by JEST");
-          expect(r.body.insertion).toBeTruthy();
-        })
-
-    });
-
-
-    // get test data back.
-    test('POST /json/test/getBulk',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/test/getBulk')
-        .send([testId])
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body.length).toBeGreaterThan(0)
-          expect(r.body[0].formId).toBe('test'+suffix);
-          expect(r.body[0].data.name).toBe("Dummy Test Object by JEST");
-          expect(r.body[0].insertion).toBeTruthy();
-        })
-
-    });
-
-    // Job data
-     test('POST /json/job',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/job')
-        .send({
-          formId: 'job'+suffix,
-          data: {
-            name: "Dummy Test Object by JEST",
-            dummyVal: 999,
-          },
-          metadata: { deleteme: true },
-        })
-        .expect('Content-Type', /json/)
-        // .expect(200)
-        .then(r=>{
-          logger.info("json/job",r.body);
-          expect(r.body).toBeDefined();
-          jobId = r.body;
-
-        })
-    });
-
-    // get job data back.
-    test('GET /json/job/<id>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/job/'+jobId)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body.formId).toBe('job'+suffix);
-          expect(r.body.data.name).toBe("Dummy Test Object by JEST");
-          expect(r.body.validity).toBeTruthy();
-          expect(r.body.insertion).toBeTruthy();
-        })
-
-    });
-
-    test('POST /json/course/<courseId>',()=>{
-      return myrequest(appAuthorized)
-        .post('/json/course/JEST_TEST_COURSE')
-        .send({
-          courseId: 'JEST_TEST_COURSE',
-          componentType: 'cform'+suffix,
-          name: 'Dummy Course by JEST',
-          icon: [],
-          tags: ['JEST'],
-          path: [
-            {  type: 'component',
-              formId: "cform"+suffix,
-              identifier: 'componentUuid',
-              advice: "advice1", },
-            { type: 'test',
-              formId: "test"+suffix,
-              advice: "advice2",
-              identifier: 'componentUuid',
-            }
-          ]
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(()=>{});
-    });
-    
-    test('GET /json/course/<courseId>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/course/JEST_TEST_COURSE')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body).toBeDefined();
-          expect(r.body.path.length).toEqual(2);
-        });
-    });
-
-    test('GET /json/course/<courseId>/<objectId> (course evaluation)',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/course/JEST_TEST_COURSE/'+uuid)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body).toBeDefined();
-          expect(r.body.score).toEqual(2);
-          expect(r.body.score_denominator).toEqual(2);
-        });
-    })
-
-    test('GET /json/courses',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/courses')
-        .expect('Content-Type', /json/)
-        .expect(200);
-    })
-
-
-    // Various listings
-
-    test('GET /json/components/<type>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/components/'+'cform'+suffix)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          logger.info(r.body);
-          expect(r.body).toBeDefined();
-          expect(r.body.length).toBeDefined();
-          expect(r.body.pop().componentUuid).toBe(uuid);
-        });
-    });
-
-    test('GET /json/componentTypes',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/componentTypes')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          logger.info(r.body);
-          expect(r.body).toBeDefined();
-          expect(r.body['cform'+suffix]).toBeDefined();
-        });
-    });
-
-    test('GET /json/componentTypesTags',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/componentTypes')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          logger.info('componentTypesTags',r.body);
-          expect(r.body['cform'+suffix]).toBeDefined();
-        });
-    });
-
-
-    test('GET /componentForms',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/componentForms')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body['cform'+suffix]).toBeDefined();
-        });
-    });
-
-    test('GET /testForms',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/testForms')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body['test'+suffix]).toBeDefined();
-        });
-    });
-
-    test('GET /jobForms',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/jobForms')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body['job'+suffix]).toBeDefined();
-        });
-    });
-
-    test('GET /tests/<uuid>',()=>{
-      return myrequest(appAuthorized)
-        .get('/json/tests/'+uuid)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(r=>{
-          expect(r.body.length).toBeGreaterThan(0);
-        });
-    });
-
-
-  });  
-
-  describe("autocomplete",()=>{
-    test('GET /autocomplete/uuid/...',()=>{
-        return myrequest(appAuthorized)
-          .get('/autocomplete/uuid?q='+uuid.substr(0,5))
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .then(r=>{
-            // logger.info("autocomplete",r.body);
-            expect(r.body.length).toBeGreaterThan(0);
-          });
-    });
+    return true;
   });
+}
 
-  describe("searching",()=>{
-    test('POST /json/search/component',()=>{
-        return myrequest(appAuthorized)
-          .post('/json/search/component')
-          .send({search:"JEST"})
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .then(r=>{
-            // logger.info("search result:",r.body);
-            expect(r.body.length).toBeGreaterThan(0);
-          });
+/// Function to call all relevant methods ('get', 'post', etc.) for a particular route, and then remove each [method, route] combination from the global list of routes remaining to be tested
+function myrequest(app) {
+  const r = supertest(app);
+
+  return new function () {
+    this.get = function (...args) { checkRouteOffChecklist('get', args[0]); return r.get(...args); }
+    this.post = function (...args) { checkRouteOffChecklist('post', args[0]); return r.post(...args); }
+  }
+}
+
+/// Function to run before starting the unit tests
+beforeAll(async () => {
+  try {
+    logger.info(`Starting function: 'beforeAll'`);
+    console.log(`Starting function: 'beforeAll'`);
+
+    // Initialise and attach a new instance of the DB
+    await db.open();
+    logger.info('DB initialised and attached');
+    console.log('DB initialised and attached');
+
+    // Get a new Express app, initially without any user data
+    await App.create_app(appPublic);
+
+    // Inject the previously defined user data into the application stack, and then get a new Express app, now with the correct user authorisation setup
+    appAuthorized.use((req, res, next) => { req.user = user; next(); });
+    await App.create_app(appAuthorized);
+
+    // Get a list of all routes that this app can use, and then remove any that don't need to be unit-tested (i.e. the ones defined in '/lib/auth.js')
+    routes_toBeTested = getRoutes(appAuthorized);
+
+    routes_toBeTested.all = routes_toBeTested.all.filter(function (e) {
+      if (e.route == '/login') return false;
+      if (e.route == '/callback') return false;
+      if (e.route == '/logout') return false;
+
+      if (e.route.startsWith('/api')) return false;
+
+      return true;
     });
 
-    test('POST /json/search/test',()=>{
-        return myrequest(appAuthorized)
-          .post('/json/search/test')
-          .send({search:"JEST"})
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .then(r=>{
-            // logger.info("search result:",r.body);
-            expect(r.body.length).toBeGreaterThan(0);
-          });
-    });
+    // Write a list of the routes to be tested to a file (in the same directory as this script)
+    let routes_toBeTested_list = [];
 
+    for (const entry of routes_toBeTested.all) { routes_toBeTested_list.push(entry.route) }
+    fs.writeFileSync('routes_toBeTested.log', routes_toBeTested_list.join('\n'));
 
-    test('POST /json/search/job',()=>{
-        return myrequest(appAuthorized)
-          .post('/json/search/job')
-          .send({search:"JEST"})
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .then(r=>{
-            // logger.info("search result:",r.body);
-            expect(r.body.length).toBeGreaterThan(0);
-          });
-    });
-  });
+    logger.info(`Found ${routes_toBeTested.all.length} routes to be tested ... logged in 'routes_toBeTested.log'`);
+    console.log(`Found ${routes_toBeTested.all.length} routes to be tested ... logged in 'routes_toBeTested.log'`);
 
-
-  describe("componentRoutes",()=>{
-
-    test("EditComponentForm",()=>{
-      return myrequest(appAuthorized)
-        .get('/EditComponentForm/cform'+suffix)
-        .expect(200);
-    })
-    test("EditComponentForm wrong type",()=>{
-      return myrequest(appAuthorized)
-        .get('/EditComponentForm/nonexistent'+suffix)
-        .expect(200);
-    })
-
-    test("List Types",()=>{
-      return myrequest(appAuthorized).get('/components/type')
-        .expect(200)
-        .expect(new RegExp('cform'+suffix));
-    });
-
-    test("NewComponentType",()=>{
-      return myrequest(appAuthorized)
-        .get('/NewComponentType/cform+'+suffix)
-        .expect(200);
-    })
-
-    test("List Recent of Type",()=>{
-      return myrequest(appAuthorized).get('/components/type/cform'+suffix).expect(200);
-    });
-
-    test("NewComponent",()=>{
-      return myrequest(appAuthorized)
-        .get('/NewComponent/cform'+suffix)
-        .expect(200);
-    })
-    test("Recent Components",()=>{
-      return myrequest(appAuthorized)
-        .get('/components/recent')
-        .expect(200);
-    })
-
-    test("Recent Components of type",()=>{
-      return myrequest(appAuthorized)
-      .get('/components/type/cform'+suffix)
-      .expect(200)
-      .expect(new RegExp('cform'+suffix));
-    });
-  });
-
-
-  describe("testRoutes",()=>{
-   test("/test/<record_id>",()=>{
-      return myrequest(appAuthorized)
-      .get('/test/'+testId)
-      .expect(200)
-      .expect(new RegExp('JEST'));
-    });
-
-
-   test("/test/<form_id>",()=>{
-      return myrequest(appAuthorized)
-      .get('/test/test'+suffix)
-      .expect(200)
-      .expect(new RegExp('test'+suffix));
-    });
-
-   test("/test/<form_id>",()=>{
-      return myrequest(appAuthorized)
-      .get('/test/test'+suffix)
-      .expect(200)
-      .expect(new RegExp('test'+suffix));
-    });
-
-   test("/tests/<formId>",()=>{
-      return myrequest(appAuthorized)
-        .get('/tests/test'+suffix)
-        .expect(200);
-   })
-
-   test("/test/copyAsDraft/<recordId>",()=>{
-      return myrequest(appAuthorized)
-        .get('/test/copyAsDraft/'+testId)
-        .expect(302); // redirected successfully to the new one
-   })
-
-   test("/test/draft/<record_id>",()=>{
-      return myrequest(appAuthorized)
-      .get('/test/draft/'+draftTestId)
-      .expect(200)
-      .expect(new RegExp('test'+suffix));
-    });
-
-   test("/test/deleteDraft/<record_id>",()=>{
-      return myrequest(appAuthorized)
-      .get('/test/deleteDraft/'+draftTestId)
-      .expect(302); // redirect back 
-    });
-  });
-
-  describe("jobRoutes",()=>{
-
-   test("/job/<jobId>",()=>{
-      return myrequest(appAuthorized)
-      .get('/job/'+jobId)
-      .expect(200)
-      .expect(new RegExp('JEST'));
-    });
-
-   test("/job/<formId>",()=>{
-      return myrequest(appAuthorized)
-      .get('/job/job'+suffix)
-      .expect(200);
-    });
-
-   test("/job/edit/<jobId>",()=>{
-      return myrequest(appAuthorized)
-      .get('/job/edit/'+jobId)
-      .expect(200);
-    });
-
-   test("/job/<jobId>/history",()=>{
-      return myrequest(appAuthorized)
-      .get('/job/'+jobId+"/history")
-      .expect(200);
-    });
-   
-   test("/jobs/<formId>",()=>{
-      return myrequest(appAuthorized)
-      .get('/jobs/job'+suffix)
-      .expect(200)
-      .expect(new RegExp('job'+suffix));
-    });
-   test("/job/copyAsDraft/<jobId>",()=>{
-      return myrequest(appAuthorized)
-      .get('/job/copyAsDraft/'+jobId)
-      .expect(302);
-    });
-   test("/drafts",()=>{
-      return myrequest(appAuthorized)
-      .get('/drafts')
-      .expect(200);
-    });
-
-
- });
-  describe("categories and courses",()=>{
-
-    test("/category/:tag",()=>{
-      return myrequest(appAuthorized)
-      .get('/category/flute')
-      .expect(200);
-    });
-
-    test("/courses",()=>{
-      return myrequest(appAuthorized)
-      .get('/courses')
-      .expect(200);
-    });
-    test("/EditCourse/:courseId",()=>{
-      return myrequest(appAuthorized)
-      .get('/EditCourse/test-course')
-      .expect(200);
-    });
-    // FIXME  need more
-
-  });
-
-  describe("userRoutes",()=>{
-
-    test("/profile",()=>{
-      return myrequest(appAuthorized)
-      .get('/profile')
-      .expect(200);
-    });
-    test("/promoteYourself",()=>{
-      return myrequest(appAuthorized)
-      .get('/promoteYourself')
-      .expect(200);
-    });
-    // test("/promoteYourself limits rate",async ()=>{
-    //   var userSession = session(appAuthorized);
-    //   checkRouteOffChecklist('post','/promoteYourself');
-    //   await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"});
-    //   await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"});
-    //   await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"});
-    //   await userSession.post('/promoteYourself').send({user:"dummy",password:"badpassword"})
-    //   .expect(403);
-    // });
-
-    test("/users",()=>{
-      return myrequest(appAuthorized)
-      .get('/users')
-      .expect(200);
-    });
-    test("/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d",()=>{
-      return myrequest(appAuthorized)
-      .get('/users')
-      .expect(200);
-    });
-    test("/json/roles",()=>{
-      return myrequest(appAuthorized)
-      .get('/json/roles')
-      .expect(200);
-    });
-    test("/json/users",()=>{
-      return myrequest(appAuthorized)
-      .get('/json/users')
-      .expect(200);
-    });
-    test("/json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d",()=>{
-      return myrequest(appAuthorized)
-      .get('/json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d')
-      .expect(200);
-    });
-    test("post /json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d",()=>{
-      return myrequest(appAuthorized)
-      .post('/json/user/auth0%7C5e4c0a06b6ef8d0e9ccffc5d')
-      .send({user_metadata:{dummy:"dummy"}})
-      .expect(400);
-    });
- });
-
-  describe("file routes",()=>{
-    var fileurl;
-    test("POST file to /gridfs ",(done)=>{
-      
-        // fs.readFile("static/images/Otterbein.png",
-          // function(buffer){
-            myrequest(appAuthorized)
-              .post("/file/gridfs")
-              // .attach('name', buffer, {filename:'myTestFile.png', contentType:"image/png"})
-              .attach('name', "static/images/browser_icon.png")
-              .expect('Content-Type', /json/)
-              .expect(200)
-              .then(r=>{
-                logger.info("gridfs post result:",r.body);
-                expect(r.body).toBeTruthy();
-                var url = r.body.url;
-                fileurl = '/' + url.split('/').splice(3).join('/')
-                logger.info("fileurl",url, fileurl);
-                done();
-              });
-          // });
-
-
-    });
-    test("GET file from gridfs",()=>{
-        return myrequest(appAuthorized)
-          .get(fileurl)
-          .expect(200);
-
-    });
-  })
-  describe("done",()=>{
-    test("done",()=>{})
-  });
-
+    logger.info(`Finished function: 'beforeAll'`);
+    console.log(`Finished function: 'beforeAll'`);
+  } catch (err) {
+    logger.error(err);
+    console.log(err);
+  }
 });
 
+/// Function to run after completing all possible unit tests
+afterAll(async () => {
+  logger.info(`Starting function: 'afterAll'`);
+  console.log(`Starting function: 'afterAll'`);
+
+  // Write a list of the routes that were not tested to a file (in the same directory as this script)
+  let routes_notTested = [];
+
+  for (const entry of routes_toBeTested.all) { routes_notTested.push(entry.route) }
+  fs.writeFileSync('routes_notTested.log', routes_notTested.join('\n'));
+
+  logger.info(`Found ${routes_notTested.length} routes that were not tested ... logged in 'routes_notTested.log'`);
+  console.log(`Found ${routes_notTested.length} routes that were not tested ... logged in 'routes_notTested.log'`);
+
+  // Remove all of the records that were added to the DB as part of the unit tests, and then close the DB instance
+  await db.collection('componentForms').deleteMany({ formId: `cform${suffix}` });
+  await db.collection('actionForms').deleteMany({ formId: `aform${suffix}` });
+  await db.collection('workflowForms').deleteMany({ formId: `wform${suffix}` });
+  await db.collection('components').deleteMany({ formId: `cform${suffix}` });
+  await db.collection('actions').deleteMany({ typeFormId: `aform${suffix}` });
+  await db.collection('workflows').deleteMany({ typeFormId: `wform${suffix}` });
+  await db.close();
+
+  logger.info('Removed unit test records from DB');
+  console.log('Removed unit test records from DB');
+
+  logger.info(`Finished function: 'afterAll'`);
+  console.log(`Finished function: 'afterAll'`);
+});
+
+
+//////////////////
+/// UNIT TESTS ///
+//////////////////
+
+// Test the public routes ... i.e. ones that do not need user authorisation
+// Also include in this an attempt to test a private route - i.e. one that is expected to fail (return '400' instead of '200'), to confirm that the user authorisation setup is working correctly
+describe('Public routes', function () {
+  test('GET /', function (done) {
+    return myrequest(appPublic)
+      .get('/')
+      .expect(200, done);
+  });
+
+  test('GET /componentTypes/list', function (done) {
+    return myrequest(appPublic)
+      .get('/componentTypes/list')
+      .expect(400, done);
+  });
+});
+
+// Test the private routes ... i.e. browser interface and JSON prefixed
+describe('Private routes', function () {
+  // Form routes
+  describe('Form routes', () => {
+    test('POST /json/componentForms/<typeFormId>', function (done) {
+      return myrequest(appAuthorized)
+        .post(`/json/componentForms/cform${suffix}`)
+        .send({
+          formId: `cform${suffix}`,
+          formName: `Component Type ${suffix}`,
+          schema: dummySchema,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(() => done());
+    });
+
+    test('POST /json/actionForms/<typeFormId>', function (done) {
+      return myrequest(appAuthorized)
+        .post(`/json/actionForms/aform${suffix}`)
+        .send({
+          formId: `aform${suffix}`,
+          formName: `Action Type ${suffix}`,
+          schema: dummySchema,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(() => done());
+    });
+
+    test('POST /json/workflowForms/<typeFormId>', function (done) {
+      return myrequest(appAuthorized)
+        .post(`/json/workflowForms/wform${suffix}`)
+        .send({
+          formId: `wform${suffix}`,
+          formName: `Workflow Type ${suffix}`,
+          schema: dummySchema,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(() => done());
+    });
+
+    test('GET /json/componentForms/<typeFormId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/componentForms/cform${suffix}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeTruthy();
+          expect(response.body.formId).toBe(`cform${suffix}`);
+        });
+    });
+
+    test('GET /json/actionForms/<typeFormId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/actionForms/aform${suffix}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeTruthy();
+          expect(response.body.formId).toBe(`aform${suffix}`);
+        });
+    });
+
+    test('GET /json/workflowForms/<typeFormId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/workflowForms/wform${suffix}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeTruthy();
+          expect(response.body.formId).toBe(`wform${suffix}`);
+        });
+    });
+
+    test('GET /json/componentForms/list', () => {
+      return myrequest(appAuthorized)
+        .get('/json/componentForms/list')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body[`cform${suffix}`]).toBeDefined();
+        });
+    });
+
+    test('GET /json/actionForms/list', () => {
+      return myrequest(appAuthorized)
+        .get('/json/actionForms/list')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body[`aform${suffix}`]).toBeDefined();
+        });
+    });
+
+    test('GET /json/workflowForms/list', () => {
+      return myrequest(appAuthorized)
+        .get('/json/workflowForms/list')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body[`wform${suffix}`]).toBeDefined();
+        });
+    });
+  });
+
+  // Component routes
+  describe('Component routes', () => {
+    test('GET /json/newComponentUUID', () => {
+      return myrequest(appAuthorized)
+        .get('/json/newComponentUUID')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          uuid = response.body;
+        });
+    });
+
+    test('POST /json/component', () => {
+      return myrequest(appAuthorized)
+        .post('/json/action')
+        .send({
+          formId: `cform${suffix}`,
+          data: { name: 'Dummy Component by JEST', },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeDefined();
+          uuid = response.body;
+        });
+    });
+
+    test('GET /json/component/<uuid>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/component/${uuid}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeTruthy();
+          expect(response.body.typeFormId).toBe(`cform${suffix}`);
+          expect(response.body.data.name).toBe('Dummy Component by JEST');
+        });
+    });
+
+    test('GET /json/components/<typeFormId>/list', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/components/cform${suffix}/list`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body.length).toBeGreaterThan(0);
+          expect(response.body[0]).toBe(uuid);
+        });
+    });
+
+    test('GET /component/<uuid>', () => {
+      return myrequest(appAuthorized)
+        .get(`/component/${uuid}`)
+        .expect(200);
+    });
+
+    test('GET /component/<uuid>/qrCodes', () => {
+      return myrequest(appAuthorized)
+        .get(`/component/${uuid}/qrCodes`)
+        .expect(200);
+    });
+
+    test('GET /component/<uuid>/summary', () => {
+      return myrequest(appAuthorized)
+        .get(`/component/${uuid}/summary`)
+        .expect(200);
+    });
+
+    test('GET /component/<uuid>/execSummary', () => {
+      return myrequest(appAuthorized)
+        .get(`/component/${uuid}/execSummary`)
+        .expect(200);
+    });
+
+    test('GET /component/<typeFormId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/component/cform${suffix}`)
+        .expect(200);
+    });
+
+    test('GET /component/<uuid>/edit', () => {
+      return myrequest(appAuthorized)
+        .get(`/component/${uuid}/edit`)
+        .expect(200);
+    });
+
+    test('GET /component/<uuid>/updateBoardLocations/<criteria>', () => {
+      return myrequest(appAuthorized)
+        .get(`/component/${uuid}/updateBoardLocations/${'daresbury'}/${'2023-01-01'}`)
+        .expect(200);
+    });
+
+    test('GET /componentTypes/<typeFormId>/new', () => {
+      return myrequest(appAuthorized)
+        .get(`/componentTypes/cform${suffix}/new`)
+        .expect(200);
+    });
+
+    test('GET /componentTypes/<typeFormId>/edit', () => {
+      return myrequest(appAuthorized)
+        .get(`/componentTypes/cform${suffix}/edit`)
+        .expect(200);
+    });
+
+    test('GET /componentTypes/list', () => {
+      return myrequest(appAuthorized)
+        .get('/componentTypes/list')
+        .expect(200);
+    });
+
+    test('GET /components/list', () => {
+      return myrequest(appAuthorized)
+        .get('/components/list')
+        .expect(200);
+    });
+
+    test('GET /components/<typeFormId>/list', () => {
+      return myrequest(appAuthorized)
+        .get(`/components/cform${suffix}/list`)
+        .expect(200);
+    });
+  });
+
+  // Action routes
+  describe('Action routes', () => {
+    test('POST /json/action', () => {
+      return myrequest(appAuthorized)
+        .post('/json/action')
+        .send({
+          typeFormId: `aform${suffix}`,
+          componentUuid: uuid,
+          data: { name: 'Dummy Action by JEST', },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeDefined();
+          actionId = response.body;
+        });
+    });
+
+    test('GET /json/action/<actionId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/action/${actionId}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeTruthy();
+          expect(response.body.typeFormId).toBe(`aform${suffix}`);
+          expect(response.body.data.name).toBe('Dummy Action by JEST');
+        });
+    });
+
+    test('POST /json/action/<actionId>/addImages', () => {
+      return myrequest(appAuthorized)
+        .post(`/json/action/${actionId}/addImages`)
+        .expect('Content-Type', /json/)
+        .then(response => {
+          expect(response.body).toBe(actionId);
+        });
+    });
+
+    test('GET /json/actions/<typeFormId>/list', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/actions/aform${suffix}/list`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body.length).toBeGreaterThan(0);
+          expect(response.body[0]).toBe(actionId);
+        });
+    });
+
+    test('GET /action/<actionId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/action/${actionId}`)
+        .expect(200);
+    });
+
+    test('GET /action/<typeFormId>/unspec', () => {
+      return myrequest(appAuthorized)
+        .get(`/action/aform${suffix}/unspec`)
+        .expect(200);
+    });
+
+    test('GET /action/<typeFormId>/<uuid>', () => {
+      return myrequest(appAuthorized)
+        .get(`/action/aform${suffix}/${uuid}`)
+        .expect(200);
+    });
+
+    test('GET /action/<actionId>/edit', () => {
+      return myrequest(appAuthorized)
+        .get(`/action/${actionId}/edit`)
+        .expect(200);
+    });
+
+    test('GET /actionTypes/<typeFormId>/new', () => {
+      return myrequest(appAuthorized)
+        .get(`/actionTypes/aform${suffix}/new`)
+        .expect(200);
+    });
+
+    test('GET /actionTypes/<typeFormId>/edit', () => {
+      return myrequest(appAuthorized)
+        .get(`/actionTypes/aform${suffix}/edit`)
+        .expect(200);
+    });
+
+    test('GET /actionTypes/list', () => {
+      return myrequest(appAuthorized)
+        .get('/actionTypes/list')
+        .expect(200);
+    });
+
+    test('GET /actions/list', () => {
+      return myrequest(appAuthorized)
+        .get('/actions/list')
+        .expect(200);
+    });
+
+    test('GET /actions/<typeFormId>/list', () => {
+      return myrequest(appAuthorized)
+        .get(`/actions/aform${suffix}/list`)
+        .expect(200);
+    });
+  });
+
+  // Workflow routes
+  describe('Workflow routes', () => {
+    test('POST /json/workflow', () => {
+      return myrequest(appAuthorized)
+        .post('/json/workflow')
+        .send({
+          typeFormId: `wform${suffix}`,
+          data: { name: 'Dummy Workflow by JEST', },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeDefined();
+          workflowId = response.body;
+        });
+    });
+
+    test('GET /json/workflow/<workflowId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/workflow/${workflowId}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeTruthy();
+          expect(response.body.typeFormId).toBe(`wform${suffix}`);
+          expect(response.body.data.name).toBe('Dummy Workflow by JEST');
+        });
+    });
+
+    test('GET /workflow/<workflowId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/workflow/${workflowId}`)
+        .expect(200);
+    });
+
+    test('GET /workflow/<typeFormId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/workflow/wform${suffix}`)
+        .expect(200);
+    });
+
+    test('GET /workflow/<workflowId>/edit', () => {
+      return myrequest(appAuthorized)
+        .get(`/workflow/${workflowId}/edit`)
+        .expect(200);
+    });
+
+    test('GET /workflow/<workflowId>/<criteria>', () => {
+      return myrequest(appAuthorized)
+        .get(`/workflow/${workflowId}/${'component'}/${uuid}`)
+        .expect(200);
+    });
+
+    test('GET /workflowTypes/<typeFormId>/new', () => {
+      return myrequest(appAuthorized)
+        .get(`/workflowTypes/wform${suffix}/new`)
+        .expect(200);
+    });
+
+    test('GET /workflowTypes/<typeFormId>/edit', () => {
+      return myrequest(appAuthorized)
+        .get(`/workflowTypes/wform${suffix}/edit`)
+        .expect(200);
+    });
+
+    test('GET /workflowTypes/list', () => {
+      return myrequest(appAuthorized)
+        .get('/workflowTypes/list')
+        .expect(200);
+    });
+
+    test('GET /workflows/list', () => {
+      return myrequest(appAuthorized)
+        .get('/workflows/list')
+        .expect(200);
+    });
+
+    test('GET /workflows/<typeFormId>/list', () => {
+      return myrequest(appAuthorized)
+        .get(`/workflows/wform${suffix}/list`)
+        .expect(200);
+    });
+  });
+
+  // Search routes
+  describe('Search routes', () => {
+    test('GET /search', () => {
+      return myrequest(appAuthorized)
+        .get('/search')
+        .expect(200);
+    });
+
+    test('GET /search/recordByUUIDOrID', () => {
+      return myrequest(appAuthorized)
+        .get('/search/recordByUUIDOrID')
+        .expect(200);
+    });
+
+    test('GET /search/geoBoardsByLocationOrPartNumber', () => {
+      return myrequest(appAuthorized)
+        .get('/search/geoBoardsByLocationOrPartNumber')
+        .expect(200);
+    });
+
+    test('GET /json/search/geoBoardsByLocation/<location>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/geoBoardsByLocation/${'daresbury'}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /json/search/geoBoardsByPartNumber/<partNumber>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/geoBoardsByPartNumber/${'123456'}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /search/geoBoardsByVisInspectOrOrderNumber', () => {
+      return myrequest(appAuthorized)
+        .get('/search/geoBoardsByVisInspectOrOrderNumber')
+        .expect(200);
+    });
+
+    test('GET /json/search/geoBoardsByVisualInspection/<criteria>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/geoBoardsByVisualInspection/${'disposition'}?issue=${'issue'}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /json/search/geoBoardsByOrderNumber/<orderNumber>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/geoBoardsByOrderNumber/${'123456'}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /search/boardShipmentsByReceptionDetails', () => {
+      return myrequest(appAuthorized)
+        .get('/search/boardShipmentsByReceptionDetails')
+        .expect(200);
+    });
+
+    test('GET /json/search/boardShipmentsByReceptionDetails?<criteria>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/boardShipmentsByReceptionDetails?shipmentStatus=${'received'}&originLocation=${'daresbury'}&destinationLocation=${'lancaster'}&earliestDate=${''}&latestDate=${''}&receptionComment=${''}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /search/workflowsByUUID', () => {
+      return myrequest(appAuthorized)
+        .get('/search/workflowsByUUID')
+        .expect(200);
+    });
+
+    test('GET /json/search/workflowsByUUID/<uuid>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/workflowsByUUID/${uuid}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /search/apaByRecordDetails', () => {
+      return myrequest(appAuthorized)
+        .get('/search/apaByRecordDetails')
+        .expect(200);
+    });
+
+    test('GET /json/search/apaByRecordDetails/<criteria>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/apaByRecordDetails/${'daresbury'}/${'top'}/${'1'}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /search/nonConformanceByComponentTypeOrUUID', () => {
+      return myrequest(appAuthorized)
+        .get('/search/nonConformanceByComponentTypeOrUUID')
+        .expect(200);
+    });
+
+    test('GET /json/search/nonConformanceByComponentType?<criteria>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/nonConformanceByComponentType?componentType=${'componentType'}&disposition=${'disposition'}&status=${'status'}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /json/search/nonConformanceByComponentUUID/<uuid>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/nonConformanceByComponentUUID/${uuid}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+  });
+
+  // Autocomplete routes
+  describe('Autocomplete routes', () => {
+    test('GET /autocomplete/<uuid>', () => {
+      return myrequest(appAuthorized)
+        .get(`/autocomplete/uuid?q=${uuid.substr(0, 5)}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body.length).toBeGreaterThan(0);
+        });
+    });
+
+    test('GET /autocomplete/<actionId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/autocomplete/actionId?q=${actionId.substr(0, 5)}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body.length).toBeGreaterThan(0);
+        });
+    });
+
+    test('GET /autocomplete/<workflowId>', () => {
+      return myrequest(appAuthorized)
+        .get(`/autocomplete/workflowId?q=${workflowId.substr(0, 5)}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body.length).toBeGreaterThan(0);
+        });
+    });
+  });
+
+  // User routes
+  describe('User routes', () => {
+    test('GET /user', () => {
+      return myrequest(appAuthorized)
+        .get('/user')
+        .expect(200);
+    });
+
+    test('GET /users/list', () => {
+      return myrequest(appAuthorized)
+        .get('/users/list')
+        .expect(200);
+    });
+
+    test('GET /json/users/list', () => {
+      return myrequest(appAuthorized)
+        .get('/json/users/list')
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+  });
+});
