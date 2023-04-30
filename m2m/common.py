@@ -167,12 +167,16 @@ def CreateComponent(componentTypeFormID, componentData, connection, headers):
 ###############################
 ## Get an existing component ##
 ###############################
-def GetComponent(componentUUID, connection, headers):
-    # Request a response from the API route that retrieves the latest version of an existing component record via its UUID
+def GetComponent(componentUUID, connection, headers, version=0):
+    # Request a response from the API route that retrieves a specified version of an existing component record via its UUID (if no version is specified, the most recent one is retrieved)
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     try:
-        connection.request('GET', '/api/component/' +
-                           componentUUID, headers=headers)
+        url = f'/api/component/{componentUUID}'
+
+        if version > 0:
+            url += f'?version={version}'
+
+        connection.request('GET', url, headers=headers)
 
         # The route response is the component record as a JSON document, but when decoded it becomes a standard string containing the JSON document
         # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
@@ -329,11 +333,16 @@ def PerformAction(actionTypeFormID, componentUUID, actionData, connection, heade
 ############################
 ## Get an existing action ##
 ############################
-def GetAction(actionID, connection, headers):
-    # Request a response from the API route that retrieves the latest version of an existing action record via its ID
+def GetAction(actionID, connection, headers, version=0):
+    # Request a response from the API route that retrieves a specified version of an existing action record via its ID (if no version is specified, the most recent one is retrieved)
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     try:
-        connection.request('GET', '/api/action/' + actionID, headers=headers)
+        url = f'/api/action/{actionID}'
+
+        if version > 0:
+            url += f'?version={version}'
+
+        connection.request('GET', url, headers=headers)
 
         # The route response is the action record as a JSON document, but when decoded it becomes a standard string containing the JSON document
         # Therefore, deserialise the string to a Python dictionary so that it can be easily edited

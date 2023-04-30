@@ -15,9 +15,10 @@ if __name__ == '__main__':
     componentUUID = '5f9ea420-3e88-11ed-9114-03f8483882ff'
 
     # Call the component retrieval function, which take the UUID as its first argument
-    # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
+    # The second and third arguments must ALWAYS be 'connection' and 'headers' respectively
+    # The optional fourth argument is the desired version of the component record ... if this is not specified or set to '0', the most recent version will be retrieved
     # If successful, the function returns the latest version of the component record as a Python dictionary (if not, an error message is automatically displayed)
-    component = GetComponent(componentUUID, connection, headers)
+    component = GetComponent(componentUUID, connection, headers, version=0)
     print(component)
 
     print()
@@ -26,9 +27,10 @@ if __name__ == '__main__':
     actionID = '63340ac79708eb30e6403cb9'
 
     # Call the action retrieval function, which take the ID as its first argument
-    # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
+    # The second and third arguments must ALWAYS be 'connection' and 'headers' respectively
+    # The optional fourth argument is the desired version of the action record ... if this is not specified or set to '0', the most recent version will be retrieved
     # If successful, the function returns the latest version of the action record as a Python dictionary (if not, an error message is automatically displayed)
-    action = GetAction(actionID, connection, headers)
+    action = GetAction(actionID, connection, headers, version=0)
     print(action)
 
     ########################################
