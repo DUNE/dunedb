@@ -57,6 +57,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
       componentName,
       componentTypeForms,
       actionTypeForms,
+      queryDictionary: req.query,
     });
   } catch (err) {
     logger.error(err);

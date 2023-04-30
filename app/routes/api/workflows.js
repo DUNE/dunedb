@@ -5,12 +5,17 @@ const permissions = require('../../lib/permissions');
 const Workflows = require('../../lib/Workflows');
 
 
-/// Retrieve the most recent version of a single workflow record
+/// Retrieve a single version of a workflow record (either the most recent, or a specified one)
 router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('workflows:view'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified workflow ID
-    // If there is no record corresponding to the ID, this returns 'null'
-    const workflow = await Workflows.retrieve(req.params.workflowId);
+    // Set up a query object consisting of the specified workflow ID and a version number if one is provided (if not, the most recent version is assumed)
+    let query = { workflowId: req.params.workflowId };
+
+    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+
+    // Retrieve the specified version of the record
+    // If there is no record corresponding to the ID, or the version number is not valid, this returns 'null'
+    const workflow = await Workflows.retrieve(query);
 
     // Return the record in JSON format
     return res.json(workflow);

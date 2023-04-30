@@ -5,12 +5,17 @@ const logger = require('../../lib/logger');
 const permissions = require('../../lib/permissions');
 
 
-/// Retrieve the most recent version of a single action record
+/// Retrieve a single version of an action record (either the most recent, or a specified one)
 router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified action ID
-    // If there is no record corresponding to the ID, this returns 'null'
-    const action = await Actions.retrieve(req.params.actionId);
+    // Set up a query object consisting of the specified action ID and a version number if one is provided (if not, the most recent version is assumed)
+    let query = { actionId: req.params.actionId };
+
+    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+
+    // Retrieve the specified version of the record
+    // If there is no record corresponding to the ID, or the version number is not valid, this returns 'null'
+    const action = await Actions.retrieve(query);
 
     // Return the record in JSON format
     return res.json(action);

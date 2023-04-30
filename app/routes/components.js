@@ -66,6 +66,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       shipmentDetails,
       actions,
       actionTypeForms,
+      queryDictionary: req.query,
     });
   } catch (err) {
     logger.error(err);
