@@ -9,8 +9,10 @@ block extrascripts
     const workflow = !{JSON.stringify(workflow, null, 4)};
     const workflowVersions = !{JSON.stringify(workflowVersions, null, 4)};
     const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)};
+    const componentName = !{JSON.stringify(componentName, null, 4)};
     const componentTypeForms = !{JSON.stringify(componentTypeForms, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
+    const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
 
   block workscripts
     script(src = '/pages/workflow.js')
@@ -67,7 +69,7 @@ block content
 
                       if componentUuid.length > 0
                         td
-                          a(href = `/component/${componentUuid}`, target = '_blank') #{componentUuid}
+                          a(href = `/component/${componentUuid}`, target = '_blank') #{componentName}
                       else 
                         td
                           .form-inline 
@@ -123,8 +125,11 @@ block content
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Edit Workflow
 
+      - let jsonURLString = `/json/workflow/${workflow.workflowId}`;
+      - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
+
       .hori-space-x2
-        a.btn.btn-secondary(href = `/json/workflow/${workflow.workflowId}`, target = '_blank')
+        a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View JSON Record
 

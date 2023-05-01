@@ -32,12 +32,29 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     // Retrieve the record of the component that the action was performed on, using its component UUID (also found in the action record)
     const component = await Components.retrieve(action.componentUuid);
 
+    // For action types involving displaying tensions, get an array containing information about tensions that have changed between the first and most recent versions of the action
+    // This will usually indicate the wires that have been re-tensioned, which is useful information to be able to see quickly on the action information page
+    let changedTensions = [];
+
+    if (action.typeFormId === 'tensionTesting') {
+      const originalTensions = [...actionVersions[actionVersions.length - 1].data.tensions];
+      const latestTensions = [...action.data.tensions];
+
+      for (let i = 0; i < originalTensions.length; i++) {
+        if (originalTensions[i] !== latestTensions[i]) {
+          changedTensions.push([i, originalTensions[i], latestTensions[i]]);
+        }
+      }
+    }
+
     // Render the interface page
     res.render('action.pug', {
       action,
       actionVersions,
       actionTypeForm,
       component,
+      changedTensions,
+      queryDictionary: req.query,
     });
   } catch (err) {
     logger.error(err);
@@ -175,7 +192,30 @@ router.get('/actionTypes/:typeFormId/edit', permissions.checkPermission('forms:e
 router.get('/actionTypes/list', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
     // Retrieve a list of all action type forms that currently exist in the 'actionForms' collection, grouped by their 'recommended component type'
-    const actionTypeForms = await Forms.listGrouped('actionForms');
+    let actionTypeForms = await Forms.listGrouped('actionForms');
+
+    // For each group of action type forms ...
+    for (let actionFormsGroup of actionTypeForms) {
+      // Make a copy of the list of type form names, and sort this new copy alphabetically (the order of the original list is preserved)
+      let sorted_formNames = [...actionFormsGroup.formName];
+      sorted_formNames.sort();
+
+      // Make new lists of the type form IDs and tags, now ordered accordingly to the sorted type form names ...
+      // ... i.e. the first type form ID (which may not necessarily be the alphabetically first one) is the one corresponding to the first type form name
+      let sorted_formIds = [];
+      let sorted_tags = [];
+
+      for (const formName of sorted_formNames) {
+        const index = actionFormsGroup.formName.indexOf(formName);
+        sorted_formIds.push(actionFormsGroup.formId[index]);
+        sorted_tags.push(actionFormsGroup.tags[index]);
+      }
+
+      // Overwrite the previously unordered type form name, ID and tags lists with the alphabetically ordered versions
+      actionFormsGroup.formName.splice(0, actionFormsGroup.formName.length, ...sorted_formNames);
+      actionFormsGroup.formId.splice(0, actionFormsGroup.formId.length, ...sorted_formIds);
+      actionFormsGroup.tags.splice(0, actionFormsGroup.tags.length, ...sorted_tags);
+    }
 
     // Render the interface page
     res.render('action_listTypes.pug', { actionTypeForms });

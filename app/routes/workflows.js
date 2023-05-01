@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+const Components = require('../lib/Components');
 const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 const permissions = require('../lib/permissions');
@@ -27,6 +28,21 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
 
     if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
 
+    // Attempt to retrieve a user-defined 'name' from the record of the component associated with this workflow (only if the component has already been created)
+    let componentName = '';
+
+    if (workflow.path[0].result.length > 0) {
+      const component = await Components.retrieve(workflow.path[0].result);
+
+      if (component) {
+        if (component.data.name) {
+          componentName = component.data.name;
+        } else {
+          componentName = workflow.path[0].result;
+        }
+      }
+    }
+
     // Simultaneously retrieve lists of all component and action type forms that currently exist in their respective collections
     const [componentTypeForms, actionTypeForms] = await Promise.all([
       Forms.list('componentForms'),
@@ -38,8 +54,10 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
       workflow,
       workflowVersions,
       workflowTypeForm,
+      componentName,
       componentTypeForms,
       actionTypeForms,
+      queryDictionary: req.query,
     });
   } catch (err) {
     logger.error(err);

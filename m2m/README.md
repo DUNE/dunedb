@@ -37,9 +37,10 @@ However, users will still need to call the various backend functions in their ow
     * `componentData` (Python dictionary) : the data to be entered into the new component record's `component.data` section, arranged as a dictionary of `field: value` pairs  ... this is the same data that would be entered into the component's type form through the web interface
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `GetComponent(componentUUID, connection, headers)` : get the latest version of an existing component record, returning the record as a Python dictionary
+* `GetComponent(componentUUID, connection, headers [, version])` : get a specified version of an existing component record, returning the record as a Python dictionary
     * `componentUUID` (string) : the UUID of the component to be retrieved
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
+    * `version` (integer) : [OPTIONAL] the desired version of the record to retrieve ... if not specified or set to '0', the most recent version will be retrieved
 
 * `EditComponent(componentUUID, componentData_fields, componentData_values, connection, headers)` : edit an existing component record, returning the component's full UUID as a string
     * `componentUUID` (string) : the UUID of the component to be edited
@@ -57,9 +58,10 @@ However, users will still need to call the various backend functions in their ow
     * `actionData` (Python dictionary) : the data to be entered into the new action record's `action.data` section, arranged as a dictionary of `field: value` pairs  ... this is the same data that would be entered into the action's type form through the web interface
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `GetAction(actionID, connection, headers)` : get the latest version of an existing action record, returning the record as a Python dictionary
+* `GetAction(actionID, connection, headers [, version])` : get the latest version of an existing action record, returning the record as a Python dictionary
     * `actionID` (string) : the ID of the action to be retrieved
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
+    * `version` (integer) : [OPTIONAL] the desired version of the record to retrieve ... if not specified or set to '0', the most recent version will be retrieved
 
 * `EditAction(actionID, actionData_fields, actionData_values, connection, headers)` : edit an existing action record, returning the action ID as a string
     * `actionID` (string) : the ID of the action to be edited

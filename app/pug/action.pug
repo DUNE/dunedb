@@ -10,6 +10,8 @@ block extrascripts
     const actionVersions = !{JSON.stringify(actionVersions, null, 4)};
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
     const component = !{JSON.stringify(component, null, 4)};
+    const changedTensions = !{JSON.stringify(changedTensions, null, 4)};
+    const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
 
   block workscripts
     script(src = '/pages/action.js')
@@ -67,6 +69,34 @@ block content
 
           .vert-space-x1
 
+        if action.typeFormId == 'tensionTesting'
+          .panel.panel-default
+          .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBox')
+            | Re-tensioned Wires: 
+            i.chevron.fa.fa-fw 
+
+          .collapse#reTensionsBox
+            .vert-space-x1.border-success.border.rounded.p-2
+              - const numberOfChangedTensions = changedTensions.length
+
+              dt Found #{numberOfChangedTensions} re-tensioned wires (comparing this and earliest action versions)
+
+              if numberOfChangedTensions > 0
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-2 Wire Index
+                        th.col-md-2 Original Tension (N)
+                        th.col-md-2 Latest Tension (N)
+
+                    tbody
+                      each changedTension in changedTensions
+                        tr
+                          td #{changedTension[0]}
+                          td #{changedTension[1]}
+                          td #{changedTension[2]}
+
         if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance'
           dt Add Images to Action Record:
           dd Please use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, please use the 'Confirm Images' button to finalise the upload.
@@ -115,17 +145,15 @@ block content
 
     .vert-space-x2.form-inline
 
-      if action.typeFormId != 'tensionTesting'
-        a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
-          img.small-icon(src = '/images/edit_icon.svg')
-          | &nbsp; Edit Action
-      else 
-        a.btn.btn-outline-secondary.disabled
-          img.small-icon(src = '/images/edit_icon.svg')
-          | &nbsp; Edit Action
+      a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
+        img.small-icon(src = '/images/edit_icon.svg')
+        | &nbsp; Edit Action
+
+      - let jsonURLString = `/json/action/${action.actionId}`;
+      - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
 
       .hori-space-x2
-        a.btn.btn-secondary(href = `/json/action/${action.actionId}`, target = '_blank')
+        a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View JSON Record
 
