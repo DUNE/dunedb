@@ -8,12 +8,17 @@ const permissions = require('../../lib/permissions');
 const utils = require('../../lib/utils');
 
 
-/// Retrieve the most recent version of a single component record
+/// Retrieve a single version of a component record (either the most recent, or a specified one)
 router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified component UUID
-    // If there is no record corresponding to the UUID, this returns 'null'
-    const component = await Components.retrieve(req.params.uuid);
+    // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
+    let query = { componentUuid: req.params.uuid };
+
+    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+
+    // Retrieve the specified version of the record
+    // If there is no record corresponding to the UUID, or the version number is not valid, this returns 'null'
+    const component = await Components.retrieve(query);
 
     // Return the record in JSON format
     return res.json(component);

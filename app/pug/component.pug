@@ -13,6 +13,7 @@ block extrascripts
     const actions = !{JSON.stringify(actions, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
     const base_url = '!{base_url}';
+    const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
 
   block workscripts
     script(src = '/pages/component.js')
@@ -159,8 +160,11 @@ block content
         img.small-icon(src = '/images/edit_icon.svg')
         | &nbsp; Edit Component
 
+      - let jsonURLString = `/json/component/${component.componentUuid}`;
+      - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
+
       .hori-space-x2
-        a.btn.btn-secondary(href = `/json/component/${component.componentUuid}`, target = '_blank')
+        a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; View JSON Record
 
