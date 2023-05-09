@@ -74,6 +74,29 @@ router.post('/component', permissions.checkPermissionJson('components:edit'), as
 });
 
 
+/// Save all individual sub-component records from a single batch
+router.post('/componentBatch', permissions.checkPermissionJson('components:edit'), async function (req, res, next) {
+  try {
+    // The 'req.body' contains an array of the individual sub-component submission objects, so loop over these and save them one by one
+    // Save each sub-component's returned component UUID into an array, and additionally display a logger message indicating that each record is being saved via the '/componentBatch' route
+    let componentUuids = [];
+
+    req.body.forEach(function (subComponent) {
+      logger.info(subComponent, 'Submission to /componentBatch');
+
+      const componentUuid = Components.save(subComponent, req);
+      componentUuids.push(componentUuid);
+    });
+
+    // Return the array of sub-component component UUIDs
+    return res.json(componentUuids);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// Generate a new component UUID
 router.get('/newComponentUUID', async function (req, res, next) {
   try {
