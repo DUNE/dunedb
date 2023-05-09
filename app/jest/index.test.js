@@ -18,7 +18,7 @@ const pino_opts = {
 };
 
 // Declare and initialise variables
-let uuid, actionId, workflowId;
+let uuid, uuidsBatch, actionId, workflowId;
 let routes_toBeTested = {};
 
 // Set up a logger using the defined 'pino' settings and a destination file (in the same directory as this script)
@@ -310,7 +310,7 @@ describe('Private routes', function () {
 
     test('POST /json/component', () => {
       return myrequest(appAuthorized)
-        .post('/json/action')
+        .post('/json/component')
         .send({
           formId: `cform${suffix}`,
           data: { name: 'Dummy Component by JEST', },
@@ -320,6 +320,21 @@ describe('Private routes', function () {
         .then(response => {
           expect(response.body).toBeDefined();
           uuid = response.body;
+        });
+    });
+
+    test('POST /json/componentBatch', () => {
+      return myrequest(appAuthorized)
+        .post('/json/componentBatch')
+        .send({
+          formId: `cform${suffix}`,
+          data: { name: 'Dummy Batch of Components by JEST', },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toBeDefined();
+          uuidsBatch = response.body;
         });
     });
 
