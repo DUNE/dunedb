@@ -41,6 +41,7 @@ async function save(input, req) {
   newRecord.data = input.data;
 
   if (input.workflowId) newRecord.workflowId = input.workflowId;
+  if (input.images) newRecord.images = input.images;
 
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
