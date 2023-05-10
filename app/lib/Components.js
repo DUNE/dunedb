@@ -333,7 +333,7 @@ async function collateExecSummaryInfo(componentUUID) {
     }
   }
 
-  // Get information about any non-wire related non-conformances
+  // Get information about any non-wire related non-conformances on the Assembled APA
   aggregation_stages = [];
   results = [];
 
@@ -360,7 +360,7 @@ async function collateExecSummaryInfo(componentUUID) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  dictionary_nonConformanceIssues = {
+  dictionary_apaNonConformanceIssues = {
     geometryBoardIssue: 'Geometry Board Issue',
     combIssue: 'Comb Issue',
     machiningIssue: 'Machining Issue',
@@ -378,12 +378,68 @@ async function collateExecSummaryInfo(componentUUID) {
       }
 
       dictionary = {
-        type: dictionary_nonConformanceIssues[nonConfType],
+        component: 'Assembled APA',
+        type: dictionary_apaNonConformanceIssues[nonConfType],
         description: result.nonConf_description,
         actionId: result.actionId,
       }
 
       collatedInfo.otherNonConformances.push(dictionary);
+    }
+  }
+
+  // Get information about any non-conformances on the APA frame (first retrieving the full component record of the Assembled APA, which contains the UUID of the frame)
+  const assembledAPA = await retrieve(componentUUID);
+
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'APANonConformance',
+      'componentUuid': MUUID.from(assembledAPA.data.frameUuid),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      nonConf_type: { '$first': '$data.frameNonConformanceType' },
+      nonConf_description: { '$first': '$data.nonConformanceDescription' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  dictionary_frameNonConformanceIssues = {
+    machiningIssue: 'Machining Issue',
+    bow: 'Bow',
+    twist: 'Twist',
+    survey: 'Survey',
+  };
+
+  collatedInfo.frameNonConformances = [];
+
+  if (results.length > 0) {
+    for (const result of results) {
+      let nonConfType = '';
+
+      for (const [key, value] of Object.entries(result.nonConf_type)) {
+        if (value) nonConfType = key;
+      }
+
+      dictionary = {
+        component: 'APA Frame',
+        type: dictionary_frameNonConformanceIssues[nonConfType],
+        description: result.nonConf_description,
+        actionId: result.actionId,
+      }
+
+      collatedInfo.frameNonConformances.push(dictionary);
     }
   }
 

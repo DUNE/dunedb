@@ -246,6 +246,16 @@ function SetEntry_SectionC(nonConformanceInfo, hideHeader) {
       input: false,
       columns: [{
         components: [{
+          label: 'Component:',
+          labelPosition: 'left-left',
+          key: 'component',
+          type: 'textfield',
+          labelWidth: 25,
+          labelMargin: 1,
+          input: true,
+          defaultValue: nonConformanceInfo.component,
+        },
+        {
           label: 'Type:',
           labelPosition: 'left-left',
           key: 'type',
