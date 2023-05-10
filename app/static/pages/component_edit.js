@@ -118,8 +118,9 @@ async function onPageLoad() {
       // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
       if (submission.data.subComponent_formId === 'GeometryBoard') numberOfExistingSubComponents += 5000;
 
-      // Set up an array to hold the sub-component type record numbers (this will be populated in the sub-component loop below)
+      // Set up an array to hold the sub-component type record numbers and submission objects (these will be populated in the sub-component loop below)
       let subComponent_typeRecordNumbers = [];
+      let subComponent_objects = [];
 
       // For each sub-component ...
       for (let s = 0; s < numberOfSubComponents; s++) {
@@ -164,23 +165,68 @@ async function onPageLoad() {
           sub_submission.data.name = `Created from ${submission.data.name}`;
         }
 
-        // Since there is nothing more to be added to the sub-component submission object, immediately submit it to the DB
-        // Do not redirect the user back to the sub-component's information page, since we still need to deal with any other sub-components and the main batch-type component
-        SubmitData(sub_submission, false);
+        // Since there is nothing more to be added to the sub-component submission object, add it to the array of sub-component submission objects
+        subComponent_objects.push(sub_submission);
       }
+
+      // Once all sub-component submission objects have been created, populated and saved, submit the entire array to the database in a single API call ...
+      // ... submission of the individual sub-components is handled on the server side to reduce load on the client side     
+      // This function does NOT redirect the user anywhere after submission, since we still need to deal with the main batch-type component
+      SubmitBatchData(subComponent_objects);
 
       // Save the sub-component type record number array into the submission object, under the 'data' field that contains the rest of the form-level information
       submission.data.subComponent_typeRecordNumbers = subComponent_typeRecordNumbers;
     }
 
-    // Once all additions and changes to the 'submission' object have been completed, submit it to the database
+    // Once all additions and changes to the 'submission' object have been completed, submit it to the database, and then redirect the user as appropriate
     SubmitData(submission);
   });
 }
 
 
-// Function to submit the record to the database
-function SubmitData(submission, redirectToInfo = true) {
+// Function to submit the individual batch sub-component records to the database
+function SubmitBatchData(submission) {
+  $.ajax({
+    contentType: 'application/json',
+    method: 'post',
+    url: '/json/componentBatch',
+    data: JSON.stringify(submission),
+    dataType: 'json',
+    success: postSuccess,
+  }).fail(postFail);
+
+
+  // Function to run for a successful submission
+  function postSuccess(result) {
+    // If the submission result contains an error (even with a successful submission), display it along with the appropriate Formio alert type
+    if (result.error) {
+      typeForm.setAlert('warning', result.error);
+      typeForm.emit('error', result.error);
+    }
+
+    // Display a message to indicate successful submission
+    typeForm.emit('submitDone');
+  }
+
+
+  // Function to run for a failed submission
+  function postFail(result, statusCode, statusMsg) {
+    // If the submission result contains a response message, display it along with the appropriate Formio alert type
+    // Otherwise, display any status message and error code instead
+    if (result.responseText) {
+      typeForm.setAlert('danger', result.responseText);
+    } else {
+      typeForm.setAlert('danger', `${statusMsg} (${statusCode})`);
+    }
+
+    // Display a message to indicate that there was an error in submission
+    typeForm.emit('submitError');
+  }
+};
+
+
+// Function to submit either a non-batch component or the batch's overall component record to the database
+function SubmitData(submission) {
   $.ajax({
     contentType: 'application/json',
     method: 'post',
@@ -202,28 +248,23 @@ function SubmitData(submission, redirectToInfo = true) {
     // Display a message to indicate successful submission
     typeForm.emit('submitDone');
 
-    // If required, redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
+    // Redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
     // If the component is a 'Returned Geometry Board Batch' type, we must first update the board information (and further redirection will be handled from there)
     // If not, then we can simply proceed with standard post-submission redirection:
     //   - if the component originates from a workflow, go to the page for updating the workflow path step results
     //   - if this is a standalone component, go to the page for viewing the component record
-    if (redirectToInfo) {
-      if (submission.formId === 'ReturnedGeometryBoardBatch') {
-        const batchUUID = submission.componentUuid;
-        const receptionLocation = 'lancaster';
-        const receptionDate = (new Date()).toISOString().slice(0, 10);
+    if (submission.formId === 'ReturnedGeometryBoardBatch') {
+      const batchUUID = submission.componentUuid;
+      const receptionLocation = 'lancaster';
+      const receptionDate = (new Date()).toISOString().slice(0, 10);
 
-        let url = `/component/${batchUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
-
-        window.location.href = url;
+      window.location.href = `/component/${batchUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
+    } else {
+      if (!(workflowId === '')) {
+        window.location.href = `/workflow/${workflowId}/component/${result}`;
       } else {
-        if (!(workflowId === '')) {
-          window.location.href = `/workflow/${workflowId}/component/${result}`;
-        } else {
-          window.location.href = `/component/${result}`;
-        }
+        window.location.href = `/component/${result}`;
       }
-
     }
   }
 
