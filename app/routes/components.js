@@ -3,6 +3,7 @@ const ShortUUID = require('short-uuid');
 
 const Actions = require('../lib/Actions');
 const Components = require('../lib/Components');
+const Components_ExecSummary = require('../lib/Components_ExecSummary');
 const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 const permissions = require('../lib/permissions');
@@ -207,7 +208,7 @@ router.get('/component/' + utils.uuid_regex + '/execSummary', permissions.checkP
 
     // Retrieve the collated information about the APA - since this requires extracting specific field values from a number of DB records related to the APA ...
     // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
-    let collatedInformation = await Components.collateExecSummaryInfo(req.params.uuid);
+    let collatedInformation = await Components_ExecSummary.collateInfo(req.params.uuid);
 
     // Add relevant information from the APA's component record to the collated information
     const dictionary_productionSites = {
