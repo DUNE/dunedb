@@ -294,12 +294,11 @@ async function collateExecSummaryInfo(componentUUID) {
     $match: {
       'typeFormId': 'APANonConformance',
       'componentUuid': MUUID.from(componentUUID),
-      'data.nonConformanceType.missingWireSegment': true,
-      ///      $or: [{
-      ///        'data.nonConformanceType.missingWireSegment': true
-      ///      }, {
-      ///        'data.nonConformanceType.misplacedWireSegment': true
-      ///      }]
+      $or: [{
+        'data.nonConformanceType.missingWireSegment': true
+      }, {
+        'data.nonConformanceType.misplacedWireSegment': true
+      }],
     }
   });
 
@@ -365,6 +364,7 @@ async function collateExecSummaryInfo(componentUUID) {
     combIssue: 'Comb Issue',
     machiningIssue: 'Machining Issue',
     conduitIssue: 'Conduit Issue',
+    incorrectFasteners: 'Incorrect Fasteners',
   };
 
   collatedInfo.otherNonConformances = [];
