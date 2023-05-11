@@ -68,3 +68,7 @@ block allbody
     each nonConformanceInfo, index in collatedInformation.frameNonConformances
       .nonConformanceEntry.vert-space-x1
         .form_sectionC(data-record = [nonConformanceInfo, hideHeader = true])
+
+    each nonConformanceInfo, index in collatedInformation.meshNonConformances
+      .nonConformanceEntry.vert-space-x1
+        .form_sectionC(data-record = [nonConformanceInfo, hideHeader = true])
