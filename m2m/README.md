@@ -81,3 +81,16 @@ Users should write their own dedicated Python scripts that are suited for whatev
 Apart from `ConnectToAPI()`, the backend functions may be combined in any order and/or number as required by the user.  For example, if multiple short UUIDs need to be converted and then new components created and submitted using the returned full UUIDs, a single user-created script containing a `for` loop may be used to cover the entire procedure.
 
 This directory contains template scripts that show simple examples of how to use the various backend functions.
+
+
+## Working with APA Wire Tension Measurements
+
+Wire tension measurements can be uploaded to the APA DB using the M2M application, but when they are taken at the APA factories, these measurements are calculated and saved into bespoke spreadsheets.  Therefore, an additional step is required to extract the values from the spreadsheets and convert them into a format that the DB can accept.
+
+The `ExtractTensions(csvFile, apaLayer)` function found in the `tensions.py` file handles this step.  **Users should not attempt to modify this code**, but the function should be used in a user-create script, as with the other backend functions described above.  The function takes the  following arguments:
+   * `csvFile` (string) : an input file, in `.csv` format, containing (among other things) the tension measurements
+   * `apaLayer` (string) : one of 'X', 'U', 'V' or 'G'
+
+The function returns two Python lists, containing the tension measurements for each APA side (A and B).  **<u>These lists will always contain only the latest tension measurement for each wire or wire segment</u>** - thus, any wire re-tensioning is accounted for, as long as the new values are recorded in the correct column of the originating spreadsheet.
+
+The `ExtractTensions()` function should be followed by a call to either the `PerformAction()` or `EditAction()` backend functions, depending on whether the tension measurements action is completely new or being edited due to re-tensioning.
