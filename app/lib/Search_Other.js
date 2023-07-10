@@ -176,15 +176,14 @@ async function workflowsByUUID(componentUUID) {
 
 
 /// Retrieve a list of assembled APAs that match the specified record details
-async function apasByRecordDetails(location, configuration, locationNumber) {
+async function apasByRecordDetails(location, locationNumber) {
   let aggregation_stages = [];
 
-  // Retrieve all assembled APAs records that have the same location, configuration and location number as the specified values
+  // Retrieve all assembled APAs records that have the same location and location number as the specified values
   aggregation_stages.push({
     $match: {
       'formId': 'AssembledAPA',
       'data.apaAssemblyLocation': location,
-      'data.apaConfiguration': configuration,
       'data.apaNumberAtLocation': parseInt(locationNumber, 10),
     }
   });
