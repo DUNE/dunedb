@@ -32,17 +32,27 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     // Retrieve the record of the component that the action was performed on, using its component UUID (also found in the action record)
     const component = await Components.retrieve(action.componentUuid);
 
-    // For action types involving displaying tensions, get an array containing information about tensions that have changed between the first and most recent versions of the action
+    // For action types involving tension measurements, get arrays containing information about tensions that have changed (on both sides) between the first and most recent versions of the action
     // This will usually indicate the wires that have been re-tensioned, which is useful information to be able to see quickly on the action information page
-    let changedTensions = [];
+    let changedTensions_sideA = [];
+    let changedTensions_sideB = [];
 
-    if (action.typeFormId === 'tensionTesting') {
-      const originalTensions = [...actionVersions[actionVersions.length - 1].data.tensions];
-      const latestTensions = [...action.data.tensions];
+    if (action.typeFormId === 'x_tension_testing') {
+      const orignl_sideA = [...actionVersions[actionVersions.length - 1].data.measuredTensions_sideA];
+      const latest_sideA = [...action.data.measuredTensions_sideA];
 
-      for (let i = 0; i < originalTensions.length; i++) {
-        if (originalTensions[i] !== latestTensions[i]) {
-          changedTensions.push([i, originalTensions[i], latestTensions[i]]);
+      for (let i = 0; i < orignl_sideA.length; i++) {
+        if (orignl_sideA[i] !== latest_sideA[i]) {
+          changedTensions_sideA.push([i, orignl_sideA[i], latest_sideA[i]]);
+        }
+      }
+
+      const orignl_sideB = [...actionVersions[actionVersions.length - 1].data.measuredTensions_sideB];
+      const latest_sideB = [...action.data.measuredTensions_sideB];
+
+      for (let i = 0; i < orignl_sideB.length; i++) {
+        if (orignl_sideB[i] !== latest_sideB[i]) {
+          changedTensions_sideB.push([i, orignl_sideB[i], latest_sideB[i]]);
         }
       }
     }
@@ -53,7 +63,8 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
       actionVersions,
       actionTypeForm,
       component,
-      changedTensions,
+      changedTensions_sideA,
+      changedTensions_sideB,
       queryDictionary: req.query,
     });
   } catch (err) {

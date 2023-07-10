@@ -10,7 +10,8 @@ block extrascripts
     const actionVersions = !{JSON.stringify(actionVersions, null, 4)};
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
     const component = !{JSON.stringify(component, null, 4)};
-    const changedTensions = !{JSON.stringify(changedTensions, null, 4)};
+    const changedTensions_sideA = !{JSON.stringify(changedTensions_sideA, null, 4)};
+    const changedTensions_sideB = !{JSON.stringify(changedTensions_sideB, null, 4)};
     const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
 
   block workscripts
@@ -69,33 +70,59 @@ block content
 
           .vert-space-x1
 
-        if action.typeFormId == 'tensionTesting'
-          .panel.panel-default
-          .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBox')
-            | Re-tensioned Wires: 
-            i.chevron.fa.fa-fw 
+        if action.typeFormId == 'x_tension_testing'
+          dt Re-tensioned Wires or Wire Segments
+          
+          - const numberOfChangedTensions_sideA = changedTensions_sideA.length
+          - const numberOfChangedTensions_sideB = changedTensions_sideB.length
 
-          .collapse#reTensionsBox
-            .vert-space-x1.border-success.border.rounded.p-2
-              - const numberOfChangedTensions = changedTensions.length
+          .row
+            .col-md-6
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
+                | #{numberOfChangedTensions_sideA} on side A: 
+                i.chevron.fa.fa-fw 
 
-              dt Found #{numberOfChangedTensions} re-tensioned wires (comparing this and earliest action versions)
+              .collapse#reTensionsBoxA
+                .vert-space-x1.border-success.border.rounded.p-2
+                  if numberOfChangedTensions_sideA > 0
+                    dd
+                      table.table
+                        thead
+                          tr
+                            th.col-md-2 Index of Wire or Wire Segment
+                            th.col-md-2 Original Tension (N)
+                            th.col-md-2 Latest Tension (N)
 
-              if numberOfChangedTensions > 0
-                dd
-                  table.table
-                    thead
-                      tr
-                        th.col-md-2 Wire Index
-                        th.col-md-2 Original Tension (N)
-                        th.col-md-2 Latest Tension (N)
+                        tbody
+                          each changedTension in changedTensions_sideA
+                            tr
+                              td #{changedTension[0]}
+                              td #{changedTension[1]}
+                              td #{changedTension[2]}
+            .col-md-6
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
+                | #{numberOfChangedTensions_sideB} on side B: 
+                i.chevron.fa.fa-fw 
 
-                    tbody
-                      each changedTension in changedTensions
-                        tr
-                          td #{changedTension[0]}
-                          td #{changedTension[1]}
-                          td #{changedTension[2]}
+              .collapse#reTensionsBoxB
+                .vert-space-x1.border-success.border.rounded.p-2
+                  if numberOfChangedTensions_sideB > 0
+                    dd
+                      table.table
+                        thead
+                          tr
+                            th.col-md-2 Index of Wire or Wire Segment
+                            th.col-md-2 Original Tension (N)
+                            th.col-md-2 Latest Tension (N)
+
+                        tbody
+                          each changedTension in changedTensions_sideB
+                            tr
+                              td #{changedTension[0]}
+                              td #{changedTension[1]}
+                              td #{changedTension[2]}
 
         if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance'
           dt Add Images to Action Record:
