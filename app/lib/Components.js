@@ -215,6 +215,7 @@ async function list(match_condition, options) {
       componentUuid: { '$first': '$componentUuid' },
       typeFormId: { '$first': '$formId' },
       typeFormName: { '$first': '$formName' },
+      data: { '$first': '$data' },
       name: { '$first': '$data.name' },
       lastEditDate: { '$first': '$validity.startDate' },
       creationDate: { '$last': '$validity.startDate' },
@@ -236,8 +237,18 @@ async function list(match_condition, options) {
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
+  // Additionally, adjust the displayed names of certain component types for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
   for (let record of records) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
+
+    if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(record.typeFormId)) {
+      const name_splits = record.name.split('-');
+      record.name = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+    }
+
+    if (record.typeFormId === 'GeometryBoard') {
+      record.name = record.data.typeRecordNumber;
+    }
   }
 
   // Return the entire list of matching records
