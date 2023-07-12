@@ -10,8 +10,6 @@ block extrascripts
     const actionVersions = !{JSON.stringify(actionVersions, null, 4)};
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
     const component = !{JSON.stringify(component, null, 4)};
-    const changedTensions_sideA = !{JSON.stringify(changedTensions_sideA, null, 4)};
-    const changedTensions_sideB = !{JSON.stringify(changedTensions_sideB, null, 4)};
     const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
 
   block workscripts
@@ -73,8 +71,12 @@ block content
         if action.typeFormId == 'x_tension_testing'
           dt Re-tensioned Wires or Wire Segments (comparing this version and version 1)
 
-          - const numberOfChangedTensions_sideA = changedTensions_sideA.length
-          - const numberOfChangedTensions_sideB = changedTensions_sideB.length
+          - let numberOfChangedTensions_sideA = 0
+          - let numberOfChangedTensions_sideB = 0
+
+          if action.data.changedTensions_sideA
+            - numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
+            - numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
 
           .row
             .col-md-6
@@ -95,7 +97,7 @@ block content
                             th.col-md-2 Latest Tension (N)
 
                         tbody
-                          each changedTension in changedTensions_sideA
+                          each changedTension in action.data.changedTensions_sideA
                             tr
                               td #{changedTension[0]}
                               td #{changedTension[1]}
@@ -118,7 +120,7 @@ block content
                             th.col-md-2 Latest Tension (N)
 
                         tbody
-                          each changedTension in changedTensions_sideB
+                          each changedTension in action.data.changedTensions_sideB
                             tr
                               td #{changedTension[0]}
                               td #{changedTension[1]}

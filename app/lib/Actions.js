@@ -57,6 +57,40 @@ async function save(input, req) {
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
+  // If a tension measurements record is being edited (i.e. the new record's type form ID matches, and there is an existing record with the same action ID) ...
+  if ((newRecord.typeFormId === 'x_tension_testing') && (oldRecord)) {
+    // Get the single earliest version of this record
+    let allVersions = await versions(input.actionId);
+    let earliestVersion = allVersions[allVersions.length - 1];
+
+    // Calculate arrays containing information about tensions that have changed (on both sides) between the earliest version and this (newest) version of the record
+    // This will usually indicate the wires that have been re-tensioned, which is useful information to save directly into the record
+    let changedTensions_sideA = [];
+    let changedTensions_sideB = [];
+
+    const earliest_sideA = [...earliestVersion.data.measuredTensions_sideA];
+    const latest_sideA = [...newRecord.data.measuredTensions_sideA];
+
+    for (let i = 0; i < earliest_sideA.length; i++) {
+      if (earliest_sideA[i] !== latest_sideA[i]) {
+        changedTensions_sideA.push([i, earliest_sideA[i], latest_sideA[i]]);
+      }
+    }
+
+    const earliest_sideB = [...earliestVersion.data.measuredTensions_sideB];
+    const latest_sideB = [...newRecord.data.measuredTensions_sideB];
+
+    for (let i = 0; i < earliest_sideB.length; i++) {
+      if (earliest_sideB[i] !== latest_sideB[i]) {
+        changedTensions_sideB.push([i, earliest_sideB[i], latest_sideB[i]]);
+      }
+    }
+
+    // Add the arrays of changed tensions to the new record
+    newRecord.data.changedTensions_sideA = [...changedTensions_sideA];
+    newRecord.data.changedTensions_sideB = [...changedTensions_sideB];
+  }
+
   // Insert the new record into the 'actions' records collection, and throw an error if the insertion fails
   const result = await db.collection('actions')
     .insertOne(newRecord);
@@ -209,14 +243,24 @@ async function list(match_condition, options) {
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
-  // Then add the corresponding component name to each matching record
+  // Then add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
   for (let record of records) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
 
     const component = await Components.retrieve(record.componentUuid);
 
-    if (component.data.name) record.componentName = component.data.name;
-    else record.componentName = record.componentUuid;
+    if (component.data.name) {
+      if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
+        const name_splits = component.data.name.split('-');
+        record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      } else if (component.formId === 'GeometryBoard') {
+        record.componentName = component.data.typeRecordNumber;
+      } else {
+        record.componentName = component.data.name;
+      }
+    } else {
+      record.componentName = record.componentUuid;
+    }
   }
 
   // Return the entire list of matching records

@@ -244,10 +244,10 @@ async function list(match_condition, options) {
     if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(record.typeFormId)) {
       const name_splits = record.name.split('-');
       record.name = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-    }
-
-    if (record.typeFormId === 'GeometryBoard') {
+    } else if (record.typeFormId === 'GeometryBoard') {
       record.name = record.data.typeRecordNumber;
+    } else {
+      record.name = record.name;
     }
   }
 

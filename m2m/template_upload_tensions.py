@@ -6,10 +6,10 @@ from tensions import ExtractTensions
 # ##################################
 
 # Set a flag to specify if you are performing a new tension measurements action, or editing an existing one with re-tensioning measurements
-new_tensionMeasurements = False
+new_tensionMeasurements = True
 
 # For extracting the tension measurements (required for BOTH performing new and editing existing actions), the following information is required:
-csvFile         = '~/Desktop/tensions/APA4_U_layer_v2.csv'
+csvFile         = '~/Desktop/tensions/APA4_U_layer_v1.csv'
                                                             # Name and location of the input .csv file (must be a string ending in '.csv')
 apaLayer        = 'U'                                       # Wire layer (must be given as one of 'X','U', 'V' or 'G')
 
@@ -18,14 +18,14 @@ apa_uuid        = '49dcac80-4645-11ed-bb7f-0f80f77f8437'    # UUID of the Assemb
 winder_number   = 1                                         # Number
 winder_head     = '1'                                       # Free-form string
 measurement_sys = 'laser1'                                  # Use one of the following: 'dwa1', 'dwa2, 'dwa3', 'laser1', 'laser2', 'laser3', 'laser4', 'laser5'
-newAction_comms = 'Some comment about the new tension measurements, if needed'
+newAction_comms = 'This is a new single layer tension measurements action, uploaded via M2M'
                                                             # Free-form string, additional description or commentary if required
 
 # For uploading re-tensioning measurements (i.e. editing an existing action), the following information is required:
-action_id       = '64ae78fd79d1db9823789440'                # ID of the existing tension measurements action to be edited (get from DB)
+action_id       = '64aeed9e2f0e90764330d588'                # ID of the existing tension measurements action to be edited (get from DB)
 replaced_wires  = 'Some description of the replaced wires or wire segments, if applicable'
                                                             # Free-form string, additional description or commentary if required
-edtAction_comms = 'Some comment about the re-tensioning measurements, if needed'
+edtAction_comms = 'This is an edited single layer tension measurements action, uploaded via M2M'
                                                             # Free-form string, additional description or commentary if required
 
 # ##################################
