@@ -43,10 +43,10 @@ router.get('/search/workflowsByUUID', async function (req, res, next) {
 });
 
 
-/// Search for an assembled APA using various details from its record
-router.get('/search/apaByRecordDetails', async function (req, res, next) {
+/// Search for an assembled APA using its location and production number
+router.get('/search/apaByLocation', async function (req, res, next) {
   // Render the interface page
-  res.render('search_apaByRecordDetails.pug');
+  res.render('search_apaByLocation.pug');
 });
 
 

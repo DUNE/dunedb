@@ -1,6 +1,6 @@
-// Declare variables to hold the (initially empty) user-specified assembled APA location and location number
+// Declare variables to hold the (initially empty) user-specified assembled APA location and production number
 let apaLocation = null;
-let apaLocationNumber = null;
+let apaProductionNumber = null;
 
 
 // Main function
@@ -10,16 +10,16 @@ $(function () {
   $('#locationSelection').on('change', async function () {
     apaLocation = $('#locationSelection').val();
 
-    if (apaLocation && apaLocationNumber) performSearch();
+    if (apaLocation && apaProductionNumber) performSearch();
   });
 
-  // When the entered APA location number is changed and the 'Enter' key is pressed, get the newly entered location number from the corresponding page element
+  // When the entered APA production number is changed and the 'Enter' key is pressed, get the newly entered production number from the corresponding page element
   // If both user-specified search criteria are valid, then perform the search
-  document.getElementById('locationNumberSelection').addEventListener('keyup', function (e) {
+  document.getElementById('productionNumberSelection').addEventListener('keyup', function (e) {
     if (e.key === 'Enter') {
-      apaLocationNumber = $('#locationNumberSelection').val();
+      apaProductionNumber = $('#productionNumberSelection').val();
 
-      if (apaLocation && apaLocationNumber) performSearch();
+      if (apaLocation && apaProductionNumber) performSearch();
     }
   });
 });
@@ -30,7 +30,7 @@ function performSearch() {
   $.ajax({
     contentType: 'application/json',
     method: 'GET',
-    url: `/json/search/apaByRecordDetails/${apaLocation}/${apaLocationNumber}`,
+    url: `/json/search/apaByLocation/${apaLocation}/${apaProductionNumber}`,
     dataType: 'json',
     success: postSuccess,
   }).fail(postFail);
