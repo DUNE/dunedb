@@ -204,14 +204,24 @@ async function list(match_condition, options) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Add the corresponding component name to each matching record
+  // Add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
   for (let record of records) {
     if (record.stepResultIDs[0] != '') {
       const component = await Components.retrieve(record.stepResultIDs[0]);
 
       if (component) {
-        if (component.data.name) record.componentName = component.data.name;
-        else record.componentName = record.stepResultIDs[0];
+        if (component.data.name) {
+          if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
+            const name_splits = component.data.name.split('-');
+            record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+          } else if (component.formId === 'GeometryBoard') {
+            record.componentName = component.data.typeRecordNumber;
+          } else {
+            record.componentName = component.data.name;
+          }
+        } else {
+          record.componentName = record.stepResultIDs[0];
+        }
       }
     }
   }

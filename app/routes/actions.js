@@ -32,28 +32,12 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     // Retrieve the record of the component that the action was performed on, using its component UUID (also found in the action record)
     const component = await Components.retrieve(action.componentUuid);
 
-    // For action types involving displaying tensions, get an array containing information about tensions that have changed between the first and most recent versions of the action
-    // This will usually indicate the wires that have been re-tensioned, which is useful information to be able to see quickly on the action information page
-    let changedTensions = [];
-
-    if (action.typeFormId === 'tensionTesting') {
-      const originalTensions = [...actionVersions[actionVersions.length - 1].data.tensions];
-      const latestTensions = [...action.data.tensions];
-
-      for (let i = 0; i < originalTensions.length; i++) {
-        if (originalTensions[i] !== latestTensions[i]) {
-          changedTensions.push([i, originalTensions[i], latestTensions[i]]);
-        }
-      }
-    }
-
     // Render the interface page
     res.render('action.pug', {
       action,
       actionVersions,
       actionTypeForm,
       component,
-      changedTensions,
       queryDictionary: req.query,
     });
   } catch (err) {

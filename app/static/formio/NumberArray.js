@@ -178,7 +178,7 @@ class NumberArray extends TextFieldComponent {
     this.LizardGraph = new HistCanvas($('div.numberArrayGraph', this.element));
     this.LizardGraph.default_options.doDots = true;
     this.LizardGraph.default_options.doFill = false;
-    this.LizardGraph.xlabel = 'Wire Index';
+    this.LizardGraph.xlabel = 'Index of Wire or Wire Segment';
     this.LizardGraph.ylabel = this.component.units;
 
     this.LizardHistogram = new HistCanvas($('div.numberArrayHistogram', this.element));

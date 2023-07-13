@@ -175,17 +175,16 @@ async function workflowsByUUID(componentUUID) {
 }
 
 
-/// Retrieve a list of assembled APAs that match the specified record details
-async function apasByRecordDetails(location, configuration, locationNumber) {
+/// Retrieve a list of assembled APAs that match the specified location and production number
+async function apasByLocation(location, productionNumber) {
   let aggregation_stages = [];
 
-  // Retrieve all assembled APAs records that have the same location, configuration and location number as the specified values
+  // Retrieve all assembled APAs records that have the same location and production number as the specified values
   aggregation_stages.push({
     $match: {
       'formId': 'AssembledAPA',
       'data.apaAssemblyLocation': location,
-      'data.apaConfiguration': configuration,
-      'data.apaNumberAtLocation': parseInt(locationNumber, 10),
+      'data.apaNumberAtLocation': parseInt(productionNumber, 10),
     }
   });
 
@@ -299,7 +298,7 @@ async function nonConformanceByComponentUUID(componentUUID) {
 module.exports = {
   boardShipmentsByReceptionDetails,
   workflowsByUUID,
-  apasByRecordDetails,
+  apasByLocation,
   nonConformanceByComponentType,
   nonConformanceByComponentUUID,
 }
