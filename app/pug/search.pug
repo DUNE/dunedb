@@ -65,6 +65,24 @@ block content
 
     .vert-space-x2
       h4
+        a(href = '/search/actionsByReferencedUUID') Actions by Referenced UUID
+
+      p This page may be used to search specifically for <b>actions that reference a particular component, but have not been directly performed on it</b>.
+        br
+        |  For example, actions relating to 'Board Installation' must reference the 'Geometry Board' type components that are being installed (i.e. the action records will contain the boards' UUIDs), but these types of actions are actually performed on 'Assembled APA' type components.
+        br
+        |  Users must specify the following information:
+        
+        ul
+          li the UUID of a single component
+          li the type (or general group) of action type, selected from the provided list
+
+      p Please note that <b>both pieces of information must be provided</b> for the search to be performed.  If successful, a summary of information about each found action will be displayed in the search results panel on the right side of the page.
+
+      hr
+
+    .vert-space-x2
+      h4
         a(href = '/search/geoBoardsByLocationOrPartNumber') Geometry Boards By Location or Part Number
 
       p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios: 
