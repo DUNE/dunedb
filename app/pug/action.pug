@@ -10,7 +10,6 @@ block extrascripts
     const actionVersions = !{JSON.stringify(actionVersions, null, 4)};
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
     const component = !{JSON.stringify(component, null, 4)};
-    const changedTensions = !{JSON.stringify(changedTensions, null, 4)};
     const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
 
   block workscripts
@@ -69,35 +68,67 @@ block content
 
           .vert-space-x1
 
-        if action.typeFormId == 'tensionTesting'
-          .panel.panel-default
-          .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBox')
-            | Re-tensioned Wires: 
-            i.chevron.fa.fa-fw 
+        if action.typeFormId == 'x_tension_testing'
+          dt Re-tensioned Wires or Wire Segments (comparing this version and version 1)
 
-          .collapse#reTensionsBox
-            .vert-space-x1.border-success.border.rounded.p-2
-              - const numberOfChangedTensions = changedTensions.length
+          - let numberOfChangedTensions_sideA = 0
+          - let numberOfChangedTensions_sideB = 0
 
-              dt Found #{numberOfChangedTensions} re-tensioned wires (comparing this and earliest action versions)
+          if action.data.changedTensions_sideA
+            - numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
+            - numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
 
-              if numberOfChangedTensions > 0
-                dd
-                  table.table
-                    thead
-                      tr
-                        th.col-md-2 Wire Index
-                        th.col-md-2 Original Tension (N)
-                        th.col-md-2 Latest Tension (N)
+          .row
+            .col-md-6
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
+                | #{numberOfChangedTensions_sideA} on side A: 
+                i.chevron.fa.fa-fw 
 
-                    tbody
-                      each changedTension in changedTensions
-                        tr
-                          td #{changedTension[0]}
-                          td #{changedTension[1]}
-                          td #{changedTension[2]}
+              .collapse#reTensionsBoxA
+                .vert-space-x1.border-success.border.rounded.p-2
+                  if numberOfChangedTensions_sideA > 0
+                    dd
+                      table.table
+                        thead
+                          tr
+                            th.col-md-2 Index of Wire or Wire Segment
+                            th.col-md-2 Original Tension (N)
+                            th.col-md-2 Latest Tension (N)
 
-        if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance'
+                        tbody
+                          each changedTension in action.data.changedTensions_sideA
+                            tr
+                              td #{changedTension[0]}
+                              td #{changedTension[1]}
+                              td #{changedTension[2]}
+            .col-md-6
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
+                | #{numberOfChangedTensions_sideB} on side B: 
+                i.chevron.fa.fa-fw 
+
+              .collapse#reTensionsBoxB
+                .vert-space-x1.border-success.border.rounded.p-2
+                  if numberOfChangedTensions_sideB > 0
+                    dd
+                      table.table
+                        thead
+                          tr
+                            th.col-md-2 Index of Wire or Wire Segment
+                            th.col-md-2 Original Tension (N)
+                            th.col-md-2 Latest Tension (N)
+
+                        tbody
+                          each changedTension in action.data.changedTensions_sideB
+                            tr
+                              td #{changedTension[0]}
+                              td #{changedTension[1]}
+                              td #{changedTension[2]}
+
+          .vert-space-x2 
+
+        if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance' || action.typeFormId == 'x_tension_testing'
           dt Add Images to Action Record:
           dd Please use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, please use the 'Confirm Images' button to finalise the upload.
             br

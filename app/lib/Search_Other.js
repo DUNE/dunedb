@@ -1,5 +1,6 @@
 const MUUID = require('uuid-mongodb');
 
+const Components = require('./Components');
 const { db } = require('./db');
 
 
@@ -175,17 +176,16 @@ async function workflowsByUUID(componentUUID) {
 }
 
 
-/// Retrieve a list of assembled APAs that match the specified record details
-async function apasByRecordDetails(location, configuration, locationNumber) {
+/// Retrieve a list of assembled APAs that match the specified location and production number
+async function apasByLocation(location, productionNumber) {
   let aggregation_stages = [];
 
-  // Retrieve all assembled APAs records that have the same location, configuration and location number as the specified values
+  // Retrieve all assembled APAs records that have the same location and production number as the specified values
   aggregation_stages.push({
     $match: {
       'formId': 'AssembledAPA',
       'data.apaAssemblyLocation': location,
-      'data.apaConfiguration': configuration,
-      'data.apaNumberAtLocation': parseInt(locationNumber, 10),
+      'data.apaNumberAtLocation': parseInt(productionNumber, 10),
     }
   });
 
@@ -296,10 +296,87 @@ async function nonConformanceByComponentUUID(componentUUID) {
 }
 
 
+/// Retrieve a list of board installation actions that reference a single component, specified by its UUID
+async function boardInstallByReferencedComponent(componentUUID) {
+  // Set up a list of type form IDs which correspond to 'board installation' type actions
+  let actionTypeFormIDs = [
+    'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB',
+    'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
+    'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
+    'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
+  ];
+
+  let aggregation_stages = [];
+
+  // Retrieve all board installation type action records
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': { $in: actionTypeFormIDs },
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      typeFormName: { '$first': '$typeFormName' },
+      componentUuid: { '$first': '$componentUuid' },
+      data: { '$first': '$data' },
+    },
+  });
+
+  // Query the 'actions' records collection using the aggregation stages defined above
+  let results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+
+  // At this stage we have a list of all 'Board Installation' action records
+  // But we want to narrow this down to only those records which contain the specified component UUID in one of the 'data.boardXUuid' key/value pairs, where X = 1 -> 10 or 21
+  // Loop over the keys in each record's 'data' object, and if the value matches the specified UUID, save the record into a list
+  let boardInstalls = [];
+
+  if (results.length > 0) {
+    for (const action of results) {
+      for (const [key, value] of Object.entries(action.data)) {
+        if (value === componentUUID) boardInstalls.push(action);
+      }
+    }
+  }
+
+  // Add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
+  for (let record of boardInstalls) {
+    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
+
+    if (component.data.name) {
+      if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
+        const name_splits = component.data.name.split('-');
+        record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      } else if (component.formId === 'GeometryBoard') {
+        record.componentName = component.data.typeRecordNumber;
+      } else {
+        record.componentName = component.data.name;
+      }
+    } else {
+      record.componentName = record.componentUuid;
+    }
+  }
+
+  // Return the list of matching actions
+  return boardInstalls;
+}
+
+
 module.exports = {
   boardShipmentsByReceptionDetails,
   workflowsByUUID,
-  apasByRecordDetails,
+  apasByLocation,
   nonConformanceByComponentType,
   nonConformanceByComponentUUID,
+  boardInstallByReferencedComponent,
 }

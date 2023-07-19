@@ -143,6 +143,10 @@ body(class = `deployment-${NODE_ENV}`)
                     |      Non-Conformance by Component Type or UUID
 
                 li.nav-item
+                  +navlink(href = '/search/actionsByReferencedUUID')
+                    |      Actions by Referenced UUID
+
+                li.nav-item
                   +navlink(href = '/search/geoBoardsByLocationOrPartNumber')
                     |      Geometry Boards by Location / Part Number
 
@@ -155,8 +159,8 @@ body(class = `deployment-${NODE_ENV}`)
                     |      Geometry Board Shipments by Reception Details
 
                 li.nav-item
-                  +navlink(href = '/search/apaByRecordDetails')
-                    |      Assembled APA by Record Details
+                  +navlink(href = '/search/apaByLocation')
+                    |      Assembled APA by Location
 
           hr
 

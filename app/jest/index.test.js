@@ -19,6 +19,7 @@ const pino_opts = {
 
 // Declare and initialise variables
 let uuid, uuidsBatch, actionId, workflowId;
+let actionType = 'boardInstall';
 let routes_toBeTested = {};
 
 // Set up a logger using the defined 'pino' settings and a destination file (in the same directory as this script)
@@ -732,6 +733,19 @@ describe('Private routes', function () {
     test('GET /json/search/nonConformanceByComponentUUID/<uuid>', () => {
       return myrequest(appAuthorized)
         .get(`/json/search/nonConformanceByComponentUUID/${uuid}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /search/actionsByReferencedUUID', () => {
+      return myrequest(appAuthorized)
+        .get('/search/actionsByReferencedUUID')
+        .expect(200);
+    });
+
+    test('GET /json/search/actionsByReferencedUUID/<uuid>/<actionType>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/actionsByReferencedUUID/${uuid}/${actionType}`)
         .expect('Content-Type', /json/)
         .expect(200);
     });

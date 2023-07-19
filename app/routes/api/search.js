@@ -115,11 +115,11 @@ router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, r
 });
 
 
-/// Search for an assembled APA using various details from its record
-router.get('/search/apaByRecordDetails/:apaLocation/:apaConfiguration/:apaLocationNumber', async function (req, res, next) {
+/// Search for an assembled APA using its location and production number
+router.get('/search/apaByLocation/:apaLocation/:apaProductionNumber', async function (req, res, next) {
   try {
     // Retrieve a list of assembled APAs that match the specified record details
-    const assembledAPAs = await Search_Other.apasByRecordDetails(req.params.apaLocation, req.params.apaConfiguration, req.params.apaLocationNumber);
+    const assembledAPAs = await Search_Other.apasByLocation(req.params.apaLocation, req.params.apaProductionNumber);
 
     // Return the list in JSON format
     return res.json(assembledAPAs);
@@ -157,6 +157,25 @@ router.get('/search/nonConformanceByComponentUUID/' + utils.uuid_regex, async fu
   try {
     // Retrieve a list of non-conformance actions that have been performed on the component corresponding to the specified UUID
     const actions = await Search_Other.nonConformanceByComponentUUID(req.params.uuid);
+
+    // Return the list in JSON format
+    return res.json(actions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for actions of a specified type that reference a specified component UUID
+router.get('/search/actionsByReferencedUUID/' + utils.uuid_regex + '/:actionType', async function (req, res, next) {
+  try {
+    // Depending on the specified action type, retrieve a list of actions of that type that reference the specified component UUID
+    let actions = null;
+
+    if (req.params.actionType === 'boardInstall') {
+      actions = await Search_Other.boardInstallByReferencedComponent(req.params.uuid);
+    }
 
     // Return the list in JSON format
     return res.json(actions);

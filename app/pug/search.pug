@@ -65,6 +65,24 @@ block content
 
     .vert-space-x2
       h4
+        a(href = '/search/actionsByReferencedUUID') Actions by Referenced UUID
+
+      p This page may be used to search specifically for <b>actions that reference a particular component, but have not been directly performed on it</b>.
+        br
+        |  For example, actions relating to 'Board Installation' must reference the 'Geometry Board' type components that are being installed (i.e. the action records will contain the boards' UUIDs), but these types of actions are actually performed on 'Assembled APA' type components.
+        br
+        |  Users must specify the following information:
+        
+        ul
+          li the UUID of a single component
+          li the type (or general group) of action type, selected from the provided list
+
+      p Please note that <b>both pieces of information must be provided</b> for the search to be performed.  If successful, a summary of information about each found action will be displayed in the search results panel on the right side of the page.
+
+      hr
+
+    .vert-space-x2
+      h4
         a(href = '/search/geoBoardsByLocationOrPartNumber') Geometry Boards By Location or Part Number
 
       p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios: 
@@ -114,20 +132,19 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/apaByRecordDetails') Assembled APA by Record Details
+        a(href = '/search/apaByLocation') Assembled APA by Location
 
-      p This page may be used to search specifically for <b>assembled APAs</b> that match <b>all</b> of the following user-specified record details:
+      p This page may be used to search specifically for <b>assembled APAs</b> that match <b>both</b> of the following user-specified record details:
         ul
           li <b>location</b>: the location at which the APA is being assembled
-          li <b>configuration</b>: the configuration of the APA ('top' or 'bottom')
-          li <b>location number</b>: the number of the APA, out of all APAs being assembled at the specified location
+          li <b>production number</b>: the production number of the APA at the specified location, i.e. the order in which the APAs have been assembled
 
-      p Users may select one of the locations and configurations from the respective lists, and manually enter an (integer) location number.  Please note that <b>all three pieces of information must be provided</b> for the search to be performed.
+      p Users may select one of the locations from the list, and manually enter an (integer) production number.  Please note that <b>both pieces of information must be provided</b> for the search to be performed.
 
-      p If an existing assembled APA record that matches all three pieces of information is successfully found in the database, the user will be automatically redirected to the page for viewing the APA component record.
+      p If an existing assembled APA record that matches both pieces of information is successfully found in the database, the user will be automatically redirected to the page for viewing the APA component record.
         br
         |  If there is no such APA, i.e. the information does not match an existing APA record, a message will be displayed to the right of the input boxes to that effect.
 
-      p It should not be possible for multiple APA records to match against all three provided pieces of information, since they should uniquely identify a single APA.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
+      p It should not be possible for multiple APA records to match against both provided pieces of information, since they should uniquely identify a single APA.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 
     .vert-space-x2 

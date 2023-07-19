@@ -1,16 +1,16 @@
 extend default
 
 block vars
-  - const page_title = 'Search for Assembled APA by Record Details';
+  - const page_title = 'Search for Assembled APA by Location';
 
 block extrascripts
   block workscripts 
-    script(src = '/pages/search_apaByRecordDetails.js')
+    script(src = '/pages/search_apaByLocation.js')
 
 block content
   .container-fluid
     .vert-space-x2
-      h2 Search for Assembled APA by Record Details
+      h2 Search for Assembled APA by Location
 
     .vert-space-x2
       hr
@@ -29,23 +29,12 @@ block content
             option(value = 'wisconsin') Wisconsin 
 
           .vert-space-x2
-            h4 Select Configuration
+            h4 Enter Production Number
 
             .vert-space-x1
-              p Select a configuration from the options below.
+              p Enter the production number of the APA at the specified location below and <b>press the 'Enter' key</b>.
 
-            select.form-control#configurationSelection
-              option(value = '')          
-              option(value = 'top') Top 
-              option(value = 'bottom') Bottom 
-
-          .vert-space-x2
-            h4 Enter Location Number
-
-            .vert-space-x1
-              p Enter a location number below and press the 'Enter' key.
-
-            input.form-control#locationNumberSelection
+            input.form-control#productionNumberSelection
 
         .col-md-1
 
