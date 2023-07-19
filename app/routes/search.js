@@ -57,4 +57,11 @@ router.get('/search/nonConformanceByComponentTypeOrUUID', async function (req, r
 });
 
 
+/// Search for actions of a specified type that reference a specified component UUID
+router.get('/search/actionsByReferencedUUID', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_actionsByReferencedUUID.pug');
+});
+
+
 module.exports = router;
