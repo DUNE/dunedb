@@ -231,7 +231,7 @@ class ComponentUUID extends TextFieldComponent {
 
     if (matchedURL) {
       const shortuuid = matchedURL[1].match('[^\-]*')[0];
-      const that = this;
+      let that = this;
 
       $.ajax({
         type: 'GET',
@@ -240,6 +240,7 @@ class ComponentUUID extends TextFieldComponent {
         success: function (uuid) {
           if (uuid) {
             that.setValueAt(index, uuid);
+            that.updateValue();
           }
         },
       })
