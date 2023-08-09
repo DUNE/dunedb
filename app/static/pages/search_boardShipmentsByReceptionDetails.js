@@ -14,35 +14,26 @@ window.addEventListener('load', renderSearchForms);
 // Function to run when the page is loaded
 async function renderSearchForms() {
   // When the selected shipment status is changed, get the newly selected status
-  // If the status has a non-empty value (i.e. an option has actually been selected), perform the search using the current values of the reception details variables
   $('#shipmentStatusSelection').on('change', async function () {
     shipmentStatus = $('#shipmentStatusSelection').val();
-
-    if (shipmentStatus !== '') performSearch();
   });
 
   // When the selected origin location is changed, get the newly selected location if it has a value, or otherwise reset the string
-  // Then perform the search using the current values of the reception details variables
   $('#originLocationSelection').on('change', async function () {
     if ($('#originLocationSelection').val()) {
       originLocation = $('#originLocationSelection').val();
     } else {
       originLocation = '';
     }
-
-    performSearch();
   });
 
   // When the selected destination location is changed, get the newly selected location if it has a value, or otherwise reset the string
-  // Then perform the search using the current values of the reception details variables
   $('#destinationLocationSelection').on('change', async function () {
     if ($('#destinationLocationSelection').val()) {
       destinationLocation = $('#destinationLocationSelection').val();
     } else {
       destinationLocation = '';
     }
-
-    performSearch();
   });
 
   // Create a Formio form consisting of a date/time picker, and render it in the page element called 'earliestdateform'
@@ -60,15 +51,12 @@ async function renderSearchForms() {
 
   // When the earliest reception date is changed, get the newly set date if it is valid and has a value, or otherwise reset the string
   // Note that the search library function expects only the 'date' part of the date/time string, so split and isolate it accordingly
-  // Then perform the search using the current values of the reception details variables
   earliestDateForm.on('change', function () {
     if ((earliestDateForm.isValid()) && (earliestDateForm.submission.data.earliestDate)) {
       earliestDate = ((earliestDateForm.submission.data.earliestDate).split('T'))[0];
     } else {
       earliestDate = '';
     }
-
-    performSearch();
   });
 
   // Create a Formio form consisting of a date/time picker, and render it in the page element called 'latestdateform'
@@ -86,40 +74,38 @@ async function renderSearchForms() {
 
   // When the latest reception date is changed, get the newly set date if it is valid and has a value, or otherwise reset the string
   // Note that the search library function expects only the 'date' part of the date/time string, so split and isolate it accordingly
-  // Then perform the search using the current values of the reception details variables
   latestDateForm.on('change', function () {
     if ((latestDateForm.isValid()) && (latestDateForm.submission.data.latestDate)) {
       latestDate = ((latestDateForm.submission.data.latestDate).split('T'))[0];
     } else {
       latestDate = '';
     }
-
-    performSearch();
   });
 
   // When the shipment reception comment is changed, get the newly indicated comment if it has a value, or otherwise reset the string
-  // Then perform the search using the current values of the reception details variables
   $('#receptionCommentSelection').on('change', async function () {
     if ($('#receptionCommentSelection').val()) {
       receptionComment = $('#receptionCommentSelection').val();
     } else {
       receptionComment = '';
     }
-
-    performSearch();
   });
-}
 
+  // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the reception details variables
+  // Additionally, disable the 'Perform Search' button while the current search is being performed
+  $('#confirmButton').on('click', function () {
+    $('#confirmButton').prop('disabled', true);
 
-// Function to perform the appropriate jQuery 'ajax' call to make the search
-function performSearch() {
-  $.ajax({
-    contentType: 'application/json',
-    method: 'GET',
-    url: `/json/search/boardShipmentsByReceptionDetails?shipmentStatus=${shipmentStatus}&originLocation=${originLocation}&destinationLocation=${destinationLocation}&earliestDate=${earliestDate}&latestDate=${latestDate}&receptionComment=${receptionComment}`,
-    dataType: 'json',
-    success: postSuccess,
-  }).fail(postFail);
+    if (shipmentStatus !== '') {
+      $.ajax({
+        contentType: 'application/json',
+        method: 'GET',
+        url: `/json/search/boardShipmentsByReceptionDetails?shipmentStatus=${shipmentStatus}&originLocation=${originLocation}&destinationLocation=${destinationLocation}&earliestDate=${earliestDate}&latestDate=${latestDate}&receptionComment=${receptionComment}`,
+        dataType: 'json',
+        success: postSuccess,
+      }).fail(postFail);
+    }
+  })
 }
 
 
@@ -194,6 +180,9 @@ function postSuccess(result) {
       $('#results').append(boardText);
     }
   }
+
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
 
 
@@ -205,4 +194,7 @@ function postFail(result, statusCode, statusMsg) {
   } else {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
+
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
