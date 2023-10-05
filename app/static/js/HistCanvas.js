@@ -179,11 +179,30 @@ HistCanvas.prototype.DrawMarkers = function()
     this.ctx.save();
     for(var marker of this.markers) {
       this.ctx.fillStyle = this.marker_color || "rgba(0,0,0,1)";
-      var x1 = this.GetX(marker)-1;
-      var dx = 2;
-      var y1 = this.GetY(this.max_v);
-      var dy = (this.origin_y) - y1;
-      this.ctx.fillRect( x1, y1, dx, dy );    
+
+      let type = '';
+
+      if (this.max_u > this.max_v) {
+        type = 'graph';
+      } else {
+        type = 'histogram';
+      }
+
+      var x1, dx, y1, dy;
+
+      if (type === 'graph') {
+        x1 = this.GetX(this.max_u);
+        dx = (this.origin_x) - x1;
+        y1 = this.GetY(marker) - 1;
+        dy = 2;
+      } else {
+        x1 = this.GetX(marker) - 1;
+        dx = 2;
+        y1 = this.GetY(this.max_v);
+        dy = (this.origin_y) - y1;
+      }
+
+      this.ctx.fillRect(x1, y1, dx, dy);
     }
     this.ctx.restore();
   }
