@@ -58,10 +58,10 @@ class NumberArray extends TextFieldComponent {
           <div>Entries: <span class = 'numberArrayLength'></span></div>
           <div>Min.: <span class = 'numberArrayMin'></span></div>
           <div>Max.: <span class = 'numberArrayMax'></span></div>
-          <div>Mean: <span class = 'numberArrayMean'></span></div>
-          <div>RMS: <span class = 'numberArrayRMS'></span></div>
-          ${isNaN(bounds.lo) ? '' : '<div>OoB(L): <span class = "numberArrayOoBLo">n/a</span></div>'}
-          ${isNaN(bounds.hi) ? '' : '<div>OoB(H): <span class = "numberArrayOoBHi">n/a</span></div>'}
+          ${isNaN(bounds[0].lo) ? '' : '<div>OoB (IL): <span class = "numberArrayOoBILo">n/a</span></div>'}
+          ${isNaN(bounds[0].hi) ? '' : '<div>OoB (IH): <span class = "numberArrayOoBIHi">n/a</span></div>'}
+          ${isNaN(bounds[1].lo) ? '' : '<div>OoB (OL): <span class = "numberArrayOoBOLo">n/a</span></div>'}
+          ${isNaN(bounds[1].hi) ? '' : '<div>OoB (OH): <span class = "numberArrayOoBOHi">n/a</span></div>'}
           <div>NaNs: <span class = 'numberArrayNaNCount'></span></div>
         </div>
         <div class = 'flex-grow-1 p-4 numberArrayGraph' style = 'height: 200px; width: 240px;'></div>
@@ -81,20 +81,27 @@ class NumberArray extends TextFieldComponent {
 
   // Get the upper and lower limits of data to use based on specified nominal, tolerance and minimum and maximum values
   getBounds() {
-    let bounds = {
+    let boundsInner = {
       lo: NaN,
       hi: NaN,
     };
 
-    if (('specification_nominal' in this.component) && ('specification_tolerance' in this.component)) {
-      bounds.lo = this.component.specification_nominal - this.component.specification_tolerance;
-      bounds.hi = this.component.specification_nominal + this.component.specification_tolerance;
+    if (('specification_nominal' in this.component) && ('specification_toleranceInner' in this.component)) {
+      boundsInner.lo = this.component.specification_nominal - this.component.specification_toleranceInner;
+      boundsInner.hi = this.component.specification_nominal + this.component.specification_toleranceInner;
     }
 
-    if ('specification_minimum' in this.component) bounds.lo = this.component.specification_minimum;
-    if ('specification_maximum' in this.component) bounds.hi = this.component.specification_maximum;
+    let boundsOuter = {
+      lo: NaN,
+      hi: NaN,
+    };
 
-    return bounds;
+    if (('specification_nominal' in this.component) && ('specification_toleranceOuter' in this.component)) {
+      boundsOuter.lo = this.component.specification_nominal - this.component.specification_toleranceOuter;
+      boundsOuter.hi = this.component.specification_nominal + this.component.specification_toleranceOuter;
+    }
+
+    return [boundsInner, boundsOuter];
   }
 
   // Update the various sub-parts of this component
@@ -112,10 +119,12 @@ class NumberArray extends TextFieldComponent {
       max = 0;
     }
 
-    // Set the out-of-bounds limits and minimum and maximum values
+    // Count the number of entries outside the out-of-bounds limits, and calculate the minimum and maximum entry values
     const bounds = this.getBounds();
-    let oobHi = 0;
-    let oobLo = 0;
+    let oobIHi = 0;
+    let oobILo = 0;
+    let oobOHi = 0;
+    let oobOLo = 0;
 
     for (let i = 0; i < arr.length; i++) {
       const x = parseFloat(arr[i]);
@@ -125,8 +134,11 @@ class NumberArray extends TextFieldComponent {
         min = Math.min(min, x);
         max = Math.max(max, x);
 
-        if (x > bounds.hi) oobHi++;
-        if (x < bounds.lo) oobLo++;
+        if (x > bounds[0].hi) oobIHi++;
+        if (x < bounds[0].lo) oobILo++;
+
+        if (x > bounds[1].hi) oobOHi++;
+        if (x < bounds[1].lo) oobOLo++;
 
         arr[i] = x;
       }
@@ -134,11 +146,14 @@ class NumberArray extends TextFieldComponent {
 
     const numberOfEntries = arr.length;
 
+    // Set the displayed text information
     $('span.numberArrayLength', this.element).text(numberOfEntries);
     $('span.numberArrayMin', this.element).text(min.toFixed(2));
     $('span.numberArrayMax', this.element).text(max.toFixed(2));
-    $('span.numberArrayOoBHi', this.element).text(oobHi);
-    $('span.numberArrayOoBLo', this.element).text(oobLo);
+    $('span.numberArrayOoBIHi', this.element).text(oobIHi);
+    $('span.numberArrayOoBILo', this.element).text(oobILo);
+    $('span.numberArrayOoBOHi', this.element).text(oobOHi);
+    $('span.numberArrayOoBOLo', this.element).text(oobOLo);
     $('span.numberArrayNaNCount', this.element).text(count_nans);
 
     // Draw the graph
@@ -152,7 +167,8 @@ class NumberArray extends TextFieldComponent {
     colorscale.max = max;
 
     this.LizardGraph.SetHist(graph, colorscale);
-    this.LizardGraph.ResetDefaultRange();
+    this.LizardGraph.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
+    this.LizardGraph.marker_color = 'rgba(100, 0,0, 0.5)';
     this.LizardGraph.Draw();
 
     // Draw the histogram
@@ -161,13 +177,9 @@ class NumberArray extends TextFieldComponent {
     for (const x of arr) { hist.Fill(x); }
 
     this.LizardHistogram.SetHist(hist, colorscale);
-    this.LizardHistogram.SetMarkers([bounds.lo, bounds.hi]);
+    this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardHistogram.marker_color = 'rgba(100, 0,0, 0.5)';
     this.LizardHistogram.Draw();
-
-    // Calculate some basic statistics
-    $('span.numberArrayMean', this.element).text(hist.GetMean().toFixed(2));
-    $('span.numberArrayRMS', this.element).text(hist.GetRMS().toFixed(2));
   }
 
   // After rendering the Formio component, attach it to an element of the page
@@ -249,29 +261,21 @@ NumberArray.editForm = function (a, b, c) {
       key: 'specification_nominal',
       label: 'Nominal Value',
       placeholder: 'Nominal Value',
-      tooltip: 'Use either [nominal +/- tolerance] or [minimum -> maximum] to indicate the expected range of entered values',
+      tooltip: 'Expected inner range = [nominal +/- inner tolerance], and/or expected outer range = [nominal +/- outer tolerance]',
       input: true,
     },
     {
       type: 'number',
-      key: 'specification_tolerance',
-      label: 'Tolerance',
-      tooltip: 'If using [nominal +/- tolerance] to indicate the expected range of entered values, any values outside this limit will be counted and indicated',
+      key: 'specification_toleranceInner',
+      label: 'Inner Tolerance',
+      tooltip: 'Any values outside the expected inner range = [nominal +/- inner tolerance] will be counted and indicated',
       input: true,
     },
     {
       type: 'number',
-      key: 'specification_minimum',
-      label: 'Minimum Value',
-      tooltip: 'If using [minimum -> maximum] to indicate the expected range of entered values, any values below [this] will be counted and indicated',
-      input: true,
-
-    },
-    {
-      type: 'number',
-      key: 'specification_maximum',
-      label: 'Maximum Value',
-      tooltip: 'If using [minimum -> maximum] to indicate the expected range of entered values, any values above [this] will be counted and indicated',
+      key: 'specification_toleranceOuter',
+      label: 'Outer Tolerance',
+      tooltip: 'Any values outside the expected outer range = [nominal +/- outer tolerance] will be counted and indicated',
       input: true,
     },
     {

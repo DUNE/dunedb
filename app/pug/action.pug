@@ -128,6 +128,173 @@ block content
 
           .vert-space-x2 
 
+        if action.typeFormId == 'FrameSurveys'
+          .panel.panel-default
+          .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#datapointsBox')
+            | Datapoints (all x, y, z values in [mm]): 
+            i.chevron.fa.fa-fw 
+
+          .collapse#datapointsBox
+            .vert-space-x1.border-success.border.rounded.p-2
+              dd
+                table.table
+                  thead
+                    tr
+                      th.col-md-1 Point
+                      th.col-md-1 Actual x
+                      th.col-md-1 Actual y
+                      th.col-md-1 Actual z
+                      th.col-md-1 Nominal x
+                      th.col-md-1 Nominal y
+                      th.col-md-1 Nominal z
+                      th.col-md-1 x Deviation
+                      th.col-md-1 y Deviation
+                      th.col-md-1 z Deviation
+                      th.col-md-1 Adapter 
+                      th.col-md-1 Comments
+
+                  tbody
+                    for [key, value] of Object.entries(action.data.datapoints)
+                      tr
+                        td #{key}
+                        td #{(value['Surface x (m)'] * 1000).toFixed(1)}
+                        td #{(value['Surface y (m)'] * 1000).toFixed(1)}
+                        td #{(value['Surface z (m)'] * 1000).toFixed(1)}
+
+                        if value['Nominal x (mm)'] == ''
+                          td #{value['Nominal x (mm)']}
+                        else 
+                          td #{value['Nominal x (mm)'].toFixed(1)}
+
+                        if value['Nominal y (mm)'] == ''
+                          td #{value['Nominal y (mm)']}
+                        else 
+                          td #{value['Nominal y (mm)'].toFixed(1)}
+
+                        if value['Nominal z (mm)'] == ''
+                          td #{value['Nominal z (mm)']}
+                        else 
+                          td #{value['Nominal z (mm)'].toFixed(1)}
+
+                        if value['x Deviation (mm)'] == ''
+                          td #{value['x Deviation (mm)']}
+                        else 
+                          td #{value['x Deviation (mm)'].toFixed(2)}
+
+                        if value['y Deviation (mm)'] == ''
+                          td #{value['y Deviation (mm)']}
+                        else 
+                          td #{value['y Deviation (mm)'].toFixed(2)}
+
+                        if value['z Deviation (mm)'] == ''
+                          td #{value['z Deviation (mm)']}
+                        else 
+                          td #{value['z Deviation (mm)'].toFixed(2)}
+
+                        td #{value['Adapter']}
+                        td #{value['Comment']}
+
+          .vert-space-x1
+            - let outOfSpecCount = 0
+
+            for [key, value] of Object.entries(action.data.envelope)
+              if key < 4
+                if value['Deviation from nominal'] >= value['Tolerance']
+                  - outOfSpecCount += 1
+              else
+                if (value['Deviation from nominal'] <= (-1.0 * value['Tolerance'])) || (value['Deviation from nominal'] >= value['Tolerance'])
+                  - outOfSpecCount += 1
+
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
+              | Envelope Calculations (#{outOfSpecCount} results outside tolerance): 
+              i.chevron.fa.fa-fw 
+
+            .collapse#envelopeBox
+              .vert-space-x1.border-success.border.rounded.p-2
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-3 Measurement
+                        th.col-md-1 Units
+                        th.col-md-1 Position
+                        th.col-md-1 Nominal 
+                        th.col-md-1 Tolerance 
+                        th.col-md-1 Actual
+                        th.col-md-1 Deviation
+                        th.col-md-1 EDMS ID 
+                        th.col-md-2 Comments
+
+                    tbody
+                      for [key, value] of Object.entries(action.data.envelope)
+                        tr
+                          td #{value['Measurement']}
+                          td #{value['Units']}
+                          td #{value['Position']}
+                          td #{value['Nominal'].toFixed(2)}
+                          td #{value['Tolerance'].toFixed(2)}
+
+                          if value['Actual'] == '-'
+                            td #{value['Actual']}
+                          else 
+                            td #{value['Actual'].toFixed(2)}
+
+                          if key < 4
+                            if value['Deviation from nominal'] < value['Tolerance']
+                              td.text-success.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
+                            else
+                              td.text-danger.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
+                          else
+                            if (value['Deviation from nominal'] > (-1.0 * value['Tolerance'])) && (value['Deviation from nominal'] < value['Tolerance'])
+                              td.text-success.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
+                            else
+                              td.text-danger.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
+
+                          td 
+                            a(href = `https://edms.cern.ch/document/${value['EDMS ID']}`, target = '_blank') #{value['EDMS ID']}
+                          td #{value['Comments']}
+
+          .vert-space-x1
+            - outOfSpecCount = 0
+
+            for [key, value] of Object.entries(action.data.planarity)
+              if value.Actual >= value.Tolerance
+                - outOfSpecCount += 1
+
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+              | Planarity Calculations (#{outOfSpecCount} results outside tolerance): 
+              i.chevron.fa.fa-fw 
+
+            .collapse#planarityBox
+              .vert-space-x1.border-success.border.rounded.p-2
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-2 Measurement
+                        th.col-md-1 Actual
+                        th.col-md-1 Units
+                        th.col-md-1 Tolerance 
+                        th.col-md-7 Comment
+
+                    tbody
+                      for [key, value] of Object.entries(action.data.planarity)
+                        tr
+                          td #{key}
+
+                          if value.Actual < value.Tolerance
+                            td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
+                          else
+                            td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
+
+                          td #{value.Unit}
+                          td #{value.Tolerance.toFixed(2)}
+                          td #{value.Comment}
+
+            .vert-space-x2 
+
         if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance' || action.typeFormId == 'x_tension_testing'
           dt Add Images to Action Record:
           dd Please use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, please use the 'Confirm Images' button to finalise the upload.
