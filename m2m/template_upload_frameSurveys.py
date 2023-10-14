@@ -13,16 +13,17 @@ dataFile = '/user/majumdar/Desktop/surveys/frame 7.xlsx'
                                                              # Name and location of the input .xlsx file (must be a string ending in '.xlsx')
 
 # For uploading new survey results (i.e. performing a new action), the following information is required:
-frame_uuid       = '2367e340-5ed5-11ee-9e07-d11ab28594c8'    # UUID of the APA Frame on which the action is being performed (get from DB)
-surveys_date     = '2023-09-29'                              # Date on which the surveys were performed (in 'yyyy-MM-dd' format)
-surveys_location = 'dsm'                                     # Location at which the surveys were performed (use one of the following: 'dsm', 'daresbury', 'cern')
-newAction_comms  = 'This is a new frame surveys action, uploaded via M2M'
-                                                             # Free-form string, additional description or commentary if required
+frame_uuid        = '2367e340-5ed5-11ee-9e07-d11ab28594c8'    # UUID of the APA Frame on which the action is being performed (get from DB)
+surveys_date      = '2023-09-29'                              # Date on which the surveys were performed (in 'yyyy-MM-dd' format)
+surveys_location  = 'dsm'                                     # Location at which the surveys were performed (use one of the following: 'dsm', 'daresbury', 'cern')
+surveys_personnel = 'manchesterMetrology'                     # Who performed the surveys (use one of the following: 'daresbury', 'manchesterMetrology', 'cern')
+newAction_comms   = 'This is a new frame surveys action, uploaded via M2M'
+                                                              # Free-form string, additional description or commentary if required
 
 # For uploading edited survey results (i.e. editing an existing action), the following information is required:
-action_id        = '6516ec526af6fed6fbf7aaa6'                # ID of the existing frame surveys action to be edited (get from DB)
-edtAction_comms  = 'This is an edited frame surveys action, uploaded via M2M'
-                                                             # Free-form string, additional description or commentary if required
+action_id         = '6516ec526af6fed6fbf7aaa6'                # ID of the existing frame surveys action to be edited (get from DB)
+edtAction_comms   = 'This is an edited frame surveys action, uploaded via M2M'
+                                                              # Free-form string, additional description or commentary if required
 
 # ##################################
 
@@ -54,6 +55,7 @@ if __name__ == '__main__':
         actionData = {
             'surveysDate': surveys_date,
             'surveysLocation': surveys_location,
+            'surveysPersonnel': surveys_personnel,
             'comments': newAction_comms,
             'datapoints': dict_datapoints,
             'envelope': dict_envelope,
