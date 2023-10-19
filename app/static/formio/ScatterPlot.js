@@ -1,21 +1,21 @@
 var TextFieldComponent = Formio.Components.components.textfield;
-var gNumberArrayComponent = null;
-var gNumberArrayComponentId = 0;
+var gScatterPlotComponent = null;
+var gScatterPlotComponentId = 0;
 
 
-/// This class describes a custom Formio component for inputting an array of numbers, and displaying the numbers as scatter and bar plots
+/// This class describes a custom Formio component for inputting an array of numbers, and displaying the numbers as a scatter plot
 /// It extends the built-in 'text field' Formio component
-class NumberArray extends TextFieldComponent {
+class ScatterPlot extends TextFieldComponent {
 
   // Base schema for the component (the built-in 'text field' Formio component)
   static schema(...extend) {
     return TextFieldComponent.schema({
-      label: 'Number Array',
+      label: 'Scatter Plot',
       placeholder: 'Enter comma-delimited values here',
-      customClass: 'component-numbarray-formio',
+      customClass: 'component-scatterplot-formio',
       errorLabel: 'Values cannot be parsed!',
-      key: 'number_array',
-      type: 'NumberArray',
+      key: 'scatter_plot',
+      type: 'ScatterPlot',
       input: true,
       defaultValue: [],
     }, ...extend);
@@ -24,17 +24,17 @@ class NumberArray extends TextFieldComponent {
   // Getter functions
   static get builderInfo() {
     return {
-      title: 'Number Array',
+      title: 'Scatter Plot',
       group: 'custom',
       icon: 'bar-chart',
       weight: 72,
       documentation: '#',
-      schema: NumberArray.schema()
+      schema: ScatterPlot.schema()
     };
   }
 
   get defaultSchema() {
-    return NumberArray.schema();
+    return ScatterPlot.schema();
   }
 
   get emptyValue() {
@@ -47,7 +47,7 @@ class NumberArray extends TextFieldComponent {
     if (value.data) value = value.data;
 
     const textvalue = value.join(',');
-    gNumberArrayComponentId++;
+    gScatterPlotComponentId++;
 
     let tpl = super.renderElement(textvalue, index);
     const bounds = this.getBounds();
@@ -55,17 +55,16 @@ class NumberArray extends TextFieldComponent {
     tpl += `
       <div class = 'd-flex justify-content-around border'>
         <div class = 'align-self-center p-2'>
-          <div>Entries: <span class = 'numberArrayLength'></span></div>
-          <div>Min.: <span class = 'numberArrayMin'></span></div>
-          <div>Max.: <span class = 'numberArrayMax'></span></div>
-          ${isNaN(bounds[0].lo) ? '' : '<div>OoB (IL): <span class = "numberArrayOoBILo">n/a</span></div>'}
-          ${isNaN(bounds[0].hi) ? '' : '<div>OoB (IH): <span class = "numberArrayOoBIHi">n/a</span></div>'}
-          ${isNaN(bounds[1].lo) ? '' : '<div>OoB (OL): <span class = "numberArrayOoBOLo">n/a</span></div>'}
-          ${isNaN(bounds[1].hi) ? '' : '<div>OoB (OH): <span class = "numberArrayOoBOHi">n/a</span></div>'}
-          <div>NaNs: <span class = 'numberArrayNaNCount'></span></div>
+          <div>Entries: <span class = 'scatterPlotLength'></span></div>
+          <div>Min.: <span class = 'scatterPlotMin'></span></div>
+          <div>Max.: <span class = 'scatterPlotMax'></span></div>
+          ${isNaN(bounds[0].lo) ? '' : '<div>OoB (IL): <span class = "scatterPlotOoBILo">n/a</span></div>'}
+          ${isNaN(bounds[0].hi) ? '' : '<div>OoB (IH): <span class = "scatterPlotOoBIHi">n/a</span></div>'}
+          ${isNaN(bounds[1].lo) ? '' : '<div>OoB (OL): <span class = "scatterPlotOoBOLo">n/a</span></div>'}
+          ${isNaN(bounds[1].hi) ? '' : '<div>OoB (OH): <span class = "scatterPlotOoBOHi">n/a</span></div>'}
+          <div>NaNs: <span class = 'scatterPlotNaNCount'></span></div>
         </div>
-        <div class = 'flex-grow-1 p-4 numberArrayGraph' style = 'height: 200px; width: 240px;'></div>
-        <div class = 'flex-grow-1 p-4 numberArrayHistogram' style = 'height: 200px; width: 240px;'></div>
+        <div class = 'flex-grow-1 p-4 scatterPlotGraph' style = 'height: 200px; width: 480px;'></div>
       </div>`;
 
     return tpl;
@@ -106,7 +105,7 @@ class NumberArray extends TextFieldComponent {
 
   // Update the various sub-parts of this component
   updateExtras(value) {
-    gNumberArrayComponent = this;
+    gScatterPlotComponent = this;
 
     // Normalize the input values
     let arr = value || [];
@@ -147,14 +146,14 @@ class NumberArray extends TextFieldComponent {
     const numberOfEntries = arr.length;
 
     // Set the displayed text information
-    $('span.numberArrayLength', this.element).text(numberOfEntries);
-    $('span.numberArrayMin', this.element).text(min.toFixed(2));
-    $('span.numberArrayMax', this.element).text(max.toFixed(2));
-    $('span.numberArrayOoBIHi', this.element).text(oobIHi);
-    $('span.numberArrayOoBILo', this.element).text(oobILo);
-    $('span.numberArrayOoBOHi', this.element).text(oobOHi);
-    $('span.numberArrayOoBOLo', this.element).text(oobOLo);
-    $('span.numberArrayNaNCount', this.element).text(count_nans);
+    $('span.scatterPlotLength', this.element).text(numberOfEntries);
+    $('span.scatterPlotMin', this.element).text(min.toFixed(2));
+    $('span.scatterPlotMax', this.element).text(max.toFixed(2));
+    $('span.scatterPlotOoBIHi', this.element).text(oobIHi);
+    $('span.scatterPlotOoBILo', this.element).text(oobILo);
+    $('span.scatterPlotOoBOHi', this.element).text(oobOHi);
+    $('span.scatterPlotOoBOLo', this.element).text(oobOLo);
+    $('span.scatterPlotNaNCount', this.element).text(count_nans);
 
     // Draw the scatter plot
     let colorscale = new ColorScaleRGB(50, 50, 100);
@@ -171,16 +170,6 @@ class NumberArray extends TextFieldComponent {
     this.LizardGraph.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardGraph.marker_color = 'rgba(100, 0,0, 0.5)';
     this.LizardGraph.Draw();
-
-    // Draw the bar plot
-    let hist = new CreateGoodHistogram(Math.round((max - min) / 0.1) + 1, min, max);
-
-    for (const x of arr) { hist.Fill(x); }
-
-    this.LizardHistogram.SetHist(hist, colorscale);
-    this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
-    this.LizardHistogram.marker_color = 'rgba(100, 0,0, 0.5)';
-    this.LizardHistogram.Draw();
   }
 
   // After rendering the Formio component, attach it to an element of the page
@@ -188,27 +177,11 @@ class NumberArray extends TextFieldComponent {
     this.loadRefs(element, { readonly_display: 'single' });
     super.attach(element);
 
-    this.LizardGraph = new HistCanvas($('div.numberArrayGraph', this.element));
+    this.LizardGraph = new HistCanvas($('div.scatterPlotGraph', this.element));
     this.LizardGraph.default_options.doDots = true;
     this.LizardGraph.default_options.doFill = false;
-    this.LizardGraph.xlabel = 'Index of Wire or Wire Segment';
+    this.LizardGraph.xlabel = this.component.xtitle;
     this.LizardGraph.ylabel = this.component.units;
-
-    this.LizardHistogram = new HistCanvas($('div.numberArrayHistogram', this.element));
-    this.LizardHistogram.xlabel = this.component.units;
-    this.LizardHistogram.ylabel = 'Entries';
-
-    let readOnlyDisplay = this.refs.readonly_display;
-
-    this.LizardGraph.DoMouseClick = function (ev, u, v) {
-      const index = parseInt(u);
-      let elem = readOnlyDisplay.children[index];
-
-      if (elem) {
-        readOnlyDisplay.scrollLeft = elem.offsetLeft - 100;
-        $(elem).stop().fadeOut(250).fadeIn(250);
-      }
-    }
 
     if (this.arrayValue) this.updateExtras(this.arrayValue);
 
@@ -217,8 +190,6 @@ class NumberArray extends TextFieldComponent {
     $('.collapse', this.element).on('shown.bs.collapse', function () {
       self.LizardGraph.Resize();
       self.LizardGraph.Draw();
-      self.LizardHistogram.Resize();
-      self.LizardHistogram.Draw();
     });
   }
 
@@ -249,7 +220,7 @@ class NumberArray extends TextFieldComponent {
 
 
 /// Function for updating the selection of available Formio components to include this one (on any 'Edit Type Form' page)
-NumberArray.editForm = function (a, b, c) {
+ScatterPlot.editForm = function (a, b, c) {
   const form = TextFieldComponent.editForm(a, b, c);
   const tabs = form.components.find(obj => { return obj.type === 'tabs' });
   let datatab = tabs.components.find(obj => { return obj.key == 'data' });
@@ -281,9 +252,16 @@ NumberArray.editForm = function (a, b, c) {
     },
     {
       type: 'textfield',
+      key: 'xtitle',
+      label: 'X Axis Label',
+      tooltip: 'This is used as the scatter plot\'s horizontal axis label',
+      input: true,
+    },
+    {
+      type: 'textfield',
       key: 'units',
       label: 'Units',
-      tooltip: 'This is used as the scatter plot\'s vertical axis label, and the bar plot\'s horizontal axis label',
+      tooltip: 'This is used as the scatter plot\'s vertical axis label',
       input: true,
     },
   );
@@ -293,4 +271,4 @@ NumberArray.editForm = function (a, b, c) {
 
 
 /// Register this custom Formio component with the overall list of components that are available to use in Formio forms
-Formio.Components.addComponent('NumberArray', NumberArray);
+Formio.Components.addComponent('ScatterPlot', ScatterPlot);

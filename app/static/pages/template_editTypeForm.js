@@ -22,10 +22,12 @@ const builder_config = {
       title: 'Multiple Data Values',
       weight: 10,
       components: {
+        BarPlot: true,
         datamap: true,
         datagrid: true,
         editgrid: true,
         NumberArray: true,
+        ScatterPlot: true,
         tree: true,
       },
     },
