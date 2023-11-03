@@ -730,9 +730,22 @@ describe('Private routes', function () {
         .expect(200);
     });
 
-    test('GET /json/search/nonConformanceByComponentUUID/<uuid>', () => {
+    test('GET /json/search/nonConformanceByUUID/<uuid>', () => {
       return myrequest(appAuthorized)
-        .get(`/json/search/nonConformanceByComponentUUID/${uuid}`)
+        .get(`/json/search/nonConformanceByUUID/${uuid}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    test('GET /search/tensionMeasurementsByUUID', () => {
+      return myrequest(appAuthorized)
+        .get('/search/tensionMeasurementsByUUID')
+        .expect(200);
+    });
+
+    test('GET /json/search/tensionMeasurementsByUUID/<uuid>', () => {
+      return myrequest(appAuthorized)
+        .get(`/json/search/tensionMeasurementsByUUID/${uuid}`)
         .expect('Content-Type', /json/)
         .expect(200);
     });

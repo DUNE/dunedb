@@ -100,6 +100,21 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 });
 
 
+/// Search for grounding mesh panels of a specified part number
+router.get('/search/meshesByPartNumber/:partNumber', async function (req, res, next) {
+  try {
+    // Retrieve a list of grounding mesh panels, grouped by intake location, of the specified part number
+    const meshesByLocation = await Search_Other.meshesByPartNumber(req.params.partNumber);
+
+    // Return the list in JSON format
+    return res.json(meshesByLocation);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// Search for workflows that involve a particular component, specified by its UUID
 router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
   try {
@@ -153,10 +168,25 @@ router.get('/search/nonConformanceByComponentType', async function (req, res, ne
 
 
 /// Search for non-conformance actions performed on a single component, specified by its UUID
-router.get('/search/nonConformanceByComponentUUID/' + utils.uuid_regex, async function (req, res, next) {
+router.get('/search/nonConformanceByUUID/' + utils.uuid_regex, async function (req, res, next) {
   try {
     // Retrieve a list of non-conformance actions that have been performed on the component corresponding to the specified UUID
-    const actions = await Search_Other.nonConformanceByComponentUUID(req.params.uuid);
+    const actions = await Search_Other.nonConformanceByUUID(req.params.uuid);
+
+    // Return the list in JSON format
+    return res.json(actions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for tension measurement actions performed on a single component, specified by its UUID
+router.get('/search/tensionMeasurementsByUUID/' + utils.uuid_regex, async function (req, res, next) {
+  try {
+    // Retrieve a list of tension measurement actions that have been performed on the component corresponding to the specified UUID
+    const actions = await Search_Other.tensionMeasurementsByUUID(req.params.uuid);
 
     // Return the list in JSON format
     return res.json(actions);

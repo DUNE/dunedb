@@ -71,6 +71,7 @@ const issuesDictionary = {
   qrCodeProblem: 'QR code problem',
   millMaxHolePlating: 'Issues with mill-max hole plating',
   extraneousMaterialOnBoard: 'Extraneous material on board',
+  fiducialPin: 'Fiducial pin problem',
   other: 'Other',
 };
 

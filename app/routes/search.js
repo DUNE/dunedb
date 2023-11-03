@@ -36,6 +36,13 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 });
 
 
+/// Search for grounding mesh panels of a specified part number
+router.get('/search/meshesByPartNumber', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_meshesByPartNumber.pug');
+});
+
+
 /// Search for workflows that involve a particular component, specified by its UUID
 router.get('/search/workflowsByUUID', async function (req, res, next) {
   // Render the interface page
@@ -54,6 +61,13 @@ router.get('/search/apaByLocation', async function (req, res, next) {
 router.get('/search/nonConformanceByComponentTypeOrUUID', async function (req, res, next) {
   // Render the interface page
   res.render('search_nonConformanceByComponentTypeOrUUID.pug');
+});
+
+
+/// Search for tension measurement actions performed on a single component, specified by its UUID
+router.get('/search/tensionMeasurementsByUUID', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_tensionMeasurementsByUUID.pug');
 });
 
 

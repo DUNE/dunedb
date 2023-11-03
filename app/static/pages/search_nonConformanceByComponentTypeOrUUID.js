@@ -84,7 +84,7 @@ function performSearch_byUUID() {
   $.ajax({
     contentType: 'application/json',
     method: 'GET',
-    url: `/json/search/nonConformanceByComponentUUID/${componentUuid}`,
+    url: `/json/search/nonConformanceByUUID/${componentUuid}`,
     dataType: 'json',
     success: postSuccess,
   }).fail(postFail);
