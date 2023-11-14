@@ -142,6 +142,71 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 }
 
 
+/// Retrieve a list of grounding mesh panels of a specified part number across all mesh intake locations
+async function meshesByPartNumber(partNumber) {
+  let aggregation_stages = [];
+
+  // Retrieve all 'Grounding Mesh Panel' records that have the same part number as the specified one
+  aggregation_stages.push({
+    $match: {
+      'formId': 'GroundingMeshPanel',
+      'data.meshPanelPartNumber': partNumber,
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      intakeLocation: { '$first': '$data.intakeLocation' },
+      dunePid: { '$first': '$data.name' },
+    },
+  });
+
+  // We want to actually display the matched meshes grouped by the intake location
+  // So group the records according to the intake location, and then add the fields to be returned for each mesh in each group
+  aggregation_stages.push({
+    $group: {
+      _id: { intakeLocation: '$intakeLocation' },
+      componentUuid: { $push: '$componentUuid' },
+      dunePid: { $push: '$dunePid' },
+    }
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  let cleanedResults = [];
+
+  for (const meshGroup of results) {
+    let cleanedMeshGroup = {};
+
+    cleanedMeshGroup.intakeLocation = meshGroup._id.intakeLocation;
+
+    cleanedMeshGroup.componentUuids = [];
+    cleanedMeshGroup.dunePids = [];
+
+    for (const [index, meshUuid] of meshGroup.componentUuid.entries()) {
+      cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
+      cleanedMeshGroup.dunePids.push(meshGroup.dunePid[index]);
+    }
+
+    cleanedResults.push(cleanedMeshGroup);
+  }
+
+  // Return the list of meshes grouped by intake location
+  return cleanedResults;
+}
+
+
 /// Retrieve a list of workflows that involve a particular component, specified by its UUID
 async function workflowsByUUID(componentUUID) {
   let aggregation_stages = [];
@@ -258,7 +323,7 @@ async function nonConformanceByComponentType(componentType, disposition, status)
 
 
 /// Retrieve a list of non-conformance actions that have been performed on a single component, specified by its UUID
-async function nonConformanceByComponentUUID(componentUUID) {
+async function nonConformanceByUUID(componentUUID) {
   let aggregation_stages = [];
 
   // Retrieve all 'APA Non-Conformance' action records that have the same component UUID as the specified one
@@ -283,6 +348,44 @@ async function nonConformanceByComponentUUID(componentUUID) {
       componentType: { '$first': '$data.componentType' },
       disposition: { '$first': '$data.disposition' },
       status: { '$first': '$data.status' },
+    },
+  });
+
+  // Query the 'actions' records collection using the aggregation stages defined above
+  let results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of actions
+  return results;
+}
+
+
+/// Retrieve a list of tension measurement actions that have been performed on a single component, specified by its UUID
+async function tensionMeasurementsByUUID(componentUUID) {
+  let aggregation_stages = [];
+
+  // Retrieve all 'Single Layer Tension Measurements' action records that have the same component UUID as the specified one
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'x_tension_testing',
+      'componentUuid': MUUID.from(componentUUID),
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      componentUuid: { '$first': '$componentUuid' },
+      apaLayer: { '$first': '$data.apaLayer' },
+      location: { '$first': '$data.location' },
+      comments: { '$first': '$data.comments' },
     },
   });
 
@@ -374,9 +477,11 @@ async function boardInstallByReferencedComponent(componentUUID) {
 
 module.exports = {
   boardShipmentsByReceptionDetails,
+  meshesByPartNumber,
   workflowsByUUID,
   apasByLocation,
   nonConformanceByComponentType,
-  nonConformanceByComponentUUID,
+  nonConformanceByUUID,
+  tensionMeasurementsByUUID,
   boardInstallByReferencedComponent,
 }

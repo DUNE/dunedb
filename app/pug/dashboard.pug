@@ -143,6 +143,10 @@ body(class = `deployment-${NODE_ENV}`)
                     |      Non-Conformance by Component Type or UUID
 
                 li.nav-item
+                  +navlink(href = '/search/tensionMeasurementsByUUID')
+                    |      Wire Tension Measurements by UUID
+
+                li.nav-item
                   +navlink(href = '/search/actionsByReferencedUUID')
                     |      Actions by Referenced UUID
 
@@ -157,6 +161,10 @@ body(class = `deployment-${NODE_ENV}`)
                 li.nav-item
                   +navlink(href = '/search/boardShipmentsByReceptionDetails')
                     |      Geometry Board Shipments by Reception Details
+
+                li.nav-item
+                  +navlink(href = '/search/meshesByPartNumber')
+                    |      Grounding Mesh Panels by Part Number
 
                 li.nav-item
                   +navlink(href = '/search/apaByLocation')
