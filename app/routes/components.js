@@ -208,28 +208,12 @@ router.get('/component/' + utils.uuid_regex + '/execSummary', permissions.checkP
 
     // Retrieve the collated information about the APA - since this requires extracting specific field values from a number of DB records related to the APA ...
     // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
-    let collatedInformation = await Components_ExecSummary.collateInfo(req.params.uuid);
-
-    // Add relevant information from the APA's component record to the collated information
-    const dictionary_productionSites = {
-      chicago: 'Chicago',
-      daresbury: 'Daresbury',
-      wisconsin: 'Wisconsin',
-    };
-
-    const dictionary_topOrBottom = {
-      top: 'Top',
-      bottom: 'Bottom',
-    };
-
-    collatedInformation.dunePID = component.data.name;
-    collatedInformation.productionSite = dictionary_productionSites[component.data.apaAssemblyLocation];
-    collatedInformation.topOrBottom = dictionary_topOrBottom[component.data.apaConfiguration];
+    let collatedInfo = await Components_ExecSummary.collateInfo(req.params.uuid);
 
     // Render the interface page
     res.render('component_execSummary.pug', {
       component,
-      collatedInformation,
+      collatedInfo,
     });
   } catch (err) {
     logger.error(err);

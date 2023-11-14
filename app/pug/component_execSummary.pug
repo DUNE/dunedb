@@ -7,7 +7,7 @@ block vars
 block extrascripts
   script(type = 'text/javascript').
     const component = !{JSON.stringify(component, null, 4)};
-    const collatedInformation = !{JSON.stringify(collatedInformation, null, 4)};
+    const collatedInfo = !{JSON.stringify(collatedInfo, null, 4)};
 
   block workscripts
     script(src = '/pages/component_execSummary.js')
@@ -26,15 +26,22 @@ block allbody
     .container-fluid
       .row
         .col-sm-8
-          h1 DUNE APA Final Check List Summary
+          h1 Assembled APA Executive Summary
 
           .vert-space-x1.hori-space-x1.h4
             dl
-              dt Component UUID
-              dd #{component.componentUuid}
-
               dt DUNE PID
-              dd #{component.data.name}
+              dd #{collatedInfo.apaInfo.dunePID}
+
+              dt Production Site
+              dd #{collatedInfo.apaInfo.productionSite}
+
+              dt Configuration
+              dd #{collatedInfo.apaInfo.configuration}
+
+              dt Component UUID
+              dd
+                a(href = `/component/${component.componentUuid}`, target = '_blank') #{component.componentUuid}
 
           .vert-space-x1.hori-space-x1
             p &nbsp; This summary generated on: 
@@ -47,28 +54,60 @@ block allbody
     hr
 
   .vert-space-x2
-    #form_sectionA
+    .entry_qcSignoffs
+      .form_qcSignoffs(data-record = [collatedInfo.apaQC, collatedInfo.frameQC, collatedInfo.meshPanelQC, collatedInfo.cableConduitQC, collatedInfo.pdCableTempSensorQC])
+
+      hr
 
   .vert-space-x2
-    each wireInfo, index in collatedInformation.wireNonConformances
+    .entry_wireLayers
+      .form_wireLayers(data-record = ['G', collatedInfo.layer_g])
+
+      hr
+
+    .entry_wireLayers
+      .form_wireLayers(data-record = ['U', collatedInfo.layer_u])
+
+      hr
+
+    .entry_wireLayers
+      .form_wireLayers(data-record = ['V', collatedInfo.layer_v])
+
+      hr
+
+    .entry_wireLayers
+      .form_wireLayers(data-record = ['X', collatedInfo.layer_x])
+
+      hr
+
+  .vert-space-x2
+    each ncrInfo, index in collatedInfo.apaNCRs_wires
       - let hideHeader = true;
       - if (index == 0) hideHeader = false;
 
-      .wireEntry
-        .form_sectionB(data-record = [wireInfo, hideHeader])
+      .entry_apaNCRs_wires
+        .form_apaNCRs_wires(data-record = [ncrInfo, hideHeader])
 
-  .vert-space-x1
-    each nonConformanceInfo, index in collatedInformation.otherNonConformances
+      hr
+
+  .vert-space-x2
+    each ncrInfo, index in collatedInfo.apaNCRs_other
       - let hideHeader = true;
       - if (index == 0) hideHeader = false;
 
-      .nonConformanceEntry.vert-space-x1
-        .form_sectionC(data-record = [nonConformanceInfo, hideHeader])
+      .entry_otherNCRs.vert-space-x1
+        .form_otherNCRs(data-record = [ncrInfo, hideHeader])
 
-    each nonConformanceInfo, index in collatedInformation.frameNonConformances
-      .nonConformanceEntry.vert-space-x1
-        .form_sectionC(data-record = [nonConformanceInfo, hideHeader = true])
+      hr
 
-    each nonConformanceInfo, index in collatedInformation.meshNonConformances
-      .nonConformanceEntry.vert-space-x1
-        .form_sectionC(data-record = [nonConformanceInfo, hideHeader = true])
+    each ncrInfo, index in collatedInfo.frameNCRs
+      .entry_otherNCRs.vert-space-x1
+        .form_otherNCRs(data-record = [ncrInfo, hideHeader = true])
+
+      hr
+
+    each ncrInfo, index in collatedInfo.meshPanelNCRs
+      .entry_otherNCRs.vert-space-x1
+        .form_otherNCRs(data-record = [ncrInfo, hideHeader = true])
+
+      hr
