@@ -8,10 +8,10 @@ router.get('/search', async function (req, res, next) {
 });
 
 
-/// Search for a record using its UUID (components) or ID (actions or workflows)
-router.get('/search/recordByUUIDOrID', async function (req, res, next) {
+/// Search for components by UUID, or of a specified type and type record number
+router.get('/search/componentsByUUIDOrTypeAndNumber', async function (req, res, next) {
   // Render the interface page
-  res.render('search_recordByUUIDOrID.pug');
+  res.render('search_componentsByUUIDOrTypeAndNumber.pug');
 });
 
 
@@ -43,17 +43,17 @@ router.get('/search/meshesByPartNumber', async function (req, res, next) {
 });
 
 
-/// Search for workflows that involve a particular component, specified by its UUID
-router.get('/search/workflowsByUUID', async function (req, res, next) {
-  // Render the interface page
-  res.render('search_workflowsByUUID.pug');
-});
-
-
 /// Search for an assembled APA using its location and production number
 router.get('/search/apaByLocation', async function (req, res, next) {
   // Render the interface page
   res.render('search_apaByLocation.pug');
+});
+
+
+/// Search for actions by ID, or of a specified type that references a specified component UUID
+router.get('/search/actionsByIDOrReferencedUUID', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_actionsByIDOrReferencedUUID.pug');
 });
 
 
@@ -71,10 +71,10 @@ router.get('/search/tensionMeasurementsByUUID', async function (req, res, next) 
 });
 
 
-/// Search for actions of a specified type that reference a specified component UUID
-router.get('/search/actionsByReferencedUUID', async function (req, res, next) {
+/// Search for workflows by ID, or that involve a particular component specified by its UUID
+router.get('/search/workflowsByIDOrUUID', async function (req, res, next) {
   // Render the interface page
-  res.render('search_actionsByReferencedUUID.pug');
+  res.render('search_workflowsByIDOrUUID.pug');
 });
 
 

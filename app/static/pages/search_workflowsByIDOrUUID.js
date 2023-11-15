@@ -2,11 +2,33 @@
 let inputString = null;
 
 // Run a specific function when the page is loaded
-window.addEventListener('load', renderUUIDForm);
+window.addEventListener('load', renderSearchForms);
 
 
 // Function to run when the page is loaded
-async function renderUUIDForm() {
+async function renderSearchForms() {
+  // Create a Formio form consisting of a workflow ID input box, and render it in the page element called 'workflowidform'
+  const workflowIdSchema = {
+    components: [{
+      type: 'WorkflowID',
+      label: 'Workflow ID',
+      key: 'workflowId',
+      validate: { 'required': true, },
+      input: true,
+    }],
+  }
+
+  const workflowIdForm = await Formio.createForm(document.getElementById('workflowidform'), workflowIdSchema);
+
+  // If a valid ID is entered, create the URL for the corresponding workflow's information page, and then go to that page
+  workflowIdForm.on('change', function () {
+    if (workflowIdForm.isValid()) {
+      const workflowId = workflowIdForm.submission.data.workflowId;
+
+      if (workflowId && workflowId.length === 24) window.location.href = `/workflow/${workflowId}`;
+    }
+  });
+  
   // Create a Formio form consisting of a component UUID input box, and render it in the page element called 'componentuuidform'
   const componentUuidSchema = {
     components: [{
