@@ -32,7 +32,14 @@ block content
         br
         | If the entered UUID corresponds to a component record in the database, the user will be automatically redirected to the page for viewing the component information.  If there is no corresponding record, an error will be displayed.
 
-      p In the second scenario, users must specify the following information:
+      p In the second scenario, users must specify the following information, and then <b>press the 'Enter' key <u>when the type record number box is selected</u></b>:
+        ul
+          li the component type (from the dropdown list)
+          li the type record number (as an integer)
+
+      p If the specified information corresponds to a component record in the database, the user will be automatically redirected to the page for viewing the component information.  If there is no corresponding record, an error will be displayed.
+        br
+        |  It should not be possible for multiple components of the same type to have the same type record number, since the numbers are assigned in sequence at component creation.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 
       hr
 
@@ -182,9 +189,7 @@ block content
         br
         |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.
 
-      p In both cases, if the entered ID or UUID corresponds to a workflow record in the database, the user will be automatically redirected to the page for viewing the workflow information.  If there is no corresponding record, an error will be displayed.
-        br
-        |  If a specified ID does not correspond to an existing workflow, or if a specified component is not part of any existing workflow, a message will be displayed below the input box to that effect.
+      p In both cases, if the entered ID or UUID corresponds to a workflow record in the database, the user will be automatically redirected to the page for viewing the workflow information.  If a specified ID does not correspond to an existing workflow, or if a specified component is not part of any existing workflow, a message will be displayed below the input box to that effect.
 
       p In the case of specifying a component UUID, it should not be possible for multiple workflows to involve the same component, since each individual workflow begins with the creation of a new, unique component.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 

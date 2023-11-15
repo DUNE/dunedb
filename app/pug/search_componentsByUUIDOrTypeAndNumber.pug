@@ -29,4 +29,25 @@ block content
               .col-md-8
                 #componentuuidform
 
+          .vert-space-x2
+            hr
+
+            h4 Search by Type and Number
+
+            .vert-space-x1
+              p Select a component type from the options below.
+
+            select.form-control#componentTypeSelection
+              option(value = '')          
+              option(value = 'GeometryBoard') Geometry Board
+              option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+
+            .vert-space-x1
+            p Enter a type record number below and press the 'Enter' key.
+
+          input.form-control#typeRecordNumberSelection
+
+      .vert-space-x1
+        #messages
+
     .vert-space-x2
