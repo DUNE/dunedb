@@ -1,8 +1,9 @@
 const router = require('express').Router();
 
 const logger = require('../../lib/logger');
+const Search_ActionsWorkflows = require('../../lib/Search_ActionsWorkflows');
 const Search_GeoBoards = require('../../lib/Search_GeoBoards');
-const Search_Other = require('../../lib/Search_Other');
+const Search_OtherComponents = require('../../lib/Search_OtherComponents');
 const utils = require('../../lib/utils');
 
 
@@ -89,7 +90,7 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
     if (latest) latest = latest.replace(' ', '+');
 
     // Retrieve a list of geometry boards shipments that match the specified reception details
-    const shipments = await Search_Other.boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
+    const shipments = await Search_OtherComponents.boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
 
     // Return the list in JSON format
     return res.json(shipments);
@@ -104,7 +105,7 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 router.get('/search/meshesByPartNumber/:partNumber', async function (req, res, next) {
   try {
     // Retrieve a list of grounding mesh panels, grouped by intake location, of the specified part number
-    const meshesByLocation = await Search_Other.meshesByPartNumber(req.params.partNumber);
+    const meshesByLocation = await Search_OtherComponents.meshesByPartNumber(req.params.partNumber);
 
     // Return the list in JSON format
     return res.json(meshesByLocation);
@@ -119,7 +120,7 @@ router.get('/search/meshesByPartNumber/:partNumber', async function (req, res, n
 router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
   try {
     // Retrieve a list of workflows that involve the component corresponding to the specified UUID
-    const workflows = await Search_Other.workflowsByUUID(req.params.uuid);
+    const workflows = await Search_ActionsWorkflows.workflowsByUUID(req.params.uuid);
 
     // Return the list in JSON format
     return res.json(workflows);
@@ -134,7 +135,7 @@ router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, r
 router.get('/search/apaByLocation/:apaLocation/:apaProductionNumber', async function (req, res, next) {
   try {
     // Retrieve a list of assembled APAs that match the specified record details
-    const assembledAPAs = await Search_Other.apasByLocation(req.params.apaLocation, req.params.apaProductionNumber);
+    const assembledAPAs = await Search_OtherComponents.apasByLocation(req.params.apaLocation, req.params.apaProductionNumber);
 
     // Return the list in JSON format
     return res.json(assembledAPAs);
@@ -156,7 +157,7 @@ router.get('/search/nonConformanceByComponentType', async function (req, res, ne
     const status = (req.query.status !== '') ? req.query.status : null;
 
     // Retrieve a list of non-conformance actions that match the specified non-conformance details
-    const actions = await Search_Other.nonConformanceByComponentType(componentType, disposition, status);
+    const actions = await Search_ActionsWorkflows.nonConformanceByComponentType(componentType, disposition, status);
 
     // Return the list in JSON format
     return res.json(actions);
@@ -171,7 +172,7 @@ router.get('/search/nonConformanceByComponentType', async function (req, res, ne
 router.get('/search/nonConformanceByUUID/' + utils.uuid_regex, async function (req, res, next) {
   try {
     // Retrieve a list of non-conformance actions that have been performed on the component corresponding to the specified UUID
-    const actions = await Search_Other.nonConformanceByUUID(req.params.uuid);
+    const actions = await Search_ActionsWorkflows.nonConformanceByUUID(req.params.uuid);
 
     // Return the list in JSON format
     return res.json(actions);
@@ -186,7 +187,7 @@ router.get('/search/nonConformanceByUUID/' + utils.uuid_regex, async function (r
 router.get('/search/tensionMeasurementsByUUID/' + utils.uuid_regex, async function (req, res, next) {
   try {
     // Retrieve a list of tension measurement actions that have been performed on the component corresponding to the specified UUID
-    const actions = await Search_Other.tensionMeasurementsByUUID(req.params.uuid);
+    const actions = await Search_ActionsWorkflows.tensionMeasurementsByUUID(req.params.uuid);
 
     // Return the list in JSON format
     return res.json(actions);
@@ -204,7 +205,7 @@ router.get('/search/actionsByReferencedUUID/' + utils.uuid_regex + '/:actionType
     let actions = null;
 
     if (req.params.actionType === 'boardInstall') {
-      actions = await Search_Other.boardInstallByReferencedComponent(req.params.uuid);
+      actions = await Search_ActionsWorkflows.boardInstallByReferencedComponent(req.params.uuid);
     }
 
     // Return the list in JSON format
