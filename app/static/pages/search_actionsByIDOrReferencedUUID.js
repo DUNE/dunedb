@@ -8,6 +8,28 @@ window.addEventListener('load', renderSearchForms);
 
 // Function to run when the page is loaded
 async function renderSearchForms() {
+  // Create a Formio form consisting of an action ID input box, and render it in the page element called 'actionidform'
+  const actionIdSchema = {
+    components: [{
+      type: 'ActionID',
+      label: 'Action ID',
+      key: 'actionId',
+      validate: { 'required': true, },
+      input: true,
+    }],
+  }
+
+  const actionIdForm = await Formio.createForm(document.getElementById('actionidform'), actionIdSchema);
+
+  // If a valid ID is entered, create the URL for the corresponding action's information page, and then go to that page
+  actionIdForm.on('change', function () {
+    if (actionIdForm.isValid()) {
+      const actionId = actionIdForm.submission.data.actionId;
+
+      if (actionId && actionId.length === 24) window.location.href = `/action/${actionId}`;
+    }
+  });
+
   // When the selected action type is changed, get the newly selected type
   // If a valid UUID has been entered and an action type has been selected, perform the search
   $('#actionTypeSelection').on('change', async function () {
