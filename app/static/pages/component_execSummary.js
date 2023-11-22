@@ -187,7 +187,18 @@ function SetEntry_wireLayer(layer, layerInfo) {
           input: false,
           defaultValue: layerInfo.winder,
         }],
-        width: 4,
+        width: 2,
+        size: 'sm',
+      },
+      {
+        components: [{
+          label: 'Winder Head:',
+          key: 'wireLayer_winderHead',
+          type: 'textfield',
+          input: false,
+          defaultValue: layerInfo.winderHead,
+        }],
+        width: 2,
         size: 'sm',
       },
       {

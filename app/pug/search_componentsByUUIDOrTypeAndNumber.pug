@@ -1,0 +1,53 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Components by UUID or Type and Number';
+
+block extrascripts
+  block workscripts
+    script(src = '/pages/search_componentsByUUIDOrTypeAndNumber.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Components by UUID or Type and Number
+
+    .vert-space-x2 
+      hr
+
+      .row 
+        .col-md-6
+          h4 Search by UUID
+
+          .vert-space-x1
+            p The input box below uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
+              br
+              | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
+
+          .vert-space-x1
+            .row
+              .col-md-8
+                #componentuuidform
+
+          .vert-space-x2
+            hr
+
+            h4 Search by Type and Number
+
+            .vert-space-x1
+              p Select a component type from the options below.
+
+            select.form-control#componentTypeSelection
+              option(value = '')          
+              option(value = 'GeometryBoard') Geometry Board
+              option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+
+            .vert-space-x1
+            p Enter a type record number below and press the 'Enter' key.
+
+          input.form-control#typeRecordNumberSelection
+
+      .vert-space-x1
+        #messages
+
+    .vert-space-x2

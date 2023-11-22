@@ -1,0 +1,48 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Workflows by ID or UUID';
+
+block extrascripts
+  block workscripts
+    script(src = '/pages/search_workflowsByIDOrUUID.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Workflows by ID or UUID
+
+    .vert-space-x2 
+      hr
+
+      .row
+        .col-md-6 
+          h4 Search by Workflow ID
+
+          .vert-space-x1
+            p The input box below uses auto-complete - just start typing a workflow ID, and any matching options will be displayed.
+
+          .vert-space-x1
+            .row
+              .col-md-8
+                #workflowidform
+
+          .vert-space-x2
+            hr
+
+            h4 Search by Component UUID 
+
+            .vert-space-x1
+              p The input box below uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
+                br
+                | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
+
+            .vert-space-x1
+              .row
+                .col-md-8
+                  #componentuuidform
+
+      .vert-space-x1
+        #messages
+
+    .vert-space-x2

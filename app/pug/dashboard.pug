@@ -131,32 +131,16 @@ body(class = `deployment-${NODE_ENV}`)
 
               ul.nav.flex-column.ml-3.sub-bar
                 li.nav-item
-                  +navlink(href = '/search/recordByUUIDOrID')
-                    |      Record By UUID / ID
-
-                li.nav-item
-                  +navlink(href = '/search/workflowsByUUID')
-                    |      Workflows by UUID
-
-                li.nav-item
-                  +navlink(href = '/search/nonConformanceByComponentTypeOrUUID')
-                    |      Non-Conformance by Component Type or UUID
-
-                li.nav-item
-                  +navlink(href = '/search/tensionMeasurementsByUUID')
-                    |      Wire Tension Measurements by UUID
-
-                li.nav-item
-                  +navlink(href = '/search/actionsByReferencedUUID')
-                    |      Actions by Referenced UUID
+                  +navlink(href = '/search/componentsByUUIDOrTypeAndNumber')
+                    |      Components By UUID or Type and Number
 
                 li.nav-item
                   +navlink(href = '/search/geoBoardsByLocationOrPartNumber')
-                    |      Geometry Boards by Location / Part Number
+                    |      Geometry Boards by Location or Part Number
 
                 li.nav-item
                   +navlink(href = '/search/geoBoardsByVisInspectOrOrderNumber')
-                    |      Geometry Boards by Visual Inspection / Order Number
+                    |      Geometry Boards by Visual Inspection or Order Number
 
                 li.nav-item
                   +navlink(href = '/search/boardShipmentsByReceptionDetails')
@@ -169,6 +153,22 @@ body(class = `deployment-${NODE_ENV}`)
                 li.nav-item
                   +navlink(href = '/search/apaByLocation')
                     |      Assembled APA by Location
+
+                li.nav-item
+                  +navlink(href = '/search/actionsByIDOrReferencedUUID')
+                    |      Actions by ID or Referenced UUID
+
+                li.nav-item
+                  +navlink(href = '/search/nonConformanceByComponentTypeOrUUID')
+                    |      Non-Conformance by Component Type or UUID
+
+                li.nav-item
+                  +navlink(href = '/search/tensionMeasurementsByUUID')
+                    |      Wire Tension Measurements by UUID
+
+                li.nav-item
+                  +navlink(href = '/search/workflowsByIDOrUUID')
+                    |      Workflows by ID or UUID
 
           hr
 
