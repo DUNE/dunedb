@@ -251,9 +251,9 @@ class ComponentUUID extends TextFieldComponent {
   }
 
   // Set the input field to a provided string, and if it is a valid UUID string, do the appropriate action based on the current page URL
-  //   - if on the 'Search for Record by UUID or ID' page, redirect to the component information page
-  //   - if on the 'Search for Workflows by UUID' page, retrieve the relevant workflow information and redirect to the workflow information page
-  //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by UUID' page)
+  //   - if on the 'Search for Components by UUID or Type and Number' page, redirect to the component information page
+  //   - if on the 'Search for Workflows by ID or UUID' page, retrieve the relevant workflow information and redirect to the workflow information page
+  //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by ID or UUID' page)
   //   - if on any 'Perform Action on Unspecified Component' page, redirect to the page for performing the action on the specified component
   //   - in any other situation, i.e. if this Formio component is just part of a type form, then do not redirect anywhere
   // In any case, also display a link to allow users to directly access the component's information page from the current page
@@ -265,8 +265,8 @@ class ComponentUUID extends TextFieldComponent {
 
       const currentURL = window.location.pathname;
 
-      if (currentURL === '/search/recordByUUIDOrID') window.location.href = `/component/${value}`;
-      if (currentURL === '/search/workflowsByUUID') {
+      if (currentURL === '/search/componentsByUUIDOrTypeAndNumber') window.location.href = `/component/${value}`;
+      if (currentURL === '/search/workflowsByIDOrUUID') {
         $.ajax({
           contentType: 'application/json',
           method: 'GET',

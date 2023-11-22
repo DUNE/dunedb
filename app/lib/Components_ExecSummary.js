@@ -261,6 +261,7 @@ async function collateInfo(componentUUID) {
       $group: {
         _id: { actionId: '$actionId' },
         winder: { '$first': '$data.winder' },
+        winderHead: { '$first': '$data.winderHead' },
         winderMaintenenceSignoff: { '$first': '$data.winderMaintenanceVerification' },
         tensionControlSignoff: { '$first': '$data.tensionControlValidation' },
         replacedWires: { '$first': '$data.replacedWires' },
@@ -275,6 +276,7 @@ async function collateInfo(componentUUID) {
 
     if (results.length > 0) {
       collatedInfo[dictionaries[i]].winder = dictionary_winders[results[0].winder];
+      collatedInfo[dictionaries[i]].winderHead = results[0].winderHead;
       collatedInfo[dictionaries[i]].winderMaintenenceSignoff = results[0].winderMaintenenceSignoff;
       collatedInfo[dictionaries[i]].tensionControlSignoff = results[0].tensionControlSignoff;
       collatedInfo[dictionaries[i]].replacedWires = results[0].replacedWires;
