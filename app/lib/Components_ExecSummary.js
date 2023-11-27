@@ -16,7 +16,11 @@ async function collateInfo(componentUUID) {
   const frameUUID = assembledAPA.data.frameUuid;
 
   // Add relevant information from the APA's component record to the collated information
-  collatedInfo.apaInfo = {};
+  collatedInfo.apaInfo = {
+    dunePID: '',
+    productionSite: '',
+    configuration: '',
+  };
 
   const dictionary_productionSites = {
     chicago: 'Chicago',
@@ -34,7 +38,11 @@ async function collateInfo(componentUUID) {
   collatedInfo.apaInfo.configuration = dictionary_configuration[assembledAPA.data.apaConfiguration];
 
   // Get information about the assembled APA QC
-  collatedInfo.apaQC = {};
+  collatedInfo.apaQC = {
+    signoff: '',
+    actionId: '',
+  };
+
   aggregation_stages = [];
   results = [];
 
@@ -64,7 +72,12 @@ async function collateInfo(componentUUID) {
   }
 
   // Get information about the APA frame QC
-  collatedInfo.frameQC = {};
+  collatedInfo.frameQC = {
+    signoff: '',
+    qcActionId: '',
+    surveysActionId: '',
+  };
+
   aggregation_stages = [];
   results = [];
 
@@ -121,7 +134,11 @@ async function collateInfo(componentUUID) {
   }
 
   // Get information about the mesh panel installation QC
-  collatedInfo.meshPanelQC = {};
+  collatedInfo.meshPanelQC = {
+    signoff: '',
+    actionId: '',
+  };
+
   aggregation_stages = [];
   results = [];
 
@@ -151,7 +168,11 @@ async function collateInfo(componentUUID) {
   }
 
   // Get information about the cable conduit insertion QC
-  collatedInfo.cableConduitQC = {};
+  collatedInfo.cableConduitQC = {
+    signoff: '',
+    actionId: '',
+  };
+
   aggregation_stages = [];
   results = [];
 
@@ -181,7 +202,12 @@ async function collateInfo(componentUUID) {
   }
 
   // Get information about the photon detector cable and temperature sensor installation QC
-  collatedInfo.pdCableTempSensorQC = {};
+  collatedInfo.pdCableTempSensorQC = {
+    photonDetectorSignoff: '',
+    rdInstallationSignoff: '',
+    actionId: '',
+  };
+
   aggregation_stages = [];
   results = [];
 
@@ -243,7 +269,22 @@ async function collateInfo(componentUUID) {
   };
 
   for (let i = 0; i < typeForms_winding.length; i++) {
-    collatedInfo[dictionaries[i]] = {};
+    collatedInfo[dictionaries[i]] = {
+      winder: '',
+      winderHead: '',
+      winderMaintenenceSignoff: '',
+      tensionControlSignoff: '',
+      replacedWires: [],
+      numberOfTensionAlarms: 0,
+      winding_actionId: '',
+      badSolders: [],
+      soldering_actionId: '',
+      tensions_location: '',
+      tensions_system: '',
+      tensions_A: [],
+      tensions_B: [],
+      tensions_actionId: '',
+    };
 
     // ... get information about the winding
     aggregation_stages = [];
