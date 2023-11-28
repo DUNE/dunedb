@@ -78,9 +78,17 @@ function SubmitData(submission) {
 
     // Redirect the user to the appropriate post-submission page (where 'result' is the action record's action ID)
     // If the action is a 'Board Reception' type, we must first update the board information (and further redirection will be handled from there)
-    // If not, then we can simply proceed with standard post-submission redirection:
+    // Similarly, if the action is one of the board installation types, we must also first update the board information (in a different way)
+    // If neither of these is the case, then we can simply proceed with standard post-submission redirection:
     //   - if the action originates from a workflow, go to the page for updating the workflow path step results
     //   - if this is a standalone action, go to the page for viewing the action record 
+    const installation_typeFormIDs = [
+      'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB',
+      'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
+      'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
+      'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
+    ];
+
     if (submission.typeFormId === 'BoardReception') {
       const shipmentUUID = submission.componentUuid;
       const receptionLocation = submission.data.receptionLocation;
@@ -88,6 +96,17 @@ function SubmitData(submission) {
 
       let url = `/component/${shipmentUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
       url += `?actionId=${result}`;
+
+      if (!(workflowId === '')) url += `?workflowId=${workflowId}`;
+
+      window.location.href = url;
+    } else if (installation_typeFormIDs.includes(submission.typeFormId)) {
+      const receptionLocation = 'installed_on_APA';
+
+      const currentDT = new Date();
+      const receptionDate = `${currentDT.getFullYear()}-${currentDT.getMonth() + 1}-${currentDT.getDate()}`;
+
+      let url = `/action/${result}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
 
       if (!(workflowId === '')) url += `?workflowId=${workflowId}`;
 
