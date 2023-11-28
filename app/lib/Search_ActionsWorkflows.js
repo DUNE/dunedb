@@ -164,7 +164,7 @@ async function tensionMeasurementsByUUID(componentUUID) {
 /// Retrieve a list of board installation actions that reference a single component, specified by its UUID
 async function boardInstallByReferencedComponent(componentUUID) {
   // Set up a list of type form IDs which correspond to 'board installation' type actions
-  let actionTypeFormIDs = [
+  const actionTypeFormIDs = [
     'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB',
     'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
     'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
