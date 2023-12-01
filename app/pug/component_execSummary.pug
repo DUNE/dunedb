@@ -43,6 +43,14 @@ block allbody
               dd
                 a(href = `/component/${component.componentUuid}`, target = '_blank') #{component.componentUuid}
 
+              dt Assembly Status
+
+              if ((collatedInfo.apaInfo.assemblyStatus) === 'none')
+                dd [no associated workflow]
+              else
+                dd
+                  a(href = `/workflow/${collatedInfo.apaInfo.workflowID}`, target = '_blank') #{collatedInfo.apaInfo.assemblyStatus}
+
           .vert-space-x1.hori-space-x1
             p &nbsp; This summary generated on: 
               +dateFormat(new Date())
