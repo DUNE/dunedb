@@ -81,7 +81,8 @@ function postSuccess_location(result) {
         <tr>
           <th scope = 'col' width = '50%'>Board UUID</th>
           <th scope = 'col' width = '15%'>UKID</th>
-          <th scope = 'col' width = '35%'>Received On:</th>
+          <th scope = 'col' width = '20%'>Received On:</th>
+          <th scope = 'col' width = '15%'>On APA:</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -92,6 +93,7 @@ function postSuccess_location(result) {
             <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
             <td>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
+            <td>${boardGroup.installedOnAPA[i]}</td>
           </tr>`;
 
         $('#results').append(boardText);
@@ -113,6 +115,7 @@ function formatBoardLocation(rawLocationString) {
 
     if (location === 'williamAndMary') location = 'William and Mary';
     else if (location === 'uwPsl') location = 'UW / PSL';
+    else if (location === 'installed_on_APA') location = 'Installed on APA';
     else location = location[0].toUpperCase() + location.slice(1);
   }
 
@@ -162,7 +165,8 @@ function postSuccess_partNumber(result) {
         <tr>
           <th scope = 'col' style = 'width: 50%'>Board UUID</th>
           <th scope = 'col' style = 'width: 15%'>UKID</th>
-          <th scope = 'col' style = 'width: 35%'>Received On:</th>
+          <th scope = 'col' style = 'width: 20%'>Received On:</th>
+          <th scope = 'col' style = 'width: 15%'>On APA:</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -173,6 +177,7 @@ function postSuccess_partNumber(result) {
             <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
             <td>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
+            <td>${boardGroup.installedOnAPA[i]}</td>
           </tr>`;
 
         $('#results').append(boardText);
