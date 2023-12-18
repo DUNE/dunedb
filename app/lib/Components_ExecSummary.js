@@ -2,6 +2,7 @@ const MUUID = require('uuid-mongodb');
 
 const Components = require('./Components');
 const { db } = require('./db');
+const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
 
 
 /// Retrieve collated information about a single assembled APA (and associated components and actions) that will be displayed in its executive summary
@@ -20,6 +21,8 @@ async function collateInfo(componentUUID) {
     dunePID: '',
     productionSite: '',
     configuration: '',
+    assemblyStatus: 'none',
+    workflowID: '',
   };
 
   const dictionary_productionSites = {
@@ -36,6 +39,14 @@ async function collateInfo(componentUUID) {
   collatedInfo.apaInfo.dunePID = assembledAPA.data.name;
   collatedInfo.apaInfo.productionSite = dictionary_productionSites[assembledAPA.data.apaAssemblyLocation];
   collatedInfo.apaInfo.configuration = dictionary_configuration[assembledAPA.data.apaConfiguration];
+
+  // Get a list of workflows that involve the assembled APA, specified by its UUID (there should only be one), and add relevant information about the workflow to the collated information
+  const workflows = await Search_ActionsWorkflows.workflowsByUUID(componentUUID);
+
+  if (workflows.length === 1) {
+    collatedInfo.assemblyStatus = workflows[0].status;
+    collatedInfo.workflowID = workflows[0].workflowId;
+  }
 
   // Get information about the assembled APA QC
   collatedInfo.apaQC = {
