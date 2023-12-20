@@ -57,38 +57,38 @@ async function save(input, req) {
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
-  // If a tension measurements record is being edited (i.e. the new record's type form ID matches, and there is an existing record with the same action ID) ...
+  // If a tension measurements record is being EDITED, i.e. the following criteria are satisfied ...
+  //  - the new record's type form ID matches that of a tensions measurement action
+  //  - there is an existing record with the same action ID, and it contains tension measurements
   if ((newRecord.typeFormId === 'x_tension_testing') && (oldRecord)) {
-    // Get the single earliest version of this record
-    let allVersions = await versions(input.actionId);
-    let earliestVersion = allVersions[allVersions.length - 1];
+    if (oldRecord.data.hasOwnProperty('measuredTensions_sideA')) {
+      // Calculate arrays containing information about tensions that have changed (on both sides) between the old and new versions of the record
+      // This will usually indicate the wires that have been re-tensioned, which is useful information to save directly into the record
+      let changedTensions_sideA = [];
+      let changedTensions_sideB = [];
 
-    // Calculate arrays containing information about tensions that have changed (on both sides) between the earliest version and this (newest) version of the record
-    // This will usually indicate the wires that have been re-tensioned, which is useful information to save directly into the record
-    let changedTensions_sideA = [];
-    let changedTensions_sideB = [];
+      const old_sideA = [...oldRecord.data.measuredTensions_sideA];
+      const new_sideA = [...newRecord.data.measuredTensions_sideA];
 
-    const earliest_sideA = [...earliestVersion.data.measuredTensions_sideA];
-    const latest_sideA = [...newRecord.data.measuredTensions_sideA];
-
-    for (let i = 0; i < earliest_sideA.length; i++) {
-      if (earliest_sideA[i] !== latest_sideA[i]) {
-        changedTensions_sideA.push([i, earliest_sideA[i], latest_sideA[i]]);
+      for (let i = 0; i < old_sideA.length; i++) {
+        if (old_sideA[i] !== new_sideA[i]) {
+          changedTensions_sideA.push([i, old_sideA[i], new_sideA[i]]);
+        }
       }
-    }
 
-    const earliest_sideB = [...earliestVersion.data.measuredTensions_sideB];
-    const latest_sideB = [...newRecord.data.measuredTensions_sideB];
+      const old_sideB = [...oldRecord.data.measuredTensions_sideB];
+      const new_sideB = [...newRecord.data.measuredTensions_sideB];
 
-    for (let i = 0; i < earliest_sideB.length; i++) {
-      if (earliest_sideB[i] !== latest_sideB[i]) {
-        changedTensions_sideB.push([i, earliest_sideB[i], latest_sideB[i]]);
+      for (let i = 0; i < old_sideB.length; i++) {
+        if (old_sideB[i] !== new_sideB[i]) {
+          changedTensions_sideB.push([i, old_sideB[i], new_sideB[i]]);
+        }
       }
-    }
 
-    // Add the arrays of changed tensions to the new record
-    newRecord.data.changedTensions_sideA = [...changedTensions_sideA];
-    newRecord.data.changedTensions_sideB = [...changedTensions_sideB];
+      // Add the arrays of changed tensions to the new record
+      newRecord.data.changedTensions_sideA = [...changedTensions_sideA];
+      newRecord.data.changedTensions_sideB = [...changedTensions_sideB];
+    }
   }
 
   // Insert the new record into the 'actions' records collection, and throw an error if the insertion fails

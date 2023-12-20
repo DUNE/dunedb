@@ -264,6 +264,18 @@ async function collateInfo(componentUUID) {
     usWinder1: 'US Winder 1',
   };
 
+  const dictionary_heads = {
+    uk1: 'UK 1',
+    uk2: 'UK 2',
+    uk3: 'UK 3',
+    uk4: 'UK 4',
+    uk5: 'UK 5',
+    uk6: 'UK 6',
+    uk7: 'UK 7',
+    us1: 'US 1',
+    us1: 'US 2',
+  };
+
   const dictionary_locations = {
     daresbury: 'Daresbury',
   };
@@ -328,7 +340,7 @@ async function collateInfo(componentUUID) {
 
     if (results.length > 0) {
       collatedInfo[dictionaries[i]].winder = dictionary_winders[results[0].winder];
-      collatedInfo[dictionaries[i]].winderHead = results[0].winderHead;
+      collatedInfo[dictionaries[i]].winderHead = dictionary_heads[results[0].winderHead];
       collatedInfo[dictionaries[i]].winderMaintenenceSignoff = results[0].winderMaintenenceSignoff;
       collatedInfo[dictionaries[i]].tensionControlSignoff = results[0].tensionControlSignoff;
       collatedInfo[dictionaries[i]].replacedWires = results[0].replacedWires;

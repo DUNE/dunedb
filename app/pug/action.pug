@@ -68,15 +68,11 @@ block content
 
           .vert-space-x1
 
-        if action.typeFormId == 'x_tension_testing'
-          dt Re-tensioned Wires or Wire Segments (comparing this version and version 1)
+        if (action.typeFormId == 'x_tension_testing') && (action.data.changedTensions_sideA)
+          dt Re-tensioned Wires or Wire Segments (comparing this version [#{action.validity.version}] and version #{action.validity.version - 1}):
 
-          - let numberOfChangedTensions_sideA = 0
-          - let numberOfChangedTensions_sideB = 0
-
-          if action.data.changedTensions_sideA
-            - numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
-            - numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
+          - let numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
+          - let numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
 
           .row
             .col-md-6
@@ -86,8 +82,8 @@ block content
                 i.chevron.fa.fa-fw 
 
               .collapse#reTensionsBoxA
-                .vert-space-x1.border-success.border.rounded.p-2
-                  if numberOfChangedTensions_sideA > 0
+                if numberOfChangedTensions_sideA > 0
+                  .vert-space-x1.border-success.border.rounded.p-2
                     dd
                       table.table
                         thead
@@ -109,8 +105,8 @@ block content
                 i.chevron.fa.fa-fw 
 
               .collapse#reTensionsBoxB
-                .vert-space-x1.border-success.border.rounded.p-2
-                  if numberOfChangedTensions_sideB > 0
+                if numberOfChangedTensions_sideB > 0
+                  .vert-space-x1.border-success.border.rounded.p-2
                     dd
                       table.table
                         thead

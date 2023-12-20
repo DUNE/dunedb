@@ -9,11 +9,10 @@ columns_X_A = [1,  7,  9, 11, 13, 15]
 columns_X_B = [1, 22, 24, 26, 28, 30]
 columns_U_A = [1, 24, 26, 28, 30, 32, 34]
 columns_U_B = [1, 41, 43, 45, 47, 49, 51]
-columns_V_A = [1, 26, 28, 30, 32, 34, 36]
-columns_V_B = [1, 44, 46, 48, 50, 52, 54]
+columns_V_A = [1, 24, 26, 28, 30, 32, 34]
+columns_V_B = [1, 41, 43, 45, 47, 49, 51]
 columns_G_A = [1,  7,  9, 11, 13, 15]
 columns_G_B = [1, 22, 24, 26, 28, 30]
-chk_colHds  = [['Board #'], ['Board # '], ['Board LS#'], ['Board #']]
 
 
 ########################################################
@@ -33,28 +32,23 @@ def ExtractTensions(csvFile, apaLayer):
     if apaLayer == 'X':
         columns_A = columns_X_A
         columns_B = columns_X_B
-        chk_colHd = chk_colHds[0]
     elif apaLayer == 'U':
         columns_A = columns_U_A
         columns_B = columns_U_B
-        chk_colHd = chk_colHds[1]
     elif apaLayer == 'V':
         columns_A = columns_V_A
         columns_B = columns_V_B
-        chk_colHd = chk_colHds[2]
     else:
         columns_A = columns_G_A
         columns_B = columns_G_B
-        chk_colHd = chk_colHds[3]
     
     # First deal with the tensions on side A
     # # Extract the columns from the .csv file for this side into a Pandas dataframe (columns --> series)
     # Set the row with index = 10 as the first one to store (the 'header row') across all series, since the rows above this always contain some comments, miscellaneous calculations, etc.
     # Immediately replace all zeroes (numerical and string) with 'NaN's ... this is required for the later step of merging the series
     # Finally, drop any rows where there is a 'NaN' in the selected 'check column' ... this indicates that this is most likely a comment row
-    df_sideA = pd.read_csv(csvFile, usecols = columns_A, header = 11, encoding = 'latin1')
+    df_sideA = pd.read_csv(csvFile, usecols = columns_A, header = 10, encoding = 'latin1')
     df_sideA = df_sideA.replace([0.0, '0.00'], np.nan)
-    df_sideA = df_sideA.dropna(subset = chk_colHd)
     
     # The 'U' and 'V' layer data always contains certain rows at the start and end which never contain tension measurements, so remove these (i.e. slice the dataframe)
     if apaLayer == 'U':
@@ -78,9 +72,8 @@ def ExtractTensions(csvFile, apaLayer):
     list_sideA = tensions_sideA.fillna(0.0).to_list()
     
     # Repeat the above for side B
-    df_sideB = pd.read_csv(csvFile, usecols = columns_B, header = 11, encoding = 'latin1')
+    df_sideB = pd.read_csv(csvFile, usecols = columns_B, header = 10, encoding = 'latin1')
     df_sideB = df_sideB.replace([0.0, '0.00'], np.nan)
-    df_sideB = df_sideB.dropna(subset = chk_colHd)
     
     if apaLayer == 'U':
         df_sideB = df_sideB[7 : -4]
