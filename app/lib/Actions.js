@@ -43,6 +43,27 @@ async function save(input, req) {
   if (input.workflowId) newRecord.workflowId = input.workflowId;
   if (input.images) newRecord.images = input.images;
 
+  // Winding and soldering actions each always contain an array of replaced wires or bad solder joints respectively ...
+  // ... however, depending on the specific action, this array may not itself contain any information (i.e. there were no replaced wires or bad solders)
+  // However, Formio does not allow an empty array - instead, it creates an array with one entry, which is itself full of empty strings
+  // This is incorrect but unavoidable behaviour, since if there are no replaced wires or bad solders, the array should indeed be empty ...
+  // ... so for these types of action, if the array contains a single entry of empty strings, reset the array to be empty (NOT NULL!) 
+  if ((newRecord.typeFormId === 'g_winding') || (newRecord.typeFormId === 'u_winding') || (newRecord.typeFormId === 'v_winding') || (newRecord.typeFormId === 'x_winding')) {
+    if (newRecord.data.replacedWires.length === 1) {
+      if ((newRecord.data.replacedWires[0].side === '') && (newRecord.data.replacedWires[0].layer === '') && (newRecord.data.replacedWires[0].boardLocation === '')) {
+        newRecord.data.replacedWires = [];
+      }
+    }
+  }
+
+  if ((newRecord.typeFormId === 'g_solder') || (newRecord.typeFormId === 'u_solder') || (newRecord.typeFormId === 'v_solder') || (newRecord.typeFormId === 'x_solder')) {
+    if (newRecord.data.badSolderJoints.length === 1) {
+      if ((newRecord.data.badSolderJoints[0].side === '') && (newRecord.data.badSolderJoints[0].layer === '') && (newRecord.data.badSolderJoints[0].boardLocation === '')) {
+        newRecord.data.badSolderJoints = [];
+      }
+    }
+  }
+
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
 
