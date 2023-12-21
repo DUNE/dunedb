@@ -15,7 +15,7 @@ apaLayer        = 'X'                                       # Wire layer (must b
 
 # For uploading new tension measurements (i.e. performing a new action), the following information is required:
 apa_uuid        = '49dcac80-4645-11ed-bb7f-0f80f77f8437'    # UUID of the Assembled APA on which the action is being performed (get from DB)
-measurement_loc = 'daresbury'                               # Use one of the following: 'daresbury'
+measurement_loc = 'daresbury'                               # Use one of the following: 'daresbury', 'chicago'
 measurement_sys = 'laser1'                                  # Use one of the following: 'dwa1', 'dwa2, 'dwa3', 'laser1', 'laser2', 'laser3', 'laser4', 'laser5'
 newAction_comms = 'This is a new single layer tension measurements action, uploaded via M2M'
                                                             # Free-form string, additional description or commentary if required

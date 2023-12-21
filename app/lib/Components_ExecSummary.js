@@ -278,6 +278,7 @@ async function collateInfo(componentUUID) {
 
   const dictionary_locations = {
     daresbury: 'Daresbury',
+    chicago: 'Chicago',
   };
 
   const dictionary_systems = {
