@@ -341,9 +341,8 @@ function SetEntry_wireLayer(layer, layerInfo) {
         type: 'NumberArray',
         input: false,
         units: 'Tension [N]',
-        specification_nominal: 6.5,
-        specification_toleranceInner: 1,
-        specification_toleranceOuter: 2,
+        specification_nominal: 6.25,
+        specification_toleranceInner: 2.25,
         defaultValue: layerInfo.tensions_A
       }]
     },
@@ -354,9 +353,8 @@ function SetEntry_wireLayer(layer, layerInfo) {
         type: 'NumberArray',
         input: false,
         units: 'Tension [N]',
-        specification_nominal: 6.5,
-        specification_toleranceInner: 1,
-        specification_toleranceOuter: 2,
+        specification_nominal: 6.25,
+        specification_toleranceInner: 2.25,
         defaultValue: layerInfo.tensions_B
       }]
     }],
@@ -365,9 +363,9 @@ function SetEntry_wireLayer(layer, layerInfo) {
   return schema_wireLayer;
 }
 
-// Set up the schema for a single wire-related non-conformance entry
-function SetEntry_apaNCRs_wires(ncrInfo, hideHeader) {
-  const schema_apaNCRs_wires = {
+// Set up the schema for the wire-related non-conformance section header
+function SetEntry_apaNCRs_header() {
+  const schema_apaNCRs_header = {
     components: [{
       label: 'Assembled APA - Wire Non-Conformances',
       key: 'apaNCRs_wires',
@@ -375,9 +373,17 @@ function SetEntry_apaNCRs_wires(ncrInfo, hideHeader) {
       input: false,
       hideLabel: true,
       defaultValue: 'Assembled APA - Wire Non-Conformances',
-      hidden: hideHeader,
-    },
-    {
+    }],
+  }
+
+  return schema_apaNCRs_header;
+}
+
+
+// Set up the schema for a single wire-related non-conformance entry
+function SetEntry_apaNCRs_wires(ncrInfo) {
+  const schema_apaNCRs_wires = {
+    components: [{
       label: 'Columns',
       key: 'columns',
       type: 'columns',
@@ -453,9 +459,9 @@ function SetEntry_apaNCRs_wires(ncrInfo, hideHeader) {
   return schema_apaNCRs_wires;
 }
 
-// Set up the schema for a single non-wire non-conformance entry
-function SetEntry_otherNCRs(ncrInfo, hideHeader) {
-  const schema_otherNCRs = {
+// Set up the schema for the other non-conformance section header
+function SetEntry_otherNCRs_header() {
+  const schema_otherNCRs_header = {
     components: [{
       label: 'Other Non-Conformances',
       key: 'otherNCRs',
@@ -463,9 +469,17 @@ function SetEntry_otherNCRs(ncrInfo, hideHeader) {
       input: false,
       hideLabel: true,
       defaultValue: 'Other Non-Conformances',
-      hidden: hideHeader,
-    },
-    {
+    }],
+  }
+
+  return schema_otherNCRs_header;
+}
+
+
+// Set up the schema for a single non-wire non-conformance entry
+function SetEntry_otherNCRs(ncrInfo) {
+  const schema_otherNCRs = {
+    components: [{
       label: 'Columns',
       key: 'columns',
       type: 'columns',
@@ -547,20 +561,36 @@ async function populateExecutiveSummary() {
     Formio.createForm(form_wireLayers[0], schema_wireLayers, { readOnly: true, });
   })
 
-  // Render forms for the assembled APA wire related non-conformances
+  // Render the assembled APA wire-related non-conformances section header
+  $('div.entry_apaNCRs_header').each(function () {
+    const form_apaNCRs_header = $('.form_apaNCRs_header', this);
+    const schema_apaNCRs_header = SetEntry_apaNCRs_header()
+
+    Formio.createForm(form_apaNCRs_header[0], schema_apaNCRs_header, { readOnly: true, });
+  })
+
+  // Render forms for the assembled APA wire-related non-conformances
   $('div.entry_apaNCRs_wires').each(function () {
     const form_apaNCRs_wires = $('.form_apaNCRs_wires', this);
     const ncrInfo = form_apaNCRs_wires.data('record');
-    const schema_apaNCRs_wires = SetEntry_apaNCRs_wires(ncrInfo[0], ncrInfo[1])
+    const schema_apaNCRs_wires = SetEntry_apaNCRs_wires(ncrInfo[0])
 
     Formio.createForm(form_apaNCRs_wires[0], schema_apaNCRs_wires, { readOnly: true, });
+  })
+
+  // Render the other non-conformances section header
+  $('div.entry_otherNCRs_header').each(function () {
+    const form_otherNCRs_header = $('.form_otherNCRs_header', this);
+    const schema_otherNCRs_header = SetEntry_otherNCRs_header()
+
+    Formio.createForm(form_otherNCRs_header[0], schema_otherNCRs_header, { readOnly: true, });
   })
 
   // Render forms for the other non-conformances ... covering non wire-related assembled APA, frame and mesh panel NCRs
   $('div.entry_otherNCRs').each(function () {
     const form_otherNCRs = $('.form_otherNCRs', this);
     const ncrInfo = form_otherNCRs.data('record');
-    const schema_otherNCRs = SetEntry_otherNCRs(ncrInfo[0], ncrInfo[1])
+    const schema_otherNCRs = SetEntry_otherNCRs(ncrInfo[0])
 
     Formio.createForm(form_otherNCRs[0], schema_otherNCRs, { readOnly: true, });
   })

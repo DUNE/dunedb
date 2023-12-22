@@ -89,33 +89,43 @@ block allbody
       hr
 
   .vert-space-x2
-    each ncrInfo, index in collatedInfo.apaNCRs_wires
-      - let hideHeader = true;
-      - if (index == 0) hideHeader = false;
+    .entry_apaNCRs_header
+      .form_apaNCRs_header(data-record = [])
 
-      .entry_apaNCRs_wires
-        .form_apaNCRs_wires(data-record = [ncrInfo, hideHeader])
+    if collatedInfo.apaNCRs_wires.length > 0
+      each ncrInfo, index in collatedInfo.apaNCRs_wires
+        .entry_apaNCRs_wires
+          .form_apaNCRs_wires(data-record = [ncrInfo])
+
+        hr
+    else 
+      p [no wire non-conformances reported]
 
       hr
 
   .vert-space-x2
-    each ncrInfo, index in collatedInfo.apaNCRs_other
-      - let hideHeader = true;
-      - if (index == 0) hideHeader = false;
+    .entry_otherNCRs_header 
+      .form_otherNCRs_header(data-record = [])
 
-      .entry_otherNCRs.vert-space-x1
-        .form_otherNCRs(data-record = [ncrInfo, hideHeader])
+    if (collatedInfo.apaNCRs_other.length > 0) || (collatedInfo.frameNCRs.length > 0) || (collatedInfo.meshPanelNCRs > 0)
+      each ncrInfo, index in collatedInfo.apaNCRs_other
+        .entry_otherNCRs.vert-space-x1
+          .form_otherNCRs(data-record = [ncrInfo])
 
-      hr
+        hr
 
-    each ncrInfo, index in collatedInfo.frameNCRs
-      .entry_otherNCRs.vert-space-x1
-        .form_otherNCRs(data-record = [ncrInfo, hideHeader = true])
+      each ncrInfo, index in collatedInfo.frameNCRs
+        .entry_otherNCRs.vert-space-x1
+          .form_otherNCRs(data-record = [ncrInfo])
 
-      hr
+        hr
 
-    each ncrInfo, index in collatedInfo.meshPanelNCRs
-      .entry_otherNCRs.vert-space-x1
-        .form_otherNCRs(data-record = [ncrInfo, hideHeader = true])
+      each ncrInfo, index in collatedInfo.meshPanelNCRs
+        .entry_otherNCRs.vert-space-x1
+          .form_otherNCRs(data-record = [ncrInfo])
+
+        hr
+    else 
+      p [no other non-conformances reported]
 
       hr
