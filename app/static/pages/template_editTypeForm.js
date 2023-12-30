@@ -27,6 +27,7 @@ const builder_config = {
         datagrid: true,
         editgrid: true,
         NumberArray: true,
+        NumberArray_NoPlots: true,
         ScatterPlot: true,
         tree: true,
       },

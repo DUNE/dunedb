@@ -313,26 +313,26 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 });
 
 
-/// Update the most recently recorded reception location and date of all geometry boards in a shipment of new geometry boards or batch of returned geometry boards
+/// Update the most recently recorded reception location and date of all individual components in a shipment or batch
 /// This is an internal route - it should not be accessed directly by a user through their browser ...
-/// ... instead, it is automatically called during submission of a 'Board Reception' action or 'Returned Geometry Board Batch' component 
-router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
+/// ... instead, it is automatically called during submission of an appropriate 'XXX Shipment Reception' action or 'Returned XXX Batch' component 
+router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the board shipment or batch record corresponding to the specified component UUID
-    const boardCollection = await Components.retrieve(req.params.uuid);
+    // Retrieve the most recent version of the shipment or batch record corresponding to the specified component UUID
+    const collection = await Components.retrieve(req.params.uuid);
 
-    // Because the board UUIDs are stored differently in 'Board Shipment' and 'Returned Geometry Board Batch' type components, set up separate (but annoyingly similar!) scenarios for each one
-    if (boardCollection.formId === 'BoardShipment') {
+    // Because the board UUIDs are stored differently in the various shipment and batch type components, set up separate (but annoyingly similar!) scenarios for each one
+    if (collection.formId === 'BoardShipment') {
       // Throw an error if there is no record corresponding to the specified UUID
-      if (!boardCollection) return res.status(404).send(`There is no geometry board shipment with component UUID = ${req.params.uuid}`);
+      if (!collection) return res.status(404).send(`There is no geometry board shipment with component UUID = ${req.params.uuid}`);
 
-      // For each board in the shipment, extract the board UUID and update the reception location and date to those inherited from the 'Board Reception' action
+      // For each board in the shipment, extract the board UUID and update the reception location and date to those inherited from the 'Board Shipment Reception' action
       // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-      for (const board of boardCollection.data.boardUuiDs) {
+      for (const board of collection.data.boardUuiDs) {
         const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
       }
 
-      // Depending on if the originating 'Board Reception' action was part of a workflow or not, redirect to an appropriate page
+      // Depending on if the originating 'Board Shipment Reception' action was part of a workflow or not, redirect to an appropriate page
       // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
       // On the other hand, if it was a standalone action, go to the page for viewing the action record
       // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
@@ -341,13 +341,32 @@ router.get('/component/' + utils.uuid_regex + '/updateBoardLocations/:location/:
       } else {
         res.redirect(`/action/${req.query.actionId}`);
       }
-    } else if (boardCollection.formId === 'ReturnedGeometryBoardBatch') {
+    } else if (collection.formId === 'GroundingMeshShipment') {
       // Throw an error if there is no record corresponding to the specified UUID
-      if (!boardCollection) return res.status(404).send(`There is no returned geometry board batch with component UUID = ${req.params.uuid}`);
+      if (!collection) return res.status(404).send(`There is no grounding mesh panel shipment with component UUID = ${req.params.uuid}`);
+
+      // For each mesh in the shipment, extract the mesh UUID and update the reception location and date to those inherited from the 'Grounding Mesh Shipment Reception' action
+      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
+      for (const mesh of collection.data.apaUuiDs) {
+        const result = await Components.updateLocation(mesh.component_uuid, req.params.location, req.params.date);
+      }
+
+      // Depending on if the originating 'Grounding Mesh Shipment Reception' action was part of a workflow or not, redirect to an appropriate page
+      // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
+      // On the other hand, if it was a standalone action, go to the page for viewing the action record
+      // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
+      if (req.query.workflowId) {
+        res.redirect(`/workflow/${req.query.workflowId}/action/${req.query.actionId}`);
+      } else {
+        res.redirect(`/action/${req.query.actionId}`);
+      }
+    } else if (collection.formId === 'ReturnedGeometryBoardBatch') {
+      // Throw an error if there is no record corresponding to the specified UUID
+      if (!collection) return res.status(404).send(`There is no returned geometry board batch with component UUID = ${req.params.uuid}`);
 
       // For each board in the batch, extract the board UUID and update the reception location and date to those passed from the batch's submission
       // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-      for (const board of boardCollection.data.boardUuids) {
+      for (const board of collection.data.boardUuids) {
         const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
       }
 

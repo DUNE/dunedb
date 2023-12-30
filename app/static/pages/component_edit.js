@@ -68,12 +68,19 @@ async function onPageLoad() {
       if (componentTypesAndCounts[componentTypeForm.formId].count) numberOfExistingComponents = componentTypesAndCounts[componentTypeForm.formId].count;
 
       // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
-      // Additionally, we can set up and fill a 'Reception' field in the submission (which is relevant only for new 'Geometry Board' type components)
+      // Additionally, we can set up and fill a 'Reception' field in the submission
       if (componentTypeForm.formId === 'GeometryBoard') {
         numberOfExistingComponents += 5000;
 
         submission.reception = {};
         submission.reception.location = 'lancaster';
+        submission.reception.date = (new Date()).toString().slice(0, 10);
+      }
+
+      // If the component is a 'Grounding Mesh Panel' type, copy the (user-inputted) intake location to a newly set up and filled 'Reception' field in the submission
+      if (componentTypeForm.formId === 'GroundingMeshPanel') {
+        submission.reception = {};
+        submission.reception.location = submission.data.intakeLocation;
         submission.reception.date = (new Date()).toString().slice(0, 10);
       }
 
@@ -258,7 +265,7 @@ function SubmitData(submission) {
       const receptionLocation = 'lancaster';
       const receptionDate = (new Date()).toISOString().slice(0, 10);
 
-      window.location.href = `/component/${batchUUID}/updateBoardLocations/${receptionLocation}/${receptionDate}`;
+      window.location.href = `/component/${batchUUID}/updateLocations/${receptionLocation}/${receptionDate}`;
     } else {
       if (!(workflowId === '')) {
         window.location.href = `/workflow/${workflowId}/component/${result}`;

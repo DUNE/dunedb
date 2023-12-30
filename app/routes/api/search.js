@@ -101,10 +101,25 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 });
 
 
+/// Search for grounding mesh panels that have been received at a specified location
+router.get('/search/meshesByLocation/:location', async function (req, res, next) {
+  try {
+    // Retrieve a list of grounding mesh panels, grouped by part number, that have been received at the specified location
+    const meshesByPartNumber = await Search_OtherComponents.meshesByLocation(req.params.location);
+
+    // Return the list in JSON format
+    return res.json(meshesByPartNumber);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// Search for grounding mesh panels of a specified part number
 router.get('/search/meshesByPartNumber/:partNumber', async function (req, res, next) {
   try {
-    // Retrieve a list of grounding mesh panels, grouped by intake location, of the specified part number
+    // Retrieve a list of grounding mesh panels, grouped by reception location, of the specified part number
     const meshesByLocation = await Search_OtherComponents.meshesByPartNumber(req.params.partNumber);
 
     // Return the list in JSON format

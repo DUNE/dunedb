@@ -27,7 +27,7 @@ def ExtractTensions(csvFile, apaLayer):
         sys.exit(" ExtractTensions() - ERROR: invalid APA layer specified ... please use 'X','U', 'V' or 'G'! \n") 
     
     # Select the corresponding list of columns to extract from the .csv file for the given APA layer, as well as the 'check column header' list
-    columns_A, columns_B, chk_colHd = None, None, None
+    columns_A, columns_B = None, None
     
     if apaLayer == 'X':
         columns_A = columns_X_A
