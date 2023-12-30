@@ -141,7 +141,75 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 }
 
 
-/// Retrieve a list of grounding mesh panels of a specified part number across all mesh intake locations
+/// Retrieve a list of grounding mesh panels that have been received at a specified location across all part numbers
+async function meshesByLocation(location) {
+  let aggregation_stages = [];
+
+  // Retrieve all 'Grounding Mesh Panel' records that have the same reception location as the specified one
+  aggregation_stages.push({
+    $match: {
+      'formId': 'GroundingMeshPanel',
+      'reception.location': location,
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      partNumber: { '$first': '$data.meshPanelPartNumber' },
+      componentUuid: { '$first': '$componentUuid' },
+      dunePid: { '$first': '$data.name' },
+      receptionDate: { '$first': '$reception.date' },
+    },
+  });
+
+  // We want to actually display the matched meshes grouped by the mesh part numbers
+  // So group the records according to the mesh part number and corresponding string, and then add the fields to be returned for each mesh in each group
+  aggregation_stages.push({
+    $group: {
+      _id: { partNumber: '$partNumber' },
+      componentUuid: { $push: '$componentUuid' },
+      dunePid: { $push: '$dunePid' },
+      receptionDate: { $push: '$receptionDate' },
+    }
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  let cleanedResults = [];
+
+  for (const meshGroup of results) {
+    let cleanedMeshGroup = {};
+
+    cleanedMeshGroup.partNumber = meshGroup._id.partNumber;
+
+    cleanedMeshGroup.componentUuids = [];
+
+    for (const meshUuid of meshGroup.componentUuid) {
+      cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
+    }
+
+    cleanedMeshGroup.dunePids = meshGroup.dunePid;
+    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
+
+    cleanedResults.push(cleanedMeshGroup);
+  }
+
+  // Return the list of meshes grouped by part numbers
+  return cleanedResults;
+}
+
+
+/// Retrieve a list of grounding mesh panels of a specified part number across all mesh reception locations
 async function meshesByPartNumber(partNumber) {
   let aggregation_stages = [];
 
@@ -162,18 +230,20 @@ async function meshesByPartNumber(partNumber) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      intakeLocation: { '$first': '$data.intakeLocation' },
       dunePid: { '$first': '$data.name' },
+      receptionDate: { '$first': '$reception.date' },
+      receptionLocation: { '$first': '$reception.location' },
     },
   });
 
-  // We want to actually display the matched meshes grouped by the intake location
-  // So group the records according to the intake location, and then add the fields to be returned for each mesh in each group
+  // We want to actually display the matched meshes grouped by the reception location
+  // So group the records according to the reception location, and then add the fields to be returned for each mesh in each group
   aggregation_stages.push({
     $group: {
-      _id: { intakeLocation: '$intakeLocation' },
+      _id: { receptionLocation: '$receptionLocation' },
       componentUuid: { $push: '$componentUuid' },
       dunePid: { $push: '$dunePid' },
+      receptionDate: { $push: '$receptionDate' },
     }
   });
 
@@ -188,7 +258,7 @@ async function meshesByPartNumber(partNumber) {
   for (const meshGroup of results) {
     let cleanedMeshGroup = {};
 
-    cleanedMeshGroup.intakeLocation = meshGroup._id.intakeLocation;
+    cleanedMeshGroup.receptionLocation = meshGroup._id.receptionLocation;
 
     cleanedMeshGroup.componentUuids = [];
     cleanedMeshGroup.dunePids = [];
@@ -201,7 +271,7 @@ async function meshesByPartNumber(partNumber) {
     cleanedResults.push(cleanedMeshGroup);
   }
 
-  // Return the list of meshes grouped by intake location
+  // Return the list of meshes grouped by reception location
   return cleanedResults;
 }
 
@@ -277,6 +347,7 @@ async function componentsByTypeAndNumber(type, typeRecordNumber) {
 
 module.exports = {
   boardShipmentsByReceptionDetails,
+  meshesByLocation,
   meshesByPartNumber,
   apasByLocation,
   componentsByTypeAndNumber,

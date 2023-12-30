@@ -45,7 +45,7 @@ function postSuccess(result) {
       <td colspan = "3">The following grounding mesh panels with part number <b>${$('#partNumberSelection option:selected').text()}</b> have been received.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by intake location, and then ordered by last DB record edit (most recent at the top).
+      <td colspan = "3">They are grouped by reception location, and then ordered by last DB record edit (most recent at the top).
         <br>
         <hr>
       </td>
@@ -60,7 +60,7 @@ function postSuccess(result) {
     for (const meshGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${meshGroup.componentUuids.length} panels received at ${formatMeshLocation(meshGroup.intakeLocation)}</td>
+          <td colspan = "3">Found ${meshGroup.componentUuids.length} panels received at ${formatMeshLocation(meshGroup.receptionLocation)}</td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -69,7 +69,7 @@ function postSuccess(result) {
     $('#results').append('<br>');
 
     for (const meshGroup of result) {
-      const groupTitle = `<b>Location: ${formatMeshLocation(meshGroup.intakeLocation)}</b>`;
+      const groupTitle = `<b>Location: ${formatMeshLocation(meshGroup.receptionLocation)}</b>`;
 
       $('#results').append(groupTitle);
 

@@ -133,7 +133,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
 /// Update the location information of all geometry boards in a board installation action
 /// This is an internal route - it should not be accessed directly by a user through their browser ...
 /// ... instead, it is automatically called during submission of any type of board installation action
-router.get('/action/:actionId([A-Fa-f0-9]{24})/updateBoardLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
+router.get('/action/:actionId([A-Fa-f0-9]{24})/updateLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified action ID, and throw an error if there is no such record
     const action = await Actions.retrieve(req.params.actionId);
