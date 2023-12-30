@@ -54,7 +54,7 @@ block content
 
       p Users may select one of the available board reception locations or part numbers from the appropriate list, and a summary of information about each found board will be displayed in the search results panel on the right side of the page.
 
-      p Please note that a geometry board is only deemed to be at a given location if it has been recorded as being received there via a successfully submitted <b>Board Reception</b> action.
+      p Please note that a geometry board is only deemed to be at a given location if it has either been intaken there, or has been recorded as being received there via a successfully submitted <b>Board Shipment Reception</b> action.
 
       hr
 
@@ -96,11 +96,16 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/meshesByPartNumber') Grounding Mesh Panels By Part Number
+        a(href = '/search/meshesByLocationOrPartNumber') Grounding Mesh Panels By Location or Part Number
 
-      p This page may be used to search specifically for all <b>grounding mesh panels</b> of a <u>specified mesh part number</u> that have been received at any location.
+      p This page may be used to search specifically for <b>grounding mesh panels</b> under one of the following scenarios: 
+        ul
+          li <b>either</b> all mesh panels of any part number that have been received at a <u>specified location</u>
+          li <b>or</b> all mesh panels of a <u>specified part number</u> that have been received at any location
 
-      p Users may select one of the available grounding mesh panel part numbers from the list, and a summary of information about each found panel will be displayed in the search results panel on the right side of the page.
+      p Users may select one of the available mesh panel reception locations or part numbers from the appropriate list, and a summary of information about each found mesh panel will be displayed in the search results panel on the right side of the page.
+
+      p Please note that a mesh panel is only deemed to be at a given location if it has either been intaken there, or has been recorded as being received there via a successfully submitted <b>Grounding Mesh Panel Shipment Reception</b> action.
 
       hr
 

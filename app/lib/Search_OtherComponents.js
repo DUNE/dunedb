@@ -261,12 +261,13 @@ async function meshesByPartNumber(partNumber) {
     cleanedMeshGroup.receptionLocation = meshGroup._id.receptionLocation;
 
     cleanedMeshGroup.componentUuids = [];
-    cleanedMeshGroup.dunePids = [];
 
-    for (const [index, meshUuid] of meshGroup.componentUuid.entries()) {
+    for (const meshUuid of meshGroup.componentUuid) {
       cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-      cleanedMeshGroup.dunePids.push(meshGroup.dunePid[index]);
     }
+
+    cleanedMeshGroup.dunePids = meshGroup.dunePid;
+    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedResults.push(cleanedMeshGroup);
   }
