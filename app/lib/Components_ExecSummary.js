@@ -117,13 +117,13 @@ async function collateInfo(componentUUID) {
     collatedInfo.frameQC.qcActionId = results[0].actionId;
   }
 
-  // Get information about the (most recently performed) APA frame survey
+  // Get information about the (most recently performed) APA frame vertical inspection
   aggregation_stages = [];
   results = [];
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'FrameSurveys',
+      'typeFormId': 'FrameVerticalInspection',
       'componentUuid': MUUID.from(frameUUID),
     }
   });
