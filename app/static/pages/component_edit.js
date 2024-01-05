@@ -268,7 +268,7 @@ function SubmitData(submission) {
       window.location.href = `/component/${batchUUID}/updateLocations/${receptionLocation}/${receptionDate}`;
     } else {
       if (!(workflowId === '')) {
-        window.location.href = `/workflow/${workflowId}/component/${result}`;
+        window.location.href = `/workflow/${workflowId}/0/component/${result}`;
       } else {
         window.location.href = `/component/${result}`;
       }

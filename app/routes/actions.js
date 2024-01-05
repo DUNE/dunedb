@@ -80,10 +80,14 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
 
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
-    // Set the workflow ID if one is provided
+    // Set both the workflow ID and workflow step index if the former is provided (either both or neither will be present)
     let workflowId = '';
+    let stepIndex = '-99';
 
-    if (req.query.workflowId) workflowId = req.query.workflowId;
+    if (req.query.workflowId) {
+      workflowId = req.query.workflowId;
+      stepIndex = req.query.stepIndex;
+    }
 
     // Render the interface page
     res.render('action_specComponent.pug', {
@@ -91,6 +95,7 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
       componentUuid: req.params.uuid,
       componentName: component.data.name,
       workflowId,
+      stepIndex,
     });
   } catch (err) {
     logger.error(err);
@@ -122,6 +127,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
       componentUuid: action.componentUuid,
       componentName: component.data.name,
       workflowId: '',
+      stepIndex: '-99',
     });
   } catch (err) {
     logger.error(err);
@@ -155,7 +161,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/updateLocations/:location/:date',
     // On the other hand, if it was a standalone action, go to the page for viewing the action record
     // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
     if (req.query.workflowId) {
-      res.redirect(`/workflow/${req.query.workflowId}/action/${req.params.actionId}`);
+      res.redirect(`/workflow/${req.query.workflowId}/${req.query.stepIndex}/action/${req.params.actionId}`);
     } else {
       res.redirect(`/action/${req.params.actionId}`);
     }

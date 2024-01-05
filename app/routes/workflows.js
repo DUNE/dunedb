@@ -113,24 +113,15 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
 
 
 /// Update a single step result in the path of an existing workflow
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
+router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepIndex/:stepType/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
     const workflow = await Workflows.retrieve(req.params.workflowId);
 
     if (!workflow) return res.status(404).send(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
 
-    // Retrieve the index of the first incomplete step in the workflow path (this is the step whose result will be updated)
-    let stepIndex = -99;
-
-    for (let i = 0; i < workflow.path.length; i++) {
-      if (workflow.path[i].result === '') {
-        stepIndex = i;
-        break;
-      }
-    }
-
-    if (stepIndex === -99) return res.status(404).send(`There are no more steps to perform in the path of this workflow (ID = ${req.params.workflowId})`);
+    // Parse the step index (remembering that it is passed to this function as a string, but needs to be an integer)
+    const stepIndex = parseInt(req.params.stepIndex, 10);
 
     // Check if this is the final step in the workflow, i.e. if the workflow is complete after this step's result is saved
     let workflowStatus = 'In Progress';

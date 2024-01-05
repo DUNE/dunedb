@@ -94,10 +94,7 @@ function SubmitData(submission) {
       const receptionLocation = submission.data.receptionLocation;
       const receptionDate = (submission.data.receptionDate).toString().slice(0, 10);
 
-      let url = `/component/${shipmentUUID}/updateLocations/${receptionLocation}/${receptionDate}`;
-      url += `?actionId=${result}`;
-
-      if (!(workflowId === '')) url += `?workflowId=${workflowId}`;
+      let url = `/component/${shipmentUUID}/updateLocations/${receptionLocation}/${receptionDate}?actionId=${result}`;
 
       window.location.href = url;
     } else if (installation_typeFormIDs.includes(submission.typeFormId)) {
@@ -108,12 +105,12 @@ function SubmitData(submission) {
 
       let url = `/action/${result}/updateLocations/${receptionLocation}/${receptionDate}`;
 
-      if (!(workflowId === '')) url += `?workflowId=${workflowId}`;
+      if (!(workflowId === '')) url += `?workflowId=${workflowId}&stepIndex=${stepIndex}`;
 
       window.location.href = url;
     } else {
       if (!(workflowId === '')) {
-        window.location.href = `/workflow/${workflowId}/action/${result}`;
+        window.location.href = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
       } else {
         window.location.href = `/action/${result}`;
       }
