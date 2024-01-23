@@ -1,5 +1,12 @@
 // Set up the schema for the QC signoffs
 function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCableTempSensorQC) {
+  const apaQC_link = (apaQC.actionId !== '' ? `<a href = '/action/${apaQC.actionId}' > APA QC Review Details </a>` : `[missing APA QC Review]`);
+  const frameQC_link = (frameQC.actionId !== '' ? `<a href = '/action/${frameQC.qcActionId}' > Frame QC Review Details </a>` : `[missing no Frame QC Review]`);
+  const frameSurveys_link = (frameQC.surveysActionId !== '' ? `<a href = '/action/${frameQC.surveysActionId}' > Frame Survey Details </a>` : `[missing Frame Survey]`);
+  const meshPanelQC_link = (meshPanelQC.actionId !== '' ? `<a href = '/action/${meshPanelQC.actionId}' > Mesh Panel Installation QC Details </a>` : `[missing Mesh Panel Installation QC]`);
+  const cableConduitQC_link = (cableConduitQC.actionId !== '' ? `<a href = '/action/${cableConduitQC.actionId}' > Cable Conduit Insertion QC Details </a>` : `[missing Cable Conduit Insertion QC]`);
+  const pdCableTempSensorQC_link = (pdCableTempSensorQC.actionId !== '' ? `<a href = '/action/${pdCableTempSensorQC.actionId}' > PD and RTD Installation Details </a>` : `[missing PD and RTD Installation]`);
+
   const schema_qcSignoffs = {
     components: [{
       label: 'QC Signoffs',
@@ -30,7 +37,7 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
           key: 'apaQC_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${apaQC.actionId}' > APA QC Review Details </a> </br></p>`,
+          content: `<p><br> ${apaQC_link} </br></p>`,
         }],
         width: 3,
         size: 'sm',
@@ -51,7 +58,7 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
           key: 'frameQC_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${frameQC.qcActionId}' > Frame QC Review Details </a> </br></p>`,
+          content: `<p><br> ${frameQC_link} </br></p>`,
         }],
         width: 1,
         size: 'sm',
@@ -61,7 +68,7 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
           key: 'frameQC_surveysActionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${frameQC.surveysActionId}' > Frame Survey Details </a> </br></p>`,
+          content: `<p><br> ${frameSurveys_link} </br></p>`,
         }],
         width: 2,
         size: 'sm',
@@ -88,7 +95,7 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
           key: 'meshPanelQC_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${meshPanelQC.actionId}' > Mesh Panel Installation QC Details </a> </br></p>`,
+          content: `<p><br> ${meshPanelQC_link} </br></p>`,
         }],
         width: 3,
         size: 'sm',
@@ -109,7 +116,7 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
           key: 'cableConduitQC_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${cableConduitQC.actionId}' > Cable Conduit Insertion QC Details </a> </br></p>`,
+          content: `<p><br> ${cableConduitQC_link} </br></p>`,
         }],
         width: 3,
         size: 'sm',
@@ -147,7 +154,7 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
           key: 'pdCableTempSensorQC_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${pdCableTempSensorQC.actionId}' > PD and RTD Installation Details </a> </br></p>`,
+          content: `<p><br> ${pdCableTempSensorQC_link} </br></p>`,
         }],
         width: 3,
         size: 'sm',
@@ -165,6 +172,10 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
 
 // Set up the schema for a single wire layer entry
 function SetEntry_wireLayer(layer, layerInfo) {
+  const winding_link = (layerInfo.winding_actionId !== '' ? `<a href = '/action/${layerInfo.winding_actionId}' > Winding Details </a>` : `[missing Winding Details]`);
+  const soldering_link = (layerInfo.soldering_actionId !== '' ? `<a href = '/action/${layerInfo.soldering_actionId}' > Soldering Details </a>` : `[missing Soldering Details]`);
+  const tensions_link = (layerInfo.tensions_actionId !== '' ? `<a href = '/action/${layerInfo.tensions_actionId}' > Tension Measurements </a>` : `[missing Tension Measurements]`);
+
   const schema_wireLayer = {
     components: [{
       label: `Wire Layer ${layer}`,
@@ -275,7 +286,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           key: 'wireLayer_winding_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${layerInfo.winding_actionId}' > Winding Details </a> </br></p>`,
+          content: `<p><br> ${winding_link} </br></p>`,
         }],
         width: 2,
         size: 'sm',
@@ -285,7 +296,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           key: 'wireLayer_soldering_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${layerInfo.soldering_actionId}' > Soldering Details </a> </br></p>`,
+          content: `<p><br> ${soldering_link} </br></p>`,
         }],
         width: 2,
         size: 'sm',
@@ -323,7 +334,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           key: 'tensions_actionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> <a href = '/action/${layerInfo.tensions_actionId}' > Tension Measurements </a> </br></p>`,
+          content: `<p><br> ${tensions_link} </br></p>`,
         }],
         width: 2,
         size: 'sm',

@@ -1,5 +1,6 @@
 const MUUID = require('uuid-mongodb');
 
+const Actions = require('./Actions');
 const Components = require('./Components');
 const { db } = require('./db');
 const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
@@ -44,13 +45,23 @@ async function collateInfo(componentUUID) {
   const workflows = await Search_ActionsWorkflows.workflowsByUUID(componentUUID);
 
   if (workflows.length === 1) {
-    collatedInfo.assemblyStatus = workflows[0].status;
+    let numberOfCompleteActions = 0;
+
+    for (let stepIndex = 1; stepIndex < workflows[0].path.length; stepIndex++) {
+      if (workflows[0].path[stepIndex].result.length > 0) {
+        const action = await Actions.retrieve(workflows[0].path[stepIndex].result);
+
+        if (action.data.actionComplete) numberOfCompleteActions++;
+      }
+    }
+
+    collatedInfo.assemblyStatus = (numberOfCompleteActions === workflows[0].path.length - 1) ? 'Complete' : 'In Progress';
     collatedInfo.workflowID = workflows[0].workflowId;
   }
 
   // Get information about the assembled APA QC
   collatedInfo.apaQC = {
-    signoff: '',
+    signoff: '[no information found]',
     actionId: '',
   };
 
@@ -84,7 +95,7 @@ async function collateInfo(componentUUID) {
 
   // Get information about the APA frame QC
   collatedInfo.frameQC = {
-    signoff: '',
+    signoff: '[no information found]',
     qcActionId: '',
     surveysActionId: '',
   };
@@ -146,7 +157,7 @@ async function collateInfo(componentUUID) {
 
   // Get information about the mesh panel installation QC
   collatedInfo.meshPanelQC = {
-    signoff: '',
+    signoff: '[no information found]',
     actionId: '',
   };
 
@@ -180,7 +191,7 @@ async function collateInfo(componentUUID) {
 
   // Get information about the cable conduit insertion QC
   collatedInfo.cableConduitQC = {
-    signoff: '',
+    signoff: '[no information found]',
     actionId: '',
   };
 
@@ -214,8 +225,8 @@ async function collateInfo(componentUUID) {
 
   // Get information about the photon detector cable and temperature sensor installation QC
   collatedInfo.pdCableTempSensorQC = {
-    photonDetectorSignoff: '',
-    rdInstallationSignoff: '',
+    photonDetectorSignoff: '[no information found]',
+    rdInstallationSignoff: '[no information found]',
     actionId: '',
   };
 
@@ -296,8 +307,8 @@ async function collateInfo(componentUUID) {
     collatedInfo[dictionaries[i]] = {
       winder: '',
       winderHead: '',
-      winderMaintenenceSignoff: '',
-      tensionControlSignoff: '',
+      winderMaintenenceSignoff: '[no information found]',
+      tensionControlSignoff: '[no information found]',
       replacedWires: [],
       numberOfTensionAlarms: 0,
       winding_actionId: '',

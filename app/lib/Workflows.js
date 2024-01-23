@@ -17,10 +17,8 @@ async function save(input, req) {
   //   - the workflow type form ID
   //   - user-provided data (may be empty of content, but must still exist)
   //   - a workflow path (the path steps will be checked later in this function)
-  //   - the current status of the workflow (i.e. in progress, with steps still to be completed, or completed)
   if (!(input instanceof Object)) throw new Error(`Workflows::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('typeFormId')) throw new Error(`Workflows::save() - the 'input.typeFormId' has not been specified!`);
-  if (!input.hasOwnProperty('status')) throw new Error(`Workflows::save() - the 'input.status' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Workflows::save() - the 'input.data' has not been specified!`);
   if (!input.hasOwnProperty('path')) throw new Error(`Workflows::save() - the 'input.path' has not been specified!`);
 
@@ -50,7 +48,6 @@ async function save(input, req) {
   newRecord.workflowId = new ObjectID(input.workflowId);
   newRecord.typeFormId = input.typeFormId;
   newRecord.typeFormName = input.typeFormName || typeForm.formName;
-  newRecord.status = input.status;
   newRecord.data = input.data;
   newRecord.path = input.path;
 
@@ -82,14 +79,13 @@ async function save(input, req) {
 
 
 /// Update the result of a single step in a workflow path
-async function updatePathStep(workflowId, stepIndex, stepResult, workflowStatus) {
+async function updatePathStep(workflowId, stepIndex, stepResult) {
   // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the workflow record, and throw an error if the edit fails
   // Preset a dictionary of the variables to be updated using the operator
   // We have to do this separately because the step index is a variable, but the '$set' operator cannot use inline constructed strings as arguments
   let update = { '$set': {} };
 
   update['$set']['path.' + stepIndex + '.result'] = stepResult;
-  update['$set']['status'] = workflowStatus;
 
   const result = db.collection('workflows')
     .findOneAndUpdate(
@@ -185,7 +181,6 @@ async function list(match_condition, options) {
       typeFormName: { '$first': '$typeFormName' },
       name: { '$first': '$data.name' },
       stepResultIDs: { '$first': '$path.result' },
-      status: { '$first': '$status' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
