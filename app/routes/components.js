@@ -332,15 +332,8 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
         const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
       }
 
-      // Depending on if the originating 'Board Shipment Reception' action was part of a workflow or not, redirect to an appropriate page
-      // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
-      // On the other hand, if it was a standalone action, go to the page for viewing the action record
-      // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
-      if (req.query.workflowId) {
-        res.redirect(`/workflow/${req.query.workflowId}/action/${req.query.actionId}`);
-      } else {
-        res.redirect(`/action/${req.query.actionId}`);
-      }
+      // Once all boards have been updated, redirect to the page for viewing the action record
+      res.redirect(`/action/${req.query.actionId}`);
     } else if (collection.formId === 'GroundingMeshShipment') {
       // Throw an error if there is no record corresponding to the specified UUID
       if (!collection) return res.status(404).send(`There is no grounding mesh panel shipment with component UUID = ${req.params.uuid}`);
@@ -351,15 +344,8 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
         const result = await Components.updateLocation(mesh.component_uuid, req.params.location, req.params.date);
       }
 
-      // Depending on if the originating 'Grounding Mesh Shipment Reception' action was part of a workflow or not, redirect to an appropriate page
-      // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
-      // On the other hand, if it was a standalone action, go to the page for viewing the action record
-      // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')
-      if (req.query.workflowId) {
-        res.redirect(`/workflow/${req.query.workflowId}/action/${req.query.actionId}`);
-      } else {
-        res.redirect(`/action/${req.query.actionId}`);
-      }
+      // Once all boards have been updated, redirect to the page for viewing the action record
+      res.redirect(`/action/${req.query.actionId}`);
     } else if (collection.formId === 'ReturnedGeometryBoardBatch') {
       // Throw an error if there is no record corresponding to the specified UUID
       if (!collection) return res.status(404).send(`There is no returned geometry board batch with component UUID = ${req.params.uuid}`);

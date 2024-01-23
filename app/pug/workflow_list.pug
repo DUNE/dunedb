@@ -27,7 +27,7 @@ block content
             th.col-md-1
 
         tbody
-          each workflow in workflows
+          each workflow, index in workflows
             - const notSingleType_notTrashed = !singleType && !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash');
 
             if notSingleType_notTrashed || singleType
@@ -42,10 +42,10 @@ block content
                 else 
                   td (component not yet created)
 
-                if workflow.status === 'Complete'
-                  td.text-success.font-weight-bold #{workflow.status}
+                if workflowStatuses[index] == 'Complete'
+                  td.text-success.font-weight-bold #{workflowStatuses[index]}
                 else
-                  td.text-danger.font-weight-bold #{workflow.status}
+                  td.text-danger.font-weight-bold #{workflowStatuses[index]}
 
                 td
                   a.btn-sm.btn-secondary(href = `/json/workflow/${workflow.workflowId}`, target = '_blank')
