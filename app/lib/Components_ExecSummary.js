@@ -40,7 +40,7 @@ async function collateInfo(componentUUID) {
   collatedInfo.apaInfo.dunePID = assembledAPA.data.name;
   collatedInfo.apaInfo.productionSite = dictionary_productionSites[assembledAPA.data.apaAssemblyLocation];
   collatedInfo.apaInfo.configuration = dictionary_configuration[assembledAPA.data.apaConfiguration];
-
+/*
   // Get a list of workflows that involve the assembled APA, specified by its UUID (there should only be one), and add relevant information about the workflow to the collated information
   const workflows = await Search_ActionsWorkflows.workflowsByUUID(componentUUID);
 
@@ -58,7 +58,7 @@ async function collateInfo(componentUUID) {
     collatedInfo.assemblyStatus = (numberOfCompleteActions === workflows[0].path.length - 1) ? 'Complete' : 'In Progress';
     collatedInfo.workflowID = workflows[0].workflowId;
   }
-
+*/
   // Get information about the assembled APA QC
   collatedInfo.apaQC = {
     signoff: '[no information found]',
