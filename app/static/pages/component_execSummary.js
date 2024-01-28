@@ -1,7 +1,7 @@
 // Set up the schema for the QC signoffs
 function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCableTempSensorQC) {
   const apaQC_link = (apaQC.actionId !== '' ? `<a href = '/action/${apaQC.actionId}' > APA QC Review Details </a>` : `[missing APA QC Review]`);
-  const frameQC_link = (frameQC.actionId !== '' ? `<a href = '/action/${frameQC.qcActionId}' > Frame QC Review Details </a>` : `[missing no Frame QC Review]`);
+  const frameQC_link = (frameQC.qcActionId !== '' ? `<a href = '/action/${frameQC.qcActionId}' > Frame QC Review Details </a>` : `[missing Frame QC Review]`);
   const frameSurveys_link = (frameQC.surveysActionId !== '' ? `<a href = '/action/${frameQC.surveysActionId}' > Frame Survey Details </a>` : `[missing Frame Survey]`);
   const meshPanelQC_link = (meshPanelQC.actionId !== '' ? `<a href = '/action/${meshPanelQC.actionId}' > Mesh Panel Installation QC Details </a>` : `[missing Mesh Panel Installation QC]`);
   const cableConduitQC_link = (cableConduitQC.actionId !== '' ? `<a href = '/action/${cableConduitQC.actionId}' > Cable Conduit Insertion QC Details </a>` : `[missing Cable Conduit Insertion QC]`);

@@ -4,6 +4,7 @@ const Actions = require('./Actions');
 const Components = require('./Components');
 const { db } = require('./db');
 const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
+const Workflows = require('./Workflows');
 
 
 /// Retrieve collated information about a single assembled APA (and associated components and actions) that will be displayed in its executive summary
@@ -40,25 +41,26 @@ async function collateInfo(componentUUID) {
   collatedInfo.apaInfo.dunePID = assembledAPA.data.name;
   collatedInfo.apaInfo.productionSite = dictionary_productionSites[assembledAPA.data.apaAssemblyLocation];
   collatedInfo.apaInfo.configuration = dictionary_configuration[assembledAPA.data.apaConfiguration];
-/*
+
   // Get a list of workflows that involve the assembled APA, specified by its UUID (there should only be one), and add relevant information about the workflow to the collated information
   const workflows = await Search_ActionsWorkflows.workflowsByUUID(componentUUID);
 
   if (workflows.length === 1) {
     let numberOfCompleteActions = 0;
+    const workflow = await Workflows.retrieve(workflows[0].workflowId);
 
-    for (let stepIndex = 1; stepIndex < workflows[0].path.length; stepIndex++) {
-      if (workflows[0].path[stepIndex].result.length > 0) {
-        const action = await Actions.retrieve(workflows[0].path[stepIndex].result);
+    for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
+      if (workflow.path[stepIndex].result.length > 0) {
+        const action = await Actions.retrieve(workflow.path[stepIndex].result);
 
         if (action.data.actionComplete) numberOfCompleteActions++;
       }
     }
 
-    collatedInfo.assemblyStatus = (numberOfCompleteActions === workflows[0].path.length - 1) ? 'Complete' : 'In Progress';
-    collatedInfo.workflowID = workflows[0].workflowId;
+    collatedInfo.apaInfo.assemblyStatus = (numberOfCompleteActions === workflow.path.length - 1) ? 'Complete' : 'In Progress';
+    collatedInfo.apaInfo.workflowID = workflow.workflowId;
   }
-*/
+
   // Get information about the assembled APA QC
   collatedInfo.apaQC = {
     signoff: '[no information found]',
