@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+const Actions = require('../lib/Actions');
 const Components = require('../lib/Components');
 const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
@@ -43,6 +44,25 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
       }
     }
 
+    // Retrieve and store the status of each action that has been performed (i.e. that has a result) - that is, the value (true or false) of the action's 'data.actionComplete' field
+    // Note that this field is common across all action type forms that are used in workflows, and so it should always exist one way or the other
+    // At the same time, determine the overall status of the workflow - it is 'complete' only if every action is individually complete ...
+    // ... i.e. there are the same number of completed actions as there are total actions in the workflow path
+    let actionsDictionary = {};
+    let numberOfCompleteActions = 0;
+
+    for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
+      if (workflow.path[stepIndex].result.length > 0) {
+        const action = await Actions.retrieve(workflow.path[stepIndex].result);
+
+        actionsDictionary[stepIndex] = action.data.actionComplete;
+
+        if (action.data.actionComplete) numberOfCompleteActions++;
+      }
+    }
+
+    const workflowStatus = (numberOfCompleteActions === workflow.path.length - 1) ? 'Complete' : 'In Progress';
+
     // Simultaneously retrieve lists of all component and action type forms that currently exist in their respective collections
     const [componentTypeForms, actionTypeForms] = await Promise.all([
       Forms.list('componentForms'),
@@ -52,9 +72,11 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
     // Render the interface page
     res.render('workflow.pug', {
       workflow,
+      workflowStatus,
       workflowVersions,
       workflowTypeForm,
       componentName,
+      actionsDictionary,
       componentTypeForms,
       actionTypeForms,
       queryDictionary: req.query,
@@ -113,29 +135,15 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
 
 
 /// Update a single step result in the path of an existing workflow
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
+router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepIndex/:stepType/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
     const workflow = await Workflows.retrieve(req.params.workflowId);
 
     if (!workflow) return res.status(404).send(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
 
-    // Retrieve the index of the first incomplete step in the workflow path (this is the step whose result will be updated)
-    let stepIndex = -99;
-
-    for (let i = 0; i < workflow.path.length; i++) {
-      if (workflow.path[i].result === '') {
-        stepIndex = i;
-        break;
-      }
-    }
-
-    if (stepIndex === -99) return res.status(404).send(`There are no more steps to perform in the path of this workflow (ID = ${req.params.workflowId})`);
-
-    // Check if this is the final step in the workflow, i.e. if the workflow is complete after this step's result is saved
-    let workflowStatus = 'In Progress';
-
-    if ((stepIndex + 1) === workflow.path.length) workflowStatus = 'Complete';
+    // Parse the step index (remembering that it is passed to this function as a string, but needs to be an integer)
+    const stepIndex = parseInt(req.params.stepIndex, 10);
 
     // Get the specified step type from the URL, and throw an error if it is not valid
     const stepType = req.params.stepType;
@@ -153,9 +161,8 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepType/:stepResult', permi
 
     if (!matchedComponent && !matchedAction) return res.status(404).send(`The provided step result (${stepResult}) is not valid for this step type ('${stepType}'')`);
 
-    // Update the step result
-    // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-    const result = await Workflows.updatePathStep(req.params.workflowId, stepIndex, stepResult, workflowStatus);
+    // Update the step result ... if successful, the updating function returns 'result = 1', but we don't actually need this value for anything
+    const result = await Workflows.updatePathStep(req.params.workflowId, stepIndex, stepResult);
 
     // Redirect the user to the interface page for viewing the workflow record
     res.redirect(`/workflow/${req.params.workflowId}`);
@@ -231,12 +238,32 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
     // The first argument should be 'null' in order to match to any type form ID
     const workflows = await Workflows.list(null, { limit: 200 });
 
+    // For each workflow, determine its overall status - it is 'complete' only if every action is individually complete ...
+    // ... i.e. there are the same number of completed actions (specified by the value (true or false) of the action's 'data.actionComplete' field) as there are total actions in the workflow path
+    let workflowStatuses = [];
+
+    for (const workflow of workflows) {
+      let numberOfCompleteActions = 0;
+
+      for (let stepIndex = 1; stepIndex < workflow.stepResultIDs.length; stepIndex++) {
+        if (workflow.stepResultIDs[stepIndex].length > 0) {
+          const action = await Actions.retrieve(workflow.stepResultIDs[stepIndex]);
+
+          if (action.data.actionComplete) numberOfCompleteActions++;
+        }
+      }
+
+      const workflowStatus = (numberOfCompleteActions === workflow.stepResultIDs.length - 1) ? 'Complete' : 'In Progress';
+      workflowStatuses.push(workflowStatus);
+    }
+
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
     const allWorkflowTypeForms = await Forms.list('workflowForms');
 
     // Render the interface page
     res.render('workflow_list.pug', {
       workflows,
+      workflowStatuses,
       singleType: false,
       title: 'All Created / Edited Workflows (All Types)',
       allWorkflowTypeForms,
@@ -255,6 +282,25 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
     const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
 
+    // For each workflow, determine its overall status - it is 'complete' only if every action is individually complete ...
+    // ... i.e. there are the same number of completed actions (specified by the value (true or false) of the action's 'data.actionComplete' field) as there are total actions in the workflow path
+    let workflowStatuses = [];
+
+    for (const workflow of workflows) {
+      let numberOfCompleteActions = 0;
+
+      for (let stepIndex = 1; stepIndex < workflow.stepResultIDs.length; stepIndex++) {
+        if (workflow.stepResultIDs[stepIndex].length > 0) {
+          const action = await Actions.retrieve(workflow.stepResultIDs[stepIndex]);
+
+          if (action.data.actionComplete) numberOfCompleteActions++;
+        }
+      }
+
+      const workflowStatus = (numberOfCompleteActions === workflow.stepResultIDs.length - 1) ? 'Complete' : 'In Progress';
+      workflowStatuses.push(workflowStatus);
+    }
+
     // Retrieve the workflow type form corresponding to the specified type form ID
     const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
 
@@ -264,6 +310,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     // Render the interface page
     res.render('workflow_list.pug', {
       workflows,
+      workflowStatuses,
       singleType: true,
       title: 'All Created / Edited Workflows (Single Type)',
       workflowTypeForm,

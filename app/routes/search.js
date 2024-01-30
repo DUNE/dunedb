@@ -36,10 +36,10 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 });
 
 
-/// Search for grounding mesh panels of a specified part number
-router.get('/search/meshesByPartNumber', async function (req, res, next) {
+/// Search for grounding mesh panels that have been received at a specific location, or are of a specified part number
+router.get('/search/meshesByLocationOrPartNumber', async function (req, res, next) {
   // Render the interface page
-  res.render('search_meshesByPartNumber.pug');
+  res.render('search_meshesByLocationOrPartNumber.pug');
 });
 
 

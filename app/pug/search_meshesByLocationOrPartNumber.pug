@@ -1,0 +1,56 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Grounding Mesh Panels by Location or Part Number';
+
+block extrascripts
+  block workscripts 
+    script(src = '/pages/search_meshesByLocationOrPartNumber.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Grounding Mesh Panels by Location or Part Number
+
+    .vert-space-x2
+      hr
+
+      .row
+        .col-md-4
+          h4 Select Location
+
+          .vert-space-x1
+            p Select a location from the options below.
+
+          select.form-control#locationSelection
+            option(value = '')
+            option(value = 'lockers') Lockers 
+            option(value = 'sheffield') Sheffield 
+            option(value = 'daresbury') Daresbury 
+            option(value = 'chicago') Chicago 
+
+          .vert-space-x2
+            hr
+
+            h4 Select Part Number
+
+            .vert-space-x1
+              p Select a part number from the options below.
+
+            select.form-control#partNumberSelection
+              option(value = '')          
+              option(value = 'mesh29410560HeadEndLH') 294-10560 HEAD END - L/H 
+              option(value = 'mesh29410561HeadEndRH') 294-10561 HEAD END - R/H
+              option(value = 'mesh29410562FootEndRH') 294-10562 FOOT END - R/H 
+              option(value = 'mesh29410563FootEndLH') 294-10563 FOOT END - L/H 
+              option(value = 'mesh29410564Centre') 294-10564 CENTRE
+
+        .col-md-1
+
+        .col-md-7
+          h4 Search Results
+
+          .vert-space-x1
+            table#results
+
+    .vert-space-x2

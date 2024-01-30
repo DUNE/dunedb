@@ -45,10 +45,8 @@ async function onPageLoad() {
 
     // If this is a completely new workflow, copy the 'path' object from the workflow type form into the 'submission' object
     // For an existing workflow that is being edited, we don't want to do this, since it would overwrite any existing path results
-    // Also for a completely new workflow, set a 'status' field in the submission ... initially with a value of 'In Progress'
     if (newWorkflow) {
       submission.path = workflowTypeForm.path;
-      submission.status = 'In Progress';
     }
 
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database

@@ -147,8 +147,8 @@ body(class = `deployment-${NODE_ENV}`)
                     |      Geometry Board Shipments by Reception Details
 
                 li.nav-item
-                  +navlink(href = '/search/meshesByPartNumber')
-                    |      Grounding Mesh Panels by Part Number
+                  +navlink(href = '/search/meshesByLocationOrPartNumber')
+                    |      Grounding Mesh Panels by Location or Part Number
 
                 li.nav-item
                   +navlink(href = '/search/apaByLocation')
@@ -198,6 +198,7 @@ script(src = '/formio/BarPlot.js')
 script(src = '/formio/BetterDataGrid.js')
 script(src = '/formio/ComponentUUID.js')
 script(src = '/formio/NumberArray.js')
+script(src = '/formio/NumberArray_NoPlots.js')
 script(src = '/formio/NumberTolerance.js')
 script(src = '/formio/ScatterPlot.js')
 script(src = '/formio/WorkflowID.js')

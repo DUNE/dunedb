@@ -1,7 +1,10 @@
 const MUUID = require('uuid-mongodb');
 
+const Actions = require('./Actions');
 const Components = require('./Components');
 const { db } = require('./db');
+const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
+const Workflows = require('./Workflows');
 
 
 /// Retrieve collated information about a single assembled APA (and associated components and actions) that will be displayed in its executive summary
@@ -20,6 +23,8 @@ async function collateInfo(componentUUID) {
     dunePID: '',
     productionSite: '',
     configuration: '',
+    assemblyStatus: 'none',
+    workflowID: '',
   };
 
   const dictionary_productionSites = {
@@ -37,9 +42,28 @@ async function collateInfo(componentUUID) {
   collatedInfo.apaInfo.productionSite = dictionary_productionSites[assembledAPA.data.apaAssemblyLocation];
   collatedInfo.apaInfo.configuration = dictionary_configuration[assembledAPA.data.apaConfiguration];
 
+  // Get a list of workflows that involve the assembled APA, specified by its UUID (there should only be one), and add relevant information about the workflow to the collated information
+  const workflows = await Search_ActionsWorkflows.workflowsByUUID(componentUUID);
+
+  if (workflows.length === 1) {
+    let numberOfCompleteActions = 0;
+    const workflow = await Workflows.retrieve(workflows[0].workflowId);
+
+    for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
+      if (workflow.path[stepIndex].result.length > 0) {
+        const action = await Actions.retrieve(workflow.path[stepIndex].result);
+
+        if (action.data.actionComplete) numberOfCompleteActions++;
+      }
+    }
+
+    collatedInfo.apaInfo.assemblyStatus = (numberOfCompleteActions === workflow.path.length - 1) ? 'Complete' : 'In Progress';
+    collatedInfo.apaInfo.workflowID = workflow.workflowId;
+  }
+
   // Get information about the assembled APA QC
   collatedInfo.apaQC = {
-    signoff: '',
+    signoff: '[no information found]',
     actionId: '',
   };
 
@@ -73,7 +97,7 @@ async function collateInfo(componentUUID) {
 
   // Get information about the APA frame QC
   collatedInfo.frameQC = {
-    signoff: '',
+    signoff: '[no information found]',
     qcActionId: '',
     surveysActionId: '',
   };
@@ -106,13 +130,13 @@ async function collateInfo(componentUUID) {
     collatedInfo.frameQC.qcActionId = results[0].actionId;
   }
 
-  // Get information about the (most recently performed) APA frame survey
+  // Get information about the (most recently performed) APA frame vertical inspection
   aggregation_stages = [];
   results = [];
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'FrameSurveys',
+      'typeFormId': 'FrameVerticalInspection',
       'componentUuid': MUUID.from(frameUUID),
     }
   });
@@ -135,7 +159,7 @@ async function collateInfo(componentUUID) {
 
   // Get information about the mesh panel installation QC
   collatedInfo.meshPanelQC = {
-    signoff: '',
+    signoff: '[no information found]',
     actionId: '',
   };
 
@@ -169,7 +193,7 @@ async function collateInfo(componentUUID) {
 
   // Get information about the cable conduit insertion QC
   collatedInfo.cableConduitQC = {
-    signoff: '',
+    signoff: '[no information found]',
     actionId: '',
   };
 
@@ -203,8 +227,8 @@ async function collateInfo(componentUUID) {
 
   // Get information about the photon detector cable and temperature sensor installation QC
   collatedInfo.pdCableTempSensorQC = {
-    photonDetectorSignoff: '',
-    rdInstallationSignoff: '',
+    photonDetectorSignoff: '[no information found]',
+    rdInstallationSignoff: '[no information found]',
     actionId: '',
   };
 
@@ -253,8 +277,21 @@ async function collateInfo(componentUUID) {
     usWinder1: 'US Winder 1',
   };
 
+  const dictionary_heads = {
+    uk1: 'UK 1',
+    uk2: 'UK 2',
+    uk3: 'UK 3',
+    uk4: 'UK 4',
+    uk5: 'UK 5',
+    uk6: 'UK 6',
+    uk7: 'UK 7',
+    us1: 'US 1',
+    us1: 'US 2',
+  };
+
   const dictionary_locations = {
     daresbury: 'Daresbury',
+    chicago: 'Chicago',
   };
 
   const dictionary_systems = {
@@ -272,8 +309,8 @@ async function collateInfo(componentUUID) {
     collatedInfo[dictionaries[i]] = {
       winder: '',
       winderHead: '',
-      winderMaintenenceSignoff: '',
-      tensionControlSignoff: '',
+      winderMaintenenceSignoff: '[no information found]',
+      tensionControlSignoff: '[no information found]',
       replacedWires: [],
       numberOfTensionAlarms: 0,
       winding_actionId: '',
@@ -317,7 +354,7 @@ async function collateInfo(componentUUID) {
 
     if (results.length > 0) {
       collatedInfo[dictionaries[i]].winder = dictionary_winders[results[0].winder];
-      collatedInfo[dictionaries[i]].winderHead = results[0].winderHead;
+      collatedInfo[dictionaries[i]].winderHead = dictionary_heads[results[0].winderHead];
       collatedInfo[dictionaries[i]].winderMaintenenceSignoff = results[0].winderMaintenenceSignoff;
       collatedInfo[dictionaries[i]].tensionControlSignoff = results[0].tensionControlSignoff;
       collatedInfo[dictionaries[i]].replacedWires = results[0].replacedWires;

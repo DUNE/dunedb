@@ -43,6 +43,14 @@ block allbody
               dd
                 a(href = `/component/${component.componentUuid}`, target = '_blank') #{component.componentUuid}
 
+              dt Assembly Status
+
+              if ((collatedInfo.apaInfo.assemblyStatus) === 'none')
+                dd [no associated workflow]
+              else
+                dd
+                  a(href = `/workflow/${collatedInfo.apaInfo.workflowID}`, target = '_blank') #{collatedInfo.apaInfo.assemblyStatus}
+
           .vert-space-x1.hori-space-x1
             p &nbsp; This summary generated on: 
               +dateFormat(new Date())
@@ -81,33 +89,46 @@ block allbody
       hr
 
   .vert-space-x2
-    each ncrInfo, index in collatedInfo.apaNCRs_wires
-      - let hideHeader = true;
-      - if (index == 0) hideHeader = false;
+    .entry_apaNCRs_header
+      .form_apaNCRs_header(data-record = [])
 
-      .entry_apaNCRs_wires
-        .form_apaNCRs_wires(data-record = [ncrInfo, hideHeader])
+    if collatedInfo.apaNCRs_wires.length > 0
+      each ncrInfo, index in collatedInfo.apaNCRs_wires
+        .entry_apaNCRs_wires
+          .form_apaNCRs_wires(data-record = [ncrInfo])
+
+        hr
+    else 
+      p [no wire non-conformances reported]
 
       hr
 
   .vert-space-x2
-    each ncrInfo, index in collatedInfo.apaNCRs_other
-      - let hideHeader = true;
-      - if (index == 0) hideHeader = false;
+    .entry_otherNCRs_header 
+      .form_otherNCRs_header(data-record = [])
 
-      .entry_otherNCRs.vert-space-x1
-        .form_otherNCRs(data-record = [ncrInfo, hideHeader])
+    if (collatedInfo.apaNCRs_other.length > 0) || (collatedInfo.frameNCRs.length > 0) || (collatedInfo.meshPanelNCRs.length > 0)
+      if collatedInfo.apaNCRs_other.length > 0
+        each ncrInfo, index in collatedInfo.apaNCRs_other
+          .entry_otherNCRs.vert-space-x1
+            .form_otherNCRs(data-record = [ncrInfo])
 
-      hr
+          hr
 
-    each ncrInfo, index in collatedInfo.frameNCRs
-      .entry_otherNCRs.vert-space-x1
-        .form_otherNCRs(data-record = [ncrInfo, hideHeader = true])
+      if collatedInfo.frameNCRs.length > 0
+        each ncrInfo, index in collatedInfo.frameNCRs
+          .entry_otherNCRs.vert-space-x1
+            .form_otherNCRs(data-record = [ncrInfo])
 
-      hr
+          hr
 
-    each ncrInfo, index in collatedInfo.meshPanelNCRs
-      .entry_otherNCRs.vert-space-x1
-        .form_otherNCRs(data-record = [ncrInfo, hideHeader = true])
+      if collatedInfo.meshPanelNCRs.length > 0
+        each ncrInfo, index in collatedInfo.meshPanelNCRs
+          .entry_otherNCRs.vert-space-x1
+            .form_otherNCRs(data-record = [ncrInfo])
+
+          hr
+    else 
+      p [no other non-conformances reported]
 
       hr
