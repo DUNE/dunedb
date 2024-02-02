@@ -10,21 +10,21 @@ new_vertInspection = False
 
 # For extracting the analysis results (required for BOTH performing new and editing existing actions), the following information is required:
 dataFile_envelope  = ''     
-                                                                     # Full path to the input .xlsx file for ENVELOPE results (must be a string ending in '.xlsx')
+                                                                     # Full path to the input data file for ENVELOPE results (must be a string ending in '.xlsx')
 dataFile_planarity = '/user/majumdar/Desktop/inspectionResults/F21VL_PSL_MANM_results.csv'     
-                                                                     # Full path to the input .xlsx file for PLANARITY results (must be a string ending in '.csv')
+                                                                     # Full path to the input data file for PLANARITY results (must be a string ending in '.csv')
 
 # For uploading new inspection results (i.e. performing a new action), the following information is required:
-frame_uuid               = '2367e340-5ed5-11ee-9e07-d11ab28594c8'    # UUID of the APA Frame on which the action is being performed (get from DB)
+frame_uuid               = '034e3680-c13c-11ee-823a-b1203622d8d8'    # UUID of the APA Frame on which the action is being performed (get from DB)
 dataCollection_personnel = 'manchesterMetrology'                     # Who collected the raw data (use one of the following: 'manchesterMetrology', 'daresbury', 'cern')
-dataCollection_date      = '2024-01-01'                              # When the raw data was collected (in 'yyyy-MM-dd' format)
+dataCollection_date      = '2024-01-01T00:00:00+00:00'               # When the raw data was collected (in 'yyyy-MM-ddT00:00:00+00:00' format)
 dataCollection_location  = 'dsm'                                     # Where the raw data was collected (use one of the following: 'dsm', 'daresbury', 'cern')
 newAction_comms          = ''
                                                                      # Free-form string, additional description or commentary if required
 
 # For uploading edited inspection results (i.e. editing an existing action), the following information is required:
-action_id                = '6591a8b06a93b6fe4e1a3a91'                # ID of the existing frame surveys action to be edited (get from DB)
-edtAction_comms          = 'v3 - uploaded planarity analysis results via M2M (plus empty dictionary of envelope analysis results)'
+action_id                = '65bbf86bc073b158619c9d1a'                # ID of the existing frame surveys action to be edited (get from DB)
+edtAction_comms          = 'v2 - uploaded planarity analysis results via M2M (plus empty dictionary of envelope analysis results)'
                                                                      # Free-form string, additional description or commentary if required
 
 # ##################################
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # OR edit an existing 'Vertical Frame Inspection' action with the dictionaries in the list of field values to be edited
     # For more general details about these options, please see the README and the 'template_perform_action.py' and 'template_edit_action.py' scripts respectively
     if new_vertInspection:
-        actionTypeFormID = 'FrameVerticalInspection'
+        actionTypeFormID = 'VerticalFrameInspection'
         componentUUID = frame_uuid
         actionData = {
             'dataCollectionPersonnel': dataCollection_personnel,
