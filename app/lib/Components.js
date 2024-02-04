@@ -218,18 +218,17 @@ async function list(match_condition, options) {
       data: { '$first': '$data' },
       name: { '$first': '$data.name' },
       lastEditDate: { '$first': '$validity.startDate' },
-      creationDate: { '$last': '$validity.startDate' },
     },
   });
-
-  // Re-sort the records by most last edit date ... most recent first
-  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
   // Add aggregation stages for any additionally specified options
   if (options) {
     if (options.skip) aggregation_stages.push({ $skip: options.skip });
     if (options.limit) aggregation_stages.push({ $limit: options.limit });
   }
+
+  // Re-sort the records by most last edit date ... most recent first
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let records = await db.collection('components')
