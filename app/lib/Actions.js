@@ -258,7 +258,7 @@ async function list(match_condition, options) {
 
   // Query the 'actions' records collection using the aggregation stages defined above
   let records = await db.collection('actions')
-    .aggregate(aggregation_stages)
+    .aggregate(aggregation_stages, {allowDiskUse: true})
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
