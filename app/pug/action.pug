@@ -217,7 +217,7 @@ block content
                           tr
                             td #{value.Measurement}
 
-                            if value.Units !== null
+                            if value.Units !== null && value.Actual !== ''
                               if value.Actual < value.Tolerance
                                 td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
                               else
@@ -228,7 +228,11 @@ block content
 
                             else 
                               td #{value.Actual}
-                              td
+                              
+                              if value.Units == null
+                                td
+                              else 
+                                td #{value.Units}
                               td #{value.Tolerance}
 
                             td #{value.Comment}
