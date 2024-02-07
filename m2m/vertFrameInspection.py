@@ -15,17 +15,15 @@ def ExtractEnvelopeResults(dataFile):
         sys.exit(" ExtractEnvelopeResults() - ERROR: the specified input file does not exist! \n")
     
     # Extract the envelope results from the appropriate sheet in the data file, and save them directly into a Pandas dataframe
-    # Note the following:
-    #   - we only need to extract the specific columns and rows containing the results, and can exclude the additional calculations in other cells
-    #   - we need each row to have a unique index, but because some of them have identical measurement names (which would normally be used as the indices), restore the numerical indices instead
+    # We need each row to have a unique index, but because some of them have identical measurement names (which would normally be used as the indices), restore the numerical indices instead
     # Immediately replace all 'nan's with empty strings (the 'nan's will come from empty cells in the data file, but will not be allowed as JSON during upload)
     df_envelope = pd.read_excel(dataFile, sheet_name = 'Envelope', header = 0, index_col = 0, usecols = 'A : I', engine = 'openpyxl', nrows = 25)
     df_envelope = df_envelope.reset_index()
     df_envelope = df_envelope.fillna('')
     
     # Convert the dataframe into a nested Python dictionary, where each top-level entry takes the following {key, value} form:
-    #   - key   : index of the envelope measurement
-    #   - value : sub-dictionary of measurements, consisting of [key, value] pairs for the measurement name and various recorded per-measurement parameters
+    #   - key   : index of measurement
+    #   - value : sub-dictionary consisting of [key, value] pairs for the measurement name and the various per-measurement parameters
     dict_envelope = df_envelope.to_dict(orient = 'index')
 
     # Return the dictionary

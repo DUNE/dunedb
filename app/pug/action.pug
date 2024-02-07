@@ -124,6 +124,41 @@ block content
 
           .vert-space-x2 
 
+        if (action.typeFormId == 'HorizontalFrameInspection')
+          if (action.data.results)
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
+                | M4 hole measurements (mm): 
+                i.chevron.fa.fa-fw 
+
+              .collapse#m4HolesBox
+                .vert-space-x1.border-success.border.rounded.p-2
+                  dd
+                    table.table
+                      thead
+                        tr
+                          th.col-md-1 Hole
+                          th.col-md-1 x
+                          th.col-md-1 y
+                          th.col-md-1 z 
+                          th.col-md-2 Actual Dist. to 1st hole 
+                          th.col-md-2 Diff [Actual - Nominal]
+                          th.col-md-2 Actual Dist. to Prev. hole
+                          th.col-md-2 Diff [Actual - Nominal]
+
+                      tbody
+                        for [key, value] of Object.entries(action.data.results)
+                          tr
+                            td #{value['Hole']}
+                            td #{value['x']}
+                            td #{value['y']}
+                            td #{value['z']}
+                            td #{value['dist_1stHole']}
+                            td #{value['deviat_1stHole']}
+                            td #{value['dist_prevHole']}
+                            td #{value['deviat_prevHole']}
+
         if (action.typeFormId == 'VerticalFrameInspection')
           if (action.data.envelope)
             .vert-space-x1
@@ -228,7 +263,7 @@ block content
 
                             else 
                               td #{value.Actual}
-                              
+
                               if value.Units == null
                                 td
                               else 

@@ -268,17 +268,21 @@ async function list(match_condition, options) {
 
     const component = await Components.retrieve(record.componentUuid);
 
-    if (component.data.name) {
-      if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
-        const name_splits = component.data.name.split('-');
-        record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-      } else if (component.formId === 'GeometryBoard') {
-        record.componentName = component.data.typeRecordNumber;
-      } else {
-        record.componentName = component.data.name;
-      }
+    if (!component) {
+      record.componentName = '[UUID does not exist!]';
     } else {
-      record.componentName = record.componentUuid;
+      if (component.data.name) {
+        if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
+          const name_splits = component.data.name.split('-');
+          record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+        } else if (component.formId === 'GeometryBoard') {
+          record.componentName = component.data.typeRecordNumber;
+        } else {
+          record.componentName = component.data.name;
+        }
+      } else {
+        record.componentName = record.componentUuid;
+      }
     }
   }
 
