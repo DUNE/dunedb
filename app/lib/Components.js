@@ -232,7 +232,7 @@ async function list(match_condition, options) {
 
   // Query the 'components' records collection using the aggregation stages defined above
   let records = await db.collection('components')
-    .aggregate(aggregation_stages, {allowDiskUse: true})
+    .aggregate(aggregation_stages)
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
