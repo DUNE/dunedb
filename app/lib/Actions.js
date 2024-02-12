@@ -231,6 +231,16 @@ async function list(match_condition, options) {
     aggregation_stages.push({ $match: match_condition });
   }
 
+  // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
+  aggregation_stages.push({
+    $project: {
+      actionId: true,
+      typeFormId: true,
+      typeFormName: true,
+      componentUuid: true,
+      validity: true,
+    }
+  })
   // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
   // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
@@ -258,7 +268,7 @@ async function list(match_condition, options) {
 
   // Query the 'actions' records collection using the aggregation stages defined above
   let records = await db.collection('actions')
-    .aggregate(aggregation_stages, {allowDiskUse: true})
+    .aggregate(aggregation_stages)
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
