@@ -9,9 +9,9 @@ from vertFrameInspection import ExtractEnvelopeResults, ExtractPlanarityResults
 new_vertInspection = False
 
 # For extracting the analysis results (required for BOTH performing new and editing existing actions), the following information is required:
-dataFile_envelope  = '/user/majumdar/Desktop/verticalInspections/F21VL.xlsx'     
+dataFile_envelope  = '/user/majumdar/Desktop/Vertical_Inspections/US_Frames/F005.xlsx'     
                                                                      # Full path to the input data file for ENVELOPE results (must be a string ending in '.xlsx')
-dataFile_planarity = '/user/majumdar/Desktop/verticalInspections/F21VL_PSL_MANM_results.csv'     
+dataFile_planarity = '/user/majumdar/Desktop/Vertical_Inspections/US_Frames/F005_results.csv'     
                                                                      # Full path to the input data file for PLANARITY results (must be a string ending in '.csv')
 
 # For uploading new inspection results (i.e. performing a new action), the following information is required:
@@ -46,8 +46,6 @@ if __name__ == '__main__':
     # Call the extraction functions ... these each return a Python dictionary containing the respective results
     dict_envelope  = ExtractEnvelopeResults(dataFile_envelope)
     dict_planarity = ExtractPlanarityResults(dataFile_planarity)
-
-    print(f" Successfully extracted inspection analysis results")
 
     # EITHER perform a new 'Vertical Frame Inspection' action with the dictionaries as part of the 'actionData' dictionary ...
     # OR edit an existing 'Vertical Frame Inspection' action with the dictionaries in the list of field values to be edited
