@@ -17,7 +17,7 @@ def ExtractEnvelopeResults(dataFile):
     # Extract the envelope results from the appropriate sheet in the data file, and save them directly into a Pandas dataframe
     # We need each row to have a unique index, but because some of them have identical measurement names (which would normally be used as the indices), restore the numerical indices instead
     # Immediately replace all 'nan's with empty strings (the 'nan's will come from empty cells in the data file, but will not be allowed as JSON during upload)
-    df_envelope = pd.read_excel(dataFile, sheet_name = 'Envelope', header = 0, index_col = 0, usecols = 'A : I', engine = 'openpyxl', nrows = 25)
+    df_envelope = pd.read_excel(dataFile, sheet_name = 'Envelope', header = 0, index_col = 0, usecols = 'A : I', engine = 'openpyxl', nrows = 29)
     df_envelope = df_envelope.reset_index()
     df_envelope = df_envelope.fillna('')
     
@@ -25,6 +25,8 @@ def ExtractEnvelopeResults(dataFile):
     #   - key   : index of measurement
     #   - value : sub-dictionary consisting of [key, value] pairs for the measurement name and the various per-measurement parameters
     dict_envelope = df_envelope.to_dict(orient = 'index')
+
+    print(f" Successfully extracted envelope analysis results")
 
     # Return the dictionary
     return dict_envelope
@@ -61,6 +63,8 @@ def ExtractPlanarityResults(dataFile):
     #   - key   : index of measurement
     #   - value : sub-dictionary consisting of [key, value] pairs for the measurement name, actual measurement, the tolerance, a comment and the units
     dict_planarity = df_planarity.to_dict(orient = 'index')
+
+    print(f" Successfully extracted planarity analysis results")
 
     # Return the dictionary
     return dict_planarity
