@@ -190,7 +190,6 @@ async function list(match_condition, options) {
 
   // Add aggregation stages for any additionally specified options
   if (options) {
-    if (options.skip) aggregation_stages.push({ $skip: options.skip });
     if (options.limit) aggregation_stages.push({ $limit: options.limit });
   }
 
