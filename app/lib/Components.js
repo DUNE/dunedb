@@ -204,6 +204,17 @@ async function list(match_condition, options) {
     aggregation_stages.push({ $match: match_condition });
   }
 
+  // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
+  aggregation_stages.push({
+    $project: {
+      componentUuid: true,
+      formId: true,
+      formName: true,
+      data: true,
+      validity: true,
+    }
+  })
+
   // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
   // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
