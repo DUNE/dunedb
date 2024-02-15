@@ -230,7 +230,7 @@ async function list(match_condition, options) {
 
     aggregation_stages.push({ $match: match_condition });
   }
-
+/*
   // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
   aggregation_stages.push({
     $project: {
@@ -241,6 +241,7 @@ async function list(match_condition, options) {
       validity: true,
     }
   })
+*/
   // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
   // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
@@ -257,14 +258,13 @@ async function list(match_condition, options) {
     },
   });
 
-  // Add aggregation stages for any additionally specified options
-  if (options) {
-    if (options.skip) aggregation_stages.push({ $skip: options.skip });
-    if (options.limit) aggregation_stages.push({ $limit: options.limit });
-  }
-
   // Re-sort the records by last edit date ... most recent first
   aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+
+  // Add aggregation stages for any additionally specified options
+  if (options) {
+    if (options.limit) aggregation_stages.push({ $limit: options.limit });
+  }
 
   // Query the 'actions' records collection using the aggregation stages defined above
   let records = await db.collection('actions')
