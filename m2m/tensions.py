@@ -21,10 +21,10 @@ columns_G_B = [1, 22, 24, 26, 28, 30]
 def ExtractTensions(csvFile, apaLayer):
     # Check that the correct arguments have been provided ... if not, exit and print an appropriate error message
     if csvFile[-4 : ] != '.csv':
-        sys.exit(" ExtractTensions() - ERROR: the specified input file is not a '.csv' type! \n")
+        sys.exit(' ExtractTensions() - ERROR: the specified input file is not a \'.csv\' type! \n')
     
     if apaLayer not in apaLayers:
-        sys.exit(" ExtractTensions() - ERROR: invalid APA layer specified ... please use 'X','U', 'V' or 'G'! \n") 
+        sys.exit(' ExtractTensions() - ERROR: invalid APA layer specified ... please use \'X\',\'U\', \'V\' or \'G\'! \n') 
     
     # Select the corresponding list of columns to extract from the .csv file for the given APA layer, as well as the 'check column header' list
     columns_A, columns_B = None, None
@@ -87,5 +87,7 @@ def ExtractTensions(csvFile, apaLayer):
     
     list_sideB = tensions_sideB.fillna(0.0).to_list()
     
+    print(f' ExtractTensions() - INFO: successfully extracted {len(list_sideA)} tensions for side A and {len(list_sideB)} for side B')
+
     # Return the lists of tensions for both sides
     return list_sideA, list_sideB
