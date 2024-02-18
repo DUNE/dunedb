@@ -125,7 +125,7 @@ block content
           .vert-space-x2 
 
         if (action.typeFormId == 'HorizontalFrameInspection')
-          if (action.data.results)
+          if (action.data.m4Holes)
             .vert-space-x1
               .panel.panel-default
               .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
@@ -148,7 +148,7 @@ block content
                           th.col-md-2 Diff [Actual - Nominal]
 
                       tbody
-                        for [key, value] of Object.entries(action.data.results)
+                        for [key, value] of Object.entries(action.data.m4Holes)
                           tr
                             td #{value['Hole']}
                             td #{value['x']}
