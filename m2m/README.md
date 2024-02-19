@@ -83,14 +83,19 @@ Apart from `ConnectToAPI()`, the backend functions may be combined in any order 
 This directory contains template scripts that show simple examples of how to use the various backend functions.
 
 
-## Working with APA Wire Tension Measurements
+## Uploading Data from External Files
 
-Wire tension measurements can be uploaded to the APA DB using the M2M application, but when they are taken at the APA factories, these measurements are calculated and saved into bespoke spreadsheets.  Therefore, an additional step is required to extract the values from the spreadsheets and convert them into a format that the DB can accept.
+As noted above, one of the best use cases for the M2M application is uploading measurement data in bulk - two specific examples of this are wire tension measurements and APA frame inspection analysis results.  In most such situations, data will be saved into external files when originally measured (e.g. Excel spreadsheets or .csv files), and so an additional step is required in the M2M application to first extract these data from the external file(s).  The currently existing extraction functions are detailed below - **users should not attempt to modify these functions - if changes or new extraction functions are required, <u>please contact one of the DB Development Team</u>**.  Any call to the extraction function(s) should be followed by a call to the `EditAction()` backend function, in order to uploaded the extracted data to the appropriate DB record.
 
-The `ExtractTensions(csvFile, apaLayer)` function found in the `tensions.py` file handles this step.  **Users should not attempt to modify this code**, but the function should be used in a user-create script, as with the other backend functions described above.  The function takes the  following arguments:
-   * `csvFile` (string) : an input file, in `.csv` format, containing (among other things) the tension measurements
-   * `apaLayer` (string) : one of 'X', 'U', 'V' or 'G'
+* `ExtractTensions(csvFile, apaLayer)` (in `tensions.py`) : extract wire tension measurements, returning two Python lists containing the tension measurements for each APA side (A and B).  **<u>These lists will always contain only the latest tension measurement for each wire or wire segment</u>** - thus, any wire re-tensioning is accounted for, as long as the new values are recorded in the correct column of the originating spreadsheet.
+    * `csvFile` (string) : an input file, in `.csv` format, containing the tension measurements
+    * `apaLayer` (string) : one of 'X', 'U', 'V' or 'G'
 
-The function returns two Python lists, containing the tension measurements for each APA side (A and B).  **<u>These lists will always contain only the latest tension measurement for each wire or wire segment</u>** - thus, any wire re-tensioning is accounted for, as long as the new values are recorded in the correct column of the originating spreadsheet.
+* `ExtractEnvelopeResults(dataFile)` (in `frameInspections.py`) : extract envelope analysis results (from the vertical APA frame inspection), returning a Python dictionary containing the results arranged as `field: value` pairs
+    * `dataFile` (string) : an input file, in `.xlsx` format, containing the raw vertical frame inspection data and associated envelope analysis calculations
 
-The `ExtractTensions()` function should be followed by a call to either the `PerformAction()` or `EditAction()` backend functions, depending on whether the tension measurements action is completely new or being edited due to re-tensioning.
+* `ExtractPlanarityResults(dataFile)` (in `frameInspections.py`) : extract planarity analysis results (from the vertical APA frame inspection), returning a Python dictionary containing the results arranged as `field: value` pairs
+    * `dataFile` (string) : an input file, in `.csv` format, containing the calculated planarity analysis results
+
+* `ExtractM4HoleResults(dataFile)` (in `frameInspections.py`) : extract M4 hole measurement results (from the horizontal APA frame inspection), returning a Python dictionary containing the results arranged as `field: value` pairs
+    * `dataFile` (string) : an input file, in `.xlsx` format, containing the M4 hole measurements
