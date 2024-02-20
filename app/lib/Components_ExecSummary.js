@@ -311,10 +311,10 @@ async function collateInfo(componentUUID) {
       winderHead: '',
       winderMaintenenceSignoff: '[no information found]',
       tensionControlSignoff: '[no information found]',
-      replacedWires: [],
+      numberOfReplacedWires: 0,
       numberOfTensionAlarms: 0,
       winding_actionId: '',
-      badSolders: [],
+      numberOfBadSolders: 0,
       soldering_actionId: '',
       tensions_location: '',
       tensions_system: '',
@@ -353,11 +353,22 @@ async function collateInfo(componentUUID) {
       .toArray();
 
     if (results.length > 0) {
+      let numberOfReplacedWires = 0;
+
+      for (let i = 0; i < results[0].replacedWires.length; i++) {
+        let singleWire_solderPads = results[0].replacedWires[i].solderPad;
+        if (typeof singleWire_solderPads === 'number') {
+          singleWire_solderPads = `${singleWire_solderPads}`;
+        }
+
+        numberOfReplacedWires += singleWire_solderPads.split(',').length;
+      }
+
       collatedInfo[dictionaries[i]].winder = dictionary_winders[results[0].winder];
       collatedInfo[dictionaries[i]].winderHead = dictionary_heads[results[0].winderHead];
       collatedInfo[dictionaries[i]].winderMaintenenceSignoff = results[0].winderMaintenenceSignoff;
       collatedInfo[dictionaries[i]].tensionControlSignoff = results[0].tensionControlSignoff;
-      collatedInfo[dictionaries[i]].replacedWires = results[0].replacedWires;
+      collatedInfo[dictionaries[i]].numberOfReplacedWires = numberOfReplacedWires;
       collatedInfo[dictionaries[i]].numberOfTensionAlarms = results[0].numberOfTensionAlarms;
       collatedInfo[dictionaries[i]].winding_actionId = results[0].actionId;
     }
@@ -387,7 +398,18 @@ async function collateInfo(componentUUID) {
       .toArray();
 
     if (results.length > 0) {
-      collatedInfo[dictionaries[i]].badSolders = results[0].badSolderJoints;
+      let numberOfBadSolders = 0;
+
+      for (let i = 0; i < results[0].badSolderJoints.length; i++) {
+        let singleJoint_solderPads = results[0].badSolderJoints[i].solderPad;
+        if (typeof singleJoint_solderPads === 'number') {
+          singleJoint_solderPads = `${singleJoint_solderPads}`;
+        }
+
+        numberOfBadSolders += singleJoint_solderPads.split(',').length;
+      }
+
+      collatedInfo[dictionaries[i]].numberOfBadSolders = numberOfBadSolders;
       collatedInfo[dictionaries[i]].soldering_actionId = results[0].actionId;
     }
 
