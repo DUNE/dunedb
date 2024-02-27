@@ -50,7 +50,7 @@ async function save(input, req) {
   // ... so for these types of action, if the array contains a single entry of empty strings, reset the array to be empty (NOT NULL!) 
   if ((newRecord.typeFormId === 'g_winding') || (newRecord.typeFormId === 'u_winding') || (newRecord.typeFormId === 'v_winding') || (newRecord.typeFormId === 'x_winding')) {
     if (newRecord.data.replacedWires.length === 1) {
-      if ((newRecord.data.replacedWires[0].side === '') && (newRecord.data.replacedWires[0].layer === '') && (newRecord.data.replacedWires[0].boardLocation === '')) {
+      if ((newRecord.data.replacedWires[0].side === '') && (newRecord.data.replacedWires[0].boardLocation === '')) {
         newRecord.data.replacedWires = [];
       }
     }
@@ -58,7 +58,7 @@ async function save(input, req) {
 
   if ((newRecord.typeFormId === 'g_solder') || (newRecord.typeFormId === 'u_solder') || (newRecord.typeFormId === 'v_solder') || (newRecord.typeFormId === 'x_solder')) {
     if (newRecord.data.badSolderJoints.length === 1) {
-      if ((newRecord.data.badSolderJoints[0].side === '') && (newRecord.data.badSolderJoints[0].layer === '') && (newRecord.data.badSolderJoints[0].boardLocation === '')) {
+      if ((newRecord.data.badSolderJoints[0].side === '') && (newRecord.data.badSolderJoints[0].boardLocation === '')) {
         newRecord.data.badSolderJoints = [];
       }
     }
