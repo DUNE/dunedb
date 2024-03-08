@@ -21,13 +21,13 @@ services:
         condition: service_healthy
 
   db:
-    image: mongo:4.4
+    image: mongo:6.0
     environment:
       MONGO_INITDB_DATABASE: dunedb
     volumes:
       - ./db/mongo:/data/db
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "'db.runCommand(\"ping\").ok'", "localhost:27017/test"]
+      test: ["CMD", "mongosh", "--eval", "'db.runCommand(\"ping\").ok'", "localhost:27017/test"]
       interval: 5s
       timeout: 10s
       retries: 5
