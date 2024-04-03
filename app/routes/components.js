@@ -315,18 +315,17 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 
 /// Update the most recently recorded reception location and date of all individual components in a shipment or batch
 /// This is an internal route - it should not be accessed directly by a user through their browser ...
-/// ... instead, it is automatically called during submission of an appropriate 'XXX Shipment Reception' action or 'Returned XXX Batch' component 
+/// ... instead, it is automatically called during submission of an appropriate 'XXX Reception' action or 'Returned XXX Batch' component 
 router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the shipment or batch record corresponding to the specified component UUID
+    // Retrieve the most recent version of the shipment or batch record corresponding to the specified component UUID, and throw an error if there is no such record
     const collection = await Components.retrieve(req.params.uuid);
+
+    if (!collection) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
     // Because the board UUIDs are stored differently in the various shipment and batch type components, set up separate (but annoyingly similar!) scenarios for each one
     if (collection.formId === 'BoardShipment') {
-      // Throw an error if there is no record corresponding to the specified UUID
-      if (!collection) return res.status(404).send(`There is no geometry board shipment with component UUID = ${req.params.uuid}`);
-
-      // For each board in the shipment, extract the board UUID and update the reception location and date to those inherited from the 'Board Shipment Reception' action
+      // For each board in the shipment, extract the UUID and update the reception details to match those from the 'Board Shipment Reception' action
       // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
       for (const board of collection.data.boardUuiDs) {
         const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
@@ -335,10 +334,7 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
       // Once all boards have been updated, redirect to the page for viewing the action record
       res.redirect(`/action/${req.query.actionId}`);
     } else if (collection.formId === 'GroundingMeshShipment') {
-      // Throw an error if there is no record corresponding to the specified UUID
-      if (!collection) return res.status(404).send(`There is no grounding mesh panel shipment with component UUID = ${req.params.uuid}`);
-
-      // For each mesh in the shipment, extract the mesh UUID and update the reception location and date to those inherited from the 'Grounding Mesh Shipment Reception' action
+      // For each mesh in the shipment, extract the UUID and update the reception details to match those from the 'Grounding Mesh Shipment Reception' action
       // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
       for (const mesh of collection.data.apaUuiDs) {
         const result = await Components.updateLocation(mesh.component_uuid, req.params.location, req.params.date);
@@ -347,10 +343,7 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
       // Once all boards have been updated, redirect to the page for viewing the action record
       res.redirect(`/action/${req.query.actionId}`);
     } else if (collection.formId === 'ReturnedGeometryBoardBatch') {
-      // Throw an error if there is no record corresponding to the specified UUID
-      if (!collection) return res.status(404).send(`There is no returned geometry board batch with component UUID = ${req.params.uuid}`);
-
-      // For each board in the batch, extract the board UUID and update the reception location and date to those passed from the batch's submission
+      // For each board in the batch, extract the UUID and update the reception details to match those from the batch's submission
       // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
       for (const board of collection.data.boardUuids) {
         const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
@@ -358,6 +351,28 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
 
       // Once all boards have been updated, redirect to the page for viewing the component record
       res.redirect(`/component/${req.params.uuid}`);
+    }
+    else if (collection.formId === 'PopulatedBoardShipment') {
+      // For each CR board, G-Bias board, SHV board and cable harness in the kit, extract the UUID and update the reception details to match those from the 'Populated Board Kit Reception' action
+      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
+      for (const board of collection.data.crBoardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      }
+
+      for (const board of collection.data.gBiasBoardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      }
+
+      for (const board of collection.data.shvBoardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      }
+
+      for (const board of collection.data.cableHarnessUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      }
+
+      // Once all boards have been updated, redirect to the page for viewing the action record
+      res.redirect(`/action/${req.query.actionId}`);
     }
   } catch (err) {
     logger.error(err);
