@@ -1,0 +1,38 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Populated Board Kit Components by Location';
+
+block extrascripts
+  block workscripts 
+    script(src = '/pages/search_boardKitComponentsByLocation.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Populated Board Kit Components by Location
+
+    .vert-space-x2
+      hr
+
+      .row
+        .col-md-4
+          h4 Select Location
+
+          .vert-space-x1
+            p Select a location from the options below.
+
+          select.form-control#locationSelection
+            option(value = '')
+            option(value = 'cern') CERN 
+            option(value = 'surf') SURF 
+
+        .col-md-1
+
+        .col-md-7
+          h4 Search Results
+
+          .vert-space-x1
+            table#results
+
+    .vert-space-x2

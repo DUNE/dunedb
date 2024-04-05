@@ -131,6 +131,21 @@ router.get('/search/meshesByPartNumber/:partNumber', async function (req, res, n
 });
 
 
+/// Search for populated board kit components that have been received at a specified location
+router.get('/search/boardKitComponentsByLocation/:location', async function (req, res, next) {
+  try {
+    // Retrieve a list of populated board kit components, grouped by component type, that have been received at the specified location
+    const componentsByType = await Search_OtherComponents.boardKitComponentsByLocation(req.params.location);
+
+    // Return the list in JSON format
+    return res.json(componentsByType);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// Search for workflows that involve a particular component, specified by its UUID
 router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
   try {

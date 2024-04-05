@@ -277,6 +277,77 @@ async function meshesByPartNumber(partNumber) {
 }
 
 
+/// Retrieve a list of populated board kit components that have been received at a specified location across all component types
+async function boardKitComponentsByLocation(location) {
+  // Set up a list of component type form IDs which can be found in a populated board kit
+  const componentTypeFormIDs = ['CRBoard', 'GBiasBoard', 'SHVBoard', 'CableHarness'];
+
+  let aggregation_stages = [];
+
+  // Retrieve all component records that have the same type as those that could be in a populated board kit, and the same reception location as the specified one
+  aggregation_stages.push({
+    $match: {
+      'formId': { $in: componentTypeFormIDs },
+      'reception.location': location,
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      type: { '$first': '$formId' },
+      dunePid: { '$first': '$data.name' },
+      receptionDate: { '$first': '$reception.date' },
+    },
+  });
+
+  // We want to actually display the matched components grouped by the component type form ID
+  // So group the records according to the component type form IDs, and then add the fields to be returned for each component in each group
+  aggregation_stages.push({
+    $group: {
+      _id: { type: '$type' },
+      componentUuid: { $push: '$componentUuid' },
+      dunePid: { $push: '$dunePid' },
+      receptionDate: { $push: '$receptionDate' },
+    }
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  let cleanedResults = [];
+
+  for (const componentGroup of results) {
+    let cleanedComponentGroup = {};
+
+    cleanedComponentGroup.type = componentGroup._id.type;
+
+    cleanedComponentGroup.componentUuids = [];
+
+    for (const componentUuid of componentGroup.componentUuid) {
+      cleanedComponentGroup.componentUuids.push(MUUID.from(componentUuid).toString());
+    }
+
+    cleanedComponentGroup.dunePids = componentGroup.dunePid;
+    cleanedComponentGroup.receptionDates = componentGroup.receptionDate;
+
+    cleanedResults.push(cleanedComponentGroup);
+  }
+
+  // Return the list of components grouped by component type form ID
+  return cleanedResults;
+}
+
+
 /// Retrieve a list of assembled APAs that match the specified location and production number
 async function apasByLocation(location, productionNumber) {
   let aggregation_stages = [];
@@ -350,6 +421,7 @@ module.exports = {
   boardShipmentsByReceptionDetails,
   meshesByLocation,
   meshesByPartNumber,
+  boardKitComponentsByLocation,
   apasByLocation,
   componentsByTypeAndNumber,
 }
