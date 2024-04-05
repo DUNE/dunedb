@@ -90,11 +90,11 @@ function SubmitData(submission) {
     ];
 
     if ((submission.typeFormId === 'BoardReception') || (submission.typeFormId === 'GroundingMeshShipmentReception') || (submission.typeFormId === 'PopulatedBoardKitReception')) {
-      const shipmentUUID = submission.componentUuid;
+      const collectionUUID = submission.componentUuid;
       const receptionLocation = submission.data.receptionLocation;
       const receptionDate = (submission.data.receptionDate).toString().slice(0, 10);
 
-      let url = `/component/${shipmentUUID}/updateLocations/${receptionLocation}/${receptionDate}?actionId=${result}`;
+      let url = `/component/${collectionUUID}/updateLocations/${receptionLocation}/${receptionDate}?actionId=${result}`;
 
       window.location.href = url;
     } else if (installation_typeFormIDs.includes(submission.typeFormId)) {

@@ -43,6 +43,13 @@ router.get('/search/meshesByLocationOrPartNumber', async function (req, res, nex
 });
 
 
+/// Search for populated board kit components that have been received at a specific location
+router.get('/search/boardKitComponentsByLocation', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_boardKitComponentsByLocation.pug');
+});
+
+
 /// Search for an assembled APA using its location and production number
 router.get('/search/apaByLocation', async function (req, res, next) {
   // Render the interface page

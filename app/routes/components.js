@@ -313,7 +313,7 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 });
 
 
-/// Update the most recently recorded reception location and date of all individual components in a shipment or batch
+/// Update the most recently recorded reception location and date of all individual components in a collection of components (i.e. a shipment, batch or kit)
 /// This is an internal route - it should not be accessed directly by a user through their browser ...
 /// ... instead, it is automatically called during submission of an appropriate 'XXX Reception' action or 'Returned XXX Batch' component 
 router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
@@ -323,7 +323,7 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
 
     if (!collection) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
-    // Because the board UUIDs are stored differently in the various shipment and batch type components, set up separate (but annoyingly similar!) scenarios for each one
+    // Because the board UUIDs are stored differently in the various collections of components, set up separate (but annoyingly similar!) scenarios for each one
     if (collection.formId === 'BoardShipment') {
       // For each board in the shipment, extract the UUID and update the reception details to match those from the 'Board Shipment Reception' action
       // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
