@@ -10,10 +10,6 @@ csvFile         = '/user/majumdar/Desktop/horizontalInspections/UK_Frames/F000_X
                                                             # Full path to the input data file (must be a string ending in '.csv')
 apaLayer        = 'X'                                       # Wire layer (must be given as one of 'X','U', 'V' or 'G')
 action_id       = '6582feba5fedc88fb468a8d3'                # ID of the existing tension measurements action to be edited (get from DB)
-replaced_wires  = '[none]'
-                                                            # Free-form string, additional description or commentary if desired
-edtAction_comms = 'This is an existing single layer tension measurements action, edited via M2M'
-                                                            # Free-form string, additional description or commentary if desired
 
 # ##################################
 
@@ -40,14 +36,10 @@ if __name__ == '__main__':
     actionData_fields = [
         'measuredTensions_sideA',
         'measuredTensions_sideB',
-        'replacedWireSegs',
-        'comments',
     ]
     actionData_values = [
         tensions_sideA,
         tensions_sideB,
-        replaced_wires,
-        edtAction_comms,
     ]
 
     id = EditAction(actionID, actionData_fields, actionData_values, connection, headers)

@@ -69,7 +69,7 @@ block content
           .vert-space-x1
 
         if (action.typeFormId == 'x_tension_testing') && (action.data.changedTensions_sideA)
-          dt Re-tensioned Wires or Wire Segments (comparing this version [#{action.validity.version}] and version #{action.validity.version - 1}):
+          dt Most recently re-tensioned wires / wire segments (comparing this version [#{action.validity.version}] and version #{action.data.changedTensions_version}):
 
           - let numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
           - let numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
