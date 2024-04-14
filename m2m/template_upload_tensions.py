@@ -1,3 +1,5 @@
+import sys
+
 from common import ConnectToAPI, EditAction
 from tensions import ExtractTensions
 
@@ -8,18 +10,22 @@ from tensions import ExtractTensions
 # For uploading (re-)tensioning measurements, the following information is required:
 csvFile         = '/user/majumdar/Desktop/horizontalInspections/UK_Frames/F000_X.csv'
                                                             # Full path to the input data file (must be a string ending in '.csv')
-apaLayer        = 'X'                                       # Wire layer (must be given as one of 'X','U', 'V' or 'G')
+apaLayer        = 'X'                                       # Wire layer (must be given as one of 'X','V', 'U' or 'G')
 action_id       = '6582feba5fedc88fb468a8d3'                # ID of the existing tension measurements action to be edited (get from DB)
-replaced_wires  = '[none]'
-                                                            # Free-form string, additional description or commentary if desired
-edtAction_comms = 'This is an existing single layer tension measurements action, edited via M2M'
-                                                            # Free-form string, additional description or commentary if desired
 
 # ##################################
 
 
 # Main script function
 if __name__ == '__main__':
+    # This script can be run in two ways:
+    #   1) if no command line arguments are specified, the global variables will use the default values given above
+    #   2) if command line arguments are specified, the global variables will take the specified values, overriding the default values given above
+    if len(sys.argv) > 1:
+        csvFile   = sys.argv[1]
+        apaLayer  = sys.argv[2]
+        action_id = sys.argv[3]
+
     # Set up a connection to the database API and get the connection request headers
     # This must be done at the beginning of this main script function, but ONLY ONCE
     connection, headers = ConnectToAPI()
@@ -40,19 +46,15 @@ if __name__ == '__main__':
     actionData_fields = [
         'measuredTensions_sideA',
         'measuredTensions_sideB',
-        'replacedWireSegs',
-        'comments',
     ]
     actionData_values = [
         tensions_sideA,
         tensions_sideB,
-        replaced_wires,
-        edtAction_comms,
     ]
 
     id = EditAction(actionID, actionData_fields, actionData_values, connection, headers)
     print(f' Successfully edited action with ID: {id}')
-    
+
     ########################################
 
     print()

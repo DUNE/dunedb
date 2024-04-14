@@ -78,37 +78,49 @@ async function save(input, req) {
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
-  // If a tension measurements record is being EDITED, i.e. the following criteria are satisfied ...
-  //  - the new record's type form ID matches that of a tensions measurement action
-  //  - there is an existing record with the same action ID, and it contains tension measurements
+  // If a tension measurements record is being EDITED, i.e. the new record's type form ID matches that of a tensions measurement action and there is an existing record ...
   if ((newRecord.typeFormId === 'x_tension_testing') && (oldRecord)) {
-    if (oldRecord.data.hasOwnProperty('measuredTensions_sideA')) {
-      // Calculate arrays containing information about tensions that have changed (on both sides) between the old and new versions of the record
-      // This will usually indicate the wires that have been re-tensioned, which is useful information to save directly into the record
+    // We want to know which tensions have changed between the version of the record that is currently being saved, and the most recent previous version which had at least one different tension
+    // However, this may not necessarily be the immediately preceding version - for example, if the action was edited only to change some non-tension information ...
+    // ... then it would show that no tensions have changed between this and the preceding version (which is true, but not very helpful)
+    const new_sideA = [...newRecord.data.measuredTensions_sideA];
+    const new_sideB = [...newRecord.data.measuredTensions_sideB];
+
+    // Retrieve all versions of the action (ordered from latest to earliest)
+    const actionVersions = await versions(input.actionId);
+
+    // For each version that contains measured tensions (starting from the most recent) ...
+    for (const action of actionVersions) {
       let changedTensions_sideA = [];
       let changedTensions_sideB = [];
 
-      const old_sideA = [...oldRecord.data.measuredTensions_sideA];
-      const new_sideA = [...newRecord.data.measuredTensions_sideA];
+      if (action.data.hasOwnProperty('measuredTensions_sideA')) {
+        // Compare the tensions in this version with those in the new one, and save any that are different
+        const old_sideA = [...action.data.measuredTensions_sideA];
 
-      for (let i = 0; i < old_sideA.length; i++) {
-        if (old_sideA[i] !== new_sideA[i]) {
-          changedTensions_sideA.push([i, old_sideA[i], new_sideA[i]]);
+        for (let i = 0; i < old_sideA.length; i++) {
+          if (old_sideA[i] !== new_sideA[i]) {
+            changedTensions_sideA.push([i, old_sideA[i], new_sideA[i]]);
+          }
+        }
+
+        const old_sideB = [...action.data.measuredTensions_sideB];
+
+        for (let i = 0; i < old_sideB.length; i++) {
+          if (old_sideB[i] !== new_sideB[i]) {
+            changedTensions_sideB.push([i, old_sideB[i], new_sideB[i]]);
+          }
         }
       }
 
-      const old_sideB = [...oldRecord.data.measuredTensions_sideB];
-      const new_sideB = [...newRecord.data.measuredTensions_sideB];
+      // If any changed tensions have been found and saved, save them into the new record and break out of the loop ... if not, move to the next previous version of the action
+      if ((changedTensions_sideA.length > 0) || (changedTensions_sideB > 0)) {
+        newRecord.data.changedTensions_version = action.validity.version;
+        newRecord.data.changedTensions_sideA = [...changedTensions_sideA];
+        newRecord.data.changedTensions_sideB = [...changedTensions_sideB];
 
-      for (let i = 0; i < old_sideB.length; i++) {
-        if (old_sideB[i] !== new_sideB[i]) {
-          changedTensions_sideB.push([i, old_sideB[i], new_sideB[i]]);
-        }
+        break;
       }
-
-      // Add the arrays of changed tensions to the new record
-      newRecord.data.changedTensions_sideA = [...changedTensions_sideA];
-      newRecord.data.changedTensions_sideB = [...changedTensions_sideB];
     }
   }
 

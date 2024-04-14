@@ -77,7 +77,7 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user to the appropriate post-submission page (where 'result' is the action record's action ID)
-    // If the action is a 'Board' or 'Grounding Mesh' Shipment Reception type, we must first update the board information (and further redirection will be handled from there)
+    // If the action is a 'XXX Reception' type (performed on a shipment or batch), we must first update the individual component information (and further redirection will be handled from there)
     // Similarly, if the action is one of the board installation types, we must also first update the board information (in a different way)
     // If neither of these is the case, then we can simply proceed with standard post-submission redirection:
     //   - if the action originates from a workflow, go to the page for updating the workflow path step results
@@ -89,12 +89,12 @@ function SubmitData(submission) {
       'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
     ];
 
-    if ((submission.typeFormId === 'BoardReception') || (submission.typeFormId === 'GroundingMeshShipmentReception')) {
-      const shipmentUUID = submission.componentUuid;
+    if ((submission.typeFormId === 'BoardReception') || (submission.typeFormId === 'GroundingMeshShipmentReception') || (submission.typeFormId === 'PopulatedBoardKitReception')) {
+      const collectionUUID = submission.componentUuid;
       const receptionLocation = submission.data.receptionLocation;
       const receptionDate = (submission.data.receptionDate).toString().slice(0, 10);
 
-      let url = `/component/${shipmentUUID}/updateLocations/${receptionLocation}/${receptionDate}?actionId=${result}`;
+      let url = `/component/${collectionUUID}/updateLocations/${receptionLocation}/${receptionDate}?actionId=${result}`;
 
       window.location.href = url;
     } else if (installation_typeFormIDs.includes(submission.typeFormId)) {

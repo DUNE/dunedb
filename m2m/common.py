@@ -62,7 +62,7 @@ def ConnectToAPI():
     # If the access token string is not empty, set up and return a connection to the database API, as well as the headers defined above
     # Otherwise, exit out now since there's no point in continuing (although even if the token is fine here, further checks will be performed by the API middleware)
     # Note that locally hosted APIs will need to use the non-SSL HTTP client (HTTP), whereas the staging and production instances will need the SSL one (HTTPS)
-    if access_token is not '':
+    if access_token != '':
         if (db_domain == 'localhost:12313'):
             connection = http.client.HTTPConnection(db_domain, timeout=10)
         else:
