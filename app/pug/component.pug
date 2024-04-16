@@ -99,6 +99,10 @@ block content
 
                           td #{info[1]}
                           td #{`${base_url}/c/${info[2]}`}
+
+                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+                  img.small-icon(src = '/images/checklist_icon.svg')
+                  | &nbsp; Print all sub-component QR codes
             else if component.formId === 'GroundingMeshShipment'
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Origin Location
@@ -124,6 +128,10 @@ block content
 
                           td #{info[1]}
                           td #{`${base_url}/c/${info[2]}`}
+
+                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+                  img.small-icon(src = '/images/checklist_icon.svg')
+                  | &nbsp; Print all sub-component QR codes
             else if component.formId === 'PopulatedBoardShipment'
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Origin Location
@@ -148,9 +156,13 @@ block content
                           td
                             a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
 
+                          td #{info[3]}
                           td #{info[1]}
-                          td #{info[2]}
-                          td #{`${base_url}/c/${info[3]}`}
+                          td #{`${base_url}/c/${info[2]}`}
+
+                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+                  img.small-icon(src = '/images/checklist_icon.svg')
+                  | &nbsp; Print all sub-component QR codes
             else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
               if component.formId === 'GeometryBoardBatch'
                 .vert-space-x1.border-success.border.rounded.p-2
@@ -186,7 +198,9 @@ block content
 
                           td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
 
-                a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
+                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+                  img.small-icon(src = '/images/checklist_icon.svg')
+                  | &nbsp; Print all sub-component QR codes
             else
               .vert-space-x1.border-success.border.rounded.p-2
                 #typeform

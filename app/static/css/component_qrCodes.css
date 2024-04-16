@@ -5,3 +5,8 @@
 .qr-col {
   border: 1px solid #EEE;
 }
+
+.qr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
