@@ -38,24 +38,74 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
 
-    // For 'Geometry Board Shipment' type components, set up an array containing more detailed information about each board in the shipment
-    // This is required for this particular type of component, because by itself it only contains the UUIDs of the related boards
-    // (Contrast with 'Geometry Board Batch' type components, which natively contain both the UUIDs and UKIDs of the related boards)
-    let shipmentDetails = [];
+    // Most shipment and batch type components only hold very basic information (i.e. only the full UUIDs) about the individual sub-components that they contain
+    // (The exceptions to this are 'XXX Board Batch' type components, which naturally contain full UUIDs, short UUIDs and UKIDs/UWIDs of all boards in each one)
+    // For the other shipment and batch component types, set up an array containing more detailed information about each sub-component
+    let collectionDetails = [];
 
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
         let uuid = info.component_uuid;
-        let ukid = 'none';
 
-        if (uuid === '') uuid = 'none';
-        else {
+        if (uuid !== '') {
           const boardRecord = await Components.retrieve(uuid);
 
-          if (boardRecord) ukid = boardRecord.data.typeRecordNumber;
+          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.shortUuid]);
         }
+      }
+    }
 
-        shipmentDetails.push([uuid, ukid]);
+    if (component.formId === 'GroundingMeshShipment') {
+      for (const info of component.data.apaUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const meshRecord = await Components.retrieve(uuid);
+
+          if (meshRecord) collectionDetails.push([uuid, meshRecord.data.name, meshRecord.shortUuid]);
+        }
+      }
+    }
+
+    if (component.formId === 'PopulatedBoardShipment') {
+      for (const info of component.data.crBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, 'CR Board', componentRecord.data.typeRecordNumber, componentRecord.shortUuid]);
+        }
+      }
+
+      for (const info of component.data.gBiasBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, 'G-Bias Board', componentRecord.data.typeRecordNumber, componentRecord.shortUuid]);
+        }
+      }
+
+      for (const info of component.data.shvBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, 'SHV Board', componentRecord.data.typeRecordNumber, componentRecord.shortUuid]);
+        }
+      }
+
+      for (const info of component.data.cableHarnessUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, 'Cable Harness', componentRecord.data.typeRecordNumber, componentRecord.shortUuid]);
+        }
       }
     }
 
@@ -64,7 +114,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       component,
       componentVersions,
       componentTypeForm,
-      shipmentDetails,
+      collectionDetails,
       actions,
       actionTypeForms,
       queryDictionary: req.query,

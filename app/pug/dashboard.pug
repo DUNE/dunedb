@@ -24,7 +24,7 @@ head
   link(rel = 'stylesheet', href = '/css/fonts.css')
           //- Copied from https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap
   
-  //- The 'formio.full.min.css' stylesheet has to be loaded from an external source, because it itself references another font by URL ...
+  //- The 'formio.full.min.css' stylesheet has to be loaded from an external source, because it itself references another font package by URL ...
   //- ... and a local version of this stylesheet is not able to reference that URL (gives a 404 error)
   link(rel = 'preload', href = 'https://cdn.jsdelivr.net/npm/formiojs@4.13.3/dist/formio.full.min.css', as = 'style', 
     integrity = 'sha256-s29fAUUeOwl+ddJh9Syk/WJ5CjZiAI6BWG4uPhtKlps=', crossorigin = 'anonymous')

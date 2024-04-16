@@ -9,7 +9,7 @@ block extrascripts
     const component = !{JSON.stringify(component, null, 4)};
     const componentVersions = !{JSON.stringify(componentVersions, null, 4)};
     const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
-    const shipmentDetails = !{JSON.stringify(shipmentDetails, null, 4)};
+    const collectionDetails = !{JSON.stringify(collectionDetails, null, 4)};
     const actions = !{JSON.stringify(actions, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
     const base_url = '!{base_url}';
@@ -25,7 +25,7 @@ block content
 
     .vert-space-x1
       .row
-        .col
+        .col-md-9
           dl
             dt Component Type
             dd
@@ -74,48 +74,103 @@ block content
                 |  by !{' '}
                 a(href = `mailto:${user_email(component.insertion.user)}`) #{component.insertion.user.displayName}
 
+            if component.formId === 'BoardShipment'
               .vert-space-x1.border-success.border.rounded.p-2
-                #typeform
+                dt Origin Location 
+                dd #{component.data.originOfShipment.toUpperCase()}
 
-            if component.formId == 'BoardShipment'
-              .vert-space-x1.border-success.border.rounded.p-2
+                dt Destination Location
+                dd #{component.data.destinationOfShipment.toUpperCase()}
+
                 dt Boards in Shipment
                 dd
                   table.table
                     thead
                       tr
                         th.col-md-3 UUID
-                        th.col-md-2 UK ID
+                        th.col-md-1 UK ID
+                        th.col-md-3 QR Code Link 
 
                     tbody
-                      each info in shipmentDetails
+                      each info in collectionDetails
                         tr
-                          if info[0] == 'none'
-                            td  #{info[0]}
-                          else
-                            td
-                              a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+                          td
+                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
 
                           td #{info[1]}
+                          td #{`${base_url}/c/${info[2]}`}
+            else if component.formId === 'GroundingMeshShipment'
+              .vert-space-x1.border-success.border.rounded.p-2
+                dt Origin Location
+                dd #{component.data.originOfShipment.toUpperCase()}
 
-            if component.data.subComponent_fullUuids
+                dt Destination Location
+                dd #{component.data.destinationOfShipment.toUpperCase()}
+
+                dt Meshes in Shipment
+                dd
+                  table.table 
+                    thead 
+                      tr 
+                        th.col-md-2 UUID 
+                        th.col-md-2 DUNE PID
+                        th.col-md-3 QR Code Link 
+
+                    tbody 
+                      each info in collectionDetails
+                        tr
+                          td
+                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                          td #{info[1]}
+                          td #{`${base_url}/c/${info[2]}`}
+            else if component.formId === 'PopulatedBoardShipment'
+              .vert-space-x1.border-success.border.rounded.p-2
+                dt Origin Location
+                dd #{component.data.originOfShipment.toUpperCase()}
+
+                dt Destination Location
+                dd #{component.data.destinationOfShipment.toUpperCase()}
+
+                dt Components in Kit
+                dd
+                  table.table 
+                    thead 
+                      tr 
+                        th.col-md-2 UUID 
+                        th.col-md-1 Type
+                        th.col-md-1 UW ID 
+                        th.col-md-3 QR Code Link 
+
+                    tbody 
+                      each info in collectionDetails
+                        tr
+                          td
+                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                          td #{info[1]}
+                          td #{info[2]}
+                          td #{`${base_url}/c/${info[3]}`}
+            else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
+              if component.formId === 'GeometryBoardBatch'
+                .vert-space-x1.border-success.border.rounded.p-2
+                  #typeform
+
               - let columnHeader = ''
 
-              if component.data.subComponent_formId == 'GeometryBoard'
-                - columnHeader = 'UK ID'
-              else if component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
+              if component.data.subComponent_formId == 'CEAdapterBoard' || component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
                 - columnHeader = 'UW ID'
               else 
-                - columnHeader = 'Factory ID'
+                - columnHeader = 'UK ID'
 
               .vert-space-x1.border-success.border.rounded.p-2
-                dt Sub Components
+                dt #{`Components in Batch (total = ${component.data.subComponent_count})`}
                 dd
                   table.table
                     thead
                       tr
                         th.col-md-3 UUID
-                        th.col-md-2 #{columnHeader}
+                        th.col-md-1 #{columnHeader}
                         th.col-md-3 QR Code Link
 
                     tbody
@@ -132,6 +187,9 @@ block content
                           td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
 
                 a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
+            else
+              .vert-space-x1.border-success.border.rounded.p-2
+                #typeform
 
           .vert-space-x1
             .panel.panel-default
