@@ -23,3 +23,10 @@ mixin qr-panel-noText(text, desc)
   .qr&attributes(attributes)
     .canvas-holder
       canvas.qr-code(data-QR-text = text, data-QR-desc = desc)
+
+mixin qr-panel-topText(text, desc)
+  .qr&attributes(attributes)
+    .qr-label.qr-label-top
+      div=desc
+    .canvas-holder
+      canvas.qr-code(data-QR-text = text, data-QR-desc = desc)      
