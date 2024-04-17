@@ -198,9 +198,14 @@ block content
 
                           td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
 
-                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-                  img.small-icon(src = '/images/checklist_icon.svg')
-                  | &nbsp; Print all sub-component QR codes
+                .form-inline
+                  a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+                    img.small-icon(src = '/images/checklist_icon.svg')
+                    | &nbsp; Print all sub-component QR codes
+
+                  .hori-space-x2 
+                    a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
+
             else
               .vert-space-x1.border-success.border.rounded.p-2
                 #typeform
