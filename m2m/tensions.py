@@ -14,6 +14,11 @@ columns_V_B = [1, 41, 43, 45, 47, 49, 51]
 columns_G_A = [1,  7,  9, 11, 13, 15]
 columns_G_B = [1, 22, 24, 26, 28, 30]
 
+rows_header      = {'X':   11, 'U':   11, 'V':   11, 'G':   11}
+rows_firstEntry  = {'X':    0, 'U':    7, 'V':    7, 'G':    0}
+rows_lastEntry   = {'X':   -1, 'U':  -15, 'V':  -17, 'G':   -1}
+expected_entries = {'X':  480, 'U': 1141, 'V': 1139, 'G':  481}
+
 
 ########################################################
 ## Extract all wire tensions from the input .csv file ##
@@ -44,17 +49,10 @@ def ExtractTensions(csvFile, apaLayer):
     
     # First deal with the tensions on side A
     # # Extract the columns from the .csv file for this side into a Pandas dataframe (columns --> series)
-    # Set the row with index = 10 as the first one to store (the 'header row') across all series, since the rows above this always contain some comments, miscellaneous calculations, etc.
+    # Set the the 'header row' as the first one to store across all series, since the rows above this always contain some comments, miscellaneous calculations, etc.
     # Immediately replace all zeroes (numerical and string) with 'NaN's ... this is required for the later step of merging the series
-    # Finally, drop any rows where there is a 'NaN' in the selected 'check column' ... this indicates that this is most likely a comment row
-    df_sideA = pd.read_csv(csvFile, usecols = columns_A, header = 10, encoding = 'latin1')
+    df_sideA = pd.read_csv(csvFile, usecols = columns_A, header = rows_header[apaLayer], encoding = 'latin1')
     df_sideA = df_sideA.replace([0.0, '0.00'], np.nan)
-    
-    # The 'U' and 'V' layer data always contains certain rows at the start and end which never contain tension measurements, so remove these (i.e. slice the dataframe)
-    if apaLayer == 'U':
-        df_sideA = df_sideA[7 : -4]
-    elif apaLayer == 'V':
-        df_sideA = df_sideA[7 : -5]
     
     # Merge the tensions series such that the most recently measured tension of each wire / wire segment is kept, and any earlier values are discarded
     # Start by setting the final tensions series equal to whatever is in the last series of the dataframe ... i.e. the most recently measured tensions
@@ -69,16 +67,13 @@ def ExtractTensions(csvFile, apaLayer):
     
     # Convert the final tensions series for this side into a Python list, since this is the format in which it will be uploaded to the APA DB
     # Replace any NaNs with actual zeroes, which is a better indication of a missing measurement on the DB side
+    # Remove any entries in the list that originated from commentary or unused segment rows (these may exist immediately before and/or after the actually useful tensions)
     list_sideA = tensions_sideA.fillna(0.0).to_list()
+    list_sideA = list_sideA[rows_firstEntry[apaLayer] : rows_lastEntry[apaLayer]]
     
     # Repeat the above for side B
-    df_sideB = pd.read_csv(csvFile, usecols = columns_B, header = 10, encoding = 'latin1')
+    df_sideB = pd.read_csv(csvFile, usecols = columns_B, header = rows_header[apaLayer], encoding = 'latin1')
     df_sideB = df_sideB.replace([0.0, '0.00'], np.nan)
-    
-    if apaLayer == 'U':
-        df_sideB = df_sideB[7 : -4]
-    elif apaLayer == 'V':
-        df_sideB = df_sideB[7 : -5]
     
     tensions_sideB = df_sideB[df_sideB.columns[-1]]
     
@@ -86,8 +81,12 @@ def ExtractTensions(csvFile, apaLayer):
         tensions_sideB = tensions_sideB.combine_first(df_sideB[column])
     
     list_sideB = tensions_sideB.fillna(0.0).to_list()
+    list_sideB = list_sideB[rows_firstEntry[apaLayer] : rows_lastEntry[apaLayer]]
     
     print(f' ExtractTensions() - INFO: successfully extracted {len(list_sideA)} tensions for side A and {len(list_sideB)} for side B')
-
+    
+    if (len(list_sideA) != expected_entries[apaLayer]) or (len(list_sideB) != expected_entries[apaLayer]):
+        sys.exit(f' ExtractTensions() - ERROR: the number of extracted tensions does not match the expected number for the specified layer ({apaLayer} : {expected_entries[apaLayer]})! \n')
+    
     # Return the lists of tensions for both sides
     return list_sideA, list_sideB
