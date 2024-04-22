@@ -21,7 +21,8 @@ block content
         thead
           tr
             th.col-md-2 Type Name
-            th.col-md-4 Component Name / UUID
+            th.col-md-3 Component Name / UUID 
+            th.col-md-1
             th.col-md-2 Last Edited On:
             th.col-md-1
 
@@ -41,6 +42,14 @@ block content
                 else 
                   td 
                     a(href = `/component/${uuid}`) #{uuid}
+
+                if component.typeFormId == 'AssembledAPA'
+                  td
+                    a.btn-sm.btn-secondary(href = `/component/${uuid}/execSummary`, target = '_blank')
+                      img.small-icon(src = '/images/checklist_icon.svg')
+                      | &nbsp; Exec. Summary
+                else 
+                  td
 
                 td
                   +dateFormat(component.lastEditDate)

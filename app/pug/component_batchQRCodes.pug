@@ -1,0 +1,28 @@
+extend default
+include common.pug
+
+block vars
+  - const page_title = 'Sub-Component QR Codes';
+
+block extrascripts
+  script(type = 'text/javascript').
+    const shortUUIDs = !{JSON.stringify(shortUUIDs, null, 4)};
+    const base_url = '!{base_url}';
+
+block allbody
+  .vert-space-x2.hori-space-x1.noprint
+    a.btn.btn-primary(onclick = 'window.print(); return false;' href = '#print') Print QR Codes
+
+    .vert-space-x1
+      p For best display, please print <b>without headers and footers</b>, <b>without backgrounds</b> and <b>with no top and bottom margins</b>.
+
+  .vert-space-x2
+    hr
+
+  .vert-space-x2 
+    .container.fluid 
+      .qr-grid
+        each info in shortUUIDs
+          +qr-panel-topText(`${base_url}/c/${info[1]}`, `${info[2]} #${info[0]}`)
+
+  .vert-space-x2
