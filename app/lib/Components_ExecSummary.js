@@ -289,6 +289,12 @@ async function collateInfo(componentUUID) {
     us1: 'US 2',
   };
 
+  const dictionary_bobbinManufacturers = {
+    littleFalls: 'Little Falls',
+    rstLocker: 'RST/Locker',
+    wireAlloyInternational: 'Wire Alloy International',
+  }
+
   const dictionary_locations = {
     daresbury: 'Daresbury',
     chicago: 'Chicago',
@@ -309,6 +315,7 @@ async function collateInfo(componentUUID) {
     collatedInfo[dictionaries[i]] = {
       winder: '',
       winderHead: '',
+      bobbinManufacturers: '[no information found]',
       winderMaintenenceSignoff: '[no information found]',
       tensionControlSignoff: '[no information found]',
       numberOfReplacedWires: 0,
@@ -340,6 +347,7 @@ async function collateInfo(componentUUID) {
         _id: { actionId: '$actionId' },
         winder: { '$first': '$data.winder' },
         winderHead: { '$first': '$data.winderHead' },
+        wireBobbins: { '$first': '$data.bobbinGrid' },
         winderMaintenenceSignoff: { '$first': '$data.winderMaintenanceVerification' },
         tensionControlSignoff: { '$first': '$data.tensionControlValidation' },
         replacedWires: { '$first': '$data.replacedWires' },
@@ -353,6 +361,18 @@ async function collateInfo(componentUUID) {
       .toArray();
 
     if (results.length > 0) {
+      let bobbinManufacturers = '';
+
+      for (let i = 0; i < results[0].wireBobbins.length; i++) {
+        let bobbinUuid = results[0].wireBobbins[i].bobbinUuid;
+
+        const bobbin = await Components.retrieve(MUUID.from(bobbinUuid).toString());
+
+        if (bobbin) bobbinManufacturers += `${dictionary_bobbinManufacturers[bobbin.data.manufacturer]}, `;
+      }
+
+      bobbinManufacturers = bobbinManufacturers.substring(0, bobbinManufacturers.length - 2);
+
       let numberOfReplacedWires = 0;
 
       for (let i = 0; i < results[0].replacedWires.length; i++) {
@@ -366,6 +386,7 @@ async function collateInfo(componentUUID) {
 
       collatedInfo[dictionaries[i]].winder = dictionary_winders[results[0].winder];
       collatedInfo[dictionaries[i]].winderHead = dictionary_heads[results[0].winderHead];
+      collatedInfo[dictionaries[i]].bobbinManufacturers = bobbinManufacturers;
       collatedInfo[dictionaries[i]].winderMaintenenceSignoff = results[0].winderMaintenenceSignoff;
       collatedInfo[dictionaries[i]].tensionControlSignoff = results[0].tensionControlSignoff;
       collatedInfo[dictionaries[i]].numberOfReplacedWires = numberOfReplacedWires;
@@ -451,6 +472,17 @@ async function collateInfo(componentUUID) {
   }
 
   // Get information about any wire related non-conformances on the assembled APA
+  const dictionary_apaNCRs_types = {
+    missingWireSegment: 'Missing Wire Segment',
+    misplacedWireSegment: 'Misplaced Wire Segment',
+    shortedWireSegment: 'Shorted Wire Segment',
+    geometryBoardIssue: 'Geometry Board Issue',
+    combIssue: 'Comb Issue',
+    machiningIssue: 'Machining Issue',
+    conduitIssue: 'Conduit Issue',
+    incorrectFasteners: 'Incorrect Fasteners',
+  };
+
   collatedInfo.apaNCRs_wires = [];
   aggregation_stages = [];
   results = [];
@@ -463,6 +495,8 @@ async function collateInfo(componentUUID) {
         'data.nonConformanceType.missingWireSegment': true
       }, {
         'data.nonConformanceType.misplacedWireSegment': true
+      }, {
+        'data.nonConformanceType.shortedWireSegment': true
       }],
     }
   });
@@ -472,6 +506,7 @@ async function collateInfo(componentUUID) {
     $group: {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
+      nonConf_type: { '$first': '$data.nonConformanceType' },
       wireData: { '$first': '$data.dataGrid' },
     },
   });
@@ -483,7 +518,14 @@ async function collateInfo(componentUUID) {
   if (results.length > 0) {
     for (const result of results) {
       for (const entry of result.wireData) {
+        let nonConfType = '';
+
+        for (const [key, value] of Object.entries(result.nonConf_type)) {
+          if (value) nonConfType = key;
+        }
+
         const dictionary = {
+          type: dictionary_apaNCRs_types[nonConfType],
           layerSide: entry.wireLayer.toUpperCase(),
           boardPad: entry.headBoardAndPad,
           endpoints: entry.endPointsForMissingSegment,
@@ -508,6 +550,7 @@ async function collateInfo(componentUUID) {
       'componentUuid': MUUID.from(componentUUID),
       'data.nonConformanceType.missingWireSegment': false,
       'data.nonConformanceType.misplacedWireSegment': false,
+      'data.nonConformanceType.shortedWireSegment': false,
     }
   });
 
@@ -524,14 +567,6 @@ async function collateInfo(componentUUID) {
   results = await db.collection('actions')
     .aggregate(aggregation_stages)
     .toArray();
-
-  const dictionary_apaNCRs_types = {
-    geometryBoardIssue: 'Geometry Board Issue',
-    combIssue: 'Comb Issue',
-    machiningIssue: 'Machining Issue',
-    conduitIssue: 'Conduit Issue',
-    incorrectFasteners: 'Incorrect Fasteners',
-  };
 
   if (results.length > 0) {
     for (const result of results) {
