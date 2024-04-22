@@ -309,13 +309,24 @@ function SetEntry_wireLayer(layer, layerInfo) {
       input: false,
       columns: [{
         components: [{
+          label: 'Wire Bobbin Manufacturer(s)',
+          key: 'bobbinManufacturer',
+          type: 'textfield',
+          input: true,
+          defaultValue: layerInfo.bobbinManufacturers,
+        }],
+        width: 4,
+        size: 'sm',
+      },
+      {
+        components: [{
           label: 'Tension Measurements System',
           key: 'tensions_system',
           type: 'textfield',
           input: true,
           defaultValue: layerInfo.tensions_system,
         }],
-        width: 4,
+        width: 2,
         size: 'sm',
       },
       {
@@ -326,7 +337,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           input: true,
           defaultValue: layerInfo.tensions_location,
         }],
-        width: 4,
+        width: 2,
         size: 'sm',
       },
       {
@@ -411,13 +422,24 @@ function SetEntry_apaNCRs_wires(ncrInfo) {
       },
       {
         components: [{
+          label: 'Type:',
+          key: 'apaNCRs_wires_type',
+          type: 'textfield',
+          input: false,
+          defaultValue: ncrInfo.type,
+        }],
+        width: 2,
+        size: 'sm',
+      },
+      {
+        components: [{
           label: 'Layer & Side:',
           key: 'apaNCRs_wires_layerSide',
           type: 'textfield',
           input: false,
           defaultValue: ncrInfo.layerSide,
         }],
-        width: 2,
+        width: 1,
         size: 'sm',
       },
       {
@@ -439,7 +461,7 @@ function SetEntry_apaNCRs_wires(ncrInfo) {
           input: false,
           defaultValue: ncrInfo.endpoints,
         }],
-        width: 3,
+        width: 2,
         size: 'sm',
       },
       {
