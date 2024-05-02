@@ -4,6 +4,9 @@ block vars
   - const page_title = 'Search for Wire Tension Measurements by UUID';
 
 block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
   block workscripts
     script(src = '/pages/search_tensionMeasurementsByUUID.js')
 

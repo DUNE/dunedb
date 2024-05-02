@@ -41,7 +41,6 @@ async function onPageLoad() {
     // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' field)
     // Add all other required information, inheriting from the variables that were passed through the route to this page
     submission.typeFormId = workflowTypeForm.formId;
-    submission.typeFormName = workflowTypeForm.formName;
 
     // If this is a completely new workflow, copy the 'path' object from the workflow type form into the 'submission' object
     // For an existing workflow that is being edited, we don't want to do this, since it would overwrite any existing path results

@@ -36,7 +36,7 @@ async function save(input, req) {
   newRecord.recordType = 'action';
   newRecord.actionId = new ObjectID(input.actionId);
   newRecord.typeFormId = input.typeFormId;
-  newRecord.typeFormName = input.typeFormName || typeForm.formName;
+  newRecord.typeFormName = typeForm.formName;
   newRecord.componentUuid = MUUID.from(input.componentUuid);
   newRecord.data = input.data;
 
@@ -66,8 +66,6 @@ async function save(input, req) {
 
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
-
-  let _lock = await dbLock(`saveAction_${newRecord.actionId}`, 1000);
 
   // Attempt to retrieve an existing record with the same action ID as the specified one (relevant if we are editing an existing record)
   let oldRecord = null;
@@ -125,6 +123,8 @@ async function save(input, req) {
   }
 
   // Insert the new record into the 'actions' records collection, and throw an error if the insertion fails
+  let _lock = await dbLock(`saveAction_${newRecord.actionId}`, 1000);
+
   const result = await db.collection('actions')
     .insertOne(newRecord);
 
