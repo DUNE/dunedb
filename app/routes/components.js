@@ -117,7 +117,8 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       collectionDetails,
       actions,
       actionTypeForms,
-      queryDictionary: req.query,
+      dictionary_queries: req.query,
+      dictionary_locations: utils.dictionary_locations,
     });
   } catch (err) {
     logger.error(err);
@@ -221,10 +222,12 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
     }
 
     if (component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch') {
-      let typeFormsList = await Forms.list('componentForms');
+      for (const uuid of component.data.subComponent_fullUuids) {
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
 
-      for (const [index, shortUUID] of component.data.subComponent_shortUuids.entries()) {
-        shortUUIDs.push([component.data.subComponent_typeRecordNumbers[index], shortUUID, typeFormsList[component.data.subComponent_formId].formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+        }
       }
     }
 
@@ -459,67 +462,79 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
 });
 
 
-/// Update the most recently recorded reception location and date of all individual components in a collection of components (i.e. a shipment, batch or kit)
-/// This is an internal route - it should not be accessed directly by a user through their browser ...
-/// ... instead, it is automatically called during submission of an appropriate 'XXX Reception' action or 'Returned XXX Batch' component 
+/// Update the current location and date at location of a single component, or of all individual components in a collection of components (i.e. a shipment, batch or kit)
+/// This is an internal route - it should not be accessed directly by a user through their browser ... instead, it is automatically called during submission of an appropriate component or action
 router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the shipment or batch record corresponding to the specified component UUID, and throw an error if there is no such record
-    const collection = await Components.retrieve(req.params.uuid);
+    // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
+    const component = await Components.retrieve(req.params.uuid);
 
-    if (!collection) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
+    if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
-    // Because the board UUIDs are stored differently in the various collections of components, set up separate (but annoyingly similar!) scenarios for each one
-    if (collection.formId === 'BoardShipment') {
-      // For each board in the shipment, extract the UUID and update the reception details to match those from the 'Board Shipment Reception' action
-      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-      for (const board of collection.data.boardUuiDs) {
-        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+    // Update the location information as appropriately for the component type and contents
+    // In all cases, if successful, the updating function returns 'result = 1', but we don't actually need this value for anything
+    // Once any and all components have been updated, redirect to the page for viewing the originating component or action record
+    let url = '';
+
+    if (component.formId === 'AssembledAPA') {
+      // Update the location information of the APA frame that is referenced by the Assembled APA component, to show that the frame is now being used
+      const result = await Components.updateLocation(component.data.frameUuid, req.params.location, req.params.date, req.params.uuid);
+
+      url = `/component/${req.params.uuid}`;
+    } else if (component.formId === 'APAShipment') {
+      // Extract the UUID and update the location information of each assembled APA in a shipment of APAs, and then update the location information of the shipment itself
+      for (const apa of component.data.apaUuiDs) {
+        const result = await Components.updateLocation(apa.component_uuid, req.params.location, req.params.date, '');
       }
 
-      // Once all boards have been updated, redirect to the page for viewing the action record
-      res.redirect(`/action/${req.query.actionId}`);
-    } else if (collection.formId === 'GroundingMeshShipment') {
-      // For each mesh in the shipment, extract the UUID and update the reception details to match those from the 'Grounding Mesh Shipment Reception' action
-      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-      for (const mesh of collection.data.apaUuiDs) {
-        const result = await Components.updateLocation(mesh.component_uuid, req.params.location, req.params.date);
+      const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
+      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+    } else if (component.formId === 'BoardShipment') {
+      // Extract the UUID and update the location information of each board in a shipment of boards, and then update the location information of the shipment itself
+      for (const board of component.data.boardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
       }
 
-      // Once all boards have been updated, redirect to the page for viewing the action record
-      res.redirect(`/action/${req.query.actionId}`);
-    } else if (collection.formId === 'ReturnedGeometryBoardBatch') {
-      // For each board in the batch, extract the UUID and update the reception details to match those from the batch's submission
-      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-      for (const board of collection.data.boardUuids) {
-        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
+      const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
+      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+    } else if (component.formId === 'GroundingMeshShipment') {
+      // Extract the UUID and update the location information of each mesh in a shipment of meshes, and then update the location information of the shipment itself
+      for (const mesh of component.data.apaUuiDs) {
+        const result = await Components.updateLocation(mesh.component_uuid, req.params.location, req.params.date, '');
       }
 
-      // Once all boards have been updated, redirect to the page for viewing the component record
-      res.redirect(`/component/${req.params.uuid}`);
+      const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
+      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+    } else if (component.formId === 'PopulatedBoardShipment') {
+      // Extract the UUID and update the location information of each component in a populated kit, and then update the location information of the kit itself
+      for (const board of component.data.crBoardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
+      }
+
+      for (const board of component.data.gBiasBoardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
+      }
+
+      for (const board of component.data.shvBoardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
+      }
+
+      for (const board of component.data.cableHarnessUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
+      }
+
+      const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
+      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+    } else if (component.formId === 'ReturnedGeometryBoardBatch') {
+      // For each board in a batch of returned geometry boards, extract the UUID and update the location information to match that from the batch's submission
+      for (const board of component.data.boardUuids) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
+      }
+
+      url = `/component/${req.params.uuid}`;
     }
-    else if (collection.formId === 'PopulatedBoardShipment') {
-      // For each CR board, G-Bias board, SHV board and cable harness in the kit, extract the UUID and update the reception details to match those from the 'Populated Board Kit Reception' action
-      // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-      for (const board of collection.data.crBoardUuiDs) {
-        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
-      }
 
-      for (const board of collection.data.gBiasBoardUuiDs) {
-        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
-      }
-
-      for (const board of collection.data.shvBoardUuiDs) {
-        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
-      }
-
-      for (const board of collection.data.cableHarnessUuiDs) {
-        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date);
-      }
-
-      // Once all boards have been updated, redirect to the page for viewing the action record
-      res.redirect(`/action/${req.query.actionId}`);
-    }
+    res.redirect(url);
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

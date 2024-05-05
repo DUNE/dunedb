@@ -1,19 +1,10 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let typeForm;
 
-// If we are creating a new component, we need to fill in the 'data.typeRecordNumber' value using the 'componentTypesAndCounts' object passed through the route to this page
-// Therefore, that object will NOT be empty for a new component, but will be if editing an existing component (when we do not want to increment the 'data.typeRecordNumber' value)
-let newComponent = false;
-
-if (Object.keys(componentTypesAndCounts).length > 0) newComponent = true;
-
-// Arrays called 'subComponent_fullUuids' and 'subComponent_shortUuids' are also always passed through the route to this page
+// Arrays called 'subComponent_fullUuids' and 'subComponent_shortUuids' are always passed through the route to this page
 // If we are submitting a new batch-type component, these arrays will contain full and short sub-component UUIDs (and therefore have a size > 0)
 // If we are instead just editing an existing batch-type component, or creating or editing a non-batch-type component, the arrays will be empty
-let newBatchComponent = false;
-
-if (subComponent_fullUuids.length > 0) newBatchComponent = true;
-
+const newBatchComponent = (subComponent_fullUuids.length > 0) ? true : false;
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', onPageLoad);
@@ -51,58 +42,13 @@ async function onPageLoad() {
   // When the 'Submit' button is pressed, run the appropriate event handler callback function
   // This is a Formio event handler, NOT a jQuery one (the code syntax '.on' is identical, but the input argument and callback structure are different)
   typeForm.on('submit', function (submission) {
-    // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' field)
-    // Add all other required information, inheriting from the variables that were passed through the route to this page
+    // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' object)
+    // Add the other required information, inheriting from the variables that were passed through the route to this page
     submission.componentUuid = component.componentUuid;
     submission.formId = componentTypeForm.formId;
-    submission.formName = componentTypeForm.formName;
 
     // If the component originates from a workflow (and therefore a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
     if (!(workflowId === '')) submission.workflowId = workflowId;
-
-    // When creating a new component ...
-    if (newComponent) {
-      // Get the count of existing components of the same type as the new one from the 'componentTypesAndCounts' object
-      let numberOfExistingComponents = 0;
-
-      if (componentTypesAndCounts[componentTypeForm.formId].count) numberOfExistingComponents = componentTypesAndCounts[componentTypeForm.formId].count;
-
-      // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
-      // Additionally, we can set up and fill a 'Reception' field in the submission
-      if (componentTypeForm.formId === 'GeometryBoard') {
-        numberOfExistingComponents += 5000;
-
-        submission.reception = {};
-        submission.reception.location = 'lancaster';
-        submission.reception.date = (new Date()).toString().slice(0, 10);
-      }
-
-      // If the component is a 'Grounding Mesh Panel' type, copy the (user-inputted) intake location to a newly set up and filled 'Reception' field in the submission
-      if (componentTypeForm.formId === 'GroundingMeshPanel') {
-        submission.reception = {};
-        submission.reception.location = submission.data.intakeLocation;
-        submission.reception.date = (new Date()).toString().slice(0, 10);
-      }
-
-      // Add a component type record number to the 'data' field - this is equivalent to the 'UKID' for geometry boards, and just semi-useful information for other component types
-      const typeRecordNumber = numberOfExistingComponents + 1;
-      submission.data.typeRecordNumber = typeRecordNumber;
-
-      // Components of certain types must have a specifically formatted name, consisting of some fixed prefix and suffix, plus the type record number padded to 5 digits
-      if (componentTypeForm.formId === 'GroundingMeshPanel') {
-        submission.data.name = `D00300200004-${String(typeRecordNumber).padStart(5, '0')}-UK106-01-00-00`;
-      } else if (componentTypeForm.formId === 'CRBoard') {
-        submission.data.name = `D00300400001-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-      } else if (componentTypeForm.formId === 'GBiasBoard') {
-        submission.data.name = `D00300400002-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-      } else if (componentTypeForm.formId === 'CEAdapterBoard') {
-        submission.data.name = `D00300400003-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-      } else if (componentTypeForm.formId === 'SHVBoard') {
-        submission.data.name = `D00300500001-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-      } else if (componentTypeForm.formId === 'CableHarness') {
-        submission.data.name = `D00300500002-${String(typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-      }
-    }
 
     // When creating a new batch-type component ...
     if (newBatchComponent) {
@@ -118,11 +64,10 @@ async function onPageLoad() {
       submission.data.subComponent_shortUuids = slice_shortUuids;
 
       // Get the count of existing components of the same type as the sub-components from the 'componentTypesAndCounts' object
+      // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
       let numberOfExistingSubComponents = 0;
 
       if (componentTypesAndCounts[submission.data.subComponent_formId].count) numberOfExistingSubComponents = componentTypesAndCounts[submission.data.subComponent_formId].count;
-
-      // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
       if (submission.data.subComponent_formId === 'GeometryBoard') numberOfExistingSubComponents += 5000;
 
       // Set up an array to hold the sub-component type record numbers and submission objects (these will be populated in the sub-component loop below)
@@ -132,18 +77,10 @@ async function onPageLoad() {
       // For each sub-component ...
       for (let s = 0; s < numberOfSubComponents; s++) {
         // Set up a new empty 'sub-submission' object, using the existing 'submission' object as a template, and immediately add all required sub-component information
-        // For 'Geometry Board' type sub-components, this will include a 'Reception' field
         let sub_submission = Object.create(submission);
 
         sub_submission.componentUuid = slice_fullUuids[s];
         sub_submission.formId = submission.data.subComponent_formId;
-
-        if (submission.data.subComponent_formId === 'GeometryBoard') {
-          sub_submission.reception = {};
-          sub_submission.reception.location = 'lancaster';
-          sub_submission.reception.date = (new Date()).toISOString().slice(0, 10);
-        }
-
         sub_submission.data = Object.create(submission.data);
 
         // Add information to the sub-component's 'data' field indicating the fields and values that are inherited from the batch component
@@ -152,25 +89,9 @@ async function onPageLoad() {
         sub_submission.data.fromBatch = submission.componentUuid;
         sub_submission.data.submit = true;
 
-        // Add a component type record number to the sub-component's 'data' field - this is equivalent to the 'UKID' for geometry boards, and just semi-useful information for other component types
-        // Additionally save this number into the previously declared array
+        // Add the sub-component count to the 'data' field, under a new 'Type Record Number' field, and also save this number into the previously declared array
         sub_submission.data.typeRecordNumber = numberOfExistingSubComponents + s + 1;
         subComponent_typeRecordNumbers.push(numberOfExistingSubComponents + s + 1);
-
-        // Add a name to the sub-component 'data' field ... the format of this name will be different depending on the sub-component's component type
-        if (submission.data.subComponent_formId === 'CRBoard') {
-          sub_submission.data.name = `D00300400001-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-        } else if (submission.data.subComponent_formId === 'GBiasBoard') {
-          sub_submission.data.name = `D00300400002-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-        } else if (submission.data.subComponent_formId === 'CEAdapterBoard') {
-          sub_submission.data.name = `D00300400003-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-        } else if (submission.data.subComponent_formId === 'SHVBoard') {
-          sub_submission.data.name = `D00300500001-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-        } else if (submission.data.subComponent_formId === 'CableHarness') {
-          sub_submission.data.name = `D00300500002-${String(sub_submission.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-        } else {
-          sub_submission.data.name = `Created from ${submission.data.name}`;
-        }
 
         // Since there is nothing more to be added to the sub-component submission object, add it to the array of sub-component submission objects
         subComponent_objects.push(sub_submission);
@@ -255,24 +176,30 @@ function SubmitData(submission) {
     // Display a message to indicate successful submission
     typeForm.emit('submitDone');
 
-    // Redirect the user to the appropriate post-submission page ('result' is the component's component UUID)
+    // Redirect the user to the appropriate post-submission page ('result' is the component's UUID)
     // If the component is a 'Returned Geometry Board Batch' type, we must first update the board information (and further redirection will be handled from there)
-    // If not, then we can simply proceed with standard post-submission redirection:
+    // Similarly, if the component is an 'Assembled APA' type, we must first update the APA frame information
+    // Alternatively, if the component is one of the 'XXX Shipment' types, we must first update the individual components' information (in a different way)
+    // If neither of these is the case, then we can simply proceed with standard post-submission redirection:
     //   - if the component originates from a workflow, go to the page for updating the workflow path step results
     //   - if this is a standalone component, go to the page for viewing the component record
-    if (submission.formId === 'ReturnedGeometryBoardBatch') {
-      const batchUUID = submission.componentUuid;
-      const receptionLocation = 'lancaster';
-      const receptionDate = (new Date()).toISOString().slice(0, 10);
+    let url = '';
 
-      window.location.href = `/component/${batchUUID}/updateLocations/${receptionLocation}/${receptionDate}`;
+    if (submission.formId === 'ReturnedGeometryBoardBatch') {
+      url = `/component/${submission.componentUuid}/updateLocations/${'lancaster'}/${(new Date()).toISOString().slice(0, 10)}`;
+    } else if (submission.formId === 'AssembledAPA') {
+      url = `/component/${submission.componentUuid}/updateLocations/${'installed_on_APA'}/${(new Date()).toISOString().slice(0, 10)}`;
+    } else if ((submission.formId === 'APAShipment') || (submission.formId === 'BoardShipment') || (submission.formId === 'GroundingMeshShipment') || (submission.formId === 'PopulatedBoardShipment')) {
+      url = `/component/${submission.componentUuid}/updateLocations/${'in_transit'}/${(new Date()).toISOString().slice(0, 10)}`;
     } else {
       if (!(workflowId === '')) {
-        window.location.href = `/workflow/${workflowId}/0/component/${result}`;
+        url = `/workflow/${workflowId}/0/component/${result}`;
       } else {
-        window.location.href = `/component/${result}`;
+        url = `/component/${result}`;
       }
     }
+
+    window.location.href = url;
   }
 
 

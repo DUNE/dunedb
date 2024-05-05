@@ -136,27 +136,30 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
 });
 
 
-/// Update the location information of all geometry boards in a board installation action
-/// This is an internal route - it should not be accessed directly by a user through their browser ...
-/// ... instead, it is automatically called during submission of any type of board installation action
+/// Update the location information of all components referenced in a board or mesh installation action
+/// This is an internal route - it should not be accessed directly by a user through their browser ... instead, it is automatically called during submission of any type of board or mesh installation action
 router.get('/action/:actionId([A-Fa-f0-9]{24})/updateLocations/:location/:date', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified action ID, and throw an error if there is no such record
     const action = await Actions.retrieve(req.params.actionId);
 
-    if (!action) return res.status(404).send(`There is no board installation action with action UUID = ${req.params.actionId}`);
+    if (!action) return res.status(404).send(`There is no board or mesh installation action with action ID = ${req.params.actionId}`);
 
-    // For each board UUID in the 'data.boardXUuid' key/value pairs, where X = 1 -> 10 or 21, update the reception location and date to those inherited from the installation action
+    // For each UUID in the 'data' object, update the corresponding component's location information to that which has been passed to this route from the action submission
     // If successful, the updating function returns 'result = 1', but we don't actually need this value for anything
     const uuid_format = new RegExp(/[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/);
 
     for (const [key, value] of Object.entries(action.data)) {
       if (uuid_format.test(value)) {
-        const result = await Components.updateLocation(value, req.params.location, req.params.date);
+        if (req.params.location === 'installed_on_APA') {
+          const result = await Components.updateLocation(value, req.params.location, req.params.date, action.componentUuid);
+        } else {
+          const result = await Components.updateLocation(value, req.params.location, req.params.date, '');
+        }
       }
     }
 
-    // Depending on if the originating board installation action was part of a workflow or not, redirect to an appropriate page
+    // Depending on if the originating installation action was part of a workflow or not, redirect to an appropriate page
     // If the action originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
     // On the other hand, if it was a standalone action, go to the page for viewing the action record
     // Note that these redirections are identical to those performed after submitting ANY action (see '/app/static/pages/action_specComponent.js')

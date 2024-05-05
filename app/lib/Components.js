@@ -33,7 +33,7 @@ async function save(input, req) {
   // Check that the minimum required component information has been provided
   //   - the component UUID
   //   - the component type form ID
-  //   - user-provided data (may be empty of content, but must still exist)
+  //   - user-provided data (this may be an empty object, but must still exist)
   if (!(input instanceof Object)) throw new Error(`Components::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('componentUuid')) throw new Error(`Components::save() - the 'input.componentUuid' has not been specified!`);
   if (!input.hasOwnProperty('formId')) throw new Error(`Components::save() - the 'input.formId' has not been specified!`);
@@ -45,15 +45,14 @@ async function save(input, req) {
 
   if (!typeForm) throw new Error(`Components:save() - the specified 'input.formId' (${input.formId}) does not match a known component type form!`);
 
-  // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
-  // If no type form name has been specified in the 'input' object, use the value from the type form instead
+  // Set up a new record object, and immediately add some information, either directly or inherited from the 'input' object
   let newRecord = {};
 
   newRecord.recordType = 'component';
   newRecord.componentUuid = MUUID.from(input.componentUuid);
   newRecord.shortUuid = ShortUUID().fromUUID(input.componentUuid);
   newRecord.formId = input.formId;
-  newRecord.formName = input.formName || typeForm.formName;
+  newRecord.formName = typeForm.formName;
   newRecord.data = input.data;
 
   if (input.workflowId) newRecord.workflowId = input.workflowId;
@@ -61,20 +60,77 @@ async function save(input, req) {
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
 
-  let _lock = await dbLock(`saveComponent_${newRecord.componentUuid}`, 1000);
+  // Check if a record with the same component UUID as the specified one already exists
+  // If so (i.e. the returned object is not 'null'), this indicates that we are editing an existing component, and if not (the returned object is 'null'), this is a new component
+  let oldRecord = await retrieve(input.componentUuid);
 
-  // Attempt to retrieve an existing record with the same component UUID as the specified one (relevant if we are editing an existing record)
-  let oldRecord = null;
-
-  if (input.componentUuid) oldRecord = await retrieve(input.componentUuid);
-
-  // Generate and add a 'validity' field to the new record, either from scratch (for a new record), or via incrementing that of the existing record (if editing)
+  // Generate and add a 'validity' field to the new record, either from scratch for a new component, or via incrementing that from the existing component's record
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
 
-  if (input.reception) newRecord.reception = input.reception;
+  // If saving a new component record, certain objects and fields need to be set up and populated
+  // If editing an existing component records, this same information will either already exist (from being included when the 'input.data' object was copied over above) or can be directly copied
+  if (oldRecord === null) {
+    // Get a list of the current component count per type across all existing component types, and then get the count of existing components of the same type as this one
+    // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
+    const componentTypesAndCounts = await componentCountsByTypes();
+    let numberOfExistingComponents = 0;
+
+    if (componentTypesAndCounts[input.formId].count) numberOfExistingComponents = componentTypesAndCounts[input.formId].count;
+    if (input.formId === 'GeometryBoard') numberOfExistingComponents += 5000;
+
+    // If the 'input.data' object does NOT contain a 'Type Record Number' field, add the component count to the new record's 'data' object under a new field
+    // The field will exist only when creating new records for individual sub-components in a batch, since in this situation the sub-component type record numbers are determined on the client side
+    if (!input.data.typeRecordNumber) newRecord.data.typeRecordNumber = numberOfExistingComponents + 1;
+
+    // Components of certain types must have a specifically formatted name, consisting of some fixed prefix and suffix, plus the type record number padded to 5 digits
+    // Some other component types can just directly use the type record number as the name, and the remaining types don't need any name specified
+    if (input.formId === 'GeometryBoard') {
+      newRecord.data.name = `${newRecord.data.typeRecordNumber}`;
+    } else if (input.formId === 'GroundingMeshPanel') {
+      newRecord.data.name = `D00300200004-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-UK106-01-00-00`;
+    } else if (input.formId === 'CRBoard') {
+      newRecord.data.name = `D00300400001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+    } else if (input.formId === 'GBiasBoard') {
+      newRecord.data.name = `D00300400002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+    } else if (input.formId === 'CEAdapterBoard') {
+      newRecord.data.name = `D00300400003-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+    } else if (input.formId === 'SHVBoard') {
+      newRecord.data.name = `D00300500001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+    } else if (input.formId === 'CableHarness') {
+      newRecord.data.name = `D00300500002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+    }
+
+    // Set up a new 'Reception' object to hold the component's current location and the date at which it was received at this location ... and we can immediately set the date to be the current one
+    // This location information will eventually be changed later for certain component types, but it must exist first in order to do that
+    // The 'detail' field can be used to store a string that might contain other addtional information about the component's location
+    newRecord.reception = {};
+    newRecord.reception.date = (new Date()).toISOString().slice(0, 10);
+    newRecord.reception.detail = '';
+
+    // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
+    if ((input.formId === 'APAFrame') || (input.formId === 'GroundingMeshPanel')) {
+      newRecord.reception.location = 'ukWarehouse';
+    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
+      newRecord.reception.location = 'in_transit';
+    } else if ((input.formId === 'AssembledAPA') || (input.formId === 'wire_bobbin')) {
+      newRecord.reception.location = 'daresbury';
+    } else if ((input.formId === 'CEAdapterBoard') || (input.formId === 'CRBoard') || (input.formId === 'CableHarness') || (input.formId === 'GBiasBoard') || (input.formId === 'SHVBoard')) {
+      newRecord.reception.location = 'wisconsin';
+    } else if ((input.formId === 'DWA') || (input.formId === 'DWAPDB')) {
+      newRecord.reception.location = newRecord.data.productionLocation;
+    } else if (input.formId === 'GeometryBoard') {
+      newRecord.reception.location = 'lancaster';
+    } else {
+      newRecord.reception.location = '';
+    }
+  } else {
+    newRecord.reception = input.reception;
+  }
 
   // Insert the new record into the 'components' records collection, and throw an error if the insertion fails
+  let _lock = await dbLock(`saveComponent_${newRecord.componentUuid}`, 1000);
+
   const result = await db.collection('components')
     .insertOne(newRecord);
 
@@ -88,7 +144,7 @@ async function save(input, req) {
 
 
 /// Update the most recently logged reception location and date of a single component
-async function updateLocation(componentUuid, location, date) {
+async function updateLocation(componentUuid, location, date, detail) {
   // Set up the DB query match condition to be that a record's component UUID must match the specified one
   let match_condition = { componentUuid };
 
@@ -104,6 +160,7 @@ async function updateLocation(componentUuid, location, date) {
         $set: {
           'reception.location': location,
           'reception.date': date,
+          'reception.detail': detail,
         }
       },
       {
@@ -232,7 +289,7 @@ async function list(match_condition, options) {
     },
   });
 
-  // Re-sort the records by most last edit date ... most recent first
+  // Re-sort the records by last edit date ... most recent first
   aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
   // Add aggregation stages for any additionally specified options

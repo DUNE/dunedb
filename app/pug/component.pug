@@ -13,7 +13,8 @@ block extrascripts
     const actions = !{JSON.stringify(actions, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
     const base_url = '!{base_url}';
-    const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
+    const dictionary_queries = !{JSON.stringify(dictionary_queries, null, 4)};
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
 
   block workscripts
     script(src = '/pages/component.js')
@@ -45,12 +46,23 @@ block content
                 .hori-space-x1
                   a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
 
-            dt Component Name
-
             if component.data.name
+              dt Component Name            
               dd #{component.data.name}
-            else
-              dd (none)
+
+            if component.reception && component.reception.location !== ''
+              dt Current Location
+
+              if component.reception.detail && component.reception.detail != ''
+                dd
+                  a(href = `/component/${component.reception.detail}`, target = '_blank') #{dictionary_locations[component.reception.location]}
+                  |  (as of 
+                  +dateFormat(component.reception.date)
+                  | )
+              else 
+                dd #{dictionary_locations[component.reception.location]} (as of 
+                  +dateFormat(component.reception.date)
+                  | )
 
             if component.formId == 'GroundingMeshPanel'
               dt Factory ID
@@ -68,7 +80,7 @@ block content
 
             dt Component Data:
             dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
-              +dateFormat(component.insertion.insertDate)
+              +dateTimeFormat(component.insertion.insertDate)
 
               if component.insertion.user
                 |  by !{' '}
@@ -77,10 +89,10 @@ block content
             if component.formId === 'BoardShipment'
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Origin Location 
-                dd #{component.data.originOfShipment.toUpperCase()}
+                dd #{dictionary_locations[component.data.originOfShipment]}
 
                 dt Destination Location
-                dd #{component.data.destinationOfShipment.toUpperCase()}
+                dd #{dictionary_locations[component.data.destinationOfShipment]}
 
                 dt Boards in Shipment
                 dd
@@ -106,10 +118,10 @@ block content
             else if component.formId === 'GroundingMeshShipment'
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Origin Location
-                dd #{component.data.originOfShipment.toUpperCase()}
+                dd #{dictionary_locations[component.data.originOfShipment]}
 
                 dt Destination Location
-                dd #{component.data.destinationOfShipment.toUpperCase()}
+                dd #{dictionary_locations[component.data.destinationOfShipment]}
 
                 dt Meshes in Shipment
                 dd
@@ -135,10 +147,10 @@ block content
             else if component.formId === 'PopulatedBoardShipment'
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Origin Location
-                dd #{component.data.originOfShipment.toUpperCase()}
+                dd #{dictionary_locations[component.data.originOfShipment]}
 
                 dt Destination Location
-                dd #{component.data.destinationOfShipment.toUpperCase()}
+                dd #{dictionary_locations[component.data.destinationOfShipment]}
 
                 dt Components in Kit
                 dd
@@ -222,7 +234,7 @@ block content
                   li 
                     a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
                     |  on 
-                    +dateFormat(v.insertion.insertDate)
+                    +dateTimeFormat(v.insertion.insertDate)
 
                     if v.insertion.user
                       |  by !{' '}
@@ -238,7 +250,7 @@ block content
         | &nbsp; Edit Component
 
       - let jsonURLString = `/json/component/${component.componentUuid}`;
-      - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
+      - if ('version' in dictionary_queries) jsonURLString += `?version=${dictionary_queries.version}`;
 
       .hori-space-x2
         a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
@@ -290,7 +302,7 @@ block content
                       a(href = `/action/${action.actionId}`) #{action.actionId}
 
                     td
-                      +dateFormat(action.lastEditDate)
+                      +dateTimeFormat(action.lastEditDate)
 
         .col-sm-6
           h4 Select an Action Type to Perform
