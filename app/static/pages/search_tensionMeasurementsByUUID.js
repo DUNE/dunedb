@@ -75,7 +75,7 @@ function postSuccess(result) {
           <tr>
             <td><a href = '/action/${action.actionId}' target = '_blank'</a>${action.actionId}</td>
             <td>${action.apaLayer.toUpperCase()}</td>
-            <td>${(action.location) ? (action.location[0].toUpperCase() + action.location.slice(1)) : '[unknown]'}</td>
+            <td>${(action.location) ? (dictionary_locations[action.location]) : '[unknown]'}</td>
             <td>${action.comments}</td>
           </tr>`;
 

@@ -47,14 +47,12 @@ async function save(input, req) {
   newRecord.recordType = 'workflow';
   newRecord.workflowId = new ObjectID(input.workflowId);
   newRecord.typeFormId = input.typeFormId;
-  newRecord.typeFormName = input.typeFormName || typeForm.formName;
+  newRecord.typeFormName = typeForm.formName;
   newRecord.data = input.data;
   newRecord.path = input.path;
 
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
-
-  let _lock = await dbLock(`saveWorkflow_${newRecord.workflowId}`, 1000);
 
   // Attempt to retrieve an existing record with the same workflow ID as the specified one (relevant if we are editing an existing record)
   let oldRecord = null;
@@ -66,6 +64,8 @@ async function save(input, req) {
   newRecord.validity.ancestor_id = input._id;
 
   // Insert the new record into the 'workflows' records collection, and throw and error if the insertion fails
+  let _lock = await dbLock(`saveWorkflow_${newRecord.workflowId}`, 1000);
+
   const result = await db.collection('workflows')
     .insertOne(newRecord);
 

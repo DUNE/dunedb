@@ -5,6 +5,7 @@ const Components = require('./Components');
 const { db } = require('./db');
 const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
 const Workflows = require('./Workflows');
+const utils = require('./utils');
 
 
 /// Retrieve collated information about a single assembled APA (and associated components and actions) that will be displayed in its executive summary
@@ -295,11 +296,6 @@ async function collateInfo(componentUUID) {
     wireAlloyInternational: 'Wire Alloy International',
   }
 
-  const dictionary_locations = {
-    daresbury: 'Daresbury',
-    chicago: 'Chicago',
-  };
-
   const dictionary_systems = {
     dwa1: 'DWA #1',
     dwa2: 'DWA #2',
@@ -463,7 +459,7 @@ async function collateInfo(componentUUID) {
       .toArray();
 
     if (results.length > 0) {
-      collatedInfo[dictionaries[i]].tensions_location = dictionary_locations[results[0].location];
+      collatedInfo[dictionaries[i]].tensions_location = utils.dictionary_locations[results[0].location];
       collatedInfo[dictionaries[i]].tensions_system = dictionary_systems[results[0].system];
       collatedInfo[dictionaries[i]].tensions_A = results[0].tensions_A;
       collatedInfo[dictionaries[i]].tensions_B = results[0].tensions_B;

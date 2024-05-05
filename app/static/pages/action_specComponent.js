@@ -41,7 +41,6 @@ async function onPageLoad() {
     // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' field)
     // Add all other required information, inheriting from the variables that were passed through the route to this page
     submission.typeFormId = actionTypeForm.formId;
-    submission.typeFormName = actionTypeForm.formName;
     submission.componentUuid = componentUuid;
 
     // If the action originates from a workflow (and therefore a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
@@ -77,44 +76,36 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user to the appropriate post-submission page (where 'result' is the action record's action ID)
-    // If the action is a 'XXX Reception' type (performed on a shipment or batch), we must first update the individual component information (and further redirection will be handled from there)
-    // Similarly, if the action is one of the board installation types, we must also first update the board information (in a different way)
+    // If the action is one of the 'XXX Reception' types, we must first update the individual components' information (and further redirection will be handled from there)
+    // Similarly, if the action is one of the board or mesh installation types, we must first update the board or mesh information (in a different way)
     // If neither of these is the case, then we can simply proceed with standard post-submission redirection:
     //   - if the action originates from a workflow, go to the page for updating the workflow path step results
-    //   - if this is a standalone action, go to the page for viewing the action record 
+    //   - if this is a standalone action, go to the page for viewing the action record
+    const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
     const installation_typeFormIDs = [
-      'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB',
+      'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB', 'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
       'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
       'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
-      'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
+      'prep_mesh_panel_install',
     ];
 
-    if ((submission.typeFormId === 'BoardReception') || (submission.typeFormId === 'GroundingMeshShipmentReception') || (submission.typeFormId === 'PopulatedBoardKitReception')) {
-      const collectionUUID = submission.componentUuid;
-      const receptionLocation = submission.data.receptionLocation;
-      const receptionDate = (submission.data.receptionDate).toString().slice(0, 10);
+    let url = '';
 
-      let url = `/component/${collectionUUID}/updateLocations/${receptionLocation}/${receptionDate}?actionId=${result}`;
-
-      window.location.href = url;
+    if (reception_typeFormIDs.includes(submission.typeFormId)) {
+      url = `/component/${submission.componentUuid}/updateLocations/${submission.data.receptionLocation}/${(submission.data.receptionDate).toString().slice(0, 10)}?actionId=${result}`;
     } else if (installation_typeFormIDs.includes(submission.typeFormId)) {
-      const receptionLocation = 'installed_on_APA';
-
-      const currentDT = new Date();
-      const receptionDate = `${currentDT.getFullYear()}-${currentDT.getMonth() + 1}-${currentDT.getDate()}`;
-
-      let url = `/action/${result}/updateLocations/${receptionLocation}/${receptionDate}`;
+      url = `/action/${result}/updateLocations/${'installed_on_APA'}/${(new Date()).toISOString().slice(0, 10)}`;
 
       if (!(workflowId === '')) url += `?workflowId=${workflowId}&stepIndex=${stepIndex}`;
-
-      window.location.href = url;
     } else {
       if (!(workflowId === '')) {
-        window.location.href = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
+        url = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
       } else {
-        window.location.href = `/action/${result}`;
+        url = `/action/${result}`;
       }
     }
+
+    window.location.href = url;
   }
 
 

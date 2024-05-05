@@ -53,7 +53,7 @@ block allbody
 
           .vert-space-x1.hori-space-x1
             p &nbsp; Printed: 
-              +dateFormat(new Date())
+              +dateTimeFormat(new Date())
 
         .col-sm-5
           #qr-code
@@ -63,7 +63,7 @@ block allbody
         dl
           dt Current Version:
           dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
-            +dateFormat(component.insertion.insertDate)
+            +dateTimeFormat(component.insertion.insertDate)
 
             if component.insertion.user
               |  by !{' '} #{component.insertion.user.displayName}
@@ -105,7 +105,7 @@ block allbody
 
               dt Performance Data:
               dd This is version #{action.validity.version} of the action, performed on !{' '}
-                +dateFormat(action.insertion.insertDate)
+                +dateTimeFormat(action.insertion.insertDate)
 
                 if action.insertion.user
                   |  by !{' '} #{action.insertion.user.displayName}
@@ -134,7 +134,7 @@ block allbody
 
               dt Performance Data:
               dd This is version #{action.validity.version} of the action, performed on !{' '}
-                +dateFormat(action.insertion.insertDate)
+                +dateTimeFormat(action.insertion.insertDate)
 
                 if action.insertion.user
                   |  by !{' '} #{action.insertion.user.displayName}
@@ -163,7 +163,7 @@ block allbody
 
               dt Performance Data:
               dd This is version #{action.validity.version} of the action, performed on !{' '}
-                +dateFormat(action.insertion.insertDate)
+                +dateTimeFormat(action.insertion.insertDate)
 
                 if action.insertion.user
                   |  by !{' '} #{action.insertion.user.displayName}

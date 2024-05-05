@@ -1,5 +1,7 @@
 const router = require('express').Router();
 
+const utils = require('../lib/utils');
+
 
 /// View descriptions of the available search pages
 router.get('/search', async function (req, res, next) {
@@ -74,7 +76,7 @@ router.get('/search/nonConformanceByComponentTypeOrUUID', async function (req, r
 /// Search for tension measurement actions performed on a single component, specified by its UUID
 router.get('/search/tensionMeasurementsByUUID', async function (req, res, next) {
   // Render the interface page
-  res.render('search_tensionMeasurementsByUUID.pug');
+  res.render('search_tensionMeasurementsByUUID.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 

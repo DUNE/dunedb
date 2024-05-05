@@ -40,7 +40,7 @@ block content
                 td
                   a(href = `/component/${uuid}`) #{action.componentName}
                 td
-                  +dateFormat(action.lastEditDate)
+                  +dateTimeFormat(action.lastEditDate)
                 td
                   a.btn-sm.btn-secondary(href = `/json/action/${action.actionId}`, target = '_blank')
                     img.small-icon(src = '/images/checklist_icon.svg')
