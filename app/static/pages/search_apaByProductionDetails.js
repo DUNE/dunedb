@@ -1,25 +1,25 @@
-// Declare variables to hold the (initially empty) user-specified assembled APA location and production number
+// Declare variables to hold the (initially empty) user-specified assembled APA production location and number
 let apaLocation = null;
-let apaProductionNumber = null;
+let apaNumber = null;
 
 
 // Main function
 $(function () {
-  // When the selected APA location is changed, get the newly selected location from the corresponding page element
+  // When the selected APA production location is changed, get the newly selected location from the corresponding page element
   // If both user-specified search criteria are valid, then perform the search
   $('#locationSelection').on('change', async function () {
     apaLocation = $('#locationSelection').val();
 
-    if (apaLocation && apaProductionNumber) performSearch();
+    if (apaLocation && apaNumber) performSearch();
   });
 
-  // When the entered APA production number is changed and the 'Enter' key is pressed, get the newly entered production number from the corresponding page element
+  // When the entered APA production number is changed and the 'Enter' key is pressed, get the newly entered number from the corresponding page element
   // If both user-specified search criteria are valid, then perform the search
-  document.getElementById('productionNumberSelection').addEventListener('keyup', function (e) {
+  document.getElementById('numberSelection').addEventListener('keyup', function (e) {
     if (e.key === 'Enter') {
-      apaProductionNumber = $('#productionNumberSelection').val();
+      apaNumber = $('#numberSelection').val();
 
-      if (apaLocation && apaProductionNumber) performSearch();
+      if (apaLocation && apaNumber) performSearch();
     }
   });
 });
@@ -30,7 +30,7 @@ function performSearch() {
   $.ajax({
     contentType: 'application/json',
     method: 'GET',
-    url: `/json/search/apaByLocation/${apaLocation}/${apaProductionNumber}`,
+    url: `/json/search/apaByProductionDetails/${apaLocation}/${apaNumber}`,
     dataType: 'json',
     success: postSuccess,
   }).fail(postFail);

@@ -4,6 +4,9 @@ block vars
   - const page_title = 'Search for Grounding Mesh Panels by Location or Part Number';
 
 block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
   block workscripts 
     script(src = '/pages/search_meshesByLocationOrPartNumber.js')
 
@@ -24,10 +27,10 @@ block content
 
           select.form-control#locationSelection
             option(value = '')
-            option(value = 'chicago') Chicago 
-            option(value = 'in_transit') In Transit 
-            option(value = 'installed_on_APA') Installed on APA 
-            option(value = 'ukWarehouse') UK Warehouse  
+            option(value = 'chicago') #{dictionary_locations['chicago']} 
+            option(value = 'in_transit') #{dictionary_locations['in_transit']} 
+            option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
+            option(value = 'ukWarehouse') #{dictionary_locations['ukWarehouse']} 
 
           .vert-space-x2
             hr
