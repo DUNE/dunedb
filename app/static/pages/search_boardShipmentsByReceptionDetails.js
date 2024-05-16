@@ -109,18 +109,6 @@ async function renderSearchForms() {
 }
 
 
-// Function to correctly format a location string
-function formatLocation(rawLocationString) {
-  let location = '';
-
-  if (rawLocationString === 'williamAndMary') location = 'William and Mary';
-  else if (rawLocationString === 'uwPsl') location = 'UW / PSL';
-  else location = rawLocationString[0].toUpperCase() + rawLocationString.slice(1);
-
-  return location;
-};
-
-
 // Function to run for a successful search query
 function postSuccess(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
@@ -170,8 +158,8 @@ function postSuccess(result) {
         <tr>
           <td><a href = '/component/${shipment.uuid}' target = '_blank'</a>${shipment.uuid}</td>
           <td>${shipment.numberOfBoards}</td>
-          <td>${formatLocation(shipment.origin)}</td>
-          <td>${formatLocation(shipment.destination)}</td>
+          <td>${dictionary_locations[shipment.origin]}</td>
+          <td>${dictionary_locations[shipment.destination]}</td>
           ${actionIdLinkLine}
           <td>${shipment.receptionComment}</td>
           <td>${shipment.searchComment}</td>

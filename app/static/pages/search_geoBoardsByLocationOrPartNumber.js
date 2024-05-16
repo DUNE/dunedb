@@ -1,6 +1,6 @@
 // Declare variables to hold the (initially empty) user-specified board location and/or part number
-let location = null;
-let partNumber = null;
+let boardLocation = null;
+let boardPartNumber = null;
 
 
 // Main function
@@ -8,13 +8,13 @@ $(function () {
   // When the selected location is changed, get the newly selected location from the corresponding page element
   // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    location = $('#locationSelection').val();
+    boardLocation = $('#locationSelection').val();
 
-    if (location) {
+    if (boardLocation) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/geoBoardsByLocation/${location}`,
+        url: `/json/search/geoBoardsByLocation/${boardLocation}`,
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
@@ -24,13 +24,13 @@ $(function () {
   // When the selected board part number is changed, get the newly selected part number from the corresponding page element
   // If the part number is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#partNumberSelection').on('change', async function () {
-    partNumber = $('#partNumberSelection').val();
+    boardPartNumber = $('#partNumberSelection').val();
 
-    if (partNumber) {
+    if (boardPartNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/geoBoardsByPartNumber/${partNumber}`,
+        url: `/json/search/geoBoardsByPartNumber/${boardPartNumber}`,
         dataType: 'json',
         success: postSuccess_partNumber,
       }).fail(postFail);
