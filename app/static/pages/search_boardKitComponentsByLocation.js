@@ -1,5 +1,5 @@
 // Declare variables to hold the (initially empty) user-specified board location
-let receptionLocation = null;
+let location = null;
 
 
 // Main function
@@ -7,13 +7,13 @@ $(function () {
   // When the selected location is changed, get the newly selected location from the corresponding page element
   // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    receptionLocation = $('#locationSelection').val();
+    location = $('#locationSelection').val();
 
-    if (receptionLocation) {
+    if (location) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/boardKitComponentsByLocation/${receptionLocation}`,
+        url: `/json/search/boardKitComponentsByLocation/${location}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
@@ -38,7 +38,7 @@ function postSuccess(result) {
 
   const resultsStart = `
     <tr>
-      <td colspan = "3">The following populated board kit components have been received at <b>${$('#locationSelection option:selected').text()}</b>.</td>
+      <td colspan = "3">The following populated board kit components are at <b>${$('#locationSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
       <td colspan = "3">They are grouped by component type, and then ordered by last DB record edit (most recent at the top).
@@ -73,7 +73,7 @@ function postSuccess(result) {
         <tr>
           <th scope = 'col' width = '40%'>Component UUID</th>
           <th scope = 'col' width = '40%'>DUNE PID</th>
-          <th scope = 'col' width = '20%'>Received On:</th>
+          <th scope = 'col' width = '20%'>Arrived On:</th>
         </tr>`;
 
       $('#results').append(tableStart);

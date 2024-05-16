@@ -20,7 +20,7 @@ router.get('/search/componentsByUUIDOrTypeAndNumber', async function (req, res, 
 /// Search for geometry boards that have been received at a specific location, or are of a specified part number
 router.get('/search/geoBoardsByLocationOrPartNumber', async function (req, res, next) {
   // Render the interface page
-  res.render('search_geoBoardsByLocationOrPartNumber.pug');
+  res.render('search_geoBoardsByLocationOrPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 
@@ -34,28 +34,28 @@ router.get('/search/geoBoardsByVisInspectOrOrderNumber', async function (req, re
 /// Search for geometry board shipments using various shipment reception details
 router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
   // Render the interface page
-  res.render('search_boardShipmentsByReceptionDetails.pug');
+  res.render('search_boardShipmentsByReceptionDetails.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 
 /// Search for grounding mesh panels that have been received at a specific location, or are of a specified part number
 router.get('/search/meshesByLocationOrPartNumber', async function (req, res, next) {
   // Render the interface page
-  res.render('search_meshesByLocationOrPartNumber.pug');
+  res.render('search_meshesByLocationOrPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 
 /// Search for populated board kit components that have been received at a specific location
 router.get('/search/boardKitComponentsByLocation', async function (req, res, next) {
   // Render the interface page
-  res.render('search_boardKitComponentsByLocation.pug');
+  res.render('search_boardKitComponentsByLocation.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 
-/// Search for an assembled APA using its location and production number
-router.get('/search/apaByLocation', async function (req, res, next) {
+/// Search for an assembled APA using its production location and number
+router.get('/search/apaByProductionDetails', async function (req, res, next) {
   // Render the interface page
-  res.render('search_apaByLocation.pug');
+  res.render('search_apaByProductionDetails.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 

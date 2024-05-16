@@ -1,34 +1,35 @@
 extend default
 
 block vars
-  - const page_title = 'Search for Assembled APA by Location';
+  - const page_title = 'Search for Assembled APA by Production Details';
 
 block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
   block workscripts 
-    script(src = '/pages/search_apaByLocation.js')
+    script(src = '/pages/search_apaByProductionDetails.js')
 
 block content
   .container-fluid
     .vert-space-x2
-      h2 Search for Assembled APA by Location
+      h2 Search for Assembled APA by Production Details
 
     .vert-space-x2
       hr
 
       .row
         .col-md-4
-          h4 Select Location
+          h4 Select Production Location
 
           .vert-space-x1
             p Select a location from the options below.
 
           select.form-control#locationSelection
             option(value = '')          
-            option(value = 'daresbury') Daresbury Factory 
-            option(value = 'cern') CERN
-            option(value = 'fermilab') Fermilab
-            option(value = 'in_transit') In Transit 
-            option(value = 'surf') SURF 
+            option(value = 'chicago') #{dictionary_locations['chicago']} 
+            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+            option(value = 'fermilab') #{dictionary_locations['fermilab']} 
 
           .vert-space-x2
             h4 Enter Production Number
@@ -36,7 +37,7 @@ block content
             .vert-space-x1
               p Enter the production number of the APA at the specified location below and <b>press the 'Enter' key</b>.
 
-            input.form-control#productionNumberSelection
+            input.form-control#numberSelection
 
         .col-md-1
 

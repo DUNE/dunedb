@@ -1,5 +1,5 @@
 // Declare variables to hold the (initially empty) user-specified board location and/or part number
-let receptionLocation = null;
+let location = null;
 let partNumber = null;
 
 
@@ -8,13 +8,13 @@ $(function () {
   // When the selected location is changed, get the newly selected location from the corresponding page element
   // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    receptionLocation = $('#locationSelection').val();
+    location = $('#locationSelection').val();
 
-    if (receptionLocation) {
+    if (location) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/geoBoardsByLocation/${receptionLocation}`,
+        url: `/json/search/geoBoardsByLocation/${location}`,
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
@@ -46,7 +46,7 @@ function postSuccess_location(result) {
 
   const resultsStart = `
     <tr>
-      <td colspan = "3">The following geometry boards have been received at <b>${$('#locationSelection option:selected').text()}</b>.</td>
+      <td colspan = "3">The following geometry boards are at <b>${$('#locationSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
       <td colspan = "3">They are grouped by board part number, and then ordered by last DB record edit (most recent at the top).
@@ -81,7 +81,7 @@ function postSuccess_location(result) {
         <tr>
           <th scope = 'col' width = '50%'>Board UUID</th>
           <th scope = 'col' width = '15%'>UKID</th>
-          <th scope = 'col' width = '20%'>Received On:</th>
+          <th scope = 'col' width = '20%'>Arrived On:</th>
           <th scope = 'col' width = '15%'>On APA:</th>
         </tr>`;
 
@@ -105,24 +105,6 @@ function postSuccess_location(result) {
 };
 
 
-// Function to correctly format a board location string
-function formatBoardLocation(rawLocationString) {
-  let location = '';
-
-  if (!rawLocationString) location = '[unknown]';
-  else {
-    location = rawLocationString;
-
-    if (location === 'williamAndMary') location = 'William and Mary';
-    else if (location === 'uwPsl') location = 'UW / PSL';
-    else if (location === 'installed_on_APA') location = 'Installed on APA';
-    else location = location[0].toUpperCase() + location.slice(1);
-  }
-
-  return location;
-};
-
-
 // Function to run for a successful search query by part number
 function postSuccess_partNumber(result) {
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
@@ -133,7 +115,7 @@ function postSuccess_partNumber(result) {
       <td colspan = "3">The following geometry boards with part number <b>${$('#partNumberSelection option:selected').text()}</b> have been received.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by reception location, and then ordered by last DB record edit (most recent at the top).
+      <td colspan = "3">They are grouped by location, and then ordered by last DB record edit (most recent at the top).
         <br>
         <hr>
       </td>
@@ -143,12 +125,12 @@ function postSuccess_partNumber(result) {
 
   // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>No geometry boards of the given part number have been received at any location</b>');
+    $('#results').append('<b>No geometry boards of the given part number are at any location</b>');
   } else {
     for (const boardGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${boardGroup.componentUuids.length} boards received at ${formatBoardLocation(boardGroup.receptionLocation)}</td>
+          <td colspan = "3">Found ${boardGroup.componentUuids.length} boards at ${dictionary_locations[boardGroup.receptionLocation]}</td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -157,7 +139,7 @@ function postSuccess_partNumber(result) {
     $('#results').append('<br>');
 
     for (const boardGroup of result) {
-      const groupTitle = `<b>Location: ${formatBoardLocation(boardGroup.receptionLocation)}</b>`;
+      const groupTitle = `<b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b>`;
 
       $('#results').append(groupTitle);
 
@@ -165,7 +147,7 @@ function postSuccess_partNumber(result) {
         <tr>
           <th scope = 'col' style = 'width: 50%'>Board UUID</th>
           <th scope = 'col' style = 'width: 15%'>UKID</th>
-          <th scope = 'col' style = 'width: 20%'>Received On:</th>
+          <th scope = 'col' style = 'width: 20%'>Arrived On:</th>
           <th scope = 'col' style = 'width: 15%'>On APA:</th>
         </tr>`;
 
