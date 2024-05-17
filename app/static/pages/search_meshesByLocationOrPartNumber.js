@@ -1,6 +1,6 @@
-// Declare variables to hold the (initially empty) user-specified mesh location and/or part number
-let location = null;
-let partNumber = null;
+// Declare variables to hold the (initially empty) user-specified mesh panel location and/or part number
+let meshPanelLocation = null;
+let meshPanelPartNumber = null;
 
 
 // Main function
@@ -8,13 +8,13 @@ $(function () {
   // When the selected location is changed, get the newly selected location from the corresponding page element
   // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    location = $('#locationSelection').val();
+    meshPanelLocation = $('#locationSelection').val();
 
-    if (location) {
+    if (meshPanelLocation) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/meshesByLocation/${location}`,
+        url: `/json/search/meshesByLocation/${meshPanelLocation}`,
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
@@ -24,13 +24,13 @@ $(function () {
   // When the selected mesh part number is changed, get the newly selected part number from the corresponding page element
   // If the part number is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#partNumberSelection').on('change', async function () {
-    partNumber = $('#partNumberSelection').val();
+    meshPanelPartNumber = $('#partNumberSelection').val();
 
-    if (partNumber) {
+    if (meshPanelPartNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/meshesByPartNumber/${partNumber}`,
+        url: `/json/search/meshesByPartNumber/${meshPanelPartNumber}`,
         dataType: 'json',
         success: postSuccess_partNumber,
       }).fail(postFail);

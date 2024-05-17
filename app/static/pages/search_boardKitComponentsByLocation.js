@@ -1,5 +1,5 @@
-// Declare variables to hold the (initially empty) user-specified board location
-let location = null;
+// Declare variables to hold the (initially empty) user-specified board kit location
+let boardKitLocation = null;
 
 
 // Main function
@@ -7,13 +7,13 @@ $(function () {
   // When the selected location is changed, get the newly selected location from the corresponding page element
   // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    location = $('#locationSelection').val();
+    boardKitLocation = $('#locationSelection').val();
 
-    if (location) {
+    if (boardKitLocation) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/boardKitComponentsByLocation/${location}`,
+        url: `/json/search/boardKitComponentsByLocation/${boardKitLocation}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
