@@ -50,7 +50,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         if (uuid !== '') {
           const boardRecord = await Components.retrieve(uuid);
 
-          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.shortUuid]);
+          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.data.partNumber, boardRecord.shortUuid]);
         }
       }
     }
@@ -62,7 +62,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         if (uuid !== '') {
           const meshRecord = await Components.retrieve(uuid);
 
-          if (meshRecord) collectionDetails.push([uuid, meshRecord.data.name, meshRecord.shortUuid]);
+          if (meshRecord) collectionDetails.push([uuid, meshRecord.data.typeRecordNumber, meshRecord.data.meshPanelPartNumber, meshRecord.shortUuid]);
         }
       }
     }
@@ -74,7 +74,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
 
@@ -84,7 +84,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
 
@@ -94,7 +94,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
 
@@ -104,7 +104,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
     }

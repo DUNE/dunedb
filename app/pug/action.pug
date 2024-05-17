@@ -88,14 +88,18 @@ block content
                       table.table
                         thead
                           tr
-                            th.col-md-2 Index of Wire or Wire Segment
+                            th.col-md-2 Wire / Wire Segment
                             th.col-md-2 Original Tension (N)
                             th.col-md-2 Latest Tension (N)
 
                         tbody
                           each changedTension in action.data.changedTensions_sideA
                             tr
-                              td #{changedTension[0]}
+                              if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
+                                td #{changedTension[0] + 1}
+                              else 
+                                td #{changedTension[0] + 8}
+
                               td #{changedTension[1]}
                               td #{changedTension[2]}
             .col-md-6
@@ -111,14 +115,18 @@ block content
                       table.table
                         thead
                           tr
-                            th.col-md-2 Index of Wire or Wire Segment
+                            th.col-md-2 Wire / Wire Segment
                             th.col-md-2 Original Tension (N)
                             th.col-md-2 Latest Tension (N)
 
                         tbody
                           each changedTension in action.data.changedTensions_sideB
                             tr
-                              td #{changedTension[0]}
+                              if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
+                                td #{changedTension[0] + 1}
+                              else 
+                                td #{changedTension[0] + 8}
+
                               td #{changedTension[1]}
                               td #{changedTension[2]}
 

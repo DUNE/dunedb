@@ -240,21 +240,30 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
 
     // For each workflow, determine its overall status - it is 'complete' only if every action is individually complete ...
     // ... i.e. there are the same number of completed actions (specified by the value (true or false) of the action's 'data.actionComplete' field) as there are total actions in the workflow path
+    // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
     let workflowStatuses = [];
+    let firstIncompleteActions = [];
 
     for (const workflow of workflows) {
       let numberOfCompleteActions = 0;
+      let lastCompleteAction_stepIndex = 0;
 
       for (let stepIndex = 1; stepIndex < workflow.stepResultIDs.length; stepIndex++) {
         if (workflow.stepResultIDs[stepIndex].length > 0) {
           const action = await Actions.retrieve(workflow.stepResultIDs[stepIndex]);
 
-          if (action.data.actionComplete) numberOfCompleteActions++;
+          if (action.data.actionComplete) {
+            numberOfCompleteActions++;
+            lastCompleteAction_stepIndex = stepIndex;
+          }
         }
       }
 
       const workflowStatus = (numberOfCompleteActions === workflow.stepResultIDs.length - 1) ? 'Complete' : 'In Progress';
       workflowStatuses.push(workflowStatus);
+
+      const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.stepResultIDs.length - 1) ? (workflow.stepTypeForms[lastCompleteAction_stepIndex + 1]) : 'n.a.'
+      firstIncompleteActions.push(firstIncompleteAction);
     }
 
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
@@ -264,6 +273,7 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
     res.render('workflow_list.pug', {
       workflows,
       workflowStatuses,
+      firstIncompleteActions,
       singleType: false,
       title: 'All Created / Edited Workflows (All Types)',
       allWorkflowTypeForms,
@@ -284,21 +294,30 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
 
     // For each workflow, determine its overall status - it is 'complete' only if every action is individually complete ...
     // ... i.e. there are the same number of completed actions (specified by the value (true or false) of the action's 'data.actionComplete' field) as there are total actions in the workflow path
+    // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
     let workflowStatuses = [];
+    let firstIncompleteActions = [];
 
     for (const workflow of workflows) {
       let numberOfCompleteActions = 0;
+      let lastCompleteAction_stepIndex = 0;
 
       for (let stepIndex = 1; stepIndex < workflow.stepResultIDs.length; stepIndex++) {
         if (workflow.stepResultIDs[stepIndex].length > 0) {
           const action = await Actions.retrieve(workflow.stepResultIDs[stepIndex]);
 
-          if (action.data.actionComplete) numberOfCompleteActions++;
+          if (action.data.actionComplete) {
+            numberOfCompleteActions++;
+            lastCompleteAction_stepIndex = stepIndex;
+          }
         }
       }
 
       const workflowStatus = (numberOfCompleteActions === workflow.stepResultIDs.length - 1) ? 'Complete' : 'In Progress';
       workflowStatuses.push(workflowStatus);
+
+      const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.stepResultIDs.length - 1) ? (workflow.stepTypeForms[lastCompleteAction_stepIndex + 1]) : 'n.a.'
+      firstIncompleteActions.push(firstIncompleteAction);
     }
 
     // Retrieve the workflow type form corresponding to the specified type form ID
@@ -311,6 +330,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     res.render('workflow_list.pug', {
       workflows,
       workflowStatuses,
+      firstIncompleteActions,
       singleType: true,
       title: 'All Created / Edited Workflows (Single Type)',
       workflowTypeForm,
