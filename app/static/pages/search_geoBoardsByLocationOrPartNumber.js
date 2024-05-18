@@ -64,7 +64,7 @@ function postSuccess_location(result) {
     for (const boardGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${boardGroup.componentUuids.length} boards with part number ${boardGroup.partNumber} (${boardGroup.partString})</td>
+          <td colspan = "3">Found ${boardGroup.componentUuids.length} boards with part number <b>${boardGroup.partNumber} (${boardGroup.partString})</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -73,16 +73,18 @@ function postSuccess_location(result) {
     $('#results').append('<br>');
 
     for (const boardGroup of result) {
-      const groupTitle = `<b>Part Number: ${boardGroup.partNumber}  (${boardGroup.partString})</b>`;
+      const groupTitle = `
+        <tr>
+          <td colspan = "3"><b>Part Number: ${boardGroup.partNumber}  (${boardGroup.partString})</b></td>
+        </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '50%'>Board UUID</th>
-          <th scope = 'col' width = '15%'>UKID</th>
-          <th scope = 'col' width = '20%'>Arrived On:</th>
-          <th scope = 'col' width = '15%'>On APA:</th>
+          <th scope = 'col' style = 'width: 25%'>Board UKID</th>
+          <th scope = 'col' style = 'width: 25%'>Date at Location</th>
+          <th scope = 'col' style = 'width: 50%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -90,8 +92,7 @@ function postSuccess_location(result) {
       for (const i in boardGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
-            <td>${boardGroup.ukids[i]}</td>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
             <td>${boardGroup.installedOnAPA[i]}</td>
           </tr>`;
@@ -130,7 +131,7 @@ function postSuccess_partNumber(result) {
     for (const boardGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${boardGroup.componentUuids.length} boards at ${dictionary_locations[boardGroup.receptionLocation]}</td>
+          <td colspan = "3">Found ${boardGroup.componentUuids.length} boards at <b>${dictionary_locations[boardGroup.receptionLocation]}</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -139,16 +140,18 @@ function postSuccess_partNumber(result) {
     $('#results').append('<br>');
 
     for (const boardGroup of result) {
-      const groupTitle = `<b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b>`;
+      const groupTitle = `
+        <tr>
+          <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b></td>
+        </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' style = 'width: 50%'>Board UUID</th>
-          <th scope = 'col' style = 'width: 15%'>UKID</th>
-          <th scope = 'col' style = 'width: 20%'>Arrived On:</th>
-          <th scope = 'col' style = 'width: 15%'>On APA:</th>
+          <th scope = 'col' style = 'width: 25%'>Board UKID</th>
+          <th scope = 'col' style = 'width: 25%'>Date at Location</th>
+          <th scope = 'col' style = 'width: 50%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -156,8 +159,7 @@ function postSuccess_partNumber(result) {
       for (const i in boardGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.componentUuids[i]}</td>
-            <td>${boardGroup.ukids[i]}</td>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
             <td>${boardGroup.receptionDates[i]}</td>
             <td>${boardGroup.installedOnAPA[i]}</td>
           </tr>`;

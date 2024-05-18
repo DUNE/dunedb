@@ -77,10 +77,10 @@ async function boardsByLocation(location) {
           const name_splits = apa.data.name.split('-');
           cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
         } else {
-          cleanedBoardGroup.installedOnAPA.push('[No UUID!]');
+          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
         }
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[Not on APA]');
+        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
 
@@ -160,10 +160,10 @@ async function boardsByPartNumber(partNumber) {
           const name_splits = apa.data.name.split('-');
           cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
         } else {
-          cleanedBoardGroup.installedOnAPA.push('[No UUID!]');
+          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
         }
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[Not on APA]');
+        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
 

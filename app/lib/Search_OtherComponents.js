@@ -210,10 +210,10 @@ async function meshesByLocation(location) {
           const name_splits = apa.data.name.split('-');
           cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
         } else {
-          cleanedMeshGroup.installedOnAPA.push('[No UUID!]');
+          cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
         }
       } else {
-        cleanedMeshGroup.installedOnAPA.push('[Not on APA]');
+        cleanedMeshGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
 
@@ -293,10 +293,10 @@ async function meshesByPartNumber(partNumber) {
           const name_splits = apa.data.name.split('-');
           cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
         } else {
-          cleanedMeshGroup.installedOnAPA.push('[No UUID!]');
+          cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
         }
       } else {
-        cleanedMeshGroup.installedOnAPA.push('[Not on APA]');
+        cleanedMeshGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
 

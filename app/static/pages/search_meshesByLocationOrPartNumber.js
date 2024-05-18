@@ -75,7 +75,7 @@ function postSuccess_location(result) {
     for (const meshGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes with part number ${partNumbersDictionary[meshGroup.partNumber]}</td>
+          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes with part number <b>${partNumbersDictionary[meshGroup.partNumber]}</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -84,16 +84,18 @@ function postSuccess_location(result) {
     $('#results').append('<br>');
 
     for (const meshGroup of result) {
-      const groupTitle = `<b>Part Number: ${partNumbersDictionary[meshGroup.partNumber]}</b>`;
+      const groupTitle = `
+        <tr>
+          <td colspan = "3"><b>Part Number: ${partNumbersDictionary[meshGroup.partNumber]}</b></td>
+        </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '35%'>Mesh UUID</th>
-          <th scope = 'col' width = '30%'>DUNE PID</th>
-          <th scope = 'col' width = '20%'>Arrived On:</th>
-          <th scope = 'col' width = '15%'>On APA:</th>
+          <th scope = 'col' width = '50%'>Mesh DUNE PID</th>
+          <th scope = 'col' width = '25%'>Date at Location</th>
+          <th scope = 'col' width = '25%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -101,8 +103,7 @@ function postSuccess_location(result) {
       for (const i in meshGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.componentUuids[i]}</td>
-            <td>${meshGroup.dunePids[i]}</td>
+            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i]}</td>
             <td>${meshGroup.receptionDates[i]}</td>
             <td>${meshGroup.installedOnAPA[i]}</td>
           </tr>`;
@@ -141,7 +142,7 @@ function postSuccess_partNumber(result) {
     for (const meshGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes at ${dictionary_locations[meshGroup.receptionLocation]}</td>
+          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes at <b>${dictionary_locations[meshGroup.receptionLocation]}</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -150,16 +151,18 @@ function postSuccess_partNumber(result) {
     $('#results').append('<br>');
 
     for (const meshGroup of result) {
-      const groupTitle = `<b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b>`;
+      const groupTitle = `
+        <tr>
+          <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+        </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' style = 'width: 35%'>Mesh UUID</th>
-          <th scope = 'col' style = 'width: 30%'>DUNE PID:</th>
-          <th scope = 'col' style = 'width: 20%'>Arrived On:</th>
-          <th scope = 'col' style = 'width: 15%'>On APA:</th>
+          <th scope = 'col' width = '50%'>Mesh DUNE PID</th>
+          <th scope = 'col' width = '25%'>Date at Location</th>
+          <th scope = 'col' width = '25%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -167,8 +170,7 @@ function postSuccess_partNumber(result) {
       for (const i in meshGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.componentUuids[i]}</td>
-            <td>${meshGroup.dunePids[i]}</td>
+            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i]}</td>
             <td>${meshGroup.receptionDates[i]}</td>
             <td>${meshGroup.installedOnAPA[i]}</td>
           </tr>`;
