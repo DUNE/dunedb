@@ -170,7 +170,7 @@ function postSuccess_partNumber(result) {
             <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.componentUuids[i]}</td>
             <td>${meshGroup.dunePids[i]}</td>
             <td>${meshGroup.receptionDates[i]}</td>
-            <td>${boardGroup.installedOnAPA[i]}</td>
+            <td>${meshGroup.installedOnAPA[i]}</td>
           </tr>`;
 
         $('#results').append(boardText);

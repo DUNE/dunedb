@@ -166,7 +166,6 @@ async function meshesByLocation(location) {
       componentUuid: { '$first': '$componentUuid' },
       dunePid: { '$first': '$data.name' },
       receptionDate: { '$first': '$reception.date' },
-      receptionDetail: { '$first': '$reception.detail' },
     },
   });
 
@@ -178,7 +177,6 @@ async function meshesByLocation(location) {
       componentUuid: { $push: '$componentUuid' },
       dunePid: { $push: '$dunePid' },
       receptionDate: { $push: '$receptionDate' },
-      receptionDetail: { '$first': '$receptionDetail' },
     }
   });
 
@@ -194,27 +192,30 @@ async function meshesByLocation(location) {
     let cleanedMeshGroup = {};
 
     cleanedMeshGroup.partNumber = meshGroup._id.partNumber;
+    cleanedMeshGroup.dunePids = meshGroup.dunePid;
+    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedMeshGroup.componentUuids = [];
+    cleanedMeshGroup.installedOnAPA = [];
 
     for (const meshUuid of meshGroup.componentUuid) {
       cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-    }
 
-    cleanedMeshGroup.installedOnAPA = [];
+      const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
 
-    for (const receptionDetail of meshGroup.receptionDetail) {
       if (location === 'installed_on_APA') {
-        const component = await Components.retrieve(receptionDetail);
-        const name_splits = component.data.name.split('-');
-        cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        if (mesh.reception.detail) {
+          const apa = await Components.retrieve(mesh.reception.detail);
+
+          const name_splits = apa.data.name.split('-');
+          cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        } else {
+          cleanedMeshGroup.installedOnAPA.push('[No UUID!]');
+        }
       } else {
-        cleanedMeshGroup.installedOnAPA.push('[n.a.]');
+        cleanedMeshGroup.installedOnAPA.push('[Not on APA]');
       }
     }
-
-    cleanedMeshGroup.dunePids = meshGroup.dunePid;
-    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedResults.push(cleanedMeshGroup);
   }
@@ -248,7 +249,6 @@ async function meshesByPartNumber(partNumber) {
       dunePid: { '$first': '$data.name' },
       receptionDate: { '$first': '$reception.date' },
       receptionLocation: { '$first': '$reception.location' },
-      receptionDetail: { '$first': '$reception.detail' },
     },
   });
 
@@ -260,7 +260,6 @@ async function meshesByPartNumber(partNumber) {
       componentUuid: { $push: '$componentUuid' },
       dunePid: { $push: '$dunePid' },
       receptionDate: { $push: '$receptionDate' },
-      receptionDetail: { '$first': '$receptionDetail' },
     }
   });
 
@@ -276,27 +275,30 @@ async function meshesByPartNumber(partNumber) {
     let cleanedMeshGroup = {};
 
     cleanedMeshGroup.receptionLocation = meshGroup._id.receptionLocation;
+    cleanedMeshGroup.dunePids = meshGroup.dunePid;
+    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedMeshGroup.componentUuids = [];
+    cleanedMeshGroup.installedOnAPA = [];
 
     for (const meshUuid of meshGroup.componentUuid) {
       cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-    }
 
-    cleanedMeshGroup.installedOnAPA = [];
+      const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
 
-    for (const receptionDetail of meshGroup.receptionDetail) {
       if (meshGroup._id.receptionLocation === 'installed_on_APA') {
-        const component = await Components.retrieve(receptionDetail);
-        const name_splits = component.data.name.split('-');
-        cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        if (mesh.reception.detail) {
+          const apa = await Components.retrieve(mesh.reception.detail);
+
+          const name_splits = apa.data.name.split('-');
+          cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        } else {
+          cleanedMeshGroup.installedOnAPA.push('[No UUID!]');
+        }
       } else {
-        cleanedMeshGroup.installedOnAPA.push('[n.a.]');
+        cleanedMeshGroup.installedOnAPA.push('[Not on APA]');
       }
     }
-
-    cleanedMeshGroup.dunePids = meshGroup.dunePid;
-    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedResults.push(cleanedMeshGroup);
   }
