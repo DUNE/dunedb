@@ -190,6 +190,7 @@ async function list(match_condition, options) {
       workflowId: { '$first': '$workflowId' },
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
+      stepTypeForms: { '$first': '$path.formName' },
       stepResultIDs: { '$first': '$path.result' },
       lastEditDate: { '$first': '$validity.startDate' },
     },

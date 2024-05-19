@@ -8,10 +8,10 @@ from tensions import ExtractTensions
 # ##################################
 
 # For uploading (re-)tensioning measurements, the following information is required:
-csvFile         = '/user/majumdar/Desktop/horizontalInspections/UK_Frames/F000_X.csv'
+csvFile         = '/user/majumdar/Desktop/Tensions/V_layer_APA14.csv'
                                                             # Full path to the input data file (must be a string ending in '.csv')
-apaLayer        = 'X'                                       # Wire layer (must be given as one of 'X','V', 'U' or 'G')
-action_id       = '6582feba5fedc88fb468a8d3'                # ID of the existing tension measurements action to be edited (get from DB)
+apaLayer        = 'V'                                       # Wire layer (must be given as one of 'X','V', 'U' or 'G')
+action_id       = '66479e9ab80c19b8c800f8ae'                # ID of the existing tension measurements action to be edited (get from DB)
 
 # ##################################
 

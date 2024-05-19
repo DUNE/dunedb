@@ -29,7 +29,6 @@ async function boardsByLocation(location) {
       componentUuid: { '$first': '$componentUuid' },
       ukid: { '$first': '$data.typeRecordNumber' },
       receptionDate: { '$first': '$reception.date' },
-      receptionDetail: { '$first': '$reception.detail' },
     },
   });
 
@@ -44,7 +43,6 @@ async function boardsByLocation(location) {
       componentUuid: { $push: '$componentUuid' },
       ukid: { $push: '$ukid' },
       receptionDate: { $push: '$receptionDate' },
-      receptionDetail: { '$first': '$receptionDetail' },
     }
   });
 
@@ -61,27 +59,30 @@ async function boardsByLocation(location) {
 
     cleanedBoardGroup.partNumber = boardGroup._id.partNumber;
     cleanedBoardGroup.partString = boardGroup._id.partString;
+    cleanedBoardGroup.ukids = boardGroup.ukid;
+    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedBoardGroup.componentUuids = [];
+    cleanedBoardGroup.installedOnAPA = [];
 
     for (const boardUuid of boardGroup.componentUuid) {
       cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
-    }
 
-    cleanedBoardGroup.installedOnAPA = [];
+      const board = await Components.retrieve(MUUID.from(boardUuid).toString());
 
-    for (const receptionDetail of boardGroup.receptionDetail) {
       if (location === 'installed_on_APA') {
-        const component = await Components.retrieve(receptionDetail);
-        const name_splits = component.data.name.split('-');
-        cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        if (board.reception.detail) {
+          const apa = await Components.retrieve(board.reception.detail);
+
+          const name_splits = apa.data.name.split('-');
+          cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        } else {
+          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+        }
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[n.a.]');
+        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
-
-    cleanedBoardGroup.ukids = boardGroup.ukid;
-    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedResults.push(cleanedBoardGroup);
   }
@@ -115,7 +116,6 @@ async function boardsByPartNumber(partNumber) {
       ukid: { '$first': '$data.typeRecordNumber' },
       receptionDate: { '$first': '$reception.date' },
       receptionLocation: { '$first': '$reception.location' },
-      receptionDetail: { '$first': '$reception.detail' },
     },
   });
 
@@ -127,7 +127,6 @@ async function boardsByPartNumber(partNumber) {
       componentUuid: { $push: '$componentUuid' },
       ukid: { $push: '$ukid' },
       receptionDate: { $push: '$receptionDate' },
-      receptionDetail: { '$first': '$receptionDetail' },
     }
   });
 
@@ -143,26 +142,30 @@ async function boardsByPartNumber(partNumber) {
     let cleanedBoardGroup = {};
 
     cleanedBoardGroup.receptionLocation = boardGroup._id.receptionLocation;
+    cleanedBoardGroup.ukids = boardGroup.ukid;
+    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedBoardGroup.componentUuids = [];
     cleanedBoardGroup.installedOnAPA = [];
 
     for (const boardUuid of boardGroup.componentUuid) {
       cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
-    }
 
-    for (const receptionDetail of boardGroup.receptionDetail) {
+      const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
       if (boardGroup._id.receptionLocation === 'installed_on_APA') {
-        const component = await Components.retrieve(receptionDetail);
-        const name_splits = component.data.name.split('-');
-        cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        if (board.reception.detail) {
+          const apa = await Components.retrieve(board.reception.detail);
+
+          const name_splits = apa.data.name.split('-');
+          cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        } else {
+          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+        }
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[n.a.]');
+        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
-
-    cleanedBoardGroup.ukids = boardGroup.ukid;
-    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedResults.push(cleanedBoardGroup);
   }

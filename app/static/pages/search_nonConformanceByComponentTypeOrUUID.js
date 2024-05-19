@@ -134,11 +134,11 @@ function postSuccess(result) {
   } else {
     const tableStart = `
       <tr>
-        <th scope = 'col' width = '12%'>Component Type</th>
-        <th scope = 'col' width = '20%'>Component UUID</th>
-        <th scope = 'col' width = '18%'>Action Title / ID</th>
+        <th scope = 'col' width = '15%'>Component Type</th>
+        <th scope = 'col' width = '20%'>Component Name</th>
+        <th scope = 'col' width = '25%'>Non-Conformance Title / Action ID</th>
         <th scope = 'col' width = '15%'>Disposition</th>
-        <th scope = 'col' width = '5%'>Status</th>
+        <th scope = 'col' width = '10%'>Status</th>
       </tr>`;
 
     $('#results').append(tableStart);
@@ -147,7 +147,7 @@ function postSuccess(result) {
       const actionText = `
         <tr>
           <td>${componentTypesDictionary[action.componentType]}</td>
-          <td><a href = '/component/${action.componentUuid}' target = '_blank'</a>${action.componentUuid}</td>
+          <td><a href = '/component/${action.componentUuid}' target = '_blank'</a>${action.componentName}</td>
           <td><a href = '/action/${action.actionId}' target = '_blank'</a>${action.title ? action.title : action.actionId}</td>
           <td>${dispositionsDictionary[action.disposition]}</td>
           <td>${statusDictionary[action.status]}</td>
