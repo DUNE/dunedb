@@ -61,10 +61,10 @@ function postSuccess(result) {
   } else {
     const tableStart = `
         <tr>
-          <th scope = 'col' width = '20%'>Action</th>
-          <th scope = 'col' width = '10%'>Wire Layer</th>
-          <th scope = 'col' width = '20%'>Action Performed at:</th>
-          <th scope = 'col' width = '50%'>Comments</th>
+          <th scope = 'col' width = '30%'>Action</th>
+          <th scope = 'col' width = '15%'>Wire Layer</th>
+          <th scope = 'col' width = '30%'>Measurement Location</th>
+          <th scope = 'col' width = '20%'>Comments</th>
 
         </tr>`;
 

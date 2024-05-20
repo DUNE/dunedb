@@ -79,6 +79,12 @@ async function nonConformanceByComponentType(componentType, disposition, status)
     .aggregate(aggregation_stages)
     .toArray();
 
+  // Add the component name to each matching record ... this needs to be retrieved from the component's own record, since it is not stored in the action record
+  for (let result of results) {
+    const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
+    result.componentName = component.data.name;
+  }
+
   // Return the list of actions
   return results;
 }
@@ -117,6 +123,12 @@ async function nonConformanceByUUID(componentUUID) {
   let results = await db.collection('actions')
     .aggregate(aggregation_stages)
     .toArray();
+
+  // Add the component name to each matching record ... this needs to be retrieved from the component's own record, since it is not stored in the action record
+  for (let result of results) {
+    const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
+    result.componentName = component.data.name;
+  }
 
   // Return the list of actions
   return results;

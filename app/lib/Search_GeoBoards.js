@@ -2,14 +2,13 @@ const MUUID = require('uuid-mongodb');
 
 const Components = require('./Components');
 const { db } = require('./db');
-const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
 
 
-/// Retrieve a list of geometry boards that have been received at a specified location across all part numbers
+/// Retrieve a list of geometry boards that are at a specified location across all part numbers
 async function boardsByLocation(location) {
   let aggregation_stages = [];
 
-  // Retrieve all 'Geometry Board' records that have the same reception location as the specified one
+  // Retrieve all 'Geometry Board' records that have the same location as the specified one
   aggregation_stages.push({
     $match: {
       'formId': 'GeometryBoard',
@@ -53,8 +52,6 @@ async function boardsByLocation(location) {
     .toArray();
 
   // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
-  // If the location is 'installed on APA', get the board installation action associated with each board ...
-  // ... and from that the record and name of the APA on which the installation action was performed
   let cleanedResults = [];
 
   for (const boardGroup of results) {
@@ -62,6 +59,8 @@ async function boardsByLocation(location) {
 
     cleanedBoardGroup.partNumber = boardGroup._id.partNumber;
     cleanedBoardGroup.partString = boardGroup._id.partString;
+    cleanedBoardGroup.ukids = boardGroup.ukid;
+    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedBoardGroup.componentUuids = [];
     cleanedBoardGroup.installedOnAPA = [];
@@ -69,24 +68,21 @@ async function boardsByLocation(location) {
     for (const boardUuid of boardGroup.componentUuid) {
       cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
 
+      const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
       if (location === 'installed_on_APA') {
-        const actions = await Search_ActionsWorkflows.boardInstallByReferencedComponent(MUUID.from(boardUuid).toString());
+        if (board.reception.detail) {
+          const apa = await Components.retrieve(board.reception.detail);
 
-        if (actions.length > 0) {
-          const component = await Components.retrieve(actions[0].componentUuid);
-
-          const name_splits = component.data.name.split('-');
+          const name_splits = apa.data.name.split('-');
           cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
         } else {
-          cleanedBoardGroup.installedOnAPA.push('[n.i.]');
+          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
         }
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[n.a.]')
+        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
-
-    cleanedBoardGroup.ukids = boardGroup.ukid;
-    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedResults.push(cleanedBoardGroup);
   }
@@ -96,7 +92,7 @@ async function boardsByLocation(location) {
 }
 
 
-/// Retrieve a list of geometry boards of a specified part number across all board reception locations
+/// Retrieve a list of geometry boards of a specified part number across all board locations
 async function boardsByPartNumber(partNumber) {
   let aggregation_stages = [];
 
@@ -123,8 +119,8 @@ async function boardsByPartNumber(partNumber) {
     },
   });
 
-  // We want to actually display the matched boards grouped by the reception location
-  // So group the records according to the reception location, and then add the fields to be returned for each board in each group
+  // We want to actually display the matched boards grouped by the location
+  // So group the records according to the location, and then add the fields to be returned for each board in each group
   aggregation_stages.push({
     $group: {
       _id: { receptionLocation: '$receptionLocation' },
@@ -140,14 +136,14 @@ async function boardsByPartNumber(partNumber) {
     .toArray();
 
   // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
-  // If the location is 'installed on APA', get the board installation action associated with each board ...
-  // ... and from that the record and name of the APA on which the installation action was performed
   let cleanedResults = [];
 
   for (const boardGroup of results) {
     let cleanedBoardGroup = {};
 
     cleanedBoardGroup.receptionLocation = boardGroup._id.receptionLocation;
+    cleanedBoardGroup.ukids = boardGroup.ukid;
+    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedBoardGroup.componentUuids = [];
     cleanedBoardGroup.installedOnAPA = [];
@@ -155,29 +151,26 @@ async function boardsByPartNumber(partNumber) {
     for (const boardUuid of boardGroup.componentUuid) {
       cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
 
+      const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
       if (boardGroup._id.receptionLocation === 'installed_on_APA') {
-        const actions = await Search_ActionsWorkflows.boardInstallByReferencedComponent(MUUID.from(boardUuid).toString());
+        if (board.reception.detail) {
+          const apa = await Components.retrieve(board.reception.detail);
 
-        if (actions.length > 0) {
-          const component = await Components.retrieve(actions[0].componentUuid);
-
-          const name_splits = component.data.name.split('-');
+          const name_splits = apa.data.name.split('-');
           cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
         } else {
-          cleanedBoardGroup.installedOnAPA.push('[n.i.]');
+          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
         }
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[n.a.]')
+        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
       }
     }
-
-    cleanedBoardGroup.ukids = boardGroup.ukid;
-    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedResults.push(cleanedBoardGroup);
   }
 
-  // Return the list of boards grouped by reception location
+  // Return the list of boards grouped by location
   return cleanedResults;
 }
 

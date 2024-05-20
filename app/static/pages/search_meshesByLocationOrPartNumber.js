@@ -1,6 +1,6 @@
-// Declare variables to hold the (initially empty) user-specified mesh location and/or part number
-let receptionLocation = null;
-let partNumber = null;
+// Declare variables to hold the (initially empty) user-specified mesh panel location and/or part number
+let meshPanelLocation = null;
+let meshPanelPartNumber = null;
 
 
 // Main function
@@ -8,13 +8,13 @@ $(function () {
   // When the selected location is changed, get the newly selected location from the corresponding page element
   // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    receptionLocation = $('#locationSelection').val();
+    meshPanelLocation = $('#locationSelection').val();
 
-    if (receptionLocation) {
+    if (meshPanelLocation) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/meshesByLocation/${receptionLocation}`,
+        url: `/json/search/meshesByLocation/${meshPanelLocation}`,
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
@@ -24,13 +24,13 @@ $(function () {
   // When the selected mesh part number is changed, get the newly selected part number from the corresponding page element
   // If the part number is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#partNumberSelection').on('change', async function () {
-    partNumber = $('#partNumberSelection').val();
+    meshPanelPartNumber = $('#partNumberSelection').val();
 
-    if (partNumber) {
+    if (meshPanelPartNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/meshesByPartNumber/${partNumber}`,
+        url: `/json/search/meshesByPartNumber/${meshPanelPartNumber}`,
         dataType: 'json',
         success: postSuccess_partNumber,
       }).fail(postFail);
@@ -57,7 +57,7 @@ function postSuccess_location(result) {
 
   const resultsStart = `
     <tr>
-      <td colspan = "3">The following grounding mesh panels have been received at <b>${$('#locationSelection option:selected').text()}</b>.</td>
+      <td colspan = "3">The following grounding mesh panels are at <b>${$('#locationSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
       <td colspan = "3">They are grouped by part number, and then ordered by last DB record edit (most recent at the top).
@@ -75,7 +75,7 @@ function postSuccess_location(result) {
     for (const meshGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes with part number ${partNumbersDictionary[meshGroup.partNumber]}</td>
+          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes with part number <b>${partNumbersDictionary[meshGroup.partNumber]}</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -84,15 +84,18 @@ function postSuccess_location(result) {
     $('#results').append('<br>');
 
     for (const meshGroup of result) {
-      const groupTitle = `<b>Part Number: ${partNumbersDictionary[meshGroup.partNumber]}</b>`;
+      const groupTitle = `
+        <tr>
+          <td colspan = "3"><b>Part Number: ${partNumbersDictionary[meshGroup.partNumber]}</b></td>
+        </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '40%'>Mesh UUID</th>
-          <th scope = 'col' width = '40%'>DUNE PID</th>
-          <th scope = 'col' width = '20%'>Received On:</th>
+          <th scope = 'col' width = '50%'>Mesh DUNE PID</th>
+          <th scope = 'col' width = '25%'>Date at Location</th>
+          <th scope = 'col' width = '25%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -100,9 +103,9 @@ function postSuccess_location(result) {
       for (const i in meshGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.componentUuids[i]}</td>
-            <td>${meshGroup.dunePids[i]}</td>
+            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i]}</td>
             <td>${meshGroup.receptionDates[i]}</td>
+            <td>${meshGroup.installedOnAPA[i]}</td>
           </tr>`;
 
         $('#results').append(boardText);
@@ -111,19 +114,6 @@ function postSuccess_location(result) {
       $('#results').append('<br>');
     }
   }
-};
-
-
-// Function to correctly format a mesh's location string
-function formatMeshLocation(rawLocationString) {
-  let location = '';
-
-  if (!rawLocationString) location = '[unknown]';
-  else {
-    location = rawLocationString[0].toUpperCase() + rawLocationString.slice(1);
-  }
-
-  return location;
 };
 
 
@@ -137,7 +127,7 @@ function postSuccess_partNumber(result) {
       <td colspan = "3">The following grounding mesh panels with part number <b>${$('#partNumberSelection option:selected').text()}</b> have been received.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by reception location, and then ordered by last DB record edit (most recent at the top).
+      <td colspan = "3">They are grouped by location, and then ordered by last DB record edit (most recent at the top).
         <br>
         <hr>
       </td>
@@ -147,12 +137,12 @@ function postSuccess_partNumber(result) {
 
   // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>No grounding mesh panels of the given part number have been received at any location</b>');
+    $('#results').append('<b>No grounding mesh panels of the given part number are at any location</b>');
   } else {
     for (const meshGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes received at ${formatMeshLocation(meshGroup.receptionLocation)}</td>
+          <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes at <b>${dictionary_locations[meshGroup.receptionLocation]}</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -161,15 +151,18 @@ function postSuccess_partNumber(result) {
     $('#results').append('<br>');
 
     for (const meshGroup of result) {
-      const groupTitle = `<b>Location: ${formatMeshLocation(meshGroup.receptionLocation)}</b>`;
+      const groupTitle = `
+        <tr>
+          <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+        </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' style = 'width: 40%'>Mesh UUID</th>
-          <th scope = 'col' style = 'width: 40%'>DUNE PID:</th>
-          <th scope = 'col' style = 'width: 20%'>Received On:</th>
+          <th scope = 'col' width = '50%'>Mesh DUNE PID</th>
+          <th scope = 'col' width = '25%'>Date at Location</th>
+          <th scope = 'col' width = '25%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -177,9 +170,9 @@ function postSuccess_partNumber(result) {
       for (const i in meshGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.componentUuids[i]}</td>
-            <td>${meshGroup.dunePids[i]}</td>
+            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i]}</td>
             <td>${meshGroup.receptionDates[i]}</td>
+            <td>${meshGroup.installedOnAPA[i]}</td>
           </tr>`;
 
         $('#results').append(boardText);

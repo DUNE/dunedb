@@ -4,6 +4,9 @@ block vars
   - const page_title = 'Search for Populated Board Kit Components by Location';
 
 block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
   block workscripts 
     script(src = '/pages/search_boardKitComponentsByLocation.js')
 
@@ -24,9 +27,10 @@ block content
 
           select.form-control#locationSelection
             option(value = '')
-            option(value = 'cern') CERN 
-            option(value = 'in_transit') In Transit 
-            option(value = 'surf') SURF 
+            option(value = 'cern') #{dictionary_locations['cern']} 
+            option(value = 'in_transit') #{dictionary_locations['in_transit']} 
+            option(value = 'surf') #{dictionary_locations['surf']} 
+            option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
 
         .col-md-1
 

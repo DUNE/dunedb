@@ -4,6 +4,9 @@ block vars
   - const page_title = 'Search for Geometry Board Shipments by Reception Details';
 
 block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
   block workscripts 
     script(src = '/pages/search_boardShipmentsByReceptionDetails.js')
 
@@ -39,16 +42,14 @@ block content
 
           select.form-control#originLocationSelection
             option(value = '') (any)
-            option(value = 'cambridge') Cambridge 
-            option(value = 'chicago') Chicago
-            option(value = 'daresbury') Daresbury 
-            option(value = 'lancaster') Lancaster 
-            option(value = 'manchester') Manchester 
-            option(value = 'merlin') Merlin 
-            option(value = 'sheffield') Sheffield 
-            option(value = 'sussex') Sussex 
-            option(value = 'williamAndMary') William and Mary 
-            option(value = 'wisconsin') Wisconsin 
+            option(value = 'cambridge') #{dictionary_locations['cambridge']} 
+            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+            option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+            option(value = 'manchester') #{dictionary_locations['manchester']} 
+            option(value = 'merlin') #{dictionary_locations['merlin']} 
+            option(value = 'sheffield') #{dictionary_locations['sheffield']} 
+            option(value = 'sussex') #{dictionary_locations['sussex']} 
+            option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
 
         .col-md-3
           h4 Select Destination Location
@@ -60,16 +61,16 @@ block content
 
           select.form-control#destinationLocationSelection
             option(value = '') (any)
-            option(value = 'cambridge') Cambridge 
-            option(value = 'chicago') Chicago
-            option(value = 'daresbury') Daresbury 
-            option(value = 'lancaster') Lancaster 
-            option(value = 'manchester') Manchester 
-            option(value = 'merlin') Merlin 
-            option(value = 'sheffield') Sheffield 
-            option(value = 'sussex') Sussex 
-            option(value = 'williamAndMary') William and Mary 
-            option(value = 'wisconsin') Wisconsin 
+            option(value = 'cambridge') #{dictionary_locations['cambridge']} 
+            option(value = 'chicago') #{dictionary_locations['chicago']} 
+            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+            option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+            option(value = 'manchester') #{dictionary_locations['manchester']} 
+            option(value = 'merlin') #{dictionary_locations['merlin']} 
+            option(value = 'sheffield') #{dictionary_locations['sheffield']} 
+            option(value = 'sussex') #{dictionary_locations['sussex']} 
+            option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
+            option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
 
         .col-md-3 
 
@@ -93,7 +94,7 @@ block content
           .vert-space-x1
             p Select a date by clicking the box below.
               br
-              | The search match reception <b><u>on and before</u></b> this date.
+              | The search will match reception <b><u>on and before</u></b> this date.
 
             #latestdateform
 

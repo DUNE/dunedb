@@ -23,7 +23,7 @@ head
   link(rel = 'stylesheet', href = '/css/component_summary.css')
   link(rel = 'stylesheet', href = '/css/fonts.css')
           //- Copied from https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap
-  
+
   //- The 'formio.full.min.css' stylesheet has to be loaded from an external source, because it itself references another font package by URL ...
   //- ... and a local version of this stylesheet is not able to reference that URL (gives a 404 error)
   link(rel = 'preload', href = 'https://cdn.jsdelivr.net/npm/formiojs@4.13.3/dist/formio.full.min.css', as = 'style', 
@@ -144,8 +144,8 @@ body(class = `deployment-${NODE_ENV}`)
                     |      Populated Board Kit Components by Location
 
                 li.nav-item
-                  +navlink(href = '/search/apaByLocation')
-                    |      Assembled APA by Location
+                  +navlink(href = '/search/apaByProductionDetails')
+                    |      Assembled APA by Production Details
 
                 li.nav-item
                   +navlink(href = '/search/actionsByIDOrReferencedUUID')

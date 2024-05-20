@@ -289,8 +289,12 @@ async function list(match_condition, options) {
     },
   });
 
-  // Re-sort the records by last edit date ... most recent first
-  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+  // Re-sort the records ... by (alphabetical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
+  if ((match_condition) && (match_condition.formId) && ((match_condition.formId === 'APAFrame') || (match_condition.formId === 'AssembledAPA'))) {
+    aggregation_stages.push({ $sort: { name: 1 } });
+  } else {
+    aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+  }
 
   // Add aggregation stages for any additionally specified options
   if (options) {

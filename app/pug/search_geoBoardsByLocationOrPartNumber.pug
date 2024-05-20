@@ -4,6 +4,9 @@ block vars
   - const page_title = 'Search for Geometry Boards by Location or Part Number';
 
 block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
   block workscripts 
     script(src = '/pages/search_geoBoardsByLocationOrPartNumber.js')
 
@@ -24,18 +27,18 @@ block content
 
           select.form-control#locationSelection
             option(value = '')
-            option(value = 'cambridge') Cambridge 
-            option(value = 'chicago') Chicago
-            option(value = 'daresbury') Daresbury 
-            option(value = 'in_transit') In Transit 
-            option(value = 'installed_on_APA') Installed on APA
-            option(value = 'lancaster') Lancaster 
-            option(value = 'manchester') Manchester 
-            option(value = 'merlin') Merlin 
-            option(value = 'sheffield') Sheffield 
-            option(value = 'sussex') Sussex 
-            option(value = 'williamAndMary') William and Mary 
-            option(value = 'wisconsin') Wisconsin 
+            option(value = 'cambridge') #{dictionary_locations['cambridge']} 
+            option(value = 'chicago') #{dictionary_locations['chicago']} 
+            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+            option(value = 'in_transit') #{dictionary_locations['in_transit']} 
+            option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
+            option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+            option(value = 'manchester') #{dictionary_locations['manchester']} 
+            option(value = 'merlin') #{dictionary_locations['merlin']} 
+            option(value = 'sheffield') #{dictionary_locations['sheffield']} 
+            option(value = 'sussex') #{dictionary_locations['sussex']} 
+            option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
+            option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
 
           .vert-space-x2
             hr

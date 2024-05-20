@@ -1,5 +1,5 @@
-// Declare variables to hold the (initially empty) user-specified board location
-let receptionLocation = null;
+// Declare variables to hold the (initially empty) user-specified board kit location
+let boardKitLocation = null;
 
 
 // Main function
@@ -7,13 +7,13 @@ $(function () {
   // When the selected location is changed, get the newly selected location from the corresponding page element
   // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
   $('#locationSelection').on('change', async function () {
-    receptionLocation = $('#locationSelection').val();
+    boardKitLocation = $('#locationSelection').val();
 
-    if (receptionLocation) {
+    if (boardKitLocation) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/boardKitComponentsByLocation/${receptionLocation}`,
+        url: `/json/search/boardKitComponentsByLocation/${boardKitLocation}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
@@ -38,10 +38,10 @@ function postSuccess(result) {
 
   const resultsStart = `
     <tr>
-      <td colspan = "3">The following populated board kit components have been received at <b>${$('#locationSelection option:selected').text()}</b>.</td>
+      <td colspan = "2">The following populated board kit components are at <b>${$('#locationSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by component type, and then ordered by last DB record edit (most recent at the top).
+      <td colspan = "2">They are grouped by component type, and then ordered by last DB record edit (most recent at the top).
         <br>
         <hr>
       </td>
@@ -56,7 +56,7 @@ function postSuccess(result) {
     for (const componentGroup of result) {
       const componentCount = `
         <tr>
-          <td colspan = "3">Found ${componentGroup.componentUuids.length} components of type: <b>${componentTypesDictionary[componentGroup.type]}</b></td>
+          <td colspan = "2">Found ${componentGroup.componentUuids.length} components of type: <b>${componentTypesDictionary[componentGroup.type]}</b></td>
         </tr>`;
 
       $('#results').append(componentCount);
@@ -65,15 +65,17 @@ function postSuccess(result) {
     $('#results').append('<br>');
 
     for (const componentGroup of result) {
-      const groupTitle = `<b>Component Type: ${componentTypesDictionary[componentGroup.type]}</b>`;
+      const groupTitle = `
+        <tr>
+          <td colspan "2"><b>Component Type: ${componentTypesDictionary[componentGroup.type]}</b></td>
+        </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '40%'>Component UUID</th>
-          <th scope = 'col' width = '40%'>DUNE PID</th>
-          <th scope = 'col' width = '20%'>Received On:</th>
+          <th scope = 'col' width = '50%'>DUNE PID</th>
+          <th scope = 'col' width = '50%'>Date at Location</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -81,8 +83,7 @@ function postSuccess(result) {
       for (const i in componentGroup.componentUuids) {
         const componentText = `
           <tr>
-            <td><a href = '/component/${componentGroup.componentUuids[i]}' target = '_blank'</a>${componentGroup.componentUuids[i]}</td>
-            <td>${componentGroup.dunePids[i]}</td>
+            <td><a href = '/component/${componentGroup.componentUuids[i]}' target = '_blank'</a>${componentGroup.dunePids[i]}</td>
             <td>${componentGroup.receptionDates[i]}</td>
           </tr>`;
 

@@ -161,11 +161,11 @@ router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, r
 });
 
 
-/// Search for an assembled APA using its location and production number
-router.get('/search/apaByLocation/:apaLocation/:apaProductionNumber', async function (req, res, next) {
+/// Search for an assembled APA using its production location and number
+router.get('/search/apaByProductionDetails/:apaLocation/:apaNumber', async function (req, res, next) {
   try {
     // Retrieve a list of assembled APAs that match the specified record details
-    const assembledAPAs = await Search_OtherComponents.apasByLocation(req.params.apaLocation, req.params.apaProductionNumber);
+    const assembledAPAs = await Search_OtherComponents.apasByProductionDetails(req.params.apaLocation, req.params.apaNumber);
 
     // Return the list in JSON format
     return res.json(assembledAPAs);

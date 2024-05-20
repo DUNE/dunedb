@@ -1,5 +1,6 @@
 const MUUID = require('uuid-mongodb');
 
+const Components = require('./Components');
 const { db } = require('./db');
 
 
@@ -141,11 +142,11 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 }
 
 
-/// Retrieve a list of grounding mesh panels that have been received at a specified location across all part numbers
+/// Retrieve a list of grounding mesh panels that are at a specified location across all part numbers
 async function meshesByLocation(location) {
   let aggregation_stages = [];
 
-  // Retrieve all 'Grounding Mesh Panel' records that have the same reception location as the specified one
+  // Retrieve all 'Grounding Mesh Panel' records that have the same location as the specified one
   aggregation_stages.push({
     $match: {
       'formId': 'GroundingMeshPanel',
@@ -191,15 +192,30 @@ async function meshesByLocation(location) {
     let cleanedMeshGroup = {};
 
     cleanedMeshGroup.partNumber = meshGroup._id.partNumber;
+    cleanedMeshGroup.dunePids = meshGroup.dunePid;
+    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedMeshGroup.componentUuids = [];
+    cleanedMeshGroup.installedOnAPA = [];
 
     for (const meshUuid of meshGroup.componentUuid) {
       cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-    }
 
-    cleanedMeshGroup.dunePids = meshGroup.dunePid;
-    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
+      const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
+
+      if (location === 'installed_on_APA') {
+        if (mesh.reception.detail) {
+          const apa = await Components.retrieve(mesh.reception.detail);
+
+          const name_splits = apa.data.name.split('-');
+          cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        } else {
+          cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
+        }
+      } else {
+        cleanedMeshGroup.installedOnAPA.push('[Not installed on APA]');
+      }
+    }
 
     cleanedResults.push(cleanedMeshGroup);
   }
@@ -209,7 +225,7 @@ async function meshesByLocation(location) {
 }
 
 
-/// Retrieve a list of grounding mesh panels of a specified part number across all mesh reception locations
+/// Retrieve a list of grounding mesh panels of a specified part number across all mesh locations
 async function meshesByPartNumber(partNumber) {
   let aggregation_stages = [];
 
@@ -236,8 +252,8 @@ async function meshesByPartNumber(partNumber) {
     },
   });
 
-  // We want to actually display the matched meshes grouped by the reception location
-  // So group the records according to the reception location, and then add the fields to be returned for each mesh in each group
+  // We want to actually display the matched meshes grouped by the location
+  // So group the records according to the location, and then add the fields to be returned for each mesh in each group
   aggregation_stages.push({
     $group: {
       _id: { receptionLocation: '$receptionLocation' },
@@ -259,15 +275,30 @@ async function meshesByPartNumber(partNumber) {
     let cleanedMeshGroup = {};
 
     cleanedMeshGroup.receptionLocation = meshGroup._id.receptionLocation;
+    cleanedMeshGroup.dunePids = meshGroup.dunePid;
+    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedMeshGroup.componentUuids = [];
+    cleanedMeshGroup.installedOnAPA = [];
 
     for (const meshUuid of meshGroup.componentUuid) {
       cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-    }
 
-    cleanedMeshGroup.dunePids = meshGroup.dunePid;
-    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
+      const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
+
+      if (meshGroup._id.receptionLocation === 'installed_on_APA') {
+        if (mesh.reception.detail) {
+          const apa = await Components.retrieve(mesh.reception.detail);
+
+          const name_splits = apa.data.name.split('-');
+          cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        } else {
+          cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
+        }
+      } else {
+        cleanedMeshGroup.installedOnAPA.push('[Not installed on APA]');
+      }
+    }
 
     cleanedResults.push(cleanedMeshGroup);
   }
@@ -277,14 +308,14 @@ async function meshesByPartNumber(partNumber) {
 }
 
 
-/// Retrieve a list of populated board kit components that have been received at a specified location across all component types
+/// Retrieve a list of populated board kit components that are at a specified location across all component types
 async function boardKitComponentsByLocation(location) {
   // Set up a list of component type form IDs which can be found in a populated board kit
   const componentTypeFormIDs = ['CRBoard', 'GBiasBoard', 'SHVBoard', 'CableHarness'];
 
   let aggregation_stages = [];
 
-  // Retrieve all component records that have the same type as those that could be in a populated board kit, and the same reception location as the specified one
+  // Retrieve all component records that have the same type as those that could be in a populated board kit, and the same location as the specified one
   aggregation_stages.push({
     $match: {
       'formId': { $in: componentTypeFormIDs },
@@ -348,16 +379,16 @@ async function boardKitComponentsByLocation(location) {
 }
 
 
-/// Retrieve a list of assembled APAs that match the specified location and production number
-async function apasByLocation(location, productionNumber) {
+/// Retrieve a list of assembled APAs that match the specified production location and number
+async function apasByProductionDetails(location, number) {
   let aggregation_stages = [];
 
-  // Retrieve all assembled APAs records that have the same location and production number as the specified values
+  // Retrieve all assembled APAs records that have the same production location and number as the specified values
   aggregation_stages.push({
     $match: {
       'formId': 'AssembledAPA',
       'data.apaAssemblyLocation': location,
-      'data.apaNumberAtLocation': parseInt(productionNumber, 10),
+      'data.apaNumberAtLocation': parseInt(number, 10),
     }
   });
 
@@ -422,6 +453,6 @@ module.exports = {
   meshesByLocation,
   meshesByPartNumber,
   boardKitComponentsByLocation,
-  apasByLocation,
+  apasByProductionDetails,
   componentsByTypeAndNumber,
 }
