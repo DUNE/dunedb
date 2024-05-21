@@ -117,6 +117,37 @@ block content
                 a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
                   img.small-icon(src = '/images/checklist_icon.svg')
                   | &nbsp; Print all sub-component QR codes
+            else if component.formId === 'DWAComponentShipment'
+              .vert-space-x1.border-success.border.rounded.p-2
+                dt Origin Location
+                dd #{dictionary_locations[component.data.originOfShipment]}
+
+                dt Destination Location
+                dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+                dt Components in Shipment
+                dd
+                  table.table 
+                    thead 
+                      tr 
+                        th.col-md-2 UUID 
+                        th.col-md-1 Type
+                        th.col-md-1 Number
+                        th.col-md-3 QR Code Link 
+
+                    tbody 
+                      each info in collectionDetails
+                        tr
+                          td
+                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                          td #{info[2]}
+                          td #{info[1]}
+                          td #{`${base_url}/c/${info[3]}`}
+
+                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+                  img.small-icon(src = '/images/checklist_icon.svg')
+                  | &nbsp; Print all sub-component QR codes
             else if component.formId === 'GroundingMeshShipment'
               .vert-space-x1.border-success.border.rounded.p-2
                 dt Origin Location
