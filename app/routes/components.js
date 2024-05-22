@@ -55,6 +55,18 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       }
     }
 
+    if (component.formId === 'DWAComponentShipment') {
+      for (const info of component.data.componentUUIDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const dwaRecord = await Components.retrieve(uuid);
+
+          if (dwaRecord) collectionDetails.push([uuid, dwaRecord.data.typeRecordNumber, dwaRecord.formName, dwaRecord.shortUuid]);
+        }
+      }
+    }
+
     if (component.formId === 'GroundingMeshShipment') {
       for (const info of component.data.apaUuiDs) {
         let uuid = info.component_uuid;
@@ -163,6 +175,18 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
           const boardRecord = await Components.retrieve(uuid);
 
           if (boardRecord) shortUUIDs.push([boardRecord.data.typeRecordNumber, boardRecord.shortUuid, boardRecord.formName]);
+        }
+      }
+    }
+
+    if (component.formId === 'DWAComponentShipment') {
+      for (const info of component.data.componentUUIDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const dwaRecord = await Components.retrieve(uuid);
+
+          if (dwaRecord) shortUUIDs.push([dwaRecord.data.typeRecordNumber, dwaRecord.shortUuid, dwaRecord.formName]);
         }
       }
     }
@@ -493,6 +517,14 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
       // Extract the UUID and update the location information of each board in a shipment of boards, and then update the location information of the shipment itself
       for (const board of component.data.boardUuiDs) {
         const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
+      }
+
+      const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
+      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+    } else if (component.formId === 'DWAComponentShipment') {
+      // Extract the UUID and update the location information of each component in a (combined) shipment of DWAs and DWAPDBs, and then update the location information of the shipment itself
+      for (const dwa of component.data.componentUUIDs) {
+        const result = await Components.updateLocation(dwa.component_uuid, req.params.location, req.params.date, '');
       }
 
       const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');

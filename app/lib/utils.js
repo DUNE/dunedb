@@ -24,8 +24,6 @@ module.exports = {
     surf: 'SURF',
     sussex: 'Sussex',
     ukWarehouse: 'UK Warehouse',
-    uw: 'Wisconsin',
-    uwPsl: 'UW / PSL',
     williamAndMary: 'William and Mary',
     wisconsin: 'Wisconsin',
   },

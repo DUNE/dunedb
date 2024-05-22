@@ -99,6 +99,10 @@ async function save(input, req) {
       newRecord.data.name = `D00300500001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
     } else if (input.formId === 'CableHarness') {
       newRecord.data.name = `D00300500002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+    } else if (input.formId === 'DWA') {
+      newRecord.data.name = `D00300800001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US136-01-00-00`;
+    } else if (input.formId === 'DWAPDB') {
+      newRecord.data.name = `D00300800002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US136-01-00-00`;
     }
 
     // Set up a new 'Reception' object to hold the component's current location and the date at which it was received at this location ... and we can immediately set the date to be the current one
@@ -111,7 +115,7 @@ async function save(input, req) {
     // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
     if ((input.formId === 'APAFrame') || (input.formId === 'GroundingMeshPanel')) {
       newRecord.reception.location = 'ukWarehouse';
-    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
+    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
       newRecord.reception.location = 'in_transit';
     } else if ((input.formId === 'AssembledAPA') || (input.formId === 'wire_bobbin')) {
       newRecord.reception.location = 'daresbury';
@@ -268,6 +272,7 @@ async function list(match_condition, options) {
       formId: true,
       formName: true,
       data: true,
+      shortName: { $substr: ['$data.name', 13, 5] },
       validity: true,
     }
   })
@@ -285,13 +290,14 @@ async function list(match_condition, options) {
       typeFormName: { '$first': '$formName' },
       data: { '$first': '$data' },
       name: { '$first': '$data.name' },
+      shortName: { '$first': '$shortName' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
 
-  // Re-sort the records ... by (alphabetical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
+  // Re-sort the records ... by (alphanumerical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
   if ((match_condition) && (match_condition.formId) && ((match_condition.formId === 'APAFrame') || (match_condition.formId === 'AssembledAPA'))) {
-    aggregation_stages.push({ $sort: { name: 1 } });
+    aggregation_stages.push({ $sort: { shortName: -1 } });
   } else {
     aggregation_stages.push({ $sort: { lastEditDate: -1 } });
   }
