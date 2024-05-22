@@ -272,6 +272,7 @@ async function list(match_condition, options) {
       formId: true,
       formName: true,
       data: true,
+      shortName: { $substr: ['$data.name', 13, 5] },
       validity: true,
     }
   })
@@ -289,13 +290,14 @@ async function list(match_condition, options) {
       typeFormName: { '$first': '$formName' },
       data: { '$first': '$data' },
       name: { '$first': '$data.name' },
+      shortName: { '$first': '$shortName' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
 
-  // Re-sort the records ... by (alphabetical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
+  // Re-sort the records ... by (alphanumerical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
   if ((match_condition) && (match_condition.formId) && ((match_condition.formId === 'APAFrame') || (match_condition.formId === 'AssembledAPA'))) {
-    aggregation_stages.push({ $sort: { name: 1 } });
+    aggregation_stages.push({ $sort: { shortName: -1 } });
   } else {
     aggregation_stages.push({ $sort: { lastEditDate: -1 } });
   }
