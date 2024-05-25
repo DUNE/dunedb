@@ -189,6 +189,8 @@ function SubmitData(submission) {
       url = `/component/${submission.componentUuid}/updateLocations/${'lancaster'}/${(new Date()).toISOString().slice(0, 10)}`;
     } else if (submission.formId === 'AssembledAPA') {
       url = `/component/${submission.componentUuid}/updateLocations/${'installed_on_APA'}/${(new Date()).toISOString().slice(0, 10)}`;
+
+      if (!(workflowId === '')) url += `?workflowId=${workflowId}&stepIndex=0`;
     } else if ((submission.formId === 'APAShipment') || (submission.formId === 'BoardShipment') || (submission.formId === 'DWAComponentShipment') || (submission.formId === 'GroundingMeshShipment') || (submission.formId === 'PopulatedBoardShipment')) {
       url = `/component/${submission.componentUuid}/updateLocations/${'in_transit'}/${(new Date()).toISOString().slice(0, 10)}`;
     } else {

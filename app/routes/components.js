@@ -504,7 +504,14 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
       // Update the location information of the APA frame that is referenced by the Assembled APA component, to show that the frame is now being used
       const result = await Components.updateLocation(component.data.frameUuid, req.params.location, req.params.date, req.params.uuid);
 
-      url = `/component/${req.params.uuid}`;
+      // Depending on if the originating Assembled APA component was part of a workflow or not, redirect to an appropriate page
+      // If the component originated from a workflow (and therefore a workflow ID has been provided), go to the page for updating the workflow path step results
+      // On the other hand, if it was a standalone component, go to the page for viewing the component record
+      if (req.query.workflowId) {
+        url = `/workflow/${req.query.workflowId}/${req.query.stepIndex}/component/${req.params.uuid}`;
+      } else {
+        url = `/component/${req.params.uuid}`;
+      }
     } else if (component.formId === 'APAShipment') {
       // Extract the UUID and update the location information of each assembled APA in a shipment of APAs, and then update the location information of the shipment itself
       for (const apa of component.data.apaUuiDs) {
