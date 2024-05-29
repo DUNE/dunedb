@@ -563,7 +563,7 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
       }
 
       const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
-      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+      url = (req.params.location === 'wisconsin') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
     } else if (component.formId === 'ReturnedGeometryBoardBatch') {
       // For each board in a batch of returned geometry boards, extract the UUID and update the location information to match that from the batch's submission
       for (const board of component.data.boardUuids) {
