@@ -8,10 +8,11 @@ block extrascripts
   script(type = 'text/javascript').
     const component = !{JSON.stringify(component, null, 4)};
     const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
-    const shipmentDetails = !{JSON.stringify(shipmentDetails, null, 4)};
+    const collectionDetails = !{JSON.stringify(collectionDetails, null, 4)};
     const nonConformActions = !{JSON.stringify(nonConformActions, null, 4)};
     const workflowActions = !{JSON.stringify(workflowActions, null, 4)};
     const otherActions = !{JSON.stringify(otherActions, null, 4)};
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
 
   block workscripts
     script(src = '/pages/component_summary.js')
@@ -68,28 +69,133 @@ block allbody
             if component.insertion.user
               |  by !{' '} #{component.insertion.user.displayName}
 
-            .vert-space-x1.border-success.border.rounded.p-2
-              #componenttypeform
-
-      .pagebreak
-
-      if component.formId == 'BoardShipment'
+      if component.formId === 'BoardShipment'
         .vert-space-x1.border-success.border.rounded.p-2
+          dt Origin Location 
+          dd #{dictionary_locations[component.data.originOfShipment]}
+
+          dt Destination Location
+          dd #{dictionary_locations[component.data.destinationOfShipment]}
+
           dt Boards in Shipment
           dd
             table.table
               thead
                 tr
-                  th.col-sm-3 UUID
-                  th.col-sm-2 UK ID
+                  th.col-md-2 UUID
+                  th.col-md-1 UK ID
+                  th.col-md-1 Part Number
 
               tbody
-                each info in shipmentDetails
+                each info in collectionDetails
                   tr
                     td #{info[0]}
                     td #{info[1]}
+                    td #{info[2]}
+      else if component.formId === 'DWAComponentShipment'
+        .vert-space-x1.border-success.border.rounded.p-2
+          dt Origin Location
+          dd #{dictionary_locations[component.data.originOfShipment]}
 
-        .pagebreak
+          dt Destination Location
+          dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+          dt Components in Shipment
+          dd
+            table.table 
+              thead 
+                tr 
+                  th.col-md-2 UUID 
+                  th.col-md-1 Type
+                  th.col-md-1 Number 
+
+              tbody 
+                each info in collectionDetails
+                  tr
+                    td #{info[0]}
+                    td #{info[2]}
+                    td #{info[1]}
+      else if component.formId === 'GroundingMeshShipment'
+        .vert-space-x1.border-success.border.rounded.p-2
+          dt Origin Location
+          dd #{dictionary_locations[component.data.originOfShipment]}
+
+          dt Destination Location
+          dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+          dt Meshes in Shipment
+          dd
+            table.table 
+              thead 
+                tr 
+                  th.col-md-2 UUID 
+                  th.col-md-1 Factory ID
+                  th.col-md-1 Part Number 
+
+              tbody 
+                each info in collectionDetails
+                  tr
+                    td #{info[0]}
+                    td #{info[1]}
+                    td #{info[2]}
+      else if component.formId === 'PopulatedBoardShipment'
+        .vert-space-x1.border-success.border.rounded.p-2
+          dt Origin Location
+          dd #{dictionary_locations[component.data.originOfShipment]}
+
+          dt Destination Location
+          dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+          dt Components in Kit
+          dd
+            table.table 
+              thead 
+                tr 
+                  th.col-md-2 UUID 
+                  th.col-md-1 Type
+                  th.col-md-1 UW ID 
+
+              tbody 
+                each info in collectionDetails
+                  tr
+                    td #{info[0]}
+                    td #{info[2]}
+                    td #{info[1]}
+      else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
+        if component.formId === 'GeometryBoardBatch'
+          .vert-space-x1.border-success.border.rounded.p-2
+            #typeform
+
+        - let columnHeader = ''
+
+        if component.data.subComponent_formId == 'CEAdapterBoard' || component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
+          - columnHeader = 'UW ID'
+        else 
+          - columnHeader = 'UK ID'
+
+        .vert-space-x1.border-success.border.rounded.p-2
+          dt #{`Components in Batch (total = ${component.data.subComponent_count})`}
+          dd
+            table.table
+              thead
+                tr
+                  th.col-md-3 UUID
+                  th.col-md-1 #{columnHeader}
+
+              tbody
+                each uuid, index in component.data.subComponent_fullUuids
+                  tr
+                    td #{uuid}
+
+                    if component.data.subComponent_typeRecordNumbers
+                      td #{component.data.subComponent_typeRecordNumbers[index]}
+                    else
+                      td (not retrievable)
+      else
+        .vert-space-x1.border-success.border.rounded.p-2
+          #componenttypeform
+
+      .pagebreak
 
       each action in nonConformActions
         .section.actionSection
