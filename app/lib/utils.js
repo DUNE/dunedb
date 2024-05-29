@@ -6,7 +6,7 @@ module.exports = {
   short_uuid_regex: ':shortuuid([0-9a-bA-Z-]{20,22})',
 
   // A dictionary of locations that are used across all component and action type forms
-  // Using this centralised dictionary allows locations to be consistently displayed, regardless of on which page of the interface
+  // Using this centralised dictionary allows locations to be consistently displayed in the DB interface
   dictionary_locations: {
     bnl: 'BNL',
     cambridge: 'Cambridge',
@@ -26,5 +26,71 @@ module.exports = {
     ukWarehouse: 'UK Warehouse',
     williamAndMary: 'William and Mary',
     wisconsin: 'Wisconsin',
+  },
+
+  // The dictionaries below list various groups of UK and US personnel, whose names should be entered as appropriate in various component and action type forms
+  // Using these centralised dictionaries allows names to be consistently displayed in the DB interface, and also for them to be selected via drop-down menu when filling out the type forms
+
+  // A dictionary of UK and US technicians 
+  dictionary_technicians: {
+    vincentBaker: 'Vincent Baker',
+    davidBanner: 'David Banner',
+    carlosChavezBarajas: 'Carlos Chavez Barajas',
+    edBlucher: 'Ed Blucher',
+    josephBradwell: 'Joseph Bradwell',
+    daveBrown: 'Dave Brown',
+    markFarrell: 'Mark Farrell',
+    benFurey: 'Ben Furey',
+    lewisGannon: 'Lewis Gannon',
+    wayneGreen: 'Wayne Green',
+    nicholasHays: 'Nicholas Hays',
+    andrewKelly: 'Andrew Kelly',
+    slawekKubecki: 'Slawek Kubecki',
+    albertoMarchionni: 'Alberto Marchionni',
+    grahamMitchell: 'Graham Mitchell',
+    jackNorwell: 'Jack Norwell',
+    benjaminOye: 'Benjamin Oye',
+    radosavPantelic: 'Radosav Pantelic',
+    danielSalisbury: 'Daniel Salisbury',
+    daveSim: 'Dave Sim',
+    bjornStowell: 'Bjorn Stowell',
+    stephenSumner: 'Stephen Sumner',
+    chrisSutton: 'Chris Sutton',
+    jasonThornhill: 'Jason Thornhill',
+    oliverUnwin: 'Oliver Unwin',
+    anthonyWatling: 'Anthony Watling',
+    lewisWatson: 'Lewis Watson',
+    sotirisVlachos: 'Sotiris Vlachos',
+  },
+
+  // A dictionary of lead personnel at the UK and US APA factories
+  dictionary_apaFactoryLeads: {
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
+    radosavPantelic: 'Radosav Pantelic',
+    sotirisVlachos: 'Sotiris Vlachos',
+  },
+
+  // A dictionary of personnel who are authorised to sign-off on tension controls
+  dictionary_tensionControlSignoff: {
+    carlosChavezBarajas: 'Carlos Chavez Barajas',
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
+    sotirisVlachos: 'Sotiris Vlachos',
+  },
+
+  // A dictionary of personnel who are authorised to sign-off on winder maintenance
+  dictionary_winderMaintenanceSignoff: {
+    vincentBaker: 'Vincent Baker',
+    carlosChavezBarajas: 'Carlos Chavez Barajas',
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
+    daveSim: 'Dave Sim',
+  },
+
+  // A dictionary of personnel who are authorised to sign-off on APA frame and grounding mesh intakes
+  dictionary_frameMeshSignoff: {
+    gedBell: 'Ged Bell',
+    callumHolt: 'Callum Holt',
   },
 }

@@ -115,11 +115,11 @@ async function save(input, req) {
     // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
     if ((input.formId === 'APAFrame') || (input.formId === 'GroundingMeshPanel')) {
       newRecord.reception.location = 'ukWarehouse';
-    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
+    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment')) {
       newRecord.reception.location = 'in_transit';
     } else if ((input.formId === 'AssembledAPA') || (input.formId === 'wire_bobbin')) {
       newRecord.reception.location = 'daresbury';
-    } else if ((input.formId === 'CEAdapterBoard') || (input.formId === 'CRBoard') || (input.formId === 'CableHarness') || (input.formId === 'GBiasBoard') || (input.formId === 'SHVBoard')) {
+    } else if ((input.formId === 'CEAdapterBoard') || (input.formId === 'CRBoard') || (input.formId === 'CableHarness') || (input.formId === 'GBiasBoard') || (input.formId === 'SHVBoard') || (input.formId === 'PopulatedBoardShipment')) {
       newRecord.reception.location = 'wisconsin';
     } else if ((input.formId === 'DWA') || (input.formId === 'DWAPDB')) {
       newRecord.reception.location = newRecord.data.productionLocation;
