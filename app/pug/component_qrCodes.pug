@@ -4,6 +4,10 @@ include common.pug
 block vars
   - const page_title = 'Component QR Codes';
 
+block extrascripts
+  script(type = 'text/javascript').
+    const base_url = '!{base_url}';
+
 block allbody
   .vert-space-x2.hori-space-x1.noprint
     a.btn.btn-primary(onclick = 'window.print(); return false;' href = '#print') Print QR Codes
@@ -17,27 +21,53 @@ block allbody
   .vert-space-x2
     .container.fluid
       - const qrCodeText = `${base_url}/c/${component.shortUuid.toString()}`;
-      - const qrCodeDesc = component.data.name;
 
-      .row.qr-row
-        .col-sm-6.qr-col
-          +qr-panel-noText(qrCodeText, qrCodeDesc)
+      if (component.formId === 'APAShipment') || (component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'DWAComponentShipment') || (component.formId === 'FrameShipment') || (component.formId === 'GroundingMeshShipment') || (component.formId === 'PopulatedBoardShipment')
+        - const qrCodeDesc = component.componentUuid
 
-        .col-sm-6.qr-col
-          +qr-panel-noText(qrCodeText, qrCodeDesc)
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-topText(qrCodeText, qrCodeDesc)
 
-      .row.qr-row
-        .col-sm-6.qr-col
-          +qr-panel-noText(qrCodeText, qrCodeDesc)
+          .col-sm-6.qr-col
+            +qr-panel-topText(qrCodeText, qrCodeDesc)
 
-        .col-sm-6.qr-col
-          +qr-panel-noText(qrCodeText, qrCodeDesc)
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-topText(qrCodeText, qrCodeDesc)
 
-      .row.qr-row
-        .col-sm-6.qr-col
-          +qr-panel-noText(qrCodeText, qrCodeDesc)
+          .col-sm-6.qr-col
+            +qr-panel-topText(qrCodeText, qrCodeDesc)
 
-        .col-sm-6.qr-col
-          +qr-panel-noText(qrCodeText, qrCodeDesc)
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-topText(qrCodeText, qrCodeDesc)
+
+          .col-sm-6.qr-col
+            +qr-panel-topText(qrCodeText, qrCodeDesc)
+
+      else
+        - const qrCodeDesc = component.data.name
+
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-noText(qrCodeText, qrCodeDesc)
+
+          .col-sm-6.qr-col
+            +qr-panel-noText(qrCodeText, qrCodeDesc)
+
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-noText(qrCodeText, qrCodeDesc)
+
+          .col-sm-6.qr-col
+            +qr-panel-noText(qrCodeText, qrCodeDesc)
+
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-noText(qrCodeText, qrCodeDesc)
+
+          .col-sm-6.qr-col
+            +qr-panel-noText(qrCodeText, qrCodeDesc)
 
   .vert-space-x2
