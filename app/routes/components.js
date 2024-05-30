@@ -334,23 +334,84 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
     const chrono_workflowActions = workflowActions.reverse();
     const chrono_otherActions = otherActions.reverse();
 
-    // For 'Geometry Board Shipment' type components, set up an array containing more detailed information about each board in the shipment
-    // This is required for this particular type of component, because by itself it only contains the UUIDs of the related boards
-    // (Contrast with 'Geometry Board Batch' type components, which natively contain both the UUIDs and UKIDs of the related boards)
-    let shipmentDetails = [];
+    // For specific shipment and batch component types, set up an array containing more detailed information about each sub-component
+    let collectionDetails = [];
 
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
         let uuid = info.component_uuid;
-        let ukid = 'none';
 
-        if (uuid === '') uuid = 'none';
-        else {
+        if (uuid !== '') {
           const boardRecord = await Components.retrieve(uuid);
-          ukid = boardRecord.data.typeRecordNumber;
-        }
 
-        shipmentDetails.push([uuid, ukid]);
+          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.data.partNumber]);
+        }
+      }
+    }
+
+    if (component.formId === 'DWAComponentShipment') {
+      for (const info of component.data.componentUUIDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const dwaRecord = await Components.retrieve(uuid);
+
+          if (dwaRecord) collectionDetails.push([uuid, dwaRecord.data.typeRecordNumber, dwaRecord.formName]);
+        }
+      }
+    }
+
+    if (component.formId === 'GroundingMeshShipment') {
+      for (const info of component.data.apaUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const meshRecord = await Components.retrieve(uuid);
+
+          if (meshRecord) collectionDetails.push([uuid, meshRecord.data.typeRecordNumber, meshRecord.data.meshPanelPartNumber]);
+        }
+      }
+    }
+
+    if (component.formId === 'PopulatedBoardShipment') {
+      for (const info of component.data.crBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+        }
+      }
+
+      for (const info of component.data.gBiasBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+        }
+      }
+
+      for (const info of component.data.shvBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+        }
+      }
+
+      for (const info of component.data.cableHarnessUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+        }
       }
     }
 
@@ -358,10 +419,11 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
     res.render('component_summary.pug', {
       component,
       componentTypeForm,
-      shipmentDetails,
+      collectionDetails,
       nonConformActions: chrono_nonConformActions,
       workflowActions: chrono_workflowActions,
       otherActions: chrono_otherActions,
+      dictionary_locations: utils.dictionary_locations,
     });
   } catch (err) {
     logger.error(err);
@@ -563,7 +625,7 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
       }
 
       const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
-      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+      url = (req.params.location === 'wisconsin') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
     } else if (component.formId === 'ReturnedGeometryBoardBatch') {
       // For each board in a batch of returned geometry boards, extract the UUID and update the location information to match that from the batch's submission
       for (const board of component.data.boardUuids) {
