@@ -92,7 +92,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.apaQC.signoff = results[0].signoff;
+    collatedInfo.apaQC.signoff = utils.dictionary_apaFactoryLeads[results[0].signoff];
     collatedInfo.apaQC.actionId = results[0].actionId;
   }
 
@@ -127,7 +127,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.frameQC.signoff = results[0].signoff;
+    collatedInfo.frameQC.signoff = utils.dictionary_frameMeshSignoff[results[0].signoff];
     collatedInfo.frameQC.qcActionId = results[0].actionId;
   }
 
@@ -188,7 +188,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.meshPanelQC.signoff = results[0].signoff;
+    collatedInfo.meshPanelQC.signoff = utils.dictionary_technicians[results[0].signoff];
     collatedInfo.meshPanelQC.actionId = results[0].actionId;
   }
 
@@ -258,8 +258,8 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.pdCableTempSensorQC.photonDetectorSignoff = results[0].photonDetectorSignoff;
-    collatedInfo.pdCableTempSensorQC.rdInstallationSignoff = results[0].rdInstallationSignoff;
+    collatedInfo.pdCableTempSensorQC.photonDetectorSignoff = utils.dictionary_technicians[results[0].photonDetectorSignoff];
+    collatedInfo.pdCableTempSensorQC.rdInstallationSignoff = utils.dictionary_technicians[results[0].rdInstallationSignoff];
     collatedInfo.pdCableTempSensorQC.actionId = results[0].actionId;
   }
 
@@ -345,7 +345,7 @@ async function collateInfo(componentUUID) {
         winderHead: { '$first': '$data.winderHead' },
         wireBobbins: { '$first': '$data.bobbinGrid' },
         winderMaintenenceSignoff: { '$first': '$data.winderMaintenanceVerification' },
-        tensionControlSignoff: { '$first': '$data.tensionControlValidation' },
+        tensionControlSignoff: { '$first': '$data.tensionControlVerification' },
         replacedWires: { '$first': '$data.replacedWires' },
         numberOfTensionAlarms: { '$first': '$data.numberOfTensionAlarms' },
         actionId: { '$first': '$actionId' },
@@ -383,8 +383,8 @@ async function collateInfo(componentUUID) {
       collatedInfo[dictionaries[i]].winder = dictionary_winders[results[0].winder];
       collatedInfo[dictionaries[i]].winderHead = dictionary_heads[results[0].winderHead];
       collatedInfo[dictionaries[i]].bobbinManufacturers = bobbinManufacturers;
-      collatedInfo[dictionaries[i]].winderMaintenenceSignoff = results[0].winderMaintenenceSignoff;
-      collatedInfo[dictionaries[i]].tensionControlSignoff = results[0].tensionControlSignoff;
+      collatedInfo[dictionaries[i]].winderMaintenenceSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].winderMaintenenceSignoff];
+      collatedInfo[dictionaries[i]].tensionControlSignoff = utils.dictionary_tensionControlSignoff[results[0].tensionControlSignoff];
       collatedInfo[dictionaries[i]].numberOfReplacedWires = numberOfReplacedWires;
       collatedInfo[dictionaries[i]].numberOfTensionAlarms = results[0].numberOfTensionAlarms;
       collatedInfo[dictionaries[i]].winding_actionId = results[0].actionId;
