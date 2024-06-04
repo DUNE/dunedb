@@ -1,11 +1,11 @@
 // Set up the schema for the QC signoffs
 function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCableTempSensorQC) {
-  const apaQC_link = (apaQC.actionId !== '' ? `<a href = '/action/${apaQC.actionId}' > APA QC Review Details </a>` : `[APA QC Review not performed]`);
-  const frameQC_link = (frameQC.qcActionId !== '' ? `<a href = '/action/${frameQC.qcActionId}' > Frame QC Review Details </a>` : `[Frame QC Review not performed]`);
-  const frameSurveys_link = (frameQC.surveysActionId !== '' ? `<a href = '/action/${frameQC.surveysActionId}' > Frame Surveys Details </a>` : `[Frame Surveys not performed]`);
-  const meshPanelQC_link = (meshPanelQC.actionId !== '' ? `<a href = '/action/${meshPanelQC.actionId}' > Mesh Panel Installation QC Details </a>` : `[Mesh Panel Installation not performed]`);
-  const cableConduitQC_link = (cableConduitQC.actionId !== '' ? `<a href = '/action/${cableConduitQC.actionId}' > Cable Conduit Insertion QC Details </a>` : `[Cable Conduit Insertion not performed]`);
-  const pdCableTempSensorQC_link = (pdCableTempSensorQC.actionId !== '' ? `<a href = '/action/${pdCableTempSensorQC.actionId}' > PD & RTD Installation QC Details </a>` : `[PD & RTD Installation not performed]`);
+  const apaQC_link = (apaQC.actionId !== '' ? `<a href = '/action/${apaQC.actionId}' > APA QC Review Details </a>` : `[APA QC Review not found]`);
+  const frameQC_link = (frameQC.qcActionId !== '' ? `<a href = '/action/${frameQC.qcActionId}' > Frame QC Review Details </a>` : `[Frame QC Review not found]`);
+  const frameSurveys_link = (frameQC.surveysActionId !== '' ? `<a href = '/action/${frameQC.surveysActionId}' > Frame Installation Surveys Details </a>` : `[Frame Installation Surveys not found]`);
+  const meshPanelQC_link = (meshPanelQC.actionId !== '' ? `<a href = '/action/${meshPanelQC.actionId}' > Mesh Panel Installation Details </a>` : `[Mesh Panel Installation not found]`);
+  const cableConduitQC_link = (cableConduitQC.actionId !== '' ? `<a href = '/action/${cableConduitQC.actionId}' > Cable Conduit Insertion Details </a>` : `[Cable Conduit Insertion not found]`);
+  const pdCableTempSensorQC_link = (pdCableTempSensorQC.actionId !== '' ? `<a href = '/action/${pdCableTempSensorQC.actionId}' > PD & RTD Installation Details </a>` : `[PD & RTD Installation not found]`);
 
   const schema_qcSignoffs = {
     components: [{
@@ -172,9 +172,9 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
 
 // Set up the schema for a single wire layer entry
 function SetEntry_wireLayer(layer, layerInfo) {
-  const winding_link = (layerInfo.winding_actionId !== '' ? `<a href = '/action/${layerInfo.winding_actionId}' > Winding Details </a>` : `[Winding not performed]`);
-  const soldering_link = (layerInfo.soldering_actionId !== '' ? `<a href = '/action/${layerInfo.soldering_actionId}' > Soldering Details </a>` : `[Soldering not performed]`);
-  const tensions_link = (layerInfo.tensions_actionId !== '' ? `<a href = '/action/${layerInfo.tensions_actionId}' > Tension Measurements </a>` : `[Tension Measurements not performed]`);
+  const winding_link = (layerInfo.winding_actionId !== '' ? `<a href = '/action/${layerInfo.winding_actionId}' > Winding Details </a>` : `[Winding action not found]`);
+  const soldering_link = (layerInfo.soldering_actionId !== '' ? `<a href = '/action/${layerInfo.soldering_actionId}' > Soldering Details </a>` : `[Soldering action not found]`);
+  const tensions_link = (layerInfo.tensions_actionId !== '' ? `<a href = '/action/${layerInfo.tensions_actionId}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
 
   const schema_wireLayer = {
     components: [{
@@ -466,22 +466,22 @@ function SetEntry_apaNCRs_wires(ncrInfo) {
       },
       {
         components: [{
-          label: 'Cold Channel:',
-          key: 'apaNCRs_wires_coldChannel',
+          label: 'Offline Channel:',
+          key: 'apaNCRs_wires_offlineChannel',
           type: 'textfield',
           input: false,
-          defaultValue: ncrInfo.coldChannel,
+          defaultValue: ncrInfo.offlineChannel,
         }],
         width: 2,
         size: 'sm',
       },
       {
         components: [{
-          label: 'Offline Channel:',
-          key: 'apaNCRs_wires_offlineChannel',
+          label: 'FEMB-ASIC-ASIC Channel:',
+          key: 'apaNCRs_wires_fembChannel',
           type: 'textfield',
           input: false,
-          defaultValue: ncrInfo.offlineChannel,
+          defaultValue: ncrInfo.fembChannel,
         }],
         width: 2,
         size: 'sm',
