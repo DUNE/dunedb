@@ -132,12 +132,12 @@ block content
 
           .vert-space-x2 
 
-        if (action.typeFormId == 'HorizontalFrameInspection')
-          if (action.data.m4Holes)
+        if (action.typeFormId == 'IntakeSurveys')
+          if (action.data.intake_m4Holes)
             .vert-space-x1
               .panel.panel-default
               .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
-                | M4 hole measurements (mm): 
+                | M4 Hole Measurements (mm): 
                 i.chevron.fa.fa-fw 
 
               .collapse#m4HolesBox
@@ -156,7 +156,7 @@ block content
                           th.col-md-2 Diff [Actual - Nominal]
 
                       tbody
-                        for [key, value] of Object.entries(action.data.m4Holes)
+                        for [key, value] of Object.entries(action.data.intake_m4Holes)
                           tr
                             td #{value['Hole']}
                             td #{value['x']}
@@ -166,93 +166,69 @@ block content
                             td #{value['deviat_1stHole']}
                             td #{value['dist_prevHole']}
                             td #{value['deviat_prevHole']}
-
-        if (action.typeFormId == 'VerticalFrameInspection')
-          if (action.data.envelope)
+          else
             .vert-space-x1
-              - let outOfSpecCount = 0
-
-              for [key, value] of Object.entries(action.data.envelope)
-                if value['Tolerance'] != '-'
-                  if key < 4
-                    if value['Deviation from nominal'] >= value['Tolerance']
-                      - outOfSpecCount += 1
-                  else
-                    if (value['Deviation from nominal'] <= (-1.0 * value['Tolerance'])) || (value['Deviation from nominal'] >= value['Tolerance'])
-                      - outOfSpecCount += 1
-
               .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
-                | Envelope Analysis (#{outOfSpecCount} results outside tolerance): 
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
+                | M4 Hole Measurements (no results found in record!) 
                 i.chevron.fa.fa-fw 
 
-              .collapse#envelopeBox
+          if (action.data.intake_xCornerDev)
+            .vert-space-x1
+              - outOfSpecCount = 0
+
+              for [key, value] of Object.entries(action.data.intake_xCornerDev)
+                if (value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance)
+                  - outOfSpecCount += 1
+
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornerDevBox')
+                | Manually Measured Cross-Corner Deviation (#{outOfSpecCount} results outside tolerance): 
+                i.chevron.fa.fa-fw 
+
+              .collapse#xCornerDevBox
                 .vert-space-x1.border-success.border.rounded.p-2
                   dd
                     table.table
                       thead
                         tr
-                          th.col-md-3 Measurement
-                          th.col-md-1 Units
-                          th.col-md-1 Position
-                          th.col-md-1 Nominal 
-                          th.col-md-1 Tolerance 
+                          th.col-md-2 Measurement
                           th.col-md-1 Actual
-                          th.col-md-1 Deviation
-                          th.col-md-1 EDMS ID 
-                          th.col-md-2 Comments
+                          th.col-md-1 Units
+                          th.col-md-1 Tolerance 
+                          th.col-md-7 Comment
 
                       tbody
-                        for [key, value] of Object.entries(action.data.envelope)
+                        for [key, value] of Object.entries(action.data.intake_xCornerDev)
                           tr
-                            td #{value['Measurement']}
-                            td #{value['Units']}
-                            td #{value['Position']}
+                            td #{value.Measurement}
 
-                            if value['Nominal'] == '-'
-                              td #{value['Nominal']}
-                            else 
-                              td #{value['Nominal'].toFixed(2)}
-
-                            if value['Tolerance'] == '-'
-                              td #{value['Tolerance']}
-                            else 
-                              td #{value['Tolerance'].toFixed(2)}
-
-                            if value['Actual'] == '-'
-                              td #{value['Actual']}
-                            else 
-                              td #{value['Actual'].toFixed(2)}
-
-                            if value['Tolerance'] != '-'
-                              if key < 4
-                                if value['Deviation from nominal'] < value['Tolerance']
-                                  td.text-success.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
-                                else
-                                  td.text-danger.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
-                              else
-                                if (value['Deviation from nominal'] > (-1.0 * value['Tolerance'])) && (value['Deviation from nominal'] < value['Tolerance'])
-                                  td.text-success.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
-                                else
-                                  td.text-danger.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
+                            if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
+                              td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
                             else
-                              td.text-success.font-weight-bold #{value['Deviation from nominal'].toFixed(2)}
+                              td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
 
-                            td 
-                              a(href = `https://edms.cern.ch/document/${value['EDMS ID']}`, target = '_blank') #{value['EDMS ID']}
-                            td #{value['Comments']}
+                            td #{value.Units}
+                            td #{value.Tolerance.toFixed(2)}
+                            td #{value.Comment}
+          else
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornerDevBox')
+                | Manually Measured Cross-Corner Deviation (no results found in record!) 
+                i.chevron.fa.fa-fw 
 
-          if (action.data.planarity)
+          if (action.data.intake_planarity)
             .vert-space-x1
               - outOfSpecCount = 0
 
-              for [key, value] of Object.entries(action.data.planarity)
-                if (value.Units !== null) && (value.Actual >= value.Tolerance)
+              for [key, value] of Object.entries(action.data.intake_planarity)
+                if (value.Actual !== '') && (value.Actual !== '-') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
                   - outOfSpecCount += 1
 
               .panel.panel-default
               .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
-                | Planarity Analysis (#{outOfSpecCount} results outside tolerance): 
+                | Planarity Analysis using M4/6 Holes (#{outOfSpecCount} results outside tolerance): 
                 i.chevron.fa.fa-fw 
 
               .collapse#planarityBox
@@ -268,29 +244,166 @@ block content
                           th.col-md-7 Comment
 
                       tbody
-                        for [key, value] of Object.entries(action.data.planarity)
+                        for [key, value] of Object.entries(action.data.intake_planarity)
                           tr
                             td #{value.Measurement}
 
-                            if value.Units !== null && value.Actual !== ''
-                              if value.Actual < value.Tolerance
+                            if (value.Actual !== '') && (value.Actual !== '-')
+                              if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
                                 td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
                               else
                                 td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
-
-                              td #{value.Units}
-                              td #{value.Tolerance.toFixed(2)}
-
                             else 
                               td #{value.Actual}
 
-                              if value.Units == null
-                                td
-                              else 
-                                td #{value.Units}
+                            td #{value.Units}
+
+                            if value.Tolerance !== ''
+                              td #{value.Tolerance.toFixed(2)}
+                            else 
                               td #{value.Tolerance}
 
                             td #{value.Comment}
+          else
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+                | Planarity Analysis using M4/6 Holes (no results found in record!) 
+                i.chevron.fa.fa-fw 
+
+          .vert-space-x2 
+
+        if (action.typeFormId == 'InstallationSurveys')
+          if (action.data.install_envelope)
+            .vert-space-x1
+              - let outOfSpecCount = 0
+
+              for [key, value] of Object.entries(action.data.install_envelope)
+                if value['Tolerance (±)'] != '-'
+                  if key === 3 || key === 4
+                    if value['Max Deviation From Nominal'] >= value['Tolerance (±)']
+                      - outOfSpecCount += 1
+                  else
+                    if (value['Max Deviation From Nominal'] <= (-1.0 * value['Tolerance (±)'])) || (value['Max Deviation From Nominal'] >= value['Tolerance (±)'])
+                      - outOfSpecCount += 1
+
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
+                | Envelope Analysis (#{outOfSpecCount} results outside tolerance): 
+                i.chevron.fa.fa-fw 
+
+              .collapse#envelopeBox
+                .vert-space-x1.border-success.border.rounded.p-2
+                  dd
+                    table.table
+                      thead
+                        tr
+                          th.col-md-3 Measurement Name (and link to EDMS)
+                          th.col-md-1 Units
+                          th.col-md-2 Position
+                          th.col-md-1 Nominal 
+                          th.col-md-1 Tolerance (±) 
+                          th.col-md-1 Actual
+                          th.col-md-1 Deviation
+                          th.col-md-2 Comments
+
+                      tbody
+                        for [key, value] of Object.entries(action.data.install_envelope)
+                          tr
+                            if value['EDMS ID'] !== '-'
+                              td 
+                                a(href = `https://edms.cern.ch/document/${value['EDMS ID']}`, target = '_blank') #{value['Measurement']}
+                            else 
+                              td #{value['Measurement']}
+
+                            td #{value['Units']}
+                            td #{value['Position']}
+                            td #{value['Nominal'].toFixed(2)}
+
+                            if value['Tolerance (±)'] == '-'
+                              td #{value['Tolerance (±)']}
+                            else 
+                              td #{value['Tolerance (±)'].toFixed(2)}
+
+                            if value['Actual'] == '-'
+                              td #{value['Actual']}
+                            else 
+                              td #{value['Actual'].toFixed(2)}
+
+                            if value['Tolerance (±)'] != '-'
+                              if key === 3 || key === 4
+                                if value['Max Deviation From Nominal'] < value['Tolerance (±)']
+                                  td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                                else
+                                  td.text-danger.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                              else
+                                if (value['Max Deviation From Nominal'] > (-1.0 * value['Tolerance (±)'])) && (value['Max Deviation From Nominal'] < value['Tolerance (±)'])
+                                  td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                                else
+                                  td.text-danger.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                            else
+                              td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+
+                            td #{value['Comments']}
+          else
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
+                | Envelope Analysis (no results found in record!) 
+                i.chevron.fa.fa-fw 
+
+          if (action.data.install_planarity)
+            .vert-space-x1
+              - outOfSpecCount = 0
+
+              for [key, value] of Object.entries(action.data.install_planarity)
+                if (value.Actual !== '') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
+                  - outOfSpecCount += 1
+
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+                | Planarity Analysis using M6/10/20 Holes (#{outOfSpecCount} results outside tolerance): 
+                i.chevron.fa.fa-fw 
+
+              .collapse#planarityBox
+                .vert-space-x1.border-success.border.rounded.p-2
+                  dd
+                    table.table
+                      thead
+                        tr
+                          th.col-md-2 Measurement
+                          th.col-md-1 Actual
+                          th.col-md-1 Units
+                          th.col-md-1 Tolerance 
+                          th.col-md-7 Comment
+
+                      tbody
+                        for [key, value] of Object.entries(action.data.install_planarity)
+                          tr
+                            td #{value.Measurement}
+
+                            if value.Actual !== ''
+                              if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
+                                td.text-success.font-weight-bold #{value.Actual.toFixed(2)}
+                              else
+                                td.text-danger.font-weight-bold #{value.Actual.toFixed(2)}
+                            else 
+                              td #{value.Actual}
+
+                            td #{value.Units}
+
+                            if value.Tolerance !== ''
+                              td #{value.Tolerance.toFixed(2)}
+                            else 
+                              td #{value.Tolerance}
+
+                            td #{value.Comment}
+          else
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+                | Planarity Analysis using M6/10/20 Holes (no results found in record!) 
+                i.chevron.fa.fa-fw 
 
           .vert-space-x2 
 
