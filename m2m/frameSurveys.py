@@ -66,6 +66,42 @@ def ExtractResults_IntakePlanarity(dataFile):
     return dict_planarity
 
 
+##################################################################################
+## Set INTAKE SURVEY CROSS-CORNER measurement results from the provided values  ##
+##################################################################################
+def SetupResults_IntakeXCorners(values):
+    # Set up a dictionary for the manual cross-corner measurements ... 
+    # ... each individual entry in this dictionary should be in the same format as the entries in the intake survey planarity analysis dictionary
+    dict_intakeXCorners = {
+        0: {
+            'Measurement': 'Frame Cross Dimensions',
+            'Actual': values[0],
+            'Units': 'mm',
+            'Tolerance': 0.25,
+            'Comment': '',
+        },
+        1: {
+            'Measurement': 'Cross Dimensions Pre-Release',
+            'Actual': values[1],
+            'Units': 'mm',
+            'Tolerance': 2.0,
+            'Comment': '',
+        },
+        2: {
+            'Measurement': 'Cross Dimensions Post-Release',
+            'Actual': values[2],
+            'Units': 'mm',
+            'Tolerance': 2.0,
+            'Comment': '',
+        },
+    }
+    
+    print(f' SetupResults_IntakeXCorners() - INFO: successfully set up \'Intake Survey Cross Corner Measurement\' results')
+
+    # Return the dictionary
+    return dict_intakeXCorners
+
+
 #####################################################################################################
 ## Extract INSTALLATION SURVEY (envelope and planarity) analysis results from the input .xlsx file ##
 #####################################################################################################

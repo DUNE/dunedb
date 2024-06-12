@@ -173,20 +173,20 @@ block content
                 | M4 Hole Measurements (no results found in record!) 
                 i.chevron.fa.fa-fw 
 
-          if (action.data.intake_xCornerDev)
+          if (action.data.intake_xCorners)
             .vert-space-x1
               - outOfSpecCount = 0
 
-              for [key, value] of Object.entries(action.data.intake_xCornerDev)
+              for [key, value] of Object.entries(action.data.intake_xCorners)
                 if (value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance)
                   - outOfSpecCount += 1
 
               .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornerDevBox')
-                | Manually Measured Cross-Corner Deviation (#{outOfSpecCount} results outside tolerance): 
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
+                | Manual Cross Corner Measurements (all measured at DSM) (#{outOfSpecCount} results outside tolerance): 
                 i.chevron.fa.fa-fw 
 
-              .collapse#xCornerDevBox
+              .collapse#xCornersBox
                 .vert-space-x1.border-success.border.rounded.p-2
                   dd
                     table.table
@@ -199,7 +199,7 @@ block content
                           th.col-md-7 Comment
 
                       tbody
-                        for [key, value] of Object.entries(action.data.intake_xCornerDev)
+                        for [key, value] of Object.entries(action.data.intake_xCorners)
                           tr
                             td #{value.Measurement}
 
@@ -214,8 +214,8 @@ block content
           else
             .vert-space-x1
               .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornerDevBox')
-                | Manually Measured Cross-Corner Deviation (no results found in record!) 
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
+                | Manual Cross Corner Measurements (all measured at DSM) (no results found in record!) 
                 i.chevron.fa.fa-fw 
 
           if (action.data.intake_planarity)
@@ -263,7 +263,10 @@ block content
                             else 
                               td #{value.Tolerance}
 
-                            td #{value.Comment}
+                            if value.Measurement === 'Cross corner deviation'
+                              td For reference only - please refer instead to the manual cross corner measurements above
+                            else
+                              td #{value.Comment}
           else
             .vert-space-x1
               .panel.panel-default

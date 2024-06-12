@@ -1,5 +1,5 @@
 from common import ConnectToAPI, EditAction
-from frameSurveys import ExtractResults_IntakeM4Holes, ExtractResults_IntakePlanarity, ExtractResults_InstallationSurveys
+from frameSurveys import ExtractResults_IntakeM4Holes, ExtractResults_IntakePlanarity, SetupResults_IntakeXCorners, ExtractResults_InstallationSurveys
 
 ####################################
 # Set the user-defined information #
@@ -10,9 +10,10 @@ actionId_intake        = '664b7666004486ec08abe2cb'    # ID of the existing 'Int
 actionId_installation  = '664b51b8004486ec08abe2bd'    # ID of the existing 'Installation Surveys' action to be edited (get from DB)
 dataFile_intakeM4Holes = '/user/majumdar/Desktop/Frame_Surveys/UK_Frames/TEMPLATE_F000_m4Holes.xlsx'     
                                                        # Full path to the input data file containing INTAKE M4 HOLES SURVEY results (must be a string ending in '.xlsx')
+values_intakeXCorners  = [0.15, 1.00, 0.85]
+                                                       # Manual CROSS-CORNER measurement values (these should be provided by either Callum Holt or Ged Bell alongside the input data files)
 dataFile_allAnalyses   = '/user/majumdar/Desktop/Frame_Surveys/UK_Frames/TEMPLATE_F000_analyses.xlsx'
                                                        # Full path to the input data file containing ALL OF THE ANALYSES' results (must be a string ending in '.xlsx')
-value_intakeXCornerDev = 1.0                           # Manually measured value of the CROSS-CORNER DEVIATION (this is measured separately to the datapoints in the input data file)
 
 # ##################################
 
@@ -28,31 +29,21 @@ if __name__ == '__main__':
     ########################################
     # User-defined script functionality goes here
 
-    # Call the extraction functions for intake survey results ... these each return a single Python dictionary
+    # Call the extraction and setup functions for intake survey results ... these each return a single Python dictionary
     dict_intakeM4Holes = ExtractResults_IntakeM4Holes(dataFile_intakeM4Holes)
+    dict_intakeXCorners = SetupResults_IntakeXCorners(values_intakeXCorners)
     dict_intakePlanarity = ExtractResults_IntakePlanarity(dataFile_allAnalyses)
 
-    # Set up a (single entry) dictionary for the manually measured cross-corner deviation ... this should be in the same format as the individual entries in the Python dictionaries above
-    dict_intakeXCornerDev = {
-        0: {
-            'Measurement': 'Cross corner deviation',
-            'Actual': value_intakeXCornerDev,
-            'Units': 'mm',
-            'Tolerance': 2.0,
-            'Comment': 'Target tolerance = 1.0 mm',
-        }
-    }
-    
     # Edit an existing 'Intake Surveys' action with the dictionaries in the list of field values to be edited
     actionID = actionId_intake
     actionData_fields = [
         'intake_m4Holes',
-        'intake_xCornerDev',
+        'intake_xCorners',
         'intake_planarity',
     ]
     actionData_values = [
         dict_intakeM4Holes,
-        dict_intakeXCornerDev,
+        dict_intakeXCorners,
         dict_intakePlanarity,
     ]
 
@@ -74,8 +65,8 @@ if __name__ == '__main__':
         dict_installPlanarity,
     ]
 
-    id = EditAction(actionID, actionData_fields, actionData_values, connection, headers)
-    print(f' Successfully edited action with ID: {id}')
+  #  id = EditAction(actionID, actionData_fields, actionData_values, connection, headers)
+  #  print(f' Successfully edited action with ID: {id}')
     print()
 
     ########################################
