@@ -131,13 +131,13 @@ async function collateInfo(componentUUID) {
     collatedInfo.frameQC.qcActionId = results[0].actionId;
   }
 
-  // Get information about the (most recently performed) APA frame vertical inspection
+  // Get information about the APA frame's installation surveys action
   aggregation_stages = [];
   results = [];
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'FrameVerticalInspection',
+      'typeFormId': 'InstallationSurveys',
       'componentUuid': MUUID.from(frameUUID),
     }
   });
@@ -525,7 +525,7 @@ async function collateInfo(componentUUID) {
           layerSide: entry.wireLayer.toUpperCase(),
           boardPad: entry.headBoardAndPad,
           endpoints: entry.endPointsForMissingSegment,
-          coldChannel: entry.coldElectronicsChannel,
+          fembChannel: entry.coldElectronicsChannel,
           offlineChannel: entry.offlineChannel,
           actionId: result.actionId,
         }

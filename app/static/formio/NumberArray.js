@@ -50,20 +50,9 @@ class NumberArray extends TextFieldComponent {
     gNumberArrayComponentId++;
 
     let tpl = super.renderElement(textvalue, index);
-    const bounds = this.getBounds();
 
     tpl += `
       <div class = 'd-flex justify-content-around border'>
-        <div class = 'align-self-center p-2'>
-          <div>Entries: <span class = 'numberArrayLength'></span></div>
-          <div>Min.: <span class = 'numberArrayMin'></span></div>
-          <div>Max.: <span class = 'numberArrayMax'></span></div>
-          ${isNaN(bounds[0].lo) ? '' : '<div>OoB (IL): <span class = "numberArrayOoBILo">n/a</span></div>'}
-          ${isNaN(bounds[0].hi) ? '' : '<div>OoB (IH): <span class = "numberArrayOoBIHi">n/a</span></div>'}
-          ${isNaN(bounds[1].lo) ? '' : '<div>OoB (OL): <span class = "numberArrayOoBOLo">n/a</span></div>'}
-          ${isNaN(bounds[1].hi) ? '' : '<div>OoB (OH): <span class = "numberArrayOoBOHi">n/a</span></div>'}
-          <div>NaNs: <span class = 'numberArrayNaNCount'></span></div>
-        </div>
         <div class = 'flex-grow-1 p-4 numberArrayGraph' style = 'height: 200px; width: 240px;'></div>
         <div class = 'flex-grow-1 p-4 numberArrayHistogram' style = 'height: 200px; width: 240px;'></div>
       </div>`;
@@ -112,33 +101,21 @@ class NumberArray extends TextFieldComponent {
     let arr = value || [];
     let min = 1e99;
     let max = -1e99;
-    let count_nans = 0;
 
     if (arr.length < 1) {
       min = 0
       max = 0;
     }
 
-    // Count the number of entries outside the out-of-bounds limits, and calculate the minimum and maximum entry values
+    // Calculate the minimum and maximum entry values
     const bounds = this.getBounds();
-    let oobIHi = 0;
-    let oobILo = 0;
-    let oobOHi = 0;
-    let oobOLo = 0;
 
     for (let i = 0; i < arr.length; i++) {
       const x = parseFloat(arr[i]);
 
-      if (isNaN(x)) { count_nans++; }
-      else {
+      if (!isNaN(x)) {
         min = Math.min(min, x);
         max = Math.max(max, x);
-
-        if (x > bounds[0].hi) oobIHi++;
-        if (x < bounds[0].lo) oobILo++;
-
-        if (x > bounds[1].hi) oobOHi++;
-        if (x < bounds[1].lo) oobOLo++;
 
         arr[i] = x;
       }
@@ -146,22 +123,23 @@ class NumberArray extends TextFieldComponent {
 
     const numberOfEntries = arr.length;
 
-    // Set the displayed text information
-    $('span.numberArrayLength', this.element).text(numberOfEntries);
-    $('span.numberArrayMin', this.element).text(min.toFixed(2));
-    $('span.numberArrayMax', this.element).text(max.toFixed(2));
-    $('span.numberArrayOoBIHi', this.element).text(oobIHi);
-    $('span.numberArrayOoBILo', this.element).text(oobILo);
-    $('span.numberArrayOoBOHi', this.element).text(oobOHi);
-    $('span.numberArrayOoBOLo', this.element).text(oobOLo);
-    $('span.numberArrayNaNCount', this.element).text(count_nans);
-
     // Draw the scatter plot
     let colorscale = new ColorScaleRGB(50, 50, 100);
     colorscale.min = min;
     colorscale.max = max;
 
-    let graph = new Histogram(numberOfEntries, 0, numberOfEntries);
+    let firstWireNumber = 0;
+    let scatterPlotXLabel = 'Measurement Index';
+
+    if (numberOfEntries < 800) {    // X and G wire layers have 480 and 481 entries respectively
+      firstWireNumber = 1;
+      scatterPlotXLabel = 'Wire #';
+    } else {                        // V and U wire layers have 1139 and 1141 entries respectively
+      firstWireNumber = 8;
+      scatterPlotXLabel = 'Segment #';
+    }
+
+    let graph = new Histogram(numberOfEntries, firstWireNumber, numberOfEntries + firstWireNumber);
 
     graph.data = arr;
     graph.min_content = min;
@@ -170,6 +148,8 @@ class NumberArray extends TextFieldComponent {
     this.LizardGraph.SetHist(graph, colorscale);
     this.LizardGraph.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardGraph.marker_color = 'rgba(100, 0,0, 0.5)';
+    this.LizardGraph.xlabel = scatterPlotXLabel;
+    this.LizardGraph.ylabel = this.component.units;
     this.LizardGraph.Draw();
 
     // Draw the bar plot
@@ -180,6 +160,8 @@ class NumberArray extends TextFieldComponent {
     this.LizardHistogram.SetHist(hist, colorscale);
     this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardHistogram.marker_color = 'rgba(100, 0,0, 0.5)';
+    this.LizardHistogram.xlabel = this.component.units;
+    this.LizardHistogram.ylabel = 'Entries';
     this.LizardHistogram.Draw();
   }
 
@@ -191,12 +173,8 @@ class NumberArray extends TextFieldComponent {
     this.LizardGraph = new HistCanvas($('div.numberArrayGraph', this.element));
     this.LizardGraph.default_options.doDots = true;
     this.LizardGraph.default_options.doFill = false;
-    this.LizardGraph.xlabel = 'Index of Wire or Wire Segment';
-    this.LizardGraph.ylabel = this.component.units;
 
     this.LizardHistogram = new HistCanvas($('div.numberArrayHistogram', this.element));
-    this.LizardHistogram.xlabel = this.component.units;
-    this.LizardHistogram.ylabel = 'Entries';
 
     let readOnlyDisplay = this.refs.readonly_display;
 
@@ -269,14 +247,14 @@ NumberArray.editForm = function (a, b, c) {
       type: 'number',
       key: 'specification_toleranceInner',
       label: 'Inner Tolerance',
-      tooltip: 'Any values outside the expected inner range = [nominal +/- inner tolerance] will be counted and indicated',
+      tooltip: 'Expected inner range = [nominal +/- inner tolerance]',
       input: true,
     },
     {
       type: 'number',
       key: 'specification_toleranceOuter',
       label: 'Outer Tolerance',
-      tooltip: 'Any values outside the expected outer range = [nominal +/- outer tolerance] will be counted and indicated',
+      tooltip: 'Expected outer range = [nominal +/- outer tolerance]',
       input: true,
     },
     {

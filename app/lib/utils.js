@@ -39,18 +39,23 @@ module.exports = {
     edBlucher: 'Ed Blucher',
     josephBradwell: 'Joseph Bradwell',
     daveBrown: 'Dave Brown',
+    daveConnor: 'Dave Conner',
     markFarrell: 'Mark Farrell',
     benFurey: 'Ben Furey',
     lewisGannon: 'Lewis Gannon',
     wayneGreen: 'Wayne Green',
+    thomasHanley: 'Thomas Hanley',
     nicholasHays: 'Nicholas Hays',
+    adamJones: 'Adam Jones',
     andrewKelly: 'Andrew Kelly',
     slawekKubecki: 'Slawek Kubecki',
+    yinruiLui: 'Yinrui Lui',
     albertoMarchionni: 'Alberto Marchionni',
     grahamMitchell: 'Graham Mitchell',
     jackNorwell: 'Jack Norwell',
     benjaminOye: 'Benjamin Oye',
     radosavPantelic: 'Radosav Pantelic',
+    jordanRigby: 'Jordan Rigby',
     danielSalisbury: 'Daniel Salisbury',
     daveSim: 'Dave Sim',
     bjornStowell: 'Bjorn Stowell',
@@ -73,10 +78,12 @@ module.exports = {
 
   // A dictionary of personnel who are authorised to sign-off on tension controls
   dictionary_tensionControlSignoff: {
+    vincentBaker: 'Vincent Baker',
     carlosChavezBarajas: 'Carlos Chavez Barajas',
     edBlucher: 'Ed Blucher',
     albertoMarchionni: 'Alberto Marchionni',
-    sotirisVlachos: 'Sotiris Vlachos',
+    benjaminOye: 'Benjamin Oye',
+    danielSalisbury: 'Daniel Salisbury',
   },
 
   // A dictionary of personnel who are authorised to sign-off on winder maintenance
@@ -85,6 +92,8 @@ module.exports = {
     carlosChavezBarajas: 'Carlos Chavez Barajas',
     edBlucher: 'Ed Blucher',
     albertoMarchionni: 'Alberto Marchionni',
+    benjaminOye: 'Benjamin Oye',
+    danielSalisbury: 'Daniel Salisbury',
     daveSim: 'Dave Sim',
   },
 

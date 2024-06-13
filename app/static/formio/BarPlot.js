@@ -50,20 +50,9 @@ class BarPlot extends TextFieldComponent {
     gBarPlotComponentId++;
 
     let tpl = super.renderElement(textvalue, index);
-    const bounds = this.getBounds();
 
     tpl += `
       <div class = 'd-flex justify-content-around border'>
-        <div class = 'align-self-center p-2'>
-          <div>Entries: <span class = 'barPlotLength'></span></div>
-          <div>Min.: <span class = 'barPlotMin'></span></div>
-          <div>Max.: <span class = 'barPlotMax'></span></div>
-          ${isNaN(bounds[0].lo) ? '' : '<div>OoB (IL): <span class = "barPlotOoBILo">n/a</span></div>'}
-          ${isNaN(bounds[0].hi) ? '' : '<div>OoB (IH): <span class = "barPlotOoBIHi">n/a</span></div>'}
-          ${isNaN(bounds[1].lo) ? '' : '<div>OoB (OL): <span class = "barPlotOoBOLo">n/a</span></div>'}
-          ${isNaN(bounds[1].hi) ? '' : '<div>OoB (OH): <span class = "barPlotOoBOHi">n/a</span></div>'}
-          <div>NaNs: <span class = 'barPlotNaNCount'></span></div>
-        </div>
         <div class = 'flex-grow-1 p-4 barPlotHistogram' style = 'height: 200px; width: 480px;'></div>
       </div>`;
 
@@ -111,49 +100,25 @@ class BarPlot extends TextFieldComponent {
     let arr = value || [];
     let min = 1e99;
     let max = -1e99;
-    let count_nans = 0;
 
     if (arr.length < 1) {
       min = 0
       max = 0;
     }
 
-    // Count the number of entries outside the out-of-bounds limits, and calculate the minimum and maximum entry values
+    // Calculate the minimum and maximum entry values
     const bounds = this.getBounds();
-    let oobIHi = 0;
-    let oobILo = 0;
-    let oobOHi = 0;
-    let oobOLo = 0;
 
     for (let i = 0; i < arr.length; i++) {
       const x = parseFloat(arr[i]);
 
-      if (isNaN(x)) { count_nans++; }
-      else {
+      if (!isNaN(x)) {
         min = Math.min(min, x);
         max = Math.max(max, x);
-
-        if (x > bounds[0].hi) oobIHi++;
-        if (x < bounds[0].lo) oobILo++;
-
-        if (x > bounds[1].hi) oobOHi++;
-        if (x < bounds[1].lo) oobOLo++;
 
         arr[i] = x;
       }
     }
-
-    const numberOfEntries = arr.length;
-
-    // Set the displayed text information
-    $('span.barPlotLength', this.element).text(numberOfEntries);
-    $('span.barPlotMin', this.element).text(min.toFixed(2));
-    $('span.barPlotMax', this.element).text(max.toFixed(2));
-    $('span.barPlotOoBIHi', this.element).text(oobIHi);
-    $('span.barPlotOoBILo', this.element).text(oobILo);
-    $('span.barPlotOoBOHi', this.element).text(oobOHi);
-    $('span.barPlotOoBOLo', this.element).text(oobOLo);
-    $('span.barPlotNaNCount', this.element).text(count_nans);
 
     // Draw the bar plot
     let colorscale = new ColorScaleRGB(50, 50, 100);
@@ -167,6 +132,8 @@ class BarPlot extends TextFieldComponent {
     this.LizardHistogram.SetHist(hist, colorscale);
     this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardHistogram.marker_color = 'rgba(100, 0,0, 0.5)';
+    this.LizardHistogram.xlabel = this.component.units;
+    this.LizardHistogram.ylabel = 'Entries';
     this.LizardHistogram.Draw();
   }
 
@@ -176,8 +143,6 @@ class BarPlot extends TextFieldComponent {
     super.attach(element);
 
     this.LizardHistogram = new HistCanvas($('div.barPlotHistogram', this.element));
-    this.LizardHistogram.xlabel = this.component.units;
-    this.LizardHistogram.ylabel = 'Entries';
 
     if (this.arrayValue) this.updateExtras(this.arrayValue);
 
@@ -236,14 +201,14 @@ BarPlot.editForm = function (a, b, c) {
       type: 'number',
       key: 'specification_toleranceInner',
       label: 'Inner Tolerance',
-      tooltip: 'Any values outside the expected inner range = [nominal +/- inner tolerance] will be counted and indicated',
+      tooltip: 'Expected inner range = [nominal +/- inner tolerance]',
       input: true,
     },
     {
       type: 'number',
       key: 'specification_toleranceOuter',
       label: 'Outer Tolerance',
-      tooltip: 'Any values outside the expected outer range = [nominal +/- outer tolerance] will be counted and indicated',
+      tooltip: 'Expected outer range = [nominal +/- outer tolerance]',
       input: true,
     },
     {
