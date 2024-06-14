@@ -209,18 +209,16 @@ async function list(match_condition, options) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
+  // Add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (i.e. use shortened DUNE PIDs)
   for (let record of records) {
     if (record.stepResultIDs[0] != '') {
       const component = await Components.retrieve(record.stepResultIDs[0]);
 
       if (component) {
         if (component.data.name) {
-          if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
+          if (['APAFrame', 'AssembledAPA'].includes(component.formId)) {
             const name_splits = component.data.name.split('-');
             record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-          } else if (component.formId === 'GeometryBoard') {
-            record.componentName = component.data.typeRecordNumber;
           } else {
             record.componentName = component.data.name;
           }
@@ -230,6 +228,16 @@ async function list(match_condition, options) {
       }
     }
   }
+
+  // If listing a single type of workflow (i.e. if a match condition was specified), re-sort the records by the component name ... in reverse alphanumerical order
+  // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
+  var byField = function (field) {
+    return function (a, b) {
+      return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
+    }
+  };
+
+  if (match_condition) records.sort(byField('componentName'));
 
   // Return the entire list of matching records
   return records;
