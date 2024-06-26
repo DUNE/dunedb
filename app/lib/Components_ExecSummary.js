@@ -373,6 +373,7 @@ async function collateInfo(componentUUID) {
 
       for (let i = 0; i < results[0].replacedWires.length; i++) {
         let singleWire_solderPads = results[0].replacedWires[i].solderPad;
+
         if (typeof singleWire_solderPads === 'number') {
           singleWire_solderPads = `${singleWire_solderPads}`;
         }
@@ -419,6 +420,7 @@ async function collateInfo(componentUUID) {
 
       for (let i = 0; i < results[0].badSolderJoints.length; i++) {
         let singleJoint_solderPads = results[0].badSolderJoints[i].solderPad;
+
         if (typeof singleJoint_solderPads === 'number') {
           singleJoint_solderPads = `${singleJoint_solderPads}`;
         }

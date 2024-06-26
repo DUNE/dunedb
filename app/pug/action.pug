@@ -8,6 +8,7 @@ block extrascripts
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
     const component = !{JSON.stringify(component, null, 4)};
     const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
+    const numberOfReplacedWires = !{JSON.stringify(numberOfReplacedWires, null, 4)};
 
   block workscripts
     script(src = '/pages/action.js')
@@ -111,7 +112,7 @@ block content
           .col-md-6
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
-              | #{numberOfChangedTensions_sideA} on side A: 
+              | #{numberOfChangedTensions_sideA} on side A (found #{numberOfReplacedWires[0]} in this layer's winding action): 
               i.chevron.fa.fa-fw 
 
             .collapse#reTensionsBoxA
@@ -138,7 +139,7 @@ block content
           .col-md-6
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
-              | #{numberOfChangedTensions_sideB} on side B: 
+              | #{numberOfChangedTensions_sideB} on side B (found #{numberOfReplacedWires[1]} in this layer's winding action): 
               i.chevron.fa.fa-fw 
 
             .collapse#reTensionsBoxB
