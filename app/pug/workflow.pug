@@ -1,9 +1,6 @@
 extend default
 include common.pug
 
-block vars
-  - const page_title = 'View Workflow Information';
-
 block extrascripts
   script(type = 'text/javascript').
     const workflow = !{JSON.stringify(workflow, null, 4)};
@@ -19,208 +16,214 @@ block extrascripts
   block workscripts
     script(src = '/pages/workflow.js')
 
+block vars
+  - const page_title = `Workflow: ${workflow.typeFormName}`;
+
 block content
   .container-fluid
     .vert-space-x2
-      h2 View Workflow Information
+      h2 #{workflow.typeFormName}
 
     .vert-space-x1
-      dl
-        dt Workflow Type
-        dd #{workflow.typeFormName}
+      .row 
+        .col-md-5
+          dl
+            dt Workflow ID
+            dd
+              a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
 
-        dt Workflow ID
-        dd
-          a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
+            dt Current Status 
 
-        dt Current Status 
+            if workflowStatus == 'Complete'
+              dd.text-success.font-weight-bold #{workflowStatus}
+            else
+              dd.text-danger.font-weight-bold #{workflowStatus}
 
-        if workflowStatus == 'Complete'
-          dd.text-success.font-weight-bold #{workflowStatus}
-        else
-          dd.text-danger.font-weight-bold #{workflowStatus}
+            dt Current Version:
+            dd This is version #{workflow.validity.version} of the workflow, and it was last edited on !{' '}
+              +dateTimeFormat(workflow.insertion.insertDate)
 
-        dt Workflow Data:
-        dd This is version #{workflow.validity.version} of the workflow, and it was last edited on !{' '}
-          +dateTimeFormat(workflow.insertion.insertDate)
+              if workflow.insertion.user
+                |  by !{' '}
+                a(href = `mailto:${user_email(workflow.insertion.user)}`) #{workflow.insertion.user.displayName}
 
-          if workflow.insertion.user
-            |  by !{' '}
-            a(href = `mailto:${user_email(workflow.insertion.user)}`) #{workflow.insertion.user.displayName}
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
+                | All Versions: 
+                i.chevron.fa.fa-fw 
 
-          .vert-space-x1.border-success.border.rounded.p-2
-            - let freeSection_bgn = -2;
-            - let freeSection_end = -1;
-            - let freeSection_complete = true 
+              .collapse#versionsBox
+                ul
+                  each v in workflowVersions
+                    li 
+                      a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
+                      |  on 
+                      +dateTimeFormat(v.insertion.insertDate)
 
-            if workflow.typeFormId === 'workflow_1' || workflow.typeFormId === 'APA_Assembly'
-              if workflow.typeFormId === 'workflow_1'
-                - freeSection_bgn = 2;
-                - freeSection_end = 4;
-              else 
-                - freeSection_bgn = 2;
-                - freeSection_end = 10;
+                      if v.insertion.user
+                        |  by !{' '}
+                        a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-              each step in workflow.path.slice(freeSection_bgn - 1, freeSection_end)
-                if step.result.length === 0
-                  - freeSection_complete = false 
+        .col-md-1 
+        .col-md-3
+          .form-inline
+            a.btn.btn-warning(href = `/workflow/${workflow.workflowId}/edit`)
+              img.small-icon(src = '/images/edit_icon.svg')
+              | &nbsp; Edit Workflow
 
-            table.table
-              thead
-                tr 
-                  th.col-md-1 Step
-                  th.col-md-3 Type Form Name
-                  th.col-md-3 Result (Component Name or Action ID)
-                  th.col-md-3 Action Status
+            - let jsonURLString = `/json/workflow/${workflow.workflowId}`;
+            - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
 
-              tbody
-                each step, index in workflow.path 
-                  tr 
-                    td #{index + 1}
-                    td #{step.formName}
+            .hori-space-x2
+              a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON Record
 
-                    - const componentUuid = workflow.path[0].result;
-                    - let stepFormId = '';
+        .col-md-3
 
-                    if index === 0
-                      each typeFormId in Object.keys(componentTypeForms).sort()
-                        if componentTypeForms[typeFormId].formName == step.formName
-                          - stepFormId = componentTypeForms[typeFormId].formId
+    .vert-space-x1.border-success.border.rounded.p-2
+      - let freeSection_bgn = -2;
+      - let freeSection_end = -1;
+      - let freeSection_complete = true 
 
-                      if componentUuid.length > 0
-                        td
-                          a(href = `/component/${componentUuid}`, target = '_blank') #{componentName}
+      if workflow.typeFormId === 'workflow_1' || workflow.typeFormId === 'APA_Assembly'
+        if workflow.typeFormId === 'workflow_1'
+          - freeSection_bgn = 2;
+          - freeSection_end = 4;
+        else 
+          - freeSection_bgn = 2;
+          - freeSection_end = 10;
+
+        each step in workflow.path.slice(freeSection_bgn - 1, freeSection_end)
+          if step.result.length === 0
+            - freeSection_complete = false 
+
+      table.table
+        thead
+          tr 
+            th.col-md-1 Step
+            th.col-md-3 Type Form Name
+            th.col-md-3 Result (Component Name or Action ID)
+            th.col-md-3 Action Status
+
+        tbody
+          each step, index in workflow.path 
+            tr 
+              td #{index + 1}
+              td #{step.formName}
+
+              - const componentUuid = workflow.path[0].result;
+              - let stepFormId = '';
+
+              if index === 0
+                each typeFormId in Object.keys(componentTypeForms).sort()
+                  if componentTypeForms[typeFormId].formName == step.formName
+                    - stepFormId = componentTypeForms[typeFormId].formId
+
+                if componentUuid.length > 0
+                  td
+                    a(href = `/component/${componentUuid}`, target = '_blank') #{componentName}
+                else 
+                  td
+                    .form-inline 
+                      | (step not yet performed)
+
+                      .hori-space-x2
+                        a.btn-sm.btn-primary(href = `/component/${stepFormId}?workflowId=${workflow.workflowId}`)
+                          img.small-icon(src = '/images/run_icon.svg')
+                          | &nbsp; Create Component 
+                td [n.a.]
+              else
+                each typeFormId in Object.keys(actionTypeForms).sort()
+                  if actionTypeForms[typeFormId].formName == step.formName
+                    - stepFormId = actionTypeForms[typeFormId].formId
+
+                if workflow.typeFormId === 'workflow_1' || workflow.typeFormId === 'APA_Assembly'
+                  if index >= freeSection_bgn - 1 && index < freeSection_end
+                    if componentUuid.length > 0
+                      if step.result.length > 0
+                        td 
+                          a(href = `/action/${step.result}`, target = '_blank') #{step.result}
+
+                        if actionsDictionary[index]
+                          td.text-success.font-weight-bold Complete
+                        else
+                          td.text-danger.font-weight-bold Not Complete
                       else 
                         td
                           .form-inline 
                             | (step not yet performed)
 
                             .hori-space-x2
-                              a.btn-sm.btn-primary(href = `/component/${stepFormId}?workflowId=${workflow.workflowId}`)
+                              a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
                                 img.small-icon(src = '/images/run_icon.svg')
-                                | &nbsp; Create Component 
+                                | &nbsp; Perform Action
+                        td [n.a.]
+                    else 
+                      td
+                        .form-inline 
+                          | (step not yet performed)
+
+                          .hori-space-x2
+                            a.btn-sm.btn-danger
+                              | Create Component First
                       td [n.a.]
-                    else
-                      each typeFormId in Object.keys(actionTypeForms).sort()
-                        if actionTypeForms[typeFormId].formName == step.formName
-                          - stepFormId = actionTypeForms[typeFormId].formId
+                  else
+                    if !freeSection_complete
+                      td
+                        .form-inline 
+                          | (step not yet performed)
 
-                      if workflow.typeFormId === 'workflow_1' || workflow.typeFormId === 'APA_Assembly'
-                        if index >= freeSection_bgn - 1 && index < freeSection_end
-                          if componentUuid.length > 0
-                            if step.result.length > 0
-                              td 
-                                a(href = `/action/${step.result}`, target = '_blank') #{step.result}
+                          .hori-space-x2
+                            a.btn-sm.btn-danger
+                              | Perform Steps #{freeSection_bgn} to #{freeSection_end} First
+                      td [n.a.]
+                    else 
+                      if step.result.length > 0
+                        td 
+                          a(href = `/action/${step.result}`, target = '_blank') #{step.result}
 
-                              if actionsDictionary[index]
-                                td.text-success.font-weight-bold Complete
-                              else
-                                td.text-danger.font-weight-bold Not Complete
-                            else 
-                              td
-                                .form-inline 
-                                  | (step not yet performed)
-
-                                  .hori-space-x2
-                                    a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
-                                      img.small-icon(src = '/images/run_icon.svg')
-                                      | &nbsp; Perform Action
-                              td [n.a.]
-                          else 
-                            td
-                              .form-inline 
-                                | (step not yet performed)
-
-                                .hori-space-x2
-                                  a.btn-sm.btn-danger
-                                    | Create Component First
-                            td [n.a.]
+                        if actionsDictionary[index]
+                          td.text-success.font-weight-bold Complete
                         else
-                          if !freeSection_complete
-                            td
-                              .form-inline 
-                                | (step not yet performed)
+                          td.text-danger.font-weight-bold Not Complete
+                      else 
+                        td
+                          .form-inline 
+                            | (step not yet performed)
 
-                                .hori-space-x2
-                                  a.btn-sm.btn-danger
-                                    | Perform Steps #{freeSection_bgn} to #{freeSection_end} First
-                            td [n.a.]
+                            .hori-space-x2
+                              if workflow.path[index - 1].result.length > 0
+                                a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
+                                  img.small-icon(src = '/images/run_icon.svg')
+                                  | &nbsp; Perform Action
+                              else 
+                                a.btn-sm.btn-danger
+                                  | Perform Previous Steps First
+                        td [n.a.]
+                else
+                  if step.result.length > 0
+                    td 
+                      a(href = `/action/${step.result}`, target = '_blank') #{step.result}
+
+                    if actionsDictionary[index]
+                      td.text-success.font-weight-bold Complete
+                    else
+                      td.text-danger.font-weight-bold Not Complete
+                  else 
+                    td
+                      .form-inline 
+                        | (step not yet performed)
+
+                        .hori-space-x2
+                          if workflow.path[index - 1].result.length > 0
+                            a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
+                              img.small-icon(src = '/images/run_icon.svg')
+                              | &nbsp; Perform Action
                           else 
-                            if step.result.length > 0
-                              td 
-                                a(href = `/action/${step.result}`, target = '_blank') #{step.result}
-
-                              if actionsDictionary[index]
-                                td.text-success.font-weight-bold Complete
-                              else
-                                td.text-danger.font-weight-bold Not Complete
-                            else 
-                              td
-                                .form-inline 
-                                  | (step not yet performed)
-
-                                  .hori-space-x2
-                                    if workflow.path[index - 1].result.length > 0
-                                      a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
-                                        img.small-icon(src = '/images/run_icon.svg')
-                                        | &nbsp; Perform Action
-                                    else 
-                                      a.btn-sm.btn-danger
-                                        | Perform Previous Steps First
-                              td [n.a.]
-                      else
-                        if step.result.length > 0
-                          td 
-                            a(href = `/action/${step.result}`, target = '_blank') #{step.result}
-
-                          if actionsDictionary[index]
-                            td.text-success.font-weight-bold Complete
-                          else
-                            td.text-danger.font-weight-bold Not Complete
-                        else 
-                          td
-                            .form-inline 
-                              | (step not yet performed)
-
-                              .hori-space-x2
-                                if workflow.path[index - 1].result.length > 0
-                                  a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
-                                    img.small-icon(src = '/images/run_icon.svg')
-                                    | &nbsp; Perform Action
-                                else 
-                                  a.btn-sm.btn-danger
-                                    | Perform Previous Steps First
-                          td [n.a.]
-
-    .vert-space-x1
-      .panel.panel-default
-      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
-        | All Versions: 
-        i.chevron.fa.fa-fw 
-
-      .collapse#versionsBox
-        ul
-          each v in workflowVersions
-            li 
-              a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
-              |  on 
-              +dateTimeFormat(v.insertion.insertDate)
-
-              if v.insertion.user
-                |  by !{' '}
-                a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
-
-    .vert-space-x2.form-inline
-      a.btn.btn-warning(href = `/workflow/${workflow.workflowId}/edit`)
-        img.small-icon(src = '/images/edit_icon.svg')
-        | &nbsp; Edit Workflow
-
-      - let jsonURLString = `/json/workflow/${workflow.workflowId}`;
-      - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
-
-      .hori-space-x2
-        a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
-          img.small-icon(src = '/images/checklist_icon.svg')
-          | &nbsp; View JSON Record
+                            a.btn-sm.btn-danger
+                              | Perform Previous Steps First
+                    td [n.a.]
 
     .vert-space-x2

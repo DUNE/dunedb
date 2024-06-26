@@ -1,9 +1,6 @@
 extend default
 include common.pug
 
-block vars
-  - const page_title = 'View Action Information';
-
 block extrascripts
   script(type = 'text/javascript').
     const action = !{JSON.stringify(action, null, 4)};
@@ -15,459 +12,463 @@ block extrascripts
   block workscripts
     script(src = '/pages/action.js')
 
+block vars
+  - const page_title = `Action: ${action.typeFormName}`;
+
 block content
   .container-fluid
     .vert-space-x2
-      h2 View Action Information
+      h2 #{action.typeFormName}
 
     .vert-space-x1
-      dl
-        dt Action Type
-        dd 
+      .row 
+        .col-md-5
+          dl
+            dt Action ID
+            dd
+              .form-inline
+                a(href = `/action/${action.actionId}`) #{action.actionId}
+
+                .hori-space-x1
+                  a.copybutton.btn-sm#copy_id(onclick = 'CopyID(action.actionId)') Copy
+
+            - const uuid = MUUID.from(action.componentUuid).toString();
+
+            dt Performed on Component:
+
+            if (component.data.name)
+              dd 
+                a(href = `/component/${uuid}`) #{component.data.name}
+                |  (#{component.formName})
+            else 
+              dd 
+                a(href = `/component/${uuid}`) #{component.formName}
+
+            if action.workflowId
+              dt Part of Workflow:
+              dd
+                a(href = `/workflow/${action.workflowId}`, target = '_blank') #{action.workflowId}
+
+            dt Current Version:
+            dd This is version #{action.validity.version} of the action, and it was last performed on !{' '}
+              +dateTimeFormat(action.insertion.insertDate)
+
+              if action.insertion.user
+                |  by !{' '}
+                a(href = `mailto:${user_email(action.insertion.user)}`) #{action.insertion.user.displayName}
+
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
+                | All Versions: 
+                i.chevron.fa.fa-fw 
+
+              .collapse#versionsBox
+                ul
+                  each v in actionVersions
+                    li 
+                      a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
+                      |  on 
+                      +dateTimeFormat(v.insertion.insertDate)
+
+                      if v.insertion.user
+                        |  by !{' '}
+                        a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
+
+        .col-md-1 
+        .col-md-3 
           .form-inline
-            a #{action.typeFormName}
+            a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
+              img.small-icon(src = '/images/edit_icon.svg')
+              | &nbsp; Edit Action
 
-            .hori-space-x1
-              a.btn-sm.btn-primary(href = `/action/${action.typeFormId}/unspec`)
-                img.small-icon(src = '/images/run_icon.svg')
-                | &nbsp; Perform New Action of This Type
+            - let jsonURLString = `/json/action/${action.actionId}`;
+            - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
 
-        dt Action ID
-        dd
-          .form-inline
-            a(href = `/action/${action.actionId}`) #{action.actionId}
-
-            .hori-space-x1
-              a.copybutton.btn-sm#copy_id(onclick = 'CopyID(action.actionId)') Copy
-
-        - const uuid = MUUID.from(action.componentUuid).toString();
-
-        dt Performed on Component:
-        dd UUID: 
-          a(href = `/component/${uuid}`) #{uuid}
-          br
-          | Type: #{component.formName}
-          br
-          | Name: #{component.data.name}
-
-        if action.workflowId
-          dt Part of Workflow:
-          dd
-            a(href = `/workflow/${action.workflowId}`, target = '_blank') #{action.workflowId}
-
-        dt Action Data:
-        dd This is version #{action.validity.version} of the action, and it was last performed on !{' '}
-          +dateTimeFormat(action.insertion.insertDate)
-
-          if action.insertion.user
-            |  by !{' '}
-            a(href = `mailto:${user_email(action.insertion.user)}`) #{action.insertion.user.displayName}
-
-          .vert-space-x1.border-success.border.rounded.p-2
-            #typeform
+            .hori-space-x2
+              a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON Record
 
           .vert-space-x1
+            a.btn.btn-primary(href = `/action/${action.typeFormId}/unspec`)
+              img.small-icon(src = '/images/run_icon.svg')
+              | &nbsp; Perform New Action of This Type
 
-        if (action.typeFormId == 'x_tension_testing') && (action.data.changedTensions_sideA)
-          dt Most recently re-tensioned wires / wire segments (comparing this version [#{action.validity.version}] and version #{action.data.changedTensions_version}):
+        .col-md-3
 
-          - let numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
-          - let numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
+    .vert-space-x1.border-success.border.rounded.p-2
+      #typeform
 
-          .row
-            .col-md-6
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
-                | #{numberOfChangedTensions_sideA} on side A: 
-                i.chevron.fa.fa-fw 
+    .vert-space-x1
+      if (action.typeFormId == 'x_tension_testing') && (action.data.changedTensions_sideA)
+        dt Most recently re-tensioned wires / wire segments (comparing this version [#{action.validity.version}] and version #{action.data.changedTensions_version}):
 
-              .collapse#reTensionsBoxA
-                if numberOfChangedTensions_sideA > 0
-                  .vert-space-x1.border-success.border.rounded.p-2
-                    dd
-                      table.table
-                        thead
-                          tr
-                            th.col-md-2 Wire / Wire Segment
-                            th.col-md-2 Original Tension (N)
-                            th.col-md-2 Latest Tension (N)
+        - let numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
+        - let numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
 
-                        tbody
-                          each changedTension in action.data.changedTensions_sideA
-                            tr
-                              if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
-                                td #{changedTension[0] + 1}
-                              else 
-                                td #{changedTension[0] + 8}
+        .row
+          .col-md-6
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
+              | #{numberOfChangedTensions_sideA} on side A: 
+              i.chevron.fa.fa-fw 
 
-                              td #{changedTension[1]}
-                              td #{changedTension[2]}
-            .col-md-6
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
-                | #{numberOfChangedTensions_sideB} on side B: 
-                i.chevron.fa.fa-fw 
-
-              .collapse#reTensionsBoxB
-                if numberOfChangedTensions_sideB > 0
-                  .vert-space-x1.border-success.border.rounded.p-2
-                    dd
-                      table.table
-                        thead
-                          tr
-                            th.col-md-2 Wire / Wire Segment
-                            th.col-md-2 Original Tension (N)
-                            th.col-md-2 Latest Tension (N)
-
-                        tbody
-                          each changedTension in action.data.changedTensions_sideB
-                            tr
-                              if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
-                                td #{changedTension[0] + 1}
-                              else 
-                                td #{changedTension[0] + 8}
-
-                              td #{changedTension[1]}
-                              td #{changedTension[2]}
-
-          .vert-space-x2 
-
-        if (action.typeFormId == 'IntakeSurveys')
-          if (action.data.intake_m4Holes)
-            .vert-space-x1
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
-                | M4 Hole Measurements (mm): 
-                i.chevron.fa.fa-fw 
-
-              .collapse#m4HolesBox
+            .collapse#reTensionsBoxA
+              if numberOfChangedTensions_sideA > 0
                 .vert-space-x1.border-success.border.rounded.p-2
                   dd
                     table.table
                       thead
                         tr
-                          th.col-md-1 Hole
-                          th.col-md-1 x
-                          th.col-md-1 y
-                          th.col-md-1 z 
-                          th.col-md-2 Actual Dist. to 1st hole 
-                          th.col-md-2 Diff [Actual - Nominal]
-                          th.col-md-2 Actual Dist. to Prev. hole
-                          th.col-md-2 Diff [Actual - Nominal]
+                          th.col-md-2 Wire / Wire Segment
+                          th.col-md-2 Original Tension (N)
+                          th.col-md-2 Latest Tension (N)
 
                       tbody
-                        for [key, value] of Object.entries(action.data.intake_m4Holes)
+                        each changedTension in action.data.changedTensions_sideA
                           tr
-                            td #{value['Hole']}
-                            td #{value['x']}
-                            td #{value['y']}
-                            td #{value['z']}
-                            td #{value['dist_1stHole']}
-                            td #{value['deviat_1stHole']}
-                            td #{value['dist_prevHole']}
-                            td #{value['deviat_prevHole']}
-          else
-            .vert-space-x1
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
-                | M4 Hole Measurements (no results found in record!) 
-                i.chevron.fa.fa-fw 
+                            if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
+                              td #{changedTension[0] + 1}
+                            else 
+                              td #{changedTension[0] + 8}
 
-          if (action.data.intake_xCorners)
-            .vert-space-x1
-              - outOfSpecCount = 0
+                            td #{changedTension[1]}
+                            td #{changedTension[2]}
+          .col-md-6
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
+              | #{numberOfChangedTensions_sideB} on side B: 
+              i.chevron.fa.fa-fw 
 
-              for [key, value] of Object.entries(action.data.intake_xCorners)
-                if (value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance)
-                  - outOfSpecCount += 1
-
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
-                | Manual Cross Corner Measurements (all measured at DSM) (#{outOfSpecCount} results outside tolerance): 
-                i.chevron.fa.fa-fw 
-
-              .collapse#xCornersBox
+            .collapse#reTensionsBoxB
+              if numberOfChangedTensions_sideB > 0
                 .vert-space-x1.border-success.border.rounded.p-2
                   dd
                     table.table
                       thead
                         tr
-                          th.col-md-2 Measurement
-                          th.col-md-1 Actual
-                          th.col-md-1 Units
-                          th.col-md-1 Tolerance 
-                          th.col-md-7 Comment
+                          th.col-md-2 Wire / Wire Segment
+                          th.col-md-2 Original Tension (N)
+                          th.col-md-2 Latest Tension (N)
 
                       tbody
-                        for [key, value] of Object.entries(action.data.intake_xCorners)
+                        each changedTension in action.data.changedTensions_sideB
                           tr
-                            td #{value.Measurement}
+                            if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
+                              td #{changedTension[0] + 1}
+                            else 
+                              td #{changedTension[0] + 8}
 
+                            td #{changedTension[1]}
+                            td #{changedTension[2]}
+
+        .vert-space-x2 
+
+      if (action.typeFormId == 'IntakeSurveys')
+        if (action.data.intake_m4Holes)
+          .vert-space-x1
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
+              | M4 Hole Measurements (mm): 
+              i.chevron.fa.fa-fw 
+
+            .collapse#m4HolesBox
+              .vert-space-x1.border-success.border.rounded.p-2
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-1 Hole
+                        th.col-md-1 x
+                        th.col-md-1 y
+                        th.col-md-1 z 
+                        th.col-md-2 Actual Dist. to 1st hole 
+                        th.col-md-2 Diff [Actual - Nominal]
+                        th.col-md-2 Actual Dist. to Prev. hole
+                        th.col-md-2 Diff [Actual - Nominal]
+
+                    tbody
+                      for [key, value] of Object.entries(action.data.intake_m4Holes)
+                        tr
+                          td #{value['Hole']}
+                          td #{value['x']}
+                          td #{value['y']}
+                          td #{value['z']}
+                          td #{value['dist_1stHole']}
+                          td #{value['deviat_1stHole']}
+                          td #{value['dist_prevHole']}
+                          td #{value['deviat_prevHole']}
+        else
+          .vert-space-x1
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#m4HolesBox')
+              | M4 Hole Measurements (no results found in record!) 
+              i.chevron.fa.fa-fw 
+
+        if (action.data.intake_xCorners)
+          .vert-space-x1
+            - outOfSpecCount = 0
+
+            for [key, value] of Object.entries(action.data.intake_xCorners)
+              if (value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance)
+                - outOfSpecCount += 1
+
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
+              | Manual Cross Corner Measurements (all measured at DSM) (#{outOfSpecCount} results outside tolerance): 
+              i.chevron.fa.fa-fw 
+
+            .collapse#xCornersBox
+              .vert-space-x1.border-success.border.rounded.p-2
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-2 Measurement
+                        th.col-md-1 Actual
+                        th.col-md-1 Units
+                        th.col-md-1 Tolerance 
+                        th.col-md-7 Comment
+
+                    tbody
+                      for [key, value] of Object.entries(action.data.intake_xCorners)
+                        tr
+                          td #{value.Measurement}
+
+                          if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
+                            td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
+                          else
+                            td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
+
+                          td #{value.Units}
+                          td #{value.Tolerance.toFixed(2)}
+                          td #{value.Comment}
+        else
+          .vert-space-x1
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
+              | Manual Cross Corner Measurements (all measured at DSM) (no results found in record!) 
+              i.chevron.fa.fa-fw 
+
+        if (action.data.intake_planarity)
+          .vert-space-x1
+            - outOfSpecCount = 0
+
+            for [key, value] of Object.entries(action.data.intake_planarity)
+              if (value.Actual !== '') && (value.Actual !== '-') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
+                - outOfSpecCount += 1
+
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+              | Planarity Analysis using M4/6 Holes (#{outOfSpecCount} results outside tolerance): 
+              i.chevron.fa.fa-fw 
+
+            .collapse#planarityBox
+              .vert-space-x1.border-success.border.rounded.p-2
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-2 Measurement
+                        th.col-md-1 Actual
+                        th.col-md-1 Units
+                        th.col-md-1 Tolerance 
+                        th.col-md-7 Comment
+
+                    tbody
+                      for [key, value] of Object.entries(action.data.intake_planarity)
+                        tr
+                          td #{value.Measurement}
+
+                          if (value.Actual !== '') && (value.Actual !== '-')
                             if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
                               td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
                             else
                               td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
+                          else 
+                            td #{value.Actual}
 
-                            td #{value.Units}
+                          td #{value.Units}
+
+                          if value.Tolerance !== ''
                             td #{value.Tolerance.toFixed(2)}
+                          else 
+                            td #{value.Tolerance}
+
+                          if value.Measurement === 'Cross corner deviation'
+                            td For reference only - please refer instead to the manual cross corner measurements above
+                          else
                             td #{value.Comment}
-          else
-            .vert-space-x1
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
-                | Manual Cross Corner Measurements (all measured at DSM) (no results found in record!) 
-                i.chevron.fa.fa-fw 
+        else
+          .vert-space-x1
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+              | Planarity Analysis using M4/6 Holes (no results found in record!) 
+              i.chevron.fa.fa-fw 
 
-          if (action.data.intake_planarity)
-            .vert-space-x1
-              - outOfSpecCount = 0
+        .vert-space-x2 
 
-              for [key, value] of Object.entries(action.data.intake_planarity)
-                if (value.Actual !== '') && (value.Actual !== '-') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
-                  - outOfSpecCount += 1
+      if (action.typeFormId == 'InstallationSurveys')
+        if (action.data.install_envelope)
+          .vert-space-x1
+            - let outOfSpecCount = 0
 
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
-                | Planarity Analysis using M4/6 Holes (#{outOfSpecCount} results outside tolerance): 
-                i.chevron.fa.fa-fw 
+            for [key, value] of Object.entries(action.data.install_envelope)
+              if value['Tolerance (±)'] != '-'
+                if key === 3 || key === 4
+                  if value['Max Deviation From Nominal'] >= value['Tolerance (±)']
+                    - outOfSpecCount += 1
+                else
+                  if (value['Max Deviation From Nominal'] <= (-1.0 * value['Tolerance (±)'])) || (value['Max Deviation From Nominal'] >= value['Tolerance (±)'])
+                    - outOfSpecCount += 1
 
-              .collapse#planarityBox
-                .vert-space-x1.border-success.border.rounded.p-2
-                  dd
-                    table.table
-                      thead
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
+              | Envelope Analysis (#{outOfSpecCount} results outside tolerance): 
+              i.chevron.fa.fa-fw 
+
+            .collapse#envelopeBox
+              .vert-space-x1.border-success.border.rounded.p-2
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-3 Measurement Name (and link to EDMS)
+                        th.col-md-1 Units
+                        th.col-md-2 Position
+                        th.col-md-1 Nominal 
+                        th.col-md-1 Tolerance (±) 
+                        th.col-md-1 Actual
+                        th.col-md-1 Deviation
+                        th.col-md-2 Comments
+
+                    tbody
+                      for [key, value] of Object.entries(action.data.install_envelope)
                         tr
-                          th.col-md-2 Measurement
-                          th.col-md-1 Actual
-                          th.col-md-1 Units
-                          th.col-md-1 Tolerance 
-                          th.col-md-7 Comment
+                          if value['EDMS ID'] !== '-'
+                            td 
+                              a(href = `https://edms.cern.ch/document/${value['EDMS ID']}`, target = '_blank') #{value['Measurement']}
+                          else 
+                            td #{value['Measurement']}
 
-                      tbody
-                        for [key, value] of Object.entries(action.data.intake_planarity)
-                          tr
-                            td #{value.Measurement}
+                          td #{value['Units']}
+                          td #{value['Position']}
+                          td #{value['Nominal'].toFixed(2)}
 
-                            if (value.Actual !== '') && (value.Actual !== '-')
-                              if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
-                                td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
+                          if value['Tolerance (±)'] == '-'
+                            td #{value['Tolerance (±)']}
+                          else 
+                            td #{value['Tolerance (±)'].toFixed(2)}
+
+                          if value['Actual'] == '-'
+                            td #{value['Actual']}
+                          else 
+                            td #{value['Actual'].toFixed(2)}
+
+                          if value['Tolerance (±)'] != '-'
+                            if key === 3 || key === 4
+                              if value['Max Deviation From Nominal'] < value['Tolerance (±)']
+                                td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
                               else
-                                td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
-                            else 
-                              td #{value.Actual}
-
-                            td #{value.Units}
-
-                            if value.Tolerance !== ''
-                              td #{value.Tolerance.toFixed(2)}
-                            else 
-                              td #{value.Tolerance}
-
-                            if value.Measurement === 'Cross corner deviation'
-                              td For reference only - please refer instead to the manual cross corner measurements above
+                                td.text-danger.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
                             else
-                              td #{value.Comment}
-          else
-            .vert-space-x1
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
-                | Planarity Analysis using M4/6 Holes (no results found in record!) 
-                i.chevron.fa.fa-fw 
-
-          .vert-space-x2 
-
-        if (action.typeFormId == 'InstallationSurveys')
-          if (action.data.install_envelope)
-            .vert-space-x1
-              - let outOfSpecCount = 0
-
-              for [key, value] of Object.entries(action.data.install_envelope)
-                if value['Tolerance (±)'] != '-'
-                  if key === 3 || key === 4
-                    if value['Max Deviation From Nominal'] >= value['Tolerance (±)']
-                      - outOfSpecCount += 1
-                  else
-                    if (value['Max Deviation From Nominal'] <= (-1.0 * value['Tolerance (±)'])) || (value['Max Deviation From Nominal'] >= value['Tolerance (±)'])
-                      - outOfSpecCount += 1
-
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
-                | Envelope Analysis (#{outOfSpecCount} results outside tolerance): 
-                i.chevron.fa.fa-fw 
-
-              .collapse#envelopeBox
-                .vert-space-x1.border-success.border.rounded.p-2
-                  dd
-                    table.table
-                      thead
-                        tr
-                          th.col-md-3 Measurement Name (and link to EDMS)
-                          th.col-md-1 Units
-                          th.col-md-2 Position
-                          th.col-md-1 Nominal 
-                          th.col-md-1 Tolerance (±) 
-                          th.col-md-1 Actual
-                          th.col-md-1 Deviation
-                          th.col-md-2 Comments
-
-                      tbody
-                        for [key, value] of Object.entries(action.data.install_envelope)
-                          tr
-                            if value['EDMS ID'] !== '-'
-                              td 
-                                a(href = `https://edms.cern.ch/document/${value['EDMS ID']}`, target = '_blank') #{value['Measurement']}
-                            else 
-                              td #{value['Measurement']}
-
-                            td #{value['Units']}
-                            td #{value['Position']}
-                            td #{value['Nominal'].toFixed(2)}
-
-                            if value['Tolerance (±)'] == '-'
-                              td #{value['Tolerance (±)']}
-                            else 
-                              td #{value['Tolerance (±)'].toFixed(2)}
-
-                            if value['Actual'] == '-'
-                              td #{value['Actual']}
-                            else 
-                              td #{value['Actual'].toFixed(2)}
-
-                            if value['Tolerance (±)'] != '-'
-                              if key === 3 || key === 4
-                                if value['Max Deviation From Nominal'] < value['Tolerance (±)']
-                                  td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
-                                else
-                                  td.text-danger.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                              if (value['Max Deviation From Nominal'] > (-1.0 * value['Tolerance (±)'])) && (value['Max Deviation From Nominal'] < value['Tolerance (±)'])
+                                td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
                               else
-                                if (value['Max Deviation From Nominal'] > (-1.0 * value['Tolerance (±)'])) && (value['Max Deviation From Nominal'] < value['Tolerance (±)'])
-                                  td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
-                                else
-                                  td.text-danger.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                                td.text-danger.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                          else
+                            td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+
+                          td #{value['Comments']}
+        else
+          .vert-space-x1
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
+              | Envelope Analysis (no results found in record!) 
+              i.chevron.fa.fa-fw 
+
+        if (action.data.install_planarity)
+          .vert-space-x1
+            - outOfSpecCount = 0
+
+            for [key, value] of Object.entries(action.data.install_planarity)
+              if (value.Actual !== '') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
+                - outOfSpecCount += 1
+
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+              | Planarity Analysis using M6/10/20 Holes (#{outOfSpecCount} results outside tolerance): 
+              i.chevron.fa.fa-fw 
+
+            .collapse#planarityBox
+              .vert-space-x1.border-success.border.rounded.p-2
+                dd
+                  table.table
+                    thead
+                      tr
+                        th.col-md-2 Measurement
+                        th.col-md-1 Actual
+                        th.col-md-1 Units
+                        th.col-md-1 Tolerance 
+                        th.col-md-7 Comment
+
+                    tbody
+                      for [key, value] of Object.entries(action.data.install_planarity)
+                        tr
+                          td #{value.Measurement}
+
+                          if value.Actual !== ''
+                            if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
+                              td.text-success.font-weight-bold #{value.Actual.toFixed(2)}
                             else
-                              td.text-success.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
+                              td.text-danger.font-weight-bold #{value.Actual.toFixed(2)}
+                          else 
+                            td #{value.Actual}
 
-                            td #{value['Comments']}
-          else
+                          td #{value.Units}
+
+                          if value.Tolerance !== ''
+                            td #{value.Tolerance.toFixed(2)}
+                          else 
+                            td #{value.Tolerance}
+
+                          td #{value.Comment}
+        else
+          .vert-space-x1
+            .panel.panel-default
+            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
+              | Planarity Analysis using M6/10/20 Holes (no results found in record!) 
+              i.chevron.fa.fa-fw 
+
+        .vert-space-x2 
+
+      if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance' || action.typeFormId == 'x_tension_testing' || action.typeFormId == 'MeshQAInspection'
+        dt Add Images to Action Record:
+        dd Please use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, please use the 'Confirm Images' button to finalise the upload.
+          br
+          | Please make sure that your <b>images are individually no more than <u>1MB</u> in size</b>, and <b>please do not add more than <u>5 images</u> in total to any single record</b>.
+
+          .vert-space-x1.form-inline
+            label.btn.btn-primary(for = 'image-selector')
+              input.custom-file-input#image-selector(type = 'file', style = 'display:none', onchange = 'DisplayFileNames(this)', multiple)
+              | Select Images
+
+            .hori-space-x2
+              label.label-info#image-filenames 
+
+            .hori-space-x2
+              a.btn-danger.btn-sm#confirm-button(onclick = 'EncodeStoreImages()') Confirm Upload
+
+          if action.images
             .vert-space-x1
               .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
-                | Envelope Analysis (no results found in record!) 
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#imagesBox')
+                | View Gallery (#{action.images.length} images): 
                 i.chevron.fa.fa-fw 
 
-          if (action.data.install_planarity)
-            .vert-space-x1
-              - outOfSpecCount = 0
-
-              for [key, value] of Object.entries(action.data.install_planarity)
-                if (value.Actual !== '') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
-                  - outOfSpecCount += 1
-
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
-                | Planarity Analysis using M6/10/20 Holes (#{outOfSpecCount} results outside tolerance): 
-                i.chevron.fa.fa-fw 
-
-              .collapse#planarityBox
-                .vert-space-x1.border-success.border.rounded.p-2
-                  dd
-                    table.table
-                      thead
-                        tr
-                          th.col-md-2 Measurement
-                          th.col-md-1 Actual
-                          th.col-md-1 Units
-                          th.col-md-1 Tolerance 
-                          th.col-md-7 Comment
-
-                      tbody
-                        for [key, value] of Object.entries(action.data.install_planarity)
-                          tr
-                            td #{value.Measurement}
-
-                            if value.Actual !== ''
-                              if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
-                                td.text-success.font-weight-bold #{value.Actual.toFixed(2)}
-                              else
-                                td.text-danger.font-weight-bold #{value.Actual.toFixed(2)}
-                            else 
-                              td #{value.Actual}
-
-                            td #{value.Units}
-
-                            if value.Tolerance !== ''
-                              td #{value.Tolerance.toFixed(2)}
-                            else 
-                              td #{value.Tolerance}
-
-                            td #{value.Comment}
-          else
-            .vert-space-x1
-              .panel.panel-default
-              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
-                | Planarity Analysis using M6/10/20 Holes (no results found in record!) 
-                i.chevron.fa.fa-fw 
-
-          .vert-space-x2 
-
-        if action.typeFormId == 'action_test' || action.typeFormId == 'APANonConformance' || action.typeFormId == 'x_tension_testing' || action.typeFormId == 'MeshQAInspection'
-          dt Add Images to Action Record:
-          dd Please use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, please use the 'Confirm Images' button to finalise the upload.
-            br
-            | Please make sure that your <b>images are individually no more than <u>1MB</u> in size</b>, and <b>please do not add more than <u>5 images</u> in total to any single record</b>.
-
-            .vert-space-x1.form-inline
-              label.btn.btn-primary(for = 'image-selector')
-                input.custom-file-input#image-selector(type = 'file', style = 'display:none', onchange = 'DisplayFileNames(this)', multiple)
-                | Select Images
-
-              .hori-space-x2
-                label.label-info#image-filenames 
-
-              .hori-space-x2
-                a.btn-danger.btn-sm#confirm-button(onclick = 'EncodeStoreImages()') Confirm Upload
-
-            if action.images
-              .vert-space-x1
-                .panel.panel-default
-                .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#imagesBox')
-                  | View Gallery (#{action.images.length} images): 
-                  i.chevron.fa.fa-fw 
-
-                .collapse#imagesBox
-                  each imageString in action.images
-                    img.in-gallery(src = imageString)
-
-    .vert-space-x2
-      .panel.panel-default
-      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
-        | All Versions: 
-        i.chevron.fa.fa-fw 
-
-      .collapse#versionsBox
-        ul
-          each v in actionVersions
-            li 
-              a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
-              |  on 
-              +dateTimeFormat(v.insertion.insertDate)
-
-              if v.insertion.user
-                |  by !{' '}
-                a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
-
-    .vert-space-x2.form-inline
-
-      a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
-        img.small-icon(src = '/images/edit_icon.svg')
-        | &nbsp; Edit Action
-
-      - let jsonURLString = `/json/action/${action.actionId}`;
-      - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
-
-      .hori-space-x2
-        a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
-          img.small-icon(src = '/images/checklist_icon.svg')
-          | &nbsp; View JSON Record
+              .collapse#imagesBox
+                each imageString in action.images
+                  img.in-gallery(src = imageString)
 
     .vert-space-x2
