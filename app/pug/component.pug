@@ -1,9 +1,6 @@
 extend default
 include common.pug
 
-block vars
-  - const page_title = 'View Component Information';
-
 block extrascripts
   script(type = 'text/javascript').
     const component = !{JSON.stringify(component, null, 4)};
@@ -19,25 +16,18 @@ block extrascripts
   block workscripts
     script(src = '/pages/component.js')
 
+block vars
+  - const page_title = `Component: ${component.formName}`;
+
 block content
   .container-fluid
     .vert-space-x2
-      h2 View Component Information
+      h2 #{component.formName}
 
     .vert-space-x1
       .row
-        .col-md-9
+        .col-md-5
           dl
-            dt Component Type
-            dd
-              .form-inline
-                a #{component.formName}
-
-                .hori-space-x1
-                  a.btn-sm.btn-primary(href = `/component/${component.formId}`)
-                    img.small-icon(src = '/images/run_icon.svg')
-                    | &nbsp; Create New Component of This Type
-
             dt Component UUID
             dd
               .form-inline
@@ -47,11 +37,15 @@ block content
                   a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
 
             if component.data.name
-              dt Component Name            
-              dd #{component.data.name}
+              dt Name or ID
+
+                if component.formId == 'GroundingMeshPanel'
+                  dd #{component.data.typeRecordNumber}
+                else
+                  dd #{component.data.name}
 
             if component.reception && component.reception.location !== ''
-              dt Current Location
+              dt Location
 
               if component.reception.detail && component.reception.detail != ''
                 dd
@@ -64,10 +58,6 @@ block content
                   +dateFormat(component.reception.date)
                   | )
 
-            if component.formId == 'GroundingMeshPanel'
-              dt Factory ID
-              dd #{component.data.typeRecordNumber}
-
             if component.workflowId
               dt Part of Workflow:
               dd
@@ -78,7 +68,7 @@ block content
               dd
                 a(href = `/component/${component.data.fromBatch}`, target = '_blank') #{component.data.fromBatch}
 
-            dt Component Data:
+            dt Current Version:
             dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
               +dateTimeFormat(component.insertion.insertDate)
 
@@ -86,227 +76,234 @@ block content
                 |  by !{' '}
                 a(href = `mailto:${user_email(component.insertion.user)}`) #{component.insertion.user.displayName}
 
-            if component.formId === 'BoardShipment'
-              .vert-space-x1.border-success.border.rounded.p-2
-                dt Origin Location 
-                dd #{dictionary_locations[component.data.originOfShipment]}
+            .vert-space-x1
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
+                | All Versions: 
+                i.chevron.fa.fa-fw 
 
-                dt Destination Location
-                dd #{dictionary_locations[component.data.destinationOfShipment]}
+              .collapse#versionsBox
+                ul
+                  each v in componentVersions
+                    li 
+                      a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
+                      |  on 
+                      +dateTimeFormat(v.insertion.insertDate)
 
-                dt Boards in Shipment
-                dd
-                  table.table
-                    thead
-                      tr
-                        th.col-md-2 UUID
-                        th.col-md-1 UK ID
-                        th.col-md-1 Part Number
-                        th.col-md-3 QR Code Link 
+                      if v.insertion.user
+                        |  by !{' '}
+                        a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-                    tbody
-                      each info in collectionDetails
-                        tr
-                          td
-                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+        .col-md-1
+        .col-md-3
+          .form-inline
+            a.btn.btn-warning(href = `/component/${component.componentUuid}/edit`)
+              img.small-icon(src = '/images/edit_icon.svg')
+              | &nbsp; Edit Component
 
-                          td #{info[1]}
-                          td #{info[2]}
-                          td #{`${base_url}/c/${info[3]}`}
+            - let jsonURLString = `/json/component/${component.componentUuid}`;
+            - if ('version' in dictionary_queries) jsonURLString += `?version=${dictionary_queries.version}`;
 
-                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-                  img.small-icon(src = '/images/checklist_icon.svg')
-                  | &nbsp; Print all sub-component QR codes
-            else if component.formId === 'DWAComponentShipment'
-              .vert-space-x1.border-success.border.rounded.p-2
-                dt Origin Location
-                dd #{dictionary_locations[component.data.originOfShipment]}
+            .hori-space-x2
+              a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View JSON Record
 
-                dt Destination Location
-                dd #{dictionary_locations[component.data.destinationOfShipment]}
-
-                dt Components in Shipment
-                dd
-                  table.table 
-                    thead 
-                      tr 
-                        th.col-md-2 UUID 
-                        th.col-md-1 Type
-                        th.col-md-1 Number
-                        th.col-md-3 QR Code Link 
-
-                    tbody 
-                      each info in collectionDetails
-                        tr
-                          td
-                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
-
-                          td #{info[2]}
-                          td #{info[1]}
-                          td #{`${base_url}/c/${info[3]}`}
-
-                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-                  img.small-icon(src = '/images/checklist_icon.svg')
-                  | &nbsp; Print all sub-component QR codes
-            else if component.formId === 'GroundingMeshShipment'
-              .vert-space-x1.border-success.border.rounded.p-2
-                dt Origin Location
-                dd #{dictionary_locations[component.data.originOfShipment]}
-
-                dt Destination Location
-                dd #{dictionary_locations[component.data.destinationOfShipment]}
-
-                dt Meshes in Shipment
-                dd
-                  table.table 
-                    thead 
-                      tr 
-                        th.col-md-2 UUID 
-                        th.col-md-1 Factory ID
-                        th.col-md-1 Part Number
-                        th.col-md-3 QR Code Link 
-
-                    tbody 
-                      each info in collectionDetails
-                        tr
-                          td
-                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
-
-                          td #{info[1]}
-                          td #{info[2]}
-                          td #{`${base_url}/c/${info[3]}`}
-
-                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-                  img.small-icon(src = '/images/checklist_icon.svg')
-                  | &nbsp; Print all sub-component QR codes
-            else if component.formId === 'PopulatedBoardShipment'
-              .vert-space-x1.border-success.border.rounded.p-2
-                dt Origin Location
-                dd #{dictionary_locations[component.data.originOfShipment]}
-
-                dt Destination Location
-                dd #{dictionary_locations[component.data.destinationOfShipment]}
-
-                dt Components in Kit
-                dd
-                  table.table 
-                    thead 
-                      tr 
-                        th.col-md-2 UUID 
-                        th.col-md-1 Type
-                        th.col-md-1 UW ID 
-                        th.col-md-3 QR Code Link 
-
-                    tbody 
-                      each info in collectionDetails
-                        tr
-                          td
-                            a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
-
-                          td #{info[2]}
-                          td #{info[1]}
-                          td #{`${base_url}/c/${info[3]}`}
-
-                a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-                  img.small-icon(src = '/images/checklist_icon.svg')
-                  | &nbsp; Print all sub-component QR codes
-            else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
-              if component.formId === 'GeometryBoardBatch'
-                .vert-space-x1.border-success.border.rounded.p-2
-                  #typeform
-
-              - let columnHeader = ''
-
-              if component.data.subComponent_formId == 'CEAdapterBoard' || component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
-                - columnHeader = 'UW ID'
-              else 
-                - columnHeader = 'UK ID'
-
-              .vert-space-x1.border-success.border.rounded.p-2
-                dt #{`Components in Batch (total = ${component.data.subComponent_count})`}
-                dd
-                  table.table
-                    thead
-                      tr
-                        th.col-md-3 UUID
-                        th.col-md-1 #{columnHeader}
-                        th.col-md-3 QR Code Link
-
-                    tbody
-                      each uuid, index in component.data.subComponent_fullUuids
-                        tr
-                          td
-                            a(href = `/component/${uuid}`, target = '_blank') #{uuid}
-
-                          if component.data.subComponent_typeRecordNumbers
-                            td #{component.data.subComponent_typeRecordNumbers[index]}
-                          else
-                            td (not retrievable)
-
-                          td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
-
-                .form-inline
-                  a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-                    img.small-icon(src = '/images/checklist_icon.svg')
-                    | &nbsp; Print all sub-component QR codes
-
-                  .hori-space-x2 
-                    a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
-
-            else
-              .vert-space-x1.border-success.border.rounded.p-2
-                #typeform
+          .vert-space-x1 
+            a.btn.btn-primary(href = `/component/${component.formId}`)
+              img.small-icon(src = '/images/run_icon.svg')
+              | &nbsp; Create New Component of This Type
 
           .vert-space-x1
-            .panel.panel-default
-            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
-              | All Versions: 
-              i.chevron.fa.fa-fw 
+            a.btn.btn-primary(href = `/component/${component.componentUuid}/qrCodes`)
+              img.small-icon(src = '/images/checklist_icon.svg')
+              | &nbsp; Print a set of the component's QR codes
 
-            .collapse#versionsBox
-              ul
-                each v in componentVersions
-                  li 
-                    a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
-                    |  on 
-                    +dateTimeFormat(v.insertion.insertDate)
+          .vert-space-x1
+            a.btn.btn-primary(href = `/component/${component.componentUuid}/summary`)
+              img.small-icon(src = '/images/checklist_icon.svg')
+              | &nbsp; View and print the component's summary
 
-                    if v.insertion.user
-                      |  by !{' '}
-                      a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
+          if component.formId == 'AssembledAPA'
+            .vert-space-x1
+              a.btn.btn-primary(href = `/component/${component.componentUuid}/execSummary`)
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; View and print this APA's Executive Summary
 
         .col-md-3
           #qr-code
             +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
 
-    .vert-space-x2.form-inline
-      a.btn.btn-warning(href = `/component/${component.componentUuid}/edit`)
-        img.small-icon(src = '/images/edit_icon.svg')
-        | &nbsp; Edit Component
+    if component.formId === 'BoardShipment'
+      .vert-space-x1.border-success.border.rounded.p-2
+        dt Origin Location 
+        dd #{dictionary_locations[component.data.originOfShipment]}
 
-      - let jsonURLString = `/json/component/${component.componentUuid}`;
-      - if ('version' in dictionary_queries) jsonURLString += `?version=${dictionary_queries.version}`;
+        dt Destination Location
+        dd #{dictionary_locations[component.data.destinationOfShipment]}
 
-      .hori-space-x2
-        a.btn.btn-secondary(href = `${jsonURLString}`, target = '_blank')
+        dt Boards in Shipment
+        dd
+          table.table
+            thead
+              tr
+                th.col-md-2 UUID
+                th.col-md-1 UK ID
+                th.col-md-1 Part Number
+                th.col-md-3 QR Code Link 
+
+            tbody
+              each info in collectionDetails
+                tr
+                  td
+                    a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                  td #{info[1]}
+                  td #{info[2]}
+                  td #{`${base_url}/c/${info[3]}`}
+
+        a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
-          | &nbsp; View JSON Record
+          | &nbsp; Print all sub-component QR codes
+    else if component.formId === 'DWAComponentShipment'
+      .vert-space-x1.border-success.border.rounded.p-2
+        dt Origin Location
+        dd #{dictionary_locations[component.data.originOfShipment]}
 
-      .hori-space-x2
-        a.btn.btn-primary(href = `/component/${component.componentUuid}/qrCodes`)
+        dt Destination Location
+        dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+        dt Components in Shipment
+        dd
+          table.table 
+            thead 
+              tr 
+                th.col-md-2 UUID 
+                th.col-md-1 Type
+                th.col-md-1 Number
+                th.col-md-3 QR Code Link 
+
+            tbody 
+              each info in collectionDetails
+                tr
+                  td
+                    a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                  td #{info[2]}
+                  td #{info[1]}
+                  td #{`${base_url}/c/${info[3]}`}
+
+        a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
-          | &nbsp; Print a set of the component's QR codes
+          | &nbsp; Print all sub-component QR codes
+    else if component.formId === 'GroundingMeshShipment'
+      .vert-space-x1.border-success.border.rounded.p-2
+        dt Origin Location
+        dd #{dictionary_locations[component.data.originOfShipment]}
 
-      .hori-space-x2
-        a.btn.btn-primary(href = `/component/${component.componentUuid}/summary`)
+        dt Destination Location
+        dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+        dt Meshes in Shipment
+        dd
+          table.table 
+            thead 
+              tr 
+                th.col-md-2 UUID 
+                th.col-md-1 Factory ID
+                th.col-md-1 Part Number
+                th.col-md-3 QR Code Link 
+
+            tbody 
+              each info in collectionDetails
+                tr
+                  td
+                    a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                  td #{info[1]}
+                  td #{info[2]}
+                  td #{`${base_url}/c/${info[3]}`}
+
+        a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
-          | &nbsp; View and print the component's summary
+          | &nbsp; Print all sub-component QR codes
+    else if component.formId === 'PopulatedBoardShipment'
+      .vert-space-x1.border-success.border.rounded.p-2
+        dt Origin Location
+        dd #{dictionary_locations[component.data.originOfShipment]}
 
-      if component.formId == 'AssembledAPA'
-        .hori-space-x2
-          a.btn.btn-primary(href = `/component/${component.componentUuid}/execSummary`)
+        dt Destination Location
+        dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+        dt Components in Kit
+        dd
+          table.table 
+            thead 
+              tr 
+                th.col-md-2 UUID 
+                th.col-md-1 Type
+                th.col-md-1 UW ID 
+                th.col-md-3 QR Code Link 
+
+            tbody 
+              each info in collectionDetails
+                tr
+                  td
+                    a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                  td #{info[2]}
+                  td #{info[1]}
+                  td #{`${base_url}/c/${info[3]}`}
+
+        a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; Print all sub-component QR codes
+    else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
+      if component.formId === 'GeometryBoardBatch'
+        .vert-space-x1.border-success.border.rounded.p-2
+          #typeform
+
+      - let columnHeader = ''
+
+      if component.data.subComponent_formId == 'CEAdapterBoard' || component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
+        - columnHeader = 'UW ID'
+      else 
+        - columnHeader = 'UK ID'
+
+      .vert-space-x1.border-success.border.rounded.p-2
+        dt #{`Components in Batch (total = ${component.data.subComponent_count})`}
+        dd
+          table.table
+            thead
+              tr
+                th.col-md-3 UUID
+                th.col-md-1 #{columnHeader}
+                th.col-md-3 QR Code Link
+
+            tbody
+              each uuid, index in component.data.subComponent_fullUuids
+                tr
+                  td
+                    a(href = `/component/${uuid}`, target = '_blank') #{uuid}
+
+                  if component.data.subComponent_typeRecordNumbers
+                    td #{component.data.subComponent_typeRecordNumbers[index]}
+                  else
+                    td (not retrievable)
+
+                  td #{`${base_url}/c/${component.data.subComponent_shortUuids[index]}`}
+
+        .form-inline
+          a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
             img.small-icon(src = '/images/checklist_icon.svg')
-            | &nbsp; View and print this APA's executive summary
+            | &nbsp; Print all sub-component QR codes
+
+          .hori-space-x2 
+            a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
+
+    else
+      .vert-space-x1.border-success.border.rounded.p-2
+        #typeform
 
     .vert-space-x2
       hr

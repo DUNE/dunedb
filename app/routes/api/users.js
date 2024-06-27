@@ -146,16 +146,38 @@ router.get('/winderMaintenanceSignoff.json', async function (req, res, next) {
 });
 
 
-/// List all personnel who are authorised to sign-off on APA frame and grounding mesh intakes
-router.get('/frameMeshSignoff.json', async function (req, res, next) {
+/// List all personnel who are authorised to sign-off on APA frame and grounding mesh intake (including frame intake survey results)
+router.get('/frameIntakeSignoff.json', async function (req, res, next) {
   try {
     // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
     let data = [];
 
-    for (const person in utils.dictionary_frameMeshSignoff) {
+    for (const person in utils.dictionary_frameIntakeSignoff) {
       data.push({
         api_name: person,
-        display_name: utils.dictionary_frameMeshSignoff[person],
+        display_name: utils.dictionary_frameIntakeSignoff[person],
+      });
+    }
+
+    // Return the array in JSON format
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List all personnel who are authorised to sign-off on APA frame installation survey results
+router.get('/frameInstallationSignoff.json', async function (req, res, next) {
+  try {
+    // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
+    let data = [];
+
+    for (const person in utils.dictionary_frameInstallationSignoff) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_frameInstallationSignoff[person],
       });
     }
 
