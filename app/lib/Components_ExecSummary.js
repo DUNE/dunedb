@@ -127,7 +127,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.frameQC.signoff = utils.dictionary_frameMeshSignoff[results[0].signoff];
+    collatedInfo.frameQC.signoff = utils.dictionary_frameIntakeSignoff[results[0].signoff];
     collatedInfo.frameQC.qcActionId = results[0].actionId;
   }
 
