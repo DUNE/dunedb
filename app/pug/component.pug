@@ -26,7 +26,7 @@ block content
 
     .vert-space-x1
       .row
-        .col-md-5
+        .col-sm-5
           dl
             dt Component UUID
             dd
@@ -69,7 +69,9 @@ block content
                 a(href = `/component/${component.data.fromBatch}`, target = '_blank') #{component.data.fromBatch}
 
             dt Current Version:
-            dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
+            dd This is version #{component.validity.version} of the component.
+              br
+              | It was last edited on !{' '}
               +dateTimeFormat(component.insertion.insertDate)
 
               if component.insertion.user
@@ -94,9 +96,8 @@ block content
                         |  by !{' '}
                         a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-        .col-md-1
-        .col-md-3
-          .form-inline
+        .col-sm-4
+          .vert-space-x2.form-inline
             a.btn.btn-warning(href = `/component/${component.componentUuid}/edit`)
               img.small-icon(src = '/images/edit_icon.svg')
               | &nbsp; Edit Component
@@ -130,7 +131,7 @@ block content
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; View and print this APA's Executive Summary
 
-        .col-md-3
+        .col-sm-3
           #qr-code
             +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
 

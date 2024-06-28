@@ -26,7 +26,7 @@ block content
 
     .vert-space-x1
       .row 
-        .col-md-5
+        .col-sm-5
           dl
             dt Workflow ID
             dd
@@ -40,7 +40,9 @@ block content
               dd.text-danger.font-weight-bold #{workflowStatus}
 
             dt Current Version:
-            dd This is version #{workflow.validity.version} of the workflow, and it was last edited on !{' '}
+            dd This is version #{workflow.validity.version} of the workflow.
+              br
+              | It was last edited on !{' '}
               +dateTimeFormat(workflow.insertion.insertDate)
 
               if workflow.insertion.user
@@ -65,9 +67,8 @@ block content
                         |  by !{' '}
                         a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-        .col-md-1 
-        .col-md-3
-          .form-inline
+        .col-sm-4
+          .vert-space-x2.form-inline
             a.btn.btn-warning(href = `/workflow/${workflow.workflowId}/edit`)
               img.small-icon(src = '/images/edit_icon.svg')
               | &nbsp; Edit Workflow
@@ -80,7 +81,7 @@ block content
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; View JSON Record
 
-        .col-md-3
+        .col-sm-3
 
     .vert-space-x1.border-success.border.rounded.p-2
       - let freeSection_bgn = -2;
