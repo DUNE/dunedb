@@ -23,7 +23,7 @@ block content
 
     .vert-space-x1
       .row 
-        .col-md-5
+        .col-sm-5
           dl
             dt Action ID
             dd
@@ -51,7 +51,9 @@ block content
                 a(href = `/workflow/${action.workflowId}`, target = '_blank') #{action.workflowId}
 
             dt Current Version:
-            dd This is version #{action.validity.version} of the action, and it was last performed on !{' '}
+            dd This is version #{action.validity.version} of the action.
+              br
+              | It was last performed on !{' '}
               +dateTimeFormat(action.insertion.insertDate)
 
               if action.insertion.user
@@ -76,9 +78,8 @@ block content
                         |  by !{' '}
                         a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
 
-        .col-md-1 
-        .col-md-3 
-          .form-inline
+        .col-sm-4 
+          .vert-space-x2.form-inline
             a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
               img.small-icon(src = '/images/edit_icon.svg')
               | &nbsp; Edit Action
@@ -96,7 +97,7 @@ block content
               img.small-icon(src = '/images/run_icon.svg')
               | &nbsp; Perform New Action of This Type
 
-        .col-md-3
+        .col-sm-3
 
     .vert-space-x1.border-success.border.rounded.p-2
       #typeform
