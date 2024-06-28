@@ -517,43 +517,47 @@ async function collateInfo(componentUUID) {
   if (results.length > 0) {
     for (const result of results) {
       for (const entry of result.missingWireData) {
-        let nonConfType = '';
+        if (entry.wireLayer !== '') {
+          let nonConfType = '';
 
-        for (const [key, value] of Object.entries(result.nonConf_type)) {
-          if (value) nonConfType = key;
+          for (const [key, value] of Object.entries(result.nonConf_type)) {
+            if (value) nonConfType = key;
+          }
+
+          const dictionary = {
+            type: dictionary_apaNCRs_types[nonConfType],
+            layerSide: entry.wireLayer.toUpperCase(),
+            boardPad: entry.headBoardAndPad,
+            endpoints: entry.endPointsForMissingSegment,
+            fembChannel: entry.coldElectronicsChannel,
+            offlineChannel: entry.offlineChannel,
+            actionId: result.actionId,
+          }
+
+          collatedInfo.apaNCRs_wires.push(dictionary);
         }
-
-        const dictionary = {
-          type: dictionary_apaNCRs_types[nonConfType],
-          layerSide: entry.wireLayer.toUpperCase(),
-          boardPad: entry.headBoardAndPad,
-          endpoints: entry.endPointsForMissingSegment,
-          fembChannel: entry.coldElectronicsChannel,
-          offlineChannel: entry.offlineChannel,
-          actionId: result.actionId,
-        }
-
-        collatedInfo.apaNCRs_wires.push(dictionary);
       }
 
       for (const entry of result.shortedWireData) {
-        let nonConfType = '';
+        if (entry.wireLayer !== '') {
+          let nonConfType = '';
 
-        for (const [key, value] of Object.entries(result.nonConf_type)) {
-          if (value) nonConfType = key;
+          for (const [key, value] of Object.entries(result.nonConf_type)) {
+            if (value) nonConfType = key;
+          }
+
+          const dictionary = {
+            type: dictionary_apaNCRs_types[nonConfType],
+            layerSide: entry.wireLayer.toUpperCase(),
+            boardPad: entry.headBoardAndPad,
+            endpoints: entry.endPointsForMissingSegment,
+            fembChannel: entry.coldElectronicsChannel,
+            offlineChannel: entry.offlineChannel,
+            actionId: result.actionId,
+          }
+
+          collatedInfo.apaNCRs_wires.push(dictionary);
         }
-
-        const dictionary = {
-          type: dictionary_apaNCRs_types[nonConfType],
-          layerSide: entry.wireLayer.toUpperCase(),
-          boardPad: entry.headBoardAndPad,
-          endpoints: entry.endPointsForMissingSegment,
-          fembChannel: entry.coldElectronicsChannel,
-          offlineChannel: entry.offlineChannel,
-          actionId: result.actionId,
-        }
-
-        collatedInfo.apaNCRs_wires.push(dictionary);
       }
     }
   }
