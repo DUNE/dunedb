@@ -32,6 +32,43 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     // Retrieve the record of the component that the action was performed on, using its component UUID (also found in the action record)
     const component = await Components.retrieve(action.componentUuid);
 
+    // When viewing a 'Single Layer Tension Measurements' type action, we also want to see the number of replaced wires from the layer's winding action ...
+    // ... so that this number can be compared (for each side) to the number of re-tensioned wires determined by the DB itself
+    let numberOfReplacedWires = [null, null];
+
+    if (action.typeFormId === 'x_tension_testing') {
+      // Set up a match condition dictionary, where we want to find the Winding action performed on the same APA component and the same side as the tension measurements being viewed
+      // Then attempt to get a list of all matching actions ... this should return at least one action, since the winding should already have been performed before the tension measurements
+      let match_condition = {
+        typeFormId: `${action.data.apaLayer}_winding`,
+        componentUuid: action.componentUuid,
+      };
+
+      const matching_windingActions = await Actions.list(match_condition);
+
+      // If there is at least one matching winding action, count the number of replaced wires noted for each side
+      if (matching_windingActions.length > 0) {
+        numberOfReplacedWires = [0, 0];
+
+        windingAction = await Actions.retrieve({ actionId: matching_windingActions[0].actionId });
+        const replacedWires = windingAction.data.replacedWires;
+
+        for (let i = 0; i < replacedWires.length; i++) {
+          let singleWire_solderPads = replacedWires[i].solderPad;
+
+          if (typeof singleWire_solderPads === 'number') {
+            singleWire_solderPads = `${singleWire_solderPads}`;
+          }
+
+          if (replacedWires[i].side === 'a') {
+            numberOfReplacedWires[0] += singleWire_solderPads.split(',').length;
+          } else {
+            numberOfReplacedWires[1] += singleWire_solderPads.split(',').length;
+          }
+        }
+      }
+    }
+
     // Render the interface page
     res.render('action.pug', {
       action,
@@ -39,6 +76,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
       actionTypeForm,
       component,
       queryDictionary: req.query,
+      numberOfReplacedWires,
     });
   } catch (err) {
     logger.error(err);

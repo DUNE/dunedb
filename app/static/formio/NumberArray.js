@@ -131,10 +131,10 @@ class NumberArray extends TextFieldComponent {
     let firstWireNumber = 0;
     let scatterPlotXLabel = 'Measurement Index';
 
-    if (numberOfEntries < 800) {    // X and G wire layers have 480 and 481 entries respectively
+    if ((numberOfEntries > 0) && (numberOfEntries < 800)) {    // X and G wire layers have 480 and 481 entries respectively
       firstWireNumber = 1;
       scatterPlotXLabel = 'Wire #';
-    } else {                        // V and U wire layers have 1139 and 1141 entries respectively
+    } else if (numberOfEntries > 800) {                        // V and U wire layers have 1139 and 1141 entries respectively
       firstWireNumber = 8;
       scatterPlotXLabel = 'Segment #';
     }
@@ -142,8 +142,8 @@ class NumberArray extends TextFieldComponent {
     let graph = new Histogram(numberOfEntries, firstWireNumber, numberOfEntries + firstWireNumber);
 
     graph.data = arr;
-    graph.min_content = min;
-    graph.max_content = max;
+    graph.min_content = 3.0;    // Fix the default y-axis range of the scatter plot (it can still be zoomed and moved through the interface)
+    graph.max_content = 9.5;
 
     this.LizardGraph.SetHist(graph, colorscale);
     this.LizardGraph.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
@@ -156,6 +156,9 @@ class NumberArray extends TextFieldComponent {
     let hist = new CreateGoodHistogram(Math.round((max - min) / 0.1) + 1, min, max);
 
     for (const x of arr) { hist.Fill(x); }
+
+    hist.min = 3.0;    // Fix the default x-axis range of the bar plot (it can still be zoomed and moved through the interface)
+    hist.max = 9.5;
 
     this.LizardHistogram.SetHist(hist, colorscale);
     this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);

@@ -127,7 +127,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.frameQC.signoff = utils.dictionary_frameMeshSignoff[results[0].signoff];
+    collatedInfo.frameQC.signoff = utils.dictionary_frameIntakeSignoff[results[0].signoff];
     collatedInfo.frameQC.qcActionId = results[0].actionId;
   }
 
@@ -373,6 +373,7 @@ async function collateInfo(componentUUID) {
 
       for (let i = 0; i < results[0].replacedWires.length; i++) {
         let singleWire_solderPads = results[0].replacedWires[i].solderPad;
+
         if (typeof singleWire_solderPads === 'number') {
           singleWire_solderPads = `${singleWire_solderPads}`;
         }
@@ -419,6 +420,7 @@ async function collateInfo(componentUUID) {
 
       for (let i = 0; i < results[0].badSolderJoints.length; i++) {
         let singleJoint_solderPads = results[0].badSolderJoints[i].solderPad;
+
         if (typeof singleJoint_solderPads === 'number') {
           singleJoint_solderPads = `${singleJoint_solderPads}`;
         }
@@ -503,7 +505,8 @@ async function collateInfo(componentUUID) {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
       nonConf_type: { '$first': '$data.nonConformanceType' },
-      wireData: { '$first': '$data.dataGrid' },
+      missingWireData: { '$first': '$data.dataGrid' },
+      shortedWireData: { '$first': '$data.shortedGrid' },
     },
   });
 
@@ -513,24 +516,48 @@ async function collateInfo(componentUUID) {
 
   if (results.length > 0) {
     for (const result of results) {
-      for (const entry of result.wireData) {
-        let nonConfType = '';
+      for (const entry of result.missingWireData) {
+        if (entry.wireLayer !== '') {
+          let nonConfType = '';
 
-        for (const [key, value] of Object.entries(result.nonConf_type)) {
-          if (value) nonConfType = key;
+          for (const [key, value] of Object.entries(result.nonConf_type)) {
+            if (value) nonConfType = key;
+          }
+
+          const dictionary = {
+            type: dictionary_apaNCRs_types[nonConfType],
+            layerSide: entry.wireLayer.toUpperCase(),
+            boardPad: entry.headBoardAndPad,
+            endpoints: entry.endPointsForMissingSegment,
+            fembChannel: entry.coldElectronicsChannel,
+            offlineChannel: entry.offlineChannel,
+            actionId: result.actionId,
+          }
+
+          collatedInfo.apaNCRs_wires.push(dictionary);
         }
+      }
 
-        const dictionary = {
-          type: dictionary_apaNCRs_types[nonConfType],
-          layerSide: entry.wireLayer.toUpperCase(),
-          boardPad: entry.headBoardAndPad,
-          endpoints: entry.endPointsForMissingSegment,
-          fembChannel: entry.coldElectronicsChannel,
-          offlineChannel: entry.offlineChannel,
-          actionId: result.actionId,
+      for (const entry of result.shortedWireData) {
+        if (entry.wireLayer !== '') {
+          let nonConfType = '';
+
+          for (const [key, value] of Object.entries(result.nonConf_type)) {
+            if (value) nonConfType = key;
+          }
+
+          const dictionary = {
+            type: dictionary_apaNCRs_types[nonConfType],
+            layerSide: entry.wireLayer.toUpperCase(),
+            boardPad: entry.headBoardAndPad,
+            endpoints: entry.endPointsForMissingSegment,
+            fembChannel: entry.coldElectronicsChannel,
+            offlineChannel: entry.offlineChannel,
+            actionId: result.actionId,
+          }
+
+          collatedInfo.apaNCRs_wires.push(dictionary);
         }
-
-        collatedInfo.apaNCRs_wires.push(dictionary);
       }
     }
   }

@@ -129,6 +129,9 @@ class BarPlot extends TextFieldComponent {
 
     for (const x of arr) { hist.Fill(x); }
 
+    hist.min = 3.0;    // Fix the default x-axis range of the bar plot (it can still be zoomed and moved through the interface)
+    hist.max = 9.5;
+
     this.LizardHistogram.SetHist(hist, colorscale);
     this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardHistogram.marker_color = 'rgba(100, 0,0, 0.5)';
