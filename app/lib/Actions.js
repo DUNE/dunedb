@@ -112,7 +112,7 @@ async function save(input, req) {
       }
 
       // If any changed tensions have been found and saved, save them into the new record and break out of the loop ... if not, move to the next previous version of the action
-      if ((changedTensions_sideA.length > 0) || (changedTensions_sideB > 0)) {
+      if ((changedTensions_sideA.length > 0) || (changedTensions_sideB.length > 0)) {
         newRecord.data.changedTensions_version = action.validity.version;
         newRecord.data.changedTensions_sideA = [...changedTensions_sideA];
         newRecord.data.changedTensions_sideB = [...changedTensions_sideB];
