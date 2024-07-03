@@ -98,26 +98,16 @@ class ScatterPlot extends TextFieldComponent {
 
     // Normalize the input values
     let arr = value || [];
-    let min = 1e99;
-    let max = -1e99;
+    let min = 3.5;
+    let max = 9.0;
 
-    if (arr.length < 1) {
-      min = 0
-      max = 0;
-    }
-
-    // Calculate the minimum and maximum entry values
+    // Calculate the data bounds, and set up the array of values to be plotted
     const bounds = this.getBounds();
 
     for (let i = 0; i < arr.length; i++) {
       const x = parseFloat(arr[i]);
 
-      if (!isNaN(x)) {
-        min = Math.min(min, x);
-        max = Math.max(max, x);
-
-        arr[i] = x;
-      }
+      if (!isNaN(x)) { arr[i] = x; }
     }
 
     const numberOfEntries = arr.length;
@@ -141,8 +131,8 @@ class ScatterPlot extends TextFieldComponent {
     let graph = new Histogram(numberOfEntries, firstWireNumber, numberOfEntries + firstWireNumber);
 
     graph.data = arr;
-    graph.min_content = 3.0;    // Fix the default y-axis range of the scatter plot (it can still be zoomed and moved through the interface)
-    graph.max_content = 9.5;
+    graph.min_content = min;
+    graph.max_content = max;
 
     this.LizardGraph.SetHist(graph, colorscale);
     this.LizardGraph.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);

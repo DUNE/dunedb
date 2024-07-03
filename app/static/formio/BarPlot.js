@@ -96,28 +96,18 @@ class BarPlot extends TextFieldComponent {
   updateExtras(value) {
     gBarPlotComponent = this;
 
-    // Normalize the input values
+    // Normalize the input values, and fix the data range (x-axis limits on the bar graph)
     let arr = value || [];
-    let min = 1e99;
-    let max = -1e99;
+    let min = 3.5;
+    let max = 9.0;
 
-    if (arr.length < 1) {
-      min = 0
-      max = 0;
-    }
-
-    // Calculate the minimum and maximum entry values
+    // Calculate the data bounds, and set up the array of values to be plotted
     const bounds = this.getBounds();
 
     for (let i = 0; i < arr.length; i++) {
       const x = parseFloat(arr[i]);
 
-      if (!isNaN(x)) {
-        min = Math.min(min, x);
-        max = Math.max(max, x);
-
-        arr[i] = x;
-      }
+      if (!isNaN(x)) { arr[i] = x; }
     }
 
     // Draw the bar plot
@@ -128,9 +118,6 @@ class BarPlot extends TextFieldComponent {
     let hist = new CreateGoodHistogram(Math.round((max - min) / 0.1) + 1, min, max);
 
     for (const x of arr) { hist.Fill(x); }
-
-    hist.min = 3.0;    // Fix the default x-axis range of the bar plot (it can still be zoomed and moved through the interface)
-    hist.max = 9.5;
 
     this.LizardHistogram.SetHist(hist, colorscale);
     this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
