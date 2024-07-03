@@ -8,6 +8,8 @@ block extrascripts
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
     const component = !{JSON.stringify(component, null, 4)};
     const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
+    const retensionedWires_versions = !{JSON.stringify(retensionedWires_versions, null, 4)};
+    const retensionedWires_values = !{JSON.stringify(retensionedWires_values, null, 4)};
     const numberOfReplacedWires = !{JSON.stringify(numberOfReplacedWires, null, 4)};
 
   block workscripts
@@ -103,21 +105,18 @@ block content
       #typeform
 
     .vert-space-x1
-      if (action.typeFormId == 'x_tension_testing') && (action.data.changedTensions_sideA)
-        dt Most recently re-tensioned wires / wire segments (comparing this version [#{action.validity.version}] and version #{action.data.changedTensions_version}):
-
-        - let numberOfChangedTensions_sideA = action.data.changedTensions_sideA.length
-        - let numberOfChangedTensions_sideB = action.data.changedTensions_sideB.length
+      if (action.typeFormId == 'x_tension_testing') && (retensionedWires_versions[0] !== null)
+        dt Most recently re-tensioned wires / wire segments (comparing versions #{retensionedWires_versions[1]} and #{retensionedWires_versions[0]}):
 
         .row
           .col-md-6
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
-              | #{numberOfChangedTensions_sideA} on side A (found #{numberOfReplacedWires[0]} in this layer's winding action): 
+              | #{retensionedWires_values[0].length} on side A (found #{numberOfReplacedWires[0]} in this layer's winding action): 
               i.chevron.fa.fa-fw 
 
             .collapse#reTensionsBoxA
-              if numberOfChangedTensions_sideA > 0
+              if retensionedWires_values[0].length > 0
                 .vert-space-x1.border-success.border.rounded.p-2
                   dd
                     table.table
@@ -128,23 +127,19 @@ block content
                           th.col-md-2 Latest Tension (N)
 
                       tbody
-                        each changedTension in action.data.changedTensions_sideA
+                        each changedTension in retensionedWires_values[0]
                           tr
-                            if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
-                              td #{changedTension[0] + 1}
-                            else 
-                              td #{changedTension[0] + 8}
-
+                            td #{changedTension[0]}
                             td #{changedTension[1]}
                             td #{changedTension[2]}
           .col-md-6
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
-              | #{numberOfChangedTensions_sideB} on side B (found #{numberOfReplacedWires[1]} in this layer's winding action): 
+              | #{retensionedWires_values[1].length} on side B (found #{numberOfReplacedWires[1]} in this layer's winding action): 
               i.chevron.fa.fa-fw 
 
             .collapse#reTensionsBoxB
-              if numberOfChangedTensions_sideB > 0
+              if retensionedWires_values[1].length > 0
                 .vert-space-x1.border-success.border.rounded.p-2
                   dd
                     table.table
@@ -155,13 +150,9 @@ block content
                           th.col-md-2 Latest Tension (N)
 
                       tbody
-                        each changedTension in action.data.changedTensions_sideB
+                        each changedTension in retensionedWires_values[1]
                           tr
-                            if action.data.apaLayer === 'x' || action.data.apaLayer === 'g'
-                              td #{changedTension[0] + 1}
-                            else 
-                              td #{changedTension[0] + 8}
-
+                            td #{changedTension[0]}
                             td #{changedTension[1]}
                             td #{changedTension[2]}
 
