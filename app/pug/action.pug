@@ -99,6 +99,10 @@ block content
               img.small-icon(src = '/images/run_icon.svg')
               | &nbsp; Perform New Action of This Type
 
+          if (action.typeFormId == 'x_tension_testing')
+            .vert-space-x1 
+              a.btn.btn-secondary#download_changedTensions(onclick = 'DownloadChangedTensions(retensionedWires_values)', download = `retensions_${action.actionId}_v${retensionedWires_versions[1]}-v${retensionedWires_versions[0]}.txt`, href = '') Download List of Changed Tensions
+
         .col-sm-3
 
     .vert-space-x1.border-success.border.rounded.p-2
