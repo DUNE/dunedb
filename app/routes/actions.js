@@ -41,16 +41,19 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
 
     if (action.typeFormId === 'x_tension_testing') {
       // Retrieve all versions of the action (ordered from latest to earliest)
-      // Then filter the list of versions to only include those which were uploaded by the M2M Client (i.e. those where new tension measurements were uploaded)
+      // Then filter the list of versions to only include those which satisfy the following criteria:
+      //  - uploaded by the M2M Client (i.e. those where new tension measurements were uploaded)
+      //  - with version number no greater than the version currently being viewed
       const actionVersions = await Actions.versions(req.params.actionId);
+      const versionNumber = (req.query.version) ? parseInt(req.query.version, 10) : 99;
 
       let filteredVersions = [];
 
       for (const action of actionVersions) {
-        if (action.insertion.user.displayName == 'M2M Client') filteredVersions.push(action);
+        if ((action.insertion.user.displayName == 'M2M Client') && (action.validity.version <= versionNumber)) filteredVersions.push(action);
       }
 
-      // If there are at least two M2M-uploaded versions of the action (i.e. so that some comparison can actually be made) ...
+      // If there are at least two matching versions of the action (i.e. so that some comparison can actually be made) ...
       if (filteredVersions.length > 1) {
         // Save the version numbers of the two most recent versions (these are the ones whose tension measurements will be compared)
         retensionedWires_versions = [filteredVersions[0].validity.version, filteredVersions[1].validity.version];

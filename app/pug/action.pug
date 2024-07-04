@@ -101,7 +101,10 @@ block content
 
           if (action.typeFormId == 'x_tension_testing')
             .vert-space-x1 
-              a.btn.btn-secondary#download_changedTensions(onclick = 'DownloadChangedTensions(retensionedWires_values)', download = `retensions_${action.actionId}_v${retensionedWires_versions[1]}-v${retensionedWires_versions[0]}.txt`, href = '') Download List of Changed Tensions
+              if retensionedWires_versions[0] !== null
+                a.btn.btn-secondary#download_changedTensions(onclick = 'DownloadChangedTensions(retensionedWires_values)', download = `retensions_${action.actionId}_v${retensionedWires_versions[1]}-v${retensionedWires_versions[0]}.txt`, href = '') Download List of Changed Tensions
+              else 
+                a.btn.btn-secondary.disabled(href = '') Download List of Changed Tensions
 
         .col-sm-3
 
