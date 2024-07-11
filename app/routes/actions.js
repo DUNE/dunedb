@@ -32,11 +32,48 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     // Retrieve the record of the component that the action was performed on, using its component UUID (also found in the action record)
     const component = await Components.retrieve(action.componentUuid);
 
-    // When viewing a 'Single Layer Tension Measurements' type action, we also want to see the number of replaced wires from the layer's winding action ...
-    // ... so that this number can be compared (for each side) to the number of re-tensioned wires determined by the DB itself
+    // When viewing a 'Single Layer Tension Measurements' type action, we also want to see some additional information not directly contained in the action record:
+    // - the number of wires that have been re-tensioned since the last time measurements were uploaded
+    // - the number of replaced wires from the layer's winding action (which can be compared per side to the number of re-tensioned wires)
+    let retensionedWires_versions = [null, null];
+    let retensionedWires_values = [[], []];
     let numberOfReplacedWires = [null, null];
 
     if (action.typeFormId === 'x_tension_testing') {
+      // Retrieve all versions of the action (ordered from latest to earliest)
+      // Then filter the list of versions to only include those which satisfy the following criteria:
+      //  - uploaded by the M2M Client (i.e. those where new tension measurements were uploaded)
+      //  - with version number no greater than the version currently being viewed
+      const actionVersions = await Actions.versions(req.params.actionId);
+      const versionNumber = (req.query.version) ? parseInt(req.query.version, 10) : 99;
+
+      let filteredVersions = [];
+
+      for (const action of actionVersions) {
+        if ((action.insertion.user.displayName == 'M2M Client') && (action.validity.version <= versionNumber)) filteredVersions.push(action);
+      }
+
+      // If there are at least two matching versions of the action (i.e. so that some comparison can actually be made) ...
+      if (filteredVersions.length > 1) {
+        // Save the version numbers of the two most recent versions (these are the ones whose tension measurements will be compared)
+        retensionedWires_versions = [filteredVersions[0].validity.version, filteredVersions[1].validity.version];
+
+        // Loop through the tension measurements on both sides, compare them across the versions, and save any that are different (including the wire or wire segment number)
+        // Note that we can use a single loop here, since the number of wire (segments) is always the same on both sides
+        // Also note that we want to see the wire or wire segment number instead of its index, so use an offset that converts from the latter to the former (dependent on the wire layer)
+        let offset_wireIndex = ((action.data.apaLayer === 'x') || (action.data.apaLayer === 'g')) ? 1 : 8;
+
+        for (let i = 0; i < filteredVersions[0].data.measuredTensions_sideA.length; i++) {
+          if (filteredVersions[1].data.measuredTensions_sideA[i] !== filteredVersions[0].data.measuredTensions_sideA[i]) {
+            retensionedWires_values[0].push([i + offset_wireIndex, filteredVersions[1].data.measuredTensions_sideA[i], filteredVersions[0].data.measuredTensions_sideA[i]]);
+          }
+
+          if (filteredVersions[1].data.measuredTensions_sideB[i] !== filteredVersions[0].data.measuredTensions_sideB[i]) {
+            retensionedWires_values[1].push([i + offset_wireIndex, filteredVersions[1].data.measuredTensions_sideB[i], filteredVersions[0].data.measuredTensions_sideB[i]]);
+          }
+        }
+      }
+
       // Set up a match condition dictionary, where we want to find the Winding action performed on the same APA component and the same side as the tension measurements being viewed
       // Then attempt to get a list of all matching actions ... this should return at least one action, since the winding should already have been performed before the tension measurements
       let match_condition = {
@@ -76,6 +113,8 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
       actionTypeForm,
       component,
       queryDictionary: req.query,
+      retensionedWires_versions,
+      retensionedWires_values,
       numberOfReplacedWires,
     });
   } catch (err) {

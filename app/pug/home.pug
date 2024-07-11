@@ -1,32 +1,36 @@
 extend default
 
 block vars
-  - const page_title = 'Dashboard';
+  - const page_title = 'APA Construction DB';
 
 block content
   if NODE_ENV == 'development'
     .alert.alert-warning
       br
-      p This is a <b>DEVELOPMENT</b> deployment of the DUNE APA Construction Database, hosted locally on your computer.  It is <b>not</b> connected to either the 
-        a(href = 'https://apa-dev.dunedb.org') staging
+      p This is a <b>DEVELOPMENT</b> deployment of the DUNE APA Construction Database, hosted locally on your computer.
+        br
+        | It is <b>not</b> connected to either the 
+        a(href = 'https://apa-staging.dunedb.org') staging
         |  or 
         a(href = 'https://apa.dunedb.org') production
-        |  deployments, so any additions and/or alterations to database records that are made through this web interface will not be reflected outside of this deployment.
+        |  deployments, so any additions and/or alterations to database records that are made through this web interface will <b>not</b> be reflected outside of this deployment.
         br
         | If you have any such content here that you wish moved to the staging and/or production deployments, please contact 
-        a(href = 'mailto:brebel@wisc.edu') Brian Rebel. 
-        |  Otherwise, this deployment is your own personal playground.
+        a(href = 'mailto:dune-fd-apa-db@fnal.gov') the DB Admin Team
+        | .  Otherwise, this deployment is your own personal playground.
       p
 
   if NODE_ENV == 'staging'
     .alert.alert-danger
       br
-      p This is the <b>STAGING</b> deployment of the DUNE APA Construction Database, hosted at Fermilab.  It uses a representative copy of the 
-        a(href = 'https://apa.dunedb.org') production
-        |  database, and is to be used <b>only</b> for testing and previewing purposes by selected individuals who will be granted access on a case-by-case basis.
+      p This is the <b>STAGING</b> deployment of the DUNE APA Construction Database, hosted at Fermilab.
         br
-        | Changes to the underlying code made by the developers will be automatically pushed to the production deployment, but it up to individual users to copy over any additions and/or alterations to database records that they make through this deployment's web interface.
-      p
+        |  It is to be used <b>only</b> for testing and previewing purposes by selected individuals, who will be granted access on a case-by-case basis by 
+        a(href = 'mailto:dune-fd-apa-db@fnal.gov') the DB Admin Team.
+        br
+        |  Please note that all records from the  
+        a(href = 'https://apa.dunedb.org') production
+        |  database are copied to this deployment every Monday at 23:45 GMT, so any changes to records that are present here but not on the production deployment at that time will be lost.
 
   if NODE_ENV == 'production'
     .alert.alert-success 
@@ -41,17 +45,17 @@ block content
         li For documentation relating to the database itself (i.e. descriptions of the functionality, overviews of common usage, etc.), please see our 
           |
           a(href = 'https://github.com/DUNE/dunedb/wiki', target = '_blank') Github Wiki page
-          |  (a Github account is not required to view the Wiki).  Please note that this Wiki should always be considered 'in progress'.
+          |  (a Github account is <b>not</b> required to view the Wiki).
         li Documents and other files relating to APA construction (manufacturer invoices, procedure write-ups, etc.) should be stored externally in the 
           a(href = 'https://edms.cern.ch/ui/#!master/navigator/project?P:100233208:100233208:subDocs', target = '_blank') APA area
-          |  of CERN's EDMS system (a CERN account is not required to view documents).
+          |  of CERN's EDMS system (a CERN account may be required to view certain files).
 
         br
 
-        li Bugs and other errors with existing functionality should be reported at our 
+        li Bugs and other errors with existing functionality should be reported to the DB Admin Team at  
           |
-          a(href = 'https://github.com/DUNE/dunedb/issues', target = '_blank') Github Issues page
-          |  (a Github account is required to report issues).  Please give as much information as you can - an example page or link to where the bug occurs, how to reproduce the error (if appropriate), etc.
-        li Requests for new and/or additional features and functionality can also be made on the Issues page, but please first check if the addition and/or change can be made by users directly through the web interface.
+          a(href = 'mailto:dune-fd-apa-db@fnal.gov', target = '_blank') dune-fd-apa-db@fnal.gov
+          | .  Please give as much information as you can - an example page or link to where the bug occurs, how to reproduce the error (if appropriate), etc.
+        li Requests for new and/or additional features and functionality can also be made to the Admin Team, but please first check if the addition and/or change can be made by users directly through this web interface.
 
     .vert-space-x2
