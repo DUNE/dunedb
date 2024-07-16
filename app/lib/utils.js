@@ -105,5 +105,7 @@ module.exports = {
 
   // A dictionary of personnel who are authorised to sign-off on APA frame installation survey results
   dictionary_frameInstallationSignoff: {
+    olgaBeltramello: 'Olga Beltramello',
+    denisDiyakov: 'Denis Diyakov',
   },
 }
