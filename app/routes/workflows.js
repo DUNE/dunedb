@@ -58,6 +58,8 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
         actionsDictionary[stepIndex] = action.data.actionComplete;
 
         if (action.data.actionComplete) numberOfCompleteActions++;
+      } else {
+        actionsDictionary[stepIndex] = false;
       }
     }
 
