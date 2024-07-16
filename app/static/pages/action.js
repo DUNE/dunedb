@@ -31,6 +31,26 @@ function CopyID(actionID) {
 };
 
 
+// When the 'Download List of Changed Tensions' button is pressed, write a list of the changed tensions to a file and then download the file
+function DownloadChangedTensions(retensionedWires) {
+  let tensions_text = '';
+
+  for (const changedTension of retensionedWires[0]) {
+    const tensions_line = `A    ${changedTension[0]}    ${changedTension[1]}    ${changedTension[2]}\n`;
+    tensions_text = tensions_text.concat(tensions_line);
+  }
+
+  for (const changedTension of retensionedWires[1]) {
+    const tensions_line = `B    ${changedTension[0]}    ${changedTension[1]}    ${changedTension[2]}\n`;
+    tensions_text = tensions_text.concat(tensions_line);
+  }
+
+  const tensions_obj = window.URL.createObjectURL(new Blob([tensions_text], { type: 'text/plain' }));
+
+  $('#download_changedTensions').attr('href', tensions_obj);
+};
+
+
 // When one or more images is selected, display their name(s) in the space between the selection and confirmation buttons
 // Also change the colour and text of the confirmation button to indicate that at least one image has been selected
 function DisplayFileNames(element) {
