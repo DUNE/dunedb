@@ -4,6 +4,8 @@ from common import ConnectToAPI, CreateComponent
 
 # Main script function
 if __name__ == '__main__':
+    print()
+    
     # Set up a connection to the database API and get the connection request headers
     # This must be done at the beginning of this main script function, but ONLY ONCE
     connection, headers = ConnectToAPI()
@@ -17,14 +19,13 @@ if __name__ == '__main__':
     componentTypeFormID = 'basic_component'
     componentData = {
         'name': 'New M2M Component',
-        'textField': 'This is a component created through the M2M application'
+        'textField': 'This is a component created through the M2M application',
     }
 
     # Call the component creation function, which takes the type form ID and data as its first two arguments
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
     # If successful, the function returns the UUID of the created component (if not, an error message is automatically displayed)
-    uuid = CreateComponent(componentTypeFormID,
-                           componentData, connection, headers)
+    uuid = CreateComponent(componentTypeFormID, componentData, connection, headers)
     print(f" Successfully submitted component with UUID: {uuid}")
 
     ########################################

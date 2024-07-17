@@ -4,6 +4,8 @@ from common import ConnectToAPI, EditComponent
 
 # Main script function
 if __name__ == '__main__':
+    print()
+    
     # Set up a connection to the database API and get the connection request headers
     # This must be done at the beginning of this main script function, but ONLY ONCE
     connection, headers = ConnectToAPI()
@@ -16,15 +18,17 @@ if __name__ == '__main__':
     #   - the names of any data fields to be edited
     #   - the new values of any data fields to be edited
     componentUUID = '5f9ea420-3e88-11ed-9114-03f8483882ff'
-    componentData_fields = ['textField']
+    componentData_fields = [
+        'textField',
+    ]
     componentData_values = [
-        'This component has been edited through the M2M application']
+        'This component has been edited through the M2M application',
+    ]
 
     # Call the component editing function, which takes the UUID, data field names and new field values as its first three arguments
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
     # If successful, the function returns the UUID of the edited component (if not, an error message is automatically displayed)
-    uuid = EditComponent(componentUUID, componentData_fields,
-                         componentData_values, connection, headers)
+    uuid = EditComponent(componentUUID, componentData_fields, componentData_values, connection, headers)
     print(f" Successfully edited component with UUID: {uuid}")
 
     ########################################
