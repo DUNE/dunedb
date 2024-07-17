@@ -44,4 +44,27 @@ router.post('/workflow', permissions.checkPermissionJson('workflows:edit'), asyn
 });
 
 
+/// Retrieve a list of all workflows of a single workflow type
+router.get('/workflows/:typeFormId/list', permissions.checkPermissionJson('workflows:view'), async function (req, res, next) {
+  try {
+    // Retrieve records of all workflows with the specified workflow type
+    // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
+    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, { limit: 500 });
+
+    // Extract only the ID field (in string format) from each workflow record, and save it into a list to be returned
+    let workflowIDs = [];
+
+    for (const workflow of workflows) {
+      workflowIDs.push(workflow.workflowId);
+    }
+
+    // Return the list of workflow IDs
+    return res.json(workflowIDs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 module.exports = router;

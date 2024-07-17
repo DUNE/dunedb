@@ -251,11 +251,16 @@ def GetListOfComponents(componentTypeFormID, connection, headers):
         # The route response is the list of component UUIDs as a JSON formatted string (i.e. a string within a string)
         responseText = connection.getresponse().read().decode('utf-8')
 
-        # Split the inner string by commas ... this will create an actual Python list of the UUID strings
+        # Split the inner string by commas ... this will create an actual Python list of the UUID strings, but the UUID strings are themselves also strings within strings
+        # So then strip the quotation marks around each element of the Python list
         componentUUIDs = responseText[1: -1].split(',')
+        fixed_componentUUIDs = []
+
+        for componentUUID in componentUUIDs:
+            fixed_componentUUIDs.append(componentUUID[1: -1])
 
         # Return the list of UUIDs
-        return componentUUIDs
+        return fixed_componentUUIDs
     except http.client.HTTPException as e:
         print(f" GetListOfComponents() [GET /api/components/typeFormId/list] - HTTP EXCEPTION: {e} \n")
     except socket.timeout as s:
@@ -401,12 +406,70 @@ def GetListOfActions(actionTypeFormID, connection, headers):
         # The route response is the list of action IDs as a JSON formatted string (i.e. a string within a string)
         responseText = connection.getresponse().read().decode('utf-8')
 
-        # Split the inner string by commas ... this will create an actual Python list of the ID strings
+        # Split the inner string by commas ... this will create an actual Python list of the ID strings, but the ID strings are themselves also strings within strings
+        # So then strip the quotation marks around each element of the Python list
         actionIDs = responseText[1: -1].split(',')
+        fixed_actionIDs = []
+
+        for actionID in actionIDs:
+            fixed_actionIDs.append(actionID[1: -1])
 
         # Return the list of IDs
-        return actionIDs
+        return fixed_actionIDs
     except http.client.HTTPException as e:
         print(f" GetListOfActions() [GET /api/actions/typeFormId/list] - HTTP EXCEPTION: {e} \n")
     except socket.timeout as s:
         print(f" GetListOfActions() [GET /api/actions/typeFormId/list] - SOCKET TIMEOUT: {s} \n")
+
+
+##############################
+## Get an existing workflow ##
+##############################
+def GetWorkflow(workflowID, connection, headers):
+    # Request a response from the API route that retrieves the most recent version of an existing workflow record via its ID
+    # If the request is successful, continue with the function ... otherwise print any raised exceptions
+    try:
+        connection.request('GET', '/api/workflow/' + workflowID, headers = headers)
+
+        # The route response is the workflow record as a JSON document, but when decoded it becomes a standard string containing the JSON document
+        # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
+        workflow = json.loads(connection.getresponse().read().decode('utf-8'))
+
+        # If the provided ID doesn't correspond to an existing workflow record, print an error and exit the function immediately
+        if workflow == None:
+            sys.exit(f" GetWorkflow() - ERROR: there is no workflow record with workflow ID = {workflowID} \n")
+
+        # Return the Python dictionary containing the workflow record
+        return workflow
+    except http.client.HTTPException as e:
+        print(f" GetWorkflow() [GET /api/workflow/workflowId] - HTTP EXCEPTION: {e} \n")
+    except socket.timeout as s:
+        print(f" GetWorkflow() [GET /api/workflow/workflowId] - SOCKET TIMEOUT: {s} \n")
+
+
+##################################################
+## Get a list of all workflows of a single type ##
+##################################################
+def GetListOfWorkflows(workflowTypeFormID, connection, headers):
+    # Request a response from the API route that gets a list of workflow IDs for a given workflow type form ID
+    # If the request is successful, continue with the function ... otherwise print any raised exceptions
+    try:
+        connection.request('GET', '/api/workflows/' + workflowTypeFormID + '/list', headers = headers)
+
+        # The route response is the list of action IDs as a JSON formatted string (i.e. a string within a string)
+        responseText = connection.getresponse().read().decode('utf-8')
+
+        # Split the inner string by commas ... this will create an actual Python list of the ID strings, but the ID strings are themselves also strings within strings
+        # So then strip the quotation marks around each element of the Python list
+        workflowIDs = responseText[1: -1].split(',')
+        fixed_workflowIDs = []
+
+        for workflowID in workflowIDs:
+            fixed_workflowIDs.append(workflowID[1: -1])
+
+        # Return the list of IDs
+        return fixed_workflowIDs
+    except http.client.HTTPException as e:
+        print(f" GetListOfWorkflows() [GET /api/workflows/typeFormId/list] - HTTP EXCEPTION: {e} \n")
+    except socket.timeout as s:
+        print(f" GetListOfWorkflows() [GET /api/workflows/typeFormId/list] - SOCKET TIMEOUT: {s} \n")
