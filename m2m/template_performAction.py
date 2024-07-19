@@ -4,6 +4,8 @@ from common import ConnectToAPI, PerformAction
 
 # Main script function
 if __name__ == '__main__':
+    print()
+    
     # Set up a connection to the database API and get the connection request headers
     # This must be done at the beginning of this main script function, but ONLY ONCE
     connection, headers = ConnectToAPI()
@@ -20,14 +22,13 @@ if __name__ == '__main__':
     actionData = {
         'name': 'M2M Action',
         'actionPerformedAfterFormsCleanup': True,
-        'measurement': 12.04
+        'measurement': 12.04,
     }
 
     # Call the action performance function, which takes the action type form ID, component UUID and action data as its first three arguments
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
     # If successful, the function returns the ID of the performed action (if not, an error message is automatically displayed)
-    id = PerformAction(actionTypeFormID, componentUUID,
-                       actionData, connection, headers)
+    id = PerformAction(actionTypeFormID, componentUUID, actionData, connection, headers)
     print(f" Successfully performed action with ID: {id}")
 
     ########################################

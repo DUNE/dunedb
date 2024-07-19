@@ -65,12 +65,22 @@ class NumberArray_NoPlots extends TextFieldComponent {
   // Update the various sub-parts of this component
   updateExtras(value) {
     gNumberArrayNoPlotsComponent = this;
+
+    let arr = value || [];
+
+    for (let i = 0; i < arr.length; i++) {
+      const x = parseFloat(arr[i]);
+
+      if (!isNaN(x)) { arr[i] = x; }
+    }
   }
 
   // After rendering the Formio component, attach it to an element of the page
   attach(element) {
     this.loadRefs(element, { readonly_display: 'single' });
     super.attach(element);
+
+    if (this.arrayValue) this.updateExtras(this.arrayValue);
   }
 
   // Set the input field to a provided value, and update the various sub-parts of the component

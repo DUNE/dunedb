@@ -6,8 +6,10 @@ from tkterminal import Terminal
 from tktooltip import ToolTip
 
 # Default variables - these should NEVER be changed!
-upload_script = 'C:/DUNE/bin/m2m/template_upload_tensions.py'
-apaLayers     = ['X', 'V', 'U', 'G']
+upload_script   = 'C:/DUNE/bin/m2m/upload_tensions.py'
+file_location   = 'C:/DUNE/bin/T01-Winder/src/winder/Data/APA'
+python_location = 'C:/DUNE/bin/Python312/python.exe'
+apaLayers       = ['X', 'V', 'U', 'G']
 
 # Input variables - these are picked up from the GUI
 csvFile   = ''
@@ -24,7 +26,7 @@ terminalState = 'None'
 ## Setter callback functions ##
 ###############################
 def callback_browseFiles():
-    filename = File.askopenfilename(initialdir = 'C:/DUNE/bin/T01-Winder/src/winder/Data/APA', title = 'Select Input File ...', filetypes = (('.csv files', '*.csv'), ('Python files', '.py')))
+    filename = File.askopenfilename(initialdir = file_location, title = 'Select Input File ...', filetypes = (('.csv files', '*.csv'), ('Python files', '.py')))
     strng_csvFile.set(filename)
 
     
@@ -56,7 +58,7 @@ def callback_startUpload():
     terminalState = 'None'
     
     # Construct and run the upload command in the terminal
-    command = f'C:/DUNE/bin/Python312/python.exe "{upload_script}" "{csvFile}" {apaLayer} {action_id}'
+    command = f'{python_location} "{upload_script}" "{csvFile}" {apaLayer} {action_id}'
     
     terminal.clear()
     terminal.run_command(command)
