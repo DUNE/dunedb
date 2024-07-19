@@ -259,7 +259,7 @@ block content
             - outOfSpecCount = 0
 
             for [key, value] of Object.entries(action.data.intake_planarity)
-              if (value.Actual !== '') && (value.Actual !== '-') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
+              if (value.Actual !== '') && (value.Actual !== '-') && (value.Tolerance !== '-') && (value.Tolerance !== '') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
                 - outOfSpecCount += 1
 
             .panel.panel-default
@@ -284,23 +284,26 @@ block content
                         tr
                           td #{value.Measurement}
 
-                          if (value.Actual !== '') && (value.Actual !== '-')
+                          if (value.Actual !== '') && (value.Actual !== '-') && (value.Tolerance !== '-') && (value.Tolerance !== '')
                             if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
                               td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
                             else
                               td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
                           else 
-                            td #{value.Actual}
+                            if value.Tolerance !== '-'
+                              td #{value.Actual}
+                            else 
+                              td #{value.Actual.toFixed(2)}
 
                           td #{value.Units}
 
-                          if value.Tolerance !== ''
+                          if (value.Tolerance !== '') && (value.Tolerance !== '-')
                             td #{value.Tolerance.toFixed(2)}
                           else 
                             td #{value.Tolerance}
 
                           if value.Measurement === 'Cross corner deviation'
-                            td For reference only - please refer instead to the manual cross corner measurements above
+                            td For completeness of calculations only - please refer to the 'Manual Cross Corner Measurements' above for the measured values
                           else
                             td #{value.Comment}
         else
@@ -328,7 +331,7 @@ block content
 
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#envelopeBox')
-              | Envelope Analysis (#{outOfSpecCount} results outside tolerance): 
+              | Envelope Analysis (#{outOfSpecCount} results outside guidance): 
               i.chevron.fa.fa-fw 
 
             .collapse#envelopeBox
@@ -341,7 +344,7 @@ block content
                         th.col-md-1 Units
                         th.col-md-2 Position
                         th.col-md-1 Nominal 
-                        th.col-md-1 Tolerance (±) 
+                        th.col-md-1 Guidance (±) 
                         th.col-md-1 Actual
                         th.col-md-1 Deviation
                         th.col-md-2 Comments
@@ -396,12 +399,12 @@ block content
             - outOfSpecCount = 0
 
             for [key, value] of Object.entries(action.data.install_planarity)
-              if (value.Actual !== '') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
+              if (value.Actual !== '') && (value.Actual !== '-') && (value.Tolerance !== '-') && (value.Tolerance !== '') && ((value.Actual <= (-1.0 * value.Tolerance)) || (value.Actual >= value.Tolerance))
                 - outOfSpecCount += 1
 
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#planarityBox')
-              | Planarity Analysis using M6/10/20 Holes (#{outOfSpecCount} results outside tolerance): 
+              | Planarity Analysis using M6/10/20 Holes (#{outOfSpecCount} results outside guidance): 
               i.chevron.fa.fa-fw 
 
             .collapse#planarityBox
@@ -413,7 +416,7 @@ block content
                         th.col-md-2 Measurement
                         th.col-md-1 Actual
                         th.col-md-1 Units
-                        th.col-md-1 Tolerance 
+                        th.col-md-1 Guidance 
                         th.col-md-7 Comment
 
                     tbody
@@ -421,22 +424,28 @@ block content
                         tr
                           td #{value.Measurement}
 
-                          if value.Actual !== ''
+                          if (value.Actual !== '') && (value.Actual !== '-') && (value.Tolerance !== '-') && (value.Tolerance !== '')
                             if (value.Actual > (-1.0 * value.Tolerance)) && (value.Actual < value.Tolerance)
                               td.text-success.font-weight-bold #{value.Actual.toFixed(2)}
                             else
                               td.text-danger.font-weight-bold #{value.Actual.toFixed(2)}
                           else 
-                            td #{value.Actual}
+                            if value.Tolerance !== '-'
+                              td #{value.Actual}
+                            else 
+                              td #{value.Actual.toFixed(2)}
 
                           td #{value.Units}
 
-                          if value.Tolerance !== ''
+                          if (value.Tolerance !== '') && (value.Tolerance !== '-')
                             td #{value.Tolerance.toFixed(2)}
                           else 
                             td #{value.Tolerance}
 
-                          td #{value.Comment}
+                          if value.Measurement === 'Cross corner deviation'
+                            td For completeness of calculations only - please refer to the Intake Survey's 'Manual Cross Corner Measurements' for the measured values
+                          else
+                            td #{value.Comment}
         else
           .vert-space-x1
             .panel.panel-default

@@ -1,8 +1,8 @@
 // Set up the schema for the QC signoffs
 function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCableTempSensorQC) {
   const apaQC_link = (apaQC.actionId !== '' ? `<a href = '/action/${apaQC.actionId}' > APA QC Review Details </a>` : `[APA QC Review not found]`);
-  const frameQC_link = (frameQC.qcActionId !== '' ? `<a href = '/action/${frameQC.qcActionId}' > Frame QC Review Details </a>` : `[Frame QC Review not found]`);
-  const frameSurveys_link = (frameQC.surveysActionId !== '' ? `<a href = '/action/${frameQC.surveysActionId}' > Frame Installation Surveys Details </a>` : `[Frame Installation Surveys not found]`);
+  const frameIntakeSurveys_link = (frameQC.intakeSurveysActionId !== '' ? `<a href = '/action/${frameQC.intakeSurveysActionId}' > Frame Intake Survey Results </a>` : `[Frame Intake Surveys not found]`);
+  const frameInstallSurveys_link = (frameQC.installSurveysActionId !== '' ? `<a href = '/action/${frameQC.installSurveysActionId}' > Frame Installation Survey Results </a>` : `[Frame Installation Surveys not found]`);
   const meshPanelQC_link = (meshPanelQC.actionId !== '' ? `<a href = '/action/${meshPanelQC.actionId}' > Mesh Panel Installation Details </a>` : `[Mesh Panel Installation not found]`);
   const cableConduitQC_link = (cableConduitQC.actionId !== '' ? `<a href = '/action/${cableConduitQC.actionId}' > Cable Conduit Insertion Details </a>` : `[Cable Conduit Insertion not found]`);
   const pdCableTempSensorQC_link = (pdCableTempSensorQC.actionId !== '' ? `<a href = '/action/${pdCableTempSensorQC.actionId}' > PD & RTD Installation Details </a>` : `[PD & RTD Installation not found]`);
@@ -44,31 +44,31 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
       },
       {
         components: [{
-          label: 'Final Frame QC:',
+          label: 'Final Frame Approval:',
           key: 'frameQC_signoff',
           type: 'textfield',
           input: true,
           defaultValue: frameQC.signoff,
         }],
-        width: 3,
+        width: 2,
         size: 'sm',
       },
       {
         components: [{
-          key: 'frameQC_actionId',
+          key: 'frameQC_intakeSurveysActionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> ${frameQC_link} </br></p>`,
+          content: `<p><br> ${frameIntakeSurveys_link} </br></p>`,
         }],
-        width: 1,
+        width: 2,
         size: 'sm',
       },
       {
         components: [{
-          key: 'frameQC_surveysActionId',
+          key: 'frameQC_installSurveysActionId',
           type: 'htmlelement',
           input: false,
-          content: `<p><br> ${frameSurveys_link} </br></p>`,
+          content: `<p><br> ${frameInstallSurveys_link} </br></p>`,
         }],
         width: 2,
         size: 'sm',

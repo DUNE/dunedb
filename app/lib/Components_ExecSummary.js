@@ -100,7 +100,8 @@ async function collateInfo(componentUUID) {
   collatedInfo.frameQC = {
     signoff: '[no information found]',
     qcActionId: '',
-    surveysActionId: '',
+    intakeSurveysActionId: '',
+    installSurveysActionId: '',
   };
 
   aggregation_stages = [];
@@ -131,7 +132,33 @@ async function collateInfo(componentUUID) {
     collatedInfo.frameQC.qcActionId = results[0].actionId;
   }
 
-  // Get information about the APA frame's installation surveys action
+  // Get information about the APA frame's intake and installation survey actions
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'IntakeSurveys',
+      'componentUuid': MUUID.from(frameUUID),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  if (results.length > 0) {
+    collatedInfo.frameQC.intakeSurveysActionId = results[0].actionId;
+  }
+
   aggregation_stages = [];
   results = [];
 
@@ -155,7 +182,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.frameQC.surveysActionId = results[0].actionId;
+    collatedInfo.frameQC.installSurveysActionId = results[0].actionId;
   }
 
   // Get information about the mesh panel installation QC

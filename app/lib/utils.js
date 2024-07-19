@@ -97,15 +97,10 @@ module.exports = {
     daveSim: 'Dave Sim',
   },
 
-  // A dictionary of personnel who are authorised to sign-off on APA frame and grounding mesh intake (including frame intake survey results)
+  // A dictionary of personnel who are authorised to sign-off on APA frame and grounding mesh intake (including both types of frame survey results)
   dictionary_frameIntakeSignoff: {
     gedBell: 'Ged Bell',
     callumHolt: 'Callum Holt',
-  },
-
-  // A dictionary of personnel who are authorised to sign-off on APA frame installation survey results
-  dictionary_frameInstallationSignoff: {
-    olgaBeltramello: 'Olga Beltramello',
-    denisDiyakov: 'Denis Diyakov',
+    sotirisVlachos: 'Sotiris Vlachos',
   },
 }

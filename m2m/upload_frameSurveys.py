@@ -110,7 +110,7 @@ def SetupResults_IntakeXCorners(values):
             'Measurement': 'Cross Dimensions Post-Release',
             'Actual': values[2],
             'Units': 'mm',
-            'Tolerance': 2.0,
+            'Tolerance': 3.0,
             'Comment': '',
         },
     }

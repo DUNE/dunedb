@@ -64,13 +64,21 @@ However, users will still need to call the various backend functions in their ow
     * `actionData_values` (list) : the new values of the fields specified in the `actionData_fields` list
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `GetAction(actionID, connection, headers [, version])` : get the latest version of an existing action record, returning the record as a Python dictionary
+* `GetAction(actionID, connection, headers [, version])` : get a specified version of an existing action record, returning the record as a Python dictionary
     * `actionID` (string) : the ID of the action to be retrieved
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
     * `version` (integer) : [OPTIONAL] the desired version of the record to retrieve ... if not specified or set to '0', the most recent version will be retrieved
 
 * `GetListOfActions(actionTypeFormID, connection, headers)` : get a list of the action IDs of all actions of the specified action type, returning a Python list of the IDs
     * `actionTypeFormID` (string) : the type form ID of the actions to be listed
+    * `connection, headers` : objects returned by the `ConnectToAPI()` function
+
+* `GetWorkflow(workflowID, connection, headers)` : get the latest version of an existing action record, returning the record as a Python dictionary
+    * `workflowID` (string) : the ID of the workflow to be retrieved
+    * `connection, headers` : objects returned by the `ConnectToAPI()` function
+
+* `GetListOfWorkflows(workflowTypeFormID, connection, headers)` : get a list of the workflow IDs of all workflows of the specified workflow type, returning a Python list of the IDs
+    * `workflowTypeFormID` (string) : the type form ID of the workflows to be listed
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
 
