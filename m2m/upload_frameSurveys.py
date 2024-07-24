@@ -96,14 +96,14 @@ def SetupResults_IntakeXCorners(values):
             'Measurement': 'Frame Cross Dimensions',
             'Actual': values[0],
             'Units': 'mm',
-            'Tolerance': 0.25,
+            'Tolerance': '-',
             'Comment': '',
         },
         1: {
             'Measurement': 'Cross Dimensions Pre-Release',
             'Actual': values[1],
             'Units': 'mm',
-            'Tolerance': 2.0,
+            'Tolerance': '-',
             'Comment': '',
         },
         2: {
