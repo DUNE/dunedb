@@ -214,12 +214,13 @@ block content
             - outOfSpecCount = 0
 
             for [key, value] of Object.entries(action.data.intake_xCorners)
-              if (value.Actual < (-1.0 * value.Tolerance)) || (value.Actual > value.Tolerance)
-                - outOfSpecCount += 1
+              if key == 2
+                if (value.Actual < (-1.0 * value.Tolerance)) || (value.Actual > value.Tolerance)
+                  - outOfSpecCount += 1
 
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
-              | Manual Cross Corner Measurements (all measured at DSM) (#{outOfSpecCount} results outside tolerance): 
+              | Manual Cross Corner Measurements [from Frame Documentation] (#{outOfSpecCount} results outside tolerance): 
               i.chevron.fa.fa-fw 
 
             .collapse#xCornersBox
@@ -239,19 +240,27 @@ block content
                         tr
                           td #{value.Measurement}
 
-                          if (value.Actual >= (-1.0 * value.Tolerance)) && (value.Actual <= value.Tolerance)
-                            td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
-                          else
-                            td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
+                          if value.Tolerance === '-'
+                            td #{value.Actual.toFixed(2)}
+                          else 
+                            if (value.Actual >= (-1.0 * value.Tolerance)) && (value.Actual <= value.Tolerance)
+                              td.text-success.font-weight-bold #{value.Actual.toFixed(2)}
+                            else
+                              td.text-danger.font-weight-bold #{value.Actual.toFixed(2)}
 
                           td #{value.Units}
-                          td #{value.Tolerance.toFixed(2)}
+
+                          if value.Tolerance === '-'
+                            td #{value.Tolerance}
+                          else 
+                            td #{value.Tolerance.toFixed(2)}
+
                           td #{value.Comment}
         else
           .vert-space-x1
             .panel.panel-default
             .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#xCornersBox')
-              | Manual Cross Corner Measurements (all measured at DSM) (no results found in record!) 
+              | Manual Cross Corner Measurements [from Frame Documentation] (no results found in record!) 
               i.chevron.fa.fa-fw 
 
         if (action.data.intake_planarity)
@@ -259,7 +268,7 @@ block content
             - outOfSpecCount = 0
 
             for [key, value] of Object.entries(action.data.intake_planarity)
-              if key < 19
+              if ((key >= 1) && (key <= 18)) || (key >= 27)
                 if (value.Actual !== '') && (value.Actual !== '-') && (value.Tolerance !== '-') && (value.Tolerance !== '') && ((value.Actual < (-1.0 * value.Tolerance)) || (value.Actual > value.Tolerance))
                   - outOfSpecCount += 1
 
@@ -282,32 +291,33 @@ block content
 
                     tbody
                       for [key, value] of Object.entries(action.data.intake_planarity)
-                        if key < 19
-                          tr
-                            td #{value.Measurement}
+                        tr
+                          td #{value.Measurement}
 
-                            if (value.Actual === '') || (value.Actual === '-')
-                              td  #{value.Actual}
-                            else
-                              if (value.Tolerance === '') || (value.Tolerance === '-')
-                                td #{value.Actual.toFixed(3)}
-                              else 
-                                if (value.Actual >= (-1.0 * value.Tolerance)) && (value.Actual <= value.Tolerance)
-                                  td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
-                                else
-                                  td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
-
-                            td #{value.Units}
-
+                          if (value.Actual === '') || (value.Actual === '-')
+                            td  #{value.Actual}
+                          else
                             if (value.Tolerance === '') || (value.Tolerance === '-')
-                              td #{value.Tolerance}
+                              td #{value.Actual.toFixed(3)}
                             else 
-                              td #{value.Tolerance.toFixed(2)}
+                              if (value.Actual >= (-1.0 * value.Tolerance)) && (value.Actual <= value.Tolerance)
+                                td.text-success.font-weight-bold #{value.Actual.toFixed(3)}
+                              else
+                                td.text-danger.font-weight-bold #{value.Actual.toFixed(3)}
 
-                            if value.Measurement === 'Cross corner deviation'
-                              td For completeness of calculations only - please refer to the 'Manual Cross Corner Measurements' above for the measured values
-                            else
-                              td #{value.Comment}
+                          td #{value.Units}
+
+                          if (value.Tolerance === '') || (value.Tolerance === '-')
+                            td #{value.Tolerance}
+                          else 
+                            td #{value.Tolerance.toFixed(2)}
+
+                          if key == 0
+                            td For completeness of calculations only - please refer to the 'Manual Cross Corner Measurements' above for the measured values
+                          else if (key >= 19) && (key <= 26)
+                            td For comparison to installation surveys only, not used for frame acceptance purposes
+                          else
+                            td #{value.Comment}
         else
           .vert-space-x1
             .panel.panel-default
@@ -444,7 +454,7 @@ block content
                           else 
                             td #{value.Tolerance.toFixed(2)}
 
-                          if value.Measurement === 'Cross corner deviation'
+                          if key == 0
                             td For completeness of calculations only - please refer to the Intake Survey's 'Manual Cross Corner Measurements' for the measured values
                           else
                             td #{value.Comment}
