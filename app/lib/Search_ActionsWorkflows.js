@@ -226,26 +226,77 @@ async function boardInstallByReferencedComponent(componentUUID) {
     }
   }
 
-  // Add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
+  // Add the corresponding shortened Assembled APA component name to each matching record
   for (let record of boardInstalls) {
     const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
-
-    if (component.data.name) {
-      if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
-        const name_splits = component.data.name.split('-');
-        record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-      } else if (component.formId === 'GeometryBoard') {
-        record.componentName = component.data.typeRecordNumber;
-      } else {
-        record.componentName = component.data.name;
-      }
-    } else {
-      record.componentName = record.componentUuid;
-    }
+    const name_splits = component.data.name.split('-');
+    record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
   }
 
   // Return the list of matching actions
   return boardInstalls;
+}
+
+
+/// Retrieve a list of winding actions that reference a single component, specified by its UUID
+async function windingByReferencedComponent(componentUUID) {
+  // Set up a list of type form IDs which correspond to 'winding' type actions
+  const actionTypeFormIDs = [
+    'g_winding', 'u_winding', 'v_winding', 'x_winding',
+  ];
+
+  let aggregation_stages = [];
+
+  // Retrieve all board installation type action records
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': { $in: actionTypeFormIDs },
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      typeFormName: { '$first': '$typeFormName' },
+      componentUuid: { '$first': '$componentUuid' },
+      data: { '$first': '$data' },
+    },
+  });
+
+  // Query the 'actions' records collection using the aggregation stages defined above
+  let results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+
+  // At this stage we have a list of all 'Winding' action records
+  // But we want to narrow this down to only those records which contain the specified component UUID in one of the 'data.bobbinGrid[X].bobbinUuid' key/value pairs, where X >= 0
+  // Loop over the keys in each record's 'data' object, and if the value matches the specified UUID, save the record into a list
+  let windings = [];
+
+  if (results.length > 0) {
+    for (const action of results) {
+      for (const bobbin of action.data.bobbinGrid) {
+        if (bobbin.bobbinUuid === componentUUID) windings.push(action);
+      }
+    }
+  }
+
+  // Add the corresponding shortened Assembled APA component name to each matching record
+  for (let record of windings) {
+    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
+    const name_splits = component.data.name.split('-');
+    record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+  }
+
+  // Return the list of matching actions
+  return windings;
 }
 
 
@@ -255,4 +306,5 @@ module.exports = {
   nonConformanceByUUID,
   tensionMeasurementsByUUID,
   boardInstallByReferencedComponent,
+  windingByReferencedComponent,
 }
