@@ -59,9 +59,15 @@ block content
                   td 0
 
                 td
-                  a.btn-sm.btn-primary(href = `/component/${typeFormId}`)
-                    img.small-icon(src = '/images/run_icon.svg')
-                    | &nbsp; Create New Component of This Type
+                  if (typeFormId === 'AssembledAPA' || typeFormId === 'APAFrame')
+                    a.btn-sm.btn-secondary.disabled(href = '')
+                      img.small-icon(src = '/images/run_icon.svg')
+                      | &nbsp; Create New Components of This Type via Workflows
+                  else
+                    a.btn-sm.btn-primary(href = `/component/${typeFormId}`)
+                      img.small-icon(src = '/images/run_icon.svg')
+                      | &nbsp; Create New Component of This Type
+
                 td
                   a.btn-sm.btn-warning(href = `/componentTypes/${typeFormId}/edit`)
                     img.small-icon(src = '/images/edit_icon.svg')

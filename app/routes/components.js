@@ -30,13 +30,38 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
     //  - the component type form corresponding to the type form ID in the component record (and throw an error if there is no such type form)
     //  - records of all actions that have already been performed on this component
     //  - all currently available action type forms
-    const [componentTypeForm, actions, actionTypeForms] = await Promise.all([
+    let [componentTypeForm, actions, actionTypeForms] = await Promise.all([
       Forms.retrieve('componentForms', component.formId),
       Actions.list({ componentUuid: req.params.uuid }),
       Forms.list('actionForms'),
     ]);
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
+
+    // If the component is of a type that is the subject of a workflow, remove the action types that should be performed through the workflow
+    // First, retrieve the workflow type form, and then build an array of the workflow's action type form names from its path steps
+    // Finally, loop through the dictionary of all currently available action type forms, and remove those whose type form name appears in the array of workflow action type form names
+    if (component.formId === 'AssembledAPA' || component.formId === 'APAFrame') {
+      let workflowTypeForm = null;
+
+      if (component.formId === 'AssembledAPA') {
+        workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
+      } else if (component.formId === 'APAFrame') {
+        workflowTypeForm = await Forms.retrieve('workflowForms', 'FrameAssembly');
+      }
+
+      const workflowActions = [];
+
+      for (const step of workflowTypeForm.path.slice(1)) {
+        workflowActions.push(step.formName);
+      }
+
+      for (const [typeFormID, typeForm] of Object.entries(actionTypeForms)) {
+        if (workflowActions.includes(typeForm.formName)) {
+          delete actionTypeForms[typeFormID];
+        }
+      }
+    }
 
     // Most shipment and batch type components only hold very basic information (i.e. only the full UUIDs) about the individual sub-components that they contain
     // (The exceptions to this are 'XXX Board Batch' type components, which naturally contain the full UUIDs, short UUIDs and UKIDs/UWIDs of all boards in each one)
