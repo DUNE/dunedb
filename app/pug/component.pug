@@ -111,7 +111,7 @@ block content
                 | &nbsp; View JSON Record
 
           .vert-space-x1 
-            if (component.formId === 'AssembledAPA' || component.formId === 'APAFrame')
+            if workflowComponent
               a.btn.btn-secondary.disabled(href = '')
                 img.small-icon(src = '/images/run_icon.svg')
                 | &nbsp; Create New Components of This Type via Workflows
