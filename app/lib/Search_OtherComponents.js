@@ -380,7 +380,7 @@ async function boardKitComponentsByLocation(location) {
 
 
 /// Retrieve a list of assembled APAs that match the specified production location and number
-async function apasByProductionDetails(location, number) {
+async function apaByProductionDetails(location, number) {
   let aggregation_stages = [];
 
   // Retrieve all assembled APAs records that have the same production location and number as the specified values
@@ -453,6 +453,6 @@ module.exports = {
   meshesByLocation,
   meshesByPartNumber,
   boardKitComponentsByLocation,
-  apasByProductionDetails,
+  apaByProductionDetails,
   componentsByTypeAndNumber,
 }

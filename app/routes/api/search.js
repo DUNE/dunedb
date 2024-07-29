@@ -165,7 +165,7 @@ router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, r
 router.get('/search/apaByProductionDetails/:apaLocation/:apaNumber', async function (req, res, next) {
   try {
     // Retrieve a list of assembled APAs that match the specified record details
-    const assembledAPAs = await Search_OtherComponents.apasByProductionDetails(req.params.apaLocation, req.params.apaNumber);
+    const assembledAPAs = await Search_OtherComponents.apaByProductionDetails(req.params.apaLocation, req.params.apaNumber);
 
     // Return the list in JSON format
     return res.json(assembledAPAs);
@@ -251,6 +251,8 @@ router.get('/search/actionsByReferencedUUID/' + utils.uuid_regex + '/:actionType
 
     if (req.params.actionType === 'boardInstall') {
       actions = await Search_ActionsWorkflows.boardInstallByReferencedComponent(req.params.uuid);
+    } else if (req.params.actionType === 'winding') {
+      actions = await Search_ActionsWorkflows.windingByReferencedComponent(req.params.uuid);
     }
 
     // Return the list in JSON format

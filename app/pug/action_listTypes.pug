@@ -61,15 +61,22 @@ block content
                 each typeFormName, i in actionFormsGroup.formName
                   - const typeFormId = actionFormsGroup.formId[i];
                   - const typeFormTags = actionFormsGroup.tags[i];
+                  - const workflowAction = actionFormsGroup.workflowAction[i]
 
                   if typeFormTags && !typeFormTags.includes('Trash')
                     tr
                       td.col-md-4
                         a(href = `/actions/${typeFormId}/list`) #{typeFormName}
                       td.col-md-2
-                        a.btn-sm.btn-primary(href = `/action/${typeFormId}/unspec`)
-                          img.small-icon(src = '/images/run_icon.svg')
-                          | &nbsp; Perform Action on Component
+                        if workflowAction
+                          a.btn-sm.btn-secondary.disabled(href = '')
+                            img.small-icon(src = '/images/run_icon.svg')
+                            | &nbsp; Perform New Actions of This Type via Workflows
+                        else
+                          a.btn-sm.btn-primary(href = `/action/${typeFormId}/unspec`)
+                            img.small-icon(src = '/images/run_icon.svg')
+                            | &nbsp; Perform Action on Component
+
                       td.col-md-2
                         a.btn-sm.btn-warning(href = `/actionTypes/${typeFormId}/edit`)
                           img.small-icon(src = '/images/edit_icon.svg')

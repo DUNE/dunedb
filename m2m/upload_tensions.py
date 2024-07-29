@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 import sys
+import warnings
+warnings.simplefilter(action = 'ignore', category = FutureWarning)
 
 # Local Python imports
 from common import ConnectToAPI, EditAction

@@ -94,10 +94,15 @@ block content
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; View JSON Record
 
-          .vert-space-x1
-            a.btn.btn-primary(href = `/action/${action.typeFormId}/unspec`)
-              img.small-icon(src = '/images/run_icon.svg')
-              | &nbsp; Perform New Action of This Type
+          .vert-space-x1 
+            if workflowAction
+              a.btn.btn-secondary.disabled(href = '')
+                img.small-icon(src = '/images/run_icon.svg')
+                | &nbsp; Perform New Actions of This Type via Workflows
+            else
+              a.btn.btn-primary(href = `/action/${action.typeFormId}/unspec`)
+                img.small-icon(src = '/images/run_icon.svg')
+                | &nbsp; Perform New Action of This Type
 
           if (action.typeFormId == 'x_tension_testing')
             .vert-space-x1 
