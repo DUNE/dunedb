@@ -2,7 +2,9 @@ const router = require('express').Router();
 
 const Actions = require('../../lib/Actions');
 const logger = require('../../lib/logger');
+const Search_ActionsWorkflows = require('../../lib/Search_ActionsWorkflows');
 const permissions = require('../../lib/permissions');
+const utils = require('../../lib/utils');
 
 
 /// Retrieve a single version of an action record (either the most recent, or a specified one)
@@ -76,6 +78,22 @@ router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions
 
     // Return the list of action IDs
     return res.json(actionIDs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Compare wire tension measurements across locations
+router.get('/actions/tensionComparisonAcrossLocations/' + utils.uuid_regex + '/:wireLayer/:origin/:destination', async function (req, res, next) {
+  try {
+    // Retrieve wire tension measurements that have been performed on a specified wire layer of a specified Assembled APA at two specified locations
+    // If successful, this returns an object containing the measured tensions on both sides at both locations, along with the pre-calculated differences between tensions
+    const tensions = await Search_ActionsWorkflows.tensionComparisonAcrossLocations(req.params.uuid, req.params.wireLayer, req.params.origin, req.params.destination);
+
+    // Return the object in JSON format
+    return res.json(tensions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
