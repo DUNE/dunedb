@@ -30,13 +30,46 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
     //  - the component type form corresponding to the type form ID in the component record (and throw an error if there is no such type form)
     //  - records of all actions that have already been performed on this component
     //  - all currently available action type forms
-    const [componentTypeForm, actions, actionTypeForms] = await Promise.all([
+    let [componentTypeForm, actions, actionTypeForms] = await Promise.all([
       Forms.retrieve('componentForms', component.formId),
       Actions.list({ componentUuid: req.params.uuid }),
       Forms.list('actionForms'),
     ]);
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
+
+    // Set a variable to indicate if the specified component type is one that is the subject of a workflow
+    // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only two workflow types, so we can do this explicitly)
+    // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
+    const list_workflowComponents = ['AssembledAPA', 'APAFrame'];
+    const workflowComponent = list_workflowComponents.includes(component.formId);
+
+    // If the specified component type is one that is the subject of a workflow, filter out any action types that should be performed through the workflow
+    // First, retrieve the workflow type form, and then build an array of the workflow's action type form names from its path steps
+    // Finally loop through the dictionary of all currently available action type forms, and remove those whose type form name appears in the array of workflow action type form names
+    if (workflowComponent) {
+      let workflowTypeForm = null;
+
+      if (component.formId === 'AssembledAPA') {
+        workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
+      } else if (component.formId === 'APAFrame') {
+        workflowTypeForm = await Forms.retrieve('workflowForms', 'FrameAssembly');
+      }
+
+      const list_workflowActions = [];
+
+      if (workflowTypeForm) {
+        for (const step of workflowTypeForm.path.slice(1)) {
+          list_workflowActions.push(step.formName);
+        }
+      }
+
+      for (const [typeFormID, typeForm] of Object.entries(actionTypeForms)) {
+        if (list_workflowActions.includes(typeForm.formName)) {
+          delete actionTypeForms[typeFormID];
+        }
+      }
+    }
 
     // Most shipment and batch type components only hold very basic information (i.e. only the full UUIDs) about the individual sub-components that they contain
     // (The exceptions to this are 'XXX Board Batch' type components, which naturally contain the full UUIDs, short UUIDs and UKIDs/UWIDs of all boards in each one)
@@ -131,6 +164,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       actionTypeForms,
       dictionary_queries: req.query,
       dictionary_locations: utils.dictionary_locations,
+      workflowComponent,
     });
   } catch (err) {
     logger.error(err);
@@ -716,6 +750,7 @@ router.get('/components/list', permissions.checkPermission('components:view'), a
       singleType: false,
       title: 'All Created / Edited Components (All Types)',
       allComponentTypeForms,
+      workflowComponent: false,
     });
   } catch (err) {
     logger.error(err);
@@ -737,6 +772,12 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
     // Retrieve a list of all component type forms that currently exist in the 'componentForms' collection
     const allComponentTypeForms = await Forms.list('componentForms');
 
+    // Set a variable to indicate if the specified component type is one that is the subject of a workflow
+    // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only two workflow types, so we can do this explicitly)
+    // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
+    const list_workflowComponents = ['AssembledAPA', 'APAFrame'];
+    const workflowComponent = list_workflowComponents.includes(req.params.typeFormId);
+
     // Render the interface page
     res.render('component_list.pug', {
       components,
@@ -744,6 +785,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
       title: 'All Created / Edited Components (Single Type)',
       componentTypeForm,
       allComponentTypeForms,
+      workflowComponent,
     });
   } catch (err) {
     logger.error(err);

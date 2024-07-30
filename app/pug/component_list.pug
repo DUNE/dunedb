@@ -8,9 +8,14 @@ block content
   .container-fluid
     .vert-space-x2
       if singleType && componentTypeForm.tags && !componentTypeForm.tags.includes('Trash')
-        a.btn.btn-primary(href = `/component/${componentTypeForm.formId}`)
-          img.small-icon(src = '/images/run_icon.svg')
-          | &nbsp; Create New Component of This Type
+        if workflowComponent
+          a.btn.btn-secondary.disabled(href = '')
+            img.small-icon(src = '/images/run_icon.svg')
+            | &nbsp; Create New Components of This Type via Workflows
+        else
+          a.btn.btn-primary(href = `/component/${componentTypeForm.formId}`)
+            img.small-icon(src = '/images/run_icon.svg')
+            | &nbsp; Create New Component of This Type
 
         .vert-space-x2
 

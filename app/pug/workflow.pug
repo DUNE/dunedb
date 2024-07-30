@@ -91,6 +91,9 @@ block content
       if workflow.typeFormId === 'APA_Assembly'
         - freeSection_bgn = 3;
         - freeSection_end = 9;
+      else if workflow.typeFormId === 'FrameAssembly'
+        - freeSection_bgn = 3;
+        - freeSection_end = 4;
 
         - for (let i = freeSection_bgn - 1; i < freeSection_end; i++) {
           - if (!actionsDictionary[i])
@@ -166,7 +169,7 @@ block content
                   if actionTypeForms[typeFormId].formName == step.formName
                     - stepFormId = actionTypeForms[typeFormId].formId
 
-                if workflow.typeFormId === 'APA_Assembly'
+                if (workflow.typeFormId === 'APA_Assembly') || (workflow.typeFormId === 'FrameAssembly')
                   if index >= freeSection_bgn - 1 && index < freeSection_end
                     if step.result.length === 0
                       td

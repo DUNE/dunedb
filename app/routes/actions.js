@@ -32,6 +32,24 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     // Retrieve the record of the component that the action was performed on, using its component UUID (also found in the action record)
     const component = await Components.retrieve(action.componentUuid);
 
+    // Set a variable to indicate if the specified action type is one that is part of a workflow
+    // First set up a list of action type form names for all actions that are part of any workflow
+    // Then check to see if the list of action type form names includes the type form name of the action type being specified
+    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly'];
+    let list_workflowActions = [];
+
+    for (const workflowTypeFormID of list_workflowTypeFormIDs) {
+      const workflowTypeForm = await Forms.retrieve('workflowForms', workflowTypeFormID);
+
+      if (workflowTypeForm) {
+        for (const step of workflowTypeForm.path.slice(1)) {
+          list_workflowActions.push(step.formName);
+        }
+      }
+    }
+
+    const workflowAction = list_workflowActions.includes(action.typeFormName);
+
     // When viewing a 'Single Layer Tension Measurements' type action, we also want to see some additional information not directly contained in the action record:
     // - the number of wires that have been re-tensioned since the last time measurements were uploaded
     // - the number of replaced wires from the layer's winding action (which can be compared per side to the number of re-tensioned wires)
@@ -116,6 +134,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
       retensionedWires_versions,
       retensionedWires_values,
       numberOfReplacedWires,
+      workflowAction,
     });
   } catch (err) {
     logger.error(err);
@@ -300,6 +319,20 @@ router.get('/actionTypes/list', permissions.checkPermission('actions:view'), asy
     // Retrieve a list of all action type forms that currently exist in the 'actionForms' collection, grouped by their 'recommended component type'
     let actionTypeForms = await Forms.listGrouped('actionForms');
 
+    // Set up a list of action type form names for all actions that are part of any workflow
+    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly'];
+    let list_workflowActions = [];
+
+    for (const workflowTypeFormID of list_workflowTypeFormIDs) {
+      const workflowTypeForm = await Forms.retrieve('workflowForms', workflowTypeFormID);
+
+      if (workflowTypeForm) {
+        for (const step of workflowTypeForm.path.slice(1)) {
+          list_workflowActions.push(step.formName);
+        }
+      }
+    }
+
     // For each group of action type forms ...
     for (let actionFormsGroup of actionTypeForms) {
       // Make a copy of the list of type form names, and sort this new copy alphabetically (the order of the original list is preserved)
@@ -308,19 +341,23 @@ router.get('/actionTypes/list', permissions.checkPermission('actions:view'), asy
 
       // Make new lists of the type form IDs and tags, now ordered accordingly to the sorted type form names ...
       // ... i.e. the first type form ID (which may not necessarily be the alphabetically first one) is the one corresponding to the first type form name
+      // Additionally, set a variable to indicate if the action type is one that is part of a workflow, by checking to see if the list of action type form names includes the type form name
       let sorted_formIds = [];
       let sorted_tags = [];
+      let sorted_workflowActions = [];
 
       for (const formName of sorted_formNames) {
         const index = actionFormsGroup.formName.indexOf(formName);
         sorted_formIds.push(actionFormsGroup.formId[index]);
         sorted_tags.push(actionFormsGroup.tags[index]);
+        sorted_workflowActions.push(list_workflowActions.includes(formName));
       }
 
-      // Overwrite the previously unordered type form name, ID and tags lists with the alphabetically ordered versions
+      // Overwrite the previously unordered type form name, ID and tags lists with the alphabetically ordered versions, and add the list of flags indicating workflow actions
       actionFormsGroup.formName.splice(0, actionFormsGroup.formName.length, ...sorted_formNames);
       actionFormsGroup.formId.splice(0, actionFormsGroup.formId.length, ...sorted_formIds);
       actionFormsGroup.tags.splice(0, actionFormsGroup.tags.length, ...sorted_tags);
+      actionFormsGroup.workflowAction = [...sorted_workflowActions];
     }
 
     // Render the interface page
@@ -348,6 +385,7 @@ router.get('/actions/list', permissions.checkPermission('actions:view'), async f
       singleType: false,
       title: 'All Performed Actions (All Types)',
       allActionTypeForms,
+      workflowAction: false,
     });
   } catch (err) {
     logger.error(err);
@@ -369,6 +407,24 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
     // Retrieve a list of all action type forms that currently exist in the 'actionForms' collection
     const allActionTypeForms = await Forms.list('actionForms');
 
+    // Set a variable to indicate if the specified action type is one that is part of a workflow
+    // First set up a list of action type form names for all actions that are part of any workflow
+    // Then check to see if the list of action type form names includes the type form name of the action type being specified
+    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly'];
+    let list_workflowActions = [];
+
+    for (const workflowTypeFormID of list_workflowTypeFormIDs) {
+      const workflowTypeForm = await Forms.retrieve('workflowForms', workflowTypeFormID);
+
+      if (workflowTypeForm) {
+        for (const step of workflowTypeForm.path.slice(1)) {
+          list_workflowActions.push(step.formName);
+        }
+      }
+    }
+
+    const workflowAction = list_workflowActions.includes(actionTypeForm.formName);
+
     // Render the interface page
     res.render('action_list.pug', {
       actions,
@@ -376,6 +432,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
       title: 'All Performed Actions (Single Type)',
       actionTypeForm,
       allActionTypeForms,
+      workflowAction,
     });
   } catch (err) {
     logger.error(err);

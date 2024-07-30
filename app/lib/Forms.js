@@ -122,6 +122,9 @@ async function list(collection) {
 
   aggregation_stages.push(grouping);
 
+  // Sort the records into alphabetical order
+  aggregation_stages.push({ $sort: { formName: 1 } });
+
   // Query the specified records collection using the aggregation stages defined above
   let records = await db.collection(collection)
     .aggregate(aggregation_stages)
