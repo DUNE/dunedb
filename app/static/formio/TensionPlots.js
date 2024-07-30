@@ -1,21 +1,21 @@
 var TextFieldComponent = Formio.Components.components.textfield;
-var gNumberArrayComponent = null;
-var gNumberArrayComponentId = 0;
+var gTensionPlotsComponent = null;
+var gTensionPlotsComponentId = 0;
 
 
-/// This class describes a custom Formio component for inputting an array of numbers, and displaying the numbers as scatter and bar plots
+/// This class describes a custom Formio component for inputting an array of tension measurements, and displaying them using scatter and bar plots
 /// It extends the built-in 'text field' Formio component
-class NumberArray extends TextFieldComponent {
+class TensionPlots extends TextFieldComponent {
 
   // Base schema for the component (the built-in 'text field' Formio component)
   static schema(...extend) {
     return TextFieldComponent.schema({
-      label: 'Number Array',
+      label: 'Tension Plots',
       placeholder: 'Enter comma-delimited values here',
-      customClass: 'component-numbarray-formio',
+      customClass: 'component-tensionplots-formio',
       errorLabel: 'Values cannot be parsed!',
-      key: 'number_array',
-      type: 'NumberArray',
+      key: 'tension_plots',
+      type: 'TensionPlots',
       input: true,
       defaultValue: [],
     }, ...extend);
@@ -24,17 +24,17 @@ class NumberArray extends TextFieldComponent {
   // Getter functions
   static get builderInfo() {
     return {
-      title: 'Number Array',
+      title: 'Tension Plots',
       group: 'custom',
       icon: 'bar-chart',
       weight: 72,
       documentation: '#',
-      schema: NumberArray.schema()
+      schema: TensionPlots.schema()
     };
   }
 
   get defaultSchema() {
-    return NumberArray.schema();
+    return TensionPlots.schema();
   }
 
   get emptyValue() {
@@ -47,20 +47,20 @@ class NumberArray extends TextFieldComponent {
     if (value.data) value = value.data;
 
     const textvalue = value.join(',');
-    gNumberArrayComponentId++;
+    gTensionPlotsComponentId++;
 
     let tpl = super.renderElement(textvalue, index);
 
     tpl += `
       <div class = 'd-flex justify-content-around border'>
-        <div class = 'flex-grow-1 p-4 numberArrayGraph' style = 'height: 200px; width: 240px;'></div>
-        <div class = 'flex-grow-1 p-4 numberArrayHistogram' style = 'height: 200px; width: 240px;'></div>
+        <div class = 'flex-grow-1 p-4 tensionPlotsScatter' style = 'height: 200px; width: 240px;'></div>
+        <div class = 'flex-grow-1 p-4 tensionPlotsBar' style = 'height: 200px; width: 240px;'></div>
       </div>`;
 
     return tpl;
   }
 
-  // Parse the comma-delimited input values into an array of individual data values
+  // Parse the comma-delimited input tensions into an array of individual data values
   parseText(text) {
     text = text || '';
     const arr = text.split(',');
@@ -68,7 +68,8 @@ class NumberArray extends TextFieldComponent {
     return arr;
   }
 
-  // Get the upper and lower limits of data to use based on specified nominal, inner tolerance and outer tolerance values
+  // Determine the upper and lower bounds based on specified nominal, inner tolerance and outer tolerance values
+  // Note that these bounds are only used for display purposes - the input tensions are NOT cut or removed if outside the bounds
   getBounds() {
     let boundsInner = {
       lo: NaN,
@@ -95,14 +96,13 @@ class NumberArray extends TextFieldComponent {
 
   // Update the various sub-parts of this component
   updateExtras(value) {
-    gNumberArrayComponent = this;
+    gTensionPlotsComponent = this;
 
-    // Normalize the input values, and fix the data range (x-axis limits on the bar graph, y-axis limits on the scatter plot)
+    // Set the axis ranges (y-axis limits on the scatter plot, x-axis limits on the bar graph) and calculate the data bounds
     let arr = value || [];
     let min = 3.5;
     let max = 9.0;
 
-    // Calculate the data bounds, and set up the array of values to be plotted
     const bounds = this.getBounds();
 
     for (let i = 0; i < arr.length; i++) {
@@ -160,11 +160,11 @@ class NumberArray extends TextFieldComponent {
     this.loadRefs(element, { readonly_display: 'single' });
     super.attach(element);
 
-    this.LizardGraph = new HistCanvas($('div.numberArrayGraph', this.element));
+    this.LizardGraph = new HistCanvas($('div.tensionPlotsScatter', this.element));
     this.LizardGraph.default_options.doDots = true;
     this.LizardGraph.default_options.doFill = false;
 
-    this.LizardHistogram = new HistCanvas($('div.numberArrayHistogram', this.element));
+    this.LizardHistogram = new HistCanvas($('div.tensionPlotsBar', this.element));
 
     let readOnlyDisplay = this.refs.readonly_display;
 
@@ -217,7 +217,7 @@ class NumberArray extends TextFieldComponent {
 
 
 /// Function for updating the selection of available Formio components to include this one (on any 'Edit Type Form' page)
-NumberArray.editForm = function (a, b, c) {
+TensionPlots.editForm = function (a, b, c) {
   const form = TextFieldComponent.editForm(a, b, c);
   const tabs = form.components.find(obj => { return obj.type === 'tabs' });
   let datatab = tabs.components.find(obj => { return obj.key == 'data' });
@@ -261,4 +261,4 @@ NumberArray.editForm = function (a, b, c) {
 
 
 /// Register this custom Formio component with the overall list of components that are available to use in Formio forms
-Formio.Components.addComponent('NumberArray', NumberArray);
+Formio.Components.addComponent('TensionPlots', TensionPlots);
