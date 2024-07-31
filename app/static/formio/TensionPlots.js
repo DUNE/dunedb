@@ -100,8 +100,8 @@ class TensionPlots extends TextFieldComponent {
 
     // Set the axis ranges (y-axis limits on the scatter plot, x-axis limits on the bar graph) and calculate the data bounds
     let arr = value || [];
-    let min = 3.5;
-    let max = 9.0;
+    let min = this.component.axis_limitLower;
+    let max = this.component.axis_limitUpper;
 
     const bounds = this.getBounds();
 
@@ -252,6 +252,20 @@ TensionPlots.editForm = function (a, b, c) {
       key: 'units',
       label: 'Units',
       tooltip: 'This is used as the scatter plot\'s vertical axis label, and the bar plot\'s horizontal axis label',
+      input: true,
+    },
+    {
+      type: 'number',
+      key: 'axis_limitLower',
+      label: 'Axis Limit (Lower)',
+      tooltip: 'This is used as the low limit of the scatter plot\'s vertical axis and the bar plot\'s horizontal axis',
+      input: true,
+    },
+    {
+      type: 'number',
+      key: 'axis_limitUpper',
+      label: 'Axis Limit (Upper)',
+      tooltip: 'This is used as the upper limit of the scatter plot\'s vertical axis and the bar plot\'s horizontal axis',
       input: true,
     },
   );

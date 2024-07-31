@@ -103,6 +103,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
       }]
     }).then((form) => {
       form.submission = {
@@ -120,6 +122,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
       }]
     }).then((form) => {
       form.submission = {
@@ -129,7 +133,7 @@ function postSuccess(result) {
 
     Formio.createForm(document.getElementById('results_diffsSideA'), {
       components: [{
-        type: 'NumberArray_BothPlots',
+        type: 'TensionPlots',
         label: 'Differences between Measured Tensions (Side A) [Second Location - First Location]',
         key: 'measuredTensions_diffsSideA',
         input: true,
@@ -137,6 +141,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 0.00,
         specification_toleranceInner: 0.50,
+        axis_limitLower: -1.0,
+        axis_limitUpper: 1.0,
       }]
     }).then((form) => {
       form.submission = {
@@ -154,6 +160,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
       }]
     }).then((form) => {
       form.submission = {
@@ -171,6 +179,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
       }]
     }).then((form) => {
       form.submission = {
@@ -180,7 +190,7 @@ function postSuccess(result) {
 
     Formio.createForm(document.getElementById('results_diffsSideB'), {
       components: [{
-        type: 'NumberArray_BothPlots',
+        type: 'TensionPlots',
         label: 'Differences between Measured Tensions (Side B) [Second Location - First Location]',
         key: 'measuredTensions_diffsSideB',
         input: true,
@@ -188,6 +198,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 0.00,
         specification_toleranceInner: 0.50,
+        axis_limitLower: -1.0,
+        axis_limitUpper: 1.0,
       }]
     }).then((form) => {
       form.submission = {
