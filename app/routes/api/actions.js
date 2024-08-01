@@ -65,9 +65,15 @@ router.post('/action/:actionId([A-Fa-f0-9]{24})/addImages', permissions.checkPer
 /// Retrieve a list of all actions of a single action type
 router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
-    // Retrieve records of all actions with the specified action type
+    // Set up the object containing the matching conditions ... to start with, this only consists of the specified action type
+    // If a component UUID has been provided in the query, add it to the object under the appropriate field
+    let match_condition = { typeFormId: req.params.typeFormId };
+
+    if (req.query.uuid) { match_condition.componentUuid = req.query.uuid; }
+
+    // Retrieve records of all actions with the specified action type, and optionally further match to those that were performed on the specified component
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const actions = await Actions.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
+    const actions = await Actions.list(match_condition, { limit: 200 });
 
     // Extract only the ID field (in string format) from each action record, and save it into a list to be returned
     let actionIDs = [];

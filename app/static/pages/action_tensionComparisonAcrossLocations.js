@@ -141,8 +141,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 0.00,
         specification_toleranceInner: 0.50,
-        axis_limitLower: -1.0,
-        axis_limitUpper: 1.0,
+        axis_limitLower: -1.5,
+        axis_limitUpper: 1.5,
       }]
     }).then((form) => {
       form.submission = {
@@ -198,8 +198,8 @@ function postSuccess(result) {
         units: 'Tension (N)',
         specification_nominal: 0.00,
         specification_toleranceInner: 0.50,
-        axis_limitLower: -1.0,
-        axis_limitUpper: 1.0,
+        axis_limitLower: -1.5,
+        axis_limitUpper: 1.5,
       }]
     }).then((form) => {
       form.submission = {
