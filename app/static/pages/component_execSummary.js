@@ -365,6 +365,8 @@ function SetEntry_wireLayer(layer, layerInfo) {
         units: 'Tension [N]',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
         defaultValue: layerInfo.tensions_A
       }]
     },
@@ -377,6 +379,8 @@ function SetEntry_wireLayer(layer, layerInfo) {
         units: 'Tension [N]',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
         defaultValue: layerInfo.tensions_B
       }]
     }],
