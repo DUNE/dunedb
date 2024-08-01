@@ -1,21 +1,21 @@
 var TextFieldComponent = Formio.Components.components.textfield;
-var gScatterPlotComponent = null;
-var gScatterPlotComponentId = 0;
+var gNumberArrayBothPlotsComponent = null;
+var gNumberArrayBothPlotsComponentId = 0;
 
 
-/// This class describes a custom Formio component for inputting an array of numbers, and displaying the numbers as a scatter plot
+/// This class describes a custom Formio component for inputting an array of values, and displaying them using scatter and bar plots
 /// It extends the built-in 'text field' Formio component
-class ScatterPlot extends TextFieldComponent {
+class NumberArray_BothPlots extends TextFieldComponent {
 
   // Base schema for the component (the built-in 'text field' Formio component)
   static schema(...extend) {
     return TextFieldComponent.schema({
-      label: 'Scatter Plot',
+      label: 'Number Array (Both Plots)',
       placeholder: 'Enter comma-delimited values here',
-      customClass: 'component-scatterplot-formio',
+      customClass: 'component-numbarraybothplots-formio',
       errorLabel: 'Values cannot be parsed!',
-      key: 'scatter_plot',
-      type: 'ScatterPlot',
+      key: 'number_array_both_plots',
+      type: 'NumberArray_BothPlots',
       input: true,
       defaultValue: [],
     }, ...extend);
@@ -24,17 +24,17 @@ class ScatterPlot extends TextFieldComponent {
   // Getter functions
   static get builderInfo() {
     return {
-      title: 'Scatter Plot',
+      title: 'Number Array (Both Plots)',
       group: 'custom',
       icon: 'bar-chart',
       weight: 72,
       documentation: '#',
-      schema: ScatterPlot.schema()
+      schema: NumberArray_BothPlots.schema()
     };
   }
 
   get defaultSchema() {
-    return ScatterPlot.schema();
+    return NumberArray_BothPlots.schema();
   }
 
   get emptyValue() {
@@ -47,13 +47,14 @@ class ScatterPlot extends TextFieldComponent {
     if (value.data) value = value.data;
 
     const textvalue = value.join(',');
-    gScatterPlotComponentId++;
+    gNumberArrayBothPlotsComponentId++;
 
     let tpl = super.renderElement(textvalue, index);
 
     tpl += `
       <div class = 'd-flex justify-content-around border'>
-        <div class = 'flex-grow-1 p-4 scatterPlotGraph' style = 'height: 200px; width: 480px;'></div>
+        <div class = 'flex-grow-1 p-4 numberArrayBothPlotsScatter' style = 'height: 200px; width: 240px;'></div>
+        <div class = 'flex-grow-1 p-4 numberArrayBothPlotsBar' style = 'height: 200px; width: 240px;'></div>
       </div>`;
 
     return tpl;
@@ -67,7 +68,8 @@ class ScatterPlot extends TextFieldComponent {
     return arr;
   }
 
-  // Get the upper and lower limits of data to use based on specified nominal, inner tolerance and outer tolerance values
+  // Determine the upper and lower bounds based on specified nominal, inner tolerance and outer tolerance values
+  // Note that these bounds are only used for display purposes - the input values are NOT cut or removed if outside the bounds
   getBounds() {
     let boundsInner = {
       lo: NaN,
@@ -94,20 +96,29 @@ class ScatterPlot extends TextFieldComponent {
 
   // Update the various sub-parts of this component
   updateExtras(value) {
-    gScatterPlotComponent = this;
+    gNumberArrayBothPlotsComponent = this;
 
-    // Normalize the input values
+    // Set the axis ranges (y-axis limits on the scatter plot, x-axis limits on the bar graph) and calculate the data bounds
     let arr = value || [];
-    let min = 3.5;
-    let max = 9.0;
+    let min = 1e99;
+    let max = -1e99;
 
-    // Calculate the data bounds, and set up the array of values to be plotted
+    if (arr.length < 1) {
+      min = 0
+      max = 0;
+    }
+
     const bounds = this.getBounds();
 
     for (let i = 0; i < arr.length; i++) {
       const x = parseFloat(arr[i]);
 
-      if (!isNaN(x)) { arr[i] = x; }
+      if (!isNaN(x)) {
+        min = Math.min(min, x);
+        max = Math.max(max, x);
+
+        arr[i] = x;
+      }
     }
 
     const numberOfEntries = arr.length;
@@ -117,18 +128,7 @@ class ScatterPlot extends TextFieldComponent {
     colorscale.min = min;
     colorscale.max = max;
 
-    let firstWireNumber = 0;
-    let scatterPlotXLabel = 'Measurement Index';
-
-    if ((numberOfEntries > 0) && (numberOfEntries < 800)) {    // X and G wire layers have 480 and 481 entries respectively
-      firstWireNumber = 1;
-      scatterPlotXLabel = 'Wire #';
-    } else if (numberOfEntries > 800) {                        // V and U wire layers have 1139 and 1141 entries respectively
-      firstWireNumber = 8;
-      scatterPlotXLabel = 'Segment #';
-    }
-
-    let graph = new Histogram(numberOfEntries, firstWireNumber, numberOfEntries + firstWireNumber);
+    let graph = new Histogram(numberOfEntries, 0, numberOfEntries);
 
     graph.data = arr;
     graph.min_content = min;
@@ -137,9 +137,21 @@ class ScatterPlot extends TextFieldComponent {
     this.LizardGraph.SetHist(graph, colorscale);
     this.LizardGraph.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardGraph.marker_color = 'rgba(100, 0,0, 0.5)';
-    this.LizardGraph.xlabel = scatterPlotXLabel;
+    this.LizardGraph.xlabel = '';
     this.LizardGraph.ylabel = this.component.units;
     this.LizardGraph.Draw();
+
+    // Draw the bar plot
+    let hist = new CreateGoodHistogram(Math.round((max - min) / 0.1) + 1, min, max);
+
+    for (const x of arr) { hist.Fill(x); }
+
+    this.LizardHistogram.SetHist(hist, colorscale);
+    this.LizardHistogram.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
+    this.LizardHistogram.marker_color = 'rgba(100, 0,0, 0.5)';
+    this.LizardHistogram.xlabel = this.component.units;
+    this.LizardHistogram.ylabel = 'Entries';
+    this.LizardHistogram.Draw();
   }
 
   // After rendering the Formio component, attach it to an element of the page
@@ -147,9 +159,23 @@ class ScatterPlot extends TextFieldComponent {
     this.loadRefs(element, { readonly_display: 'single' });
     super.attach(element);
 
-    this.LizardGraph = new HistCanvas($('div.scatterPlotGraph', this.element));
+    this.LizardGraph = new HistCanvas($('div.numberArrayBothPlotsScatter', this.element));
     this.LizardGraph.default_options.doDots = true;
     this.LizardGraph.default_options.doFill = false;
+
+    this.LizardHistogram = new HistCanvas($('div.numberArrayBothPlotsBar', this.element));
+
+    let readOnlyDisplay = this.refs.readonly_display;
+
+    this.LizardGraph.DoMouseClick = function (ev, u, v) {
+      const index = parseInt(u);
+      let elem = readOnlyDisplay.children[index];
+
+      if (elem) {
+        readOnlyDisplay.scrollLeft = elem.offsetLeft - 100;
+        $(elem).stop().fadeOut(250).fadeIn(250);
+      }
+    }
 
     if (this.arrayValue) this.updateExtras(this.arrayValue);
 
@@ -158,6 +184,8 @@ class ScatterPlot extends TextFieldComponent {
     $('.collapse', this.element).on('shown.bs.collapse', function () {
       self.LizardGraph.Resize();
       self.LizardGraph.Draw();
+      self.LizardHistogram.Resize();
+      self.LizardHistogram.Draw();
     });
   }
 
@@ -188,7 +216,7 @@ class ScatterPlot extends TextFieldComponent {
 
 
 /// Function for updating the selection of available Formio components to include this one (on any 'Edit Type Form' page)
-ScatterPlot.editForm = function (a, b, c) {
+NumberArray_BothPlots.editForm = function (a, b, c) {
   const form = TextFieldComponent.editForm(a, b, c);
   const tabs = form.components.find(obj => { return obj.type === 'tabs' });
   let datatab = tabs.components.find(obj => { return obj.key == 'data' });
@@ -208,21 +236,21 @@ ScatterPlot.editForm = function (a, b, c) {
       type: 'number',
       key: 'specification_toleranceInner',
       label: 'Inner Tolerance',
-      tooltip: 'Expected inner range = [nominal +/- inner tolerance]',
+      tooltip: 'Any values outside the expected inner range = [nominal +/- inner tolerance] will be counted and indicated',
       input: true,
     },
     {
       type: 'number',
       key: 'specification_toleranceOuter',
       label: 'Outer Tolerance',
-      tooltip: 'Expected outer range = [nominal +/- outer tolerance]',
+      tooltip: 'Any values outside the expected outer range = [nominal +/- outer tolerance] will be counted and indicated',
       input: true,
     },
     {
       type: 'textfield',
       key: 'units',
       label: 'Units',
-      tooltip: 'This is used as the scatter plot\'s vertical axis label',
+      tooltip: 'This is used as the scatter plot\'s vertical axis label, and the bar plot\'s horizontal axis label',
       input: true,
     },
   );
@@ -232,4 +260,4 @@ ScatterPlot.editForm = function (a, b, c) {
 
 
 /// Register this custom Formio component with the overall list of components that are available to use in Formio forms
-Formio.Components.addComponent('ScatterPlot', ScatterPlot);
+Formio.Components.addComponent('NumberArray_BothPlots', NumberArray_BothPlots);

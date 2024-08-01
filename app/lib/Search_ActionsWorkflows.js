@@ -135,44 +135,6 @@ async function nonConformanceByUUID(componentUUID) {
 }
 
 
-/// Retrieve a list of tension measurement actions that have been performed on a single component, specified by its UUID
-async function tensionMeasurementsByUUID(componentUUID) {
-  let aggregation_stages = [];
-
-  // Retrieve all 'Single Layer Tension Measurements' action records that have the same component UUID as the specified one
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'x_tension_testing',
-      'componentUuid': MUUID.from(componentUUID),
-    }
-  });
-
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-      componentUuid: { '$first': '$componentUuid' },
-      apaLayer: { '$first': '$data.apaLayer' },
-      location: { '$first': '$data.location' },
-      comments: { '$first': '$data.comments' },
-    },
-  });
-
-  // Query the 'actions' records collection using the aggregation stages defined above
-  let results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  // Return the list of actions
-  return results;
-}
-
-
 /// Retrieve a list of board installation actions that reference a single component, specified by its UUID
 async function boardInstallByReferencedComponent(componentUUID) {
   // Set up a list of type form IDs which correspond to 'board installation' type actions
@@ -300,11 +262,89 @@ async function windingByReferencedComponent(componentUUID) {
 }
 
 
+/// Retrieve wire tension measurements that have been performed on a specified wire layer of a specified Assembled APA at two specified locations
+async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin, destination) {
+  let aggregation_stages = [];
+
+  // Retrieve all 'Single Layer Tension Measurements' action records that have the same component UUID, wire layer and location as the specified ones
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'x_tension_testing',
+      'componentUuid': MUUID.from(componentUUID),
+      'data.apaLayer': wireLayer,
+      'data.location': { $in: [origin, destination] }
+    }
+  });
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      location: { '$first': '$data.location' },
+      tensions_sideA: { '$first': '$data.measuredTensions_sideA' },
+      tensions_sideB: { '$first': '$data.measuredTensions_sideB' },
+    },
+  });
+
+  // Query the 'actions' records collection using the aggregation stages defined above
+  let results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Set up an object to be returned ... once completed, this will contain the raw measured tensions on both sides at both locations, as well as the differences between the tensions across locations
+  let tensions = {
+    origin_actionId: null,
+    origin_sideA: null,
+    origin_sideB: null,
+    destination_actionId: null,
+    destination_sideA: null,
+    destination_sideB: null,
+    differences_sideA: [],
+    differences_sideB: [],
+  }
+
+  // Set the various object entries using the appropriate tension measurements (making sure to check that the measurements actually exist along the way)
+  for (const result of results) {
+    if (result.location === origin) {
+      tensions.origin_actionId = result.actionId;
+
+      if (result.tensions_sideA) tensions.origin_sideA = [...result.tensions_sideA];
+      if (result.tensions_sideB) tensions.origin_sideB = [...result.tensions_sideB];
+    } else if (result.location === destination) {
+      tensions.destination_actionId = result.actionId;
+
+      if (result.tensions_sideA) tensions.destination_sideA = [...result.tensions_sideA];
+      if (result.tensions_sideB) tensions.destination_sideB = [...result.tensions_sideB];
+    }
+  }
+
+  if ((tensions.origin_sideA) && (tensions.destination_sideA) && (tensions.origin_sideA.length === tensions.destination_sideA.length)) {
+    for (let t = 0; t < tensions.origin_sideA.length; t++) {
+      tensions.differences_sideA.push(tensions.destination_sideA[t] - tensions.origin_sideA[t]);
+    }
+  }
+
+  if ((tensions.origin_sideB) && (tensions.destination_sideB) && (tensions.origin_sideB.length === tensions.destination_sideB.length)) {
+    for (let t = 0; t < tensions.origin_sideB.length; t++) {
+      tensions.differences_sideB.push(tensions.destination_sideB[t] - tensions.origin_sideB[t]);
+    }
+  }
+
+  // Return the object
+  return tensions;
+}
+
+
 module.exports = {
   workflowsByUUID,
   nonConformanceByComponentType,
   nonConformanceByUUID,
-  tensionMeasurementsByUUID,
   boardInstallByReferencedComponent,
   windingByReferencedComponent,
+  tensionComparisonAcrossLocations,
 }

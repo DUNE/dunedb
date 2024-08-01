@@ -2,7 +2,9 @@ const router = require('express').Router();
 
 const Actions = require('../../lib/Actions');
 const logger = require('../../lib/logger');
+const Search_ActionsWorkflows = require('../../lib/Search_ActionsWorkflows');
 const permissions = require('../../lib/permissions');
+const utils = require('../../lib/utils');
 
 
 /// Retrieve a single version of an action record (either the most recent, or a specified one)
@@ -63,9 +65,15 @@ router.post('/action/:actionId([A-Fa-f0-9]{24})/addImages', permissions.checkPer
 /// Retrieve a list of all actions of a single action type
 router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
-    // Retrieve records of all actions with the specified action type
+    // Set up the object containing the matching conditions ... to start with, this only consists of the specified action type
+    // If a component UUID has been provided in the query, add it to the object under the appropriate field
+    let match_condition = { typeFormId: req.params.typeFormId };
+
+    if (req.query.uuid) { match_condition.componentUuid = req.query.uuid; }
+
+    // Retrieve records of all actions with the specified action type, and optionally further match to those that were performed on the specified component
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const actions = await Actions.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
+    const actions = await Actions.list(match_condition, { limit: 200 });
 
     // Extract only the ID field (in string format) from each action record, and save it into a list to be returned
     let actionIDs = [];
@@ -76,6 +84,22 @@ router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions
 
     // Return the list of action IDs
     return res.json(actionIDs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Compare wire tension measurements across locations
+router.get('/actions/tensionComparisonAcrossLocations/' + utils.uuid_regex + '/:wireLayer/:origin/:destination', async function (req, res, next) {
+  try {
+    // Retrieve wire tension measurements that have been performed on a specified wire layer of a specified Assembled APA at two specified locations
+    // If successful, this returns an object containing the measured tensions on both sides at both locations, along with the pre-calculated differences between tensions
+    const tensions = await Search_ActionsWorkflows.tensionComparisonAcrossLocations(req.params.uuid, req.params.wireLayer, req.params.origin, req.params.destination);
+
+    // Return the object in JSON format
+    return res.json(tensions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

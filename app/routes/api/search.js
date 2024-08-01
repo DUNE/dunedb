@@ -228,21 +228,6 @@ router.get('/search/nonConformanceByUUID/' + utils.uuid_regex, async function (r
 });
 
 
-/// Search for tension measurement actions performed on a single component, specified by its UUID
-router.get('/search/tensionMeasurementsByUUID/' + utils.uuid_regex, async function (req, res, next) {
-  try {
-    // Retrieve a list of tension measurement actions that have been performed on the component corresponding to the specified UUID
-    const actions = await Search_ActionsWorkflows.tensionMeasurementsByUUID(req.params.uuid);
-
-    // Return the list in JSON format
-    return res.json(actions);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
 /// Search for actions of a specified type that reference a specified component UUID
 router.get('/search/actionsByReferencedUUID/' + utils.uuid_regex + '/:actionType', async function (req, res, next) {
   try {

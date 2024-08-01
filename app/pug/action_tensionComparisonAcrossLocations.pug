@@ -1,0 +1,89 @@
+extend default
+
+block vars
+  - const page_title = 'Compare Wire Tension Measurements across Locations';
+
+block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
+  block workscripts
+    script(src = '/pages/action_tensionComparisonAcrossLocations.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Compare Wire Tension Measurements across Locations
+
+    .vert-space-x2
+      p This page may be used to compare wire tension measurements that have been measured on the <b>same wire layer</b> of the <b>same Assembled APA</b> at <b>different locations</b>.
+
+      p Please enter the UUID of an Assembled APA into the UUID input box.  This box uses auto-complete, so users may begin manually entering a UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.
+        br
+        |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.
+        br
+        br
+        |  Please also select a wire layer and two locations at which tension measurements were performed from the respective dropdown menus.
+
+    .vert-space-x2 
+      hr
+
+      .vert-space-x1
+        .row
+          .col-md-3
+            #componentuuidform
+
+          .col-md-2
+            p Wire Layer
+
+            select.form-control#wireLayerSelection
+              option(value = '')
+              option(value = 'x') X 
+              option(value = 'v') V 
+              option(value = 'u') U 
+              option(value = 'g') G 
+
+          .col-md-3
+            p First Location
+
+            select.form-control#originLocationSelection
+              option(value = '')
+              option(value = 'cern') CERN
+              option(value = 'chicago') Chicago 
+              option(value = 'daresbury') Daresbury Factory 
+              option(value = 'fermilab') Fermilab 
+              option(value = 'surf') SURF 
+
+          .col-md-3
+            p Second Location
+
+            select.form-control#destinationLocationSelection
+              option(value = '')
+              option(value = 'cern') CERN
+              option(value = 'chicago') Chicago 
+              option(value = 'daresbury') Daresbury Factory 
+              option(value = 'fermilab') Fermilab 
+              option(value = 'surf') SURF 
+
+          .col-md-1
+
+        .row.vert-space-x2
+          .col-md-3 
+            button.btn-primary.btn-lg#confirmButton Perform Comparison
+
+    .vert-space-x2
+      hr
+
+      h4 Comparison Results
+
+      .vert-space-x1
+        #results_originSideA 
+        #results_destinationSideA
+        #results_diffsSideA 
+
+      .vert-space-x1
+        #results_originSideB
+        #results_destinationSideB
+        #results_diffsSideB 
+
+    .vert-space-x2

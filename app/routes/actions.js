@@ -441,4 +441,11 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
 });
 
 
+/// Compare wire tension measurements across locations
+router.get('/actions/tensionComparisonAcrossLocations', async function (req, res, next) {
+  // Render the interface page
+  res.render('action_tensionComparisonAcrossLocations.pug', { dictionary_locations: utils.dictionary_locations });
+});
+
+
 module.exports = router;
