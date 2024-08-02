@@ -3,7 +3,7 @@ var gNumberArrayNoPlotsComponent = null;
 var gNumberArrayNoPlotsComponentId = 0;
 
 
-/// This class describes a custom Formio component for inputting an array of numbers
+/// This class describes a custom Formio component for inputting an array of values
 /// It extends the built-in 'text field' Formio component
 class NumberArray_NoPlots extends TextFieldComponent {
 

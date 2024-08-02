@@ -22,7 +22,7 @@ head
   link(rel = 'stylesheet', href = '/css/component_qrCodes.css')
   link(rel = 'stylesheet', href = '/css/component_summary.css')
   link(rel = 'stylesheet', href = '/css/fonts.css')
-          //- Copied from https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap
+    //- Copied from https://fonts.googleapis.com/css2?family=Inconsolata&family=Palanquin&display=swap
 
   //- The 'formio.full.min.css' stylesheet has to be loaded from an external source, because it itself references another font package by URL ...
   //- ... and a local version of this stylesheet is not able to reference that URL (gives a 404 error)
@@ -92,6 +92,10 @@ body(class = `deployment-${NODE_ENV}`)
                   +navlink(href = '/actionTypes/list')
                     |      Action Types
 
+                li.nav-item
+                  +navlink(href = '/actions/tensionComparisonAcrossLocations')
+                    |      Compare Wire Tensions across Locations
+
             li.nav-item
               +navlink(href = '/workflows/list')
                 i.fa.fa-graduation-cap(aria-hidden = 'true')
@@ -156,10 +160,6 @@ body(class = `deployment-${NODE_ENV}`)
                     |      Non-Conformance by Component Type or UUID
 
                 li.nav-item
-                  +navlink(href = '/search/tensionMeasurementsByUUID')
-                    |      Wire Tension Measurements by UUID
-
-                li.nav-item
                   +navlink(href = '/search/workflowsByIDOrUUID')
                     |      Workflows by ID or UUID
 
@@ -193,13 +193,14 @@ script.
   Formio.setBaseUrl('!{base_url}');
 
 script(src = '/formio/ActionID.js')
-script(src = '/formio/BarPlot.js')
 script(src = '/formio/BetterDataGrid.js')
 script(src = '/formio/ComponentUUID.js')
-script(src = '/formio/NumberArray.js')
+script(src = '/formio/NumberArray_BarPlot.js')
+script(src = '/formio/NumberArray_BothPlots.js')
 script(src = '/formio/NumberArray_NoPlots.js')
+script(src = '/formio/NumberArray_ScatterPlot.js')
+script(src = '/formio/TensionPlots.js')
 script(src = '/formio/NumberTolerance.js')
-script(src = '/formio/ScatterPlot.js')
 script(src = '/formio/WorkflowID.js')
 
 script(src = '/js/ABoundObject.js')

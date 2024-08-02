@@ -73,13 +73,6 @@ router.get('/search/nonConformanceByComponentTypeOrUUID', async function (req, r
 });
 
 
-/// Search for tension measurement actions performed on a single component, specified by its UUID
-router.get('/search/tensionMeasurementsByUUID', async function (req, res, next) {
-  // Render the interface page
-  res.render('search_tensionMeasurementsByUUID.pug', { dictionary_locations: utils.dictionary_locations });
-});
-
-
 /// Search for workflows by ID, or that involve a particular component specified by its UUID
 router.get('/search/workflowsByIDOrUUID', async function (req, res, next) {
   // Render the interface page

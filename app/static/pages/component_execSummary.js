@@ -360,11 +360,13 @@ function SetEntry_wireLayer(layer, layerInfo) {
       components: [{
         label: 'Tension Measurements (Side A)',
         key: 'tensionMeasurements_A',
-        type: 'NumberArray',
+        type: 'TensionPlots',
         input: false,
         units: 'Tension [N]',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
         defaultValue: layerInfo.tensions_A
       }]
     },
@@ -372,11 +374,13 @@ function SetEntry_wireLayer(layer, layerInfo) {
       components: [{
         label: 'Tension Measurements (Side B)',
         key: 'tensionMeasurements_B',
-        type: 'NumberArray',
+        type: 'TensionPlots',
         input: false,
         units: 'Tension [N]',
         specification_nominal: 6.25,
         specification_toleranceInner: 2.25,
+        axis_limitLower: 3.5,
+        axis_limitUpper: 9.0,
         defaultValue: layerInfo.tensions_B
       }]
     }],
