@@ -1,170 +1,1495 @@
 // Set up the schema for the QC signoffs
-function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCableTempSensorQC) {
-  const apaQC_link = (apaQC.actionId !== '' ? `<a href = '/action/${apaQC.actionId}' > APA QC Review Details </a>` : `[APA QC Review not found]`);
-  const frameIntakeSurveys_link = (frameQC.intakeSurveysActionId !== '' ? `<a href = '/action/${frameQC.intakeSurveysActionId}' > Frame Intake Survey Results </a>` : `[Frame Intake Surveys not found]`);
-  const frameInstallSurveys_link = (frameQC.installSurveysActionId !== '' ? `<a href = '/action/${frameQC.installSurveysActionId}' > Frame Installation Survey Results </a>` : `[Frame Installation Surveys not found]`);
-  const meshPanelQC_link = (meshPanelQC.actionId !== '' ? `<a href = '/action/${meshPanelQC.actionId}' > Mesh Panel Installation Details </a>` : `[Mesh Panel Installation not found]`);
-  const cableConduitQC_link = (cableConduitQC.actionId !== '' ? `<a href = '/action/${cableConduitQC.actionId}' > Cable Conduit Insertion Details </a>` : `[Cable Conduit Insertion not found]`);
-  const pdCableTempSensorQC_link = (pdCableTempSensorQC.actionId !== '' ? `<a href = '/action/${pdCableTempSensorQC.actionId}' > PD & RTD Installation Details </a>` : `[PD & RTD Installation not found]`);
+function SetSection_qcSignoffs(frameConstr, framePrep, layer_x, layer_v, layer_u, layer_g, coverCaps, shippingPrep, completedAPA) {
+  const frameIntakeSurveys_link = (frameConstr.intakeSurveysID !== '' ? `<a href = '/action/${frameConstr.intakeSurveysID}' > Frame Intake Surveys </a>` : `[Frame Intake Surveys not found]`);
+  const frameInstallSurveys_link = (frameConstr.installSurveysID !== '' ? `<a href = '/action/${frameConstr.installSurveysID}' > Frame Installation Surveys </a>` : `[Frame Installation Surveys not found]`);
+
+  const meshInstall_link = (framePrep.meshInstallID !== '' ? `<a href = '/action/${framePrep.meshInstallID}' > Mesh Panel Installation Details </a>` : `[Mesh Panel Installation not found]`);
+  const rtdInstall_link = (framePrep.rtdInstallID !== '' ? `<a href = '/action/${framePrep.rtdInstallID}' > PD & RTD Installation Details </a>` : `[PD & RTD Installation not found]`);
+
+  const xWinding_link = (layer_x.windingID !== '' ? `<a href = '/action/${layer_x.windingID}' > Winding Details </a>` : `[Winding Details not found]`);
+  const xSoldering_link = (layer_x.solderingID !== '' ? `<a href = '/action/${layer_x.solderingID}' > Soldering Details </a>` : `[Soldering Details not found]`);
+  const xTensions_link = (layer_x.tensionsID !== '' ? `<a href = '/action/${layer_x.tensionsID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+
+  const vWinding_link = (layer_v.windingID !== '' ? `<a href = '/action/${layer_v.windingID}' > Winding Details </a>` : `[Winding Details not found]`);
+  const vSoldering_link = (layer_v.solderingID !== '' ? `<a href = '/action/${layer_v.solderingID}' > Soldering Details </a>` : `[Soldering Details not found]`);
+  const vTensions_link = (layer_v.tensionsID !== '' ? `<a href = '/action/${layer_v.tensionsID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+
+  const uWinding_link = (layer_u.windingID !== '' ? `<a href = '/action/${layer_u.windingID}' > Winding Details </a>` : `[Winding Details not found]`);
+  const uSoldering_link = (layer_u.solderingID !== '' ? `<a href = '/action/${layer_u.solderingID}' > Soldering Details </a>` : `[Soldering Details not found]`);
+  const uTensions_link = (layer_u.tensionsID !== '' ? `<a href = '/action/${layer_u.tensionsID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+
+  const gWinding_link = (layer_g.windingID !== '' ? `<a href = '/action/${layer_g.windingID}' > Winding Details </a>` : `[Winding Details not found]`);
+  const gSoldering_link = (layer_g.solderingID !== '' ? `<a href = '/action/${layer_g.solderingID}' > Soldering Details </a>` : `[Soldering Details not found]`);
+  const gTensions_link = (layer_g.tensionsID !== '' ? `<a href = '/action/${layer_g.tensionsID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+
+  const panelInstall_link = (shippingPrep.panelInstallID !== '' ? `<a href = '/action/${shippingPrep.panelInstallID}' > Protection Panel Details </a>` : `[Protection Panel Details not found]`);
+  const conduitInstall_link = (shippingPrep.conduitInstallID !== '' ? `<a href = '/action/${shippingPrep.conduitInstallID}' > Cable Conduit Details </a>` : `[Cable Conduit Details not found]`);
 
   const schema_qcSignoffs = {
-    components: [{
-      label: 'QC Signoffs',
-      key: 'qcSignoffs',
-      type: 'textfield',
-      input: false,
-      hideLabel: true,
-      defaultValue: 'QC Signoffs',
-    },
-    {
-      label: 'Columns',
-      key: 'columns',
-      type: 'columns',
-      input: false,
-      columns: [{
-        components: [{
-          label: 'Completed APA QC:',
-          key: 'apaQC_signoff',
-          type: 'textfield',
-          input: true,
-          defaultValue: apaQC.signoff,
-        }],
-        width: 3,
-        size: 'sm',
+    "components": [
+      {
+        "label": "QC Signoffs",
+        "hideLabel": true,
+        "tableView": true,
+        "defaultValue": "QC Signoffs",
+        "key": "qcSignoffs",
+        "type": "textfield",
+        "input": false
       },
       {
-        components: [{
-          key: 'apaQC_actionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${apaQC_link} </br></p>`,
-        }],
-        width: 3,
-        size: 'sm',
+        "label": "Frame Construction",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_frameConstr",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "frameConstr_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": frameConstr.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "frameConstr_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": frameConstr.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Frame Intake Surveys",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "frameConstr_intakeSurveys",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${frameIntakeSurveys_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Frame Installation Surveys",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "frameConstr_installSurveys",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${frameInstallSurveys_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 3,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 3
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          label: 'Final Frame Approval:',
-          key: 'frameQC_signoff',
-          type: 'textfield',
-          input: true,
-          defaultValue: frameQC.signoff,
-        }],
-        width: 2,
-        size: 'sm',
+        "label": "Frame Preparation",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_framePrep",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "framePrep_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": framePrep.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "framePrep_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": framePrep.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Mesh Panel Installation Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "framePrep_meshInstall",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${meshInstall_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "PD & RTD Installation Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "framePrep_rtdInstall",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${rtdInstall_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 3,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 3
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          key: 'frameQC_intakeSurveysActionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${frameIntakeSurveys_link} </br></p>`,
-        }],
-        width: 2,
-        size: 'sm',
+        "label": "X Layer Assembly",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_xLayer",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "xLayer_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": layer_x.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "xLayer_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": layer_x.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Winding Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "xLayer_winding",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${xWinding_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Soldering Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "xLayer_soldering",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${xSoldering_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Tension Measurements",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "xLayer_tensions",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${xTensions_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          key: 'frameQC_installSurveysActionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${frameInstallSurveys_link} </br></p>`,
-        }],
-        width: 2,
-        size: 'sm',
-      }],
-    },
-    {
-      label: 'Columns',
-      key: 'columns1',
-      type: 'columns',
-      input: false,
-      columns: [{
-        components: [{
-          label: 'Mesh Panel Installation QC:',
-          key: 'meshPanelQC_signoff',
-          type: 'textfield',
-          input: true,
-          defaultValue: meshPanelQC.signoff,
-        }],
-        width: 3,
-        size: 'sm',
+        "label": "V Layer Assembly",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_vLayer",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "vLayer_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": layer_v.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "vLayer_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": layer_v.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Winding Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "vLayer_winding",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${vWinding_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Soldering Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "vLayer_soldering",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${vSoldering_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Tension Measurements",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "vLayer_tensions",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${vTensions_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          key: 'meshPanelQC_actionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${meshPanelQC_link} </br></p>`,
-        }],
-        width: 3,
-        size: 'sm',
+        "label": "U Layer Assembly",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_uLayer",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "uLayer_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": layer_u.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "uLayer_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": layer_u.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Winding Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "uLayer_winding",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${uWinding_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Soldering Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "uLayer_soldering",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${uSoldering_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Tension Measurements",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "uLayer_tensions",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${uTensions_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          label: 'Conduit Insertion QC:',
-          key: 'cableConduitQC_signoff',
-          type: 'textfield',
-          input: true,
-          defaultValue: cableConduitQC.signoff,
-        }],
-        width: 3,
-        size: 'sm',
+        "label": "G Layer Assembly",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_gLayer",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "gLayer_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": layer_g.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "gLayer_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": layer_g.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Winding Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "gLayer_winding",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${gWinding_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Soldering Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "gLayer_soldering",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${gSoldering_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Tension Measurements",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "gLayer_tensions",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${gTensions_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          key: 'cableConduitQC_actionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${cableConduitQC_link} </br></p>`,
-        }],
-        width: 3,
-        size: 'sm',
-      }],
-    },
-    {
-      label: 'Columns',
-      key: 'columns11',
-      type: 'columns',
-      input: false,
-      columns: [{
-        components: [{
-          label: 'PD Cable Installation QC:',
-          key: 'photonDetectorSignoff',
-          type: 'textfield',
-          input: true,
-          defaultValue: pdCableTempSensorQC.photonDetectorSignoff,
-        }],
-        width: 3,
-        size: 'sm',
+        "label": "Cover Board and Caps Installation",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_coverCaps",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "coverCaps_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": coverCaps.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "coverCaps_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": coverCaps.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Spacer 1",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "spacer1",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 5,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 5
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          label: 'RTDs and Cable Installation QC:',
-          key: 'rdInstallationSignoff',
-          type: 'textfield',
-          'input': true,
-          defaultValue: pdCableTempSensorQC.rdInstallationSignoff,
-        }],
-        width: 3,
-        size: 'sm',
+        "label": "Shipping Preparation",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_shippingPrep",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "shippingPrep_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": shippingPrep.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "shippingPrep_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": shippingPrep.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              }, {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Protection Panel Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "shippingPrep_panel",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${panelInstall_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Cable Conduit Details",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "shippingPrep_conduit",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `${conduitInstall_link}<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 3,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 3
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
       {
-        components: [{
-          key: 'pdCableTempSensorQC_actionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${pdCableTempSensorQC_link} </br></p>`,
-        }],
-        width: 3,
-        size: 'sm',
+        "label": "Completed APA",
+        "reorder": false,
+        "addAnotherPosition": "bottom",
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "initEmpty": false,
+        "tableView": false,
+        "key": "grid_completedAPA",
+        "type": "datagrid",
+        "input": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Name:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": true,
+                    "key": "completedAPA_name",
+                    "type": "textfield",
+                    "input": false,
+                    "defaultValue": completedAPA.name
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [
+                  {
+                    "label": "Date:",
+                    "labelPosition": "left-left",
+                    "labelWidth": 10,
+                    "tableView": false,
+                    "enableMinDateInput": false,
+                    "datePicker": {
+                      "disableWeekends": false,
+                      "disableWeekdays": false
+                    },
+                    "enableMaxDateInput": false,
+                    "key": "completedAPA_date",
+                    "type": "datetime",
+                    "input": false,
+                    "widget": {
+                      "type": "calendar",
+                      "displayInTimezone": "viewer",
+                      "locale": "en",
+                      "useLocaleSettings": false,
+                      "allowInput": true,
+                      "mode": "single",
+                      "enableTime": true,
+                      "noCalendar": false,
+                      "format": "yyyy-MM-dd hh:mm a",
+                      "hourIncrement": 1,
+                      "minuteIncrement": 1,
+                      "time_24hr": false,
+                      "minDate": null,
+                      "disableWeekends": false,
+                      "disableWeekdays": false,
+                      "maxDate": null
+                    },
+                    "defaultValue": completedAPA.date
+                  }
+                ],
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "sm",
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 1,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 1
+              },
+              {
+                "components": [
+                  {
+                    "label": "Spacer 2",
+                    "attrs": [
+                      {
+                        "attr": "",
+                        "value": ""
+                      }
+                    ],
+                    "refreshOnChange": false,
+                    "key": "spacer2",
+                    "type": "htmlelement",
+                    "input": false,
+                    "tableView": false,
+                    "content": `<br></br>`
+                  }
+                ],
+                "size": "sm",
+                "width": 2,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 2
+              },
+              {
+                "components": [],
+                "size": "sm",
+                "width": 5,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "currentWidth": 5
+              }
+            ],
+            "hideLabel": true,
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
       },
-      {
-        components: [],
-        width: 3,
-        size: 'sm',
-      }]
-    }]
+    ]
   }
 
   return schema_qcSignoffs;
@@ -172,10 +1497,6 @@ function SetSection_qcSignoffs(apaQC, frameQC, meshPanelQC, cableConduitQC, pdCa
 
 // Set up the schema for a single wire layer entry
 function SetEntry_wireLayer(layer, layerInfo) {
-  const winding_link = (layerInfo.winding_actionId !== '' ? `<a href = '/action/${layerInfo.winding_actionId}' > Winding Details </a>` : `[Winding action not found]`);
-  const soldering_link = (layerInfo.soldering_actionId !== '' ? `<a href = '/action/${layerInfo.soldering_actionId}' > Soldering Details </a>` : `[Soldering action not found]`);
-  const tensions_link = (layerInfo.tensions_actionId !== '' ? `<a href = '/action/${layerInfo.tensions_actionId}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
-
   const schema_wireLayer = {
     components: [{
       label: `Wire Layer ${layer}`,
@@ -198,7 +1519,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           input: false,
           defaultValue: layerInfo.winder,
         }],
-        width: 2,
+        width: 3,
         size: 'sm',
       },
       {
@@ -209,7 +1530,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           input: false,
           defaultValue: layerInfo.winderHead,
         }],
-        width: 2,
+        width: 3,
         size: 'sm',
       },
       {
@@ -220,7 +1541,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           input: false,
           defaultValue: layerInfo.winderMaintenenceSignoff,
         }],
-        width: 4,
+        width: 3,
         size: 'sm',
       },
       {
@@ -231,9 +1552,34 @@ function SetEntry_wireLayer(layer, layerInfo) {
           input: false,
           defaultValue: layerInfo.tensionControlSignoff,
         }],
-        width: 4,
+        width: 3,
         size: 'sm',
       }],
+    },
+    {
+      "components": [
+        {
+          "label": "Spacer 1",
+          "attrs": [
+            {
+              "attr": "",
+              "value": ""
+            }
+          ],
+          "refreshOnChange": false,
+          "key": "spacer1",
+          "type": "htmlelement",
+          "input": false,
+          "tableView": false,
+          "content": `<br></br>`
+        }
+      ],
+      "size": "sm",
+      "width": 12,
+      "offset": 0,
+      "push": 0,
+      "pull": 0,
+      "currentWidth": 12
     },
     {
       label: 'Columns',
@@ -241,6 +1587,17 @@ function SetEntry_wireLayer(layer, layerInfo) {
       type: 'columns',
       input: false,
       columns: [{
+        components: [{
+          label: 'Wire Bobbin Manufacturer(s)',
+          key: 'bobbinManufacturer',
+          type: 'textfield',
+          input: false,
+          defaultValue: layerInfo.bobbinManufacturers,
+        }],
+        width: 2,
+        size: 'sm',
+      },
+      {
         components: [{
           label: 'Number of Replaced Wires',
           key: 'wireLayer_numberOfReplacedWires',
@@ -277,53 +1634,11 @@ function SetEntry_wireLayer(layer, layerInfo) {
         size: 'sm',
       },
       {
-        components: [],
-        width: 2,
-        size: 'sm',
-      },
-      {
-        components: [{
-          key: 'wireLayer_winding_actionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${winding_link} </br></p>`,
-        }],
-        width: 2,
-        size: 'sm',
-      },
-      {
-        components: [{
-          key: 'wireLayer_soldering_actionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${soldering_link} </br></p>`,
-        }],
-        width: 2,
-        size: 'sm',
-      }],
-    },
-    {
-      label: 'Columns',
-      key: 'columns3',
-      type: 'columns',
-      input: false,
-      columns: [{
-        components: [{
-          label: 'Wire Bobbin Manufacturer(s)',
-          key: 'bobbinManufacturer',
-          type: 'textfield',
-          input: true,
-          defaultValue: layerInfo.bobbinManufacturers,
-        }],
-        width: 4,
-        size: 'sm',
-      },
-      {
         components: [{
           label: 'Tension Measurements System',
           key: 'tensions_system',
           type: 'textfield',
-          input: true,
+          input: false,
           defaultValue: layerInfo.tensions_system,
         }],
         width: 2,
@@ -334,27 +1649,37 @@ function SetEntry_wireLayer(layer, layerInfo) {
           label: 'Tension Measurements Location',
           key: 'tensions_location',
           type: 'textfield',
-          input: true,
+          input: false,
           defaultValue: layerInfo.tensions_location,
         }],
         width: 2,
         size: 'sm',
-      },
-      {
-        components: [{
-          key: 'tensions_actionId',
-          type: 'htmlelement',
-          input: false,
-          content: `<p><br> ${tensions_link} </br></p>`,
-        }],
-        width: 2,
-        size: 'sm',
-      },
-      {
-        components: [],
-        width: 2,
-        size: 'sm',
       }],
+    },
+    {
+      "components": [
+        {
+          "label": "Spacer 2",
+          "attrs": [
+            {
+              "attr": "",
+              "value": ""
+            }
+          ],
+          "refreshOnChange": false,
+          "key": "spacer2",
+          "type": "htmlelement",
+          "input": false,
+          "tableView": false,
+          "content": `<br></br>`
+        }
+      ],
+      "size": "sm",
+      "width": 12,
+      "offset": 0,
+      "push": 0,
+      "pull": 0,
+      "currentWidth": 12
     },
     {
       components: [{
@@ -584,7 +1909,7 @@ async function populateExecutiveSummary() {
   $('div.entry_qcSignoffs').each(function () {
     const form_qcSignoffs = $('.form_qcSignoffs', this);
     const signoffInfo = form_qcSignoffs.data('record');
-    const schema_qcSignoffs = SetSection_qcSignoffs(signoffInfo[0], signoffInfo[1], signoffInfo[2], signoffInfo[3], signoffInfo[4])
+    const schema_qcSignoffs = SetSection_qcSignoffs(signoffInfo[0], signoffInfo[1], signoffInfo[2], signoffInfo[3], signoffInfo[4], signoffInfo[5], signoffInfo[6], signoffInfo[7], signoffInfo[8]);
 
     Formio.createForm(form_qcSignoffs[0], schema_qcSignoffs, { readOnly: true, });
   })

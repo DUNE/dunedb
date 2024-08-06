@@ -90,8 +90,6 @@ function postSuccess(result) {
   } else if (result.differences_sideB.length === 0) {
     $('#results_originSideA').append(`<b>The tension measurement actions performed at ${$('#originLocationSelection option:selected').text()}) (ID = ${result.origin_actionId}) and ${$('#destinationLocationSelection option:selected').text()}) (ID = ${result.destination_actionId}) have different numbers of values on side B`)
   } else {
-    console.log(result);
-
     // Create a set of Formio forms, populate each one with the appropriate data from the result object, and render them in the appropriate page elements
     Formio.createForm(document.getElementById('results_originSideA'), {
       components: [{

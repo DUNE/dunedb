@@ -31,13 +31,13 @@ block allbody
           .vert-space-x1.hori-space-x1.h4
             dl
               dt DUNE PID
-              dd #{collatedInfo.apaInfo.dunePID}
+              dd #{collatedInfo.general.dunePID}
 
               dt Production Site
-              dd #{collatedInfo.apaInfo.productionSite}
+              dd #{collatedInfo.general.productionSite}
 
               dt Configuration
-              dd #{collatedInfo.apaInfo.configuration}
+              dd #{collatedInfo.general.configuration}
 
               dt Component UUID
               dd
@@ -45,11 +45,11 @@ block allbody
 
               dt Assembly Status
 
-              if ((collatedInfo.apaInfo.assemblyStatus) === 'none')
+              if ((collatedInfo.general.assemblyStatus) === '')
                 dd [no associated workflow]
               else
                 dd
-                  a(href = `/workflow/${collatedInfo.apaInfo.workflowID}`, target = '_blank') #{collatedInfo.apaInfo.assemblyStatus}
+                  a(href = `/workflow/${collatedInfo.general.workflowID}`, target = '_blank') #{collatedInfo.general.assemblyStatus}
 
           .vert-space-x1.hori-space-x1
             p &nbsp; This summary generated on: 
@@ -63,30 +63,29 @@ block allbody
 
   .vert-space-x2
     .entry_qcSignoffs
-      .form_qcSignoffs(data-record = [collatedInfo.apaQC, collatedInfo.frameQC, collatedInfo.meshPanelQC, collatedInfo.cableConduitQC, collatedInfo.pdCableTempSensorQC])
+      .form_qcSignoffs(data-record = [collatedInfo.frameConstr, collatedInfo.framePrep, collatedInfo.layer_x, collatedInfo.layer_v, collatedInfo.layer_u, collatedInfo.layer_g, collatedInfo.coverCaps, collatedInfo.shippingPrep, collatedInfo.completedAPA])
 
-      hr
+  .pagebreak
+
+  .vert-space-x2
+    .entry_wireLayers
+      .form_wireLayers(data-record = ['X', collatedInfo.layer_x])
+
+  .vert-space-x2
+    .entry_wireLayers
+      .form_wireLayers(data-record = ['V', collatedInfo.layer_v])
+
+  .pagebreak
+
+  .vert-space-x2
+    .entry_wireLayers
+      .form_wireLayers(data-record = ['U', collatedInfo.layer_u])
 
   .vert-space-x2
     .entry_wireLayers
       .form_wireLayers(data-record = ['G', collatedInfo.layer_g])
 
-      hr
-
-    .entry_wireLayers
-      .form_wireLayers(data-record = ['U', collatedInfo.layer_u])
-
-      hr
-
-    .entry_wireLayers
-      .form_wireLayers(data-record = ['V', collatedInfo.layer_v])
-
-      hr
-
-    .entry_wireLayers
-      .form_wireLayers(data-record = ['X', collatedInfo.layer_x])
-
-      hr
+  .pagebreak
 
   .vert-space-x2
     .entry_apaNCRs_header
