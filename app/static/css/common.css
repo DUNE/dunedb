@@ -53,6 +53,10 @@ img.small-icon {
   padding: 10px;
 }
 
+.pagebreak {
+  break-before: page;
+}
+
 .qr:before {
   content: '';
   display: inline-block;
