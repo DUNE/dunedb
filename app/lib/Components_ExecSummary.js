@@ -94,6 +94,7 @@ async function collateInfo(componentUUID) {
   };
 
   collatedInfo.frameConstr = {
+    qaCheckID: '[no record found]',
     name: '[no information found]',
     date: '',
     intakeSurveysID: '',
@@ -101,6 +102,7 @@ async function collateInfo(componentUUID) {
   };
 
   collatedInfo.framePrep = {
+    qaCheckID: '[no record found]',
     name: '[no information found]',
     date: '',
     meshInstallID: '',
@@ -109,6 +111,7 @@ async function collateInfo(componentUUID) {
 
   for (let i = 0; i < layerSection_names.length; i++) {
     collatedInfo[layerSection_names[i]] = {
+      qaCheckID: '[no record found]',
       name: '[no information found]',
       date: '',
       windingID: '',
@@ -130,11 +133,13 @@ async function collateInfo(componentUUID) {
   }
 
   collatedInfo.coverCaps = {
+    qaCheckID: '[no record found]',
     name: '[no information found]',
     date: '',
   };
 
   collatedInfo.shippingPrep = {
+    qaCheckID: '[no record found]',
     name: '[no information found]',
     date: '',
     panelInstallID: '',
@@ -142,6 +147,7 @@ async function collateInfo(componentUUID) {
   };
 
   collatedInfo.completedAPA = {
+    qaCheckID: '[no record found]',
     name: '[no information found]',
     date: '',
   };
@@ -186,7 +192,7 @@ async function collateInfo(componentUUID) {
   /////////////////
   // QC SIGNOFFS //
   /////////////////
-  // Some of the QC signoff information is located in the various 'Assembled APA QA Check' type actions that have been performed on the APA
+  // Some of the QC signoff information can be found in the various 'Assembled APA QA Check' type actions that have been performed on the APA
   // The most efficient approach is to retrieve all of these at once from the DB, and then get the signoff information from each one depending on which part of the assembly it corresponds to
   aggregation_stages = [];
   results = [];
@@ -213,23 +219,27 @@ async function collateInfo(componentUUID) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  for (const result in results) {
+  for (const result of results) {
     if (result.section === 'framePreparation') {
+      collatedInfo.framePrep.qaCheckID = result.actionId;
       collatedInfo.framePrep.name = utils.dictionary_apaFactoryLeads[result.name];
       collatedInfo.framePrep.date = result.date;
     } else if ((result.section === 'xLayerAssembly') || (result.section === 'vLayerAssembly') || (result.section === 'uLayerAssembly') || (result.section === 'gLayerAssembly')) {
+      collatedInfo[`layer_${result.section[0]}`].qaCheckID = result.actionId;
       collatedInfo[`layer_${result.section[0]}`].name = utils.dictionary_apaFactoryLeads[result.name];
       collatedInfo[`layer_${result.section[0]}`].date = result.date;
     } else if (result.section === 'coverBoardsAndCaps') {
+      collatedInfo.coverCaps.qaCheckID = result.actionId;
       collatedInfo.coverCaps.name = utils.dictionary_apaFactoryLeads[result.name];
       collatedInfo.coverCaps.date = result.date;
     } else if (result.section === 'shippingPreparation') {
+      collatedInfo.shippingPrep.qaCheckID = result.actionId;
       collatedInfo.shippingPrep.name = utils.dictionary_apaFactoryLeads[result.name];
       collatedInfo.shippingPrep.date = result.date;
     }
   };
 
-  // Signoff information relating to APA frame construction can also be found in the frame's 'Completed Frame QC Checklist', 'Intake Surveys' and 'Installation Surveys' actions
+  // Signoff information relating to APA frame construction can be ONLY found in the frame's 'Completed Frame QC Checklist', 'Intake Surveys' and 'Installation Surveys' actions
   aggregation_stages = [];
   results = [];
 
@@ -255,6 +265,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
+    collatedInfo.frameConstr.qaCheckID = results[0].actionId;
     collatedInfo.frameConstr.name = utils.dictionary_frameIntakeSignoff[results[0].name];
     collatedInfo.frameConstr.date = results[0].date;
   }
@@ -311,7 +322,7 @@ async function collateInfo(componentUUID) {
     collatedInfo.frameConstr.installSurveysID = results[0].actionId;
   }
 
-  // Signoff information relating to APA frame preparation can also be found in the APA's 'Mesh Panel Installation' and 'PD & RTD Installation' actions
+  // Additional signoff information relating to APA frame preparation can also be found in the APA's 'Mesh Panel Installation' and 'PD & RTD Installation' actions
   aggregation_stages = [];
   results = [];
 
@@ -364,7 +375,7 @@ async function collateInfo(componentUUID) {
     collatedInfo.framePrep.rtdInstallID = results[0].actionId;
   }
 
-  // Signoff information relating to APA shipping preparation can also be found in the APA's 'Protection Panel Installation' and 'Cable Conduit Installation' actions
+  // Additional signoff information relating to APA shipping preparation can also be found in the APA's 'Protection Panel Installation' and 'Cable Conduit Installation' actions
   aggregation_stages = [];
   results = [];
 
@@ -417,7 +428,7 @@ async function collateInfo(componentUUID) {
     collatedInfo.shippingPrep.conduitInstallID = results[0].actionId;
   }
 
-  // Signoff information relating to the completed APA can also be found in the APA's 'Completed APA QC Checklist' action
+  // Signoff information relating to the completed APA can ONLY be found in the APA's 'Completed APA QC Checklist' action
   aggregation_stages = [];
   results = [];
 
@@ -443,6 +454,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
+    collatedInfo.completedAPA.qaCheckID = results[0].actionId;
     collatedInfo.completedAPA.name = utils.dictionary_apaFactoryLeads[results[0].name];
     collatedInfo.completedAPA.date = results[0].date;
   }
