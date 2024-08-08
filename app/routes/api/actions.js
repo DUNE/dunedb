@@ -139,7 +139,7 @@ router.get('/actions_NCRs/' + utils.uuid_regex, permissions.checkPermissionJson(
     // Set up an object containing the conditions to match to ... the action type form ID and the component UUID
     let match_condition = {
       typeFormId: 'APANonConformance',
-      componentUuid: req.query.uuid,
+      componentUuid: req.params.uuid,
     };
 
     // Retrieve the latest version of all records of all actions that match the specified conditions - in this case, NCRs that have been performed on the component
