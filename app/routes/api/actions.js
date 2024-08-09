@@ -5,6 +5,7 @@ const logger = require('../../lib/logger');
 const Search_ActionsWorkflows = require('../../lib/Search_ActionsWorkflows');
 const permissions = require('../../lib/permissions');
 const utils = require('../../lib/utils');
+const Workflows = require('../../lib/Workflows');
 
 
 /// Retrieve a single version of an action record (either the most recent, or a specified one)
@@ -84,6 +85,76 @@ router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions
 
     // Return the list of action IDs
     return res.json(actionIDs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Retrieve all versions of all actions that have been performed as part of a specified workflow
+router.get('/actions_fromWorkflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Retrieve the most recent version of the record corresponding to the specified workflow ID
+    const workflow = await Workflows.retrieve(req.params.workflowId);
+
+    // Loop over the action steps in the workflow path (i.e. not including the first one relating to component creation)
+    // If the step has been performed, retrieve and save all versions of the corresponding action (first removing any fields that contain large amounts of unneeded information)
+    // If the step has not yet been performed, set up and save a list containing a single entry ... with this entry consisting of an object containing only the action type form name
+    let workflowActions = [];
+
+    for (const step of workflow.path.slice(1)) {
+      if (step.result !== '') {
+        let actionVersions = await Actions.versions(step.result);
+
+        for (let singleVersion of actionVersions) {
+          if ('images' in singleVersion) delete singleVersion.images;
+          if ('comments' in singleVersion.data) delete singleVersion.data.comments;
+          if ('replacedWires' in singleVersion.data) delete singleVersion.data.replacedWires;
+          if ('badSolderJoints' in singleVersion.data) delete singleVersion.data.badSolderJoints;
+          if ('measuredTensions_sideA' in singleVersion.data) delete singleVersion.data.measuredTensions_sideA;
+          if ('measuredTensions_sideB' in singleVersion.data) delete singleVersion.data.measuredTensions_sideB;
+          if ('changedTensions_sideA' in singleVersion.data) delete singleVersion.data.changedTensions_sideA;
+          if ('changedTensions_sideB' in singleVersion.data) delete singleVersion.data.changedTensions_sideB;
+        }
+
+        workflowActions.push(actionVersions);
+      } else {
+        workflowActions.push([{ 'typeFormName': step.formName }]);
+      }
+    }
+
+    // Return the list containing all versions of all actions
+    return res.json(workflowActions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Retrieve all versions of all Non-Conformance Report (NCR) actions that have been performed on a specified component
+router.get('/actions_NCRs/' + utils.uuid_regex, permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Set up an object containing the conditions to match to ... the action type form ID and the component UUID
+    let match_condition = {
+      typeFormId: 'APANonConformance',
+      componentUuid: req.params.uuid,
+    };
+
+    // Retrieve the latest version of all records of all actions that match the specified conditions - in this case, NCRs that have been performed on the component
+    const latestVersions = await Actions.list(match_condition);
+
+    // Loop over the returned actions, and retrieve and save ALL versions of each action
+    let ncrActions = [];
+
+    for (const action of latestVersions) {
+      let ncrVersions = await Actions.versions(action.actionId);
+      ncrActions.push(ncrVersions);
+    }
+
+    // Return the list containing all versions of all NCRs
+    return res.json(ncrActions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

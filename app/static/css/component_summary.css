@@ -1,7 +1,3 @@
-.pagebreak {
-  break-before: page;
-}
-
 .section {
   break-inside: avoid-page;
   display: block;

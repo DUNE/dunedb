@@ -90,7 +90,7 @@ block content
 
       if workflow.typeFormId === 'APA_Assembly'
         - freeSection_bgn = 3;
-        - freeSection_end = 9;
+        - freeSection_end = 11;
       else if workflow.typeFormId === 'FrameAssembly'
         - freeSection_bgn = 3;
         - freeSection_end = 4;
@@ -179,7 +179,7 @@ block content
                           .hori-space-x2
                             if !actionsDictionary[freeSection_bgn - 2]
                               a.btn-sm.btn-danger
-                                | Complete Step #{freeSection_bgn - 2} First
+                                | Complete Step #{freeSection_bgn - 1} First
                             else 
                               a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
                                 img.small-icon(src = '/images/run_icon.svg')
