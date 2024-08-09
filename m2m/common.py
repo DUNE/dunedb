@@ -456,19 +456,13 @@ def GetListOfWorkflows(workflowTypeFormID, connection, headers):
     try:
         connection.request('GET', '/api/workflows/' + workflowTypeFormID + '/list', headers = headers)
 
-        # The route response is the list of action IDs as a JSON formatted string (i.e. a string within a string)
+        # The route response is a list (itself containing inner lists of workflow IDs and workflow statuses) as a JSON formatted string (i.e. a string within a string)
         responseText = connection.getresponse().read().decode('utf-8')
 
-        # Split the inner string by commas ... this will create an actual Python list of the ID strings, but the ID strings are themselves also strings within strings
-        # So then strip the quotation marks around each element of the Python list
-        workflowIDs = responseText[1: -1].split(',')
-        fixed_workflowIDs = []
+        # Convert the JSON string to an actual Python list of lists, and return the inner lists separately
+        workflowInformation = json.loads(responseText)
 
-        for workflowID in workflowIDs:
-            fixed_workflowIDs.append(workflowID[1: -1])
-
-        # Return the list of IDs
-        return fixed_workflowIDs
+        return workflowInformation[0], workflowInformation[1]
     except http.client.HTTPException as e:
         print(f" GetListOfWorkflows() [GET /api/workflows/typeFormId/list] - HTTP EXCEPTION: {e} \n")
     except socket.timeout as s:

@@ -102,5 +102,6 @@ module.exports = {
     gedBell: 'Ged Bell',
     callumHolt: 'Callum Holt',
     sotirisVlachos: 'Sotiris Vlachos',
+    kyleZeug: 'Kyle Zeug',
   },
 }
