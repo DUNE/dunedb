@@ -256,7 +256,7 @@ class ComponentUUID extends TextFieldComponent {
   //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by ID or UUID' page)
   //   - if on any 'Perform Action on Unspecified Component' page, redirect to the page for performing the action on the specified component
   //   - in any other situation, i.e. if this Formio component is just part of a type form, then do not redirect anywhere
-  // In any case, also display a link to allow users to directly access the component's information page from the current page
+  // In the last case, also display a link to allow users to directly access the component's information page from the current page
   setValueAt(index, value, flags) {
     const changed = super.setValueAt.call(this, index, value);
 
@@ -265,8 +265,9 @@ class ComponentUUID extends TextFieldComponent {
 
       const currentURL = window.location.pathname;
 
-      if (currentURL === '/search/componentsByUUIDOrTypeAndNumber') window.location.href = `/component/${value}`;
-      if (currentURL === '/search/workflowsByIDOrUUID') {
+      if (currentURL === '/search/componentsByUUIDOrTypeAndNumber') {
+        window.location.href = `/component/${value}`;
+      } else if (currentURL === '/search/workflowsByIDOrUUID') {
         $.ajax({
           contentType: 'application/json',
           method: 'GET',
@@ -274,16 +275,55 @@ class ComponentUUID extends TextFieldComponent {
           dataType: 'json',
           success: postSuccess,
         }).fail(postFail);
-      }
-      if ((currentURL.substring(0, 8) === '/action/') && (currentURL.substring(currentURL.length - 7) === '/unspec')) {
+      } else if ((currentURL.substring(0, 8) === '/action/') && (currentURL.substring(currentURL.length - 7) === '/unspec')) {
         const baseURL = currentURL.substring(0, currentURL.length - 7);
         window.location.href = `${baseURL}/${value}`;
-      }
+      } else {
+        let info_target = $(this.refs.compUuidInfo[index]);
+        info_target.prop('href', `/component/${value}`).text('link');
 
-      let info_target = $(this.refs.compUuidInfo[index]);
-      info_target.prop('href', `/component/${value}`).text('link');
-      info_target.text(`\xa0 Click here for this component's information page`);
-      info_target.show()
+        let componentTypeName = '[unknown type]';
+
+        $.ajax({
+          contentType: 'application/json',
+          method: 'GET',
+          url: `/json/component/${value}`,
+          dataType: 'json',
+          success: function (component) {
+            if (component.formId === 'APAFrame') {
+              $.ajax({
+                contentType: 'application/json',
+                method: 'GET',
+                url: `/json/actions/${'CompletedFrameQCChecklist'}/list?uuid=${value}`,
+                dataType: 'json',
+                success: function (actionIDsList) {
+                  if (actionIDsList.length > 0) {
+                    $.ajax({
+                      contentType: 'application/json',
+                      method: 'GET',
+                      url: `/json/action/${actionIDsList[0]}`,
+                      dataType: 'json',
+                      success: function (action) {
+                        if (action.data.actionComplete) {
+                          info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
+                        } else {
+                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (incomplete final QA checklist)... click here for this component's information page`);
+                        }
+                      },
+                    }).fail();
+                  } else {
+                    info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (no final QA checklist)... click here for this component's information page`);
+                  }
+                },
+              }).fail();
+            } else {
+              info_target.text(`\xa0 Click here for this component's information page`);
+            }
+          },
+        }).fail();
+
+        info_target.show()
+      }
     }
 
     return changed;
