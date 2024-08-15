@@ -31,19 +31,19 @@ docker compose down
 The code in this respository is organised as follows (for simplicity, normally hidden directories and files are not listed here):
 
 * `/app` : contains all of the code required for the APA DB app
-    * `/lib` : JavaScript functions that operate directly on and with the MongoDB database
-    * `/pug` : Pug templates for the web interface pages
-    * `/routes` : JavaScript functions that dictate which `/lib` functions are called when a user accesses a specific web interface URL, and which `/pug` template is displayed for that URL
+    * `/lib` : server-side JavaScript functions that operate directly on and with the MongoDB database
+    * `/pug` : Pug templates for the client-side web interface pages
+    * `/routes` : JavaScript functions that connect the client-side web interface with the server-side functions
     * `/scss` : static CSS styling, compiled at DB startup
-    * `/static` : various functions that operate at the web interface's individual page level
-        * `/css` : additional CSS style guides for specific pages
+    * `/static` : various functions that operate within the client-side web interface
+        * `/css` : additional CSS style guides for specific web interface pages
         * `/formio` : JavaScript code that governs the behaviour and appearance of the various Formio form components used by the web interface
         * `/images` : images that are used by the web interface
-        * `/js` : non-specific page level JavaScript functions, as well as external third-party libraries
-        * `/pages` : JavaScript code that governs the behaviour of specific pages (with each file in this subdirectory corresponding to the same-named file in the `/pug` subdirectory)
+        * `/js` : non-specific client-side JavaScript functions, as well as external third-party libraries
+        * `/pages` : JavaScript code that governs the behaviour of specific web interface pages (with each file in this subdirectory corresponding to the same-named file in the `/pug` subdirectory)
     * `app.js` : the main APA DB app
     * `index.js` : the 'launch point' for starting, connecting to and stopping the APA DB app
-* `/m2m` : contains standalone Python code for the machine-to-machine ('M2M') client scripts ... please see the [dedicated README](https://github.com/DUNE/dunedb/tree/staging/m2m#readme) for full details
+* `/m2m` : contains standalone Python code for the machine-to-machine ('M2M') scripts ... please see the [dedicated README](https://github.com/DUNE/dunedb/tree/staging/m2m#readme) for full details
 * `/okd` : files required for deployment of the APA DB on the OKD system at Fermilab
 
 

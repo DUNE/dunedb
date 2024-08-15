@@ -65,7 +65,7 @@ def ConnectToAPI():
         if (db_domain == 'localhost:12313'):
             connection = http.client.HTTPConnection(db_domain, timeout = 10)
         else:
-            connection = http.client.HTTPSConnection(db_domain, timeout = 10)
+            connection = http.client.HTTPSConnection(db_domain, timeout = 60)
 
         return connection, headers
     else:
@@ -81,16 +81,16 @@ def ConvertShortUUID(shortUUID, connection, headers):
     try:
         connection.request('GET', '/api/confirmShortUUID/' + shortUUID, headers = headers)
 
-        # The route returns a different string based on success or failure of the conversion from short to full UUID:
-        #   - if successful (i.e. the full UUID corresponds to an existing component record), the full UUID is returned as a JSON formatted string (i.e. the UUID string within a JSON string)
-        #   - if not successful, an error message is returned
+        # The route returns differently based on success (i.e. the full UUID corresponds to an existing component record) or failure of the conversion from short to full UUID:
+        #   - if successful, the full UUID is returned as a JSON document (which must be deserialised to get the UUID as a string)
+        #   - if not successful, an error message is returned (which we don't actually use - all that matters is that it is not a full UUID with 36 characters + 2 quotation marks)
         responseText = connection.getresponse().read().decode('utf-8')
         result = 'No matching component record!'
 
         if len(responseText) == 38:
-            result = responseText[1: -1]
+            result = json.loads(responseText)
 
-        # Return the result string
+        # Return the result string, which contains either the returned and deserialised UUID or a message indicating failure
         return result
     except http.client.HTTPException as e:
         print(f" ConvertShortUUID() [GET /api/confirmShortUUID/shortUuid] - HTTP EXCEPTION: {e} \n")
@@ -102,13 +102,13 @@ def ConvertShortUUID(shortUUID, connection, headers):
 ## Create a new component ##
 ############################
 def CreateComponent(componentTypeFormID, componentData, connection, headers):
-    # Request a response from the API route that generates new component UUID
+    # Request a response from the API route that generates a new component UUID
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     try:
         connection.request('GET', '/api/newComponentUUID', headers = headers)
 
-        # The route returns the UUID as a JSON formatted string (i.e. the UUID string within a JSON string)
-        componentUUID = connection.getresponse().read().decode('utf-8')[1: -1]
+        # The route returns the UUID as a JSON document (which must be deserialised to get the UUID as a string)
+        componentUUID = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # Declare a new empty Python dictionary to hold the component information to be uploaded
         # Then populate it with the absolutely critical information (the component's UUID and type form ID), as well as the 'data' object defined by the user
@@ -124,26 +124,26 @@ def CreateComponent(componentTypeFormID, componentData, connection, headers):
 
         ### TOFIX (krishmaj) 'component.data.typeRecordNumber' is not set when using M2M client script to create a new component ###
 
-        # Serialise the component dictionary to a JSON formatted string (since it must be uploaded as such)
+        # Serialise the component dictionary to a JSON document (since it must be uploaded as such)
         componentJSON = json.dumps(component)
 
-        # Request a response from the API route that submits a component record, using the serialised dictionary as the request body
+        # Request a response from the API route that submits a component record, using the JSON document as the request body
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
             connection.request('POST', '/api/component', body = componentJSON, headers = headers)
 
-            # The route returns a different string based on success (response code = 200) or failure (response code = anything else)
-            #  - if successful, the full UUID of the submitted component is returned and set to the result string
-            #  - if not successful, an error is returned and displayed on screen, and the result string is set to an 'invalid' indicator
+            # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+            #  - if successful, the full UUID of the submitted component is returned as a JSON document (which must be deserialised to get the UUID as a string)
+            #  - if not successful, an error is returned and displayed on screen
             submissionResponse = connection.getresponse()
             result = 'none'
 
             if submissionResponse.status == 200:
-                result = submissionResponse.read().decode('utf-8')
+                result = json.loads(submissionResponse.read().decode('utf-8'))
             else:
                 print(submissionResponse.status, submissionResponse.reason)
 
-            # Return the result string
+            # Return the result string, which contains either the returned and deserialised UUID or a message indicating failure
             return result
         except http.client.HTTPException as e2:
             print(f" CreateComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
@@ -164,8 +164,7 @@ def EditComponent(componentUUID, componentData_fields, componentData_values, con
     try:
         connection.request('GET', '/api/component/' + componentUUID, headers = headers)
 
-        # The route response is the component record as a JSON document, but when decoded it becomes a standard string containing the JSON document
-        # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
+        # The route returns the component record as a JSON document (which must be deserialised to get the record as a Python dictionary)
         component = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # If the provided UUID doesn't correspond to an existing component record, print an error and exit the function immediately
@@ -178,26 +177,26 @@ def EditComponent(componentUUID, componentData_fields, componentData_values, con
         for index, fieldName in enumerate(componentData_fields):
             component['data'][fieldName] = componentData_values[index]
 
-        # Serialise the edited component dictionary back to a JSON formatted string (since it must be uploaded as such)
+        # Serialise the edited component dictionary back to a JSON document (since it must be uploaded as such)
         componentJSON = json.dumps(component)
 
-        # Request a response from the API route that submits a component record, using the serialised dictionary as the request body
+        # Request a response from the API route that submits a component record, using the JSON document as the request body
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
             connection.request('POST', '/api/component', body = componentJSON, headers = headers)
 
-            # The route returns a different string based on success (response code = 200) or failure (response code = anything else)
-            #  - if successful, the full UUID of the submitted component is returned and set to the result string
-            #  - if not successful, an error is returned and displayed on screen, and the result string is set to an 'invalid' indicator
+            # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+            #  - if successful, the full UUID of the submitted component is returned as a JSON document (which must be deserialised to get the UUID as a string)
+            #  - if not successful, an error is returned and displayed on screen
             submissionResponse = connection.getresponse()
             result = 'none'
 
             if submissionResponse.status == 200:
-                result = submissionResponse.read().decode('utf-8')
+                result = json.loads(submissionResponse.read().decode('utf-8'))
             else:
                 print(submissionResponse.status, submissionResponse.reason)
 
-            # Return the result string
+            # Return the result string, which contains either the returned and deserialised UUID or a message indicating failure
             return result
         except http.client.HTTPException as e2:
             print(f" EditComponent() [POST /api/component] - HTTP EXCEPTION: {e2} \n")
@@ -223,15 +222,14 @@ def GetComponent(componentUUID, connection, headers, version = 0):
 
         connection.request('GET', url, headers = headers)
 
-        # The route response is the component record as a JSON document, but when decoded it becomes a standard string containing the JSON document
-        # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
+        # The route returns the component record as a JSON document (which must be deserialised to get the record as a Python dictionary)
         component = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # If the provided UUID doesn't correspond to an existing component record, print an error and exit the function immediately
         if component == None:
             sys.exit(f" GetComponent() - ERROR: there is no component record with component UUID = {componentUUID} \n")
 
-        # Return the Python dictionary containing the component record
+        # Return the component record
         return component
     except http.client.HTTPException as e:
         print(f" GetComponent() [GET /api/component/componentUuid] - HTTP EXCEPTION: {e} \n")
@@ -248,19 +246,11 @@ def GetListOfComponents(componentTypeFormID, connection, headers):
     try:
         connection.request('GET', '/api/components/' + componentTypeFormID + '/list', headers = headers)
 
-        # The route response is the list of component UUIDs as a JSON formatted string (i.e. a string within a string)
-        responseText = connection.getresponse().read().decode('utf-8')
-
-        # Split the inner string by commas ... this will create an actual Python list of the UUID strings, but the UUID strings are themselves also strings within strings
-        # So then strip the quotation marks around each element of the Python list
-        componentUUIDs = responseText[1: -1].split(',')
-        fixed_componentUUIDs = []
-
-        for componentUUID in componentUUIDs:
-            fixed_componentUUIDs.append(componentUUID[1: -1])
+        # The route returns the list of component UUIDs as a JSON document (which must be deserialised to get the list as a Python list)
+        componentUUIDs = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # Return the list of UUIDs
-        return fixed_componentUUIDs
+        return componentUUIDs
     except http.client.HTTPException as e:
         print(f" GetListOfComponents() [GET /api/components/typeFormId/list] - HTTP EXCEPTION: {e} \n")
     except socket.timeout as s:
@@ -283,26 +273,26 @@ def PerformAction(actionTypeFormID, componentUUID, actionData, connection, heade
     # In order to keep the action records as consistent as possible between web interface and M2M client submissions, add this field in explicitly
     action['data']['submit'] = True
 
-    # Serialise the action dictionary to a JSON formatted string (since it must be uploaded as such)
+    # Serialise the action dictionary to a JSON document (since it must be uploaded as such)
     actionJSON = json.dumps(action)
 
-    # Request a response from the API route that submits an action record, using the serialised dictionary as the request body
+    # Request a response from the API route that submits an action record, using the JSON document as the request body
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     try:
         connection.request('POST', '/api/action', body = actionJSON, headers = headers)
 
-        # The route returns a different string based on success (response code = 200) or failure (response code = anything else)
-        #  - if successful, the ID of the submitted action is returned and set to the result string
-        #  - if not successful, an error is returned and displayed on screen, and the result string is set to an 'invalid' indicator
+        # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+        #  - if successful, the ID of the submitted action is returned as a JSON document (which must be deserialised to get the ID as a string)
+        #  - if not successful, an error is returned and displayed on screen
         submissionResponse = connection.getresponse()
         result = 'none'
 
         if submissionResponse.status == 200:
-            result = submissionResponse.read().decode('utf-8')
+            result = json.loads(submissionResponse.read().decode('utf-8'))
         else:
             print(submissionResponse.status, submissionResponse.reason)
 
-        # Return the result string
+        # Return the result string, which contains either the returned and deserialised ID or a message indicating failure
         return result
     except http.client.HTTPException as e:
         print(f" PerformAction() [POST /api/action] - HTTP EXCEPTION: {e} \n")
@@ -319,8 +309,7 @@ def EditAction(actionID, actionData_fields, actionData_values, connection, heade
     try:
         connection.request('GET', '/api/action/' + actionID, headers = headers)
 
-        # The route response is the action record as a JSON document, but when decoded it becomes a standard string containing the JSON document
-        # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
+        # The route returns the action record as a JSON document (which must be deserialised to get the record as a Python dictionary)
         action = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # If the provided ID doesn't correspond to an existing action record, print an error and exit the function immediately
@@ -333,26 +322,26 @@ def EditAction(actionID, actionData_fields, actionData_values, connection, heade
         for index, fieldName in enumerate(actionData_fields):
             action['data'][fieldName] = actionData_values[index]
 
-        # Serialise the edited action dictionary back to a JSON formatted string (since it must be uploaded as such)
+        # Serialise the edited action dictionary back to a JSON document (since it must be uploaded as such)
         actionJSON = json.dumps(action)
 
-        # Request a response from the API route that submits an action record, using the serialised dictionary as the request body
+        # Request a response from the API route that submits an action record, using the JSON document as the request body
         # If the request is successful, continue with the function ... otherwise print any raised exceptions
         try:
             connection.request('POST', '/api/action', body = actionJSON, headers = headers)
 
-            # The route returns a different string based on success (response code = 200) or failure (response code = anything else)
-            #  - if successful, the ID of the submitted action is returned and set to the result string
-            #  - if not successful, an error is returned and displayed on screen, and the result string is set to an 'invalid' indicator
+            # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+            #  - if successful, the ID of the submitted action is returned as a JSON document (which must be deserialised to get the ID as a string)
+            #  - if not successful, an error is returned and displayed on screen
             submissionResponse = connection.getresponse()
             result = 'none'
 
             if submissionResponse.status == 200:
-                result = submissionResponse.read().decode('utf-8')
+                result = json.loads(submissionResponse.read().decode('utf-8'))
             else:
                 print(submissionResponse.status, submissionResponse.reason)
 
-            # Return the result string
+            # Return the result string, which contains either the returned and deserialised ID or a message indicating failure
             return result
         except http.client.HTTPException as e2:
             print(f" EditAction() [POST /api/action] - HTTP EXCEPTION: {e2} \n")
@@ -378,15 +367,14 @@ def GetAction(actionID, connection, headers, version = 0):
 
         connection.request('GET', url, headers = headers)
 
-        # The route response is the action record as a JSON document, but when decoded it becomes a standard string containing the JSON document
-        # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
+        # The route returns the action record as a JSON document (which must be deserialised to get the record as a Python dictionary)
         action = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # If the provided ID doesn't correspond to an existing action record, print an error and exit the function immediately
         if action == None:
             sys.exit(f" GetAction() - ERROR: there is no action record with action ID = {actionID} \n")
 
-        # Return the Python dictionary containing the action record
+        # Return the action record
         return action
     except http.client.HTTPException as e:
         print(f" GetAction() [GET /api/action/actionId] - HTTP EXCEPTION: {e} \n")
@@ -403,19 +391,11 @@ def GetListOfActions(actionTypeFormID, connection, headers):
     try:
         connection.request('GET', '/api/actions/' + actionTypeFormID + '/list', headers = headers)
 
-        # The route response is the list of action IDs as a JSON formatted string (i.e. a string within a string)
-        responseText = connection.getresponse().read().decode('utf-8')
-
-        # Split the inner string by commas ... this will create an actual Python list of the ID strings, but the ID strings are themselves also strings within strings
-        # So then strip the quotation marks around each element of the Python list
-        actionIDs = responseText[1: -1].split(',')
-        fixed_actionIDs = []
-
-        for actionID in actionIDs:
-            fixed_actionIDs.append(actionID[1: -1])
+        # The route returns the list of action IDs as a JSON document (which must be deserialised to get the list as a Python list)
+        actionIDs = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # Return the list of IDs
-        return fixed_actionIDs
+        return actionIDs
     except http.client.HTTPException as e:
         print(f" GetListOfActions() [GET /api/actions/typeFormId/list] - HTTP EXCEPTION: {e} \n")
     except socket.timeout as s:
@@ -431,15 +411,14 @@ def GetWorkflow(workflowID, connection, headers):
     try:
         connection.request('GET', '/api/workflow/' + workflowID, headers = headers)
 
-        # The route response is the workflow record as a JSON document, but when decoded it becomes a standard string containing the JSON document
-        # Therefore, deserialise the string to a Python dictionary so that it can be easily edited
+        # The route returns the workflow record as a JSON document (which must be deserialised to get the record as a Python dictionary)
         workflow = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # If the provided ID doesn't correspond to an existing workflow record, print an error and exit the function immediately
         if workflow == None:
             sys.exit(f" GetWorkflow() - ERROR: there is no workflow record with workflow ID = {workflowID} \n")
 
-        # Return the Python dictionary containing the workflow record
+        # Return the workflow record
         return workflow
     except http.client.HTTPException as e:
         print(f" GetWorkflow() [GET /api/workflow/workflowId] - HTTP EXCEPTION: {e} \n")
@@ -456,12 +435,11 @@ def GetListOfWorkflows(workflowTypeFormID, connection, headers):
     try:
         connection.request('GET', '/api/workflows/' + workflowTypeFormID + '/list', headers = headers)
 
-        # The route response is a list (itself containing inner lists of workflow IDs and workflow statuses) as a JSON formatted string (i.e. a string within a string)
-        responseText = connection.getresponse().read().decode('utf-8')
+        # The route returns a nested list as a JSON document (which must be deserialised to get the list as a Python list)
+        # The outer list contains two inner lists - one of workflow IDs and the other of workflow statusus
+        workflowInformation = json.loads(connection.getresponse().read().decode('utf-8'))
 
-        # Convert the JSON string to an actual Python list of lists, and return the inner lists separately
-        workflowInformation = json.loads(responseText)
-
+        # Return the lists of workflow IDs and statuses
         return workflowInformation[0], workflowInformation[1]
     except http.client.HTTPException as e:
         print(f" GetListOfWorkflows() [GET /api/workflows/typeFormId/list] - HTTP EXCEPTION: {e} \n")
