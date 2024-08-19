@@ -89,7 +89,7 @@ async function collateInfo(componentUUID) {
     dunePID: '[no information found]',
     productionSite: '[no information found]',
     configuration: '[no information found]',
-    assemblyStatus: '',
+    assemblyStatus: -99.9,
     workflowID: '',
   };
 
@@ -185,7 +185,7 @@ async function collateInfo(componentUUID) {
       }
     }
 
-    collatedInfo.general.assemblyStatus = (numberOfCompleteActions === workflow.path.length - 1) ? 'Complete' : 'In Progress';
+    collatedInfo.general.assemblyStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
     collatedInfo.general.workflowID = workflow.workflowId;
   }
 

@@ -43,13 +43,13 @@ block allbody
               dd
                 a(href = `/component/${component.componentUuid}`, target = '_blank') #{component.componentUuid}
 
-              dt Assembly Status
+              dt Assembly Completion [%]
 
-              if ((collatedInfo.general.assemblyStatus) === '')
+              if ((collatedInfo.general.assemblyStatus) === -99.9)
                 dd [no associated workflow]
               else
                 dd
-                  a(href = `/workflow/${collatedInfo.general.workflowID}`, target = '_blank') #{collatedInfo.general.assemblyStatus}
+                  a(href = `/workflow/${collatedInfo.general.workflowID}`, target = '_blank') #{collatedInfo.general.assemblyStatus.toFixed(2)}
 
           .vert-space-x1.hori-space-x1
             p &nbsp; This summary generated on: 
