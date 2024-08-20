@@ -46,8 +46,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
 
     // Retrieve and store the status of each action that has been performed (i.e. that has a result) - that is, the value (true or false) of the action's 'data.actionComplete' field
     // Note that this field is common across all action type forms that are used in workflows, and so it should always exist one way or the other
-    // At the same time, determine the overall status of the workflow - it is 'complete' only if every action is individually complete ...
-    // ... i.e. there are the same number of completed actions as there are total actions in the workflow path
+    // At the same time, calculate the overall status of the workflow as the percentage of all action steps that have been completed
     let actionsDictionary = {};
     let numberOfCompleteActions = 0;
 
@@ -63,7 +62,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
       }
     }
 
-    const workflowStatus = (numberOfCompleteActions === workflow.path.length - 1) ? 'Complete' : 'In Progress';
+    const workflowStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
 
     // Simultaneously retrieve lists of all component and action type forms that currently exist in their respective collections
     const [componentTypeForms, actionTypeForms] = await Promise.all([
@@ -221,7 +220,14 @@ router.get('/workflowTypes/:typeFormId/edit', permissions.checkPermission('forms
 router.get('/workflowTypes/list', permissions.checkPermission('workflows:view'), async function (req, res, next) {
   try {
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
-    const workflowTypeForms = await Forms.list('workflowForms');
+    let workflowTypeForms = await Forms.list('workflowForms');
+
+    // Copy the existing 'APA_Assembly' entry in the list to two new entries, keyed by location, and then remove the 'APA_Assembly' entry
+    // This will allow the interface to show separate listing pages for the UK and US APA Assembly workflows
+    workflowTypeForms['APA_Assembly_US'] = workflowTypeForms['APA_Assembly'];
+    workflowTypeForms['APA_Assembly_UK'] = workflowTypeForms['APA_Assembly'];
+
+    delete workflowTypeForms['APA_Assembly'];
 
     // Render the interface page
     res.render('workflow_listTypes.pug', { workflowTypeForms });
@@ -240,8 +246,7 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
     // The first argument should be 'null' in order to match to any type form ID
     const workflows = await Workflows.list(null, { limit: 200 });
 
-    // For each workflow, determine its overall status - it is 'complete' only if every action is individually complete ...
-    // ... i.e. there are the same number of completed actions (specified by the value (true or false) of the action's 'data.actionComplete' field) as there are total actions in the workflow path
+    // For each workflow, calculate the overall status as the percentage of all action steps that have been completed
     // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
     let workflowStatuses = [];
     let firstIncompleteActions = [];
@@ -261,8 +266,7 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
         }
       }
 
-      const workflowStatus = (numberOfCompleteActions === workflow.stepResultIDs.length - 1) ? 'Complete' : 'In Progress';
-      workflowStatuses.push(workflowStatus);
+      workflowStatuses.push((numberOfCompleteActions * 100.0) / (workflow.stepResultIDs.length - 1));
 
       const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.stepResultIDs.length - 1) ? (workflow.stepTypeForms[lastCompleteAction_stepIndex + 1]) : 'n.a.'
       firstIncompleteActions.push(firstIncompleteAction);
@@ -290,12 +294,17 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
 /// List all workflows of a single workflow type
 router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows:view'), async function (req, res, next) {
   try {
+    // Set up the object containing the options ... to start with, this only consists of a limit on the number of records to return
+    // If a location has been provided in the query, add it to the object under the appropriate field
+    let options = { limit: 200 };
+
+    if (req.query.location) { options.location = req.query.location; }
+
     // Retrieve records of all workflows with the specified workflow type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
+    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, options);
 
-    // For each workflow, determine its overall status - it is 'complete' only if every action is individually complete ...
-    // ... i.e. there are the same number of completed actions (specified by the value (true or false) of the action's 'data.actionComplete' field) as there are total actions in the workflow path
+    // For each workflow, calculate the overall status as the percentage of all action steps that have been completed
     // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
     let workflowStatuses = [];
     let firstIncompleteActions = [];
@@ -315,8 +324,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
         }
       }
 
-      const workflowStatus = (numberOfCompleteActions === workflow.stepResultIDs.length - 1) ? 'Complete' : 'In Progress';
-      workflowStatuses.push(workflowStatus);
+      workflowStatuses.push((numberOfCompleteActions * 100.0) / (workflow.stepResultIDs.length - 1));
 
       const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.stepResultIDs.length - 1) ? (workflow.stepTypeForms[lastCompleteAction_stepIndex + 1]) : 'n.a.'
       firstIncompleteActions.push(firstIncompleteAction);

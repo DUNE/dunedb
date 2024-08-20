@@ -53,7 +53,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermissionJson('workf
     const workflows = await Workflows.list({ typeFormId: req.params.typeFormId });
 
     // Extract the ID field (in string format) from each workflow record, and save it into a list
-    // Additionally, determine if each workflow is complete or in progress, and save these statuses into a separate list
+    // Additionally, calculate the overall workflow status as the percentage of all action steps that have been completed, and save it into a separate list
     let workflowIDs = [];
     let workflowStatuses = [];
 
@@ -72,8 +72,7 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermissionJson('workf
         }
       }
 
-      const workflowStatus = (numberOfCompleteActions === workflow.stepResultIDs.length - 1) ? 'Complete' : 'In Progress';
-      workflowStatuses.push(workflowStatus);
+      workflowStatuses.push((numberOfCompleteActions * 100) / (workflow.stepResultIDs.length - 1));
     }
 
     // Return a list containing both the list of workflow IDs and the list of workflow statuses

@@ -282,8 +282,6 @@ class ComponentUUID extends TextFieldComponent {
         let info_target = $(this.refs.compUuidInfo[index]);
         info_target.prop('href', `/component/${value}`).text('link');
 
-        let componentTypeName = '[unknown type]';
-
         $.ajax({
           contentType: 'application/json',
           method: 'GET',
@@ -307,15 +305,47 @@ class ComponentUUID extends TextFieldComponent {
                         if (action.data.actionComplete) {
                           info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
                         } else {
-                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (incomplete final QA checklist)... click here for this component's information page`);
+                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (Final QA Checklist is not complete)... click here for this component's information page`);
                         }
                       },
                     }).fail();
                   } else {
-                    info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (no final QA checklist)... click here for this component's information page`);
+                    info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (no Final QA Checklist)... click here for this component's information page`);
                   }
                 },
               }).fail();
+            } else if (component.formId === 'GroundingMeshPanel') {
+              $.ajax({
+                contentType: 'application/json',
+                method: 'GET',
+                url: `/json/actions/${'MeshQAInspection'}/list?uuid=${value}`,
+                dataType: 'json',
+                success: function (actionIDsList) {
+                  if (actionIDsList.length > 0) {
+                    $.ajax({
+                      contentType: 'application/json',
+                      method: 'GET',
+                      url: `/json/action/${actionIDsList[0]}`,
+                      dataType: 'json',
+                      success: function (action) {
+                        if (action.data.disposition === 'useAsIs') {
+                          info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
+                        } else {
+                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (QA Inspection disposition is not 'Use As Is')... click here for this component's information page`);
+                        }
+                      },
+                    }).fail();
+                  } else {
+                    info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (no QA Inspection)... click here for this component's information page`);
+                  }
+                },
+              }).fail();
+            } else if (component.formId === 'wire_bobbin') {
+              if (component.data.meanBreakStrength >= 24.0) {
+                info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
+              } else {
+                info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (mean break strength < 24.0 N)... click here for this component's information page`);
+              }
             } else {
               info_target.text(`\xa0 Click here for this component's information page`);
             }

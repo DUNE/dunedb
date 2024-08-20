@@ -1,11 +1,11 @@
 # Local Python imports
-from common import ConnectToAPI, GetComponent, GetListOfComponents, GetAction, GetListOfActions
+from common import ConnectToAPI, GetComponent, GetListOfComponents, GetAction, GetListOfActions, GetWorkflow, GetListOfWorkflows
 
 
 # Main script function
 if __name__ == '__main__':
     print()
-    
+
     # Set up a connection to the database API and get the connection request headers
     # This must be done at the beginning of this main script function, but ONLY ONCE
     connection, headers = ConnectToAPI()
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # User-defined script functionality goes here
 
     # Retrieving a single existing component record requires only the UUID
-    # Call the component retrieval function, which take the UUID as its first argument
+    # Call the component retrieval function, which takes the UUID as its first argument
     # The second and third arguments must ALWAYS be 'connection' and 'headers' respectively
     # The optional fourth argument is the desired version of the component record ... if this is not specified or set to '0', the most recent version will be retrieved
     # If successful, the function returns the latest version of the component record as a Python dictionary (if not, an error message is automatically displayed)
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     print()
 
     # Retrieving a list of all components of a single type requires only the component type form ID (NOT THE TYPE FORM NAME!)
-    # Call the component listing function, which take the type form ID as its first argument
+    # Call the component listing function, which takes the type form ID as its first argument
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
     # If successful, the function returns a list of component UUIDs, with each UUID being an individual string
     componentTypeFormID = 'basic_component_2'
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     print(componentUUIDs)
 
     # Retrieving a single existing action record requires only the ID
-    # Call the action retrieval function, which take the ID as its first argument
+    # Call the action retrieval function, which takes the ID as its first argument
     # The second and third arguments must ALWAYS be 'connection' and 'headers' respectively
     # The optional fourth argument is the desired version of the action record ... if this is not specified or set to '0', the most recent version will be retrieved
     # If successful, the function returns the latest version of the action record as a Python dictionary (if not, an error message is automatically displayed)
@@ -44,9 +44,9 @@ if __name__ == '__main__':
     action = GetAction(actionID, connection, headers, version = 0)
     print(action)
     print()
-    
+
     # Retrieving a list of all actions of a single type requires only the action type form ID (NOT THE TYPE FORM NAME!)
-    # Call the action listing function, which take the type form ID as its first argument
+    # Call the action listing function, which takes the type form ID as its first argument
     # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
     # If successful, the function returns a list of action IDs, with each ID being an individual string
     actionTypeFormID = 'my_action'
@@ -54,6 +54,27 @@ if __name__ == '__main__':
     actionIDs = GetListOfActions(actionTypeFormID, connection, headers)
     print(f" Found {len(actionIDs)} actions with type form ID: '{actionTypeFormID}'")
     print(actionIDs)
+
+    # Retrieving a single existing workflow record requires only the ID
+    # Call the workflow retrieval function, which takes the ID as its first argument
+    # The second and third arguments must ALWAYS be 'connection' and 'headers' respectively
+    # If successful, the function returns the latest version of the workflow record as a Python dictionary (if not, an error message is automatically displayed)
+    workflowID = '668ed67ee7db83204afd723f'
+
+    workflow = GetWorkflow(workflowID, connection, headers)
+    print(workflow)
+    print()
+
+    # Retrieving a list of all workflows of a single type requires only the workflow type form ID (NOT THE TYPE FORM NAME!)
+    # Call the workflow listing function, which takes the type form ID as its first argument
+    # The last two arguments must ALWAYS be 'connection' and 'headers' respectively
+    # If successful, the function returns two lists - one of workflow IDs (with each ID being an individual string), and the other of workflow statuses
+    workflowTypeFormID = 'APA_Assembly'
+
+    workflowIDs, workflowStatuses = GetListOfWorkflows(workflowTypeFormID, connection, headers)
+    print(f" Found {len(workflowIDs)} workflows with type form ID: '{workflowTypeFormID}'")
+    print(workflowIDs)
+    print(workflowStatuses)
 
     ########################################
 

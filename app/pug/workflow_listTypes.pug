@@ -50,8 +50,14 @@ block content
 
             if typeForm.tags && !typeForm.tags.includes('Trash')
               tr
-                td
-                  a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
+                if typeFormId.slice(0, 12) === 'APA_Assembly'
+                  - const location = typeFormId.slice(13)
+
+                  td
+                    a(href = `/workflows/${typeForm.formId}/list?location=${location}`) #{typeForm.formName} (#{location})
+                else 
+                  td
+                    a(href = `/workflows/${typeForm.formId}/list`) #{typeForm.formName}
 
                 if typeForm.componentTypes && typeForm.componentTypes.length > 0
                   td 

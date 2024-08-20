@@ -23,7 +23,7 @@ block content
             th.col-md-1 Type Name
             th.col-md-1 Workflow ID
             th.col-md-1 Associated Component
-            th.col-md-1 Status
+            th.col-md-1 Completion [%]
             th.col-md-2 Next Action to Complete
             th.col-md-1
 
@@ -43,10 +43,16 @@ block content
                 else 
                   td (component not yet created)
 
-                if workflowStatuses[index] == 'Complete'
-                  td.text-success.font-weight-bold #{workflowStatuses[index]}
-                else
-                  td.text-danger.font-weight-bold #{workflowStatuses[index]}
+                if workflowStatuses[index] < 50.0
+                  td.text-danger.font-weight-bold #{workflowStatuses[index].toFixed(2)}
+                else if workflowStatuses[index] >= 50.0 && workflowStatuses[index] < 70.0
+                  td.text-warning.font-weight-bold #{workflowStatuses[index].toFixed(2)}
+                else if workflowStatuses[index] >= 70.0 && workflowStatuses[index] < 90.0
+                  td.text-info.font-weight-bold #{workflowStatuses[index].toFixed(2)}
+                else if workflowStatuses[index] >= 90.0 && workflowStatuses[index] < 100.0
+                  td.text-primary.font-weight-bold #{workflowStatuses[index].toFixed(2)}
+                else 
+                  td.text-success.font-weight-bold #{workflowStatuses[index].toFixed(2)}
 
                 td #{firstIncompleteActions[index]}
                 td
