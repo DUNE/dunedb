@@ -220,7 +220,14 @@ router.get('/workflowTypes/:typeFormId/edit', permissions.checkPermission('forms
 router.get('/workflowTypes/list', permissions.checkPermission('workflows:view'), async function (req, res, next) {
   try {
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
-    const workflowTypeForms = await Forms.list('workflowForms');
+    let workflowTypeForms = await Forms.list('workflowForms');
+
+    // Copy the existing 'APA_Assembly' entry in the list to two new entries, keyed by location, and then remove the 'APA_Assembly' entry
+    // This will allow the interface to show separate listing pages for the UK and US APA Assembly workflows
+    workflowTypeForms['APA_Assembly_US'] = workflowTypeForms['APA_Assembly'];
+    workflowTypeForms['APA_Assembly_UK'] = workflowTypeForms['APA_Assembly'];
+
+    delete workflowTypeForms['APA_Assembly'];
 
     // Render the interface page
     res.render('workflow_listTypes.pug', { workflowTypeForms });
@@ -287,9 +294,15 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
 /// List all workflows of a single workflow type
 router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows:view'), async function (req, res, next) {
   try {
+    // Set up the object containing the options ... to start with, this only consists of a limit on the number of records to return
+    // If a location has been provided in the query, add it to the object under the appropriate field
+    let options = { limit: 200 };
+
+    if (req.query.location) { options.location = req.query.location; }
+
     // Retrieve records of all workflows with the specified workflow type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, { limit: 200 });
+    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, options);
 
     // For each workflow, calculate the overall status as the percentage of all action steps that have been completed
     // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
