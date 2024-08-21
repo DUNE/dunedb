@@ -328,10 +328,10 @@ class ComponentUUID extends TextFieldComponent {
                       url: `/json/action/${actionIDsList[0]}`,
                       dataType: 'json',
                       success: function (action) {
-                        if (action.data.disposition === 'useAsIs') {
+                        if ((action.data.disposition === 'useAsIs') || (action.data.disposition === 'conformant')) {
                           info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
                         } else {
-                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (QA Inspection disposition is not 'Use As Is')... click here for this component's information page`);
+                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (QA Inspection disposition is not 'Use As Is' or 'Conformant')... click here for this component's information page`);
                         }
                       },
                     }).fail();

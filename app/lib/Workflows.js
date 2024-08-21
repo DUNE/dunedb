@@ -237,9 +237,13 @@ async function list(match_condition, options) {
   // If listing any other type of workflow or all workflows regardless of type, no location matching is required and all workflows should 'pass' the filter
   let filtered_records = [];
 
-  if (options.location) {
-    for (let record of records) {
-      if (record.componentName.slice(6) === options.location) filtered_records.push(record);
+  if (options) {
+    if (options.location) {
+      for (let record of records) {
+        if (record.componentName.slice(6) === options.location) filtered_records.push(record);
+      }
+    } else {
+      filtered_records = [...records];
     }
   } else {
     filtered_records = [...records];
