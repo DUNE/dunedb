@@ -110,16 +110,6 @@ block content
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; View JSON Record
 
-          .vert-space-x1 
-            if workflowComponent
-              a.btn.btn-secondary.disabled(href = '')
-                img.small-icon(src = '/images/run_icon.svg')
-                | &nbsp; Create New Components of This Type via Workflows
-            else
-              a.btn.btn-primary(href = `/component/${component.formId}`)
-                img.small-icon(src = '/images/run_icon.svg')
-                | &nbsp; Create New Component of This Type
-
           .vert-space-x1
             a.btn.btn-primary(href = `/component/${component.componentUuid}/qrCodes`)
               img.small-icon(src = '/images/checklist_icon.svg')
@@ -135,6 +125,19 @@ block content
               a.btn.btn-primary(href = `/component/${component.componentUuid}/execSummary`)
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; View and print this APA's Executive Summary
+
+          .vert-space-x2
+            hr
+
+            .vert-space-x2   
+              if workflowComponent
+                a.btn.btn-secondary.disabled(href = '')
+                  img.small-icon(src = '/images/run_icon.svg')
+                  | &nbsp; Create New Components of This Type via Workflows
+              else
+                a.btn.btn-primary(href = `/component/${component.formId}`)
+                  img.small-icon(src = '/images/run_icon.svg')
+                  | &nbsp; Create New Component of This Type
 
         .col-sm-3
           #qr-code

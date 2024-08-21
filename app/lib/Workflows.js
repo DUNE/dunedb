@@ -199,7 +199,7 @@ async function list(match_condition, options) {
   // Re-sort the records by last edit date ... most recent first
   aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
-  // Add aggregation stages for any additionally specified options
+  // Add aggregation stages for any additionally specified options that should be dealt with at the MongoDB aggregation stage
   if (options) {
     if (options.limit) aggregation_stages.push({ $limit: options.limit });
   }
@@ -210,6 +210,8 @@ async function list(match_condition, options) {
     .toArray();
 
   // Add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (i.e. use shortened DUNE PIDs)
+  // NOTE: all workflows must have some kind of component name in order to determine where they are being performed in the section below ...
+  // ... so any workflow that does not yet have an associated component will be given a temporary fake UK-based component name here, purely for location matching
   for (let record of records) {
     if (record.stepResultIDs[0] != '') {
       const component = await Components.retrieve(record.stepResultIDs[0]);
@@ -226,7 +228,25 @@ async function list(match_condition, options) {
           record.componentName = record.stepResultIDs[0];
         }
       }
+    } else {
+      record.componentName = '99999-UK';
     }
+  }
+
+  // If listing 'APA Assembly' workflows, a location will have been specified in the 'options' - use the component name to filter out those workflows that do not match that location
+  // If listing any other type of workflow or all workflows regardless of type, no location matching is required and all workflows should 'pass' the filter
+  let filtered_records = [];
+
+  if (options) {
+    if (options.location) {
+      for (let record of records) {
+        if (record.componentName.slice(6) === options.location) filtered_records.push(record);
+      }
+    } else {
+      filtered_records = [...records];
+    }
+  } else {
+    filtered_records = [...records];
   }
 
   // If listing a single type of workflow (i.e. if a match condition was specified), re-sort the records by the component name ... in reverse alphanumerical order
@@ -237,10 +257,10 @@ async function list(match_condition, options) {
     }
   };
 
-  if (match_condition) records.sort(byField('componentName'));
+  if (match_condition) filtered_records.sort(byField('componentName'));
 
   // Return the entire list of matching records
-  return records;
+  return filtered_records;
 }
 
 
