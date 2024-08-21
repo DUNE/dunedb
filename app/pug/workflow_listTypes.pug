@@ -50,8 +50,8 @@ block content
 
             if typeForm.tags && !typeForm.tags.includes('Trash')
               tr
-                if typeFormId.slice(0, 12) === 'APA_Assembly'
-                  - const location = typeFormId.slice(13)
+                if typeForm.formId === 'APA_Assembly'
+                  - const location = typeFormId.slice(-2)
 
                   td
                     a(href = `/workflows/${typeForm.formId}/list?location=${location}`) #{typeForm.formName} (#{location})
@@ -66,11 +66,11 @@ block content
                   td (none)
 
                 td
-                  a.btn-sm.btn-primary(href = `/workflow/${typeFormId}`)
+                  a.btn-sm.btn-primary(href = `/workflow/${typeForm.formId}`)
                     img.small-icon(src = '/images/run_icon.svg')
                     | &nbsp; Create New Workflow of This Type
                 td
-                  a.btn-sm.btn-warning(href = `/workflowTypes/${typeFormId}/edit`)
+                  a.btn-sm.btn-warning(href = `/workflowTypes/${typeForm.formId}/edit`)
                     img.small-icon(src = '/images/edit_icon.svg')
                     | &nbsp; Edit Workflow Type Form
 
