@@ -1,0 +1,67 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Assembled APAs by Production Details';
+
+block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
+  block workscripts 
+    script(src = '/pages/search_apasByProductionDetails.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Assembled APAs by Production Details
+
+    .vert-space-x2
+      hr
+
+      .row
+        .col-md-4
+          h4 Search by Production Location and Number
+
+          .vert-space-x1
+            p Select a production location from the options below.
+
+          select.form-control#locationSelection
+            option(value = '')          
+            option(value = 'chicago') #{dictionary_locations['chicago']} 
+            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+            option(value = 'fermilab') #{dictionary_locations['fermilab']} 
+
+          .vert-space-x1
+            p Enter the production number of the APA at the specified location below and <b>press the 'Enter' key</b>.
+
+          input.form-control#numberSelection
+
+          br
+
+          .vert-space-x2 
+            hr
+
+            h4 Search by Last Completed Assembly Step
+
+            .vert-space-x1
+              p Select an assembly step from the options below.
+
+            select.form-control#assemblyStepSelection
+              option(value = '')
+              option(value = 'framePreparation') Assembled APA Quality Assurance Check (Frame Prep)
+              option(value = 'xLayerAssembly') Assembled APA Quality Assurance Check (X Layer)
+              option(value = 'vLayerAssembly') Assembled APA Quality Assurance Check (V Layer)
+              option(value = 'uLayerAssembly') Assembled APA Quality Assurance Check (U Layer)
+              option(value = 'gLayerAssembly') Assembled APA Quality Assurance Check (G Layer)
+              option(value = 'coverBoardsAndCaps') Assembled APA Quality Assurance Check (Cover Boards / Cap Installation)
+              option(value = 'shippingPreparation') Assembled APA Quality Assurance Check (Shipping Preparation)
+
+        .col-md-1
+
+        .col-md-7
+          h4 Search Results
+
+          .vert-space-x1
+            table#results
+
+    .vert-space-x2
