@@ -1,42 +1,54 @@
-// Declare variables to hold the (initially empty) user-specified board location and/or part number
+// Declare variables to hold the (initially empty) user-specified board location, part number and status
 let boardLocation = null;
 let boardPartNumber = null;
+let boardStatus = 'any';
 
 
-// Main function
-$(function () {
-  // When the selected location is changed, get the newly selected location from the corresponding page element
-  // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
+// Run a specific function when the page is loaded
+window.addEventListener('load', renderSearchForms);
+
+
+// Function to run when the page is loaded
+async function renderSearchForms() {
+  // When the selected location is changed, get the newly selected location
   $('#locationSelection').on('change', async function () {
     boardLocation = $('#locationSelection').val();
+  });
+
+  // When the selected board part number is changed, get the newly selected part number
+  $('#partNumberSelection').on('change', async function () {
+    boardPartNumber = $('#partNumberSelection').val();
+  });
+
+  // When the selected status is changed, get the newly selected status
+  $('#statusSelection').on('change', async function () {
+    boardStatus = $('#statusSelection').val();
+  });
+
+  // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable the 'Perform Search' button while the current search is being performed
+  $('#confirmButton').on('click', function () {
+    $('#confirmButton').prop('disabled', true);
 
     if (boardLocation) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/geoBoardsByLocation/${boardLocation}`,
+        url: `/json/search/geoBoardsByLocation/${boardLocation}/${boardStatus}`,
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
-    }
-  });
-
-  // When the selected board part number is changed, get the newly selected part number from the corresponding page element
-  // If the part number is valid, perform the appropriate jQuery 'ajax' call to make the search
-  $('#partNumberSelection').on('change', async function () {
-    boardPartNumber = $('#partNumberSelection').val();
-
-    if (boardPartNumber) {
+    } else if (boardPartNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/geoBoardsByPartNumber/${boardPartNumber}`,
+        url: `/json/search/geoBoardsByPartNumber/${boardPartNumber}/${boardStatus}`,
         dataType: 'json',
         success: postSuccess_partNumber,
       }).fail(postFail);
     }
-  });
-});
+  })
+}
 
 
 // Function to run for a successful search query by location
@@ -103,6 +115,9 @@ function postSuccess_location(result) {
       $('#results').append('<br>');
     }
   }
+
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
 
 
@@ -170,6 +185,9 @@ function postSuccess_partNumber(result) {
       $('#results').append('<br>');
     }
   }
+
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
 
 
@@ -181,4 +199,7 @@ function postFail(result, statusCode, statusMsg) {
   } else {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
+
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
