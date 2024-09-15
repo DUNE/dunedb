@@ -7,6 +7,7 @@ const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
 const permissions = require('./permissions');
+const utils = require('./utils');
 
 
 /// Save a new or edited action record
@@ -28,6 +29,14 @@ async function save(input, req) {
   const typeForm = typeFormsList[input.typeFormId];
 
   if (!typeForm) throw new Error(`Actions:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known action type form!`);
+
+  // Check that the person performing or editing the action is permitted to do so ... this is an additional security check for specific action types, beyond a simple global 'permissions' check
+  // It is designed to make sure that these actions are not being performed by the logged-in user on behalf of someone else, without the latter's knowledge or permission 
+  if (input.typeFormId === 'AssembledAPAQACheck') {
+    if (!(utils.listIDs_apaFactoryLeads.includes(req.user.user_id))) {
+      throw new Error(`Actions:save() - you are not permitted to perform or edit this type of action ... it can only be done by one of the following personnel: ${Object.values(utils.dictionary_apaFactoryLeads).join(', ')}`);
+    }
+  }
 
   // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
   // If no type form name has been specified in the 'input' object, use the value from the type form instead
