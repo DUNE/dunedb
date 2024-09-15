@@ -38,6 +38,14 @@ async function save(input, req) {
     }
   }
 
+  // Check that certain relevant fields do actually have some user-defined data in them if the action is being 'completed' (specific to the particular action type form)
+  // This is designed to stop users from performing and 'completing' blank actions in order to skip ahead in workflows, but this way it does not require any fields to be 'required' in the type form
+  if (input.data.actionComplete) {
+    if ((input.typeFormId === 'x_tension_testing') && (input.data.measuredTensions_sideA.length === 0) && (input.data.measuredTensions_sideB.length === 0)) {
+      throw new Error(`Actions:save() - this action does not contain any tension measurements, but has been set as 'complete' ... please uncheck the 'Action Complete' box to submit!`);
+    }
+  }
+
   // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
   // If no type form name has been specified in the 'input' object, use the value from the type form instead
   let newRecord = {};
