@@ -120,56 +120,60 @@ block content
       #typeform
 
     .vert-space-x1
-      if (action.typeFormId == 'x_tension_testing') && (retensionedWires_versions[0] !== null)
-        dt Most recently re-tensioned wires / wire segments (comparing versions #{retensionedWires_versions[1]} and #{retensionedWires_versions[0]}):
+      if (action.typeFormId == 'x_tension_testing')
+        dt Comparison to this layer's winding action:
+        dd Found #{numberOfReplacedWires[0]} on Side A and #{numberOfReplacedWires[1]} on Side B 
 
-        .row
-          .col-md-6
-            .panel.panel-default
-            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
-              | #{retensionedWires_values[0].length} on side A (found #{numberOfReplacedWires[0]} in this layer's winding action): 
-              i.chevron.fa.fa-fw 
+        if (retensionedWires_versions[0] !== null)
+          dt Most recently re-tensioned wires / wire segments (comparing versions #{retensionedWires_versions[1]} and #{retensionedWires_versions[0]}):
 
-            .collapse#reTensionsBoxA
-              if retensionedWires_values[0].length > 0
-                .vert-space-x1.border-success.border.rounded.p-2
-                  dd
-                    table.table
-                      thead
-                        tr
-                          th.col-md-2 Wire / Wire Segment
-                          th.col-md-2 Original Tension (N)
-                          th.col-md-2 Latest Tension (N)
+          .row
+            .col-md-6
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxA')
+                | #{retensionedWires_values[0].length} on side A: 
+                i.chevron.fa.fa-fw 
 
-                      tbody
-                        each changedTension in retensionedWires_values[0]
+              .collapse#reTensionsBoxA
+                if retensionedWires_values[0].length > 0
+                  .vert-space-x1.border-success.border.rounded.p-2
+                    dd
+                      table.table
+                        thead
                           tr
-                            td #{changedTension[0]}
-                            td #{changedTension[1]}
-                            td #{changedTension[2]}
-          .col-md-6
-            .panel.panel-default
-            .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
-              | #{retensionedWires_values[1].length} on side B (found #{numberOfReplacedWires[1]} in this layer's winding action): 
-              i.chevron.fa.fa-fw 
+                            th.col-md-2 Wire / Wire Segment
+                            th.col-md-2 Original Tension (N)
+                            th.col-md-2 Latest Tension (N)
 
-            .collapse#reTensionsBoxB
-              if retensionedWires_values[1].length > 0
-                .vert-space-x1.border-success.border.rounded.p-2
-                  dd
-                    table.table
-                      thead
-                        tr
-                          th.col-md-2 Wire / Wire Segment
-                          th.col-md-2 Original Tension (N)
-                          th.col-md-2 Latest Tension (N)
+                        tbody
+                          each changedTension in retensionedWires_values[0]
+                            tr
+                              td #{changedTension[0]}
+                              td #{changedTension[1]}
+                              td #{changedTension[2]}
+            .col-md-6
+              .panel.panel-default
+              .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#reTensionsBoxB')
+                | #{retensionedWires_values[1].length} on side B: 
+                i.chevron.fa.fa-fw 
 
-                      tbody
-                        each changedTension in retensionedWires_values[1]
+              .collapse#reTensionsBoxB
+                if retensionedWires_values[1].length > 0
+                  .vert-space-x1.border-success.border.rounded.p-2
+                    dd
+                      table.table
+                        thead
                           tr
-                            td #{changedTension[0]}
-                            td #{changedTension[1]}
-                            td #{changedTension[2]}
+                            th.col-md-2 Wire / Wire Segment
+                            th.col-md-2 Original Tension (N)
+                            th.col-md-2 Latest Tension (N)
+
+                        tbody
+                          each changedTension in retensionedWires_values[1]
+                            tr
+                              td #{changedTension[0]}
+                              td #{changedTension[1]}
+                              td #{changedTension[2]}
 
         .vert-space-x2 
 

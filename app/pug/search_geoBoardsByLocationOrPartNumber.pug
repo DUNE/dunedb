@@ -19,11 +19,13 @@ block content
       hr
 
       .row
-        .col-md-4
+        .col-md-3
           h4 Select Location
 
           .vert-space-x1
-            p Select a location from the options below.
+            p Select <b>either</b> a location below <b>or</b> a part number to the right.
+              br
+              | <b>This is a <u>required</u> parameter.</b>
 
           select.form-control#locationSelection
             option(value = '')
@@ -43,46 +45,65 @@ block content
           .vert-space-x2
             hr
 
-            h4 Select Part Number
+            h4 Select Status
 
-            .vert-space-x1
-              p Select a part number from the options below.
+            .vert-space-x1 
+              p Select a status below ... this is an optional parameter.
 
-            select.form-control#partNumberSelection
-              option(value = '')          
-              option(value = '8760051') 8760051 (G Foot Board Low Slot End) 
-              option(value = '8760054') 8760054 (G Foot Board Middle)
-              option(value = '8760062') 8760062 (G Foot Board High Slot End) 
-              option(value = '8760113') 8760113 (G Foot Board Position 4 & 7) 
-              option(value = '8760038') 8760038 (U Side Board End)
-              option(value = '8760040') 8760040 (U Side Board w/o Slot Middle) 
-              option(value = '8760042') 8760042 (U Side Board w/ Slot Middle) 
-              option(value = '8760044') 8760044 (U Foot Board High Slot End)
-              option(value = '8760057') 8760057 (U Foot Board Middle) 
-              option(value = '8760059') 8760059 (U Foot Board Low Slot End)
-              option(value = '8760111') 8760111 (U Foot Board Position 4 & 7)
-              option(value = '8760024') 8760024 (V Side Board End)
-              option(value = '8760026') 8760026 (V Middle Side Board w/o Slot)
-              option(value = '8760030') 8760030 (V Foot Board Middle)
-              option(value = '8760036') 8760036 (V Foot Board End)
-              option(value = '8760107') 8760107 (V Foot Board Middle Position 4 & 7)
-              option(value = '8760028') 8760028 (V Middle Side Board w/ Slot)
-              option(value = '8760032') 8760032 (X Foot Board End)
-              option(value = '8760034') 8760034 (X Foot Board Middle)
-              option(value = '8760109') 8760109 (X Foot Board Position 4 & 7)
-              option(value = '8760119') 8760119 (U Head Board Left End)
-              option(value = '8760115') 8760115 (U Head Board Middle)
-              option(value = '8760123') 8760123 (U Head Board Right End)
-              option(value = '8760122') 8760122 (G Head Board Left End)
-              option(value = '8760121') 8760121 (G Head Board Middle)
-              option(value = '8760120') 8760120 (G Head Board Right End)
-              option(value = '8760104') 8760104 (X Head Board)
-              option(value = '8760116') 8760116 (V Head Board Left End)
-              option(value = '8760108') 8760108 (V Head Board Middle and Right End)
+            select.form-control#statusSelection
+              option(value = 'any') (any)
+              option(value = 'accepted') Accepted at Factory 
+              option(value = 'rejected') Rejected at Factory 
+
+        .col-md-3
+          h4 Select Part Number
+
+          .vert-space-x1
+            p Select <b>either</b> a part number below <b>or</b> a location to the left.
+              br
+              | <b>This is a <u>required</u> parameter.</b>
+
+          select.form-control#partNumberSelection
+            option(value = '')          
+            option(value = '8760051') 8760051 (G Foot Board Low Slot End) 
+            option(value = '8760054') 8760054 (G Foot Board Middle)
+            option(value = '8760062') 8760062 (G Foot Board High Slot End) 
+            option(value = '8760113') 8760113 (G Foot Board Position 4 & 7) 
+            option(value = '8760038') 8760038 (U Side Board End)
+            option(value = '8760040') 8760040 (U Side Board w/o Slot Middle) 
+            option(value = '8760042') 8760042 (U Side Board w/ Slot Middle) 
+            option(value = '8760044') 8760044 (U Foot Board High Slot End)
+            option(value = '8760057') 8760057 (U Foot Board Middle) 
+            option(value = '8760059') 8760059 (U Foot Board Low Slot End)
+            option(value = '8760111') 8760111 (U Foot Board Position 4 & 7)
+            option(value = '8760024') 8760024 (V Side Board End)
+            option(value = '8760026') 8760026 (V Middle Side Board w/o Slot)
+            option(value = '8760030') 8760030 (V Foot Board Middle)
+            option(value = '8760036') 8760036 (V Foot Board End)
+            option(value = '8760107') 8760107 (V Foot Board Middle Position 4 & 7)
+            option(value = '8760028') 8760028 (V Middle Side Board w/ Slot)
+            option(value = '8760032') 8760032 (X Foot Board End)
+            option(value = '8760034') 8760034 (X Foot Board Middle)
+            option(value = '8760109') 8760109 (X Foot Board Position 4 & 7)
+            option(value = '8760119') 8760119 (U Head Board Left End)
+            option(value = '8760115') 8760115 (U Head Board Middle)
+            option(value = '8760123') 8760123 (U Head Board Right End)
+            option(value = '8760122') 8760122 (G Head Board Left End)
+            option(value = '8760121') 8760121 (G Head Board Middle)
+            option(value = '8760120') 8760120 (G Head Board Right End)
+            option(value = '8760104') 8760104 (X Head Board)
+            option(value = '8760116') 8760116 (V Head Board Left End)
+            option(value = '8760108') 8760108 (V Head Board Middle and Right End)
+
+          .vert-space-x2
+            hr
+
+            .vert-space-x2
+              button.btn-primary.btn-lg.float-right#confirmButton Perform Search
 
         .col-md-1
 
-        .col-md-7
+        .col-md-5
           h4 Search Results
 
           .vert-space-x1

@@ -346,6 +346,32 @@ class ComponentUUID extends TextFieldComponent {
               } else {
                 info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (mean break strength < 24.0 N)... click here for this component's information page`);
               }
+            } else if (component.formId === 'GeometryBoard') {
+              $.ajax({
+                contentType: 'application/json',
+                method: 'GET',
+                url: `/json/actions/${'FactoryBoardRejection'}/list?uuid=${value}`,
+                dataType: 'json',
+                success: function (actionIDsList) {
+                  if (actionIDsList.length == 0) {
+                    info_target.text(`\xa0 This ${component.formName} has been accepted and is ready for use ... click here for this component's information page`);
+                  } else {
+                    $.ajax({
+                      contentType: 'application/json',
+                      method: 'GET',
+                      url: `/json/action/${actionIDsList[0]}`,
+                      dataType: 'json',
+                      success: function (action) {
+                        if ((action.data.disposition === 'useAsIs') || (action.data.disposition === 'remediated')) {
+                          info_target.text(`\xa0 This ${component.formName} has been accepted and is ready for use ... click here for this component's information page`);
+                        } else {
+                          info_target.text(`\xa0 This ${component.formName} HAS BEEN REJECTED (via Factory Rejection action) ... click here for this component's information page`);
+                        }
+                      },
+                    }).fail();
+                  }
+                },
+              }).fail();
             } else {
               info_target.text(`\xa0 Click here for this component's information page`);
             }

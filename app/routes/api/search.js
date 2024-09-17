@@ -8,10 +8,10 @@ const utils = require('../../lib/utils');
 
 
 /// Search for geometry boards that have been received at a specified location
-router.get('/search/geoBoardsByLocation/:location', async function (req, res, next) {
+router.get('/search/geoBoardsByLocation/:location/:status', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have been received at the specified location
-    const boardsByPartNumber = await Search_GeoBoards.boardsByLocation(req.params.location);
+    const boardsByPartNumber = await Search_GeoBoards.boardsByLocation(req.params.location, req.params.status);
 
     // Return the list in JSON format
     return res.json(boardsByPartNumber);
@@ -23,10 +23,10 @@ router.get('/search/geoBoardsByLocation/:location', async function (req, res, ne
 
 
 /// Search for geometry boards of a specified part number
-router.get('/search/geoBoardsByPartNumber/:partNumber', async function (req, res, next) {
+router.get('/search/geoBoardsByPartNumber/:partNumber/:status', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by reception location, of the specified part number
-    const boardsByLocation = await Search_GeoBoards.boardsByPartNumber(req.params.partNumber);
+    const boardsByLocation = await Search_GeoBoards.boardsByPartNumber(req.params.partNumber, req.params.status);
 
     // Return the list in JSON format
     return res.json(boardsByLocation);
