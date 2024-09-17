@@ -53,6 +53,8 @@ block content
           li <b>or</b> all geometry boards of a <u>specified board part number</u> that have been received at any location
 
       p Users may select one of the available board reception locations or part numbers from the appropriate list, and a summary of information about each found board will be displayed in the search results panel on the right side of the page.
+        br
+        | The search may be optionally refined by the <b>board status</b> - that is, whether a board has been <b>rejected</b> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <b>accepted</b> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediatated</u>).
 
       p Please note that a geometry board is only deemed to be at a given location if it has either been intaken there, or has been recorded as being received there via a successfully submitted <b>Board Shipment Reception</b> action.
 
@@ -123,20 +125,22 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/apaByProductionDetails') Assembled APA by Production Details
+        a(href = '/search/apasByProductionDetails') Assembled APAs by Production Details
 
-      p This page may be used to search specifically for <b>assembled APAs</b> that match <b>both</b> of the following user-specified record details:
+      p This page may be used to search specifically for <b>assembled APAs</b> under one of the following scenarios:
         ul
-          li <b>production location</b>: the location at which the APA is being assembled
-          li <b>production number</b>: the order in which the APA has been assembled at the specified location
+          li <b>either</b> any assembled APA that has a specified <u>production location</u> (the location at which the APA is being assembled) <b>and</b> <u>production number</u> (the order in which the APA has been assembled at the specified location)
+          li <b>or</b> all assembled APAs that have been completed up to and including a <u>specified assembly workflow step</u>
 
       p Users may select one of the production locations from the list, and manually enter an (integer) production number.  Please note that <b>both pieces of information must be provided</b> for the search to be performed.
-
-      p If an existing assembled APA record that matches both pieces of information is successfully found in the database, the user will be automatically redirected to the page for viewing the APA component record.
         br
-        |  If there is no such APA, i.e. the information does not match an existing APA record, a message will be displayed to the right of the input boxes to that effect.
+        |  If an existing assembled APA record matching both pieces of information is successfully found in the database, the user will be automatically redirected to the page for viewing the APA component record.
+        br
+        |  If there is no such APA, i.e. the information does not match an existing APA record, a message to that effect will be displayed in the search results panel on the right side of the page.
+        br
+        |  It should not be possible for multiple APA records to match against both provided pieces of information, since they should uniquely identify a single APA.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 
-      p It should not be possible for multiple APA records to match against both provided pieces of information, since they should uniquely identify a single APA.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
+      p Alternatively, users may select one of the provided assembly workflow steps.  A list of all assembled APAs that have been completed up to and including that step in their assembly workflows will be displayed in the search results panel on the right side of the page.
 
       hr
 

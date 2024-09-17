@@ -1,11 +1,12 @@
 const MUUID = require('uuid-mongodb');
 
+const Actions = require('./Actions');
 const Components = require('./Components');
 const { db } = require('./db');
 
 
 /// Retrieve a list of geometry boards that are at a specified location across all part numbers
-async function boardsByLocation(location) {
+async function boardsByLocation(location, boardStatus) {
   let aggregation_stages = [];
 
   // Retrieve all 'Geometry Board' records that have the same location as the specified one
@@ -52,6 +53,8 @@ async function boardsByLocation(location) {
     .toArray();
 
   // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  // In addition, if a board status has been specified, remove any boards that do not have a matching status here ...
+  // ... remembering that a board could be 'accepted' by either having a 'Factory Rejection' action performed with one of the two 'accepted' statuses, or by not having the action performed at all
   let cleanedResults = [];
 
   for (const boardGroup of results) {
@@ -66,21 +69,46 @@ async function boardsByLocation(location) {
     cleanedBoardGroup.installedOnAPA = [];
 
     for (const boardUuid of boardGroup.componentUuid) {
-      cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+      let includeBoard = false;
 
-      const board = await Components.retrieve(MUUID.from(boardUuid).toString());
-
-      if (location === 'installed_on_APA') {
-        if (board.reception.detail) {
-          const apa = await Components.retrieve(board.reception.detail);
-
-          const name_splits = apa.data.name.split('-');
-          cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
-        } else {
-          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
-        }
+      if (boardStatus === 'any') {
+        includeBoard = true;
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
+        let match_condition = {
+          typeFormId: 'FactoryBoardRejection',
+          componentUuid: MUUID.from(boardUuid).toString(),
+        };
+
+        const rejectionActions = await Actions.list(match_condition);
+
+        if (rejectionActions.length === 0) {
+          if (boardStatus === 'accepted') includeBoard = true;
+        } else {
+          const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
+          const disposition = rejectionAction.data.disposition;
+
+          if ((boardStatus === 'accepted') && ((disposition === 'useAsIs') || (disposition === 'remediated'))) includeBoard = true;
+          else if ((boardStatus === 'rejected') && (disposition === 'rejected')) includeBoard = true;
+        }
+      }
+
+      if (includeBoard) {
+        cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+
+        const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
+        if (location === 'installed_on_APA') {
+          if (board.reception.detail) {
+            const apa = await Components.retrieve(board.reception.detail);
+
+            const name_splits = apa.data.name.split('-');
+            cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+          } else {
+            cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+          }
+        } else {
+          cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
+        }
       }
     }
 
@@ -93,7 +121,7 @@ async function boardsByLocation(location) {
 
 
 /// Retrieve a list of geometry boards of a specified part number across all board locations
-async function boardsByPartNumber(partNumber) {
+async function boardsByPartNumber(partNumber, boardStatus) {
   let aggregation_stages = [];
 
   // Retrieve all 'Geometry Board' records that have the same part number as the specified one
@@ -136,6 +164,8 @@ async function boardsByPartNumber(partNumber) {
     .toArray();
 
   // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  // In addition, if a board status has been specified, remove any boards that do not have a matching status here ...
+  // ... remembering that a board could be 'accepted' by either having a 'Factory Rejection' action performed with one of the two 'accepted' statuses, or by not having the action performed at all
   let cleanedResults = [];
 
   for (const boardGroup of results) {
@@ -149,21 +179,46 @@ async function boardsByPartNumber(partNumber) {
     cleanedBoardGroup.installedOnAPA = [];
 
     for (const boardUuid of boardGroup.componentUuid) {
-      cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+      let includeBoard = false;
 
-      const board = await Components.retrieve(MUUID.from(boardUuid).toString());
-
-      if (boardGroup._id.receptionLocation === 'installed_on_APA') {
-        if (board.reception.detail) {
-          const apa = await Components.retrieve(board.reception.detail);
-
-          const name_splits = apa.data.name.split('-');
-          cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
-        } else {
-          cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
-        }
+      if (boardStatus === 'any') {
+        includeBoard = true;
       } else {
-        cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
+        let match_condition = {
+          typeFormId: 'FactoryBoardRejection',
+          componentUuid: MUUID.from(boardUuid).toString(),
+        };
+
+        const rejectionActions = await Actions.list(match_condition);
+
+        if (rejectionActions.length === 0) {
+          if (boardStatus === 'accepted') includeBoard = true;
+        } else {
+          const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
+          const disposition = rejectionAction.data.disposition;
+
+          if ((boardStatus === 'accepted') && ((disposition === 'useAsIs') || (disposition === 'remediated'))) includeBoard = true;
+          else if ((boardStatus === 'rejected') && (disposition === 'rejected')) includeBoard = true;
+        }
+      }
+
+      if (includeBoard) {
+        cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+
+        const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
+        if (boardGroup._id.receptionLocation === 'installed_on_APA') {
+          if (board.reception.detail) {
+            const apa = await Components.retrieve(board.reception.detail);
+
+            const name_splits = apa.data.name.split('-');
+            cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+          } else {
+            cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+          }
+        } else {
+          cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
+        }
       }
     }
 

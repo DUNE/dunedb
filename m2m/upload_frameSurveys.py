@@ -13,11 +13,11 @@ from common import ConnectToAPI, EditAction
 # For uploading new or revised survey results, the following information is required:
 actionId_intake        = '000000000000000000000000'    # ID of the existing 'Intake Surveys' action to be edited (get from DB)
 actionId_installation  = '000000000000000000000000'    # ID of the existing 'Installation Surveys' action to be edited (get from DB)
-dataFile_intakeM4Holes = 'D:/Documents/2016 - 2024 Liverpool/DUNE/2023-10 APA Frame Planarity Surveys/UK_Frames/F000_m4Holes.xlsx'     
+dataFile_intakeM4Holes = 'C:/Users/krish/Documents/2016 - 2024 Liverpool/DUNE/2023-10 APA Frame Planarity Surveys/UK_Frames/F000_m4Holes.xlsx'     
                                                        # Full path to the input data file containing INTAKE M4 HOLES SURVEY results (must be a string ending in '.xlsx')
 values_intakeXCorners  = [0.00, 0.00, 0.00]
                                                        # Manual CROSS-CORNER measurement values (these should be copied from the frame's 'Delivered Frame QA Checklist' action)
-dataFile_allAnalyses   = 'D:/Documents/2016 - 2024 Liverpool/DUNE/2023-10 APA Frame Planarity Surveys/UK_Frames/F000_analyses.xlsx'
+dataFile_allAnalyses   = 'C:/Users/krish/Documents/2016 - 2024 Liverpool/DUNE/2023-10 APA Frame Planarity Surveys/UK_Frames/F000_analyses.xlsx'
                                                        # Full path to the input data file containing ALL OF THE ANALYSES' results (must be a string ending in '.xlsx')
 
 ######################################

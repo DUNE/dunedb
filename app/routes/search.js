@@ -52,10 +52,10 @@ router.get('/search/boardKitComponentsByLocation', async function (req, res, nex
 });
 
 
-/// Search for an assembled APA using its production location and number
-router.get('/search/apaByProductionDetails', async function (req, res, next) {
+/// Search for assembled APAs by production details - either location and number, or last completed assembly step
+router.get('/search/apasByProductionDetails', async function (req, res, next) {
   // Render the interface page
-  res.render('search_apaByProductionDetails.pug', { dictionary_locations: utils.dictionary_locations });
+  res.render('search_apasByProductionDetails.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 

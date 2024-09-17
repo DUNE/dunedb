@@ -47,6 +47,10 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
     // If the specified component type is one that is the subject of a workflow, filter out any action types that should be performed through the workflow
     // First, retrieve the workflow type form, and then build an array of the workflow's action type form names from its path steps
     // Finally loop through the dictionary of all currently available action type forms, and remove those whose type form name appears in the array of workflow action type form names
+    // Then create a list of only the non-workflow actions that have already been performed on the component, using the same array of workflow action type form names from above
+    // For component types that are not the subject of a workflow, the list of action types remains unchanged, and the list of non-workflow actions is the same as the overall list retrieved above
+    let nonWorkflowActions = [];
+
     if (workflowComponent) {
       let workflowTypeForm = null;
 
@@ -69,6 +73,12 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
           delete actionTypeForms[typeFormID];
         }
       }
+
+      for (const action of actions) {
+        if (!(list_workflowActions.includes(action.typeFormName))) nonWorkflowActions.push(action);
+      }
+    } else {
+      nonWorkflowActions = actions;
     }
 
     // Most shipment and batch type components only hold very basic information (i.e. only the full UUIDs) about the individual sub-components that they contain
@@ -160,7 +170,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       componentVersions,
       componentTypeForm,
       collectionDetails,
-      actions,
+      actions: nonWorkflowActions,
       actionTypeForms,
       dictionary_queries: req.query,
       dictionary_locations: utils.dictionary_locations,

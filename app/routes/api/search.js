@@ -8,10 +8,10 @@ const utils = require('../../lib/utils');
 
 
 /// Search for geometry boards that have been received at a specified location
-router.get('/search/geoBoardsByLocation/:location', async function (req, res, next) {
+router.get('/search/geoBoardsByLocation/:location/:status', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have been received at the specified location
-    const boardsByPartNumber = await Search_GeoBoards.boardsByLocation(req.params.location);
+    const boardsByPartNumber = await Search_GeoBoards.boardsByLocation(req.params.location, req.params.status);
 
     // Return the list in JSON format
     return res.json(boardsByPartNumber);
@@ -23,10 +23,10 @@ router.get('/search/geoBoardsByLocation/:location', async function (req, res, ne
 
 
 /// Search for geometry boards of a specified part number
-router.get('/search/geoBoardsByPartNumber/:partNumber', async function (req, res, next) {
+router.get('/search/geoBoardsByPartNumber/:partNumber/:status', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by reception location, of the specified part number
-    const boardsByLocation = await Search_GeoBoards.boardsByPartNumber(req.params.partNumber);
+    const boardsByLocation = await Search_GeoBoards.boardsByPartNumber(req.params.partNumber, req.params.status);
 
     // Return the list in JSON format
     return res.json(boardsByLocation);
@@ -161,11 +161,28 @@ router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, r
 });
 
 
-/// Search for an assembled APA using its production location and number
-router.get('/search/apaByProductionDetails/:apaLocation/:apaNumber', async function (req, res, next) {
+/// Search for assembled APAs by production location and number
+router.get('/search/apasByProductionLocationAndNumber/:apaLocation/:apaNumber', async function (req, res, next) {
   try {
     // Retrieve a list of assembled APAs that match the specified record details
-    const assembledAPAs = await Search_OtherComponents.apaByProductionDetails(req.params.apaLocation, req.params.apaNumber);
+    const assembledAPAs = await Search_OtherComponents.apasByProductionLocationAndNumber(req.params.apaLocation, req.params.apaNumber);
+
+    // Return the list in JSON format
+    return res.json(assembledAPAs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for assembled APAs by last completed assembly step
+router.get('/search/apasByLastCompletedAssemblyStep/:assemblyStep', async function (req, res, next) {
+  try {
+    // Retrieve a nested list, consisting of:
+    // - a list of all assembled APAs that have been completed up to and including the specified step in their assembly workflows
+    // - a list of all assembled APAs that have NOT yet reached the specified step in their assembly workflows
+    const assembledAPAs = await Search_OtherComponents.apasByLastCompletedAssemblyStep(req.params.assemblyStep);
 
     // Return the list in JSON format
     return res.json(assembledAPAs);

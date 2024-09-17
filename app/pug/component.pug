@@ -320,7 +320,22 @@ block content
     .vert-space-x1
       .row
         .col-sm-6
-          h4 Action History
+          if component.formId === 'AssembledAPA'
+            h4 Action History (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>Existing workflow actions can be accessed through this component's 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
+                | workflow</b>
+          else if component.formId === 'APAFrame'
+            h4 Action History (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>Existing workflow actions can be accessed through this component's 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
+                | workflow</b>
+          else 
+            h4 Action History
 
           hr
 
@@ -346,19 +361,27 @@ block content
                       +dateTimeFormat(action.lastEditDate)
 
         .col-sm-6
-          h4 Select an Action Type to Perform
+          if component.formId === 'AssembledAPA'
+            h4 Select an Action Type to Perform (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>New workflow actions must be performed through this component's 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
+                | workflow</b>
+          else if component.formId === 'APAFrame'
+            h4 Select an Action Type to Perform (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>New workflow actions must be performed through this component's Frame Assembly 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
+                | workflow</b>
+          else 
+            h4 Select an Action Type to Perform
 
           hr
 
           each typeForm in actionTypeForms
             if typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash')
               a.actionbutton.btn.btn-success(href = `/action/${typeForm.formId}/${component.componentUuid}`) #{typeForm.formName}
-
-          if component.formId === 'AssembledAPA'
-            .vert-space-x1
-              p <b>Actions of types not shown here must be performed through this component's 'APA Assembly' workflow</b>
-          else if component.formId === 'APAFrame'
-            .vert-space-x1
-              p <b>Actions of types not shown here must be performed through this component's 'Frame Assembly' workflow</b>
 
     .vert-space-x2
