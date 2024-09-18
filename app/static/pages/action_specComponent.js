@@ -81,7 +81,7 @@ function SubmitData(submission) {
     // If neither of these is the case, then we can simply proceed with standard post-submission redirection:
     //   - if the action originates from a workflow, go to the page for updating the workflow path step results
     //   - if this is a standalone action, go to the page for viewing the action record
-    const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
+    const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
     const installation_typeFormIDs = [
       'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB', 'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
       'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
