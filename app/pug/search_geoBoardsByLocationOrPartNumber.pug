@@ -45,15 +45,26 @@ block content
           .vert-space-x2
             hr
 
-            h4 Select Status
+            h4 Select Board Acceptance Status
 
             .vert-space-x1 
               p Select a status below ... this is an optional parameter.
 
-            select.form-control#statusSelection
+            select.form-control#acceptanceStatusSelection
               option(value = 'any') (any)
-              option(value = 'accepted') Accepted at Factory 
-              option(value = 'rejected') Rejected at Factory 
+              option(value = 'accepted') Board Accepted at Factory 
+              option(value = 'rejected') Board Rejected at Factory
+
+          .vert-space-x2
+            h4 Select Tooth Strip Attachment Status
+
+            .vert-space-x1 
+              p Select a status below ... this is an optional parameter.
+
+            select.form-control#toothStripStatusSelection
+              option(value = 'any') (any)
+              option(value = 'attached') Tooth Strip Attached
+              option(value = 'notAttached') Tooth Strip Not Yet Attached
 
         .col-md-3
           h4 Select Part Number

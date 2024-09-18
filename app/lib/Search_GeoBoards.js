@@ -6,7 +6,7 @@ const { db } = require('./db');
 
 
 /// Retrieve a list of geometry boards that are at a specified location across all part numbers
-async function boardsByLocation(location, boardStatus) {
+async function boardsByLocation(location, acceptanceStatus, toothStripStatus) {
   let aggregation_stages = [];
 
   // Retrieve all 'Geometry Board' records that have the same location as the specified one
@@ -28,8 +28,6 @@ async function boardsByLocation(location, boardStatus) {
       partNumber: { '$first': '$data.partNumber' },
       partString: { '$first': '$data.partString' },
       componentUuid: { '$first': '$componentUuid' },
-      ukid: { '$first': '$data.typeRecordNumber' },
-      receptionDate: { '$first': '$reception.date' },
     },
   });
 
@@ -42,8 +40,6 @@ async function boardsByLocation(location, boardStatus) {
         partString: '$partString',
       },
       componentUuid: { $push: '$componentUuid' },
-      ukid: { $push: '$ukid' },
-      receptionDate: { $push: '$receptionDate' },
     }
   });
 
@@ -53,8 +49,7 @@ async function boardsByLocation(location, boardStatus) {
     .toArray();
 
   // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
-  // In addition, if a board status has been specified, remove any boards that do not have a matching status here ...
-  // ... remembering that a board could be 'accepted' by either having a 'Factory Rejection' action performed with one of the two 'accepted' statuses, or by not having the action performed at all
+  // In addition, filter the results based on any optional search parameters - board acceptance status and tooth strip attachment status
   let cleanedResults = [];
 
   for (const boardGroup of results) {
@@ -62,40 +57,62 @@ async function boardsByLocation(location, boardStatus) {
 
     cleanedBoardGroup.partNumber = boardGroup._id.partNumber;
     cleanedBoardGroup.partString = boardGroup._id.partString;
-    cleanedBoardGroup.ukids = boardGroup.ukid;
-    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedBoardGroup.componentUuids = [];
+    cleanedBoardGroup.ukids = [];
+    cleanedBoardGroup.receptionDates = [];
     cleanedBoardGroup.installedOnAPA = [];
 
     for (const boardUuid of boardGroup.componentUuid) {
-      let includeBoard = false;
+      let boardAccepted = false;
+      let includeBoard_basedOnAcceptanceStatus = false;
 
-      if (boardStatus === 'any') {
-        includeBoard = true;
-      } else {
-        let match_condition = {
-          typeFormId: 'FactoryBoardRejection',
-          componentUuid: MUUID.from(boardUuid).toString(),
-        };
+      let match_condition = {
+        typeFormId: 'FactoryBoardRejection',
+        componentUuid: MUUID.from(boardUuid).toString(),
+      };
 
-        const rejectionActions = await Actions.list(match_condition);
+      const rejectionActions = await Actions.list(match_condition);
 
-        if (rejectionActions.length === 0) {
-          if (boardStatus === 'accepted') includeBoard = true;
-        } else {
-          const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
-          const disposition = rejectionAction.data.disposition;
+      if (rejectionActions.length === 0) boardAccepted = true;
+      else {
+        const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
+        const disposition = rejectionAction.data.disposition;
 
-          if ((boardStatus === 'accepted') && ((disposition === 'useAsIs') || (disposition === 'remediated'))) includeBoard = true;
-          else if ((boardStatus === 'rejected') && (disposition === 'rejected')) includeBoard = true;
-        }
+        if (((disposition === 'useAsIs') || (disposition === 'remediated'))) boardAccepted = true;
       }
 
-      if (includeBoard) {
-        cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+      if ((acceptanceStatus === 'any') || ((acceptanceStatus === 'accepted') && (boardAccepted == true)) || (acceptanceStatus == 'rejected') && (boardAccepted == false)) {
+        includeBoard_basedOnAcceptanceStatus = true;
+      }
 
+      let toothStripAttached = false;
+      let includeBoard_basedOnToothStripStatus = false;
+
+      match_condition = {
+        typeFormId: 'BoardToothStripAttachment',
+        componentUuid: MUUID.from(boardUuid).toString(),
+      }
+
+      const toothStripAttachmentActions = await Actions.list(match_condition);
+
+      if (toothStripAttachmentActions.length > 0) toothStripAttached = true;
+
+      if ((toothStripStatus === 'any') || ((toothStripStatus === 'attached') && (toothStripAttached == true)) || (toothStripStatus == 'notAttached') && (toothStripAttached == false)) {
+        includeBoard_basedOnToothStripStatus = true;
+      }
+
+      if (includeBoard_basedOnAcceptanceStatus && includeBoard_basedOnToothStripStatus) {
         const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
+        cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+        cleanedBoardGroup.ukids.push(board.data.typeRecordNumber);
+
+        if (board.reception) {
+          cleanedBoardGroup.receptionDates.push(board.reception.date);
+        } else {
+          cleanedBoardGroup.receptionDates.push('[No Date Found!]');
+        }
 
         if (location === 'installed_on_APA') {
           if (board.reception.detail) {
@@ -112,7 +129,7 @@ async function boardsByLocation(location, boardStatus) {
       }
     }
 
-    cleanedResults.push(cleanedBoardGroup);
+    if (cleanedBoardGroup.componentUuids.length > 0) cleanedResults.push(cleanedBoardGroup);
   }
 
   // Return the list of boards grouped by part numbers
@@ -121,7 +138,7 @@ async function boardsByLocation(location, boardStatus) {
 
 
 /// Retrieve a list of geometry boards of a specified part number across all board locations
-async function boardsByPartNumber(partNumber, boardStatus) {
+async function boardsByPartNumber(partNumber, acceptanceStatus, toothStripStatus) {
   let aggregation_stages = [];
 
   // Retrieve all 'Geometry Board' records that have the same part number as the specified one
@@ -141,8 +158,6 @@ async function boardsByPartNumber(partNumber, boardStatus) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      ukid: { '$first': '$data.typeRecordNumber' },
-      receptionDate: { '$first': '$reception.date' },
       receptionLocation: { '$first': '$reception.location' },
     },
   });
@@ -153,8 +168,6 @@ async function boardsByPartNumber(partNumber, boardStatus) {
     $group: {
       _id: { receptionLocation: '$receptionLocation' },
       componentUuid: { $push: '$componentUuid' },
-      ukid: { $push: '$ukid' },
-      receptionDate: { $push: '$receptionDate' },
     }
   });
 
@@ -164,48 +177,69 @@ async function boardsByPartNumber(partNumber, boardStatus) {
     .toArray();
 
   // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
-  // In addition, if a board status has been specified, remove any boards that do not have a matching status here ...
-  // ... remembering that a board could be 'accepted' by either having a 'Factory Rejection' action performed with one of the two 'accepted' statuses, or by not having the action performed at all
+  // In addition, filter the results based on any optional search parameters - board acceptance status and tooth strip attachment status
   let cleanedResults = [];
 
   for (const boardGroup of results) {
     let cleanedBoardGroup = {};
 
     cleanedBoardGroup.receptionLocation = boardGroup._id.receptionLocation;
-    cleanedBoardGroup.ukids = boardGroup.ukid;
-    cleanedBoardGroup.receptionDates = boardGroup.receptionDate;
 
     cleanedBoardGroup.componentUuids = [];
+    cleanedBoardGroup.ukids = [];
+    cleanedBoardGroup.receptionDates = [];
     cleanedBoardGroup.installedOnAPA = [];
 
     for (const boardUuid of boardGroup.componentUuid) {
-      let includeBoard = false;
+      let boardAccepted = false;
+      let includeBoard_basedOnAcceptanceStatus = false;
 
-      if (boardStatus === 'any') {
-        includeBoard = true;
-      } else {
-        let match_condition = {
-          typeFormId: 'FactoryBoardRejection',
-          componentUuid: MUUID.from(boardUuid).toString(),
-        };
+      let match_condition = {
+        typeFormId: 'FactoryBoardRejection',
+        componentUuid: MUUID.from(boardUuid).toString(),
+      };
 
-        const rejectionActions = await Actions.list(match_condition);
+      const rejectionActions = await Actions.list(match_condition);
 
-        if (rejectionActions.length === 0) {
-          if (boardStatus === 'accepted') includeBoard = true;
-        } else {
-          const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
-          const disposition = rejectionAction.data.disposition;
+      if (rejectionActions.length === 0) boardAccepted = true;
+      else {
+        const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
+        const disposition = rejectionAction.data.disposition;
 
-          if ((boardStatus === 'accepted') && ((disposition === 'useAsIs') || (disposition === 'remediated'))) includeBoard = true;
-          else if ((boardStatus === 'rejected') && (disposition === 'rejected')) includeBoard = true;
-        }
+        if (((disposition === 'useAsIs') || (disposition === 'remediated'))) boardAccepted = true;
       }
 
-      if (includeBoard) {
-        cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+      if ((acceptanceStatus === 'any') || ((acceptanceStatus === 'accepted') && (boardAccepted == true)) || (acceptanceStatus == 'rejected') && (boardAccepted == false)) {
+        includeBoard_basedOnAcceptanceStatus = true;
+      }
 
+      let toothStripAttached = false;
+      let includeBoard_basedOnToothStripStatus = false;
+
+      match_condition = {
+        typeFormId: 'BoardToothStripAttachment',
+        componentUuid: MUUID.from(boardUuid).toString(),
+      }
+
+      const toothStripAttachmentActions = await Actions.list(match_condition);
+
+      if (toothStripAttachmentActions.length > 0) toothStripAttached = true;
+
+      if ((toothStripStatus === 'any') || ((toothStripStatus === 'attached') && (toothStripAttached == true)) || (toothStripStatus == 'notAttached') && (toothStripAttached == false)) {
+        includeBoard_basedOnToothStripStatus = true;
+      }
+
+      if (includeBoard_basedOnAcceptanceStatus && includeBoard_basedOnToothStripStatus) {
         const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
+        cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+        cleanedBoardGroup.ukids.push(board.data.typeRecordNumber);
+
+        if (board.reception) {
+          cleanedBoardGroup.receptionDates.push(board.reception.date);
+        } else {
+          cleanedBoardGroup.receptionDates.push('[No Date Found!]');
+        }
 
         if (boardGroup._id.receptionLocation === 'installed_on_APA') {
           if (board.reception.detail) {
@@ -222,7 +256,7 @@ async function boardsByPartNumber(partNumber, boardStatus) {
       }
     }
 
-    cleanedResults.push(cleanedBoardGroup);
+    if (cleanedBoardGroup.componentUuids.length > 0) cleanedResults.push(cleanedBoardGroup);
   }
 
   // Return the list of boards grouped by location

@@ -122,7 +122,7 @@ block content
     .vert-space-x1
       if (action.typeFormId == 'x_tension_testing')
         dt Comparison to this layer's winding action:
-        dd Found #{numberOfReplacedWires[0]} on Side A and #{numberOfReplacedWires[1]} on Side B 
+        dd The winding action indicates <u>#{numberOfReplacedWires[0]} replaced wires on Side A</u> and <u>#{numberOfReplacedWires[1]} replaced wires on Side B</u> 
 
         if (retensionedWires_versions[0] !== null)
           dt Most recently re-tensioned wires / wire segments (comparing versions #{retensionedWires_versions[1]} and #{retensionedWires_versions[0]}):
