@@ -1,7 +1,8 @@
-// Declare variables to hold the (initially empty) user-specified board location, part number and status
+// Declare variables to hold the (initially empty) user-specified board location, part number, board acceptance status and tooth strip attachment status
 let boardLocation = null;
 let boardPartNumber = null;
-let boardStatus = 'any';
+let acceptanceStatus = 'any';
+let toothStripStatus = 'any';
 
 
 // Run a specific function when the page is loaded
@@ -20,9 +21,14 @@ async function renderSearchForms() {
     boardPartNumber = $('#partNumberSelection').val();
   });
 
-  // When the selected status is changed, get the newly selected status
-  $('#statusSelection').on('change', async function () {
-    boardStatus = $('#statusSelection').val();
+  // When the selected board acceptance status is changed, get the newly selected status
+  $('#acceptanceStatusSelection').on('change', async function () {
+    acceptanceStatus = $('#acceptanceStatusSelection').val();
+  });
+
+  // When the selected tooth strip attachment status is changed, get the newly selected status
+  $('#toothStripStatusSelection').on('change', async function () {
+    toothStripStatus = $('#toothStripStatusSelection').val();
   });
 
   // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
@@ -34,7 +40,7 @@ async function renderSearchForms() {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/geoBoardsByLocation/${boardLocation}/${boardStatus}`,
+        url: `/json/search/geoBoardsByLocation/${boardLocation}/${acceptanceStatus}/${toothStripStatus}`,
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
@@ -42,7 +48,7 @@ async function renderSearchForms() {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/geoBoardsByPartNumber/${boardPartNumber}/${boardStatus}`,
+        url: `/json/search/geoBoardsByPartNumber/${boardPartNumber}/${acceptanceStatus}/${toothStripStatus}`,
         dataType: 'json',
         success: postSuccess_partNumber,
       }).fail(postFail);
@@ -71,7 +77,7 @@ function postSuccess_location(result) {
 
   // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>There are no geometry boards at the specified location</b>');
+    $('#results').append('<b>There are no geometry boards at the given location with the specified options</b>');
   } else {
     for (const boardGroup of result) {
       const groupCount = `
@@ -141,7 +147,7 @@ function postSuccess_partNumber(result) {
 
   // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>No geometry boards of the given part number are at any location</b>');
+    $('#results').append('<b>There are no geometry boards of the given part number and specified options at any location</b>');
   } else {
     for (const boardGroup of result) {
       const groupCount = `
