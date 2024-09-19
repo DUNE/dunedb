@@ -98,6 +98,18 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       }
     }
 
+    if (component.formId === 'CEAdapterBoardShipment') {
+      for (const info of component.data.ceAdapterBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const boardRecord = await Components.retrieve(uuid);
+
+          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.formName, boardRecord.shortUuid]);
+        }
+      }
+    }
+
     if (component.formId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
         let uuid = info.component_uuid;
@@ -213,6 +225,18 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
 
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const boardRecord = await Components.retrieve(uuid);
+
+          if (boardRecord) shortUUIDs.push([boardRecord.data.typeRecordNumber, boardRecord.shortUuid, boardRecord.formName]);
+        }
+      }
+    }
+
+    if (component.formId === 'CEAdapterBoardShipment') {
+      for (const info of component.data.ceAdapterBoardUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -389,6 +413,18 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
           const boardRecord = await Components.retrieve(uuid);
 
           if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.data.partNumber]);
+        }
+      }
+    }
+
+    if (component.formId === 'CEAdapterBoardShipment') {
+      for (const info of component.data.ceAdapterBoardUuiDs) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const boardRecord = await Components.retrieve(uuid);
+
+          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.formName]);
         }
       }
     }
@@ -629,6 +665,14 @@ router.get('/component/' + utils.uuid_regex + '/updateLocations/:location/:date'
     } else if (component.formId === 'BoardShipment') {
       // Extract the UUID and update the location information of each board in a shipment of boards, and then update the location information of the shipment itself
       for (const board of component.data.boardUuiDs) {
+        const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
+      }
+
+      const result = await Components.updateLocation(req.params.uuid, req.params.location, req.params.date, '');
+      url = (req.params.location === 'in_transit') ? `/component/${req.params.uuid}` : `/action/${req.query.actionId}`;
+    } else if (component.formId === 'CEAdapterBoardShipment') {
+      // Extract the UUID and update the location information of each board in a shipment of CE Adapter boards, and then update the location information of the shipment itself
+      for (const board of component.data.ceAdapterBoardUuiDs) {
         const result = await Components.updateLocation(board.component_uuid, req.params.location, req.params.date, '');
       }
 

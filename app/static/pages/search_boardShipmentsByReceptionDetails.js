@@ -142,8 +142,9 @@ function postSuccess(result) {
         <th scope = 'col' width = '7%'>Boards</th>
         <th scope = 'col' width = '9%'>Origin</th>
         <th scope = 'col' width = '9%'>Destination</th>
+        <th scope = 'col' width = '9%'>Creation Date</th>
         <th scope = 'col' width = '9%'>Reception Date</th>
-        <th scope = 'col' width = '36%'>Shipment Reception Comment</th>
+        <th scope = 'col' width = '27%'>Shipment Reception Comment</th>
         <th scope = 'col' width = '12%'>Search Comment</th>
       </tr>`;
 
@@ -160,6 +161,7 @@ function postSuccess(result) {
           <td>${shipment.numberOfBoards}</td>
           <td>${dictionary_locations[shipment.origin]}</td>
           <td>${dictionary_locations[shipment.destination]}</td>
+          <td>${shipment.creationDate}</td>
           ${actionIdLinkLine}
           <td>${shipment.receptionComment}</td>
           <td>${shipment.searchComment}</td>

@@ -32,6 +32,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       data: { '$first': '$data' },
+      startDate: { '$first': '$validity.startDate'},
     },
   });
 
@@ -76,6 +77,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
     let shipment = {
       uuid: shipmentRecord.componentUuid,
       numberOfBoards: shipmentRecord.data.boardUuiDs.length,
+      creationDate: (shipmentRecord.startDate.toISOString().split('T'))[0],
       origin: shipmentRecord.data.originOfShipment,
       destination: shipmentRecord.data.destinationOfShipment,
       receptionDate: '[n.a.]',

@@ -92,6 +92,29 @@ block allbody
                     td #{info[0]}
                     td #{info[1]}
                     td #{info[2]}
+      else if component.formId === 'CEAdapterBoardShipment'
+        .vert-space-x1.border-success.border.rounded.p-2
+          dt Origin Location 
+          dd #{dictionary_locations[component.data.originOfShipment]}
+
+          dt Destination Location
+          dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+          dt Boards in Shipment
+          dd
+            table.table
+              thead
+                tr
+                  th.col-sm-1 UUID
+                  th.col-sm-1 Type
+                  th.col-sm-1 UW ID
+
+              tbody
+                each info in collectionDetails
+                  tr
+                    td #{info[0]}
+                    td #{info[2]}
+                    td #{info[1]}
       else if component.formId === 'DWAComponentShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location
