@@ -38,14 +38,10 @@ router.get('/search/geoBoardsByPartNumber/:partNumber/:acceptanceStatus/:toothSt
 
 
 /// Search for geometry boards that have a specified visual inspection disposition
-router.get('/search/geoBoardsByVisualInspection/:disposition', async function (req, res, next) {
+router.get('/search/geoBoardsByVisualInspection/:disposition/:issue', async function (req, res, next) {
   try {
-    // This search query can have an optional query string for a specific inspection issue
-    // Parse out the string if it has been provided (as a non-empty string), or otherwise set it to 'null'
-    const issue = (req.query.issue !== '') ? req.query.issue : null;
-
-    // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition and optional issue
-    const boardsByLocation = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, issue);
+    // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition
+    const boardsByLocation = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, req.params.issue);
 
     // Return the list in JSON format
     return res.json(boardsByLocation);
