@@ -1,83 +1,75 @@
-// Declare variables to hold the (initially empty) user-specified visual inspection disposition, issue and/or order number
+// Declare variables to hold the (initially empty) user-specified visual inspection disposition, issue and order number
 let disposition = null;
-let issue = '';
+let issue = 'any';
 let orderNumber = null;
 
 
-// Main function
-$(function () {
-  // When the selected disposition is changed, get the newly selected disposition from the corresponding page element
-  // If the disposition is valid, perform the disposition search using the current values of the disposition details variables
+// Run a specific function when the page is loaded
+window.addEventListener('load', renderSearchForms);
+
+
+// Function to run when the page is loaded
+async function renderSearchForms() {
+  // When the selected disposition is changed, get the newly selected disposition 
   $('#dispositionSelection').on('change', async function () {
     disposition = $('#dispositionSelection').val();
-
-    if (disposition) performDispositionSearch();
   });
 
-  // When the selected issue is changed, get the newly selected issue if it has a value, or otherwise reset the string
-  // Then perform the disposition search using the current values of the disposition details variables
+  // When the selected issue is changed, get the newly selected issue
   $('#issueSelection').on('change', async function () {
-    if ($('#issueSelection').val()) {
-      issue = $('#issueSelection').val();
-    } else {
-      issue = '';
-    };
-
-    performDispositionSearch();
+    issue = $('#issueSelection').val();
   });
 
-  // When the entered order number is changed and the 'Enter' key is pressed, get the newly entered order number from the corresponding page element
-  // If the order number is valid, perform the appropriate jQuery 'ajax' call to make the search
-  document.getElementById('orderNumberSelection').addEventListener('keyup', function (e) {
-    if (e.key === 'Enter') {
-      orderNumber = $('#orderNumberSelection').val();
+  // When the entered order number is changed, get the newly entered order number
+  $('#orderNumberSelection').on('change', async function () {
+    orderNumber = $('#orderNumberSelection').val();
+  });
 
-      if (orderNumber) {
-        $.ajax({
-          contentType: 'application/json',
-          method: 'GET',
-          url: `/json/search/geoBoardsByOrderNumber/${orderNumber}`,
-          dataType: 'json',
-          success: postSuccess_orderNumber,
-        }).fail(postFail);
-      }
+  // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable the 'Perform Search' button while the current search is being performed
+  $('#confirmButton').on('click', function () {
+    $('#confirmButton').prop('disabled', true);
+
+    if (disposition) {
+      $.ajax({
+        contentType: 'application/json',
+        method: 'GET',
+        url: `/json/search/geoBoardsByVisualInspection/${disposition}/${issue}`,
+        dataType: 'json',
+        success: postSuccess_disposition,
+      }).fail(postFail);
+    } else if (orderNumber) {
+      $.ajax({
+        contentType: 'application/json',
+        method: 'GET',
+        url: `/json/search/geoBoardsByOrderNumber/${orderNumber}`,
+        dataType: 'json',
+        success: postSuccess_orderNumber,
+      }).fail(postFail);
     }
-  });
-});
-
-
-// Function to perform the appropriate jQuery 'ajax' call to make the disposition search
-function performDispositionSearch() {
-  $.ajax({
-    contentType: 'application/json',
-    method: 'GET',
-    url: `/json/search/geoBoardsByVisualInspection/${disposition}?issue=${issue}`,
-    dataType: 'json',
-    success: postSuccess_disposition,
-  }).fail(postFail);
+  })
 }
-
-
-// Set up a dictionary containing the visual inspection issue [key, string] pairs (taken directly from the 'Visual Inspection' action type form)
-const issuesDictionary = {
-  packagingDamaged: 'Packaging damaged',
-  scratches: 'Scratches',
-  exposedCopper: 'Exposed copper',
-  interruptedTraces: 'Copper trace(s) interrupted',
-  chipped: 'PCB chipped',
-  notFlat: 'PCB not flat',
-  incorrectGeometry: 'Incorrect geometry',
-  incorrectThickness: 'Incorrect thickness',
-  qrCodeProblem: 'QR code problem',
-  millMaxHolePlating: 'Issues with mill-max hole plating',
-  extraneousMaterialOnBoard: 'Extraneous material on board',
-  fiducialPin: 'Fiducial pin problem',
-  other: 'Other',
-};
 
 
 // Function to better format geometry board visual inspection results for display
 function formatInspectionResults(results) {
+  // Set up a dictionary containing the visual inspection issue [key, string] pairs (taken directly from the 'Visual Inspection' action type form)
+  const issuesDictionary = {
+    packagingDamaged: 'Packaging damaged',
+    scratches: 'Scratches',
+    exposedCopper: 'Exposed copper',
+    interruptedTraces: 'Copper trace(s) interrupted',
+    chipped: 'PCB chipped',
+    notFlat: 'PCB not flat',
+    incorrectGeometry: 'Incorrect geometry',
+    incorrectThickness: 'Incorrect thickness',
+    qrCodeProblem: 'QR code problem',
+    millMaxHolePlating: 'Issues with mill-max hole plating',
+    extraneousMaterialOnBoard: 'Extraneous material on board',
+    fiducialPin: 'Fiducial pin problem',
+    other: 'Other',
+  };
+
   // First, extract the entire list of possible issue keys (including both 'true' and 'false' ones) from the inspection results
   const allIssueKeys = Object.keys(results.visualInspectionIssues);
 
@@ -124,10 +116,7 @@ function postSuccess_disposition(result) {
       <td colspan = "5">The following geometry boards have been visually inspected and found to have the disposition: <b>${$('#dispositionSelection option:selected').text()}</b> and the issue: <b>${$('#issueSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
-      <td colspan = "5">They are grouped by board part number, and then ordered by last DB record edit (most recent at the top).
-        <br>
-        <hr>
-      </td>
+      <td colspan = "5"><hr></td>
     </tr>`;
 
   $('#results').append(resultsStart);
@@ -158,9 +147,9 @@ function postSuccess_disposition(result) {
       const tableStart = `
         <tr>
           <th scope = 'col' width = '10%'>Board UKID</th>
-          <th scope = 'col' width = '15%'>Part of Order</th>
+          <th scope = 'col' width = '15%'>Order Number</th>
           <th scope = 'col' width = '25%'>Visual Inspection Action</th>
-          <th scope = 'col' width = '25%'>Issue(s) Identified:</th>
+          <th scope = 'col' width = '25%'>Issue(s) Identified</th>
           <th scope = 'col' width = '25%'>Repairs Description (if applicable)</th>
         </tr>`;
 
@@ -184,22 +173,24 @@ function postSuccess_disposition(result) {
       $('#results').append('<br>');
     }
   }
-};
 
-
-// Set up a dictionary containing the visual inspection disposition [key, string] pairs (taken directly from the 'Visual Inspection' action type form)
-const dispositionsDictionary = {
-  useAsIs: 'Use As Is',
-  repair: 'Repair',
-  return: 'Return',
-  scrap: 'Scrap',
-  toBeDetermined: 'To be determined',
-  boardIsConformant: 'Board Is Conformant',
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
 
 
 // Function to run for a successful search query by order number
 function postSuccess_orderNumber(result) {
+  // Set up a dictionary containing the visual inspection disposition [key, string] pairs (taken directly from the 'Visual Inspection' action type form)
+  const dispositionsDictionary = {
+    useAsIs: 'Use As Is',
+    repair: 'Repair',
+    return: 'Return',
+    scrap: 'Scrap',
+    toBeDetermined: 'To be determined',
+    boardIsConformant: 'Board Is Conformant',
+  };
+
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
 
@@ -208,25 +199,19 @@ function postSuccess_orderNumber(result) {
       <td colspan = "4">The following geometry boards with order number: <b>${$('#orderNumberSelection').val()}</b> and at least one recorded visual inspection have been found.</td>
     </tr>
     <tr>
-      <td colspan = "4">They are grouped by visual inspection disposition, and then ordered by last DB record edit (most recent at the top).
-    </tr>
-    <tr>
-      <td colspan = "4"><b>Please note that only boards which have had a visual inspection performed on them are displayed here - there may be additional boards with this order number that have not had inspections performed.</b>
-        <br>
-        <hr>
-      </td>
+      <td colspan = "4"><b>Please note that only boards which have had a Visual Inspection action performed on them are shown here - there may be additional boards in this order that have not yet had inspections performed.</b><br><hr></td>
     </tr>`;
 
   $('#results').append(resultsStart);
 
   // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>There are no geometry boards with the specified order number and at least one recorded visual inspection</b>');
+    $('#results').append('<b>There are no geometry boards with the specified order number and at least one Visual Inspection</b>');
   } else {
     for (const boardGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "4">Found ${boardGroup.actionIds.length} boards with visual inspection disposition: <b>${dispositionsDictionary[boardGroup.disposition]}</b></td>
+          <td colspan = "4">Found ${boardGroup.actionIds.length} boards with disposition: <b>${dispositionsDictionary[boardGroup.disposition]}</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -246,7 +231,7 @@ function postSuccess_orderNumber(result) {
         <tr>
           <th scope = 'col' width = '25%'>Board UKID</th>
           <th scope = 'col' width = '25%'>Visual Inspection Action</th>
-          <th scope = 'col' width = '25%'>Issue(s) Ddentified</th>
+          <th scope = 'col' width = '25%'>Issue(s) Identified</th>
           <th scope = 'col' width = '25%'>Repairs Description (if applicable)</th>
         </tr>`;
 
@@ -269,6 +254,9 @@ function postSuccess_orderNumber(result) {
       $('#results').append('<br>');
     }
   }
+
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
 
 
