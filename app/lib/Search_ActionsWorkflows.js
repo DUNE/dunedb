@@ -8,16 +8,13 @@ const { db } = require('./db');
 async function workflowsByUUID(componentUUID) {
   let aggregation_stages = [];
 
-  // Retrieve all workflows (across all types) that have the same component UUID as the specified one
-  // For all workflows, the component UUID will always be set in the 'result' field of the first step in the path
+  // Match against the component UUID to get records of all workflows that have the same associated component as the specified one
+  // The component UUID will always be set in the 'result' field of the first step in the workflow path
   aggregation_stages.push({
     $match: { 'path.0.result': componentUUID }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the  workflow ID (i.e. each group contains all versions of the same workflow), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
@@ -40,27 +37,17 @@ async function workflowsByUUID(componentUUID) {
 
 /// Retrieve a list of non-conformance actions that have been performed on a specified component type
 async function nonConformanceByComponentType(componentType, disposition, status) {
-  // Set up 'matching' strings that can be used by MongoDB to match against specific record field values
-  // For the disposition and status, if it has been specified, just use it as the matching string ... otherwise use a fully wildcard regular expression
-  const dispositionString = (disposition) ? disposition : /(.*?)/;
-  const statusString = (status) ? status : /(.*?)/;
-
   let aggregation_stages = [];
 
-  // Retrieve all 'APA Non-Conformance' action records that match the provided component type and disposition and status matching strings
+  // Match against the type form ID and component type to get records of all NCRs performed on all components of the specified type
   aggregation_stages.push({
     $match: {
       'typeFormId': 'APANonConformance',
       'data.componentType': componentType,
-      'data.disposition': dispositionString,
-      'data.status': statusString,
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
@@ -74,18 +61,30 @@ async function nonConformanceByComponentType(componentType, disposition, status)
     },
   });
 
+  // Set up 'matching' strings for the disposition and status that can be used by MongoDB to match against specific record field values, and then match against them
+  // If either parameter has been provided as something other than 'any', just match against the provided string ... otherwise use a fully wildcard regular expression
+  const dispositionString = (disposition !== 'any') ? disposition : /(.*?)/;
+  const statusString = (status !== 'any') ? status : /(.*?)/;
+
+  aggregation_stages.push({
+    $match: {
+      'disposition': dispositionString,
+      'status': statusString,
+    }
+  });
+
   // Query the 'actions' records collection using the aggregation stages defined above
   let results = await db.collection('actions')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Add the component name to each matching record ... this needs to be retrieved from the component's own record, since it is not stored in the action record
+  // Add the corresponding component name to each matching record
   for (let result of results) {
     const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
     result.componentName = component.data.name;
   }
 
-  // Return the list of actions
+  // Return the list of matching actions
   return results;
 }
 
@@ -94,7 +93,7 @@ async function nonConformanceByComponentType(componentType, disposition, status)
 async function nonConformanceByUUID(componentUUID) {
   let aggregation_stages = [];
 
-  // Retrieve all 'APA Non-Conformance' action records that have the same component UUID as the specified one
+  // Match against the type form ID and component UUID to get records of all NCR actions performed on the specified component
   aggregation_stages.push({
     $match: {
       'typeFormId': 'APANonConformance',
@@ -102,10 +101,7 @@ async function nonConformanceByUUID(componentUUID) {
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
@@ -124,40 +120,36 @@ async function nonConformanceByUUID(componentUUID) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Add the component name to each matching record ... this needs to be retrieved from the component's own record, since it is not stored in the action record
+  // Add the corresponding component name to each matching record
   for (let result of results) {
     const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
     result.componentName = component.data.name;
   }
 
-  // Return the list of actions
+  // Return the list of  atching actions
   return results;
 }
 
 
 /// Retrieve a list of board installation actions that reference a single component, specified by its UUID
 async function boardInstallByReferencedComponent(componentUUID) {
-  // Set up a list of type form IDs which correspond to 'board installation' type actions
-  const actionTypeFormIDs = [
-    'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB',
-    'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
-    'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
-    'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
-  ];
-
   let aggregation_stages = [];
 
-  // Retrieve all board installation type action records
+  // Match against the type form ID to get records of all 'Board Installation' actions
   aggregation_stages.push({
     $match: {
-      'typeFormId': { $in: actionTypeFormIDs },
+      'typeFormId': {
+        $in: [
+          'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB',
+          'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
+          'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
+          'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
+        ]
+      },
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
@@ -175,9 +167,9 @@ async function boardInstallByReferencedComponent(componentUUID) {
     .toArray();
 
 
-  // At this stage we have a list of all 'Board Installation' action records
+  // At this point, we have a list of all 'Board Installation' action records
   // But we want to narrow this down to only those records which contain the specified component UUID in one of the 'data.boardXUuid' key/value pairs, where X = 1 -> 10 or 21
-  // Loop over the keys in each record's 'data' object, and if the value matches the specified UUID, save the record into a list
+  // Loop over the keys in each record's 'data' object, and if the value matches the specified UUID, save the record into a list to be returned
   let boardInstalls = [];
 
   if (results.length > 0) {
@@ -202,24 +194,16 @@ async function boardInstallByReferencedComponent(componentUUID) {
 
 /// Retrieve a list of winding actions that reference a single component, specified by its UUID
 async function windingByReferencedComponent(componentUUID) {
-  // Set up a list of type form IDs which correspond to 'winding' type actions
-  const actionTypeFormIDs = [
-    'g_winding', 'u_winding', 'v_winding', 'x_winding',
-  ];
-
   let aggregation_stages = [];
 
-  // Retrieve all board installation type action records
+  // Match against the type form ID to get records of all 'Winding' actions
   aggregation_stages.push({
     $match: {
-      'typeFormId': { $in: actionTypeFormIDs },
+      'typeFormId': { $in: ['g_winding', 'u_winding', 'v_winding', 'x_winding'] },
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
@@ -236,10 +220,9 @@ async function windingByReferencedComponent(componentUUID) {
     .aggregate(aggregation_stages)
     .toArray();
 
-
-  // At this stage we have a list of all 'Winding' action records
+  // At this point, we have a list of all 'Winding' action records
   // But we want to narrow this down to only those records which contain the specified component UUID in one of the 'data.bobbinGrid[X].bobbinUuid' key/value pairs, where X >= 0
-  // Loop over the keys in each record's 'data' object, and if the value matches the specified UUID, save the record into a list
+  // Loop over the keys in each record's 'data' object, and if the value matches the specified UUID, save the record into a list to be returned
   let windings = [];
 
   if (results.length > 0) {
@@ -266,7 +249,7 @@ async function windingByReferencedComponent(componentUUID) {
 async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin, destination) {
   let aggregation_stages = [];
 
-  // Retrieve all 'Single Layer Tension Measurements' action records that have the same component UUID, wire layer and location as the specified ones
+  // Match against the type form ID, component UUID, APA layer and location to get records of all 'Single Layer Tension Measurement' actions performed on the given [APA, layer] combination at the given locations
   aggregation_stages.push({
     $match: {
       'typeFormId': 'x_tension_testing',
@@ -276,10 +259,7 @@ async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
@@ -296,7 +276,7 @@ async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Set up an object to be returned ... once completed, this will contain the raw measured tensions on both sides at both locations, as well as the differences between the tensions across locations
+  // Set up an object to be returned ... once populated, this will contain the raw measured tensions on both sides at both locations, as well as the differences between the tensions across locations
   let tensions = {
     origin_actionId: null,
     origin_sideA: null,

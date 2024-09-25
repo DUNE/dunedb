@@ -16,13 +16,13 @@ block content
       hr
 
       .row
-        .col-md-3
+        .col-md-4
           h4 Select Component Type
 
           .vert-space-x1
-            p Select a component type from the options below.
+            p <b>Either</b> select a component type below <b>or</b> enter a component UUID to the right.
               br
-              | <b>This selection is a <u>required</u> search parameter.</b>
+              | <b>This is a <u>required</u> parameter.</b>
 
           select.form-control#componentTypeSelection
             option(value = '')
@@ -30,46 +30,56 @@ block content
             option(value = 'apaFrame') APA Frame 
             option(value = 'groundingMeshPanel') Grounding Mesh Panel 
 
-        .col-md-2 
+          .vert-space-x2 
+            hr
+
+            h4 Select Disposition
+
+            .vert-space-x1 
+              p Select a disposition below ... this is an optional parameter.
+                br
+                | It is only used alongside the <b>component type</b> required parameter.
+
+            select.form-control#dispositionSelection
+              option(value = 'any') (any)
+              option(value = 'useAsIs') Use As Is 
+              option(value = 'repair') Repair 
+              option(value = 'rework') Rework 
+              option(value = 'returnToSupplier') Return to Supplier 
+              option(value = 'rejectRePurpose') Reject/Re-purpose
+              option(value = 'scrap') Scrap 
+
+          .vert-space-x2 
+            h4 Select Status
+
+            .vert-space-x1 
+              p Select a status below ... this is an optional parameter.
+                br
+                | It is only used alongside the <b>component type</b> required parameter.
+
+            select.form-control#statusSelection
+              option(value = 'any') (any)
+              option(value = 'open') Open 
+              option(value = 'closed') Closed 
+
+        .col-md-1
 
         .col-md-5 
           h4 Enter Component UUID
 
           .vert-space-x1
-            p Alternatively, enter a component UUID below or take a picture of the component's QR code.
+            p <b>Either</b> enter a component UUID below <b>or</b> select a component type to the left.
               br
-              | <b>This selection is an <u>alternative required</u> search parameter.</b>
+              | <b>This is a <u>required</u> parameter.</b>
 
           .vert-space-x1 
             #componentUuidSelection
 
-      .row
-        .col-md-3 
-          h4 Select Disposition
+          .vert-space-x2
+            hr
 
-          .vert-space-x1 
-            p Select a disposition from the options below.
-
-          select.form-control#dispositionSelection
-            option(value = '') (any)
-            option(value = 'useAsIs') Use As Is 
-            option(value = 'repair') Repair 
-            option(value = 'rework') Rework 
-            option(value = 'returnToSupplier') Return to Supplier 
-            option(value = 'rejectRePurpose') Reject/Re-purpose
-            option(value = 'scrap') Scrap 
-
-      .row.vert-space-x2  
-        .col-md-3 
-          h4 Select Status 
-
-          .vert-space-x1 
-            p Select a status from the options below.
-
-          select.form-control#statusSelection
-            option(value = '') (any)
-            option(value = 'open') Open 
-            option(value = 'closed') Closed 
+            .vert-space-x2
+              button.btn-primary.btn-lg.float-right#confirmButton Perform Search
 
     .vert-space-x2
       hr
