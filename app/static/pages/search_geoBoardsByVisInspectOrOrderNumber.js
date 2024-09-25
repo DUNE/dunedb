@@ -1,8 +1,7 @@
-// Declare variables to hold the (initially empty) user-specified visual inspection disposition, issue and order number
+// Declare variables to hold the user-specified search parameters
 let disposition = null;
 let issue = 'any';
 let orderNumber = null;
-
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -10,17 +9,15 @@ window.addEventListener('load', renderSearchForms);
 
 // Function to run when the page is loaded
 async function renderSearchForms() {
-  // When the selected disposition is changed, get the newly selected disposition 
+  // Get and set the value of any search parameter that is changed
   $('#dispositionSelection').on('change', async function () {
     disposition = $('#dispositionSelection').val();
   });
 
-  // When the selected issue is changed, get the newly selected issue
   $('#issueSelection').on('change', async function () {
     issue = $('#issueSelection').val();
   });
 
-  // When the entered order number is changed, get the newly entered order number
   $('#orderNumberSelection').on('change', async function () {
     orderNumber = $('#orderNumberSelection').val();
   });
@@ -268,4 +265,7 @@ function postFail(result, statusCode, statusMsg) {
   } else {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
+
+  // Re-enable the 'Perform Search' button for the next search
+  $('#confirmButton').prop('disabled', false);
 };

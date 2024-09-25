@@ -1,9 +1,8 @@
-// Declare variables to hold the (initially empty) user-specified board location, part number, board acceptance status and tooth strip attachment status
+// Declare variables to hold the user-specified search parameters
 let boardLocation = null;
 let boardPartNumber = null;
 let acceptanceStatus = 'any';
 let toothStripStatus = 'any';
-
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -11,22 +10,19 @@ window.addEventListener('load', renderSearchForms);
 
 // Function to run when the page is loaded
 async function renderSearchForms() {
-  // When the selected location is changed, get the newly selected location
+  // Get and set the value of any search parameter that is changed
   $('#locationSelection').on('change', async function () {
     boardLocation = $('#locationSelection').val();
   });
 
-  // When the selected board part number is changed, get the newly selected part number
   $('#partNumberSelection').on('change', async function () {
     boardPartNumber = $('#partNumberSelection').val();
   });
 
-  // When the selected board acceptance status is changed, get the newly selected status
   $('#acceptanceStatusSelection').on('change', async function () {
     acceptanceStatus = $('#acceptanceStatusSelection').val();
   });
 
-  // When the selected tooth strip attachment status is changed, get the newly selected status
   $('#toothStripStatusSelection').on('change', async function () {
     toothStripStatus = $('#toothStripStatusSelection').val();
   });

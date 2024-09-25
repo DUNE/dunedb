@@ -16,7 +16,7 @@ block content
       hr
 
       .row
-        .col-md-4
+        .col-md-6
           h4 Search by Action ID
 
           .vert-space-x1
@@ -24,7 +24,7 @@ block content
 
           .vert-space-x1
           .row
-            .col-md-10
+            .col-md-8
               #actionidform
 
           .vert-space-x2 
@@ -36,19 +36,23 @@ block content
               p Enter a component UUID below or take a picture of the component's QR code.
 
             .vert-space-x1 
-              #componentUuidSelection
+              .row
+                .col-md-8
+                  #componentuuidform
 
             .vert-space-x1
               p Select an action type from the options below.
 
-            select.form-control#actionTypeSelection
-              option(value = '')          
-              option(value = 'boardInstall') Board Installation (any layer, any side, any position)
-              option(value = 'winding') Winding (any layer)
+              .row
+                .col-md-8
+                  select.form-control#actionTypeSelection
+                    option(value = '')          
+                    option(value = 'boardInstall') Board Installation (any layer, any side, any position)
+                    option(value = 'winding') Winding (any layer)
 
         .col-md-1
 
-        .col-md-7
+        .col-md-5
           h4 Search Results
 
           .vert-space-x1

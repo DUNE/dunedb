@@ -1,6 +1,6 @@
-// Declare variables to hold the (initially empty) user-specified component UUID and desired action type
+// Declare variables to hold the user-specified search parameters
 let componentUuid = null;
-let actionType = '';
+let actionType = null;
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -21,24 +21,7 @@ async function renderSearchForms() {
 
   const actionIdForm = await Formio.createForm(document.getElementById('actionidform'), actionIdSchema);
 
-  // If a valid ID is entered, create the URL for the corresponding action's information page, and then go to that page
-  actionIdForm.on('change', function () {
-    if (actionIdForm.isValid()) {
-      const actionId = actionIdForm.submission.data.actionId;
-
-      if (actionId && actionId.length === 24) window.location.href = `/action/${actionId}`;
-    }
-  });
-
-  // When the selected action type is changed, get the newly selected type
-  // If a valid UUID has been entered and an action type has been selected, perform the search
-  $('#actionTypeSelection').on('change', async function () {
-    actionType = $('#actionTypeSelection').val();
-
-    if (componentUuid && componentUuid.length === 36 && actionType !== '') performSearch();
-  });
-
-  // Create a Formio form consisting of a component UUID input box, and render it in the page element called 'componentUuidSelection'
+  // Create a Formio form consisting of a component UUID input box, and render it in the page element called 'componentuuidform'
   const componentUuidSchema = {
     components: [{
       type: 'ComponentUUID',
@@ -49,9 +32,20 @@ async function renderSearchForms() {
     }],
   }
 
-  const componentUuidForm = await Formio.createForm(document.getElementById('componentUuidSelection'), componentUuidSchema);
+  const componentUuidForm = await Formio.createForm(document.getElementById('componentuuidform'), componentUuidSchema);
 
-  // If a valid UUID has been entered and an action type has been selected, perform the search
+  // When the content of the action ID input box is changed, get the text string from the box
+  // If the string is consistent with a valid ID, create the URL for the corresponding action's information page, and then go to that page
+  actionIdForm.on('change', function () {
+    if (actionIdForm.isValid()) {
+      const actionId = actionIdForm.submission.data.actionId;
+
+      if (actionId && actionId.length === 24) window.location.href = `/action/${actionId}`;
+    }
+  });
+
+  // When the content of the UUID input box is changed, get the text string from the box
+  // If the string is consistent with a valid UUID, and an action type has been selected, perform the search
   componentUuidForm.on('change', function () {
     if (componentUuidForm.isValid()) {
       componentUuid = componentUuidForm.submission.data.componentUuid;
@@ -59,10 +53,18 @@ async function renderSearchForms() {
       if (componentUuid && componentUuid.length === 36 && actionType !== '') performSearch();
     }
   });
+
+  // Get and set the value of the action type search parameter as it is changed
+  // If a valid UUID has been entered and an action type has been selected, perform the search
+  $('#actionTypeSelection').on('change', async function () {
+    actionType = $('#actionTypeSelection').val();
+
+    if (componentUuid && componentUuid.length === 36 && actionType !== '') performSearch();
+  });
 }
 
 
-// Function to perform the appropriate jQuery 'ajax' call to make the search by referenced UUID
+// Function to perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
 function performSearch() {
   $.ajax({
     contentType: 'application/json',
