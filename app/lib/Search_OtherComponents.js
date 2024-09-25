@@ -13,7 +13,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 
   let comp_aggregation_stages = [];
 
-  // Retrieve all shipment component records that match the origin and destination location matching strings
+  // Match against the type form ID and both locations to get records of all 'Board Shipment' components that were supposed to travel between the specified locations
   comp_aggregation_stages.push({
     $match: {
       'formId': 'BoardShipment',
@@ -22,17 +22,14 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       data: { '$first': '$data' },
-      startDate: { '$first': '$validity.startDate'},
+      startDate: { '$first': '$validity.startDate' },
     },
   });
 
@@ -41,7 +38,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
     .aggregate(comp_aggregation_stages)
     .toArray();
 
-  // At this stage we have a list of 'Board Shipment' component records that:
+  // At this point, we have a list of 'Board Shipment' component records that:
   //   - originated at the specified origin location (if one was specified), or at any location (if not)
   //   - were supposed to end up at the specified destination location (if one was specified), or at any location (if not)
   // But what we actually want is a combination of some information from both the shipment component record and the corresponding reception action record (if the shipment has been received)
@@ -49,9 +46,9 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 
   // For each shipment record ...
   for (const shipmentRecord of component_results) {
-    // Set up a query to the 'actions' records collection to retrieve the record of the most recent 'Board Shipment Reception' action performed on this shipment (match by shipment UUID)
     let action_aggregation_stages = [];
 
+    // Match against the type form ID and component UUID to get records of all 'Board Reception' actions performed on the specified board shipment component
     action_aggregation_stages.push({
       $match: {
         'typeFormId': 'BoardReception',
@@ -59,6 +56,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
       }
     });
 
+    // Select the latest version of each record, and pass through only the fields required for later use
     action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
     action_aggregation_stages.push({
       $group: {
@@ -69,6 +67,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
       },
     });
 
+    // Query the 'actions' records collection using the aggregation stages defined above
     let action_results = await db.collection('actions')
       .aggregate(action_aggregation_stages)
       .toArray();
@@ -148,7 +147,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 async function meshesByLocation(location) {
   let aggregation_stages = [];
 
-  // Retrieve all 'Grounding Mesh Panel' records that have the same location as the specified one
+  // Match against the type form ID and specified location to get records of all 'Grounding Mesh Panel' components currently at this location
   aggregation_stages.push({
     $match: {
       'formId': 'GroundingMeshPanel',
@@ -156,54 +155,56 @@ async function meshesByLocation(location) {
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
       partNumber: { '$first': '$data.meshPanelPartNumber' },
       componentUuid: { '$first': '$componentUuid' },
-      dunePid: { '$first': '$data.name' },
-      receptionDate: { '$first': '$reception.date' },
     },
   });
 
-  // We want to actually display the matched meshes grouped by the mesh part numbers
-  // So group the records according to the mesh part number and corresponding string, and then add the fields to be returned for each mesh in each group
+  // Group the records according to the mesh part number and corresponding string, and pass through the fields required for later use
   aggregation_stages.push({
     $group: {
       _id: { partNumber: '$partNumber' },
       componentUuid: { $push: '$componentUuid' },
-      dunePid: { $push: '$dunePid' },
-      receptionDate: { $push: '$receptionDate' },
     }
   });
+
+  // Sort the record groups to be in numerical order of the part number
+  aggregation_stages.push({ $sort: { '_id.partNumber': 1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let results = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  // Reorganise the query results to make it easier to display them on the interface page
   let cleanedResults = [];
 
   for (const meshGroup of results) {
     let cleanedMeshGroup = {};
 
     cleanedMeshGroup.partNumber = meshGroup._id.partNumber;
-    cleanedMeshGroup.dunePids = meshGroup.dunePid;
-    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedMeshGroup.componentUuids = [];
+    cleanedMeshGroup.dunePids = [];
+    cleanedMeshGroup.receptionDates = [];
     cleanedMeshGroup.installedOnAPA = [];
 
     for (const meshUuid of meshGroup.componentUuid) {
-      cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-
       const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
+
+      cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
+      cleanedMeshGroup.dunePids.push(mesh.data.name);
+
+      if (mesh.reception) {
+        cleanedMeshGroup.receptionDates.push(mesh.reception.date);
+      } else {
+        cleanedMeshGroup.receptionDates.push('[No Date Found!]');
+      }
 
       if (location === 'installed_on_APA') {
         if (mesh.reception.detail) {
@@ -219,7 +220,7 @@ async function meshesByLocation(location) {
       }
     }
 
-    cleanedResults.push(cleanedMeshGroup);
+    if (cleanedMeshGroup.componentUuids.length > 0) cleanedResults.push(cleanedMeshGroup);
   }
 
   // Return the list of meshes grouped by part numbers
@@ -231,7 +232,7 @@ async function meshesByLocation(location) {
 async function meshesByPartNumber(partNumber) {
   let aggregation_stages = [];
 
-  // Retrieve all 'Grounding Mesh Panel' records that have the same part number as the specified one
+  // Match against the type form ID and specified part number to get records of all 'Grounding Mesh Panel' components of this part number
   aggregation_stages.push({
     $match: {
       'formId': 'GroundingMeshPanel',
@@ -239,54 +240,56 @@ async function meshesByPartNumber(partNumber) {
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      dunePid: { '$first': '$data.name' },
-      receptionDate: { '$first': '$reception.date' },
       receptionLocation: { '$first': '$reception.location' },
     },
   });
 
-  // We want to actually display the matched meshes grouped by the location
-  // So group the records according to the location, and then add the fields to be returned for each mesh in each group
+  // Group the records according to the location, and pass through the fields required for later use
   aggregation_stages.push({
     $group: {
       _id: { receptionLocation: '$receptionLocation' },
       componentUuid: { $push: '$componentUuid' },
-      dunePid: { $push: '$dunePid' },
-      receptionDate: { $push: '$receptionDate' },
     }
   });
+
+  // Sort the record groups to be in alphabetical order of the location
+  aggregation_stages.push({ $sort: { '_id.receptionLocation': 1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let results = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  // Reorganise the query results to make it easier to display them on the interface page
   let cleanedResults = [];
 
   for (const meshGroup of results) {
     let cleanedMeshGroup = {};
 
     cleanedMeshGroup.receptionLocation = meshGroup._id.receptionLocation;
-    cleanedMeshGroup.dunePids = meshGroup.dunePid;
-    cleanedMeshGroup.receptionDates = meshGroup.receptionDate;
 
     cleanedMeshGroup.componentUuids = [];
+    cleanedMeshGroup.dunePids = [];
+    cleanedMeshGroup.receptionDates = [];
     cleanedMeshGroup.installedOnAPA = [];
 
     for (const meshUuid of meshGroup.componentUuid) {
-      cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-
       const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
+
+      cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
+      cleanedMeshGroup.dunePids.push(mesh.data.name);
+
+      if (mesh.reception) {
+        cleanedMeshGroup.receptionDates.push(mesh.reception.date);
+      } else {
+        cleanedMeshGroup.receptionDates.push('[No Date Found!]');
+      }
 
       if (meshGroup._id.receptionLocation === 'installed_on_APA') {
         if (mesh.reception.detail) {
@@ -302,7 +305,7 @@ async function meshesByPartNumber(partNumber) {
       }
     }
 
-    cleanedResults.push(cleanedMeshGroup);
+    if (cleanedMeshGroup.componentUuids.length > 0) cleanedResults.push(cleanedMeshGroup);
   }
 
   // Return the list of meshes grouped by reception location
@@ -312,51 +315,43 @@ async function meshesByPartNumber(partNumber) {
 
 /// Retrieve a list of populated board kit components that are at a specified location across all component types
 async function boardKitComponentsByLocation(location) {
-  // Set up a list of component type form IDs which can be found in a populated board kit
-  const componentTypeFormIDs = ['CRBoard', 'GBiasBoard', 'SHVBoard', 'CableHarness'];
-
   let aggregation_stages = [];
 
-  // Retrieve all component records that have the same type as those that could be in a populated board kit, and the same location as the specified one
+  // Match against the type form ID and specified location to get records of all populated board kit components currently at this location
   aggregation_stages.push({
     $match: {
-      'formId': { $in: componentTypeFormIDs },
+      'formId': { $in: ['CRBoard', 'GBiasBoard', 'SHVBoard', 'CableHarness'] },
       'reception.location': location,
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       type: { '$first': '$formId' },
-      dunePid: { '$first': '$data.name' },
-      receptionDate: { '$first': '$reception.date' },
     },
   });
 
-  // We want to actually display the matched components grouped by the component type form ID
-  // So group the records according to the component type form IDs, and then add the fields to be returned for each component in each group
+  // Group the records according to the component type form IDs, and pass through the fields required for later use
   aggregation_stages.push({
     $group: {
       _id: { type: '$type' },
       componentUuid: { $push: '$componentUuid' },
-      dunePid: { $push: '$dunePid' },
-      receptionDate: { $push: '$receptionDate' },
     }
   });
+
+  // Sort the record groups to be in alphabetical order of the component type
+  aggregation_stages.push({ $sort: { '_id.type': 1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let results = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // The query results are a bit of a mess at this point, so clean them up to make it easier to display them on the search results page
+  // Reorganise the query results to make it easier to display them on the interface page
   let cleanedResults = [];
 
   for (const componentGroup of results) {
@@ -365,15 +360,37 @@ async function boardKitComponentsByLocation(location) {
     cleanedComponentGroup.type = componentGroup._id.type;
 
     cleanedComponentGroup.componentUuids = [];
+    cleanedComponentGroup.dunePids = [];
+    cleanedComponentGroup.receptionDates = [];
+    cleanedComponentGroup.installedOnAPA = [];
 
     for (const componentUuid of componentGroup.componentUuid) {
+      const component = await Components.retrieve(MUUID.from(componentUuid).toString());
+
       cleanedComponentGroup.componentUuids.push(MUUID.from(componentUuid).toString());
+      cleanedComponentGroup.dunePids.push(component.data.name);
+
+      if (component.reception) {
+        cleanedComponentGroup.receptionDates.push(component.reception.date);
+      } else {
+        cleanedComponentGroup.receptionDates.push('[No Date Found!]');
+      }
+
+      if (location === 'installed_on_APA') {
+        if (component.reception.detail) {
+          const apa = await Components.retrieve(component.reception.detail);
+
+          const name_splits = apa.data.name.split('-');
+          cleanedComponentGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+        } else {
+          cleanedComponentGroup.installedOnAPA.push('[No APA UUID found!]');
+        }
+      } else {
+        cleanedComponentGroup.installedOnAPA.push('[Not installed on APA]');
+      }
     }
 
-    cleanedComponentGroup.dunePids = componentGroup.dunePid;
-    cleanedComponentGroup.receptionDates = componentGroup.receptionDate;
-
-    cleanedResults.push(cleanedComponentGroup);
+    if (cleanedComponentGroup.componentUuids.length > 0) cleanedResults.push(cleanedComponentGroup);
   }
 
   // Return the list of components grouped by component type form ID
@@ -385,25 +402,29 @@ async function boardKitComponentsByLocation(location) {
 async function apasByProductionLocationAndNumber(location, number) {
   let aggregation_stages = [];
 
-  // Retrieve all assembled APAs records that have the same production location and number as the specified values
+  // Match against the type form ID to get records of all 'Assembled APA' components
   aggregation_stages.push({
     $match: {
       'formId': 'AssembledAPA',
-      'data.apaAssemblyLocation': location,
-      'data.apaNumberAtLocation': parseInt(number, 10),
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
+      data: { '$first': '$data' },
     },
+  });
+
+  // Match against the specified APA assembly location and production number
+  aggregation_stages.push({
+    $match: {
+      'data.apaAssemblyLocation': location,
+      'data.apaNumberAtLocation': parseInt(number, 10),
+    }
   });
 
   // Query the 'components' records collection using the aggregation stages defined above
@@ -420,7 +441,7 @@ async function apasByProductionLocationAndNumber(location, number) {
 async function apasByLastCompletedAssemblyStep(assemblyStep) {
   let action_aggregation_stages = [];
 
-  // Retrieve all 'Assembled APA QA Check' action records that have been performed at the specified step and completed
+  // Match against the type form ID to get records of all 'Asssmbled APA QA Check' actions that have been performed and completed at the specified assembly step
   action_aggregation_stages.push({
     $match: {
       'typeFormId': 'AssembledAPAQACheck',
@@ -429,10 +450,7 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   action_aggregation_stages.push({
     $group: {
@@ -447,7 +465,8 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
     .aggregate(action_aggregation_stages)
     .toArray();
 
-  // At this stage we have a list of completed 'Assembled APA QA Check' action records, but we actually want a list of the Assembled APA components that these actions have been performed on
+  // At this point, we have a list of completed 'Assembled APA QA Check' action records
+  // But we actually want a list of the Assembled APA components that these actions have been performed on
   // Loop over the action records, retrieve the associated component record, and add the desired information to each record
   let uuids_apasCompletedToStep = []
 
@@ -461,7 +480,7 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
     action.workflowId = component.workflowId;
   }
 
-  // Re-sort the records by the component name ... in reverse alphanumerical order
+  // Re-sort the records by the component name, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
   var byField = function (field) {
     return function (a, b) {
@@ -471,9 +490,10 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
 
   apasCompletedToStep.sort(byField('componentName'));
 
-  // Retrieve all 'Assembled APA' component records that have UUIDs which are NOT in the list of APAs which have been completed to the specified assembly step
   let comp_aggregation_stages = [];
 
+  // Now we also want a list of the Assembled APA components that these actions have NOT been performed on
+  // Match against the type form ID and component UUID to get records of all 'Assembled APA' components that the previously found 'Assembled APA QA Check' actions were NOT performed on
   comp_aggregation_stages.push({
     $match: {
       'formId': 'AssembledAPA',
@@ -481,10 +501,7 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   comp_aggregation_stages.push({
     $group: {
@@ -520,7 +537,7 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
 async function componentsByTypeAndNumber(type, typeRecordNumber) {
   let aggregation_stages = [];
 
-  // Retrieve all component records that have the same component type and type record number as the specified values
+  // Match against the type form ID and type record number to get records of all components that have the same type and number as the specified ones
   aggregation_stages.push({
     $match: {
       'formId': type,
@@ -528,10 +545,7 @@ async function componentsByTypeAndNumber(type, typeRecordNumber) {
     }
   });
 
-  // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
-  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
-  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
