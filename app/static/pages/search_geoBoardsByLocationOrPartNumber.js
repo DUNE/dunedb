@@ -27,10 +27,11 @@ async function renderSearchForms() {
     toothStripStatus = $('#toothStripStatusSelection').val();
   });
 
-  // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable the 'Perform Search' button while the current search is being performed
-  $('#confirmButton').on('click', function () {
-    $('#confirmButton').prop('disabled', true);
+  // When the appropriate confirmation button is pressed, perform the search by location using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_location').on('click', function () {
+    $('#confirmButton_location').prop('disabled', true);
+    $('#confirmButton_partNumber').prop('disabled', true);
 
     if (boardLocation) {
       $.ajax({
@@ -40,7 +41,16 @@ async function renderSearchForms() {
         dataType: 'json',
         success: postSuccess_location,
       }).fail(postFail);
-    } else if (boardPartNumber) {
+    }
+  });
+
+  // When the appropriate confirmation button is pressed, perform the search by part number using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_partNumber').on('click', function () {
+    $('#confirmButton_location').prop('disabled', true);
+    $('#confirmButton_partNumber').prop('disabled', true);
+
+    if (boardPartNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -49,7 +59,7 @@ async function renderSearchForms() {
         success: postSuccess_partNumber,
       }).fail(postFail);
     }
-  })
+  });
 }
 
 
@@ -118,8 +128,9 @@ function postSuccess_location(result) {
     }
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_location').prop('disabled', false);
+  $('#confirmButton_partNumber').prop('disabled', false);
 };
 
 
@@ -188,8 +199,9 @@ function postSuccess_partNumber(result) {
     }
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_location').prop('disabled', false);
+  $('#confirmButton_partNumber').prop('disabled', false);
 };
 
 
@@ -202,6 +214,7 @@ function postFail(result, statusCode, statusMsg) {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_location').prop('disabled', false);
+  $('#confirmButton_partNumber').prop('disabled', false);
 };

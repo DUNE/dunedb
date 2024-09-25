@@ -44,35 +44,36 @@ async function renderSearchForms() {
     }
   });
 
+  // Get and set the value of any search parameter that is changed
+  $('#actionTypeSelection').on('change', async function () {
+    actionType = $('#actionTypeSelection').val();
+  });
+
   // When the content of the UUID input box is changed, get the text string from the box
-  // If the string is consistent with a valid UUID, and an action type has been selected, perform the search
+  // If the string is consistent with a valid UUID, store it in the global UUID variable
   componentUuidForm.on('change', function () {
     if (componentUuidForm.isValid()) {
-      componentUuid = componentUuidForm.submission.data.componentUuid;
+      let inputString = componentUuidForm.submission.data.componentUuid;
 
-      if (componentUuid && componentUuid.length === 36 && actionType !== '') performSearch();
+      if (inputString && inputString.length === 36) componentUuid = inputString;
     }
   });
 
-  // Get and set the value of the action type search parameter as it is changed
-  // If a valid UUID has been entered and an action type has been selected, perform the search
-  $('#actionTypeSelection').on('change', async function () {
-    actionType = $('#actionTypeSelection').val();
+  // When the confirmation button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable the button while the current search is being performed
+  $('#confirmButton').on('click', function () {
+    $('#confirmButton').prop('disabled', true);
 
-    if (componentUuid && componentUuid.length === 36 && actionType !== '') performSearch();
-  });
-}
-
-
-// Function to perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
-function performSearch() {
-  $.ajax({
-    contentType: 'application/json',
-    method: 'GET',
-    url: `/json/search/actionsByReferencedUUID/${componentUuid}/${actionType}`,
-    dataType: 'json',
-    success: postSuccess,
-  }).fail(postFail);
+    if (componentUuid && actionType) {
+      $.ajax({
+        contentType: 'application/json',
+        method: 'GET',
+        url: `/json/search/actionsByReferencedUUID/${componentUuid}/${actionType}`,
+        dataType: 'json',
+        success: postSuccess,
+      }).fail(postFail);
+    }
+  })
 }
 
 
@@ -113,6 +114,9 @@ function postSuccess(result) {
       $('#results').append(actionText);
     }
   }
+
+  // Re-enable the confirmation button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
 
 
@@ -124,4 +128,7 @@ function postFail(result, statusCode, statusMsg) {
   } else {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
+
+  // Re-enable the confirmation button for the next search
+  $('#confirmButton').prop('disabled', false);
 };

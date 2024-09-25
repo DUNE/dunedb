@@ -19,11 +19,13 @@ block content
       hr
 
       .row
-        .col-md-4
+        .col-md-3
           h4 Select Location
 
           .vert-space-x1
-            p Select a location from the options below.
+            p Select <b>either</b> a location below <b>or</b> a part number to the right.
+              br
+              | <b>This is a <u>required</u> parameter.</b>
 
           select.form-control#locationSelection
             option(value = '')
@@ -32,25 +34,33 @@ block content
             option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
             option(value = 'ukWarehouse') #{dictionary_locations['ukWarehouse']} 
 
+        .col-md-3
+          h4 Select Part Number
+
+          .vert-space-x1
+            p Select <b>either</b> a part number below <b>or</b> a location to the left.
+              br
+              | <b>This is a <u>required</u> parameter.</b>
+
+          select.form-control#partNumberSelection
+            option(value = '')          
+            option(value = 'mesh29410560HeadEndLH') 294-10560 HEAD END - L/H 
+            option(value = 'mesh29410561HeadEndRH') 294-10561 HEAD END - R/H
+            option(value = 'mesh29410562FootEndRH') 294-10562 FOOT END - R/H 
+            option(value = 'mesh29410563FootEndLH') 294-10563 FOOT END - L/H 
+            option(value = 'mesh29410564Centre') 294-10564 CENTRE
+
           .vert-space-x2
             hr
 
-            h4 Select Part Number
+            .vert-space-x2
+              button.btn-primary.btn-lg.float-left#confirmButton_location Search by Location
 
-            .vert-space-x1
-              p Select a part number from the options below.
-
-            select.form-control#partNumberSelection
-              option(value = '')          
-              option(value = 'mesh29410560HeadEndLH') 294-10560 HEAD END - L/H 
-              option(value = 'mesh29410561HeadEndRH') 294-10561 HEAD END - R/H
-              option(value = 'mesh29410562FootEndRH') 294-10562 FOOT END - R/H 
-              option(value = 'mesh29410563FootEndLH') 294-10563 FOOT END - L/H 
-              option(value = 'mesh29410564Centre') 294-10564 CENTRE
+              button.btn-primary.btn-lg.float-right#confirmButton_partNumber Search by Part Number 
 
         .col-md-1
 
-        .col-md-7
+        .col-md-5
           h4 Search Results
 
           .vert-space-x1

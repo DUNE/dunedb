@@ -22,10 +22,11 @@ async function renderSearchForms() {
     orderNumber = $('#orderNumberSelection').val();
   });
 
-  // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable the 'Perform Search' button while the current search is being performed
-  $('#confirmButton').on('click', function () {
-    $('#confirmButton').prop('disabled', true);
+  // When the appropriate confirmation button is pressed, perform the search by disposition using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_disposition').on('click', function () {
+    $('#confirmButton_disposition').prop('disabled', true);
+    $('#confirmButton_orderNumber').prop('disabled', true);
 
     if (disposition) {
       $.ajax({
@@ -35,7 +36,16 @@ async function renderSearchForms() {
         dataType: 'json',
         success: postSuccess_disposition,
       }).fail(postFail);
-    } else if (orderNumber) {
+    }
+  });
+
+  // When the appropriate confirmation button is pressed, perform the search by order number using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_orderNumber').on('click', function () {
+    $('#confirmButton_disposition').prop('disabled', true);
+    $('#confirmButton_orderNumber').prop('disabled', true);
+
+    if (orderNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -44,7 +54,7 @@ async function renderSearchForms() {
         success: postSuccess_orderNumber,
       }).fail(postFail);
     }
-  })
+  });
 }
 
 
@@ -171,8 +181,9 @@ function postSuccess_disposition(result) {
     }
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_disposition').prop('disabled', false);
+  $('#confirmButton_orderNumber').prop('disabled', false);
 };
 
 
@@ -252,8 +263,9 @@ function postSuccess_orderNumber(result) {
     }
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_disposition').prop('disabled', false);
+  $('#confirmButton_orderNumber').prop('disabled', false);
 };
 
 
@@ -266,6 +278,7 @@ function postFail(result, statusCode, statusMsg) {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_disposition').prop('disabled', false);
+  $('#confirmButton_orderNumber').prop('disabled', false);
 };

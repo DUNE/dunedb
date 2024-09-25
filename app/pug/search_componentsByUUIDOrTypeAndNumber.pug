@@ -35,22 +35,29 @@ block content
             h4 Search by Type and Number
 
             .vert-space-x1
-              p Select a component type from the options below.
+              p Select a component type below.
 
-            select.form-control#componentTypeSelection
-              option(value = '')          
-              option(value = 'CEAdapterBoard') CE Adapter Board
-              option(value = 'CRBoard') CR Board
-              option(value = 'CableHarness') Cable Harness
-              option(value = 'GBiasBoard') G-Bias Board
-              option(value = 'GeometryBoard') Geometry Board
-              option(value = 'GroundingMeshPanel') Grounding Mesh Panel
-              option(value = 'SHVBoard') SHV Board
+              .row
+                .col-md-8
+                  select.form-control#componentTypeSelection
+                    option(value = '')
+                    option(value = 'CEAdapterBoard') CE Adapter Board
+                    option(value = 'CRBoard') CR Board
+                    option(value = 'CableHarness') Cable Harness
+                    option(value = 'GBiasBoard') G-Bias Board
+                    option(value = 'GeometryBoard') Geometry Board
+                    option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+                    option(value = 'SHVBoard') SHV Board
 
-            .vert-space-x1
-            p Enter a type record number below and press the 'Enter' key.
+            .vert-space-x2
+              p Enter a type record number below.
 
-          input.form-control#typeRecordNumberSelection
+              .row
+                .col-md-8
+                  input.form-control#typeRecordNumberSelection
+
+            .vert-space-x2
+              button.btn-primary.btn-lg#confirmButton Search by Type and Number
 
       .vert-space-x1
         #messages

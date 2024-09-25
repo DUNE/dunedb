@@ -46,10 +46,11 @@ async function renderSearchForms() {
     }
   });
 
-  // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable the 'Perform Search' button while the current search is being performed
-  $('#confirmButton').on('click', function () {
-    $('#confirmButton').prop('disabled', true);
+  // When the appropriate confirmation button is pressed, perform the search by component type using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_type').on('click', function () {
+    $('#confirmButton_type').prop('disabled', true);
+    $('#confirmButton_uuid').prop('disabled', true);
 
     if (componentType) {
       $.ajax({
@@ -59,7 +60,16 @@ async function renderSearchForms() {
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
-    } else if (componentUuid) {
+    }
+  });
+
+  // When the appropriate confirmation button is pressed, perform the search by component UUID using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_uuid').on('click', function () {
+    $('#confirmButton_type').prop('disabled', true);
+    $('#confirmButton_uuid').prop('disabled', true);
+
+    if (componentUuid) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -68,7 +78,7 @@ async function renderSearchForms() {
         success: postSuccess,
       }).fail(postFail);
     }
-  })
+  });
 }
 
 
@@ -137,8 +147,9 @@ function postSuccess(result) {
     }
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_type').prop('disabled', false);
+  $('#confirmButton_uuid').prop('disabled', false);
 };
 
 
@@ -151,6 +162,7 @@ function postFail(result, statusCode, statusMsg) {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_type').prop('disabled', false);
+  $('#confirmButton_uuid').prop('disabled', false);
 };

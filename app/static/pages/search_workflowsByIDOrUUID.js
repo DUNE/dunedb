@@ -44,7 +44,7 @@ async function renderSearchForms() {
   });
 
   // When the content of the UUID input box is changed, get the text string from the box
-  // If the string is consistent with a valid UUID, perform the search using the appropriate jQuery 'ajax' call and the UUID
+  // If the string is consistent with a valid UUID, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
   componentUuidForm.on('change', function () {
     if (componentUuidForm.isValid()) {
       componentUuid = componentUuidForm.submission.data.componentUuid;
