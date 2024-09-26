@@ -23,9 +23,9 @@ block content
           h4 Select Shipment Status
 
           .vert-space-x1
-            p Select a status from the options below.
+            p Select a status below.
               br
-              | <b>This selection is a <u>required</u> search parameter.</b>
+              | <b>This is a <u>required</u> parameter.</b>
 
           select.form-control#shipmentStatusSelection
             option(value = '') (please select)
@@ -36,7 +36,7 @@ block content
           h4 Select Origin Location
 
           .vert-space-x1
-            p Select a location from the options below.
+            p Select a location below ... this is an optional parameter.
               br
               | &nbsp 
 
@@ -55,7 +55,7 @@ block content
           h4 Select Destination Location
 
           .vert-space-x1
-            p Select a location from the options below.
+            p Select a location below ... this is an optional parameter.
               br
               | &nbsp
 
@@ -76,13 +76,13 @@ block content
 
       .row.vert-space-x2
         .col-md-3 
-          button.btn-primary.btn-lg#confirmButton Perform Search
+          button.btn-primary.btn-lg#confirmButton Search by Reception Details
 
         .col-md-3
           h4 Select Earliest Reception Date
 
           .vert-space-x1
-            p Select a date by clicking the box below.
+            p Select a date below ... this is an optional parameter.
               br
               | The search will match reception <b><u>on and after</u></b> this date.
 
@@ -92,7 +92,7 @@ block content
           h4 Select Latest Reception Date
 
           .vert-space-x1
-            p Select a date by clicking the box below.
+            p Select a date below ... this is an optional parameter.
               br
               | The search will match reception <b><u>on and before</u></b> this date.
 
@@ -104,7 +104,7 @@ block content
           .vert-space-x1
             p Indicate if you would like to query against reception comments.
               br
-              | &nbsp 
+              | This is an optional parameter.
 
           select.form-control#receptionCommentSelection
             option(value = '') All shipments 

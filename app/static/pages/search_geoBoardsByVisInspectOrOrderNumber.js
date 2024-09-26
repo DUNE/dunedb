@@ -1,8 +1,7 @@
-// Declare variables to hold the (initially empty) user-specified visual inspection disposition, issue and order number
+// Declare variables to hold the user-specified search parameters
 let disposition = null;
 let issue = 'any';
 let orderNumber = null;
-
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -10,25 +9,24 @@ window.addEventListener('load', renderSearchForms);
 
 // Function to run when the page is loaded
 async function renderSearchForms() {
-  // When the selected disposition is changed, get the newly selected disposition 
+  // Get and set the value of any search parameter that is changed
   $('#dispositionSelection').on('change', async function () {
     disposition = $('#dispositionSelection').val();
   });
 
-  // When the selected issue is changed, get the newly selected issue
   $('#issueSelection').on('change', async function () {
     issue = $('#issueSelection').val();
   });
 
-  // When the entered order number is changed, get the newly entered order number
   $('#orderNumberSelection').on('change', async function () {
     orderNumber = $('#orderNumberSelection').val();
   });
 
-  // When the 'Perform Search' button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable the 'Perform Search' button while the current search is being performed
-  $('#confirmButton').on('click', function () {
-    $('#confirmButton').prop('disabled', true);
+  // When the appropriate confirmation button is pressed, perform the search by disposition using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_disposition').on('click', function () {
+    $('#confirmButton_disposition').prop('disabled', true);
+    $('#confirmButton_orderNumber').prop('disabled', true);
 
     if (disposition) {
       $.ajax({
@@ -38,7 +36,16 @@ async function renderSearchForms() {
         dataType: 'json',
         success: postSuccess_disposition,
       }).fail(postFail);
-    } else if (orderNumber) {
+    }
+  });
+
+  // When the appropriate confirmation button is pressed, perform the search by order number using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_orderNumber').on('click', function () {
+    $('#confirmButton_disposition').prop('disabled', true);
+    $('#confirmButton_orderNumber').prop('disabled', true);
+
+    if (orderNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -47,7 +54,7 @@ async function renderSearchForms() {
         success: postSuccess_orderNumber,
       }).fail(postFail);
     }
-  })
+  });
 }
 
 
@@ -174,8 +181,9 @@ function postSuccess_disposition(result) {
     }
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_disposition').prop('disabled', false);
+  $('#confirmButton_orderNumber').prop('disabled', false);
 };
 
 
@@ -255,8 +263,9 @@ function postSuccess_orderNumber(result) {
     }
   }
 
-  // Re-enable the 'Perform Search' button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_disposition').prop('disabled', false);
+  $('#confirmButton_orderNumber').prop('disabled', false);
 };
 
 
@@ -268,4 +277,8 @@ function postFail(result, statusCode, statusMsg) {
   } else {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
+
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_disposition').prop('disabled', false);
+  $('#confirmButton_orderNumber').prop('disabled', false);
 };

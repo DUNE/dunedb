@@ -1,14 +1,27 @@
-// Declare variables to hold the (initially empty) user-specified mesh panel location and/or part number
+// Declare variables to hold the user-specified search parameters
 let meshPanelLocation = null;
 let meshPanelPartNumber = null;
 
+// Run a specific function when the page is loaded
+window.addEventListener('load', renderSearchForms);
 
-// Main function
-$(function () {
-  // When the selected location is changed, get the newly selected location from the corresponding page element
-  // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
+
+// Function to run when the page is loaded
+async function renderSearchForms() {
+  // Get and set the value of any search parameter that is changed
   $('#locationSelection').on('change', async function () {
     meshPanelLocation = $('#locationSelection').val();
+  });
+
+  $('#partNumberSelection').on('change', async function () {
+    meshPanelPartNumber = $('#partNumberSelection').val();
+  });
+
+  // When the appropriate confirmation button is pressed, perform the search by location using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_location').on('click', function () {
+    $('#confirmButton_location').prop('disabled', true);
+    $('#confirmButton_partNumber').prop('disabled', true);
 
     if (meshPanelLocation) {
       $.ajax({
@@ -21,10 +34,11 @@ $(function () {
     }
   });
 
-  // When the selected mesh part number is changed, get the newly selected part number from the corresponding page element
-  // If the part number is valid, perform the appropriate jQuery 'ajax' call to make the search
-  $('#partNumberSelection').on('change', async function () {
-    meshPanelPartNumber = $('#partNumberSelection').val();
+  // When the appropriate confirmation button is pressed, perform the search by part number using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_partNumber').on('click', function () {
+    $('#confirmButton_location').prop('disabled', true);
+    $('#confirmButton_partNumber').prop('disabled', true);
 
     if (meshPanelPartNumber) {
       $.ajax({
@@ -36,22 +50,20 @@ $(function () {
       }).fail(postFail);
     }
   });
-});
-
-
-
-// Set up a dictionary containing the grounding mesh panel part number [key, string] pairs (taken directly from the 'Grounding Mesh Panel' component type form)
-const partNumbersDictionary = {
-  mesh29410560HeadEndLH: '294-10560 HEAD END - L/H',
-  mesh29410561HeadEndRH: '294-10561 HEAD END - R/H',
-  mesh29410562FootEndRH: '294-10562 FOOT END - R/H',
-  mesh29410563FootEndLH: '294-10563 FOOT END - L/H',
-  mesh29410564Centre: '294-10564 CENTRE',
-};
+}
 
 
 // Function to run for a successful search query by location
 function postSuccess_location(result) {
+  // Set up a dictionary containing the grounding mesh panel part number [key, string] pairs (taken directly from the 'Grounding Mesh Panel' component type form)
+  const partNumbersDictionary = {
+    mesh29410560HeadEndLH: '294-10560 HEAD END - L/H',
+    mesh29410561HeadEndRH: '294-10561 HEAD END - R/H',
+    mesh29410562FootEndRH: '294-10562 FOOT END - R/H',
+    mesh29410563FootEndLH: '294-10563 FOOT END - L/H',
+    mesh29410564Centre: '294-10564 CENTRE',
+  };
+
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
 
@@ -114,6 +126,10 @@ function postSuccess_location(result) {
       $('#results').append('<br>');
     }
   }
+
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_location').prop('disabled', false);
+  $('#confirmButton_partNumber').prop('disabled', false);
 };
 
 
@@ -181,6 +197,10 @@ function postSuccess_partNumber(result) {
       $('#results').append('<br>');
     }
   }
+
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_location').prop('disabled', false);
+  $('#confirmButton_partNumber').prop('disabled', false);
 };
 
 
@@ -192,4 +212,8 @@ function postFail(result, statusCode, statusMsg) {
   } else {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
+
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_location').prop('disabled', false);
+  $('#confirmButton_partNumber').prop('disabled', false);
 };
