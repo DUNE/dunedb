@@ -49,6 +49,8 @@ block content
 
             .vert-space-x1 
               p Select a status below ... this is an optional parameter.
+                br
+                | It can be used alongside <b>either</b> required parameter.
 
             select.form-control#acceptanceStatusSelection
               option(value = 'any') (any)
@@ -60,6 +62,8 @@ block content
 
             .vert-space-x1 
               p Select a status below ... this is an optional parameter.
+                br
+                | It can be used alongside <b>either</b> required parameter.
 
             select.form-control#toothStripStatusSelection
               option(value = 'any') (any)
@@ -110,7 +114,9 @@ block content
             hr
 
             .vert-space-x2
-              button.btn-primary.btn-lg.float-right#confirmButton Perform Search
+              button.btn-primary.btn-lg.float-left#confirmButton_location Search by Location
+
+              button.btn-primary.btn-lg.float-right#confirmButton_partNumber Search by Part Number 
 
         .col-md-1
 

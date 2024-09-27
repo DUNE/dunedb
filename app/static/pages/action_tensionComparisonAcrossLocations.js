@@ -1,4 +1,4 @@
-// Declare a variable to hold the (initially empty) user-entered component UUID, wire layer, first location and second location
+// Declare a variable to hold the user-specified search parameters
 let componentUuid = null;
 let wireLayer = null;
 let originLocation = null;
@@ -23,34 +23,35 @@ async function renderComparisonForms() {
 
   const componentUuidForm = await Formio.createForm(document.getElementById('componentuuidform'), componentUuidSchema);
 
-  // When the content of the UUID input box is changed, get the text string from the box
-  componentUuidForm.on('change', function () {
-    if (componentUuidForm.isValid()) {
-      componentUuid = componentUuidForm.submission.data.componentUuid;
-    }
-  });
-
-  // When the selected wire layer is changed, get the newly selected layer
+  // Get and set the value of any search parameter that is changed
   $('#wireLayerSelection').on('change', async function () {
     wireLayer = $('#wireLayerSelection').val();
   });
 
-  // When the selected origin location is changed, get the newly selected location
   $('#originLocationSelection').on('change', async function () {
     originLocation = $('#originLocationSelection').val();
   });
 
-  // When the selected destination location is changed, get the newly selected location
   $('#destinationLocationSelection').on('change', async function () {
     destinationLocation = $('#destinationLocationSelection').val();
   });
 
-  // When the 'Perform Comparison' button is pressed, perform the comparison using the appropriate jQuery 'ajax' call and the current values of the user-entered variables
+  // When the content of the UUID input box is changed, get the text string from the box
+  // If the string is consistent with a valid UUID, store it in the global UUID variable
+  componentUuidForm.on('change', function () {
+    if (componentUuidForm.isValid()) {
+      let inputString = componentUuidForm.submission.data.componentUuid;
+
+      if (inputString && inputString.length === 36) componentUuid = inputString;
+    }
+  });
+
+  // When the 'Perform Comparison' button is pressed, perform the comparison using the appropriate jQuery 'ajax' call and the current values of the search parameters
   // Additionally, disable the 'Perform Comparison' button while the current comparison is being performed
   $('#confirmButton').on('click', function () {
     $('#confirmButton').prop('disabled', true);
 
-    if (componentUuid && componentUuid.length === 36 && wireLayer && originLocation && destinationLocation) {
+    if (componentUuid && wireLayer && originLocation && destinationLocation) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',

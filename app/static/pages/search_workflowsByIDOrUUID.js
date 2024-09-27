@@ -1,5 +1,5 @@
-// Declare a variable to hold the (initially empty) user-entered component UUID string
-let inputString = null;
+// Declare a variable to hold the user-specified search parameters
+let componentUuid = null;
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -20,15 +20,6 @@ async function renderSearchForms() {
 
   const workflowIdForm = await Formio.createForm(document.getElementById('workflowidform'), workflowIdSchema);
 
-  // If a valid ID is entered, create the URL for the corresponding workflow's information page, and then go to that page
-  workflowIdForm.on('change', function () {
-    if (workflowIdForm.isValid()) {
-      const workflowId = workflowIdForm.submission.data.workflowId;
-
-      if (workflowId && workflowId.length === 24) window.location.href = `/workflow/${workflowId}`;
-    }
-  });
-  
   // Create a Formio form consisting of a component UUID input box, and render it in the page element called 'componentuuidform'
   const componentUuidSchema = {
     components: [{
@@ -42,17 +33,27 @@ async function renderSearchForms() {
 
   const componentUuidForm = await Formio.createForm(document.getElementById('componentuuidform'), componentUuidSchema);
 
+  // When the content of the workflow ID input box is changed, get the text string from the box
+  // If the string is consistent with a valid ID, create the URL for the corresponding workflow's information page, and then go to that page
+  workflowIdForm.on('change', function () {
+    if (workflowIdForm.isValid()) {
+      const workflowId = workflowIdForm.submission.data.workflowId;
+
+      if (workflowId && workflowId.length === 24) window.location.href = `/workflow/${workflowId}`;
+    }
+  });
+
   // When the content of the UUID input box is changed, get the text string from the box
-  // If the string is consistent with a valid UUID, perform the appropriate jQuery 'ajax' call to make the search
+  // If the string is consistent with a valid UUID, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
   componentUuidForm.on('change', function () {
     if (componentUuidForm.isValid()) {
-      inputString = componentUuidForm.submission.data.componentUuid;
+      componentUuid = componentUuidForm.submission.data.componentUuid;
 
-      if (inputString && inputString.length === 36) {
+      if (componentUuid && componentUuid.length === 36) {
         $.ajax({
           contentType: 'application/json',
           method: 'GET',
-          url: `/json/search/workflowsByUUID/${inputString}`,
+          url: `/json/search/workflowsByUUID/${componentUuid}`,
           dataType: 'json',
           success: postSuccess,
         }).fail(postFail);

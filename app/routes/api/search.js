@@ -38,14 +38,10 @@ router.get('/search/geoBoardsByPartNumber/:partNumber/:acceptanceStatus/:toothSt
 
 
 /// Search for geometry boards that have a specified visual inspection disposition
-router.get('/search/geoBoardsByVisualInspection/:disposition', async function (req, res, next) {
+router.get('/search/geoBoardsByVisualInspection/:disposition/:issue', async function (req, res, next) {
   try {
-    // This search query can have an optional query string for a specific inspection issue
-    // Parse out the string if it has been provided (as a non-empty string), or otherwise set it to 'null'
-    const issue = (req.query.issue !== '') ? req.query.issue : null;
-
-    // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition and optional issue
-    const boardsByLocation = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, issue);
+    // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition
+    const boardsByLocation = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, req.params.issue);
 
     // Return the list in JSON format
     return res.json(boardsByLocation);
@@ -209,17 +205,10 @@ router.get('/search/componentsByTypeAndNumber/:type/:number', async function (re
 
 
 /// Search for non-conformance actions performed on a specified component type
-router.get('/search/nonConformanceByComponentType', async function (req, res, next) {
+router.get('/search/nonConformanceByComponentType/:componentType/:disposition/:status', async function (req, res, next) {
   try {
-    // This search query can have multiple query strings, some of which are optional
-    // So first, parse out the strings which have actually been provided (as non-empty strings), and set the rest to 'null'
-    // The only required query string is the 'component type', which will always have a valid value provided
-    const componentType = req.query.componentType;
-    const disposition = (req.query.disposition !== '') ? req.query.disposition : null;
-    const status = (req.query.status !== '') ? req.query.status : null;
-
     // Retrieve a list of non-conformance actions that match the specified non-conformance details
-    const actions = await Search_ActionsWorkflows.nonConformanceByComponentType(componentType, disposition, status);
+    const actions = await Search_ActionsWorkflows.nonConformanceByComponentType(req.params.componentType, req.params.disposition, req.params.status);
 
     // Return the list in JSON format
     return res.json(actions);
@@ -248,7 +237,7 @@ router.get('/search/nonConformanceByUUID/' + utils.uuid_regex, async function (r
 /// Search for actions of a specified type that reference a specified component UUID
 router.get('/search/actionsByReferencedUUID/' + utils.uuid_regex + '/:actionType', async function (req, res, next) {
   try {
-    // Depending on the specified action type, retrieve a list of actions of that type that reference the specified component UUID
+    // Depending on the specified action type, retrieve a list of actions of the specified type that reference the specified component UUID
     let actions = null;
 
     if (req.params.actionType === 'boardInstall') {

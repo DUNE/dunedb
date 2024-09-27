@@ -32,7 +32,7 @@ block content
         br
         | If the entered UUID corresponds to a component record in the database, the user will be automatically redirected to the page for viewing the component information.  If there is no corresponding record, an error will be displayed.
 
-      p In the second scenario, users must specify the following information, and then <b>press the 'Enter' key <u>when the type record number box is selected</u></b>:
+      p In the second scenario, users must specify the following information:
         ul
           li the component type (from the dropdown list)
           li the type record number (as an integer)
@@ -54,7 +54,7 @@ block content
 
       p Users may select one of the available board reception locations or part numbers from the appropriate list, and a summary of information about each found board will be displayed in the search results panel on the right side of the page.
         br
-        | The search may be optionally refined by the following parameters: 
+        | Both searches may be optionally refined by the following parameters: 
         ul
           li <b>board acceptance status</b> - that is, whether a board has been <u>rejected</u> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <u>accepted</u> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediated</u>)
           li <b>tooth strip attachment status</b> - whether a tooth strip has been attached to the board (by performing a <u>Tooth Strip Attachment</u> action on it)
@@ -69,14 +69,14 @@ block content
 
       p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios:
         ul
-          li <b>either</b> all geometry boards of any batch order number that have a <u>specified visual inspection disposition</u>, and optionally a <u>specified visual inspection issue</u>
+          li <b>either</b> all geometry boards of any batch order number that have a <u>specified visual inspection disposition</u>
           li <b>or</b> all geometry boards of a <u>specified batch order number</u> that have any visual inspection disposition
 
-      p Users may select one of the available dispositions from the list, along with a specific inspection issue if desired, and a summary of information about each found board will be displayed in the search results panel below the selection boxes.  In this scenario, only the disposition is <b>required</b>.
+      p Users may select one of the available dispositions from the list or enter an order number into the provided input box, and a summary of information about each found board will be displayed in the search results panel at the bottom of the page.
         br
-        |  Alternatively, users may manually enter an order number, and a summary of boards in that order will be shown.
+        | The search by disposition may be optionally refined by selecting a <u>visual inspection issue</u> from the provided list.
 
-      p Please note that, in either scenario, <b>a geometry board will only be displayed in the search results if a <u>Visual Inspection</u> action has been performed on it</b>.
+      p Please note that <b>a geometry board will only be displayed in the search results if a <u>Visual Inspection</u> action has been performed on it</b>.
 
       hr
 
@@ -95,7 +95,7 @@ block content
 
       p The 'shipment status' is the only <b>required</b> parameter for any search - users may use any combination of the other parameters from their respective lists.
 
-      p Please note that unlike other searches, <b>the 'Perform Search' button <u>must</u> be pressed by the user for this search to be performed</b> - it will not be automatically performed as parameters are entered.  Upon a successful search, a summary of information about each found shipment will be displayed in the search results panel below the selection boxes.  In the case of shipments that have not been received, reception information will of course be left blank in the results.
+      p Upon a successful search, a summary of information about each found shipment will be displayed in the search results panel below the selection boxes.  In the case of shipments that have not been received, reception information will of course be left blank in the results.
 
       hr
 
@@ -165,7 +165,7 @@ block content
       p In the second scenario, users must specify the following information:
         ul
           li the UUID of a single component
-          li the type (or general group) of action type, selected from the provided list
+          li the type (or general grouping) of actions, selected from the provided list
 
       p Please note that <b>both pieces of information must be provided</b> for the search to be performed.  If successful, a summary of information about each found action will be displayed in the search results panel on the right side of the page.
 

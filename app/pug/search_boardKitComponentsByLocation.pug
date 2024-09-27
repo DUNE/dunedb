@@ -23,7 +23,7 @@ block content
           h4 Select Location
 
           .vert-space-x1
-            p Select a location from the options below.
+            p Select a location below.
 
           select.form-control#locationSelection
             option(value = '')
@@ -31,6 +31,9 @@ block content
             option(value = 'in_transit') #{dictionary_locations['in_transit']} 
             option(value = 'surf') #{dictionary_locations['surf']} 
             option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
+
+          .vert-space-x2
+            button.btn-primary.btn-lg#confirmButton Search by Location
 
         .col-md-1
 

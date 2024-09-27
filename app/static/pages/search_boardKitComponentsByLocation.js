@@ -1,13 +1,21 @@
-// Declare variables to hold the (initially empty) user-specified board kit location
+// Declare variables to hold the user-specified search parameters
 let boardKitLocation = null;
 
+// Run a specific function when the page is loaded
+window.addEventListener('load', renderSearchForms);
 
-// Main function
-$(function () {
-  // When the selected location is changed, get the newly selected location from the corresponding page element
-  // If the location is valid, perform the appropriate jQuery 'ajax' call to make the search
+
+// Function to run when the page is loaded
+async function renderSearchForms() {
+  // Get and set the value of any search parameter that is changed
   $('#locationSelection').on('change', async function () {
     boardKitLocation = $('#locationSelection').val();
+  });
+
+  // When the confirmation button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable the button while the current search is being performed
+  $('#confirmButton').on('click', function () {
+    $('#confirmButton').prop('disabled', true);
 
     if (boardKitLocation) {
       $.ajax({
@@ -19,20 +27,19 @@ $(function () {
       }).fail(postFail);
     }
   });
-});
-
-
-// Set up a dictionary containing the possible component type form ID and name [key, string] pairs
-const componentTypesDictionary = {
-  CRBoard: 'CR Board',
-  GBiasBoard: 'G-Bias Board',
-  SHVBoard: 'SHV Board',
-  CableHarness: 'Cable Harness',
-};
+}
 
 
 // Function to run for a successful search query
 function postSuccess(result) {
+  // Set up a dictionary containing the possible component type form ID and name [key, string] pairs
+  const componentTypesDictionary = {
+    CRBoard: 'CR Board',
+    GBiasBoard: 'G-Bias Board',
+    SHVBoard: 'SHV Board',
+    CableHarness: 'Cable Harness',
+  };
+
   // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
   $('#results').empty();
 
@@ -93,6 +100,9 @@ function postSuccess(result) {
       $('#results').append('<br>');
     }
   }
+
+  // Re-enable the confirmation button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
 
 
@@ -104,4 +114,7 @@ function postFail(result, statusCode, statusMsg) {
   } else {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
+
+  // Re-enable the confirmation button for the next search
+  $('#confirmButton').prop('disabled', false);
 };
