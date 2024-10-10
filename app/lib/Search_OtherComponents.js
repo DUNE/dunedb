@@ -162,8 +162,11 @@ async function meshesByLocation(location) {
       _id: { componentUuid: '$componentUuid' },
       partNumber: { '$first': '$data.meshPanelPartNumber' },
       componentUuid: { '$first': '$componentUuid' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
 
   // Group the records according to the mesh part number and corresponding string, and pass through the fields required for later use
   aggregation_stages.push({
@@ -247,8 +250,11 @@ async function meshesByPartNumber(partNumber) {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       receptionLocation: { '$first': '$reception.location' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
 
   // Group the records according to the location, and pass through the fields required for later use
   aggregation_stages.push({
@@ -332,8 +338,11 @@ async function boardKitComponentsByLocation(location) {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       type: { '$first': '$formId' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
 
   // Group the records according to the component type form IDs, and pass through the fields required for later use
   aggregation_stages.push({

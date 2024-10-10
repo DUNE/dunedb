@@ -84,6 +84,16 @@ async function nonConformanceByComponentType(componentType, disposition, status)
     result.componentName = component.data.name;
   }
 
+  // Re-sort the records by the component name, in reverse alphanumerical order
+  // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
+  var byField = function (field) {
+    return function (a, b) {
+      return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
+    }
+  };
+
+  results.sort(byField('componentName'));
+
   // Return the list of matching actions
   return results;
 }
@@ -125,6 +135,16 @@ async function nonConformanceByUUID(componentUUID) {
     const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
     result.componentName = component.data.name;
   }
+
+  // Re-sort the records by the NCR action ID, in reverse alphanumerical order
+  // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
+  var byField = function (field) {
+    return function (a, b) {
+      return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
+    }
+  };
+
+  results.sort(byField('actionId'));
 
   // Return the list of  atching actions
   return results;
