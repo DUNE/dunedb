@@ -547,6 +547,8 @@ async function boardsByOrderNumber(orderNumber) {
       },
     });
 
+    action_aggregation_stages.push({ $sort: { actionId: 1 } });
+
     // Group the records according to the disposition, and pass through the fields required for later use
     action_aggregation_stages.push({
       $group: {
