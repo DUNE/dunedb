@@ -176,6 +176,18 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       }
     }
 
+    if (component.formId === 'ReturnedGeometryBoardBatch') {
+      for (const info of component.data.boardUuids) {
+        let uuid = info.component_uuid;
+
+        if (uuid !== '') {
+          const boardRecord = await Components.retrieve(uuid);
+
+          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.shortUuid]);
+        }
+      }
+    }
+
     // Render the interface page
     res.render('component.pug', {
       component,

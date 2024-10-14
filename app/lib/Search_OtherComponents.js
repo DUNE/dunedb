@@ -3,6 +3,12 @@ const MUUID = require('uuid-mongodb');
 const Components = require('./Components');
 const { db } = require('./db');
 
+var byField = function (field) {
+  return function (a, b) {
+    return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
+  }
+};
+
 
 /// Retrieve a list of geometry board shipments that match the specified reception details
 async function boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment) {
@@ -162,8 +168,11 @@ async function meshesByLocation(location) {
       _id: { componentUuid: '$componentUuid' },
       partNumber: { '$first': '$data.meshPanelPartNumber' },
       componentUuid: { '$first': '$componentUuid' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
 
   // Group the records according to the mesh part number and corresponding string, and pass through the fields required for later use
   aggregation_stages.push({
@@ -247,8 +256,11 @@ async function meshesByPartNumber(partNumber) {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       receptionLocation: { '$first': '$reception.location' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
 
   // Group the records according to the location, and pass through the fields required for later use
   aggregation_stages.push({
@@ -332,8 +344,11 @@ async function boardKitComponentsByLocation(location) {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       type: { '$first': '$formId' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
 
   // Group the records according to the component type form IDs, and pass through the fields required for later use
   aggregation_stages.push({
@@ -482,12 +497,6 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
 
   // Re-sort the records by the component name, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  var byField = function (field) {
-    return function (a, b) {
-      return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
-    }
-  };
-
   apasCompletedToStep.sort(byField('componentName'));
 
   let comp_aggregation_stages = [];

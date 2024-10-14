@@ -44,7 +44,10 @@ block content
                 if component.name
                   td
                     a(href = `/component/${uuid}`) #{component.name}
-                else 
+                else if component.data.bobbinId
+                  td 
+                    a(href = `/component/${uuid}`) #{component.data.bobbinId}
+                else
                   td 
                     a(href = `/component/${uuid}`) #{uuid}
 

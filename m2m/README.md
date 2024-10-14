@@ -90,24 +90,3 @@ Users should write their own dedicated Python scripts that are suited for whatev
 Apart from `ConnectToAPI()`, the backend functions may be combined in any order and/or number as required by the user.  For example, if multiple short UUIDs need to be converted and then new components created and submitted using the returned full UUIDs, a single user-created script containing a `for` loop may be used to cover the entire procedure.
 
 This directory contains template scripts that show simple examples of how to use the various backend functions.
-
-
-## Uploading Data from External Files
-
-As noted above, one of the best use cases for the M2M application is uploading measurement data in bulk - two specific examples of this are wire tension measurements and APA frame survey results.  In most such situations, data will be saved into external files when originally measured (e.g. Excel spreadsheets or .csv files), and so an additional step is required in the M2M application to first extract these data from the external file(s).  The currently existing extraction functions are detailed below - **users should not attempt to modify these functions - if changes or new extraction functions are required, <u>please contact one of the DB Development Team</u>**.  Any call to the extraction function(s) should be followed by a call to the `EditAction()` backend function, in order to uploaded the extracted data to the appropriate DB record.
-
-* `ExtractTensions(csvFile, apaLayer)` (in `upload_tensions.py`) : extract wire tension measurements, returning two Python lists containing the tension measurements for each APA side (A and B).  **<u>These lists will always contain only the latest tension measurement for each wire or wire segment</u>** - thus, any wire re-tensioning is accounted for, as long as the new values are recorded in the correct column of the originating spreadsheet.
-    * `csvFile` (string) : an input file, in `.csv` format, containing the tension measurements
-    * `apaLayer` (string) : one of 'X', 'U', 'V' or 'G'
-
-* `ExtractResults_IntakeM4Holes(dataFile)` (in `upload_frameSurveys.py`) : extract frame intake M4 hole measurement results, returning a Python dictionary containing the results arranged as `field: value` pairs
-    * `dataFile` (string) : an input file, in `.xlsx` format, containing the M4 hole measurements
-
-* `ExtractResults_IntakePlanarity(dataFile)` (in `upload_frameSurveys.py`) : extract frame intake planarity analysis results, returning a Python dictionary containing the results arranged as `field: value` pairs
-    * `dataFile` (string) : an input file, in `.xlsx` format, containing the calculated planarity analysis results
-
-* `SetupResults_IntakeXCorners(values)` (in `upload_frameSurveys.py`) : set up and return a Python dictionary of frame intake cross-corner measurement results arranged as `field: value` pairs
-    * `values` (list) : a Python list of cross-corner measurements, which can be found in the APA frame's 'Delivered Frame QA Checks' action
-
-* `ExtractResults_InstallationSurveys(dataFile)` (in `upload_frameSurveys.py`) : extract APA frame installation envelope and planarity analysis results, returning Python dictionaries containing the results arranged as `field: value` pairs
-    * `dataFile` (string) : an input file, in `.xlsx` format, containing the calculated envelope and planarity analysis results
