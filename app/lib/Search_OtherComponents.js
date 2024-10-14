@@ -3,6 +3,12 @@ const MUUID = require('uuid-mongodb');
 const Components = require('./Components');
 const { db } = require('./db');
 
+var byField = function (field) {
+  return function (a, b) {
+    return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
+  }
+};
+
 
 /// Retrieve a list of geometry board shipments that match the specified reception details
 async function boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment) {
@@ -491,12 +497,6 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
 
   // Re-sort the records by the component name, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  var byField = function (field) {
-    return function (a, b) {
-      return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
-    }
-  };
-
   apasCompletedToStep.sort(byField('componentName'));
 
   let comp_aggregation_stages = [];
