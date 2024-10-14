@@ -73,7 +73,7 @@ function postSuccess_location(result) {
       <td colspan = "3">The following geometry boards are at <b>${$('#locationSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by board part number, and then ordered by last DB record edit (most recent at the top).
+      <td colspan = "3">They are grouped by board part number, and then ordered by increasing UK ID within each group.
         <br>
         <hr>
       </td>
@@ -144,7 +144,7 @@ function postSuccess_partNumber(result) {
       <td colspan = "3">The following geometry boards with part number <b>${$('#partNumberSelection option:selected').text()}</b> have been received.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by location, and then ordered by last DB record edit (most recent at the top).
+      <td colspan = "3">They are grouped by location, and then ordered by increasing UK ID within each group.
         <br>
         <hr>
       </td>
