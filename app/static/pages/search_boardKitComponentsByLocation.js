@@ -48,7 +48,7 @@ function postSuccess(result) {
       <td colspan = "2">The following populated board kit components are at <b>${$('#locationSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
-      <td colspan = "2">They are grouped by component type, and then ordered by last DB record edit (most recent at the top).
+      <td colspan = "2">They are grouped by component type, and then ordered by increasing DUNE PID within each group.
         <br>
         <hr>
       </td>

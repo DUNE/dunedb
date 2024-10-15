@@ -345,7 +345,7 @@ async function boardsByVisualInspection(disposition, issue) {
     },
   });
 
-  aggregation_stages.push({ $sort: { 'ukid': 1 } });
+  comp_aggregation_stages.push({ $sort: { 'ukid': 1 } });
 
   // Group the records according to the board part number and correponding string, and pass through the fields required for later use
   comp_aggregation_stages.push({
@@ -361,7 +361,7 @@ async function boardsByVisualInspection(disposition, issue) {
   });
 
   // Sort the record groups to be in numerical order of the part number
-  action_aggregation_stages.push({ $sort: { '_id.partNumber': 1 } });
+  comp_aggregation_stages.push({ $sort: { '_id.partNumber': 1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let component_results = await db.collection('components')
