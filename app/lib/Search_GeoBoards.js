@@ -25,8 +25,11 @@ async function boardsByLocation(location, acceptanceStatus, toothStripStatus) {
       partNumber: { '$first': '$data.partNumber' },
       partString: { '$first': '$data.partString' },
       componentUuid: { '$first': '$componentUuid' },
+      ukid: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'ukid': 1 } });
 
   // Group the records according to the board part number and corresponding string, and pass through the fields required for later use
   aggregation_stages.push({
@@ -155,8 +158,11 @@ async function boardsByPartNumber(partNumber, acceptanceStatus, toothStripStatus
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       receptionLocation: { '$first': '$reception.location' },
+      ukid: { '$first': '$data.typeRecordNumber' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'ukid': 1 } });
 
   // Group the records according to the location, and pass through the fields required for later use
   aggregation_stages.push({
@@ -339,6 +345,8 @@ async function boardsByVisualInspection(disposition, issue) {
     },
   });
 
+  comp_aggregation_stages.push({ $sort: { 'ukid': 1 } });
+
   // Group the records according to the board part number and correponding string, and pass through the fields required for later use
   comp_aggregation_stages.push({
     $group: {
@@ -353,7 +361,7 @@ async function boardsByVisualInspection(disposition, issue) {
   });
 
   // Sort the record groups to be in numerical order of the part number
-  action_aggregation_stages.push({ $sort: { '_id.partNumber': 1 } });
+  comp_aggregation_stages.push({ $sort: { '_id.partNumber': 1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let component_results = await db.collection('components')
@@ -538,6 +546,8 @@ async function boardsByOrderNumber(orderNumber) {
         data: { '$first': '$data' },
       },
     });
+
+    action_aggregation_stages.push({ $sort: { actionId: 1 } });
 
     // Group the records according to the disposition, and pass through the fields required for later use
     action_aggregation_stages.push({
