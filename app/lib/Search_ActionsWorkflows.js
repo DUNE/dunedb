@@ -26,8 +26,7 @@ async function workflowsByUUID(componentUUID) {
     $group: {
       _id: { workflowId: '$workflowId' },
       workflowId: { '$first': '$workflowId' },
-      typeFormName: { '$first': '$typeFormName' },
-      status: { '$first': '$status' },
+      completionStatus: { '$first': '$completionStatus' },
     },
   });
 
