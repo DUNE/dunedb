@@ -180,6 +180,65 @@ async function updateLocation(componentUuid, location, date, detail) {
 }
 
 
+/// Update the most recently logged reception locations and dates of all sub-components in a shipment-like component
+async function updateLocations_inShipment(componentUuid, location, date) {
+  // Retrieve the most recent version of the shipment-like component record corresponding to the specified component UUID
+  const shipment = await retrieve(componentUuid);
+
+  // Loop over all sub-components in the shipment, and update each one's location information appropriately for the shipment type and contents
+  // In all cases, if successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  if (shipment.formId === 'APAShipment') {
+    // Extract the UUID and update the location information of each assembled APA in a shipment of APAs
+    for (const apa of shipment.data.apaUuiDs) {
+      const result = await updateLocation(apa.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'BoardShipment') {
+    // Extract the UUID and update the location information of each geometry board in a shipment of geometry boards
+    for (const board of shipment.data.boardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'CEAdapterBoardShipment') {
+    // Extract the UUID and update the location information of each CE Adapter board in a shipment of CE Adapter boards
+    for (const board of shipment.data.ceAdapterBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'DWAComponentShipment') {
+    // Extract the UUID and update the location information of each component in a (combined) shipment of DWAs and DWAPDBs
+    for (const dwa of shipment.data.componentUUIDs) {
+      const result = await updateLocation(dwa.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'GroundingMeshShipment') {
+    // Extract the UUID and update the location information of each mesh in a shipment of meshes
+    for (const mesh of shipment.data.apaUuiDs) {
+      const result = await updateLocation(mesh.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'PopulatedBoardShipment') {
+    // Extract the UUID and update the location information of each component in a populated kit
+    for (const board of shipment.data.crBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+
+    for (const board of shipment.data.gBiasBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+
+    for (const board of shipment.data.shvBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+
+    for (const board of shipment.data.cableHarnessUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+  }
+
+  // Update the location information of the shipment itself
+  const result = await updateLocation(componentUuid, location, date, '');
+
+  // Return the final result (which should be 1)
+  return result;
+}
+
+
 /// Retrieve a single version of a component record (either the most recent, or a specified one)
 async function retrieve(componentUuid, projection) {
   // Set up the DB query match condition to be that a record's component UUID must match the specified one, and throw an error if no component UUID has been specified
@@ -448,6 +507,7 @@ module.exports = {
   newUuid,
   save,
   updateLocation,
+  updateLocations_inShipment,
   retrieve,
   versions,
   list,

@@ -2,6 +2,7 @@
 let typeForm;
 
 // Declare a list of the available 'reception' related action type forms
+// NOTE: this must be the same as the equivalent list given in 'lib/Actions.js'
 const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
 
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
@@ -68,7 +69,9 @@ async function onPageLoad() {
 function SubmitData(submission) {
   let url = '/json/action';
 
-  if (installation_typeFormIDs.includes(submission.typeFormId)) {
+  if (reception_typeFormIDs.includes(submission.typeFormId)) {
+    url += `?location=${submission.data.receptionLocation}&date=${(submission.data.receptionDate).toString().slice(0, 10)}`;
+  } else if (installation_typeFormIDs.includes(submission.typeFormId)) {
     url += `?location=${'installed_on_APA'}&date=${(new Date()).toISOString().slice(0, 10)}`;
   }
 
@@ -94,20 +97,14 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user to the appropriate post-submission page (where 'result' is the action record's action ID)
-    // If the action is one of the 'XXX Reception' types, we must first update the individual components' information (and further redirection will be handled from there)
-    // If this is not the case, then we can simply proceed with standard post-submission redirection:
-    //   - if the action originates from a workflow, go to the page for updating the workflow path step results
-    //   - if this is a standalone action, go to the page for viewing the action record
+    // - if the action originates from a workflow, go to the page for updating the workflow path step results
+    // - if this is a standalone action, go to the page for viewing the action record
     let url = '';
 
-    if (reception_typeFormIDs.includes(submission.typeFormId)) {
-      url = `/component/${submission.componentUuid}/updateLocations/${submission.data.receptionLocation}/${(submission.data.receptionDate).toString().slice(0, 10)}?actionId=${result}`;
+    if (!(workflowId === '')) {
+      url = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
     } else {
-      if (!(workflowId === '')) {
-        url = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
-      } else {
-        url = `/action/${result}`;
-      }
+      url = `/action/${result}`;
     }
 
     window.location.href = url;

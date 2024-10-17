@@ -10,6 +10,10 @@ const permissions = require('./permissions');
 const utils = require('./utils');
 const Workflows = require('./Workflows');
 
+// Declare a list of the available 'reception' related action type forms
+// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
+const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
+
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
 // NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
 const installation_typeFormIDs = [
@@ -111,6 +115,13 @@ async function save(input, req) {
   _lock.release();
 
   if (!result.acknowledged) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
+
+  // If the action is one of the shipment or batch reception types, the reception location and date will have been passed to this function in the 'req.query' object
+  // Use these to update the location information for each individual sub-component in the shipment or batch
+  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  if (reception_typeFormIDs.includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
+  }
 
   // If the action is one of the board or mesh installation types, the installation location (always 'installed_on_APA') and date will have been passed to this function in the 'req.query' object
   // Use these to update the location information for each individual board or mesh referenced in this action
