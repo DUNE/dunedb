@@ -142,7 +142,25 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
-  // If the insertion is successful, return the record's component UUID (in string format) as confirmation
+  // If the component is of a certain type, a location and date will have been passed to this function in the 'req.query' object
+  // Use these to update the reception information, either for the component itself or for both the component and any sub-components
+  // If successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
+  if (newRecord.formId === 'AssembledAPA') {
+    // Update the location information of the APA frame that is referenced by an Assembled APA component, to show that the frame is now being used
+    const result = await updateLocation(newRecord.data.frameUuid, req.query.location, req.query.date, newRecord.componentUuid);
+  } else if ((newRecord.formId === 'APAShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
+    const result = await updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
+  } else if (newRecord.formId === 'ReturnedGeometryBoardBatch') {
+    // Extract the UUID and update the location information of each board in a batch of returned geometry boards to match that from the batch's submission
+    for (const board of newRecord.data.boardUuids) {
+      const result = await updateLocation(board.component_uuid, req.query.location, req.query.date, '');
+    }
+  }
+
+  // NOTE: the component that begins any workflow does not count towards the workflow's completion status (only actions do) ... 
+  // ... so even if the component originates from a workflow, i.e. the record contains a workflow ID, we do not need to determine the current workflow completion here, as we do for actions
+
+  // If the insertion and post-insertion changes are all successful, return the record's component UUID (in string format) as confirmation
   return MUUID.from(newRecord.componentUuid).toString();
 }
 
@@ -177,6 +195,65 @@ async function updateLocation(componentUuid, location, date, detail) {
 
   // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
   return result.ok;
+}
+
+
+/// Update the most recently logged reception locations and dates of all sub-components in a shipment-like component
+async function updateLocations_inShipment(componentUuid, location, date) {
+  // Retrieve the most recent version of the shipment-like component record corresponding to the specified component UUID
+  const shipment = await retrieve(componentUuid);
+
+  // Loop over all sub-components in the shipment, and update each one's location information appropriately for the shipment type and contents
+  // In all cases, if successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  if (shipment.formId === 'APAShipment') {
+    // Extract the UUID and update the location information of each assembled APA in a shipment of APAs
+    for (const apa of shipment.data.apaUuiDs) {
+      const result = await updateLocation(apa.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'BoardShipment') {
+    // Extract the UUID and update the location information of each geometry board in a shipment of geometry boards
+    for (const board of shipment.data.boardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'CEAdapterBoardShipment') {
+    // Extract the UUID and update the location information of each CE Adapter board in a shipment of CE Adapter boards
+    for (const board of shipment.data.ceAdapterBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'DWAComponentShipment') {
+    // Extract the UUID and update the location information of each component in a (combined) shipment of DWAs and DWAPDBs
+    for (const dwa of shipment.data.componentUUIDs) {
+      const result = await updateLocation(dwa.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'GroundingMeshShipment') {
+    // Extract the UUID and update the location information of each mesh in a shipment of meshes
+    for (const mesh of shipment.data.apaUuiDs) {
+      const result = await updateLocation(mesh.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'PopulatedBoardShipment') {
+    // Extract the UUID and update the location information of each component in a populated kit
+    for (const board of shipment.data.crBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+
+    for (const board of shipment.data.gBiasBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+
+    for (const board of shipment.data.shvBoardUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+
+    for (const board of shipment.data.cableHarnessUuiDs) {
+      const result = await updateLocation(board.component_uuid, location, date, '');
+    }
+  }
+
+  // Update the location information of the shipment itself
+  const result = await updateLocation(componentUuid, location, date, '');
+
+  // Return the final result (which should be 1)
+  return result;
 }
 
 
@@ -448,6 +525,7 @@ module.exports = {
   newUuid,
   save,
   updateLocation,
+  updateLocations_inShipment,
   retrieve,
   versions,
   list,

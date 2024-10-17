@@ -46,23 +46,17 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
 
     // Retrieve and store the status of each action that has been performed (i.e. that has a result) - that is, the value (true or false) of the action's 'data.actionComplete' field
     // Note that this field is common across all action type forms that are used in workflows, and so it should always exist one way or the other
-    // At the same time, calculate the overall status of the workflow as the percentage of all action steps that have been completed
     let actionsDictionary = {};
-    let numberOfCompleteActions = 0;
 
     for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
       if (workflow.path[stepIndex].result.length > 0) {
         const action = await Actions.retrieve(workflow.path[stepIndex].result);
 
         actionsDictionary[stepIndex] = action.data.actionComplete;
-
-        if (action.data.actionComplete) numberOfCompleteActions++;
       } else {
         actionsDictionary[stepIndex] = false;
       }
     }
-
-    const workflowStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
 
     // Simultaneously retrieve lists of all component and action type forms that currently exist in their respective collections
     const [componentTypeForms, actionTypeForms] = await Promise.all([
@@ -73,7 +67,6 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
     // Render the interface page
     res.render('workflow.pug', {
       workflow,
-      workflowStatus,
       workflowVersions,
       workflowTypeForm,
       componentName,
@@ -246,40 +239,12 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
     // The first argument should be 'null' in order to match to any type form ID
     const workflows = await Workflows.list(null, { limit: 200 });
 
-    // For each workflow, calculate the overall status as the percentage of all action steps that have been completed
-    // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
-    let workflowStatuses = [];
-    let firstIncompleteActions = [];
-
-    for (const workflow of workflows) {
-      let numberOfCompleteActions = 0;
-      let lastCompleteAction_stepIndex = 0;
-
-      for (let stepIndex = 1; stepIndex < workflow.stepResultIDs.length; stepIndex++) {
-        if (workflow.stepResultIDs[stepIndex].length > 0) {
-          const action = await Actions.retrieve(workflow.stepResultIDs[stepIndex]);
-
-          if (action.data.actionComplete) {
-            numberOfCompleteActions++;
-            lastCompleteAction_stepIndex = stepIndex;
-          }
-        }
-      }
-
-      workflowStatuses.push((numberOfCompleteActions * 100.0) / (workflow.stepResultIDs.length - 1));
-
-      const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.stepResultIDs.length - 1) ? (workflow.stepTypeForms[lastCompleteAction_stepIndex + 1]) : 'n.a.'
-      firstIncompleteActions.push(firstIncompleteAction);
-    }
-
     // Retrieve a list of all workflow type forms that currently exist in the 'workflowForms' collection
     const allWorkflowTypeForms = await Forms.list('workflowForms');
 
     // Render the interface page
     res.render('workflow_list.pug', {
       workflows,
-      workflowStatuses,
-      firstIncompleteActions,
       singleType: false,
       title: 'All Created / Edited Workflows (All Types)',
       allWorkflowTypeForms,
@@ -304,32 +269,6 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
     const workflows = await Workflows.list({ typeFormId: req.params.typeFormId }, options);
 
-    // For each workflow, calculate the overall status as the percentage of all action steps that have been completed
-    // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
-    let workflowStatuses = [];
-    let firstIncompleteActions = [];
-
-    for (const workflow of workflows) {
-      let numberOfCompleteActions = 0;
-      let lastCompleteAction_stepIndex = 0;
-
-      for (let stepIndex = 1; stepIndex < workflow.stepResultIDs.length; stepIndex++) {
-        if (workflow.stepResultIDs[stepIndex].length > 0) {
-          const action = await Actions.retrieve(workflow.stepResultIDs[stepIndex]);
-
-          if (action.data.actionComplete) {
-            numberOfCompleteActions++;
-            lastCompleteAction_stepIndex = stepIndex;
-          }
-        }
-      }
-
-      workflowStatuses.push((numberOfCompleteActions * 100.0) / (workflow.stepResultIDs.length - 1));
-
-      const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.stepResultIDs.length - 1) ? (workflow.stepTypeForms[lastCompleteAction_stepIndex + 1]) : 'n.a.'
-      firstIncompleteActions.push(firstIncompleteAction);
-    }
-
     // Retrieve the workflow type form corresponding to the specified type form ID
     const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
 
@@ -339,8 +278,6 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     // Render the interface page
     res.render('workflow_list.pug', {
       workflows,
-      workflowStatuses,
-      firstIncompleteActions,
       singleType: true,
       title: 'All Created / Edited Workflows (Single Type)',
       workflowTypeForm,

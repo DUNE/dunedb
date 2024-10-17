@@ -1,6 +1,19 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let typeForm;
 
+// Declare a list of the available 'reception' related action type forms
+// NOTE: this must be the same as the equivalent list given in 'lib/Actions.js'
+const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
+
+// Declare a list of the available 'board installation' and 'mesh installation' action type forms
+// NOTE: this must be the same as the equivalent list given in 'lib/Actions.js'
+const installation_typeFormIDs = [
+  'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB', 'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
+  'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
+  'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
+  'prep_mesh_panel_install',
+];
+
 
 // Run a specified function when the page is loaded
 window.addEventListener('load', onPageLoad);
@@ -54,10 +67,18 @@ async function onPageLoad() {
 
 // Function to submit the record to the database
 function SubmitData(submission) {
+  let url = '/json/action';
+
+  if (reception_typeFormIDs.includes(submission.typeFormId)) {
+    url += `?location=${submission.data.receptionLocation}&date=${(submission.data.receptionDate).toString().slice(0, 10)}`;
+  } else if (installation_typeFormIDs.includes(submission.typeFormId)) {
+    url += `?location=${'installed_on_APA'}&date=${(new Date()).toISOString().slice(0, 10)}`;
+  }
+
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: '/json/action',
+    url: url,
     data: JSON.stringify(submission),
     dataType: 'json',
     success: postSuccess,
@@ -76,33 +97,14 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user to the appropriate post-submission page (where 'result' is the action record's action ID)
-    // If the action is one of the 'XXX Reception' types, we must first update the individual components' information (and further redirection will be handled from there)
-    // Similarly, if the action is one of the board or mesh installation types, we must first update the board or mesh information (in a different way)
-    // If neither of these is the case, then we can simply proceed with standard post-submission redirection:
-    //   - if the action originates from a workflow, go to the page for updating the workflow path step results
-    //   - if this is a standalone action, go to the page for viewing the action record
-    const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
-    const installation_typeFormIDs = [
-      'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB', 'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
-      'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
-      'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
-      'prep_mesh_panel_install',
-    ];
-
+    // - if the action originates from a workflow, go to the page for updating the workflow path step results
+    // - if this is a standalone action, go to the page for viewing the action record
     let url = '';
 
-    if (reception_typeFormIDs.includes(submission.typeFormId)) {
-      url = `/component/${submission.componentUuid}/updateLocations/${submission.data.receptionLocation}/${(submission.data.receptionDate).toString().slice(0, 10)}?actionId=${result}`;
-    } else if (installation_typeFormIDs.includes(submission.typeFormId)) {
-      url = `/action/${result}/updateLocations/${'installed_on_APA'}/${(new Date()).toISOString().slice(0, 10)}`;
-
-      if (!(workflowId === '')) url += `?workflowId=${workflowId}&stepIndex=${stepIndex}`;
+    if (!(workflowId === '')) {
+      url = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
     } else {
-      if (!(workflowId === '')) {
-        url = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
-      } else {
-        url = `/action/${result}`;
-      }
+      url = `/action/${result}`;
     }
 
     window.location.href = url;

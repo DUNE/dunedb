@@ -448,7 +448,7 @@ async function boardsByVisualInspection(disposition, issue) {
       }
     }
 
-    cleanedResults.push(cleanedBoardGroup);
+    if (cleanedBoardGroup.componentUuids.length > 0) cleanedResults.push(cleanedBoardGroup);
   }
 
   // Return the list of boards grouped by part numbers
@@ -591,7 +591,7 @@ async function boardsByOrderNumber(orderNumber) {
 
       cleanedDispositionGroup.inspectionData = dispositionGroup.data;
 
-      cleanedResults.push(cleanedDispositionGroup);
+      if (cleanedDispositionGroup.componentUuids.length > 0) cleanedResults.push(cleanedDispositionGroup);
     }
 
     // Return the list of boards grouped by disposition

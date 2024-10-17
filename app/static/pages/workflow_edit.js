@@ -43,9 +43,12 @@ async function onPageLoad() {
     submission.typeFormId = workflowTypeForm.formId;
 
     // If this is a completely new workflow, copy the 'path' object from the workflow type form into the 'submission' object
-    // For an existing workflow that is being edited, we don't want to do this, since it would overwrite any existing path results
+    // Additionally, set up new objects for the overall completion status and next path step to be performed
+    // For an existing workflow that is being edited, we don't want to do any of this, since it would overwrite any existing path and completion results
     if (newWorkflow) {
       submission.path = workflowTypeForm.path;
+      submission.completionStatus = 0.0;
+      submission.firstIncompleteAction = 'n.a.';
     }
 
     // Once all additions and changes to the 'submission' object have been completed, submit it to the database

@@ -8,6 +8,20 @@ const dbLock = require('./dbLock');
 const Forms = require('./Forms');
 const permissions = require('./permissions');
 const utils = require('./utils');
+const Workflows = require('./Workflows');
+
+// Declare a list of the available 'reception' related action type forms
+// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
+const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
+
+// Declare a list of the available 'board installation' and 'mesh installation' action type forms
+// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
+const installation_typeFormIDs = [
+  'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB', 'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
+  'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
+  'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
+  'prep_mesh_panel_install',
+];
 
 
 /// Save a new or edited action record
@@ -47,7 +61,6 @@ async function save(input, req) {
   }
 
   // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
-  // If no type form name has been specified in the 'input' object, use the value from the type form instead
   let newRecord = {};
 
   newRecord.recordType = 'action';
@@ -103,7 +116,57 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
 
-  // If the insertion is successful, return the record's action ID as confirmation
+  // If the action is one of the shipment or batch reception types, the reception location and date will have been passed to this function in the 'req.query' object
+  // Use these to update the location information for each individual sub-component in the shipment or batch
+  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  if (reception_typeFormIDs.includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
+  }
+
+  // If the action is one of the board or mesh installation types, the installation location (always 'installed_on_APA') and date will have been passed to this function in the 'req.query' object
+  // Use these to update the location information for each individual board or mesh referenced in this action
+  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
+    const uuid_format = new RegExp(/[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/);
+
+    for (const [key, value] of Object.entries(newRecord.data)) {
+      if (uuid_format.test(value)) {
+        if (req.query.location === 'installed_on_APA') {
+          const result = await Components.updateLocation(value, req.query.location, req.query.date, newRecord.componentUuid);
+        } else {
+          const result = await Components.updateLocation(value, req.query.location, req.query.date, '');
+        }
+      }
+    }
+  }
+
+  // If the action originates from a workflow, i.e. the record contains a workflow ID, determine the current workflow completion as the percentage of all action steps that have been completed
+  // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
+  // Then update the workflow record with these parameters ... if successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  if (newRecord.workflowId) {
+    const workflow = await Workflows.retrieve(newRecord.workflowId);
+
+    let numberOfCompleteActions = 0;
+    let lastCompleteAction_stepIndex = 0;
+
+    for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
+      if (workflow.path[stepIndex].result.length > 0) {
+        const action = await retrieve(workflow.path[stepIndex].result);
+
+        if (action.data.actionComplete) {
+          numberOfCompleteActions++;
+          lastCompleteAction_stepIndex = stepIndex;
+        }
+      }
+    }
+
+    const completionStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
+    const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.path.length - 1) ? (workflow.path[lastCompleteAction_stepIndex + 1].formName) : 'n.a.'
+
+    const result = await Workflows.updateCompletionStatus(newRecord.workflowId, completionStatus, firstIncompleteAction);
+  }
+
+  // If the insertion and post-insertion changes are all successful, return the record's action ID as confirmation
   return newRecord.actionId;
 }
 

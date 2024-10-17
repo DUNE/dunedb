@@ -89,8 +89,8 @@ async function collateInfo(componentUUID) {
     dunePID: '[no information found]',
     productionSite: '[no information found]',
     configuration: '[no information found]',
-    assemblyStatus: -99.9,
     workflowID: '',
+    assemblyStatus: -99.9,
   };
 
   collatedInfo.frameConstr = {
@@ -174,19 +174,13 @@ async function collateInfo(componentUUID) {
   const workflows = await Search_ActionsWorkflows.workflowsByUUID(componentUUID);
 
   if (workflows.length === 1) {
-    let numberOfCompleteActions = 0;
-    const workflow = await Workflows.retrieve(workflows[0].workflowId);
+    collatedInfo.general.workflowID = workflows[0].workflowId;
 
-    for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
-      if (workflow.path[stepIndex].result.length > 0) {
-        const action = await Actions.retrieve(workflow.path[stepIndex].result);
-
-        if (action.data.actionComplete) numberOfCompleteActions++;
-      }
+    if (workflows[0].completionStatus) {
+      collatedInfo.general.assemblyStatus = workflows[0].completionStatus;
+    } else {
+      collatedInfo.general.assemblyStatus = -0.9;
     }
-
-    collatedInfo.general.assemblyStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
-    collatedInfo.general.workflowID = workflow.workflowId;
   }
 
   /////////////////
