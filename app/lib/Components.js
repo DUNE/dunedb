@@ -142,7 +142,25 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
-  // If the insertion is successful, return the record's component UUID (in string format) as confirmation
+  // If the component is of a certain type, a location and date will have been passed to this function in the 'req.query' object
+  // Use these to update the reception information, either for the component itself or for both the component and any sub-components
+  // If successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
+  if (newRecord.formId === 'AssembledAPA') {
+    // Update the location information of the APA frame that is referenced by an Assembled APA component, to show that the frame is now being used
+    const result = await updateLocation(newRecord.data.frameUuid, req.query.location, req.query.date, newRecord.componentUuid);
+  } else if ((newRecord.formId === 'APAShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
+    const result = await updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
+  } else if (newRecord.formId === 'ReturnedGeometryBoardBatch') {
+    // Extract the UUID and update the location information of each board in a batch of returned geometry boards to match that from the batch's submission
+    for (const board of newRecord.data.boardUuids) {
+      const result = await updateLocation(board.component_uuid, req.query.location, req.query.date, '');
+    }
+  }
+
+  // NOTE: the component that begins any workflow does not count towards the workflow's completion status (only actions do) ... 
+  // ... so even if the component originates from a workflow, i.e. the record contains a workflow ID, we do not need to determine the current workflow completion here, as we do for actions
+
+  // If the insertion and post-insertion changes are all successful, return the record's component UUID (in string format) as confirmation
   return MUUID.from(newRecord.componentUuid).toString();
 }
 
