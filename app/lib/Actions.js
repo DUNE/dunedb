@@ -8,7 +8,6 @@ const dbLock = require('./dbLock');
 const Forms = require('./Forms');
 const permissions = require('./permissions');
 const utils = require('./utils');
-const Workflows = require('./Workflows');
 
 // Declare a list of the available 'reception' related action type forms
 // NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
@@ -138,32 +137,6 @@ async function save(input, req) {
         }
       }
     }
-  }
-
-  // If the action originates from a workflow, i.e. the record contains a workflow ID, determine the current workflow completion as the percentage of all action steps that have been completed
-  // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
-  // Then update the workflow record with these parameters ... if successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
-  if (newRecord.workflowId) {
-    const workflow = await Workflows.retrieve(newRecord.workflowId);
-
-    let numberOfCompleteActions = 0;
-    let lastCompleteAction_stepIndex = 0;
-
-    for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
-      if (workflow.path[stepIndex].result.length > 0) {
-        const action = await retrieve(workflow.path[stepIndex].result);
-
-        if (action.data.actionComplete) {
-          numberOfCompleteActions++;
-          lastCompleteAction_stepIndex = stepIndex;
-        }
-      }
-    }
-
-    const completionStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
-    const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.path.length - 1) ? (workflow.path[lastCompleteAction_stepIndex + 1].formName) : 'n.a.'
-
-    const result = await Workflows.updateCompletionStatus(newRecord.workflowId, completionStatus, firstIncompleteAction);
   }
 
   // If the insertion and post-insertion changes are all successful, return the record's action ID as confirmation

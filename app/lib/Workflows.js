@@ -1,5 +1,6 @@
 const ObjectID = require('mongodb').ObjectId;
 
+const Actions = require('./Actions');
 const commonSchema = require('./commonSchema');
 const Components = require('./Components');
 const { db } = require('./db');
@@ -95,7 +96,9 @@ async function updatePathStep(workflowId, stepIndex, stepResult) {
 
   update['$set']['path.' + stepIndex + '.result'] = stepResult;
 
-  const result = db.collection('workflows')
+  let _lock = await dbLock(`updateWorkflowStep_${workflowId}`, 1000);
+
+  const result = await db.collection('workflows')
     .findOneAndUpdate(
       { 'workflowId': ObjectID(workflowId) },
       update,
@@ -105,6 +108,8 @@ async function updatePathStep(workflowId, stepIndex, stepResult) {
       },
     );
 
+  _lock.release();
+
   if (result.ok === 0) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record!`);
 
   // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
@@ -113,9 +118,32 @@ async function updatePathStep(workflowId, stepIndex, stepResult) {
 
 
 /// Update the overall completion status of a single workflow
-async function updateCompletionStatus(workflowId, completionStatus, firstIncompleteAction) {
+async function updateCompletionStatus(workflowId) {
+  // Determine the current workflow completion as the percentage of all action steps that have been completed
+  // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
+  const workflow = await retrieve(workflowId);
+
+  let numberOfCompleteActions = 0;
+  let lastCompleteAction_stepIndex = 0;
+
+  for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
+    if (workflow.path[stepIndex].result.length > 0) {
+      const action = await Actions.retrieve(workflow.path[stepIndex].result);
+
+      if (action.data.actionComplete) {
+        numberOfCompleteActions++;
+        lastCompleteAction_stepIndex = stepIndex;
+      }
+    }
+  }
+
+  const completionStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
+  const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.path.length - 1) ? (workflow.path[lastCompleteAction_stepIndex + 1].formName) : 'n.a.'
+
   // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
-  const result = db.collection('workflows')
+  let _lock = await dbLock(`updateWorkflowCompletion_${workflowId}`, 1000);
+
+  const result = await db.collection('workflows')
     .findOneAndUpdate(
       { 'workflowId': ObjectID(workflowId) },
       {
@@ -129,6 +157,8 @@ async function updateCompletionStatus(workflowId, completionStatus, firstIncompl
         returnNewDocument: true,
       },
     );
+
+  _lock.release();
 
   if (result.ok === 0) throw new Error(`Workflows::updateCompletionStatus() - failed to update the workflow record!`);
 

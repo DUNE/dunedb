@@ -216,13 +216,18 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
     // Retrieve the record of the component that the action was performed on, using its component UUID (found in the action record)
     const component = await Components.retrieve(action.componentUuid);
 
+    // Retrieve the workflow ID if the action record already contains such a field
+    let workflowId = '';
+
+    if (action.workflowId !== null) workflowId = action.workflowId;
+
     // Render the interface page
     res.render('action_specComponent.pug', {
       action,
       actionTypeForm,
       componentUuid: action.componentUuid,
       componentName: component.data.name,
-      workflowId: '',
+      workflowId,
       stepIndex: '-99',
     });
   } catch (err) {

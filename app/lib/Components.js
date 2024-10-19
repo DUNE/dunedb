@@ -157,9 +157,6 @@ async function save(input, req) {
     }
   }
 
-  // NOTE: the component that begins any workflow does not count towards the workflow's completion status (only actions do) ... 
-  // ... so even if the component originates from a workflow, i.e. the record contains a workflow ID, we do not need to determine the current workflow completion here, as we do for actions
-
   // If the insertion and post-insertion changes are all successful, return the record's component UUID (in string format) as confirmation
   return MUUID.from(newRecord.componentUuid).toString();
 }

@@ -194,7 +194,7 @@ function SubmitData(submission) {
     let url = '';
 
     if (!(workflowId === '')) {
-      url = `/workflow/${workflowId}/0/component/${result}`;
+      url = `/workflow/${workflowId}/0/${result}`;
     } else {
       url = `/component/${result}`;
     }
