@@ -128,35 +128,23 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
 });
 
 
-/// Update a single step result in the path of an existing workflow
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepIndex/:stepType/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
+/// Update a single step result in the path of an existing workflow, and re-determine the workflow completion status
+router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepIndex/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
-    // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
-    const workflow = await Workflows.retrieve(req.params.workflowId);
-
-    if (!workflow) return res.status(404).send(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
-
-    // Parse the step index (remembering that it is passed to this function as a string, but needs to be an integer)
+    // This route is accessed in one of two situations:
+    // 1) when submitting a completely new workflow-related action ... in which case, the step index will be a positive integer and the workflow path step result will need to be updated
+    // 2) when editing an existing workflow-related action ... in which case the step index will always be -99 and no change needs to be made to the workflow path step result
+    // 
+    // In either case, the workflow completion status must always be updated after any changes to the path step results have been made
+    // Note that the step index is passed to this function as a string, and therefore first needs to be converted to an integer
     const stepIndex = parseInt(req.params.stepIndex, 10);
+    let result = null;
 
-    // Get the specified step type from the URL, and throw an error if it is not valid
-    const stepType = req.params.stepType;
+    if (stepIndex !== -99) {
+      result = await Workflows.updatePathStep(req.params.workflowId, stepIndex, req.params.stepResult);
+    }
 
-    if ((!(stepType === 'component')) && (!(stepType === 'action'))) return res.status(404).send(`The provided step type (${stepType}) is not valid (must be 'component' or 'action')`);
-
-    // Get the specified step result from the URL, and throw an error if the step result does not match the corresponding regular expression
-    const stepResult = req.params.stepResult;
-
-    const matches_componentUuid = stepResult.match(/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/g);
-    const matchedComponent = (stepType === 'component') && matches_componentUuid;
-
-    const matches_actionId = stepResult.match(/^[A-Fa-f0-9]{24}/g);
-    const matchedAction = (stepType === 'action') && matches_actionId;
-
-    if (!matchedComponent && !matchedAction) return res.status(404).send(`The provided step result (${stepResult}) is not valid for this step type ('${stepType}'')`);
-
-    // Update the step result ... if successful, the updating function returns 'result = 1', but we don't actually need this value for anything
-    const result = await Workflows.updatePathStep(req.params.workflowId, stepIndex, stepResult);
+    result = await Workflows.updateCompletionStatus(req.params.workflowId);
 
     // Redirect the user to the interface page for viewing the workflow record
     res.redirect(`/workflow/${req.params.workflowId}`);

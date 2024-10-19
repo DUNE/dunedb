@@ -97,12 +97,12 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user to the appropriate post-submission page (where 'result' is the action record's action ID)
-    // - if the action originates from a workflow, go to the page for updating the workflow path step results
+    // - if the action originates from a workflow, go to the page for updating the workflow path step results and completion status
     // - if this is a standalone action, go to the page for viewing the action record
     let url = '';
 
     if (!(workflowId === '')) {
-      url = `/workflow/${workflowId}/${stepIndex}/action/${result}`;
+      url = `/workflow/${workflowId}/${stepIndex}/${result}`;
     } else {
       url = `/action/${result}`;
     }
