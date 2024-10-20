@@ -28,7 +28,7 @@ block content
             th.col-md-1
 
         tbody
-          each workflow, index in workflows
+          each workflow in workflows
             - const notSingleType_notTrashed = !singleType && !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash');
 
             if notSingleType_notTrashed || singleType
@@ -37,24 +37,27 @@ block content
                 td
                   a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
 
-                if workflow.stepResultIDs[0] != ''
+                if workflow.path[0].result != ''
                   td
-                    a(href = `/component/${workflow.stepResultIDs[0]}`) #{workflow.componentName}
+                    a(href = `/component/${workflow.path[0].result}`) #{workflow.componentName}
                 else 
                   td (component not yet created)
 
-                if workflowStatuses[index] < 50.0
-                  td.text-danger.font-weight-bold #{workflowStatuses[index].toFixed(2)}
-                else if workflowStatuses[index] >= 50.0 && workflowStatuses[index] < 70.0
-                  td.text-warning.font-weight-bold #{workflowStatuses[index].toFixed(2)}
-                else if workflowStatuses[index] >= 70.0 && workflowStatuses[index] < 90.0
-                  td.text-info.font-weight-bold #{workflowStatuses[index].toFixed(2)}
-                else if workflowStatuses[index] >= 90.0 && workflowStatuses[index] < 100.0
-                  td.text-primary.font-weight-bold #{workflowStatuses[index].toFixed(2)}
+                if workflow.completionStatus != null
+                  if workflow.completionStatus < 50.0
+                    td.text-danger.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+                  else if workflow.completionStatus >= 50.0 && workflow.completionStatus < 70.0
+                    td.text-warning.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+                  else if workflow.completionStatus >= 70.0 && workflow.completionStatus < 90.0
+                    td.text-info.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+                  else if workflow.completionStatus >= 90.0 && workflow.completionStatus < 100.0
+                    td.text-primary.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+                  else 
+                    td.text-success.font-weight-bold #{workflow.completionStatus.toFixed(2)}
                 else 
-                  td.text-success.font-weight-bold #{workflowStatuses[index].toFixed(2)}
+                  td [Not Found!]
 
-                td #{firstIncompleteActions[index]}
+                td #{workflow.firstIncompleteAction}
                 td
                   a.btn-sm.btn-secondary(href = `/json/workflow/${workflow.workflowId}`, target = '_blank')
                     img.small-icon(src = '/images/checklist_icon.svg')

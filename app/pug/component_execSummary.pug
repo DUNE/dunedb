@@ -47,6 +47,8 @@ block allbody
 
               if ((collatedInfo.general.assemblyStatus) === -99.9)
                 dd [no associated workflow]
+              else if ((collatedInfo.general.assemblyStatus) === -0.9)
+                dd [not found in workflow]
               else
                 dd
                   a(href = `/workflow/${collatedInfo.general.workflowID}`, target = '_blank') #{collatedInfo.general.assemblyStatus.toFixed(2)}

@@ -1,11 +1,18 @@
 const ObjectID = require('mongodb').ObjectId;
 
+const Actions = require('./Actions');
 const commonSchema = require('./commonSchema');
 const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
 const permissions = require('./permissions');
+
+var byField = function (field) {
+  return function (a, b) {
+    return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
+  }
+};
 
 
 /// Save a new or edited workflow record
@@ -50,6 +57,8 @@ async function save(input, req) {
   newRecord.typeFormName = typeForm.formName;
   newRecord.data = input.data;
   newRecord.path = input.path;
+  newRecord.completionStatus = input.completionStatus;
+  newRecord.firstIncompleteAction = input.firstIncompleteAction;
 
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
@@ -87,7 +96,9 @@ async function updatePathStep(workflowId, stepIndex, stepResult) {
 
   update['$set']['path.' + stepIndex + '.result'] = stepResult;
 
-  const result = db.collection('workflows')
+  let _lock = await dbLock(`updateWorkflowStep_${workflowId}`, 1000);
+
+  const result = await db.collection('workflows')
     .findOneAndUpdate(
       { 'workflowId': ObjectID(workflowId) },
       update,
@@ -97,7 +108,59 @@ async function updatePathStep(workflowId, stepIndex, stepResult) {
       },
     );
 
-  if (result.ok === 0) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record ... ${err}`);
+  _lock.release();
+
+  if (result.ok === 0) throw new Error(`Workflows::updatePathStep() - failed to update the workflow record!`);
+
+  // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
+  return result.ok;
+}
+
+
+/// Update the overall completion status of a single workflow
+async function updateCompletionStatus(workflowId) {
+  // Determine the current workflow completion as the percentage of all action steps that have been completed
+  // In addition, find which action (by type form name) is next to be completed, either because it hasn't yet been performed or because it is in progress
+  const workflow = await retrieve(workflowId);
+
+  let numberOfCompleteActions = 0;
+  let lastCompleteAction_stepIndex = 0;
+
+  for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
+    if (workflow.path[stepIndex].result.length > 0) {
+      const action = await Actions.retrieve(workflow.path[stepIndex].result);
+
+      if (action.data.actionComplete) {
+        numberOfCompleteActions++;
+        lastCompleteAction_stepIndex = stepIndex;
+      }
+    }
+  }
+
+  const completionStatus = (numberOfCompleteActions * 100.0) / (workflow.path.length - 1);
+  const firstIncompleteAction = (lastCompleteAction_stepIndex !== workflow.path.length - 1) ? (workflow.path[lastCompleteAction_stepIndex + 1].formName) : 'n.a.'
+
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
+  let _lock = await dbLock(`updateWorkflowCompletion_${workflowId}`, 1000);
+
+  const result = await db.collection('workflows')
+    .findOneAndUpdate(
+      { 'workflowId': ObjectID(workflowId) },
+      {
+        $set: {
+          'completionStatus': completionStatus,
+          'firstIncompleteAction': firstIncompleteAction,
+        }
+      },
+      {
+        sort: { 'validity.version': -1 },
+        returnNewDocument: true,
+      },
+    );
+
+  _lock.release();
+
+  if (result.ok === 0) throw new Error(`Workflows::updateCompletionStatus() - failed to update the workflow record!`);
 
   // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
   return result.ok;
@@ -175,6 +238,8 @@ async function list(match_condition, options) {
       typeFormId: true,
       typeFormName: true,
       path: true,
+      completionStatus: true,
+      firstIncompleteAction: true,
       validity: true,
     }
   })
@@ -190,8 +255,9 @@ async function list(match_condition, options) {
       workflowId: { '$first': '$workflowId' },
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
-      stepTypeForms: { '$first': '$path.formName' },
-      stepResultIDs: { '$first': '$path.result' },
+      path: { '$first': '$path' },
+      completionStatus: { '$first': '$completionStatus' },
+      firstIncompleteAction: { '$first': '$firstIncompleteAction' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
@@ -213,8 +279,8 @@ async function list(match_condition, options) {
   // NOTE: all workflows must have some kind of component name in order to determine where they are being performed in the section below ...
   // ... so any workflow that does not yet have an associated component will be given a temporary fake UK-based component name here, purely for location matching
   for (let record of records) {
-    if (record.stepResultIDs[0] != '') {
-      const component = await Components.retrieve(record.stepResultIDs[0]);
+    if (record.path[0].result != '') {
+      const component = await Components.retrieve(record.path[0].result);
 
       if (component) {
         if (component.data.name) {
@@ -225,7 +291,7 @@ async function list(match_condition, options) {
             record.componentName = component.data.name;
           }
         } else {
-          record.componentName = record.stepResultIDs[0];
+          record.componentName = record.path[0].result;
         }
       }
     } else {
@@ -251,12 +317,6 @@ async function list(match_condition, options) {
 
   // If listing a single type of workflow (i.e. if a match condition was specified), re-sort the records by the component name ... in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  var byField = function (field) {
-    return function (a, b) {
-      return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
-    }
-  };
-
   if (match_condition) filtered_records.sort(byField('componentName'));
 
   // Return the entire list of matching records
@@ -320,6 +380,7 @@ async function autoCompleteId(inputString, limit = 10) {
 module.exports = {
   save,
   updatePathStep,
+  updateCompletionStatus,
   retrieve,
   versions,
   list,
