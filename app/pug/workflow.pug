@@ -33,7 +33,7 @@ block content
 
             dt Completion [%]
 
-            if workflow.completionStatus !== null
+            if workflow.completionStatus != null
               if workflow.completionStatus < 50.0
                 dd.text-danger.font-weight-bold #{workflow.completionStatus.toFixed(2)}
               else if workflow.completionStatus >= 50.0 && workflow.completionStatus < 70.0
