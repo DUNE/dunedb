@@ -4,7 +4,6 @@ include common.pug
 block extrascripts
   script(type = 'text/javascript').
     const workflow = !{JSON.stringify(workflow, null, 4)};
-    const workflowStatus = !{JSON.stringify(workflowStatus, null, 4)};
     const workflowVersions = !{JSON.stringify(workflowVersions, null, 4)};
     const workflowTypeForm = !{JSON.stringify(workflowTypeForm, null, 4)};
     const componentName = !{JSON.stringify(componentName, null, 4)};
@@ -34,16 +33,19 @@ block content
 
             dt Completion [%]
 
-            if workflowStatus < 50.0
-              dd.text-danger.font-weight-bold #{workflowStatus.toFixed(2)}
-            else if workflowStatus >= 50.0 && workflowStatus < 70.0
-              dd.text-warning.font-weight-bold #{workflowStatus.toFixed(2)}
-            else if workflowStatus >= 70.0 && workflowStatus < 90.0
-              dd.text-info.font-weight-bold #{workflowStatus.toFixed(2)}
-            else if workflowStatus >= 90.0 && workflowStatus < 100.0
-              dd.text-primary.font-weight-bold #{workflowStatus.toFixed(2)}
+            if workflow.completionStatus != null
+              if workflow.completionStatus < 50.0
+                dd.text-danger.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+              else if workflow.completionStatus >= 50.0 && workflow.completionStatus < 70.0
+                dd.text-warning.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+              else if workflow.completionStatus >= 70.0 && workflow.completionStatus < 90.0
+                dd.text-info.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+              else if workflow.completionStatus >= 90.0 && workflow.completionStatus < 100.0
+                dd.text-primary.font-weight-bold #{workflow.completionStatus.toFixed(2)}
+              else 
+                dd.text-success.font-weight-bold #{workflow.completionStatus.toFixed(2)}
             else 
-              dd.text-success.font-weight-bold #{workflowStatus.toFixed(2)}
+              td [Not Found!]
 
             dt Current Version:
             dd This is version #{workflow.validity.version} of the workflow.

@@ -155,10 +155,22 @@ function SubmitBatchData(submission) {
 
 // Function to submit either a non-batch component or the batch's overall component record to the database
 function SubmitData(submission) {
+  let url = '/json/component';
+
+  if (submission.formId === 'AssembledAPA') {
+    url += `?location=${'installed_on_APA'}&date=${(new Date()).toISOString().slice(0, 10)}`;
+  } else if ((submission.formId === 'APAShipment') || (submission.formId === 'BoardShipment') || (submission.formId === 'CEAdapterBoardShipment') || (submission.formId === 'DWAComponentShipment') || (submission.formId === 'GroundingMeshShipment')) {
+    url += `?location=${'in_transit'}&date=${(new Date()).toISOString().slice(0, 10)}`;
+  } else if (submission.formId === 'PopulatedBoardShipment') {
+    url += `?location=${'wisconsin'}&date=${(new Date()).toISOString().slice(0, 10)}`;
+  } else if (submission.formId === 'ReturnedGeometryBoardBatch') {
+    url += `?location=${'lancaster'}&date=${(new Date()).toISOString().slice(0, 10)}`;
+  }
+
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: '/json/component',
+    url: url,
     data: JSON.stringify(submission),
     dataType: 'json',
     success: postSuccess,
@@ -177,30 +189,14 @@ function SubmitData(submission) {
     typeForm.emit('submitDone');
 
     // Redirect the user to the appropriate post-submission page ('result' is the component's UUID)
-    // If the component is a 'Returned Geometry Board Batch' type, we must first update the board information (and further redirection will be handled from there)
-    // Similarly, if the component is an 'Assembled APA' type, we must first update the APA frame information
-    // Alternatively, if the component is one of the 'XXX Shipment' types, we must first update the individual components' information (in a different way)
-    // If neither of these is the case, then we can simply proceed with standard post-submission redirection:
-    //   - if the component originates from a workflow, go to the page for updating the workflow path step results
-    //   - if this is a standalone component, go to the page for viewing the component record
+    // - if the component originates from a workflow, go to the page for updating the workflow path step results
+    // - if this is a standalone component, go to the page for viewing the component record
     let url = '';
 
-    if (submission.formId === 'ReturnedGeometryBoardBatch') {
-      url = `/component/${submission.componentUuid}/updateLocations/${'lancaster'}/${(new Date()).toISOString().slice(0, 10)}`;
-    } else if (submission.formId === 'AssembledAPA') {
-      url = `/component/${submission.componentUuid}/updateLocations/${'installed_on_APA'}/${(new Date()).toISOString().slice(0, 10)}`;
-
-      if (!(workflowId === '')) url += `?workflowId=${workflowId}&stepIndex=0`;
-    } else if ((submission.formId === 'APAShipment') || (submission.formId === 'BoardShipment') || (submission.formId === 'CEAdapterBoardShipment') || (submission.formId === 'DWAComponentShipment') || (submission.formId === 'GroundingMeshShipment')) {
-      url = `/component/${submission.componentUuid}/updateLocations/${'in_transit'}/${(new Date()).toISOString().slice(0, 10)}`;
-    } else if (submission.formId === 'PopulatedBoardShipment') {
-      url = `/component/${submission.componentUuid}/updateLocations/${'wisconsin'}/${(new Date()).toISOString().slice(0, 10)}`;
+    if (!(workflowId === '')) {
+      url = `/workflow/${workflowId}/0/${result}`;
     } else {
-      if (!(workflowId === '')) {
-        url = `/workflow/${workflowId}/0/component/${result}`;
-      } else {
-        url = `/component/${result}`;
-      }
+      url = `/component/${result}`;
     }
 
     window.location.href = url;
