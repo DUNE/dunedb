@@ -119,6 +119,7 @@ module.exports = {
   dictionary_frameIntakeSignoff: {
     gedBell: 'Ged Bell',
     callumHolt: 'Callum Holt',
+    gwennMouster: 'Gwenn Mouster',
     sotirisVlachos: 'Sotiris Vlachos',
     kyleZeug: 'Kyle Zeug',
   },
