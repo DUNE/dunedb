@@ -257,6 +257,7 @@ async function list(match_condition, options) {
       typeFormId: true,
       typeFormName: true,
       componentUuid: true,
+      workflowId: true,
       validity: true,
     }
   })
@@ -273,6 +274,7 @@ async function list(match_condition, options) {
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       componentUuid: { '$first': '$componentUuid' },
+      workflowId: { '$first': '$workflowId' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
