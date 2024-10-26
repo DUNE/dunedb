@@ -405,7 +405,10 @@ block content
                               else
                                 td.text-danger.font-weight-bold #{value['Max Deviation From Nominal'].toFixed(2)}
                           else
-                            td.text-success.font-weight-bold #{value['Max Deviation From Nominal']}
+                            if value['Max Deviation From Nominal'] == '-'
+                              td #{value['Max Deviation From Nominal']}
+                            else 
+                              td #{value['Max Deviation From Nominal'].toFixed(2)}
 
                           td #{value['Comments']}
         else
