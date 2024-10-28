@@ -8,6 +8,7 @@ const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 const permissions = require('../lib/permissions');
 const utils = require('../lib/utils');
+const Workflows = require('../lib/Workflows');
 
 
 /// View a single component record
@@ -379,40 +380,45 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
 
-    // Each action record contains only the bare minimum of information about that action, so for each one, retrieve and store the full record
-    let fullActions = [];
-
-    for (let i = 0; i < actions.length; i++) {
-      fullActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));
-    }
-
     // We would like the actions to be ordered in a specific way in the summary document, to make it easier to find any given action (particularly when there are a lot of actions):
-    //   - first, all non-conformance actions
-    //   - then, all other workflow-originating actions
-    //   - and finally, any other remaining actions
-    // with the actions in each section ordered chronologically, i.e. earliest first
+    //   - first, all non-conformance actions in chronological order (earliest to latest)
+    //   - then, all workflow actions in order of the workflow
+    //   - and finally, any other actions in chronological order
+
+    // First deal with the non-workflow actions
+    // Loop through the action records, and select only the non-workflow actions - i.e. those which do NOT have a 'workflowID' field
+    // For each such action, retrieve the entire action record (since the list retrieved previously contains only the bare minimum of information), and save it into the appropriate array based on the action type form
+    // Finally, reverse the separated arrays of non-workflow actions to get the actions in chronological order (they are natively retrieved in reverse chronological order (i.e. latest to earliest))
     let nonConformActions = [];
-    let workflowActions = [];
     let otherActions = [];
 
-    // Loop through the action records, and save them into separate arrays based on the action type form and whether or not the record has a 'workflowId' field or not
-    // Note that because the retrieved actions are natively in reverse chronological order (i.e. most recent first), this will be the ordering in the separated arrays as well
-    for (let i = 0; i < fullActions.length; i++) {
-      if (fullActions[i].typeFormId === 'APANonConformance') {
-        nonConformActions.push(fullActions[i]);
-      } else {
-        if (fullActions[i].hasOwnProperty('workflowId')) {
-          workflowActions.push(fullActions[i])
+    for (let i = 0; i < actions.length; i++) {
+      if (actions[i].workflowId == null) {
+        if (actions[i].typeFormId === 'APANonConformance') {
+          nonConformActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));
         } else {
-          otherActions.push(fullActions[i]);
+          otherActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));
         }
       }
     }
 
-    // Reverse the separated arrays to get the actions in chronological order
     const chrono_nonConformActions = nonConformActions.reverse();
-    const chrono_workflowActions = workflowActions.reverse();
     const chrono_otherActions = otherActions.reverse();
+
+    // Now deal with any workflow actions (only relevant if the component has a workflow ID)
+    let workflowActions = [];
+
+    if (component.workflowId != null) {
+      // Retrieve the most recent version of the record corresponding to the specified workflow ID
+      const workflow = await Workflows.retrieve(component.workflowId);
+
+      // Loop over the action steps in the workflow path, and for each one that has a 'result' (i.e. an action has actually been performed), retrieve and save the full action record
+      for (let stepIndex = 1; stepIndex < workflow.path.length; stepIndex++) {
+        if (workflow.path[stepIndex].result.length > 0) {
+          workflowActions.push(await Actions.retrieve(workflow.path[stepIndex].result));
+        }
+      }
+    }
 
     // For specific shipment and batch component types, set up an array containing more detailed information about each sub-component
     let collectionDetails = [];
@@ -513,7 +519,7 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
       componentTypeForm,
       collectionDetails,
       nonConformActions: chrono_nonConformActions,
-      workflowActions: chrono_workflowActions,
+      workflowActions,
       otherActions: chrono_otherActions,
       dictionary_locations: utils.dictionary_locations,
     });
