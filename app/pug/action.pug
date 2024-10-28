@@ -249,13 +249,16 @@ block content
                         tr
                           td #{value.Measurement}
 
-                          if value.Tolerance === '-'
-                            td #{value.Actual.toFixed(2)}
+                          if value.Actual === '-'
+                            td #{value.Actual}
                           else 
-                            if (value.Actual >= (-1.0 * value.Tolerance)) && (value.Actual <= value.Tolerance)
-                              td.text-success.font-weight-bold #{value.Actual.toFixed(2)}
-                            else
-                              td.text-danger.font-weight-bold #{value.Actual.toFixed(2)}
+                            if value.Tolerance === '-'
+                              td #{value.Actual.toFixed(2)}
+                            else 
+                              if (value.Actual >= (-1.0 * value.Tolerance)) && (value.Actual <= value.Tolerance)
+                                td.text-success.font-weight-bold #{value.Actual.toFixed(2)}
+                              else
+                                td.text-danger.font-weight-bold #{value.Actual.toFixed(2)}
 
                           td #{value.Units}
 
