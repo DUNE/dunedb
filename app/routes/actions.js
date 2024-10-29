@@ -219,7 +219,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
     // Retrieve the workflow ID if the action record already contains such a field
     let workflowId = '';
 
-    if (action.workflowId !== null) workflowId = action.workflowId;
+    if (action.workflowId != null) workflowId = action.workflowId;
 
     // Render the interface page
     res.render('action_specComponent.pug', {
