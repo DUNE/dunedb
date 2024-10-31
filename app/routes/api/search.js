@@ -172,13 +172,13 @@ router.get('/search/apasByProductionLocationAndNumber/:apaLocation/:apaNumber', 
 });
 
 
-/// Search for assembled APAs by last completed assembly step
-router.get('/search/apasByLastCompletedAssemblyStep/:assemblyStep', async function (req, res, next) {
+/// Search for assembled APAs by production location and last completed assembly step
+router.get('/search/apasByProductionLocationAndAssemblyStep/:apaLocation/:assemblyStep', async function (req, res, next) {
   try {
     // Retrieve a nested list, consisting of:
-    // - a list of all assembled APAs that have been completed up to and including the specified step in their assembly workflows
-    // - a list of all assembled APAs that have NOT yet reached the specified step in their assembly workflows
-    const assembledAPAs = await Search_OtherComponents.apasByLastCompletedAssemblyStep(req.params.assemblyStep);
+    // - a list of all assembled APAs at the specified location that have been completed up to and including the specified step in their assembly workflows
+    // - a list of all assembled APAs at the specified location that have NOT yet reached the specified step in their assembly workflows
+    const assembledAPAs = await Search_OtherComponents.apasByProductionLocationAndAssemblyStep(req.params.apaLocation, req.params.assemblyStep);
 
     // Return the list in JSON format
     return res.json(assembledAPAs);

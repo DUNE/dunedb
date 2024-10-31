@@ -453,17 +453,28 @@ async function apasByProductionLocationAndNumber(location, number) {
 
 
 /// Retrieve lists of all assembled APAs that have and have not been completed up to and including the specified step in their assembly workflows
-async function apasByLastCompletedAssemblyStep(assemblyStep) {
+async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
   let action_aggregation_stages = [];
 
-  // Match against the type form ID to get records of all 'Asssmbled APA QA Check' actions that have been performed and completed at the specified assembly step
-  action_aggregation_stages.push({
-    $match: {
+  // Depending on which assembly step string has been passed to this function, match against the type form ID to get:
+  // ... either records of all 'Assembled APA QA Check' actions that have been performed and completed at the specified assembly step
+  // ... or records of all 'Completed APA QA Checklist' actions that have been performed and completed
+  let match_condition = {};
+
+  if (assemblyStep === 'assemblyComplete') {
+    match_condition = {
+      'typeFormId': 'CompletedAPAQCChecklist',
+      'data.actionComplete': true,
+    };
+  } else {
+    match_condition = {
       'typeFormId': 'AssembledAPAQACheck',
       'data.workflowSectionBeingQAed': assemblyStep,
       'data.actionComplete': true,
-    }
-  });
+    };
+  }
+
+  action_aggregation_stages.push({ $match: match_condition });
 
   // Select the latest version of each record, and pass through only the fields required for later use
   action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
@@ -476,37 +487,44 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
   });
 
   // Query the 'actions' records collection using the aggregation stages defined above
-  let apasCompletedToStep = await db.collection('actions')
+  let apasCompletedToStep_allLocations = await db.collection('actions')
     .aggregate(action_aggregation_stages)
     .toArray();
 
-  // At this point, we have a list of completed 'Assembled APA QA Check' action records
-  // But we actually want a list of the Assembled APA components that these actions have been performed on
-  // Loop over the action records, retrieve the associated component record, and add the desired information to each record
-  let uuids_apasCompletedToStep = []
+  // At this point, we have a list of completed 'Assembled APA QA Check' or 'Completed APA QA Checklist' action records
+  // But we actually want a list of the Assembled APA components that have been produced at the specified location and on which these actions have been performed
+  // Loop over the action records, retrieve the associated component record, and add the desired information to each record if the APA production location matches the specified one
+  let apasCompletedToStep_atLocation = [];
+  let uuids_apasCompletedToStep_atLocation = []
 
-  for (let action of apasCompletedToStep) {
-    uuids_apasCompletedToStep.push(action.componentUuid);
-
+  for (let action of apasCompletedToStep_allLocations) {
     const component = await Components.retrieve(MUUID.from(action.componentUuid).toString());
-    const name_splits = component.data.name.split('-');
 
-    action.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-    action.workflowId = component.workflowId;
+    if (component.data.apaAssemblyLocation === location) {
+      uuids_apasCompletedToStep_atLocation.push(action.componentUuid);
+
+      const name_splits = component.data.name.split('-');
+
+      action.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      action.workflowId = component.workflowId;
+
+      apasCompletedToStep_atLocation.push(action);
+    }
   }
 
   // Re-sort the records by the component name, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  apasCompletedToStep.sort(byField('componentName'));
+  apasCompletedToStep_atLocation.sort(byField('componentName'));
 
   let comp_aggregation_stages = [];
 
-  // Now we also want a list of the Assembled APA components that these actions have NOT been performed on
-  // Match against the type form ID and component UUID to get records of all 'Assembled APA' components that the previously found 'Assembled APA QA Check' actions were NOT performed on
+  // Now we also want a list of the Assembled APA components that have been produced at the specified location and on which these actions have NOT been performed
+  // Match against the type form ID, component UUID and production location to get records of all 'Assembled APA' components that have a UUID that is NOT in the previously constructed list
   comp_aggregation_stages.push({
     $match: {
       'formId': 'AssembledAPA',
-      'componentUuid': { $nin: uuids_apasCompletedToStep }
+      'componentUuid': { $nin: uuids_apasCompletedToStep_atLocation },
+      'data.apaAssemblyLocation': location,
     }
   });
 
@@ -521,24 +539,24 @@ async function apasByLastCompletedAssemblyStep(assemblyStep) {
   });
 
   // Query the 'components' records collection using the aggregation stages defined above
-  let apasNotCompletedToStep = await db.collection('components')
+  let apasNotCompletedToStep_atLocation = await db.collection('components')
     .aggregate(comp_aggregation_stages)
     .toArray();
 
   // Add the corresponding shortened Assembled APA component name to each matching record
-  for (let record of apasNotCompletedToStep) {
+  for (let record of apasNotCompletedToStep_atLocation) {
     const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
     const name_splits = component.data.name.split('-');
     record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
   }
 
   // Re-sort the records by the component name ... in reverse alphanumerical order
-  apasNotCompletedToStep.sort(byField('componentName'));
+  apasNotCompletedToStep_atLocation.sort(byField('componentName'));
 
   // Return a nested list, consisting of:
-  // - [0] the list of all assembled APAs that have had matching 'Assembled APA QA Check' actions performed on them and completed
+  // - [0] the list of all assembled APAs produced at the specified location that have had matching 'Assembled APA QA Check'  or 'Completed APA QA Checklist' actions performed on them and completed
   // - [1] the list of all assembled APAs that have NOT had such actions performed on them and/or completed
-  return [apasCompletedToStep, apasNotCompletedToStep];
+  return [apasCompletedToStep_atLocation, apasNotCompletedToStep_atLocation];
 }
 
 
@@ -579,6 +597,6 @@ module.exports = {
   meshesByPartNumber,
   boardKitComponentsByLocation,
   apasByProductionLocationAndNumber,
-  apasByLastCompletedAssemblyStep,
+  apasByProductionLocationAndAssemblyStep,
   componentsByTypeAndNumber,
 }

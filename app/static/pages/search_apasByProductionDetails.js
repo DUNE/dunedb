@@ -24,8 +24,8 @@ async function renderSearchForms() {
 
   // When the appropriate confirmation button is pressed, perform the search by location and number using the appropriate jQuery 'ajax' call and the current values of the search parameters
   // Additionally, disable both confirmation buttons while the current search is being performed
-  $('#confirmButton_locationNumber').on('click', function () {
-    $('#confirmButton_locationNumber').prop('disabled', true);
+  $('#confirmButton_number').on('click', function () {
+    $('#confirmButton_number').prop('disabled', true);
     $('#confirmButton_assemblyStep').prop('disabled', true);
 
     if (apaLocation && apaNumber) {
@@ -39,19 +39,19 @@ async function renderSearchForms() {
     }
   });
 
-  // When the appropriate confirmation button is pressed, perform the search by assembly step using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // When the appropriate confirmation button is pressed, perform the search by location and assembly step using the appropriate jQuery 'ajax' call and the current values of the search parameters
   // Additionally, disable both confirmation buttons while the current search is being performed
   $('#confirmButton_assemblyStep').on('click', function () {
-    $('#confirmButton_locationNumber').prop('disabled', true);
+    $('#confirmButton_number').prop('disabled', true);
     $('#confirmButton_assemblyStep').prop('disabled', true);
 
-    if (assemblyStep) {
+    if (apaLocation && assemblyStep) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/apasByLastCompletedAssemblyStep/${assemblyStep}`,
+        url: `/json/search/apasByProductionLocationAndAssemblyStep/${apaLocation}/${assemblyStep}`,
         dataType: 'json',
-        success: postSuccess_assemblyStep,
+        success: postSuccess_locationAndAssemblyStep,
       }).fail(postFail);
     }
   });
@@ -87,8 +87,8 @@ function postSuccess_locationAndNumber(result) {
 };
 
 
-// Function to run for a successful search query by last completed assembly step
-function postSuccess_assemblyStep(result) {
+// Function to run for a successful search query by production location and last completed assembly step
+function postSuccess_locationAndAssemblyStep(result) {
   // Make sure that all page elements where information messages or search results will be displayed are empty
   $('#messages').empty();
   $('#results1').empty();
@@ -97,7 +97,7 @@ function postSuccess_assemblyStep(result) {
   // Display the information about APAs that have had the specified assembly step completed
   let resultsStart = `
   <tr>
-    <td colspan = "3">The specified assembly step has been completed for <b>${result[0].length} APAs</b>
+    <td colspan = "3">The specified assembly step <b><u>has been completed</u></b> for <b>${result[0].length} APAs</b>
       <br>
       <hr>
     </td>
@@ -107,9 +107,8 @@ function postSuccess_assemblyStep(result) {
 
   let tableStart = `
     <tr>
-      <th scope = 'col' width = '30%'>APA Name</th>
-      <th scope = 'col' width = '35%'>Component Info</th>
-      <th scope = 'col' width = '35%'>Assembly Workflow</th>
+      <th scope = 'col' width = '40%'>APA Name</th>
+      <th scope = 'col' width = '60%'>Assembly Workflow</th>
     </tr>`;
 
   $('#results1').append(tableStart);
@@ -117,8 +116,7 @@ function postSuccess_assemblyStep(result) {
   for (const apa of result[0]) {
     const apaText = `
       <tr>
-        <td>${apa.componentName}</td>
-        <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>[link]</td>
+        <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
         <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
       </tr>`;
 
@@ -128,7 +126,7 @@ function postSuccess_assemblyStep(result) {
   // Display the information about APAs that have not yet had the specified assembly step completed
   resultsStart = `
   <tr>
-    <td colspan = "3">The specified assembly step has not yet been completed for <b>${result[1].length} APAs</b>
+    <td colspan = "3">The specified assembly step <b><u>has not yet been completed</u></b> for <b>${result[1].length} APAs</b>
       <br>
       <hr>
     </td>
@@ -140,8 +138,7 @@ function postSuccess_assemblyStep(result) {
   for (const apa of result[1]) {
     const apaText = `
       <tr>
-        <td>${apa.componentName}</td>
-        <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>[link]</td>
+        <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
         <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
       </tr>`;
 
@@ -149,7 +146,7 @@ function postSuccess_assemblyStep(result) {
   }
 
   // Re-enable both confirmation buttons for the next search
-  $('#confirmButton_locationNumber').prop('disabled', false);
+  $('#confirmButton_number').prop('disabled', false);
   $('#confirmButton_assemblyStep').prop('disabled', false);
 }
 
@@ -164,6 +161,6 @@ function postFail(result, statusCode, statusMsg) {
   }
 
   // Re-enable both confirmation buttons for the next search
-  $('#confirmButton_locationNumber').prop('disabled', false);
+  $('#confirmButton_number').prop('disabled', false);
   $('#confirmButton_assemblyStep').prop('disabled', false);
 };

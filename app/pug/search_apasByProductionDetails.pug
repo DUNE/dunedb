@@ -19,50 +19,60 @@ block content
       hr
 
       .row
-        .col-md-3
-          h4 Search by Production Location and Number
-
+        .col-md-5
           .vert-space-x1
             p Select a production location below.
+              br
+              | <b>This is a <u>required</u> parameter for both searches.</b>
 
-          select.form-control#locationSelection
-            option(value = '')          
-            option(value = 'chicago') #{dictionary_locations['chicago']} 
-            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
-            option(value = 'fermilab') #{dictionary_locations['fermilab']} 
-
-          .vert-space-x1
-            p Enter the production number of the APA below.
-
-          input.form-control#numberSelection
-
-          .vert-space-x2
-            button.btn-primary.btn-lg#confirmButton_locationNumber Search by Location and Number
+            select.form-control#locationSelection
+              option(value = '')          
+              option(value = 'chicago') #{dictionary_locations['chicago']} 
+              option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+              option(value = 'fermilab') #{dictionary_locations['fermilab']} 
 
           .vert-space-x2
             hr
 
+            h4 Search by Production Number
+
+            .vert-space-x1
+              p <b>Either</b> enter an APA production number here <b>or</b> select a last completed assembly step below.
+                br
+                | <b>This is a <u>required</u> parameter.</b>
+
+            input.form-control#numberSelection
+
+            .vert-space-x2
+              button.btn-primary.btn-lg#confirmButton_number Search by Production Number
+
+          .vert-space-x2
+            hr  
+
             h4 Search by Last Completed Assembly Step
 
             .vert-space-x1
-              p Select an assembly step below.
+              p <b>Either</b> select a last completed assembly step here <b>or</b> enter an APA production number above.
+                br
+                | <b>This is a <u>required</u> parameter.</b>
 
             select.form-control#assemblyStepSelection
               option(value = '')
-              option(value = 'framePreparation') Assembled APA Quality Assurance Check (Frame Prep)
-              option(value = 'xLayerAssembly') Assembled APA Quality Assurance Check (X Layer)
-              option(value = 'vLayerAssembly') Assembled APA Quality Assurance Check (V Layer)
-              option(value = 'uLayerAssembly') Assembled APA Quality Assurance Check (U Layer)
-              option(value = 'gLayerAssembly') Assembled APA Quality Assurance Check (G Layer)
-              option(value = 'coverBoardsAndCaps') Assembled APA Quality Assurance Check (Cover Boards / Cap Installation)
-              option(value = 'shippingPreparation') Assembled APA Quality Assurance Check (Shipping Preparation)
+              option(value = 'framePreparation') Frame Preparation QA Check
+              option(value = 'xLayerAssembly') X Layer QA Check
+              option(value = 'vLayerAssembly') V Layer QA Check
+              option(value = 'uLayerAssembly') U Layer QA Check
+              option(value = 'gLayerAssembly') G Layer QA Check
+              option(value = 'coverBoardsAndCaps') Cover Boards / Cap Installation QA Check
+              option(value = 'shippingPreparation') Shipping Preparation QA Check
+              option(value = 'assemblyComplete') Completed APA QA Checklist
 
             .vert-space-x2
-              button.btn-primary.btn-lg#confirmButton_assemblyStep Search by Assembly Step
+              button.btn-primary.btn-lg#confirmButton_assemblyStep Search by Last Completed Assembly Step
 
         .col-md-1
 
-        .col-md-8
+        .col-md-6
           h4 Search Results
 
           .vert-space-x1 
