@@ -153,11 +153,11 @@ function postSuccess_disposition(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '10%'>Board UKID</th>
-          <th scope = 'col' width = '15%'>Order Number</th>
-          <th scope = 'col' width = '25%'>Visual Inspection Action</th>
-          <th scope = 'col' width = '25%'>Issue(s) Identified</th>
-          <th scope = 'col' width = '25%'>Repairs Description (if applicable)</th>
+          <th scope = 'col' width = '8%'>Board UKID</th>
+          <th scope = 'col' width = '10%'>Order Number</th>
+          <th scope = 'col' width = '17%'>Visual Inspection Action</th>
+          <th scope = 'col' width = '35%'>Issue(s) Identified</th>
+          <th scope = 'col' width = '30%'>Repairs Description (if applicable)</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -204,10 +204,10 @@ function postSuccess_orderNumber(result) {
 
   const resultsStart = `
     <tr>
-      <td colspan = "4">The following geometry boards with order number: <b>${$('#orderNumberSelection').val()}</b> and at least one recorded visual inspection have been found.</td>
+      <td colspan = "5">The following geometry boards with order number: <b>${$('#orderNumberSelection').val()}</b> and at least one recorded visual inspection have been found.</td>
     </tr>
     <tr>
-      <td colspan = "4"><b>Please note that only boards which have had a Visual Inspection action performed on them are shown here - there may be additional boards in this order that have not yet had inspections performed.</b><br><hr></td>
+      <td colspan = "5"><b>Please note that only boards which have had a Visual Inspection action performed on them are shown here - there may be additional boards in this order that have not yet had inspections performed.</b><br><hr></td>
     </tr>`;
 
   $('#results').append(resultsStart);
@@ -219,7 +219,7 @@ function postSuccess_orderNumber(result) {
     for (const boardGroup of result) {
       const groupCount = `
         <tr>
-          <td colspan = "4">Found ${boardGroup.actionIds.length} boards with disposition: <b>${dispositionsDictionary[boardGroup.disposition]}</b></td>
+          <td colspan = "5">Found ${boardGroup.actionIds.length} boards with disposition: <b>${dispositionsDictionary[boardGroup.disposition]}</b></td>
         </tr>`;
 
       $('#results').append(groupCount);
@@ -230,17 +230,18 @@ function postSuccess_orderNumber(result) {
     for (const boardGroup of result) {
       const groupTitle = `
         <tr>
-          <td colspan = "4"><b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b></td>
+          <td colspan = "5"><b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b></td>
         </tr>`;
 
       $('#results').append(groupTitle);
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '25%'>Board UKID</th>
-          <th scope = 'col' width = '25%'>Visual Inspection Action</th>
-          <th scope = 'col' width = '25%'>Issue(s) Identified</th>
-          <th scope = 'col' width = '25%'>Repairs Description (if applicable)</th>
+          <th scope = 'col' width = '8%'>Board UKID</th>
+          <th scope = 'col' width = '10%'></th>
+          <th scope = 'col' width = '17%'>Visual Inspection Action</th>
+          <th scope = 'col' width = '35%'>Issue(s) Identified</th>
+          <th scope = 'col' width = '30%'>Repairs Description (if applicable)</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -251,6 +252,7 @@ function postSuccess_orderNumber(result) {
         const boardText = `
           <tr>
             <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
+            <td></td>
             <td><a href = '/action/${boardGroup.actionIds[i]}' target = '_blank'</a>${boardGroup.actionIds[i]}</td>
             <td>${inspectionData.issues}</td>
             <td>${inspectionData.repairsDescription}</td>

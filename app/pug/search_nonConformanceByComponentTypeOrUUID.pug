@@ -16,7 +16,7 @@ block content
       hr
 
       .row
-        .col-md-4
+        .col-md-5
           h4 Select Component Type
 
           .vert-space-x1
@@ -30,37 +30,8 @@ block content
             option(value = 'apaFrame') APA Frame 
             option(value = 'groundingMeshPanel') Grounding Mesh Panel 
 
-          .vert-space-x2 
-            hr
-
-            h4 Select Disposition
-
-            .vert-space-x1 
-              p Select a disposition below ... this is an optional parameter.
-                br
-                | It is only used alongside the <b>component type</b> required parameter.
-
-            select.form-control#dispositionSelection
-              option(value = 'any') (any)
-              option(value = 'useAsIs') Use As Is 
-              option(value = 'repair') Repair 
-              option(value = 'rework') Rework 
-              option(value = 'returnToSupplier') Return to Supplier 
-              option(value = 'rejectRePurpose') Reject/Re-purpose
-              option(value = 'scrap') Scrap 
-
-          .vert-space-x2 
-            h4 Select Status
-
-            .vert-space-x1 
-              p Select a status below ... this is an optional parameter.
-                br
-                | It is only used alongside the <b>component type</b> required parameter.
-
-            select.form-control#statusSelection
-              option(value = 'any') (any)
-              option(value = 'open') Open 
-              option(value = 'closed') Closed 
+          .vert-space-x2
+            button.btn-primary.btn-lg#confirmButton_type Search by Component Type
 
         .col-md-1
 
@@ -75,13 +46,43 @@ block content
           .vert-space-x1 
             #componentUuidSelection
 
-          .vert-space-x2
-            hr
+          button.btn-primary.btn-lg#confirmButton_uuid Search by Component UUID
 
-            .vert-space-x2
-              button.btn-primary.btn-lg.float-left#confirmButton_type Search by Component Type
+      .vert-space-x2 
+        hr
 
-              button.btn-primary.btn-lg.float-right#confirmButton_uuid Search by Component UUID
+      .row.vert-space-x2 
+        .col-md-5
+          h4 Select Disposition
+
+          .vert-space-x1 
+            p Select a disposition below ... this is an optional parameter.
+              br
+              | It is only used alongside the <b>component type</b> required parameter.
+
+          select.form-control#dispositionSelection
+            option(value = 'any') (any)
+            option(value = 'useAsIs') Use As Is 
+            option(value = 'repair') Repair 
+            option(value = 'rework') Rework 
+            option(value = 'returnToSupplier') Return to Supplier 
+            option(value = 'rejectRePurpose') Reject/Re-purpose
+            option(value = 'scrap') Scrap 
+
+        .col-md-1 
+
+        .col-md-5
+          h4 Select Status
+
+          .vert-space-x1 
+            p Select a status below ... this is an optional parameter.
+              br
+              | It is only used alongside the <b>component type</b> required parameter.
+
+          select.form-control#statusSelection
+            option(value = 'any') (any)
+            option(value = 'open') Open 
+            option(value = 'closed') Closed 
 
     .vert-space-x2
       hr
