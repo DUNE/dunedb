@@ -34,7 +34,7 @@ module.exports = {
   // The dictionaries below list various groups of UK and US personnel, whose names should be entered as appropriate in various component and action type forms
   // Using these centralised dictionaries allows names to be consistently displayed in the DB interface, and also for them to be selected via drop-down menu when filling out the type forms
 
-  // A dictionary of UK and US technicians 
+  // A dictionary of UK and US technicians working at the APA factories
   dictionary_technicians: {
     vincentBaker: 'Vincent Baker',
     davidBanner: 'David Banner',
@@ -74,6 +74,11 @@ module.exports = {
     anthonyWatling: 'Anthony Watling',
     lewisWatson: 'Lewis Watson',
     sotirisVlachos: 'Sotiris Vlachos',
+  },
+
+  // A dictionary of technicians specifically at Manchester, working on geometry board metrology
+  dictionary_manchesterTechnicians: {
+
   },
 
   // A dictionary of lead personnel at the UK and US APA factories
