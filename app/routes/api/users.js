@@ -58,7 +58,7 @@ router.get('/users/list', permissions.checkPermissionJson('users:view'), async f
 });
 
 
-/// List all UK and US technicians
+/// List UK and US technicians working at the APA factories
 router.get('/technicians.json', async function (req, res, next) {
   try {
     // Convert the centralised list of technicians from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
@@ -80,7 +80,29 @@ router.get('/technicians.json', async function (req, res, next) {
 });
 
 
-/// List all lead personnel at the UK and US APA factories
+// List technicians specifically at Manchester, working on geometry board metrology
+router.get('/manchester_technicians.json', async function (req, res, next) {
+  try {
+    // Convert the centralised list of Manchester technicians from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
+    let data = [];
+
+    for (const person in utils.dictionary_manchesterTechnicians) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_manchesterTechnicians[person],
+      });
+    }
+
+    // Return the array in JSON format
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List lead personnel at the UK and US APA factories
 router.get('/apaFactoryLeads.json', async function (req, res, next) {
   try {
     // Convert the centralised list of lead personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
@@ -102,7 +124,7 @@ router.get('/apaFactoryLeads.json', async function (req, res, next) {
 });
 
 
-/// List all personnel who are authorised to sign-off on tension controls
+/// List personnel who are authorised to sign-off on tension controls
 router.get('/tensionControlSignoff.json', async function (req, res, next) {
   try {
     // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
@@ -124,7 +146,7 @@ router.get('/tensionControlSignoff.json', async function (req, res, next) {
 });
 
 
-/// List all personnel who are authorised to sign-off on winder maintenance
+/// List personnel who are authorised to sign-off on winder maintenance
 router.get('/winderMaintenanceSignoff.json', async function (req, res, next) {
   try {
     // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
@@ -146,7 +168,7 @@ router.get('/winderMaintenanceSignoff.json', async function (req, res, next) {
 });
 
 
-/// List all personnel who are authorised to sign-off on APA frame and grounding mesh intake (including frame intake survey results)
+/// List personnel who are authorised to sign-off on APA frame and grounding mesh intake (including both types of frame survey results)
 router.get('/frameIntakeSignoff.json', async function (req, res, next) {
   try {
     // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
@@ -156,28 +178,6 @@ router.get('/frameIntakeSignoff.json', async function (req, res, next) {
       data.push({
         api_name: person,
         display_name: utils.dictionary_frameIntakeSignoff[person],
-      });
-    }
-
-    // Return the array in JSON format
-    return res.json(data);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List all personnel who are authorised to sign-off on APA frame installation survey results
-router.get('/frameInstallationSignoff.json', async function (req, res, next) {
-  try {
-    // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
-    let data = [];
-
-    for (const person in utils.dictionary_frameInstallationSignoff) {
-      data.push({
-        api_name: person,
-        display_name: utils.dictionary_frameInstallationSignoff[person],
       });
     }
 

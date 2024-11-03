@@ -16,48 +16,40 @@ block content
       hr
 
       .row 
-        .col-md-6
-          h4 Search by UUID
+        .col-md-5
+          h4 Search by Component UUID
 
           .vert-space-x1
-            p The input box below uses auto-complete - just start typing a component UUID, and any matching options will be displayed.
-              br
-              | Alternatively, click on the camera icon (to the right of the box) to take a picture of the component's QR code if you have it available.
+            p Enter a component UUID below or take a picture of the component's QR code.
 
           .vert-space-x1
-            .row
-              .col-md-8
-                #componentuuidform
+            #componentuuidform
+
+        .col-md-1 
+
+        .col-md-5
+          h4 Search by Type and Number
+
+          .vert-space-x1
+            p Select a component type below.
+
+            select.form-control#componentTypeSelection
+              option(value = '')
+              option(value = 'CEAdapterBoard') CE Adapter Board
+              option(value = 'CRBoard') CR Board
+              option(value = 'CableHarness') Cable Harness
+              option(value = 'GBiasBoard') G-Bias Board
+              option(value = 'GeometryBoard') Geometry Board
+              option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+              option(value = 'SHVBoard') SHV Board
 
           .vert-space-x2
-            hr
+            p Enter a type record number below.
 
-            h4 Search by Type and Number
+            input.form-control#typeRecordNumberSelection
 
-            .vert-space-x1
-              p Select a component type below.
-
-              .row
-                .col-md-8
-                  select.form-control#componentTypeSelection
-                    option(value = '')
-                    option(value = 'CEAdapterBoard') CE Adapter Board
-                    option(value = 'CRBoard') CR Board
-                    option(value = 'CableHarness') Cable Harness
-                    option(value = 'GBiasBoard') G-Bias Board
-                    option(value = 'GeometryBoard') Geometry Board
-                    option(value = 'GroundingMeshPanel') Grounding Mesh Panel
-                    option(value = 'SHVBoard') SHV Board
-
-            .vert-space-x2
-              p Enter a type record number below.
-
-              .row
-                .col-md-8
-                  input.form-control#typeRecordNumberSelection
-
-            .vert-space-x2
-              button.btn-primary.btn-lg#confirmButton Search by Type and Number
+          .vert-space-x2
+            button.btn-primary.btn-lg#confirmButton Search by Type and Number
 
       .vert-space-x1
         #messages

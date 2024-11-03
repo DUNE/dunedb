@@ -72,7 +72,7 @@ function postSuccess_location(result) {
       <td colspan = "3">The following grounding mesh panels are at <b>${$('#locationSelection option:selected').text()}</b>.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by part number, and then ordered by increasing DUNE PID within each group.
+      <td colspan = "3">They are grouped by part number, and then ordered by increasing mesh number within each group.
         <br>
         <hr>
       </td>
@@ -105,9 +105,9 @@ function postSuccess_location(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '50%'>Mesh DUNE PID</th>
+          <th scope = 'col' width = '25%'>Mesh Number</th>
           <th scope = 'col' width = '25%'>Date at Location</th>
-          <th scope = 'col' width = '25%'>Installed on APA</th>
+          <th scope = 'col' width = '50%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -115,7 +115,7 @@ function postSuccess_location(result) {
       for (const i in meshGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i]}</td>
+            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
             <td>${meshGroup.receptionDates[i]}</td>
             <td>${meshGroup.installedOnAPA[i]}</td>
           </tr>`;
@@ -143,7 +143,7 @@ function postSuccess_partNumber(result) {
       <td colspan = "3">The following grounding mesh panels with part number <b>${$('#partNumberSelection option:selected').text()}</b> have been received.</td>
     </tr>
     <tr>
-      <td colspan = "3">They are grouped by location, and then ordered by increasing DUNE PID within each group.
+      <td colspan = "3">They are grouped by location, and then ordered by increasing mesh number within each group.
         <br>
         <hr>
       </td>
@@ -176,9 +176,9 @@ function postSuccess_partNumber(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '50%'>Mesh DUNE PID</th>
+          <th scope = 'col' width = '25%'>Mesh Number</th>
           <th scope = 'col' width = '25%'>Date at Location</th>
-          <th scope = 'col' width = '25%'>Installed on APA</th>
+          <th scope = 'col' width = '50%'>Installed on APA</th>
         </tr>`;
 
       $('#results').append(tableStart);
@@ -186,7 +186,7 @@ function postSuccess_partNumber(result) {
       for (const i in meshGroup.componentUuids) {
         const boardText = `
           <tr>
-            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i]}</td>
+            <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
             <td>${meshGroup.receptionDates[i]}</td>
             <td>${meshGroup.installedOnAPA[i]}</td>
           </tr>`;

@@ -36,9 +36,7 @@ block content
           h4 Select Origin Location
 
           .vert-space-x1
-            p Select a location below ... this is an optional parameter.
-              br
-              | &nbsp 
+            p Select a location below ... this is an optional parameter. 
 
           select.form-control#originLocationSelection
             option(value = '') (any)
@@ -56,8 +54,6 @@ block content
 
           .vert-space-x1
             p Select a location below ... this is an optional parameter.
-              br
-              | &nbsp
 
           select.form-control#destinationLocationSelection
             option(value = '') (any)
@@ -84,7 +80,7 @@ block content
           .vert-space-x1
             p Select a date below ... this is an optional parameter.
               br
-              | The search will match reception <b><u>on and after</u></b> this date.
+              | Dates <b><u>on and after</u></b> this will be matched.
 
             #earliestdateform
 
@@ -94,7 +90,7 @@ block content
           .vert-space-x1
             p Select a date below ... this is an optional parameter.
               br
-              | The search will match reception <b><u>on and before</u></b> this date.
+              | Dates <b><u>on and before</u></b> this will be matched.
 
             #latestdateform
 
@@ -111,7 +107,7 @@ block content
             option(value = 'noComment') Only shipments received with no comments 
             option(value = 'comment') Only shipments received with comments 
 
-    .vert-space-x2
+    .vert-space-x1
       hr
 
       h4 Search Results

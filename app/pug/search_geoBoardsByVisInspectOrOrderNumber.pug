@@ -16,11 +16,11 @@ block content
       hr
 
       .row
-        .col-md-4
-          h4 Select Disposition
+        .col-md-5
+          h4 Select Visual Inspection Disposition
 
           .vert-space-x1
-            p <b>Either</b> select a disposition below <b>or</b> set an order number to the right.
+            p <b>Either</b> select a disposition below <b>or</b> enter an order number to the right.
               br
               | <b>This is a <u>required</u> parameter.</b>
 
@@ -34,34 +34,11 @@ block content
             option(value = 'boardIsConformant') Board Is Conformant
 
           .vert-space-x2
-            hr
-
-            h4 Select Issue
-
-            .vert-space-x1
-              p Select an issue below ... this is an optional parameter.
-                br
-                | It is only used alongside the <b>disposition</b> required parameter.
-
-            select.form-control#issueSelection
-              option(value = 'any') (any)         
-              option(value = 'packagingDamaged') Packaging damaged 
-              option(value = 'scratches') Scratches 
-              option(value = 'exposedCopper') Exposed copper 
-              option(value = 'interruptedTraces') Copper trace(s) interrupted 
-              option(value = 'chipped') PCB chipped 
-              option(value = 'notFlat') PCB not flat
-              option(value = 'incorrectGeometry') Incorrect geometry 
-              option(value = 'incorrectThickness') Incorrect thickness
-              option(value = 'qrCodeProblem') QR code problem 
-              option(value = 'millMaxHolePlating') Issues with mill-max hole plating
-              option(value = 'extraneousMaterialOnBoard') Extraneous material on board 
-              option(value = 'fiducialPin') Fiducial pin more than 0.25 mm above board surface
-              option(value = 'other') Other
+            button.btn-primary.btn-lg#confirmButton_disposition Search by Disposition
 
         .col-md-1 
 
-        .col-md-4
+        .col-md-5
           h4 Enter Order Number
 
           .vert-space-x1
@@ -72,12 +49,34 @@ block content
           input.form-control#orderNumberSelection
 
           .vert-space-x2
-            hr
+            button.btn-primary.btn-lg#confirmButton_orderNumber Search by Order Number
 
-            .vert-space-x2
-              button.btn-primary.btn-lg.float-left#confirmButton_disposition Search by Disposition
+      .row 
+        .col-md-5
+          hr
 
-              button.btn-primary.btn-lg.float-right#confirmButton_orderNumber Search by Order Number
+          h4 Select Issue
+
+          .vert-space-x1
+            p Select an issue below ... this is an optional parameter.
+              br
+              | It is only used alongside the <b>disposition</b> required parameter above.
+
+          select.form-control#issueSelection
+            option(value = 'any') (any)         
+            option(value = 'packagingDamaged') Packaging damaged 
+            option(value = 'scratches') Scratches 
+            option(value = 'exposedCopper') Exposed copper 
+            option(value = 'interruptedTraces') Copper trace(s) interrupted 
+            option(value = 'chipped') PCB chipped 
+            option(value = 'notFlat') PCB not flat
+            option(value = 'incorrectGeometry') Incorrect geometry 
+            option(value = 'incorrectThickness') Incorrect thickness
+            option(value = 'qrCodeProblem') QR code problem 
+            option(value = 'millMaxHolePlating') Issues with mill-max hole plating
+            option(value = 'extraneousMaterialOnBoard') Extraneous material on board 
+            option(value = 'fiducialPin') Fiducial pin more than 0.25 mm above board surface
+            option(value = 'other') Other
 
     .vert-space-x2
       hr
