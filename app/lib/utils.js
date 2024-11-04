@@ -34,7 +34,7 @@ module.exports = {
   // The dictionaries below list various groups of UK and US personnel, whose names should be entered as appropriate in various component and action type forms
   // Using these centralised dictionaries allows names to be consistently displayed in the DB interface, and also for them to be selected via drop-down menu when filling out the type forms
 
-  // A dictionary of UK and US technicians working at the APA factories
+  // General technicians at the UK and US APA factories
   dictionary_technicians: {
     vincentBaker: 'Vincent Baker',
     davidBanner: 'David Banner',
@@ -76,12 +76,66 @@ module.exports = {
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
-  // A dictionary of technicians specifically at Manchester, working on geometry board metrology
+  // Personnel who are authorised to sign-off on APA frame and grounding mesh intake (including both types of frame survey results)
+  dictionary_frameIntakeSignoff: {
+    gedBell: 'Ged Bell',
+    callumHolt: 'Callum Holt',
+    gwennMouster: 'Gwenn Mouster',
+    sotirisVlachos: 'Sotiris Vlachos',
+    kyleZeug: 'Kyle Zeug',
+  },
+
+  // Geometry board metrology technicians at Manchester
   dictionary_manchesterTechnicians: {
 
   },
 
-  // A dictionary of lead personnel at the UK and US APA factories
+  // Personnel who are authorised to sign-off on tension controls
+  dictionary_tensionControlSignoff: {
+    vincentBaker: 'Vincent Baker',
+    carlosChavezBarajas: 'Carlos Chavez Barajas',
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
+    benjaminOye: 'Benjamin Oye',
+    danielSalisbury: 'Daniel Salisbury',
+  },
+
+  // Personnel who are authorised to sign-off on winder maintenance
+  dictionary_winderMaintenanceSignoff: {
+    vincentBaker: 'Vincent Baker',
+    carlosChavezBarajas: 'Carlos Chavez Barajas',
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
+    benjaminOye: 'Benjamin Oye',
+    danielSalisbury: 'Daniel Salisbury',
+    daveSim: 'Dave Sim',
+  },
+
+  // PCB technicians at UW
+  dictionary_uwPCBTechnicians: {
+    andyArbuckle: 'Andy Arbuckle',
+    krishnaLakkaraju: 'Krishna Lakkaraju',
+    marySeverson: 'Mary Severson',
+    christineVerdico: 'Christine Verdico',
+  },
+
+  // Personnel who are authorised to approve PCBs at UW
+  dictionary_uwPCBApproval: {
+    andyArbuckle: 'Andy Arbuckle',
+    pamMarrLaundrie: 'Pam Marr-Laundrie',
+  },
+
+  // Hardware installation technicians at UW
+  dictionary_uwInstallationTechnicians: {
+
+  },
+
+  // Personnel who are authorised to approve hardware installation at UW
+  dictionary_uwInstallationApproval: {
+    joeMunski: 'Joe Munski',
+  },
+
+  // Lead personnel at the UK and US APA factories
   dictionary_apaFactoryLeads: {
     edBlucher: 'Ed Blucher',
     albertoMarchionni: 'Alberto Marchionni',
@@ -99,34 +153,4 @@ module.exports = {
     'auth0|62c1f26dd68f53308071c91a', 'auth0|6247211d7ca173006f55b951',                                   // Brian Rebel (Staging, Production)
     'auth0|62366229e644f4006ff1b144', 'auth0|6236627bcd1229006a1e5c54', 'auth0|623662b39e63f500683a210f', // Krish Majumdar (Staging, Production, Development)
   ],
-
-  // A dictionary of personnel who are authorised to sign-off on tension controls
-  dictionary_tensionControlSignoff: {
-    vincentBaker: 'Vincent Baker',
-    carlosChavezBarajas: 'Carlos Chavez Barajas',
-    edBlucher: 'Ed Blucher',
-    albertoMarchionni: 'Alberto Marchionni',
-    benjaminOye: 'Benjamin Oye',
-    danielSalisbury: 'Daniel Salisbury',
-  },
-
-  // A dictionary of personnel who are authorised to sign-off on winder maintenance
-  dictionary_winderMaintenanceSignoff: {
-    vincentBaker: 'Vincent Baker',
-    carlosChavezBarajas: 'Carlos Chavez Barajas',
-    edBlucher: 'Ed Blucher',
-    albertoMarchionni: 'Alberto Marchionni',
-    benjaminOye: 'Benjamin Oye',
-    danielSalisbury: 'Daniel Salisbury',
-    daveSim: 'Dave Sim',
-  },
-
-  // A dictionary of personnel who are authorised to sign-off on APA frame and grounding mesh intake (including both types of frame survey results)
-  dictionary_frameIntakeSignoff: {
-    gedBell: 'Ged Bell',
-    callumHolt: 'Callum Holt',
-    gwennMouster: 'Gwenn Mouster',
-    sotirisVlachos: 'Sotiris Vlachos',
-    kyleZeug: 'Kyle Zeug',
-  },
 }
