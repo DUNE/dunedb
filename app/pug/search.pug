@@ -130,20 +130,20 @@ block content
       h4
         a(href = '/search/apasByProductionDetails') Assembled APAs by Production Details
 
-      p This page may be used to search specifically for <b>assembled APAs</b> under one of the following scenarios:
+      p This page may be used to search specifically for <b>assembled APAs</b> by one of the following filters:
         ul
-          li <b>either</b> any assembled APA that has a specified <u>production location</u> (the location at which the APA is being assembled) <b>and</b> <u>production number</u> (the order in which the APA has been assembled at the specified location)
-          li <b>or</b> all assembled APAs that have been completed up to and including a <u>specified assembly workflow step</u>
+          li <b>either</b> by <u>production number</u> (the order in which the APA has been assembled at a specified production location)
+          li <b>or</b> by the <u>last completed assembly workflow step</u>
 
-      p Users may select one of the production locations from the list, and manually enter an (integer) production number.  Please note that <b>both pieces of information must be provided</b> for the search to be performed.
-        br
-        |  If an existing assembled APA record matching both pieces of information is successfully found in the database, the user will be automatically redirected to the page for viewing the APA component record.
+      p Users <b>must</b> select a <u>production location</u> from the list - this is a <b>required</b> parameter for either search.  They may then either manually enter an (integer) production number, or select one of the pre-set assembly workflow steps from the list.
+
+      p When searching by production number, if an existing assembled APA record matching both pieces of information is successfully found in the database, the user will be automatically redirected to the page for viewing the APA component record.
         br
         |  If there is no such APA, i.e. the information does not match an existing APA record, a message to that effect will be displayed in the search results panel on the right side of the page.
         br
         |  It should not be possible for multiple APA records to match against both provided pieces of information, since they should uniquely identify a single APA.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 
-      p Alternatively, users may select one of the provided assembly workflow steps.  A list of all assembled APAs that have been completed up to and including that step in their assembly workflows will be displayed in the search results panel on the right side of the page.
+      p When searching by the last completed assembly step, a list of all assembled APAs that have been produced at the specified location and completed up to <u>and including</u> that step in the assembly workflow will be displayed in the search results panel on the right side of the page.  Alongside this, a list of APAs that have <b>not</b> had the specified assembly step completed will also be displayed.
 
       hr
 

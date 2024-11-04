@@ -124,9 +124,9 @@ function postSuccess(result) {
   } else {
     const tableStart = `
       <tr>
-        <th scope = 'col' width = '15%'>Component Type</th>
+        <th scope = 'col' width = '10%'>Component Type</th>
         <th scope = 'col' width = '20%'>Component Name</th>
-        <th scope = 'col' width = '25%'>Non-Conformance Title / Action ID</th>
+        <th scope = 'col' width = '30%'>Non-Conformance Title / Action ID</th>
         <th scope = 'col' width = '15%'>Disposition</th>
         <th scope = 'col' width = '10%'>Status</th>
       </tr>`;

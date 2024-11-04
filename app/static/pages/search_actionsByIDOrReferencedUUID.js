@@ -87,7 +87,7 @@ function postSuccess(result) {
       <td colspan = "2">The following <b>${$('#actionTypeSelection option:selected').text()}</b> actions reference the specified component UUID.</td>
     </tr>
     <tr>
-      <td colspan = "5"><br></td>
+      <td colspan = "2"><br></td>
     </tr>`;
 
   $('#results').append(resultsStart);
@@ -98,8 +98,8 @@ function postSuccess(result) {
   } else {
     const tableStart = `
         <tr>
-          <th scope = 'col' width = '50%'>Action</th>
-          <th scope = 'col' width = '50%'>Performed On Component</th>
+          <th scope = 'col' width = '30%'>Component</th>
+          <th scope = 'col' width = '70%'>Action</th>
         </tr>`;
 
     $('#results').append(tableStart);
@@ -107,8 +107,8 @@ function postSuccess(result) {
     for (const action of result) {
       const actionText = `
           <tr>
-            <td><a href = '/action/${action.actionId}' target = '_blank'</a>${action.typeFormName}</td>
             <td><a href = '/component/${action.componentUuid}' target = '_blank'</a>${action.componentName}</td>
+            <td><a href = '/action/${action.actionId}' target = '_blank'</a>${action.typeFormName}</td>
           </tr>`;
 
       $('#results').append(actionText);

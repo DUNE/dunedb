@@ -109,10 +109,10 @@ function postSuccess(result) {
 
   const resultsStart = `
     <tr>
-      <td colspan = "4">The following geometry board shipments have been found matching the specified search criteria.</td>
+      <td colspan = "7">The following geometry board shipments have been found matching the specified search criteria.</td>
     </tr>
     <tr>
-      <td colspan = "4"><br><hr></td>
+      <td colspan = "7"><br><hr></td>
     </tr>`;
 
   $('#results').append(resultsStart);
@@ -123,7 +123,7 @@ function postSuccess(result) {
   } else {
     const resultsCount = `
       <tr>
-        <td colspan = "3"><b>Found ${result.length} matching geometry board shipments</b></td>
+        <td colspan = "7"><b>Found ${result.length} matching geometry board shipments</b></td>
       </tr>`;
 
     $('#results').append(resultsCount);
@@ -131,14 +131,13 @@ function postSuccess(result) {
 
     const tableStart = `
       <tr>
-        <th scope = 'col' width = '18%'>Shipment UUID</th>
-        <th scope = 'col' width = '7%'>Boards</th>
-        <th scope = 'col' width = '9%'>Origin</th>
-        <th scope = 'col' width = '9%'>Destination</th>
-        <th scope = 'col' width = '9%'>Creation Date</th>
-        <th scope = 'col' width = '9%'>Reception Date</th>
-        <th scope = 'col' width = '27%'>Shipment Reception Comment</th>
-        <th scope = 'col' width = '12%'>Search Comment</th>
+        <th scope = 'col' width = '16%'>Shipment Information</th>
+        <th scope = 'col' width = '13%'>Origin</th>
+        <th scope = 'col' width = '13%'>Destination</th>
+        <th scope = 'col' width = '12%'>Creation Date</th>
+        <th scope = 'col' width = '12%'>Reception Date</th>
+        <th scope = 'col' width = '24%'>Shipment Reception Comment</th>
+        <th scope = 'col' width = '10%'>Search Comment</th>
       </tr>`;
 
     $('#results').append(tableStart);
@@ -150,8 +149,7 @@ function postSuccess(result) {
 
       const boardText = `
         <tr>
-          <td><a href = '/component/${shipment.uuid}' target = '_blank'</a>${shipment.uuid}</td>
-          <td>${shipment.numberOfBoards}</td>
+          <td><a href = '/component/${shipment.uuid}' target = '_blank'</a>${shipment.numberOfBoards} Boards</td>
           <td>${dictionary_locations[shipment.origin]}</td>
           <td>${dictionary_locations[shipment.destination]}</td>
           <td>${shipment.creationDate}</td>
