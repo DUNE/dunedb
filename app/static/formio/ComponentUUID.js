@@ -230,6 +230,8 @@ class ComponentUUID extends TextFieldComponent {
     const matchedURL = qrCode.match('.*/([0-9a-zA-Z]{20,22})');
 
     if (matchedURL) {
+      console.log(`static/formio/ComponentUUID.js:233 - found 'matchedURL' (= ${matchedURL})`)
+      
       const shortuuid = matchedURL[1].match('[^\-]*')[0];
       let that = this;
 
@@ -244,7 +246,8 @@ class ComponentUUID extends TextFieldComponent {
           }
         },
       })
-
+    } else {
+      console.log(`static/formio/ComponentUUID.js:248 - cannot find 'matchedURL' (= ${matchedURL})`)
     }
 
     return true;
