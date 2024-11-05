@@ -58,10 +58,9 @@ router.get('/users/list', permissions.checkPermissionJson('users:view'), async f
 });
 
 
-/// List UK and US technicians working at the APA factories
+/// List general technicians at the UK and US APA factories
 router.get('/technicians.json', async function (req, res, next) {
   try {
-    // Convert the centralised list of technicians from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
     let data = [];
 
     for (const person in utils.dictionary_technicians) {
@@ -71,95 +70,6 @@ router.get('/technicians.json', async function (req, res, next) {
       });
     }
 
-    // Return the array in JSON format
-    return res.json(data);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-// List technicians specifically at Manchester, working on geometry board metrology
-router.get('/manchester_technicians.json', async function (req, res, next) {
-  try {
-    // Convert the centralised list of Manchester technicians from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
-    let data = [];
-
-    for (const person in utils.dictionary_manchesterTechnicians) {
-      data.push({
-        api_name: person,
-        display_name: utils.dictionary_manchesterTechnicians[person],
-      });
-    }
-
-    // Return the array in JSON format
-    return res.json(data);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List lead personnel at the UK and US APA factories
-router.get('/apaFactoryLeads.json', async function (req, res, next) {
-  try {
-    // Convert the centralised list of lead personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
-    let data = [];
-
-    for (const person in utils.dictionary_apaFactoryLeads) {
-      data.push({
-        api_name: person,
-        display_name: utils.dictionary_apaFactoryLeads[person],
-      });
-    }
-
-    // Return the array in JSON format
-    return res.json(data);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List personnel who are authorised to sign-off on tension controls
-router.get('/tensionControlSignoff.json', async function (req, res, next) {
-  try {
-    // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
-    let data = [];
-
-    for (const person in utils.dictionary_tensionControlSignoff) {
-      data.push({
-        api_name: person,
-        display_name: utils.dictionary_tensionControlSignoff[person],
-      });
-    }
-
-    // Return the array in JSON format
-    return res.json(data);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List personnel who are authorised to sign-off on winder maintenance
-router.get('/winderMaintenanceSignoff.json', async function (req, res, next) {
-  try {
-    // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
-    let data = [];
-
-    for (const person in utils.dictionary_winderMaintenanceSignoff) {
-      data.push({
-        api_name: person,
-        display_name: utils.dictionary_winderMaintenanceSignoff[person],
-      });
-    }
-
-    // Return the array in JSON format
     return res.json(data);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
@@ -171,7 +81,6 @@ router.get('/winderMaintenanceSignoff.json', async function (req, res, next) {
 /// List personnel who are authorised to sign-off on APA frame and grounding mesh intake (including both types of frame survey results)
 router.get('/frameIntakeSignoff.json', async function (req, res, next) {
   try {
-    // Convert the centralised list of personnel from a dictionary to an array, with each element of the array being a sub-dictionary containing the API and display names of each person
     let data = [];
 
     for (const person in utils.dictionary_frameIntakeSignoff) {
@@ -181,7 +90,166 @@ router.get('/frameIntakeSignoff.json', async function (req, res, next) {
       });
     }
 
-    // Return the array in JSON format
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List geometry board metrology technicians at Manchester
+router.get('/manchesterTechnicians.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_manchesterTechnicians) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_manchesterTechnicians[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List personnel who are authorised to sign-off on tension controls
+router.get('/tensionControlSignoff.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_tensionControlSignoff) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_tensionControlSignoff[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List personnel who are authorised to sign-off on winder maintenance
+router.get('/winderMaintenanceSignoff.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_winderMaintenanceSignoff) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_winderMaintenanceSignoff[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List PCB technicians at UW
+router.get('/uwPCBTechnicians.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_uwPCBTechnicians) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_uwPCBTechnicians[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List personnel who are authorised to approve PCBs at UW
+router.get('/uwPCBApproval.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_uwPCBApproval) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_uwPCBApproval[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List hardware installation technicians at UW
+router.get('/uwInstallationTechnicians.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_uwInstallationTechnicians) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_uwInstallationTechnicians[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List personnel who are authorised to approve hardware installation at UW
+router.get('/uwInstallationApproval.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_uwInstallationApproval) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_uwInstallationApproval[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List lead personnel at the UK and US APA factories
+router.get('/apaFactoryLeads.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_apaFactoryLeads) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_apaFactoryLeads[person],
+      });
+    }
+
     return res.json(data);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
