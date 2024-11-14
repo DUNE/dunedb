@@ -143,6 +143,8 @@ block content
           #qr-code
             +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
 
+          p.small.text-center #{base_url}/c/#{component.shortUuid.toString()}
+
     if component.formId === 'BoardShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location 

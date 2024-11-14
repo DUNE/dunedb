@@ -1,29 +1,45 @@
 extend default
 
 block vars
-  - const page_title = 'Search for Components by UUID or Type and Number';
+  - const page_title = 'Search for Components by Identifier';
 
 block extrascripts
   block workscripts
-    script(src = '/pages/search_componentsByUUIDOrTypeAndNumber.js')
+    script(src = '/pages/search_componentsByIdentifier.js')
 
 block content
   .container-fluid
     .vert-space-x2
-      h2 Search for Components by UUID or Type and Number
+      h2 Search for Components by Identifier
 
     .vert-space-x2 
       hr
 
       .row 
         .col-md-5
-          h4 Search by Component UUID
+          .row 
+            .col-md-12 
+              h4 Search by Component UUID
 
-          .vert-space-x1
-            p Enter a component UUID below or take a picture of the component's QR code.
+              .vert-space-x1
+                p Enter a component UUID below or take a picture of the component's QR code.
 
-          .vert-space-x1
-            #componentuuidform
+              .vert-space-x1
+                #componentuuidform
+
+          hr
+
+          .row 
+            .col-md-12 
+              h4 Search by DUNE PID 
+
+              .vert-space-x1
+                p Enter a DUNE PID (in the form D00300XXXXXX-XXXXX-XXXXX-01-00-00) below.
+
+              input.form-control#dunePIDSelection
+
+              .vert-space-x2
+                button.btn-primary.btn-lg#confirmButton_dunePID Search by DUNE PID
 
         .col-md-1 
 
@@ -49,7 +65,10 @@ block content
             input.form-control#typeRecordNumberSelection
 
           .vert-space-x2
-            button.btn-primary.btn-lg#confirmButton Search by Type and Number
+            button.btn-primary.btn-lg#confirmButton_typeAndNumber Search by Type and Number
+
+      .vert-space-x2 
+        hr
 
       .vert-space-x1
         #messages

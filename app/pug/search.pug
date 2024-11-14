@@ -17,14 +17,15 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/componentsByUUIDOrTypeAndNumber') Components by UUID or Type and Number
+        a(href = '/search/componentsByIdentifier') Components by Identifier
 
       p This page may be used to search specifically for <b>components</b> under one of the following scenarios: 
         ul
           li <b>by component UUID</b>
+          li <b>by DUNE PID</b>
           li <b>by component type and type record number</b>
 
-      p Every component record includes a type record number, but only for specific component types is this number actually used.  For example, 'Geometry Board' type components use the type record number as their 'UKID' unique identifiers, and 'Grounding Mesh Panel' type components include the type record number within their DUNE PID identifiers.
+      p Some (but not all) component types use a DUNE PID in place of a component name.  Every component record includes a type record number, but only for specific component types is this number actually used.  For example, 'Geometry Board' type components use the type record number as their 'UKID' unique identifiers, and 'Grounding Mesh Panel' type components include the type record number within their DUNE PID.
 
       p In the first scenario, the UUID input box uses auto-complete, so users may begin manually entering a UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the input is entered.
         br
@@ -32,14 +33,16 @@ block content
         br
         | If the entered UUID corresponds to a component record in the database, the user will be automatically redirected to the page for viewing the component information.  If there is no corresponding record, an error will be displayed.
 
-      p In the second scenario, users must specify the following information:
+      p In the second scenario, users must specify the component DUNE PID in the form D00300XXXXXX-XXXXX-XXXXX-01-00-00.
+
+      p In the third scenario, users must specify the following information:
         ul
           li the component type (from the dropdown list)
           li the type record number (as an integer)
 
       p If the specified information corresponds to a component record in the database, the user will be automatically redirected to the page for viewing the component information.  If there is no corresponding record, an error will be displayed.
         br
-        |  It should not be possible for multiple components of the same type to have the same type record number, since the numbers are assigned in sequence at component creation.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
+        |  It should not be possible for multiple components of the same type to have the same type record number (since the numbers are assigned in sequence at component creation) or for multiple components to have the same DUNE PID.  However, in the unlikely case of this situation occurring, a message will also be displayed indicating so.
 
       hr
 

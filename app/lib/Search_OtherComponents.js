@@ -560,6 +560,34 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
 }
 
 
+/// Retrieve a list of components that match the specified DUNE PID
+async function componentsByDUNEPID(dunePID) {
+  let aggregation_stages = [];
+
+  // Match against the DUNE PID to get records of all components that have the same name as the specified one
+  aggregation_stages.push({
+    $match: { 'data.name': dunePID }
+  });
+
+  // Select the latest version of each record, and pass through only the fields required for later use
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+    },
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of components
+  return results;
+}
+
+
 /// Retrieve a list of components that match the specified type and type record number
 async function componentsByTypeAndNumber(type, typeRecordNumber) {
   let aggregation_stages = [];
@@ -598,5 +626,6 @@ module.exports = {
   boardKitComponentsByLocation,
   apasByProductionLocationAndNumber,
   apasByProductionLocationAndAssemblyStep,
+  componentsByDUNEPID,
   componentsByTypeAndNumber,
 }
