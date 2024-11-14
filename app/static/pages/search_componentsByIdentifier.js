@@ -1,4 +1,5 @@
 // Declare variables to hold the user-specified search parameters
+let dunePID = null;
 let componentType = null;
 let typeRecordNumber = null;
 
@@ -32,6 +33,10 @@ async function renderSearchForms() {
   });
 
   // Get and set the value of any search parameter that is changed
+  $('#dunePIDSelection').on('change', async function () {
+    dunePID = $('#dunePIDSelection').val();
+  });
+
   $('#componentTypeSelection').on('change', async function () {
     componentType = $('#componentTypeSelection').val();
   });
@@ -40,10 +45,28 @@ async function renderSearchForms() {
     typeRecordNumber = $('#typeRecordNumberSelection').val();
   });
 
-  // When the confirmation button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable the button while the current search is being performed
-  $('#confirmButton').on('click', function () {
-    $('#confirmButton').prop('disabled', true);
+  // When the appropriate confirmation button is pressed, perform the search by DUNE PID using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_dunePID').on('click', function () {
+    $('#confirmButton_dunePID').prop('disabled', true);
+    $('#confirmButton_typeAndNumber').prop('disabled', true);
+
+    if (dunePID) {
+      $.ajax({
+        contentType: 'application/json',
+        method: 'GET',
+        url: `/json/search/componentsByDUNEPID/${dunePID}`,
+        dataType: 'json',
+        success: postSuccess,
+      }).fail(postFail);
+    }
+  })
+
+  // When the appropriate confirmation button is pressed, perform the search by component type and type record number using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_typeAndNumber').on('click', function () {
+    $('#confirmButton_dunePID').prop('disabled', true);
+    $('#confirmButton_typeAndNumber').prop('disabled', true);
 
     if (componentType && typeRecordNumber) {
       $.ajax({
@@ -58,32 +81,34 @@ async function renderSearchForms() {
 }
 
 
-// Function to run for a successful search query
+// Function to run for a successful search query of either scenario
 function postSuccess(result) {
   // Make sure that the page element where any information messages will be displayed is empty
   $('#messages').empty();
 
-  // If there are no search results, display a message to indicate this, and then re-enable the confirmation button for the next search
-  // Similarly, if there is more than one search result (i.e. the specified type record number matches multiple components of the specified type), also display a message and re-enable the button
+  // If there are no search results, display a message to indicate this, and then re-enable both confirmation buttons for the next search
+  // Similarly, if there is more than one search result, also display a message and re-enable both buttons
   // Otherwise (i.e. there is exactly one component in the search results), redirect the user to the page for viewing the component record
   if (result.length === 0) {
-    $('#messages').append('<b>The specified type record number does not match an existing component of the specified type.</b>');
-    $('#confirmButton').prop('disabled', false);
+    $('#messages').append('<b>The specified search parameters do not match an existing component.</b>');
+    $('#confirmButton_dunePID').prop('disabled', false);
+    $('#confirmButton_typeAndNumber').prop('disabled', false);
   } else if (result.length > 1) {
     const output = `
-      <b>The specified type record number matches <u>multiple</u> components of the specified type.</b>
-      <br>This should not happen, since each component of a single type should have a unique type record number.
-      <br>Please bring this to the attention of one of the database development team, indicating the component type and type record number that you specified above.`;
+      <b>The specified search parameters match <u>multiple</u> components.</b>
+      <br>This should not happen, since each component should have a unique DUNE PID, and each component of a single type should have a unique type record number.
+      <br>Please bring this to the attention of one of the database development team, indicating the search parameters that you specified above.`;
 
     $('#messages').append(output);
-    $('#confirmButton').prop('disabled', false);
+    $('#confirmButton_dunePID').prop('disabled', false);
+    $('#confirmButton_typeAndNumber').prop('disabled', false);
   } else {
     window.location.href = `/component/${result[0].componentUuid}`;
   }
 };
 
 
-// Function to run for a failed search query
+// Function to run for a failed search query of either scenario
 function postFail(result, statusCode, statusMsg) {
   // If the query result contains a response message, display it, and if not, display any status message and error code instead
   if (result.responseText) {
@@ -92,6 +117,7 @@ function postFail(result, statusCode, statusMsg) {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
 
-  // Re-enable the confirmation button for the next search
-  $('#confirmButton').prop('disabled', false);
+  // Re-enable both confirmation buttons for the next search
+  $('#confirmButton_dunePID').prop('disabled', false);
+  $('#confirmButton_typeAndNumber').prop('disabled', false);
 };

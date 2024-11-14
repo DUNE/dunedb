@@ -10,10 +10,10 @@ router.get('/search', async function (req, res, next) {
 });
 
 
-/// Search for components by UUID, or of a specified type and type record number
-router.get('/search/componentsByUUIDOrTypeAndNumber', async function (req, res, next) {
+/// Search for components by UUID, DUNE PID, or type and type record number
+router.get('/search/componentsByIdentifier', async function (req, res, next) {
   // Render the interface page
-  res.render('search_componentsByUUIDOrTypeAndNumber.pug');
+  res.render('search_componentsByIdentifier.pug');
 });
 
 

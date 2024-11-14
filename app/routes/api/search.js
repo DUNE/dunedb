@@ -189,7 +189,22 @@ router.get('/search/apasByProductionLocationAndAssemblyStep/:apaLocation/:assemb
 });
 
 
-/// Search for components of a specified type and type record number
+/// Search for components by DUNE PID
+router.get('/search/componentsByDUNEPID/:dunePID', async function (req, res, next) {
+  try {
+    // Retrieve a list of components that match the specified record details
+    const components = await Search_OtherComponents.componentsByDUNEPID(req.params.dunePID);
+
+    // Return the list in JSON format
+    return res.json(components);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for components by type and type record number
 router.get('/search/componentsByTypeAndNumber/:type/:number', async function (req, res, next) {
   try {
     // Retrieve a list of components that match the specified record details
