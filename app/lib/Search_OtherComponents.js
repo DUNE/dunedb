@@ -2,12 +2,7 @@ const MUUID = require('uuid-mongodb');
 
 const Components = require('./Components');
 const { db } = require('./db');
-
-var byField = function (field) {
-  return function (a, b) {
-    return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
-  }
-};
+const utils = require('./utils');
 
 
 /// Retrieve a list of geometry board shipments that match the specified reception details
@@ -143,6 +138,45 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
       }
     }
   }
+
+  // Return the list of shipments
+  return shipments;
+}
+
+
+/// Retrieve a list of geometry board shipments that reference a single component, specified by its UUID
+async function boardShipmentsByBoardUUID(componentUUID) {
+  let aggregation_stages = [];
+
+  // Match against the type form ID to get records of all 'Board Shipment' components
+  aggregation_stages.push({ $match: { 'formId': 'BoardShipment' } });
+
+  // Select the latest version of each record, and pass through only the fields required for later use
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      typeFormId: { '$first': '$formId' },
+      typeFormName: { '$first': '$formName' },
+      data: { '$first': '$data' },
+      reception: { '$first': '$reception' },
+      lastEditDate: { '$first': '$validity.startDate' },
+    },
+  });
+
+  // Match against the specified component UUID
+  // Since the component UUIDs are stored as an ARRAY in the shipment record, this requires first unwinding the array (to temporarily produce a single record per array entry)
+  aggregation_stages.push({ $unwind: '$data.boardUuiDs' });
+
+  aggregation_stages.push({
+    $match: { 'data.boardUuiDs.component_uuid': MUUID.from(componentUUID).toString() }
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let shipments = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
 
   // Return the list of shipments
   return shipments;
@@ -514,7 +548,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
 
   // Re-sort the records by the component name, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  apasCompletedToStep_atLocation.sort(byField('componentName'));
+  apasCompletedToStep_atLocation.sort(utils.byField_decreasing('componentName'));
 
   let comp_aggregation_stages = [];
 
@@ -551,7 +585,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
   }
 
   // Re-sort the records by the component name ... in reverse alphanumerical order
-  apasNotCompletedToStep_atLocation.sort(byField('componentName'));
+  apasNotCompletedToStep_atLocation.sort(utils.byField_decreasing('componentName'));
 
   // Return a nested list, consisting of:
   // - [0] the list of all assembled APAs produced at the specified location that have had matching 'Assembled APA QA Check'  or 'Completed APA QA Checklist' actions performed on them and completed
@@ -621,6 +655,7 @@ async function componentsByTypeAndNumber(type, typeRecordNumber) {
 
 module.exports = {
   boardShipmentsByReceptionDetails,
+  boardShipmentsByBoardUUID,
   meshesByLocation,
   meshesByPartNumber,
   boardKitComponentsByLocation,

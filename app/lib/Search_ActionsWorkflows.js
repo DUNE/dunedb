@@ -2,12 +2,7 @@ const MUUID = require('uuid-mongodb');
 
 const Components = require('./Components');
 const { db } = require('./db');
-
-var byField = function (field) {
-  return function (a, b) {
-    return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
-  }
-};
+const utils = require('./utils');
 
 
 /// Retrieve a list of workflows that involve a particular component, specified by its UUID
@@ -91,7 +86,7 @@ async function nonConformanceByComponentType(componentType, disposition, status)
 
   // Re-sort the records by the component name, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  results.sort(byField('componentName'));
+  results.sort(utils.byField_decreasing('componentName'));
 
   // Return the list of matching actions
   return results;
@@ -137,7 +132,7 @@ async function nonConformanceByUUID(componentUUID) {
 
   // Re-sort the records by the NCR action ID, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  results.sort(byField('actionId'));
+  results.sort(utils.byField_decreasing('actionId'));
 
   // Return the list of  atching actions
   return results;

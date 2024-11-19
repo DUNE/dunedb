@@ -7,12 +7,7 @@ const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
 const permissions = require('./permissions');
-
-var byField = function (field) {
-  return function (a, b) {
-    return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
-  }
-};
+const utils = require('./utils');
 
 
 /// Save a new or edited workflow record
@@ -317,7 +312,7 @@ async function list(match_condition, options) {
 
   // If listing a single type of workflow (i.e. if a match condition was specified), re-sort the records by the component name ... in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  if (match_condition) filtered_records.sort(byField('componentName'));
+  if (match_condition) filtered_records.sort(utils.byField_decreasing('componentName'));
 
   // Return the entire list of matching records
   return filtered_records;

@@ -1,10 +1,8 @@
 const MUUID = require('uuid-mongodb');
 
-const Actions = require('./Actions');
 const Components = require('./Components');
 const { db } = require('./db');
 const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
-const Workflows = require('./Workflows');
 const utils = require('./utils');
 
 const layerSection_names = ['layer_x', 'layer_v', 'layer_u', 'layer_g'];
@@ -60,13 +58,8 @@ const dictionary_apaNCRs_types = {
   machiningIssue: 'Machining Issue',
   conduitIssue: 'Conduit Issue',
   incorrectFasteners: 'Incorrect Fasteners',
-};
-
-const dictionary_frameNCRs_types = {
-  machiningIssue: 'Machining Issue',
-  bow: 'Bow',
-  twist: 'Twist',
-  survey: 'Survey',
+  frameIssue: 'Issue with the Frame',
+  meshIssue: 'Issue with Mesh Panel',
 };
 
 const dictionary_meshPanelNCRs_types = {
@@ -154,7 +147,6 @@ async function collateInfo(componentUUID) {
 
   collatedInfo.apaNCRs_wires = [];
   collatedInfo.apaNCRs_other = [];
-  collatedInfo.frameNCRs = [];
   collatedInfo.meshPanelNCRs = [];
 
   /////////////////////////
@@ -690,9 +682,21 @@ async function collateInfo(componentUUID) {
     $match: {
       'typeFormId': 'APANonConformance',
       'componentUuid': MUUID.from(componentUUID),
-      'data.nonConformanceType.missingWireSegment': false,
-      'data.nonConformanceType.misplacedWireSegment': false,
-      'data.nonConformanceType.shortedWireSegment': false,
+      $or: [{
+        'data.nonConformanceType.geometryBoardIssue': true
+      }, {
+        'data.nonConformanceType.combIssue': true
+      }, {
+        'data.nonConformanceType.machiningIssue': true
+      }, {
+        'data.nonConformanceType.conduitIssue': true
+      }, {
+        'data.nonConformanceType.incorrectFasteners': true
+      }, {
+        'data.nonConformanceType.frameIssue': true
+      }, {
+        'data.nonConformanceType.meshIssue': true
+      }],
     }
   });
 
@@ -726,53 +730,6 @@ async function collateInfo(componentUUID) {
       }
 
       collatedInfo.apaNCRs_other.push(dictionary);
-    }
-  }
-
-  ////////////////////////////
-  // FRAME NON-CONFORMANCES //
-  ////////////////////////////
-  // Get information about any non-conformances on the APA frame  
-  aggregation_stages = [];
-  results = [];
-
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'APANonConformance',
-      'componentUuid': MUUID.from(frameUUID),
-    }
-  });
-
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-      nonConf_type: { '$first': '$data.frameNonConformanceType' },
-      nonConf_description: { '$first': '$data.nonConformanceDescription' },
-    },
-  });
-
-  results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  if (results.length > 0) {
-    for (const result of results) {
-      let nonConfType = '';
-
-      for (const [key, value] of Object.entries(result.nonConf_type)) {
-        if (value) nonConfType = key;
-      }
-
-      const dictionary = {
-        component: 'APA Frame',
-        type: dictionary_frameNCRs_types[nonConfType],
-        description: result.nonConf_description,
-        actionId: result.actionId,
-      }
-
-      collatedInfo.frameNCRs.push(dictionary);
     }
   }
 

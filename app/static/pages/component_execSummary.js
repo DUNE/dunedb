@@ -1948,7 +1948,7 @@ async function populateExecutiveSummary() {
     Formio.createForm(form_otherNCRs_header[0], schema_otherNCRs_header, { readOnly: true, });
   })
 
-  // Render forms for the other non-conformances ... covering non wire-related assembled APA, frame and mesh panel NCRs
+  // Render forms for the other non-conformances ... covering non wire-related assembled APA and mesh panel NCRs
   $('div.entry_otherNCRs').each(function () {
     const form_otherNCRs = $('.form_otherNCRs', this);
     const ncrInfo = form_otherNCRs.data('record');
