@@ -2,11 +2,25 @@ const MUUID = require('uuid-mongodb');
 
 const Components = require('./Components');
 const { db } = require('./db');
+const utils = require('./utils');
 
-var byField = function (field) {
-  return function (a, b) {
-    return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
-  }
+const dictionary_apaNCRs_types = {
+  missingWireSegment: 'Missing Wire Segment',
+  misplacedWireSegment: 'Misplaced Wire Segment',
+  shortedWireSegment: 'Shorted Wire Segment',
+  geometryBoardIssue: 'Geometry Board Issue',
+  combIssue: 'Comb Issue',
+  machiningIssue: 'Machining Issue',
+  conduitIssue: 'Conduit Issue',
+  incorrectFasteners: 'Incorrect Fasteners',
+  frameIssue: 'Issue with the Frame',
+  meshIssue: 'Issue with Mesh Panel',
+};
+
+const dictionary_meshPanelNCRs_types = {
+  holesInMesh: 'Holes in mesh',
+  frameIssue: 'Frame issue',
+  meshNotTight: 'Mesh not tight',
 };
 
 
@@ -61,6 +75,8 @@ async function nonConformanceByComponentType(componentType, disposition, status)
       componentUuid: { '$first': '$componentUuid' },
       title: { '$first': '$data.nonConformanceTitle' },
       componentType: { '$first': '$data.componentType' },
+      nonConfTypes_apas: { '$first': '$data.nonConformanceType' },
+      nonConfTypes_meshes: { '$first': '$data.frameNonConformanceType1' },
       disposition: { '$first': '$data.disposition' },
       status: { '$first': '$data.status' },
     },
@@ -84,14 +100,29 @@ async function nonConformanceByComponentType(componentType, disposition, status)
     .toArray();
 
   // Add the corresponding component name to each matching record
+  // Additionally, get the first 'true' non-conformance type in each record, convert it to something more readable and save this new string to the record
   for (let result of results) {
     const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
     result.componentName = component.data.name;
+
+    if (result.componentType === 'assembledApa') {
+      if (result.nonConfTypes_apas != null) {
+        result.nonConfType = dictionary_apaNCRs_types[Object.keys(result.nonConfTypes_apas).filter(k => result.nonConfTypes_apas[k])[0]];
+      } else {
+        result.nonConfType = '[No NC Type Found!]';
+      }
+    } else {
+      if (result.nonConfTypes_meshes != null) {
+        result.nonConfType = dictionary_meshPanelNCRs_types[Object.keys(result.nonConfTypes_meshes).filter(k => result.nonConfTypes_meshes[k])[0]];
+      } else {
+        result.nonConfType = '[No NC Type Found!]';
+      }
+    }
   }
 
   // Re-sort the records by the component name, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  results.sort(byField('componentName'));
+  results.sort(utils.byField_decreasing('componentName'));
 
   // Return the list of matching actions
   return results;
@@ -119,6 +150,8 @@ async function nonConformanceByUUID(componentUUID) {
       componentUuid: { '$first': '$componentUuid' },
       title: { '$first': '$data.nonConformanceTitle' },
       componentType: { '$first': '$data.componentType' },
+      nonConfTypes_apas: { '$first': '$data.nonConformanceType' },
+      nonConfTypes_meshes: { '$first': '$data.frameNonConformanceType1' },
       disposition: { '$first': '$data.disposition' },
       status: { '$first': '$data.status' },
     },
@@ -130,14 +163,29 @@ async function nonConformanceByUUID(componentUUID) {
     .toArray();
 
   // Add the corresponding component name to each matching record
+  // Additionally, get the first 'true' non-conformance type in each record, convert it to something more readable and save this new string to the record
   for (let result of results) {
     const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
     result.componentName = component.data.name;
+
+    if (result.componentType === 'assembledApa') {
+      if (result.nonConfTypes_apas != null) {
+        result.nonConfType = dictionary_apaNCRs_types[Object.keys(result.nonConfTypes_apas).filter(k => result.nonConfTypes_apas[k])[0]];
+      } else {
+        result.nonConfType = '[No NC Type Found!]';
+      }
+    } else {
+      if (result.nonConfTypes_meshes != null) {
+        result.nonConfType = dictionary_meshPanelNCRs_types[Object.keys(result.nonConfTypes_meshes).filter(k => result.nonConfTypes_meshes[k])[0]];
+      } else {
+        result.nonConfType = '[No NC Type Found!]';
+      }
+    }
   }
 
   // Re-sort the records by the NCR action ID, in reverse alphanumerical order
   // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  results.sort(byField('actionId'));
+  results.sort(utils.byField_decreasing('actionId'));
 
   // Return the list of  atching actions
   return results;

@@ -5,6 +5,20 @@ module.exports = {
   // A 20 to 22 character long shortened UUID
   short_uuid_regex: ':shortuuid([0-9a-bA-Z-]{20,22})',
 
+  // Function to sort an array of objects by a common object key, in increasing order
+  byField_increasing: function (field) {
+    return function (a, b) {
+      return ((a[field] < b[field]) ? -1 : ((a[field] > b[field]) ? 1 : 0));
+    }
+  },
+
+  // Function to sort an array of objects by a common object key, in decreasing order
+  byField_decreasing: function (field) {
+    return function (a, b) {
+      return ((a[field] > b[field]) ? -1 : ((a[field] < b[field]) ? 1 : 0));
+    }
+  },
+
   // A dictionary of locations that are used across all component and action type forms
   // Using this centralised dictionary allows locations to be consistently displayed in the DB interface
   dictionary_locations: {
@@ -83,6 +97,13 @@ module.exports = {
     gwennMouster: 'Gwenn Mouster',
     sotirisVlachos: 'Sotiris Vlachos',
     kyleZeug: 'Kyle Zeug',
+  },
+
+  // Personnel who are authorised to sign-off on APA frame NCR concessions
+  dictionary_frameNCRSignoff: {
+    olgaBeltramello: 'Olga Beltramello',
+    ericJames: 'Eric James',
+    radosavPantelic: 'Radosav Pantelic',
   },
 
   // Geometry board metrology technicians at Manchester

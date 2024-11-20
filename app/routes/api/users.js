@@ -98,6 +98,26 @@ router.get('/frameIntakeSignoff.json', async function (req, res, next) {
 });
 
 
+/// List personnel who are authorised to sign-off on APA frame NCR concessions
+router.get('/frameNCRSignoff.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_frameNCRSignoff) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_frameNCRSignoff[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// List geometry board metrology technicians at Manchester
 router.get('/manchesterTechnicians.json', async function (req, res, next) {
   try {

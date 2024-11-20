@@ -108,16 +108,9 @@ block allbody
     .entry_otherNCRs_header 
       .form_otherNCRs_header(data-record = [])
 
-    if (collatedInfo.apaNCRs_other.length > 0) || (collatedInfo.frameNCRs.length > 0) || (collatedInfo.meshPanelNCRs.length > 0)
+    if (collatedInfo.apaNCRs_other.length > 0) || (collatedInfo.meshPanelNCRs.length > 0)
       if collatedInfo.apaNCRs_other.length > 0
         each ncrInfo, index in collatedInfo.apaNCRs_other
-          .entry_otherNCRs.vert-space-x1
-            .form_otherNCRs(data-record = [ncrInfo])
-
-          hr
-
-      if collatedInfo.frameNCRs.length > 0
-        each ncrInfo, index in collatedInfo.frameNCRs
           .entry_otherNCRs.vert-space-x1
             .form_otherNCRs(data-record = [ncrInfo])
 
