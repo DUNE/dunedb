@@ -7,6 +7,7 @@ const Components_ExecSummary = require('../lib/Components_ExecSummary');
 const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 const permissions = require('../lib/permissions');
+const Search_OtherComponents = require('../lib/Search_OtherComponents');
 const utils = require('../lib/utils');
 const Workflows = require('../lib/Workflows');
 
@@ -38,6 +39,58 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
     ]);
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
+
+    // If the specified component is a 'Geometry Board' type, retrieve some more detailed information about any shipments that the board has been part of
+    // Add this information to the previously retrieved list of actions performed on the board, and make sure that all of the action entries contain the same (or equivalent) fields
+    // Add an entry for the board itself (again, containing the same fields as the action entries), and finally sort all entries in the combined array by the 'lastEditDate' field
+    if (component.formId === 'GeometryBoard') {
+      boardShipments = await Search_OtherComponents.boardShipmentsByBoardUUID(req.params.uuid);
+      actions = actions.concat(boardShipments);
+
+      for (let entry of actions) {
+        if (entry.typeFormId !== 'BoardShipment') {
+          entry.data = {};
+          entry.data.checksPassed = 'No';
+
+          const record = await Actions.retrieve(entry.actionId);
+
+          if (entry.typeFormId === 'BoardVisualInspection') {
+            entry.data.originOfShipment = 'lancaster';
+
+            if ((record.data.nonConformingDisposition === 'boardIsConformant') || (record.data.nonConformingDisposition === 'useAsIs')) {
+              entry.data.checksPassed = 'Yes';
+            }
+          } else if (entry.typeFormId === 'BoardToothStripAttachment') {
+            entry.data.originOfShipment = record.data.locationWorkPerformed;
+
+            if ((record.data.qcBoardDamage === 'no') && (record.data.qcGapWithBoard === 'no') && (record.data.qcToothStripDamage === 'no') && (record.data.qcStripFlushWithBoard === 'yes') && (record.data.qcCorrectEpoxyApplication === 'yes') && (record.data.qcSolderPadAlignment === 'yes')) {
+              entry.data.checksPassed = 'Yes';
+            }
+          } else if (entry.typeFormId === 'BoardMetrology') {
+            entry.data.originOfShipment = record.data.location;
+
+            if ((record.data.featurePositionChecks === 'passed') && (record.data.boardThicknessCheck === 'passed')) {
+              entry.data.checksPassed = 'Yes';
+            }
+          } else if (entry.typeFormId === 'FactoryBoardRejection') {
+            entry.data.originOfShipment = record.data.boardRejectionLocation;
+
+            if ((record.data.disposition === 'remediated') || (record.data.disposition === 'useAsIs')) {
+              entry.data.checksPassed = 'Yes';
+            }
+          }
+        }
+      }
+
+      actions.push({
+        'typeFormName': 'Board DB Record Created',
+        'componentUuid': req.params.uuid,
+        'lastEditDate': componentVersions[componentVersions.length - 1].validity.startDate,
+        'data': { 'originOfShipment': 'lancaster' },
+      });
+
+      actions.sort(utils.byField_increasing('lastEditDate'));
+    }
 
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
     // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only two workflow types, so we can do this explicitly)
