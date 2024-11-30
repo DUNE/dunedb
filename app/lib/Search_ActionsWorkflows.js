@@ -58,11 +58,10 @@ async function workflowsByUUID(componentUUID) {
 async function nonConformanceByComponentType(componentType, disposition, status) {
   let aggregation_stages = [];
 
-  // Match against the type form ID and component type to get records of all NCRs performed on all components of the specified type
+  // Match against the type form ID to get records of all NCRs applying to all types of components
   aggregation_stages.push({
     $match: {
       'typeFormId': 'APANonConformance',
-      'data.componentType': componentType,
     }
   });
 
@@ -82,13 +81,15 @@ async function nonConformanceByComponentType(componentType, disposition, status)
     },
   });
 
-  // Set up 'matching' strings for the disposition and status that can be used by MongoDB to match against specific record field values, and then match against them
+  // Match against the specified component type, disposition and status
+  // For the disposition and status, set up 'matching' strings that can be used by MongoDB to match against specific record field values, and then match against them
   // If either parameter has been provided as something other than 'any', just match against the provided string ... otherwise use a fully wildcard regular expression
   const dispositionString = (disposition !== 'any') ? disposition : /(.*?)/;
   const statusString = (status !== 'any') ? status : /(.*?)/;
 
   aggregation_stages.push({
     $match: {
+      'componentType': componentType,
       'disposition': dispositionString,
       'status': statusString,
     }
