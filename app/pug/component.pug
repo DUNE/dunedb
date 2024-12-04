@@ -368,6 +368,49 @@ block content
       .vert-space-x1.border-success.border.rounded.p-2
         #typeform
 
+    if component.formId === 'GeometryBoard'
+      .vert-space-x2.border-success.border.rounded.p-2
+        dt Geometry Board History
+        dd 
+          table.table 
+            thead 
+              tr 
+                th.col-md-2 Name 
+                th.col-md-2 Date Performed
+                th.col-md-2 Location / Shipment Origin 
+                th.col-md-2 Shipment Destination
+                th.col-md-2 Shipment Reception Date
+                th.col-md-2 Checks Passed
+
+            tbody 
+              each entry in actions
+                tr 
+                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Board Shipment')
+                    td 
+                      a(href = `/component/${entry.componentUuid}`) #{entry.typeFormName}
+                  else 
+                    td 
+                      a(href = `/action/${entry.actionId}`) #{entry.typeFormName}
+
+                  td #{entry.lastEditDate.toISOString().slice(0, 10)}
+                  td #{dictionary_locations[entry.data.originOfShipment]}
+
+                  if entry.typeFormName === 'Board Shipment'
+                    if entry.reception.location === 'in_transit'
+                      td #{dictionary_locations[entry.data.destinationOfShipment]}
+                      td [not yet received]
+                    else
+                      td #{dictionary_locations[entry.reception.location]}
+                      td #{entry.reception.date}
+                  else 
+                    td -
+                    td -
+
+                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Board Shipment')
+                    td -
+                  else 
+                    td #{entry.data.checksPassed}
+
     .vert-space-x2
       hr
 
@@ -388,31 +431,36 @@ block content
               p <b>Existing workflow actions can be accessed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
                 | workflow</b>
-          else 
+          else
             h4 Action History
+
+            if component.formId === 'GeometryBoard'
+              .vert-space-x1
+                p <b> Please see the table above for the action history of geometry boards</b>
 
           hr
 
           if !actions || actions.length == 0
             p None
           else
-            table.table
-              thead
-                tr
-                  th.col-md-2 Action Type Name
-                  th.col-md-2 Action ID
-                  th.col-md-2 Last Performed On:
-
-              tbody
-                each action in actions
+            if component.formId !== 'GeometryBoard'
+              table.table
+                thead
                   tr
-                    td #{action.typeFormName}
+                    th.col-md-2 Action Type Name
+                    th.col-md-2 Action ID
+                    th.col-md-2 Last Performed On:
 
-                    td
-                      a(href = `/action/${action.actionId}`) #{action.actionId}
+                tbody
+                  each action in actions
+                    tr
+                      td #{action.typeFormName}
 
-                    td
-                      +dateTimeFormat(action.lastEditDate)
+                      td
+                        a(href = `/action/${action.actionId}`) #{action.actionId}
+
+                      td
+                        +dateTimeFormat(action.lastEditDate)
 
         .col-sm-6
           if component.formId === 'AssembledAPA'
