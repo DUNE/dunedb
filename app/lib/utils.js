@@ -108,7 +108,9 @@ module.exports = {
 
   // Geometry board metrology technicians at Manchester
   dictionary_manchesterTechnicians: {
-
+    hamzaNaseer: 'Hamza Naseer',
+    taabishAhmed: 'Taabish Ahmed',
+    jakeDeMaine: 'Jake De Maine',
   },
 
   // Personnel who are authorised to sign-off on tension controls
