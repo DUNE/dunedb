@@ -8,6 +8,7 @@ block extrascripts
     const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
     const collectionDetails = !{JSON.stringify(collectionDetails, null, 4)};
     const actions = !{JSON.stringify(actions, null, 4)};
+    const mostRecentAction = !{JSON.stringify(mostRecentAction, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
     const base_url = '!{base_url}';
     const dictionary_queries = !{JSON.stringify(dictionary_queries, null, 4)};
@@ -68,7 +69,15 @@ block content
               dd
                 a(href = `/component/${component.data.fromBatch}`, target = '_blank') #{component.data.fromBatch}
 
-            dt Current Version:
+            if mostRecentAction
+              dt Most Recent Action:
+              dd
+                a(href = `/action/${mostRecentAction.actionId}`, target = '_blank') #{mostRecentAction.typeFormName}
+                br
+                | This action was last edited on !{' '}
+                +dateTimeFormat(mostRecentAction.lastEditDate)
+
+            dt Current Component Version:
             dd This is version #{component.validity.version} of the component.
               br
               | It was last edited on !{' '}
