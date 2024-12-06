@@ -40,6 +40,10 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
 
+    // Extract the most recently performed / edited action from the list of all actions above
+    // This should be done explicitly here, since that list could be modified below depending on the component's type
+    const mostRecentAction = (actions.length > 0) ? actions[0] : null;
+
     // If the specified component is a 'Geometry Board' type, retrieve some more detailed information about any shipments that the board has been part of
     // Add this information to the previously retrieved list of actions performed on the board, and make sure that all of the action entries contain the same (or equivalent) fields
     // Add an entry for the board itself (again, containing the same fields as the action entries), and finally sort all entries in the combined array by the 'lastEditDate' field
@@ -249,6 +253,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       componentTypeForm,
       collectionDetails,
       actions: nonWorkflowActions,
+      mostRecentAction,
       actionTypeForms,
       dictionary_queries: req.query,
       dictionary_locations: utils.dictionary_locations,
