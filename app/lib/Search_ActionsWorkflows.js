@@ -104,7 +104,8 @@ async function nonConformanceByComponentType(componentType, disposition, status)
   // Additionally, get the first 'true' non-conformance type in each record, convert it to something more readable and save this new string to the record
   for (let result of results) {
     const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
-    result.componentName = component.data.name;
+    const name_splits = component.data.name.split('-');
+    result.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
 
     if (result.componentType === 'assembledApa') {
       if (result.nonConfTypes_apas != null) {
@@ -167,7 +168,8 @@ async function nonConformanceByUUID(componentUUID) {
   // Additionally, get the first 'true' non-conformance type in each record, convert it to something more readable and save this new string to the record
   for (let result of results) {
     const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
-    result.componentName = component.data.name;
+    const name_splits = component.data.name.split('-');
+    result.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
 
     if (result.componentType === 'assembledApa') {
       if (result.nonConfTypes_apas != null) {
