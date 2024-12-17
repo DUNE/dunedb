@@ -135,4 +135,19 @@ router.get('/components/:typeFormId/list', permissions.checkPermissionJson('comp
 });
 
 
+/// Retrieve a list of geometry board counts across all [board part number, board location] combinations
+router.get('/components/boardCounts_byPartNumberAndLocation', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry board counts across all [board part number, board location] combinations
+    const boardCounts_byPartNumberAndLocation = await Components.boardCounts_byPartNumberAndLocation();
+
+    // Return the list of geometry board counts
+    return res.json(boardCounts_byPartNumberAndLocation);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 module.exports = router;
