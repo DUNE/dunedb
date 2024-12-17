@@ -45,8 +45,8 @@ block content
             th.col-md-2
 
         tbody
-          each typeFormId in Object.keys(componentCountsByType).sort()
-            - const typeForm = componentCountsByType[typeFormId];
+          each typeFormId in Object.keys(componentCounts_byType).sort()
+            - const typeForm = componentCounts_byType[typeFormId];
 
             if typeForm.tags && !typeForm.tags.includes('Trash')
               tr
@@ -87,8 +87,8 @@ block content
               th.col-md-2
 
           tbody
-            each typeFormId in Object.keys(componentCountsByType).sort()
-              - const typeForm = componentCountsByType[typeFormId];
+            each typeFormId in Object.keys(componentCounts_byType).sort()
+              - const typeForm = componentCounts_byType[typeFormId];
 
               if typeForm.tags && typeForm.tags.includes('Trash')
                 tr

@@ -649,7 +649,7 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
     }
 
     // Get a list of the current component count per type across all existing component types
-    const componentTypesAndCounts = await Components.componentCountsByTypes();
+    const componentCounts_byType = await Components.counts_byType();
 
     // Set the workflow ID if one is provided
     let workflowId = '';
@@ -665,7 +665,7 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
       componentTypeForm,
       subComponent_fullUuids,
       subComponent_shortUuids,
-      componentTypesAndCounts,
+      componentCounts_byType,
       workflowId,
     });
   } catch (err) {
@@ -694,7 +694,7 @@ router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermissi
       componentTypeForm,
       subComponent_fullUuids: [],
       subComponent_shortUuids: [],
-      componentTypesAndCounts: [],
+      componentCounts_byType: [],
       workflowId: '',
     });
   } catch (err) {
@@ -749,11 +749,11 @@ router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('form
 /// List all component types
 router.get('/componentTypes/list', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
-    // Retrieve a list of component counts by type across all type forms
-    const componentCountsByType = await Components.componentCountsByTypes();
+    // Retrieve a list of component counts per type across all existing component types
+    const componentCounts_byType = await Components.counts_byType();
 
     // Render the interface page
-    res.render('component_listTypes.pug', { componentCountsByType });
+    res.render('component_listTypes.pug', { componentCounts_byType });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
