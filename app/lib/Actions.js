@@ -327,11 +327,10 @@ async function list(match_condition, options) {
 async function boardRejectionCounts_byPartNumberAndLocation() {
   let aggregation_stages = [];
 
-  // Match against the type form ID and disposition to get records of all 'Factory Board Rejection' actions that result in a completely rejected board
+  // Match against the type form ID to get records of all 'Factory Board Rejection' actions (with any disposition)
   aggregation_stages.push({
     $match: {
       'typeFormId': 'FactoryBoardRejection',
-      'data.disposition': 'rejected',
     }
   });
 
@@ -346,8 +345,16 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
       actionId: { '$first': '$actionId' },
       typeFormId: { '$first': '$typeFormId' },
       componentUuid: { '$first': '$componentUuid' },
+      disposition: { '$first': '$data.disposition' },
       location: { '$first': '$data.boardRejectionLocation' },
     },
+  });
+
+  // Match against the disposition to select only actions that result in a completely rejected board
+  aggregation_stages.push({
+    $match: {
+      'disposition': 'rejected',
+    }
   });
 
   // Query the 'actions' records collection using the aggregation stages defined above

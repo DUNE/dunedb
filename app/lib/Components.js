@@ -472,25 +472,37 @@ async function boardCounts_byPartNumberAndLocation() {
   // Match against the type form ID to get records of all components of the single specified component type
   aggregation_stages.push({ $match: { formId: 'GeometryBoard' } });
 
-  // Group the records by the part number, location and component UUID, so that each group represents all records with the same [part number, location, component UUID] combination
-  // This is an alternative approach to selecting only the most recent version of a single component ... since we don't need the individual versions, they can all be represented by a single group
+  // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
+  aggregation_stages.push({
+    $project: {
+      componentUuid: true,
+      data: true,
+      reception: true,
+      validity: true,
+    }
+  })
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
-      _id: {
-        partNumber: '$data.partNumber',
-        location: '$reception.location',
-        componentUuid: '$componentUuid',
-      },
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      partNumber: { '$first': '$data.partNumber' },
+      location: { '$first': '$reception.location' },
     },
   });
 
-  // Re-group the records by the part number and the location, so that each group now represents all of the previous 'single UUID' groups with the same [part number, location] combination
+  // Group the records by the part number and location, so that each group represents all records with the same [part number, location] combination
   // Then determine the 'count' - i.e. how many records are in each group
   aggregation_stages.push({
     $group: {
       _id: {
-        partNumber: '$_id.partNumber',
-        location: '$_id.location',
+        partNumber: '$partNumber',
+        location: '$location',
       },
       count: { $sum: 1 },
     },
