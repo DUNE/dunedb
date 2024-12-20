@@ -9,11 +9,10 @@ const { db } = require('./db');
 async function boardsByLocation(location, acceptanceStatus, toothStripStatus) {
   let aggregation_stages = [];
 
-  // Match against the type form ID and specified location to get records of all 'Geometry Board' components currently at this location
+  // Match against the type form ID to get records of all 'Geometry Board' components
   aggregation_stages.push({
     $match: {
       'formId': 'GeometryBoard',
-      'reception.location': location,
     }
   });
 
@@ -26,7 +25,15 @@ async function boardsByLocation(location, acceptanceStatus, toothStripStatus) {
       partString: { '$first': '$data.partString' },
       componentUuid: { '$first': '$componentUuid' },
       ukid: { '$first': '$data.typeRecordNumber' },
+      receptionLocation: { '$first': '$reception.location' },
     },
+  });
+
+  // Match against the specified location
+  aggregation_stages.push({
+    $match: {
+      'receptionLocation': location,
+    }
   });
 
   aggregation_stages.push({ $sort: { 'ukid': 1 } });
@@ -143,11 +150,10 @@ async function boardsByLocation(location, acceptanceStatus, toothStripStatus) {
 async function boardsByPartNumber(partNumber, acceptanceStatus, toothStripStatus) {
   let aggregation_stages = [];
 
-  // Match against the type form ID and specified part number to get records of all 'Geometry Board' components of this part number
+  // Match against the type form ID to get records of all 'Geometry Board' components
   aggregation_stages.push({
     $match: {
       'formId': 'GeometryBoard',
-      'data.partNumber': partNumber,
     }
   });
 
@@ -159,7 +165,15 @@ async function boardsByPartNumber(partNumber, acceptanceStatus, toothStripStatus
       componentUuid: { '$first': '$componentUuid' },
       receptionLocation: { '$first': '$reception.location' },
       ukid: { '$first': '$data.typeRecordNumber' },
+      partNumber: { '$first': '$data.partNumber' },
     },
+  });
+
+  // Match against the specified part number
+  aggregation_stages.push({
+    $match: {
+      'partNumber': partNumber,
+    }
   });
 
   aggregation_stages.push({ $sort: { 'ukid': 1 } });

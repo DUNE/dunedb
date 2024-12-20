@@ -162,6 +162,21 @@ router.get('/actions_NCRs/' + utils.uuid_regex, permissions.checkPermissionJson(
 });
 
 
+/// Retrieve a list of geometry board rejection counts across all [board part number, rejection location] combinations
+router.get('/actions/boardRejectionCounts_byPartNumberAndLocation', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry board rejection counts across all [board part number, rejection location] combinations
+    const boardRejectionCounts_byPartNumberAndLocation = await Actions.boardRejectionCounts_byPartNumberAndLocation();
+
+    // Return the list of geometry board rejection counts
+    return res.json(boardRejectionCounts_byPartNumberAndLocation);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// Compare wire tension measurements across locations
 router.get('/actions/tensionComparisonAcrossLocations/' + utils.uuid_regex + '/:wireLayer/:origin/:destination', async function (req, res, next) {
   try {

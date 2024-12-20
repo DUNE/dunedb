@@ -73,10 +73,10 @@ async function save(input, req) {
   if (oldRecord === null) {
     // Get a list of the current component count per type across all existing component types, and then get the count of existing components of the same type as this one
     // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
-    const componentTypesAndCounts = await componentCountsByTypes();
+    const componentCounts_byType = await counts_byType();
     let numberOfExistingComponents = 0;
 
-    if (componentTypesAndCounts[input.formId].count) numberOfExistingComponents = componentTypesAndCounts[input.formId].count;
+    if (componentCounts_byType[input.formId].count) numberOfExistingComponents = componentCounts_byType[input.formId].count;
     if (input.formId === 'GeometryBoard') numberOfExistingComponents += 5000;
 
     // If the 'input.data' object does NOT contain a 'Type Record Number' field, add the component count to the new record's 'data' object under a new field
@@ -406,10 +406,12 @@ async function list(match_condition, options) {
 }
 
 
-/// Get a list of the current component count per type across all existing component types
-async function componentCountsByTypes() {
+/// Get a list of component counts per type across all existing component types
+async function counts_byType() {
   let aggregation_stages = [];
 
+  // Group the records by the type form ID and component UUID, so that each group represents all records with the same [component type, component UUID] combination
+  // This is an alternative approach to selecting only the most recent version of a single component ... since we don't need the individual versions, they can all be represented by a single group
   aggregation_stages.push({
     $group: {
       _id: {
@@ -419,6 +421,8 @@ async function componentCountsByTypes() {
     },
   });
 
+  // Re-group the records by the type form ID, so that each group now represents all of the previous 'single UUID' groups with the same component type
+  // Then determine the 'count' - i.e. how many records are in each group
   aggregation_stages.push({
     $group: {
       _id: '$_id.formId',
@@ -426,6 +430,7 @@ async function componentCountsByTypes() {
     },
   });
 
+  // Flatten the returned groups by projecting the 'formId' group ID directly (along with the 'count'), and not projecting the group ID object
   aggregation_stages.push({
     $project: {
       formId: '$_id',
@@ -456,6 +461,70 @@ async function componentCountsByTypes() {
 
   // Return the type forms object
   return typeFormsList;
+}
+
+
+/// Get a list of geometry board counts across all [board part number, board location] combinations
+/// This function is intended to be used ONLY for 'Geometry Board' type components, and therefore does not take any user-specified arguments
+async function boardCounts_byPartNumberAndLocation() {
+  let aggregation_stages = [];
+
+  // Match against the type form ID to get records of all components of the single specified component type
+  aggregation_stages.push({ $match: { formId: 'GeometryBoard' } });
+
+  // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
+  aggregation_stages.push({
+    $project: {
+      componentUuid: true,
+      data: true,
+      reception: true,
+      validity: true,
+    }
+  })
+
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      partNumber: { '$first': '$data.partNumber' },
+      location: { '$first': '$reception.location' },
+    },
+  });
+
+  // Group the records by the part number and location, so that each group represents all records with the same [part number, location] combination
+  // Then determine the 'count' - i.e. how many records are in each group
+  aggregation_stages.push({
+    $group: {
+      _id: {
+        partNumber: '$partNumber',
+        location: '$location',
+      },
+      count: { $sum: 1 },
+    },
+  });
+
+  // Flatten the returned groups by projecting the group IDs directly (along with the 'count'), and not projecting the group ID object
+  aggregation_stages.push({
+    $project: {
+      partNumber: '$_id.partNumber',
+      location: '$_id.location',
+      count: true,
+      _id: false,
+    },
+  });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let records = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of grouped records
+  return records;
 }
 
 
@@ -526,6 +595,7 @@ module.exports = {
   retrieve,
   versions,
   list,
-  componentCountsByTypes,
+  counts_byType,
+  boardCounts_byPartNumberAndLocation,
   autoCompleteUuid,
 }

@@ -63,11 +63,11 @@ async function onPageLoad() {
       submission.data.subComponent_fullUuids = slice_fullUuids;
       submission.data.subComponent_shortUuids = slice_shortUuids;
 
-      // Get the count of existing components of the same type as the sub-components from the 'componentTypesAndCounts' object
+      // Get the count of existing components of the same type as the sub-components from the 'componentCounts_byType' object
       // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
       let numberOfExistingSubComponents = 0;
 
-      if (componentTypesAndCounts[submission.data.subComponent_formId].count) numberOfExistingSubComponents = componentTypesAndCounts[submission.data.subComponent_formId].count;
+      if (componentCounts_byType[submission.data.subComponent_formId].count) numberOfExistingSubComponents = componentCounts_byType[submission.data.subComponent_formId].count;
       if (submission.data.subComponent_formId === 'GeometryBoard') numberOfExistingSubComponents += 5000;
 
       // Set up an array to hold the sub-component type record numbers and submission objects (these will be populated in the sub-component loop below)
