@@ -9,6 +9,9 @@ const { db } = require('./db');
 async function boardsByLocation(location, acceptanceStatus, toothStripStatus) {
   let aggregation_stages = [];
 
+  // Allow for a 'null' location to be specified, to make debugging of missing locations easier
+  if (location == 'none') location = null;
+
   // Match against the type form ID to get records of all 'Geometry Board' components
   aggregation_stages.push({
     $match: {
