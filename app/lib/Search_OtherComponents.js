@@ -640,6 +640,9 @@ async function componentsByTypeAndNumber(type, typeRecordNumber) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
+      formName: { '$first': '$formName' },
+      shortUuid: { '$first': '$shortUuid' },
     },
   });
 
