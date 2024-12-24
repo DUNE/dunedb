@@ -4,7 +4,6 @@ const routes = [
   require('./components'),
   require('./search'),
   require('./start'),
-  require('./tags'),
   require('./users'),
   require('./workflows'),
 ];
