@@ -395,7 +395,7 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
     }
 
     // Render the interface page
-    res.render('component_batchQRCodes.pug', { shortUUIDs });
+    res.render('component_bulkQRCodeViewer.pug', { shortUUIDs });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
@@ -814,6 +814,36 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
       allComponentTypeForms,
       workflowComponent,
     });
+  } catch (err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+
+/// Select components of a specified type and within a specified range of type record numbers to view the QR codes of
+router.get('/components/bulkQRCodes', async function (req, res, next) {
+  // Render the interface page
+  res.render('component_bulkQRCodeSelector.pug');
+});
+
+
+/// View and print the QR codes of all components of the specified type and within the specified range of type record numbers
+router.get('/components/bulkQRCodes/:typeFormId/:firstNumber/:lastNumber', permissions.checkPermission('components:view'), async function (req, res, next) {
+  try {
+    // Set up and populate a list of the components' shortened UUIDs (plus some useful information to display alongside the component QR codes)
+    let shortUUIDs = [];
+
+    // For each value of the type record number in the specified range (including both the first and last ones) ...
+    // ... retrieve a reduced instance of the component record corresponding to the specified type form ID and type record number value, and add the information in the correct order to the  list
+    for (let typeRecordNumber = parseInt(req.params.firstNumber, 10); typeRecordNumber <= parseInt(req.params.lastNumber, 10); typeRecordNumber++) {
+      const componentsList = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, typeRecordNumber);
+
+      if (componentsList.length > 0) shortUUIDs.push([componentsList[0].typeRecordNumber, componentsList[0].shortUuid, componentsList[0].formName]);
+    }
+
+    // Render the interface page
+    res.render('component_bulkQRCodeViewer.pug', { shortUUIDs });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

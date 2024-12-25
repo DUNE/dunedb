@@ -211,33 +211,9 @@ async function listGrouped(collection) {
 }
 
 
-/// Retrieve a list of all type form tags that exist across all type forms
-async function tags() {
-  // Simultaneously get all type form tags from each individual type form collection ... this returns a list containing three sub-lists, one for each collection
-  const tags_lists = await Promise.all([
-    db.collection('componentForms').distinct('tags'),
-    db.collection('actionForms').distinct('tags'),
-    db.collection('workflowForms').distinct('tags'),
-  ]);
-
-  // Concatenate the three lists, and keep hold of only the unique tags across the concatenation (apart from the 'Trash' tag, which we don't care about)
-  let tokens = {};
-
-  for (const tags_list of tags_lists) {
-    tokens = tags_list.reduce((acc, curr) => (acc[curr] = 1, acc), tokens);
-  }
-
-  delete tokens.Trash;
-
-  // Return an object containing all unique tags, with each entry keyed by the tag itself
-  return Object.keys(tokens);
-}
-
-
 module.exports = {
   save,
   retrieve,
   list,
   listGrouped,
-  tags,
 }
