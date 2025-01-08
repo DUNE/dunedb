@@ -155,22 +155,10 @@ function SubmitBatchData(submission) {
 
 // Function to submit either a non-batch component or the batch's overall component record to the database
 function SubmitData(submission) {
-  let url = '/json/component';
-
-  if (submission.formId === 'AssembledAPA') {
-    url += `?location=${'installed_on_APA'}&date=${(new Date()).toISOString().slice(0, 10)}`;
-  } else if ((submission.formId === 'APAShipment') || (submission.formId === 'BoardShipment') || (submission.formId === 'CEAdapterBoardShipment') || (submission.formId === 'DWAComponentShipment') || (submission.formId === 'GroundingMeshShipment')) {
-    url += `?location=${'in_transit'}&date=${(new Date()).toISOString().slice(0, 10)}`;
-  } else if (submission.formId === 'PopulatedBoardShipment') {
-    url += `?location=${'wisconsin'}&date=${(new Date()).toISOString().slice(0, 10)}`;
-  } else if (submission.formId === 'ReturnedGeometryBoardBatch') {
-    url += `?location=${'lancaster'}&date=${(new Date()).toISOString().slice(0, 10)}`;
-  }
-
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: url,
+    url: '/json/component',
     data: JSON.stringify(submission),
     dataType: 'json',
     success: postSuccess,
