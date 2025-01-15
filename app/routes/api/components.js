@@ -5,10 +5,11 @@ const ShortUUID = require('short-uuid');
 const Components = require('../../lib/Components');
 const logger = require('../../lib/logger');
 const permissions = require('../../lib/permissions');
+const Search_OtherComponents = require('../../lib/Search_OtherComponents');
 const utils = require('../../lib/utils');
 
 
-/// Retrieve a single version of a component record (either the most recent, or a specified one)
+/// Retrieve a single version of a component record via its UUID (either the most recent, or a specified one)
 router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
@@ -22,6 +23,26 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('co
 
     // Return the record in JSON format
     return res.json(component);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Retrieve the most recent version of a component record via its type form ID and type record number
+router.get('/component/:typeFormId/:typeRecordNumber', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
+  try {
+    // Retrieve a reduced instance of the component record corresponding to the specified type form ID and type record number
+    const componentsList = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, req.params.typeRecordNumber);
+
+    // If at least one record has been returned, return it in JSON format ... otherwise, return 'null' explicitly (also in JSON format)
+    if (componentsList.length > 0) {
+      return res.json(componentsList[0]);
+    } else {
+      return res.json(null);
+    }
+
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
