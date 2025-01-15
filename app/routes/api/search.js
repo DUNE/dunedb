@@ -205,10 +205,10 @@ router.get('/search/componentsByDUNEPID/:dunePID', async function (req, res, nex
 
 
 /// Search for components by type and type record number
-router.get('/search/componentsByTypeAndNumber/:type/:number', async function (req, res, next) {
+router.get('/search/componentsByTypeAndNumber/:typeFormId/:typeRecordNumber', async function (req, res, next) {
   try {
     // Retrieve a list of components that match the specified record details
-    const components = await Search_OtherComponents.componentsByTypeAndNumber(req.params.type, req.params.number);
+    const components = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, req.params.typeRecordNumber);
 
     // Return the list in JSON format
     return res.json(components);
