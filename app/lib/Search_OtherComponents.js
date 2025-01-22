@@ -623,13 +623,13 @@ async function componentsByDUNEPID(dunePID) {
 
 
 /// Retrieve a list of components that match the specified type and type record number
-async function componentsByTypeAndNumber(type, typeRecordNumber) {
+async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
   let aggregation_stages = [];
 
   // Match against the type form ID and type record number to get records of all components that have the same type and number as the specified ones
   aggregation_stages.push({
     $match: {
-      'formId': type,
+      'formId': typeFormId,
       'data.typeRecordNumber': parseInt(typeRecordNumber, 10),
     }
   });
@@ -640,6 +640,9 @@ async function componentsByTypeAndNumber(type, typeRecordNumber) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
+      formName: { '$first': '$formName' },
+      shortUuid: { '$first': '$shortUuid' },
     },
   });
 

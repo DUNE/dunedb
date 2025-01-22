@@ -44,10 +44,15 @@ However, users will still need to call the various backend functions in their ow
     * `componentData_values` (list of variables) : the new values of the fields specified in the `componentData_fields` list
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
-* `GetComponent(componentUUID, connection, headers [, version])` : retrieve a specific version of an existing component record, returning the record as a Python dictionary
+* `GetComponent(componentUUID, connection, headers [, version])` : retrieve a specific version of an existing component record via its UUID, returning the record as a Python dictionary
     * `componentUUID` (string) : the UUID of the component to be retrieved
     * `connection, headers` : objects returned by the `ConnectToAPI()` function
     * `version` (integer) : [OPTIONAL] the desired version of the record to retrieve ... if not specified or set to '0', the most recent version will be retrieved
+
+* `GetComponent_byTypeRecordNumber(componentTypeFormID, typeRecordNumber, connection, headers)` : retrieve the most recent version of an existing component record via its type form ID and type record number, returning the record as a Python dictionary
+    * `componentTypeFormID` (string) : the type form ID of the component to be retrieved
+    * `typeRecordNumber` (integer) : the type record number of the component to be retrieved
+    * `connection, headers` : objects returned by the `ConnectToAPI()` function
 
 * `GetListOfComponents(componentTypeFormID, connection, headers)` : retrieve a list of all components of the specified type, returning a Python list of the component UUIDs
     * `componentTypeFormID` (string) : the type form ID of the components to be listed

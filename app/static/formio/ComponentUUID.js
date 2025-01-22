@@ -231,7 +231,7 @@ class ComponentUUID extends TextFieldComponent {
 
     if (matchedURL) {
       console.log(`static/formio/ComponentUUID.js:233 - found 'matchedURL' (= ${matchedURL})`)
-      
+
       const shortuuid = matchedURL[1].match('[^\-]*')[0];
       let that = this;
 
@@ -290,7 +290,11 @@ class ComponentUUID extends TextFieldComponent {
           method: 'GET',
           url: `/json/component/${value}`,
           dataType: 'json',
-          success: function (component) {
+          success: function (component) {    // This line will sometimes throw an error in console when moving away from an interface page that contains a lot of UUID boxes
+                                             // It appears that this code sometimes can't quite keep up with loading all of the boxes' messages, and may not finish before the next page loads ...
+                                             // ... meaning that it cannot find the 'component' variable in time, and throws an error as a result
+                                             // It does eventually catch up if given enough time, but the box messages are purely for displaying information ...
+                                             // ... it won't affect any record submission if they don't load fast enough
             if (component.formId === 'APAFrame') {
               $.ajax({
                 contentType: 'application/json',

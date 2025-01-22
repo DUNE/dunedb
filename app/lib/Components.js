@@ -142,18 +142,21 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
-  // If the component is of a certain type, a location and date will have been passed to this function in the 'req.query' object
-  // Use these to update the reception information, either for the component itself or for both the component and any sub-components
-  // If successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
-  if (newRecord.formId === 'AssembledAPA') {
-    // Update the location information of the APA frame that is referenced by an Assembled APA component, to show that the frame is now being used
-    const result = await updateLocation(newRecord.data.frameUuid, req.query.location, req.query.date, newRecord.componentUuid);
-  } else if ((newRecord.formId === 'APAShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
-    const result = await updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
+  // Once the component record has been successfully saved, deal with the reception information for any related components:
+  // - for any type of shipment except a 'Populated Board Kit', update the reception information of the various sub-components to indicate that they are in transit
+  // - for an 'Assembled APA', update the reception information of the underlying 'APA Frame' to indicate that it is now being used
+  // - for a 'Populated Board Kit', update the reception information of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
+  // - for a 'Return Geometry Board Batch', update the reception information of the individual geometry board sub-components to indicate they are at Lancaster (where the batch is put together)
+  // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
+  if ((newRecord.formId === 'APAShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment')) {
+    const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
+  } else if (newRecord.formId === 'AssembledAPA') {
+    const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
+  } else if (newRecord.formId === 'PopulatedBoardShipment') {
+    const result = await updateLocations_inShipment(newRecord.componentUuid, 'wisconsin', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.formId === 'ReturnedGeometryBoardBatch') {
-    // Extract the UUID and update the location information of each board in a batch of returned geometry boards to match that from the batch's submission
     for (const board of newRecord.data.boardUuids) {
-      const result = await updateLocation(board.component_uuid, req.query.location, req.query.date, '');
+      const result = await updateLocation(board.component_uuid, 'lancaster', (new Date()).toISOString().slice(0, 10), '');
     }
   }
 
@@ -392,12 +395,14 @@ async function list(match_condition, options) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
 
     if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(record.typeFormId)) {
-      const name_splits = record.name.split('-');
-      record.name = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      if ((record.name !== null) && (record.name !== '')) {
+        const name_splits = record.name.split('-');
+        record.name = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      } else {
+        record.name = record.componentUuid;
+      }
     } else if (record.typeFormId === 'GeometryBoard') {
       record.name = record.data.typeRecordNumber;
-    } else {
-      record.name = record.name;
     }
   }
 
