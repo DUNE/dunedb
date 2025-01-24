@@ -87,6 +87,7 @@ module.exports = {
     oliverUnwin: 'Oliver Unwin',
     anthonyWatling: 'Anthony Watling',
     lewisWatson: 'Lewis Watson',
+    kimWilliams: 'Kim Williams',
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
