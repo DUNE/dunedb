@@ -87,6 +87,7 @@ module.exports = {
     oliverUnwin: 'Oliver Unwin',
     anthonyWatling: 'Anthony Watling',
     lewisWatson: 'Lewis Watson',
+    kimWilliams: 'Kim Williams',
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
@@ -158,7 +159,7 @@ module.exports = {
     joeMunski: 'Joe Munski',
   },
 
-  // Lead personnel at the UK and US APA factories
+  // Lead personnel at the UK and US APA factories (also doubling for personnel who are authorised to sign-off on 'Assembled APA Quality Assurance Check' actions)
   dictionary_apaFactoryLeads: {
     edBlucher: 'Ed Blucher',
     albertoMarchionni: 'Alberto Marchionni',
