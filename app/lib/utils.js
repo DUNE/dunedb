@@ -162,8 +162,11 @@ module.exports = {
   // Lead personnel at the UK and US APA factories (also doubling for personnel who are authorised to sign-off on 'Assembled APA Quality Assurance Check' actions)
   dictionary_apaFactoryLeads: {
     edBlucher: 'Ed Blucher',
+    daveBrown: 'Dave Brown',
     albertoMarchionni: 'Alberto Marchionni',
+    gwennMouster: 'Gwenn Mouster',
     radosavPantelic: 'Radosav Pantelic',
+    danielSalisbury: 'Daniel Salisbury',
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
@@ -171,8 +174,11 @@ module.exports = {
   // Also included are the current DB admins, so they can have access for testing and debugging any issues
   listIDs_apaFactoryLeads: [
     'auth0|64567419151ddf91659e4f3a',                                                                     // Ed Blucher (Production)
+    'auth0|66766bf5c413c4d216ce3066',                                                                     // Dave Brown (Production)
     'auth0|6467c2cd7446c74d64aa82f6',                                                                     // Alberto Marchionni (Production)
+    'auth0|6283d0da53955b00670866fa',                                                                     // Gwenn Mouster (Production)
     'auth0|6543ac95a5b46c922b92fc5b',                                                                     // Radosav Pantelic (Production)
+    'auth0|62cc5cd824d68a7b806288dc',                                                                     // Daniel Salisbury (Production)
     'auth0|6419d07e67b64413cd0679f5',                                                                     // Sotiris Vlachos (Production)
     'auth0|62c1f26dd68f53308071c91a', 'auth0|6247211d7ca173006f55b951',                                   // Brian Rebel (Staging, Production)
     'auth0|62366229e644f4006ff1b144', 'auth0|6236627bcd1229006a1e5c54', 'auth0|623662b39e63f500683a210f', // Krish Majumdar (Staging, Production, Development)
