@@ -7,6 +7,7 @@ const Components_ExecSummary = require('../lib/Components_ExecSummary');
 const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 const permissions = require('../lib/permissions');
+const Search_GeoBoards = require('../lib/Search_GeoBoards');
 const Search_OtherComponents = require('../lib/Search_OtherComponents');
 const utils = require('../lib/utils');
 const Workflows = require('../lib/Workflows');
@@ -246,12 +247,26 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       }
     }
 
+    // If the specified component is an 'Assembled APA' type, retrieve some more detailed information about any geometry boards that have been installed on it
+    let installedGeometryBoards = [];
+    let installedGeometryBoardsCount = 0;
+
+    if (component.formId === 'AssembledAPA') {
+      installedGeometryBoards = await Search_GeoBoards.boardsByAPA(req.params.uuid);
+
+      for (const boardGroup of installedGeometryBoards) {
+        installedGeometryBoardsCount += boardGroup.componentUuids.length;
+      }
+    }
+
     // Render the interface page
     res.render('component.pug', {
       component,
       componentVersions,
       componentTypeForm,
       collectionDetails,
+      installedGeometryBoards,
+      installedGeometryBoardsCount,
       actions: nonWorkflowActions,
       mostRecentAction,
       actionTypeForms,
