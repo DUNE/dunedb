@@ -7,6 +7,8 @@ block extrascripts
     const componentVersions = !{JSON.stringify(componentVersions, null, 4)};
     const componentTypeForm = !{JSON.stringify(componentTypeForm, null, 4)};
     const collectionDetails = !{JSON.stringify(collectionDetails, null, 4)};
+    const installedGeometryBoards = !{JSON.stringify(installedGeometryBoards, null, 4)};
+    const installedGeometryBoardsCount = !{JSON.stringify(installedGeometryBoardsCount, null, 4)};
     const actions = !{JSON.stringify(actions, null, 4)};
     const mostRecentAction = !{JSON.stringify(mostRecentAction, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
@@ -419,6 +421,51 @@ block content
                     td -
                   else 
                     td #{entry.data.checksPassed}
+
+    if component.formId === 'AssembledAPA'
+      .vert-space-x2.border-success.border.rounded.p-2
+        dt Installed Geometry Boards (#{installedGeometryBoardsCount})
+        dd
+          .row 
+            .col-sm-5 
+              table.table 
+                thead 
+                  tr 
+                    th.col-md-8 Part Number / String 
+                    th.col-md-1 UKID
+                    th.col-md-3 Install. Date
+
+                tbody 
+                  each entry in installedGeometryBoards.slice(0, (installedGeometryBoards.length / 2))
+                    each uuid, index in entry.componentUuids
+                      tr 
+                        td #{entry.partNumber} (#{entry.partString})
+                        td
+                          a(href = `/component/${uuid}`) #{entry.ukids[index]}
+
+                        td #{entry.receptionDates[index]}
+
+            .col-sm-1 
+
+            .col-sm-5 
+              table.table 
+                thead 
+                  tr 
+                    th.col-md-8 Part Number / String 
+                    th.col-md-1 UKID
+                    th.col-md-3 Install. Date
+
+                tbody 
+                  each entry in installedGeometryBoards.slice((installedGeometryBoards.length / 2), installedGeometryBoards.length)
+                    each uuid, index in entry.componentUuids
+                      tr 
+                        td #{entry.partNumber} (#{entry.partString})
+                        td
+                          a(href = `/component/${uuid}`) #{entry.ukids[index]}
+
+                        td #{entry.receptionDates[index]}
+
+            .col-sm-1
 
     .vert-space-x2
       hr

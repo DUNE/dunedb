@@ -620,9 +620,94 @@ async function boardsByOrderNumber(orderNumber) {
 }
 
 
+/// Retrieve a list of geometry boards that have been installed on a particular Assembled APA, specified by its UUID
+async function boardsByAPA(apaUUID) {
+  let aggregation_stages = [];
+
+  // Match against the type form ID to get records of all 'Geometry Board' components
+  aggregation_stages.push({
+    $match: {
+      'formId': 'GeometryBoard',
+    }
+  });
+
+  // Select the latest version of each record, and pass through only the fields required for later use
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      partNumber: { '$first': '$data.partNumber' },
+      partString: { '$first': '$data.partString' },
+      componentUuid: { '$first': '$componentUuid' },
+      ukid: { '$first': '$data.typeRecordNumber' },
+      receptionLocation: { '$first': '$reception.location' },
+      receptionDetail: { '$first': '$reception.detail' },
+    },
+  });
+
+  // Match against the reception location and detail to get only those boards that have been installed on the specified APA
+  // Note that for some reason, the APA UUID can be saved into the 'reception.detail' field as EITHER a string OR a MUUID-type object, so we have to account for both possibilities
+  aggregation_stages.push({
+    $match: {
+      'receptionLocation': 'installed_on_APA',
+      'receptionDetail': { $in: [apaUUID, MUUID.from(apaUUID)] },
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'ukid': 1 } });
+
+  // Group the records according to the board part number and corresponding string, and pass through the fields required for later use
+  aggregation_stages.push({
+    $group: {
+      _id: {
+        partNumber: '$partNumber',
+        partString: '$partString',
+      },
+      componentUuid: { $push: '$componentUuid' },
+    }
+  });
+
+  // Sort the record groups to be in numerical order of the part number
+  aggregation_stages.push({ $sort: { '_id.partNumber': 1 } });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Reorganise the query results to make it easier to display them on the interface page
+  let cleanedResults = [];
+
+  for (const boardGroup of results) {
+    let cleanedBoardGroup = {};
+
+    cleanedBoardGroup.partNumber = boardGroup._id.partNumber;
+    cleanedBoardGroup.partString = boardGroup._id.partString;
+
+    cleanedBoardGroup.componentUuids = [];
+    cleanedBoardGroup.ukids = [];
+    cleanedBoardGroup.receptionDates = [];
+
+    for (const boardUuid of boardGroup.componentUuid) {
+      const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
+      cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+      cleanedBoardGroup.ukids.push(board.data.typeRecordNumber);
+      cleanedBoardGroup.receptionDates.push(board.reception.date);
+    }
+
+    if (cleanedBoardGroup.componentUuids.length > 0) cleanedResults.push(cleanedBoardGroup);
+  }
+
+  // Return the list of boards grouped by part numbers
+  return cleanedResults;
+}
+
+
 module.exports = {
   boardsByLocation,
   boardsByPartNumber,
   boardsByVisualInspection,
   boardsByOrderNumber,
+  boardsByAPA,
 }    

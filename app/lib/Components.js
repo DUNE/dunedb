@@ -165,36 +165,47 @@ async function save(input, req) {
 }
 
 
-/// Update the most recently logged reception location and date of a single component
+/// Update the most recently logged reception information of a single component
 async function updateLocation(componentUuid, location, date, detail) {
-  // Set up the DB query match condition to be that a record's component UUID must match the specified one
-  let match_condition = { componentUuid };
+  // The reception information should NOT be changed in the following situations:
+  //  - if the location is currently set to 'installed_on_APA' ... this can happen if a geometry board shipment is being retroactively received
+  // 
+  // First retrieve the component's record, then check for the current location, and only proceed to change the reception information if we are NOT in one of the situations described above
+  const component = await retrieve(componentUuid);
+  const currentLocation = component.reception.location;
 
-  if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+  if (currentLocation !== 'installed_on_APA') {
+    // Set up the DB query match condition to be that a record's component UUID must match the specified one
+    let match_condition = { componentUuid };
 
-  match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+    if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
 
-  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
-  const result = db.collection('components')
-    .findOneAndUpdate(
-      match_condition,
-      {
-        $set: {
-          'reception.location': location,
-          'reception.date': date,
-          'reception.detail': detail,
-        }
-      },
-      {
-        sort: { 'validity.version': -1 },
-        returnNewDocument: true,
-      },
-    );
+    match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
-  if (result.ok === 0) throw new Error(`Components::updateLocation() - failed to update the component record!`);
+    // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
+    const result = db.collection('components')
+      .findOneAndUpdate(
+        match_condition,
+        {
+          $set: {
+            'reception.location': location,
+            'reception.date': date,
+            'reception.detail': detail,
+          }
+        },
+        {
+          sort: { 'validity.version': -1 },
+          returnNewDocument: true,
+        },
+      );
 
-  // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
-  return result.ok;
+    if (result.ok === 0) throw new Error(`Components::updateLocation() - failed to update the component record!`);
+
+    // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
+    return result.ok;
+  }
+
+  return 1;
 }
 
 
