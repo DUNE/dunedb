@@ -157,8 +157,8 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       }
     }
 
-    if (component.formId === 'CEAdapterBoardShipment') {
-      for (const info of component.data.ceAdapterBoardUuiDs) {
+    if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
+      for (const info of component.data.boardUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -194,43 +194,43 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
     }
 
     if (component.formId === 'PopulatedBoardShipment') {
-      for (const info of component.data.crBoardUuiDs) {
+      for (const info of component.data.crBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
 
-      for (const info of component.data.gBiasBoardUuiDs) {
+      for (const info of component.data.gBiasBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
 
-      for (const info of component.data.shvBoardUuiDs) {
+      for (const info of component.data.shvBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
 
-      for (const info of component.data.cableHarnessUuiDs) {
+      for (const info of component.data.cableHarnessKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
     }
@@ -309,20 +309,8 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
     // ... but for batch-type components, they are already saved in the batch component's own record, so the individual sub-component records are not needed
     let shortUUIDs = [];
 
-    if (component.formId === 'BoardShipment') {
+    if ((component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
-        let uuid = info.component_uuid;
-
-        if (uuid !== '') {
-          const boardRecord = await Components.retrieve(uuid);
-
-          if (boardRecord) shortUUIDs.push([boardRecord.data.typeRecordNumber, boardRecord.shortUuid, boardRecord.formName]);
-        }
-      }
-    }
-
-    if (component.formId === 'CEAdapterBoardShipment') {
-      for (const info of component.data.ceAdapterBoardUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -358,7 +346,7 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
     }
 
     if (component.formId === 'PopulatedBoardShipment') {
-      for (const info of component.data.crBoardUuiDs) {
+      for (const info of component.data.crBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -368,7 +356,7 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
         }
       }
 
-      for (const info of component.data.gBiasBoardUuiDs) {
+      for (const info of component.data.gBiasBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -378,7 +366,7 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
         }
       }
 
-      for (const info of component.data.shvBoardUuiDs) {
+      for (const info of component.data.shvBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -388,7 +376,7 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
         }
       }
 
-      for (const info of component.data.cableHarnessUuiDs) {
+      for (const info of component.data.cableHarnessKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -508,8 +496,8 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
       }
     }
 
-    if (component.formId === 'CEAdapterBoardShipment') {
-      for (const info of component.data.ceAdapterBoardUuiDs) {
+    if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
+      for (const info of component.data.boardUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -545,7 +533,7 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
     }
 
     if (component.formId === 'PopulatedBoardShipment') {
-      for (const info of component.data.crBoardUuiDs) {
+      for (const info of component.data.crBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -555,7 +543,7 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
         }
       }
 
-      for (const info of component.data.gBiasBoardUuiDs) {
+      for (const info of component.data.gBiasBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -565,7 +553,7 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
         }
       }
 
-      for (const info of component.data.shvBoardUuiDs) {
+      for (const info of component.data.shvBoardKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {
@@ -575,7 +563,7 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
         }
       }
 
-      for (const info of component.data.cableHarnessUuiDs) {
+      for (const info of component.data.cableHarnessKitUuiDs) {
         let uuid = info.component_uuid;
 
         if (uuid !== '') {

@@ -115,16 +115,18 @@ async function save(input, req) {
     // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
     if ((input.formId === 'APAFrame') || (input.formId === 'GroundingMeshPanel')) {
       newRecord.reception.location = 'ukWarehouse';
-    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment')) {
+    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
       newRecord.reception.location = 'in_transit';
-    } else if ((input.formId === 'AssembledAPA') || (input.formId === 'wire_bobbin')) {
-      newRecord.reception.location = 'daresbury';
-    } else if ((input.formId === 'CEAdapterBoard') || (input.formId === 'CRBoard') || (input.formId === 'CableHarness') || (input.formId === 'GBiasBoard') || (input.formId === 'SHVBoard') || (input.formId === 'PopulatedBoardShipment')) {
+    } else if (input.formId === 'AssembledAPA') {
+      newRecord.reception.location = newRecord.data.apaAssemblyLocation;
+    } else if ((input.formId === 'CEAdapterBoard') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'CRBoard') || (input.formId === 'CRBoardShipment') || (input.formId === 'CableHarness') || (input.formId === 'CableHarnessShipment') || (input.formId === 'GBiasBoard') || (input.formId === 'GBiasBoardShipment') || (input.formId === 'SHVBoard') || (input.formId === 'SHVBoardShipment')) {
       newRecord.reception.location = 'wisconsin';
     } else if ((input.formId === 'DWA') || (input.formId === 'DWAPDB')) {
       newRecord.reception.location = newRecord.data.productionLocation;
     } else if (input.formId === 'GeometryBoard') {
       newRecord.reception.location = 'lancaster';
+    } else if (input.formId === 'wire_bobbin') {
+      newRecord.reception.location = 'daresbury';
     } else {
       newRecord.reception.location = '';
     }
@@ -143,17 +145,15 @@ async function save(input, req) {
   if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
   // Once the component record has been successfully saved, deal with the reception information for any related components:
-  // - for any type of shipment except a 'Populated Board Kit', update the reception information of the various sub-components to indicate that they are in transit
+  // - for various types of shipment, update the reception information of the various sub-components to indicate that they are in transit
   // - for an 'Assembled APA', update the reception information of the underlying 'APA Frame' to indicate that it is now being used
-  // - for a 'Populated Board Kit', update the reception information of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
+  // - for a 'Populated Board Shipment', update the reception information of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
   // - for a 'Return Geometry Board Batch', update the reception information of the individual geometry board sub-components to indicate they are at Lancaster (where the batch is put together)
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
-  if ((newRecord.formId === 'APAShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment')) {
+  if ((newRecord.formId === 'APAShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.formId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
-  } else if (newRecord.formId === 'PopulatedBoardShipment') {
-    const result = await updateLocations_inShipment(newRecord.componentUuid, 'wisconsin', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.formId === 'ReturnedGeometryBoardBatch') {
     for (const board of newRecord.data.boardUuids) {
       const result = await updateLocation(board.component_uuid, 'lancaster', (new Date()).toISOString().slice(0, 10), '');
@@ -209,7 +209,7 @@ async function updateLocation(componentUuid, location, date, detail) {
 }
 
 
-/// Update the most recently logged reception locations and dates of all sub-components in a shipment-like component
+/// Update the most recently logged reception locations and dates of all sub-components in a shipment-type component
 async function updateLocations_inShipment(componentUuid, location, date) {
   // Retrieve the most recent version of the shipment-like component record corresponding to the specified component UUID
   const shipment = await retrieve(componentUuid);
@@ -221,14 +221,9 @@ async function updateLocations_inShipment(componentUuid, location, date) {
     for (const apa of shipment.data.apaUuiDs) {
       const result = await updateLocation(apa.component_uuid, location, date, '');
     }
-  } else if (shipment.formId === 'BoardShipment') {
-    // Extract the UUID and update the location information of each geometry board in a shipment of geometry boards
+  } else if ((shipment.formId === 'BoardShipment') || (shipment.formId === 'CEAdapterBoardShipment') || (shipment.formId === 'CRBoardShipment') || (shipment.formId === 'CableHarnessShipment') || (shipment.formId === 'GBiasBoardShipment') || (shipment.formId === 'SHVBoardShipment')) {
+    // Extract the UUID and update the location information of each board in a shipment of (single type) boards
     for (const board of shipment.data.boardUuiDs) {
-      const result = await updateLocation(board.component_uuid, location, date, '');
-    }
-  } else if (shipment.formId === 'CEAdapterBoardShipment') {
-    // Extract the UUID and update the location information of each CE Adapter board in a shipment of CE Adapter boards
-    for (const board of shipment.data.ceAdapterBoardUuiDs) {
       const result = await updateLocation(board.component_uuid, location, date, '');
     }
   } else if (shipment.formId === 'DWAComponentShipment') {
@@ -242,21 +237,21 @@ async function updateLocations_inShipment(componentUuid, location, date) {
       const result = await updateLocation(mesh.component_uuid, location, date, '');
     }
   } else if (shipment.formId === 'PopulatedBoardShipment') {
-    // Extract the UUID and update the location information of each component in a populated kit
-    for (const board of shipment.data.crBoardUuiDs) {
-      const result = await updateLocation(board.component_uuid, location, date, '');
+    // Extract the UUID and update the location information of each shipment in a multi-type populated board shipment
+    for (const crBoardShipment of shipment.data.crBoardKitUuiDs) {
+      const result = await updateLocations_inShipment(crBoardShipment.component_uuid, location, date);
     }
 
-    for (const board of shipment.data.gBiasBoardUuiDs) {
-      const result = await updateLocation(board.component_uuid, location, date, '');
+    for (const gBiasBoardShipment of shipment.data.gBiasBoardKitUuiDs) {
+      const result = await updateLocations_inShipment(gBiasBoardShipment.component_uuid, location, date);
     }
 
-    for (const board of shipment.data.shvBoardUuiDs) {
-      const result = await updateLocation(board.component_uuid, location, date, '');
+    for (const shvBoardShipment of shipment.data.shvBoardKitUuiDs) {
+      const result = await updateLocations_inShipment(shvBoardShipment.component_uuid, location, date);
     }
 
-    for (const board of shipment.data.cableHarnessUuiDs) {
-      const result = await updateLocation(board.component_uuid, location, date, '');
+    for (const cableHarnessShipment of shipment.data.cableHarnessKitUuiDs) {
+      const result = await updateLocations_inShipment(cableHarnessShipment.component_uuid, location, date);
     }
   }
 
