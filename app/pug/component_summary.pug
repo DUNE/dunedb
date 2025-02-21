@@ -48,7 +48,7 @@ block allbody
               else
                 dd (none)
 
-              if component.formId == 'BoardShipment'
+              if component.formId == 'BoardShipment' || component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
                 dt Number of Boards in Shipment
                 dd #{component.data.boardUuiDs.length}
 
@@ -92,15 +92,9 @@ block allbody
                     td #{info[0]}
                     td #{info[1]}
                     td #{info[2]}
-      else if component.formId === 'CEAdapterBoardShipment'
+      else if component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
         .vert-space-x1.border-success.border.rounded.p-2
-          dt Origin Location 
-          dd #{dictionary_locations[component.data.originOfShipment]}
-
-          dt Destination Location
-          dd #{dictionary_locations[component.data.destinationOfShipment]}
-
-          dt Boards in Shipment
+          dt Boards in Shipment / Kit
           dd
             table.table
               thead
@@ -169,20 +163,18 @@ block allbody
           dt Destination Location
           dd #{dictionary_locations[component.data.destinationOfShipment]}
 
-          dt Components in Kit
+          dt Single-Type Shipments in Multi-Type Shipment
           dd
             table.table 
               thead 
                 tr 
                   th.col-sm-1 UUID 
-                  th.col-sm-1 Type
-                  th.col-sm-1 UW ID 
+                  th.col-sm-2 Type
 
               tbody 
                 each info in collectionDetails
                   tr
                     td #{info[0]}
-                    td #{info[2]}
                     td #{info[1]}
       else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
         if component.formId === 'GeometryBoardBatch'
