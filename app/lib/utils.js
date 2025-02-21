@@ -41,6 +41,7 @@ module.exports = {
     surf: 'SURF',
     sussex: 'Sussex',
     ukWarehouse: 'UK Warehouse',
+    unknown: 'Unknown / Lost',
     williamAndMary: 'William and Mary',
     wisconsin: 'Wisconsin',
   },
