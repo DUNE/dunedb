@@ -22,7 +22,7 @@ block allbody
     .container.fluid
       - const qrCodeText = `${base_url}/c/${component.shortUuid.toString()}`;
 
-      if (component.formId === 'APAShipment') || (component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'DWAComponentShipment') || (component.formId === 'FrameShipment') || (component.formId === 'GroundingMeshShipment') || (component.formId === 'PopulatedBoardShipment')
+      if (component.formId === 'APAShipment') || (component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'DWAComponentShipment') || (component.formId === 'FrameShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'GroundingMeshShipment') || (component.formId === 'PopulatedBoardShipment') || (component.formId === 'SHVBoardShipment')
         - const qrCodeDesc = component.componentUuid
 
         .row.qr-row
