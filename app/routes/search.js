@@ -17,6 +17,13 @@ router.get('/search/componentsByIdentifier', async function (req, res, next) {
 });
 
 
+/// Search for components of a specified type that have been received at a specific location
+router.get('/search/componentsByTypeAndLocation', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_componentsByTypeAndLocation.pug', { dictionary_locations: utils.dictionary_locations });
+});
+
+
 /// Search for geometry boards that have been received at a specific location, or are of a specified part number
 router.get('/search/geoBoardsByLocationOrPartNumber', async function (req, res, next) {
   // Render the interface page

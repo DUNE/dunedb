@@ -219,6 +219,22 @@ router.get('/search/componentsByTypeAndNumber/:typeFormId/:typeRecordNumber', as
 });
 
 
+/// Search for components of a specified type that been received at a specified location
+router.get('/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus', async function (req, res, next) {
+  try {
+    // Retrieve a list of components that match the specified record details
+    // Geometry boards and grounding mesh panels are grouped by part number, other component types are ungrouped
+    const components = await Search_OtherComponents.componentsByTypeAndLocation(req.params.typeFormId, req.params.location, req.params.acceptanceStatus, req.params.toothStripStatus);
+
+    // Return the list in JSON format
+    return res.json(components);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// Search for non-conformance actions performed on a specified component type
 router.get('/search/nonConformanceByComponentType/:componentType/:disposition/:status', async function (req, res, next) {
   try {

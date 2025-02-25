@@ -1,0 +1,113 @@
+extend default
+
+block vars
+  - const page_title = 'Search for Components by Type and Location';
+
+block extrascripts
+  script(type = 'text/javascript').
+    const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
+
+  block workscripts 
+    script(src = '/pages/search_componentsByTypeAndLocation.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Search for Components by Type and Location
+
+    .vert-space-x2
+      hr
+
+      .row 
+        .col-md-6 
+          .row
+            .col-md-6
+              h4 Select Component Type
+
+              .vert-space-x1
+                p Select a component type below <b>and</b> a location to the right.
+                  br
+                  | <b>This is a <u>required</u> parameter.</b>
+
+              select.form-control#typeSelection
+                option(value = '')
+                option(value = 'CableHarness') Cable Harness
+                option(value = 'CEAdapterBoard') CE Adapter Board
+                option(value = 'CRBoard') CR Board
+                option(value = 'GBiasBoard') G-Bias Board
+                option(value = 'GeometryBoard') Geometry Board 
+                option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+                option(value = 'SHVBoard') SHV Board
+                option(value = 'Yoke') Yoke
+                
+              .vert-space-x2
+
+            .col-md-6
+              h4 Select Location
+
+              .vert-space-x1
+                p Select a location below <b>and</b> a component type to the left.
+                  br
+                  | <b>This is a <u>required</u> parameter.</b>
+
+              select.form-control#locationSelection
+                option(value = '')
+                option(value = 'cambridge') #{dictionary_locations['cambridge']} 
+                option(value = 'cern') #{dictionary_locations['cern']} 
+                option(value = 'chicago') #{dictionary_locations['chicago']} 
+                option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+                option(value = 'in_transit') #{dictionary_locations['in_transit']} 
+                option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
+                option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+                option(value = 'manchester') #{dictionary_locations['manchester']} 
+                option(value = 'merlin') #{dictionary_locations['merlin']} 
+                option(value = 'sheffield') #{dictionary_locations['sheffield']} 
+                option(value = 'surf') #{dictionary_locations['surf']} 
+                option(value = 'sussex') #{dictionary_locations['sussex']} 
+                option(value = 'ukWarehouse') #{dictionary_locations['ukWarehouse']} 
+                option(value = 'unknown') #{dictionary_locations['unknown']} 
+                option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
+                option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
+
+              .vert-space-x2
+                button.btn-primary.btn-lg#confirmButton Search by Type and Location
+
+          .vert-space-x2 
+            hr
+
+          .row 
+            .col-md-6
+              h4 Board Acceptance Status
+
+              .vert-space-x1 
+                p Select a status below ... this is an optional parameter.
+                  br
+                  | It only applies when selecting <b>'Geometry Board'</b> above.
+
+              select.form-control#acceptanceStatusSelection
+                option(value = 'any') (any)
+                option(value = 'accepted') Board Accepted at Factory 
+                option(value = 'rejected') Board Rejected at Factory
+
+            .col-md-6
+              h4 Tooth Strip Attachment Status
+
+              .vert-space-x1 
+                p Select a status below ... this is an optional parameter.
+                  br
+                  | It only applies when selecting <b>'Geometry Board'</b> above.
+
+              select.form-control#toothStripStatusSelection
+                option(value = 'any') (any)
+                option(value = 'attached') Tooth Strip Attached
+                option(value = 'notAttached') Tooth Strip Not Yet Attached
+
+        .col-md-1
+
+        .col-md-5
+          h4 Search Results
+
+          .vert-space-x1
+            table#results
+
+    .vert-space-x2
