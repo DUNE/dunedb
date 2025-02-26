@@ -31,13 +31,6 @@ router.get('/search/componentsByTypeAndPartNumber', async function (req, res, ne
 });
 
 
-/// Search for geometry boards that have been received at a specific location, or are of a specified part number
-router.get('/search/geoBoardsByLocationOrPartNumber', async function (req, res, next) {
-  // Render the interface page
-  res.render('search_geoBoardsByLocationOrPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
-});
-
-
 /// Search for geometry boards that have a specified visual inspection disposition, or have a specified order number
 router.get('/search/geoBoardsByVisInspectOrOrderNumber', async function (req, res, next) {
   // Render the interface page
@@ -49,20 +42,6 @@ router.get('/search/geoBoardsByVisInspectOrOrderNumber', async function (req, re
 router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
   // Render the interface page
   res.render('search_boardShipmentsByReceptionDetails.pug', { dictionary_locations: utils.dictionary_locations });
-});
-
-
-/// Search for grounding mesh panels that have been received at a specific location, or are of a specified part number
-router.get('/search/meshesByLocationOrPartNumber', async function (req, res, next) {
-  // Render the interface page
-  res.render('search_meshesByLocationOrPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
-});
-
-
-/// Search for populated board kit components that have been received at a specific location
-router.get('/search/boardKitComponentsByLocation', async function (req, res, next) {
-  // Render the interface page
-  res.render('search_boardKitComponentsByLocation.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 

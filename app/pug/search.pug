@@ -19,7 +19,7 @@ block content
       h4
         a(href = '/search/componentsByIdentifier') Components by Identifier
 
-      p This page may be used to search specifically for <b>components</b> under one of the following scenarios: 
+      p This page may be used to search for <b>components</b> using one of the following methods: 
         ul
           li <b>by component UUID</b>
           li <b>by DUNE PID</b>
@@ -48,21 +48,39 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/geoBoardsByLocationOrPartNumber') Geometry Boards By Location or Part Number
+        a(href = '/search/componentsByTypeAndLocation') Components by Type and Location
 
-      p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios: 
+      p This page may be used to search for <b>components</b> that match <b>both</b> of the following user-specified record details: 
         ul
-          li <b>either</b> all geometry boards of any board part number that have been received at a <u>specified location</u>
-          li <b>or</b> all geometry boards of a <u>specified board part number</u> that have been received at any location
+          li <b>component type</b>
+          li <b>current location</b> 
 
-      p Users may select one of the available board reception locations or part numbers from the appropriate list, and a summary of information about each found board will be displayed in the search results panel on the right side of the page.
+      p Users must select <b>both</b> parameters from their respective lists, and a summary of information about each found component will be displayed in the search results panel on the right side of the page.
         br
-        | Both searches may be optionally refined by the following parameters: 
+        | When selecting 'Geometry Board' as the component type, the search results may be optionally refined using the following parameters: 
         ul
           li <b>board acceptance status</b> - that is, whether a board has been <u>rejected</u> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <u>accepted</u> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediated</u>)
           li <b>tooth strip attachment status</b> - whether a tooth strip has been attached to the board (by performing a <u>Tooth Strip Attachment</u> action on it)
 
-      p Please note that, apart from being 'In Transit', a geometry board is only deemed to be at a given location if it has been recorded as being received there via a successfully submitted <b>Board Shipment Reception</b> action.  Additionally, please also note that as well as being a reception location, 'Lancaster' is also where all geometry boards begin after being entered into into the DB.
+      hr
+
+    .vert-space-x2
+      h4
+        a(href = '/search/componentsByTypeAndPartNumber') Components by Type and Part Number
+
+      p This page may be used to search for <b>components</b> that match <b>both</b> of the following user-specified record details: 
+        ul
+          li <b>component type</b>
+          li <b>component part number</b>
+
+      p Users must select <b>both</b> parameters from their respective lists, and a summary of information about each found component will be displayed in the search results panel on the right side of the page.
+        br
+        | Please note that there are <u>separate</u> lists for 'Geometry Board' and 'Grounding Mesh Panel' part numbers - the search will not be performed if the selected part number does not correspond to the component type (i.e. if the user selects 'Geometry Board' as the component type, but then mistakenly selects a part number from the 'Grounding Mesh Panel' part numbers list).
+        br
+        | When selecting 'Geometry Board' as the component type, the search results may be optionally refined using the following parameters: 
+        ul
+          li <b>board acceptance status</b> - that is, whether a board has been <u>rejected</u> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <u>accepted</u> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediated</u>)
+          li <b>tooth strip attachment status</b> - whether a tooth strip has been attached to the board (by performing a <u>Tooth Strip Attachment</u> action on it)
 
       hr
 
@@ -70,7 +88,7 @@ block content
       h4
         a(href = '/search/geoBoardsByVisInspectOrOrderNumber') Geometry Boards By Visual Inspection Disposition or Order Number
 
-      p This page may be used to search specifically for <b>geometry boards</b> under one of the following scenarios:
+      p This page may be used to search for <b>geometry boards</b> under one of the following scenarios:
         ul
           li <b>either</b> all geometry boards of any batch order number that have a <u>specified visual inspection disposition</u>
           li <b>or</b> all geometry boards of a <u>specified batch order number</u> that have any visual inspection disposition
@@ -87,7 +105,7 @@ block content
       h4
         a(href = '/search/boardShipmentsByReceptionDetails') Geometry Board Shipments by Reception Details
 
-      p This page may be used to search specifically for <b>geometry board shipments</b> that match <b>one or more</b> of the following user-specified record details:
+      p This page may be used to search for <b>geometry board shipments</b> that match <b>one or more</b> of the following user-specified record details:
         ul
           li <b>shipment status</b>: whether the shipment has been recorded as received or not
           li <b>origin location</b>: the location from which the shipment was sent
@@ -96,7 +114,7 @@ block content
           li <b>latest reception date</b>: the latest date on which the shipment could have been received (if not specified, today's date is used)
           li <b>reception comment</b>: the presence of any comments noted in the shipment reception record
 
-      p The 'shipment status' is the only <b>required</b> parameter for any search - users may use any combination of the other parameters from their respective lists.
+      p The 'shipment status' is the only <b>required</b> parameter for any search - users may additionally use any combination of the other parameters from their respective lists to refine the search results.
 
       p Upon a successful search, a summary of information about each found shipment will be displayed in the search results panel below the selection boxes.  In the case of shipments that have not been received, reception information will of course be left blank in the results.
 
@@ -104,36 +122,9 @@ block content
 
     .vert-space-x2
       h4
-        a(href = '/search/meshesByLocationOrPartNumber') Grounding Mesh Panels By Location or Part Number
-
-      p This page may be used to search specifically for <b>grounding mesh panels</b> under one of the following scenarios: 
-        ul
-          li <b>either</b> all mesh panels of any part number that have been received at a <u>specified location</u>
-          li <b>or</b> all mesh panels of a <u>specified part number</u> that have been received at any location
-
-      p Users may select one of the available mesh panel reception locations or part numbers from the appropriate list, and a summary of information about each found mesh panel will be displayed in the search results panel on the right side of the page.
-
-      p Please note that a mesh panel is only deemed to be at 'Chicago' if it has been recorded as being received there via a successfully submitted <b>Grounding Mesh Panel Shipment Reception</b> action.  Additionally, the 'UK Warehouse' is where all mesh panels begin after being entered into into the DB, and to be 'Used / Installed on APA', a mesh panel must be referenced in a 'Frame Prep - Mesh Panel Installation' action.
-
-      hr
-
-    .vert-space-x2
-      h4
-        a(href = '/search/boardKitComponentsByLocation') Populated Board Kit Components By Location
-
-      p This page may be used to search specifically for components that make up <b>populated board kits</b> (<b>CR boards</b>, <b>G-Bias boards</b>, <b>SHV boards</b> and <b>cable harnesses</b>) that have been received at a <u>specified location</u>.
-
-      p Users may select one of the available board kit reception locations from the list, and a summary of information about all found components will be displayed in the search results panel on the right side of the page.
-
-      p Please note that a board kit (and therefore, its constituent components) is only deemed to be at a given location if it has been recorded as being received there via a successfully submitted <b>Populated Board Kit Reception</b> action.
-
-      hr
-
-    .vert-space-x2
-      h4
         a(href = '/search/apasByProductionDetails') Assembled APAs by Production Details
 
-      p This page may be used to search specifically for <b>assembled APAs</b> by one of the following filters:
+      p This page may be used to search for <b>assembled APAs</b> by one of the following methods:
         ul
           li <b>either</b> by <u>production number</u> (the order in which the APA has been assembled at a specified production location)
           li <b>or</b> by the <u>last completed assembly workflow step</u>
@@ -154,12 +145,12 @@ block content
       h4
         a(href = '/search/actionsByIDOrReferencedUUID') Actions by ID or Referenced UUID
 
-      p This page may be used to search specifically for <b>actions</b> under one of the following scenarios:
+      p This page may be used to search for <b>actions</b> by one of the following methods:
         ul 
           li <b>by action ID</b>
           li <b>that reference a particular component</b>, but have not been directly performed on it
 
-      p As an example of the latter, actions relating to 'Board Installation' must reference the 'Geometry Board' type components that are being installed (i.e. the action records will contain the boards' UUIDs), but these types of actions are actually performed on 'Assembled APA' type components.
+      p As an example of the latter, actions relating to 'Board Installation' are performed on 'Assembled APA' type components, but must reference the 'Geometry Board' type components that are being installed (i.e. the action records will contain the boards' UUIDs).
 
       p In the first scenario, the ID input box uses auto-complete, so users may begin manually entering an ID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the ID is entered.
         br
@@ -167,8 +158,8 @@ block content
 
       p In the second scenario, users must specify the following information:
         ul
-          li the UUID of a single component
-          li the type (or general grouping) of actions, selected from the provided list
+          li the UUID of the component that is referenced
+          li the type (or general grouping) of actions that could reference the component, selected from the provided list
 
       p Please note that <b>both pieces of information must be provided</b> for the search to be performed.  If successful, a summary of information about each found action will be displayed in the search results panel on the right side of the page.
 
@@ -178,9 +169,9 @@ block content
       h4
         a(href = '/search/nonConformanceByComponentTypeOrUUID') Non-Conformance by Component Type or UUID
 
-      p This page may be used to search specifically for <b>non-conformance actions</b> under one of the following scenarios:
+      p This page may be used to search for <b>non-conformance actions</b> under one of the following scenarios:
         ul
-          li <b>either</b> all non-conformance actions performed on a specified <u>component type</u>, with options to additionally specify a particular non-conformance disposition and/or status
+          li <b>either</b> all non-conformance actions performed on a specified <u>component type</u>, with options to additionally filter the results by a particular non-conformance disposition and/or status
           li <b>or</b> all non-conformance actions performed on a <u>single component</u>, specified by its UUID
 
       p In the first scenario, users <b>must</b> select a 'component type' from the list, but the other two available parameters are optional.  In the second scenario, the only required information is the UUID of the component being queried - there are no additional optional search arguments.
@@ -193,12 +184,12 @@ block content
       h4
         a(href = '/search/workflowsByIDOrUUID') Workflows by ID or UUID
 
-      p This page may be used to search specifically for <b>workflows</b> under one of the following scenarios:
+      p This page may be used to search for <b>workflows</b> using one of the following methods:
         ul
           li <b>by workflow ID</b>
-          li <b>that involve a particular component</b>, specified by its full 36-character UUID
+          li <b>that involve a particular component</b>, specified by its UUID
 
-      p Each respective input box uses auto-complete, so users may begin manually entering a ID or UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the input is entered.
+      p Each respective input box uses auto-complete, so users may begin manually entering an ID or UUID, and any matching entries currently in the database will be displayed (up to 10 entries).  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the input is entered.
         br
         |  UUIDs may additionally be provided in full by scanning a component QR code.  This can be done by simply pressing the 'camera' icon to the right of the component UUID input box, and directing your device's camera view to the QR code in question.
 
