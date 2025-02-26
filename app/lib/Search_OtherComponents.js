@@ -741,7 +741,6 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
 
   // Reorganise the query results to make it easier to display them on the interface page ... the format of the reorganised results depends on the specified component type
   // Additionally for the 'Geometry Board' component type, filter the results based on the optional 'board acceptance status' and 'tooth strip attachment status' search parameters
-
   let cleanedResults = [];
 
   if (typeFormId === 'GeometryBoard') {
@@ -880,6 +879,185 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
 }
 
 
+/// Retrieve a list of components that match the specified type and part number across all locations
+async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceStatus, toothStripStatus) {
+  let aggregation_stages = [];
+
+  // Match against the type form ID and specified part number to get records of all components of the specified type and part number
+  if (typeFormId === 'GeometryBoard') {
+    aggregation_stages.push({
+      $match: {
+        'formId': typeFormId,
+        'data.partNumber': partNumber,
+      }
+    });
+  } else if (typeFormId === 'GroundingMeshPanel') {
+    aggregation_stages.push({
+      $match: {
+        'formId': typeFormId,
+        'data.meshPanelPartNumber': partNumber,
+      }
+    });
+  }
+
+  // Select the latest version of each record, and pass through only the fields required for later use
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      receptionLocation: { '$first': '$reception.location' },
+      typeRecordNumber: { '$first': '$data.typeRecordNumber' },
+    },
+  });
+
+  aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
+
+  // Group the records according to the location, and pass through the fields required for later use
+  aggregation_stages.push({
+    $group: {
+      _id: { receptionLocation: '$receptionLocation' },
+      componentUuid: { $push: '$componentUuid' },
+    }
+  });
+
+  // Sort the record groups to be in alphabetical order of the location
+  aggregation_stages.push({ $sort: { '_id.receptionLocation': 1 } });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let results = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Reorganise the query results to make it easier to display them on the interface page ... the format of the reorganised results depends on the specified component type
+  // Additionally for the 'Geometry Board' component type, filter the results based on the optional 'board acceptance status' and 'tooth strip attachment status' search parameters
+  let cleanedResults = [];
+
+  if (typeFormId === 'GeometryBoard') {
+    for (const boardGroup of results) {
+      let cleanedBoardGroup = {};
+
+      cleanedBoardGroup.receptionLocation = boardGroup._id.receptionLocation;
+
+      cleanedBoardGroup.componentUuids = [];
+      cleanedBoardGroup.ukids = [];
+      cleanedBoardGroup.receptionDates = [];
+      cleanedBoardGroup.installedOnAPA = [];
+
+      for (const boardUuid of boardGroup.componentUuid) {
+        let boardAccepted = false;
+        let includeBoard_basedOnAcceptanceStatus = false;
+
+        let match_condition = {
+          typeFormId: 'FactoryBoardRejection',
+          componentUuid: MUUID.from(boardUuid).toString(),
+        };
+
+        const rejectionActions = await Actions.list(match_condition);
+
+        if (rejectionActions.length === 0) boardAccepted = true;
+        else {
+          const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
+          const disposition = rejectionAction.data.disposition;
+
+          if (((disposition === 'useAsIs') || (disposition === 'remediated'))) boardAccepted = true;
+        }
+
+        if ((acceptanceStatus === 'any') || ((acceptanceStatus === 'accepted') && (boardAccepted == true)) || (acceptanceStatus == 'rejected') && (boardAccepted == false)) {
+          includeBoard_basedOnAcceptanceStatus = true;
+        }
+
+        let toothStripAttached = false;
+        let includeBoard_basedOnToothStripStatus = false;
+
+        match_condition = {
+          typeFormId: 'BoardToothStripAttachment',
+          componentUuid: MUUID.from(boardUuid).toString(),
+        }
+
+        const toothStripAttachmentActions = await Actions.list(match_condition);
+
+        if (toothStripAttachmentActions.length > 0) toothStripAttached = true;
+
+        if ((toothStripStatus === 'any') || ((toothStripStatus === 'attached') && (toothStripAttached == true)) || (toothStripStatus == 'notAttached') && (toothStripAttached == false)) {
+          includeBoard_basedOnToothStripStatus = true;
+        }
+
+        if (includeBoard_basedOnAcceptanceStatus && includeBoard_basedOnToothStripStatus) {
+          const board = await Components.retrieve(MUUID.from(boardUuid).toString());
+
+          cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
+          cleanedBoardGroup.ukids.push(board.data.typeRecordNumber);
+
+          if (board.reception) {
+            cleanedBoardGroup.receptionDates.push(board.reception.date);
+          } else {
+            cleanedBoardGroup.receptionDates.push('[No Date Found!]');
+          }
+
+          if (boardGroup._id.receptionLocation === 'installed_on_APA') {
+            if (board.reception.detail) {
+              const apa = await Components.retrieve(board.reception.detail);
+
+              const name_splits = apa.data.name.split('-');
+              cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+            } else {
+              cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+            }
+          } else {
+            cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
+          }
+        }
+      }
+
+      if (cleanedBoardGroup.componentUuids.length > 0) cleanedResults.push(cleanedBoardGroup);
+    }
+  } else if (typeFormId === 'GroundingMeshPanel') {
+    for (const meshGroup of results) {
+      let cleanedMeshGroup = {};
+
+      cleanedMeshGroup.receptionLocation = meshGroup._id.receptionLocation;
+
+      cleanedMeshGroup.componentUuids = [];
+      cleanedMeshGroup.dunePids = [];
+      cleanedMeshGroup.receptionDates = [];
+      cleanedMeshGroup.installedOnAPA = [];
+
+      for (const meshUuid of meshGroup.componentUuid) {
+        const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
+
+        cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
+        cleanedMeshGroup.dunePids.push(mesh.data.name);
+
+        if (mesh.reception) {
+          cleanedMeshGroup.receptionDates.push(mesh.reception.date);
+        } else {
+          cleanedMeshGroup.receptionDates.push('[No Date Found!]');
+        }
+
+        if (meshGroup._id.receptionLocation === 'installed_on_APA') {
+          if (mesh.reception.detail) {
+            const apa = await Components.retrieve(mesh.reception.detail);
+
+            const name_splits = apa.data.name.split('-');
+            cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+          } else {
+            cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
+          }
+        } else {
+          cleanedMeshGroup.installedOnAPA.push('[Not installed on APA]');
+        }
+      }
+
+      if (cleanedMeshGroup.componentUuids.length > 0) cleanedResults.push(cleanedMeshGroup);
+    }
+  }
+
+  // Return the list of components, possibly grouped by reception locations
+  return cleanedResults;
+}
+
+
 module.exports = {
   boardShipmentsByReceptionDetails,
   boardShipmentsByBoardUUID,
@@ -891,4 +1069,5 @@ module.exports = {
   componentsByDUNEPID,
   componentsByTypeAndNumber,
   componentsByTypeAndLocation,
+  componentsByTypeAndPartNumber,
 }

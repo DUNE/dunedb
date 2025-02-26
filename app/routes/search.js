@@ -17,10 +17,17 @@ router.get('/search/componentsByIdentifier', async function (req, res, next) {
 });
 
 
-/// Search for components of a specified type that have been received at a specific location
+/// Search for components by type and current location
 router.get('/search/componentsByTypeAndLocation', async function (req, res, next) {
   // Render the interface page
   res.render('search_componentsByTypeAndLocation.pug', { dictionary_locations: utils.dictionary_locations });
+});
+
+
+/// Search for components by type and part number
+router.get('/search/componentsByTypeAndPartNumber', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_componentsByTypeAndPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 
