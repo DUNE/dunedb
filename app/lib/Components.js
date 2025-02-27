@@ -98,7 +98,11 @@ async function save(input, req) {
     } else if (input.formId === 'SHVBoard') {
       newRecord.data.name = `D00300500001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
     } else if (input.formId === 'CableHarness') {
-      newRecord.data.name = `D00300500002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      if (newRecord.data.cableHarnessSide === 'a') {
+        newRecord.data.name = `D00300500002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      } else if (newRecord.data.cableHarnessSide === 'b') {
+        newRecord.data.name = `D00300500003-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+      }
     } else if (input.formId === 'DWA') {
       newRecord.data.name = `D00300800001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US136-01-00-00`;
     } else if (input.formId === 'DWAPDB') {
