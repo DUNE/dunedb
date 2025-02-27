@@ -17,10 +17,17 @@ router.get('/search/componentsByIdentifier', async function (req, res, next) {
 });
 
 
-/// Search for geometry boards that have been received at a specific location, or are of a specified part number
-router.get('/search/geoBoardsByLocationOrPartNumber', async function (req, res, next) {
+/// Search for components by type and current location
+router.get('/search/componentsByTypeAndLocation', async function (req, res, next) {
   // Render the interface page
-  res.render('search_geoBoardsByLocationOrPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
+  res.render('search_componentsByTypeAndLocation.pug', { dictionary_locations: utils.dictionary_locations });
+});
+
+
+/// Search for components by type and part number
+router.get('/search/componentsByTypeAndPartNumber', async function (req, res, next) {
+  // Render the interface page
+  res.render('search_componentsByTypeAndPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 
@@ -35,20 +42,6 @@ router.get('/search/geoBoardsByVisInspectOrOrderNumber', async function (req, re
 router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
   // Render the interface page
   res.render('search_boardShipmentsByReceptionDetails.pug', { dictionary_locations: utils.dictionary_locations });
-});
-
-
-/// Search for grounding mesh panels that have been received at a specific location, or are of a specified part number
-router.get('/search/meshesByLocationOrPartNumber', async function (req, res, next) {
-  // Render the interface page
-  res.render('search_meshesByLocationOrPartNumber.pug', { dictionary_locations: utils.dictionary_locations });
-});
-
-
-/// Search for populated board kit components that have been received at a specific location
-router.get('/search/boardKitComponentsByLocation', async function (req, res, next) {
-  // Render the interface page
-  res.render('search_boardKitComponentsByLocation.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 

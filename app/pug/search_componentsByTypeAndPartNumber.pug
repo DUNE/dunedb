@@ -1,19 +1,19 @@
 extend default
 
 block vars
-  - const page_title = 'Search for Geometry Boards by Location or Part Number';
+  - const page_title = 'Search for Components by Type and Part Number';
 
 block extrascripts
   script(type = 'text/javascript').
     const dictionary_locations = !{JSON.stringify(dictionary_locations, null, 4)};
 
   block workscripts 
-    script(src = '/pages/search_geoBoardsByLocationOrPartNumber.js')
+    script(src = '/pages/search_componentsByTypeAndPartNumber.js')
 
 block content
   .container-fluid
     .vert-space-x2
-      h2 Search for Geometry Boards by Location or Part Number
+      h2 Search for Components by Type and Part Number
 
     .vert-space-x2
       hr
@@ -22,42 +22,35 @@ block content
         .col-md-6 
           .row
             .col-md-6
-              h4 Select Location
+              h4 Select Component Type
 
               .vert-space-x1
-                p Select <b>either</b> a location below <b>or</b> a part number to the right.
+                p Select a component type <b>and</b> a part number below.
                   br
                   | <b>This is a <u>required</u> parameter.</b>
 
-              select.form-control#locationSelection
+              select.form-control#typeSelection
                 option(value = '')
-                option(value = 'cambridge') #{dictionary_locations['cambridge']} 
-                option(value = 'chicago') #{dictionary_locations['chicago']} 
-                option(value = 'daresbury') #{dictionary_locations['daresbury']} 
-                option(value = 'in_transit') #{dictionary_locations['in_transit']} 
-                option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
-                option(value = 'lancaster') #{dictionary_locations['lancaster']} 
-                option(value = 'manchester') #{dictionary_locations['manchester']} 
-                option(value = 'merlin') #{dictionary_locations['merlin']} 
-                option(value = 'sheffield') #{dictionary_locations['sheffield']} 
-                option(value = 'sussex') #{dictionary_locations['sussex']} 
-                option(value = 'unknown') #{dictionary_locations['unknown']} 
-                option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
-                option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
-
-              .vert-space-x2
-                button.btn-primary.btn-lg#confirmButton_location Search by Location
+                option(value = 'GeometryBoard') Geometry Board 
+                option(value = 'GroundingMeshPanel') Grounding Mesh Panel
 
             .col-md-6
-              h4 Select Part Number
+              .vert-space-x2
+                button.btn-primary.btn-lg.float-right#confirmButton Search by Type and Part No. 
+
+          .vert-space-x2 
+
+          .row
+            .col-md-6
+              h4 Select Geometry Board Part No.
 
               .vert-space-x1
-                p Select <b>either</b> a part number below <b>or</b> a location to the left.
+                p Select a part number below if searching for <b>Geometry Boards</b>.
                   br
                   | <b>This is a <u>required</u> parameter.</b>
 
-              select.form-control#partNumberSelection
-                option(value = '')          
+              select.form-control#boardPartNumberSelection
+                option(value = '')
                 option(value = '8760024') 8760024 (V Side Board End)
                 option(value = '8760026') 8760026 (V Middle Side Board w/o Slot)
                 option(value = '8760028') 8760028 (V Middle Side Board w/ Slot)
@@ -88,8 +81,21 @@ block content
                 option(value = '8760122') 8760122 (G Head Board Left End)
                 option(value = '8760123') 8760123 (U Head Board Right End)
 
-              .vert-space-x2
-                button.btn-primary.btn-lg#confirmButton_partNumber Search by Part Number 
+            .col-md-6
+              h4 Select Mesh Panel Part No.
+
+              .vert-space-x1
+                p Select a part number below if searching for <b>Grounding Mesh Panels</b>.
+                  br
+                  | <b>This is a <u>required</u> parameter.</b>
+
+              select.form-control#meshPartNumberSelection
+                option(value = '')
+                option(value = 'mesh29410560HeadEndLH') 294-10560 HEAD END - L/H 
+                option(value = 'mesh29410561HeadEndRH') 294-10561 HEAD END - R/H
+                option(value = 'mesh29410562FootEndRH') 294-10562 FOOT END - R/H 
+                option(value = 'mesh29410563FootEndLH') 294-10563 FOOT END - L/H 
+                option(value = 'mesh29410564Centre') 294-10564 CENTRE
 
           .vert-space-x2 
             hr
@@ -101,7 +107,7 @@ block content
               .vert-space-x1 
                 p Select a status below ... this is an optional parameter.
                   br
-                  | It can be used alongside <b>either</b> required parameter above.
+                  | It only applies when selecting <b>'Geometry Board'</b> above.
 
               select.form-control#acceptanceStatusSelection
                 option(value = 'any') (any)
@@ -114,7 +120,7 @@ block content
               .vert-space-x1 
                 p Select a status below ... this is an optional parameter.
                   br
-                  | It can be used alongside <b>either</b> required parameter above.
+                  | It only applies when selecting <b>'Geometry Board'</b> above.
 
               select.form-control#toothStripStatusSelection
                 option(value = 'any') (any)
