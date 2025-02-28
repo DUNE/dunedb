@@ -7,44 +7,14 @@ const Search_OtherComponents = require('../../lib/Search_OtherComponents');
 const utils = require('../../lib/utils');
 
 
-/// Search for geometry boards that have been received at a specified location
-router.get('/search/geoBoardsByLocation/:location/:acceptanceStatus/:toothStripStatus', async function (req, res, next) {
-  try {
-    // Retrieve a list of geometry boards, grouped by part number, that have been received at the specified location
-    const boardsByPartNumber = await Search_GeoBoards.boardsByLocation(req.params.location, req.params.acceptanceStatus, req.params.toothStripStatus);
-
-    // Return the list in JSON format
-    return res.json(boardsByPartNumber);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// Search for geometry boards of a specified part number
-router.get('/search/geoBoardsByPartNumber/:partNumber/:acceptanceStatus/:toothStripStatus', async function (req, res, next) {
-  try {
-    // Retrieve a list of geometry boards, grouped by reception location, of the specified part number
-    const boardsByLocation = await Search_GeoBoards.boardsByPartNumber(req.params.partNumber, req.params.acceptanceStatus, req.params.toothStripStatus);
-
-    // Return the list in JSON format
-    return res.json(boardsByLocation);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
 /// Search for geometry boards that have a specified visual inspection disposition
 router.get('/search/geoBoardsByVisualInspection/:disposition/:issue', async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards, grouped by part number, that have the specified visual inspection disposition
-    const boardsByLocation = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, req.params.issue);
+    const boardsByPartNumber = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, req.params.issue);
 
     // Return the list in JSON format
-    return res.json(boardsByLocation);
+    return res.json(boardsByPartNumber);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -90,51 +60,6 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 
     // Return the list in JSON format
     return res.json(shipments);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// Search for grounding mesh panels that have been received at a specified location
-router.get('/search/meshesByLocation/:location', async function (req, res, next) {
-  try {
-    // Retrieve a list of grounding mesh panels, grouped by part number, that have been received at the specified location
-    const meshesByPartNumber = await Search_OtherComponents.meshesByLocation(req.params.location);
-
-    // Return the list in JSON format
-    return res.json(meshesByPartNumber);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// Search for grounding mesh panels of a specified part number
-router.get('/search/meshesByPartNumber/:partNumber', async function (req, res, next) {
-  try {
-    // Retrieve a list of grounding mesh panels, grouped by reception location, of the specified part number
-    const meshesByLocation = await Search_OtherComponents.meshesByPartNumber(req.params.partNumber);
-
-    // Return the list in JSON format
-    return res.json(meshesByLocation);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// Search for populated board kit components that have been received at a specified location
-router.get('/search/boardKitComponentsByLocation/:location', async function (req, res, next) {
-  try {
-    // Retrieve a list of populated board kit components, grouped by component type, that have been received at the specified location
-    const componentsByType = await Search_OtherComponents.boardKitComponentsByLocation(req.params.location);
-
-    // Return the list in JSON format
-    return res.json(componentsByType);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -209,6 +134,38 @@ router.get('/search/componentsByTypeAndNumber/:typeFormId/:typeRecordNumber', as
   try {
     // Retrieve a list of components that match the specified record details
     const components = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, req.params.typeRecordNumber);
+
+    // Return the list in JSON format
+    return res.json(components);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for components by type and current location
+router.get('/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus', async function (req, res, next) {
+  try {
+    // Retrieve a list of components that match the specified record details
+    // Geometry boards and grounding mesh panels are grouped by part number, other component types are ungrouped
+    const components = await Search_OtherComponents.componentsByTypeAndLocation(req.params.typeFormId, req.params.location, req.params.acceptanceStatus, req.params.toothStripStatus);
+
+    // Return the list in JSON format
+    return res.json(components);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Search for components by type and part number
+router.get('/search/componentsByTypeAndPartNumber/:typeFormId/:partNumber/:acceptanceStatus/:toothStripStatus', async function (req, res, next) {
+  try {
+    // Retrieve a list of components that match the specified record details
+    // Geometry boards and grounding mesh panels are grouped by location, other component types are ungrouped
+    const components = await Search_OtherComponents.componentsByTypeAndPartNumber(req.params.typeFormId, req.params.partNumber, req.params.acceptanceStatus, req.params.toothStripStatus);
 
     // Return the list in JSON format
     return res.json(components);
