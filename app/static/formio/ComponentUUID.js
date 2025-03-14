@@ -291,10 +291,10 @@ class ComponentUUID extends TextFieldComponent {
           url: `/json/component/${value}`,
           dataType: 'json',
           success: function (component) {    // This line will sometimes throw an error in console when moving away from an interface page that contains a lot of UUID boxes
-                                             // It appears that this code sometimes can't quite keep up with loading all of the boxes' messages, and may not finish before the next page loads ...
-                                             // ... meaning that it cannot find the 'component' variable in time, and throws an error as a result
-                                             // It does eventually catch up if given enough time, but the box messages are purely for displaying information ...
-                                             // ... it won't affect any record submission if they don't load fast enough
+            // It appears that this code sometimes can't quite keep up with loading all of the boxes' messages, and may not finish before the next page loads ...
+            // ... meaning that it cannot find the 'component' variable in time, and throws an error as a result
+            // It does eventually catch up if given enough time, but the box messages are purely for displaying information ...
+            // ... it won't affect any record submission if they don't load fast enough
             if (component.formId === 'APAFrame') {
               $.ajax({
                 contentType: 'application/json',
@@ -310,14 +310,14 @@ class ComponentUUID extends TextFieldComponent {
                       dataType: 'json',
                       success: function (action) {
                         if (action.data.actionComplete) {
-                          info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName} is ready for use`);
                         } else {
-                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (Final QA Checklist is not complete)... click here for this component's information page`);
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName}'s Final QA Checklist is not complete!`);
                         }
                       },
                     }).fail();
                   } else {
-                    info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (no Final QA Checklist)... click here for this component's information page`);
+                    info_target.text(`\xa0 [Click for Component Info] This ${component.formName} does not have a Final QA Checklist!`);
                   }
                 },
               }).fail();
@@ -336,22 +336,22 @@ class ComponentUUID extends TextFieldComponent {
                       dataType: 'json',
                       success: function (action) {
                         if ((action.data.disposition === 'useAsIs') || (action.data.disposition === 'conformant')) {
-                          info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName} is ready for use`);
                         } else {
-                          info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (QA Inspection disposition is not 'Use As Is' or 'Conformant')... click here for this component's information page`);
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName}'s QA Inspection disposition is not 'Use As Is' or 'Conformant'!`);
                         }
                       },
                     }).fail();
                   } else {
-                    info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (no QA Inspection)... click here for this component's information page`);
+                    info_target.text(`\xa0 [Click for Component Info] This ${component.formName} does not have a QA Inspection!`);
                   }
                 },
               }).fail();
             } else if (component.formId === 'wire_bobbin') {
               if (component.data.meanBreakStrength >= 24.0) {
-                info_target.text(`\xa0 This ${component.formName} is ready for use ... click here for this component's information page`);
+                info_target.text(`\xa0 [Click for Component Info] This ${component.formName} is ready for use`);
               } else {
-                info_target.text(`\xa0 This ${component.formName} is NOT READY TO BE USED (mean break strength < 24.0 N)... click here for this component's information page`);
+                info_target.text(`\xa0 [Click for Component Info] This ${component.formName}'s mean break strength is less than 24.0 N!`);
               }
             } else if (component.formId === 'GeometryBoard') {
               $.ajax({
@@ -361,7 +361,7 @@ class ComponentUUID extends TextFieldComponent {
                 dataType: 'json',
                 success: function (actionIDsList) {
                   if (actionIDsList.length == 0) {
-                    info_target.text(`\xa0 This ${component.formName} has been accepted and is ready for use ... click here for this component's information page`);
+                    info_target.text(`\xa0 [Click for Component Info] This ${component.formName} (part number: ${component.data.partNumber}) is ready for use`);
                   } else {
                     $.ajax({
                       contentType: 'application/json',
@@ -370,9 +370,9 @@ class ComponentUUID extends TextFieldComponent {
                       dataType: 'json',
                       success: function (action) {
                         if ((action.data.disposition === 'useAsIs') || (action.data.disposition === 'remediated')) {
-                          info_target.text(`\xa0 This ${component.formName} has been accepted and is ready for use ... click here for this component's information page`);
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName} (part number: ${component.data.partNumber}) is ready for use`);
                         } else {
-                          info_target.text(`\xa0 This ${component.formName} HAS BEEN REJECTED (via Factory Rejection action) ... click here for this component's information page`);
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName} (part number: ${component.data.partNumber}) has been rejected!`);
                         }
                       },
                     }).fail();
@@ -380,7 +380,7 @@ class ComponentUUID extends TextFieldComponent {
                 },
               }).fail();
             } else {
-              info_target.text(`\xa0 Click here for this component's information page`);
+              info_target.text(`\xa0 [Click for Component Info]`);
             }
           },
         }).fail();

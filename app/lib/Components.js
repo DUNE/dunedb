@@ -172,8 +172,10 @@ async function save(input, req) {
 /// Update the most recently logged reception information of a single component
 async function updateLocation(componentUuid, location, date, detail) {
   // The reception information should NOT be changed in the following situations:
-  //  - if the location is currently set to 'installed_on_APA' ... this can happen if a geometry board shipment is being retroactively received
-  // 
+  //  - if the location is currently set to 'installed_on_APA' ... this can happen in the following circumstances:
+  //      * if a geometry board shipment is being retroactively received
+  //      * when a board installation action has previously been only partially completed, and is now being edited with additional board entries
+
   // First retrieve the component's record, then check for the current location, and only proceed to change the reception information if we are NOT in one of the situations described above
   const component = await retrieve(componentUuid);
   const currentLocation = component.reception.location;
