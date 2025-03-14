@@ -203,12 +203,7 @@ async function boardInstallByReferencedComponent(componentUUID) {
   aggregation_stages.push({
     $match: {
       'typeFormId': {
-        $in: [
-          'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB',
-          'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
-          'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
-          'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
-        ]
+        $in: ['x_boards', 'v_boards', 'u_boards', 'g_boards']
       },
     }
   });
@@ -232,14 +227,33 @@ async function boardInstallByReferencedComponent(componentUUID) {
 
 
   // At this point, we have a list of all 'Board Installation' action records
-  // But we want to narrow this down to only those records which contain the specified component UUID in one of the 'data.boardXUuid' key/value pairs, where X = 1 -> 10 or 21
-  // Loop over the keys in each record's 'data' object, and if the value matches the specified UUID, save the record into a list to be returned
+  // But we want to narrow this down to only those records which contain the specified component UUID in one of the arrays of board UUIDs in the 'data' object ...
+  // ... where the arrays are named: 'headBoardsA', 'headBoardsB', 'footBoards', 'sideBoardsHSB', 'sideBoardsLSB' (the latter two being present only in V and U layer board installation actions)
+  // Loop over the entries in each possible array, and if the entry's UUID matches the specified one, save the record into a list to be returned
   let boardInstalls = [];
 
   if (results.length > 0) {
     for (const action of results) {
-      for (const [key, value] of Object.entries(action.data)) {
-        if (value === componentUUID) boardInstalls.push(action);
+      for (const board of action.data.headBoardsA) {
+        if (board.boardUuid === componentUUID) boardInstalls.push(action);
+      }
+
+      for (const board of action.data.headBoardsB) {
+        if (board.boardUuid === componentUUID) boardInstalls.push(action);
+      }
+
+      for (const board of action.data.footBoards) {
+        if (board.boardUuid === componentUUID) boardInstalls.push(action);
+      }
+
+      if (action.data.sideBoardsHSB) {
+        for (const board of action.data.sideBoardsHSB) {
+          if (board.boardUuid === componentUUID) boardInstalls.push(action);
+        }
+
+        for (const board of action.data.sideBoardsLSB) {
+          if (board.boardUuid === componentUUID) boardInstalls.push(action);
+        }
       }
     }
   }

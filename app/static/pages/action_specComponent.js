@@ -7,12 +7,7 @@ const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdap
 
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
 // NOTE: this must be the same as the equivalent list given in 'lib/Actions.js'
-const installation_typeFormIDs = [
-  'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB', 'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
-  'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
-  'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
-  'prep_mesh_panel_install',
-];
+const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
 
 
 // Run a specified function when the page is loaded

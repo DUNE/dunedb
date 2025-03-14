@@ -15,12 +15,7 @@ const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdap
 
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
 // NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
-const installation_typeFormIDs = [
-  'g_foot_board_install', 'g_head_board_install_sideA', 'g_head_board_install_sideB', 'x_foot_board_install', 'x_head_board_install_sideA', 'x_head_board_install_sideB',
-  'u_foot_boards_install', 'u_head_board_install_sideA', 'u_head_board_installation_sideB', 'u_side_board_install_HSB', 'u_side_board_install_LSB',
-  'v_foot_board_install', 'v_head_board_install_sideA', 'v_head_board_install_sideB', 'v_side_board_install_HSB', 'v_side_board_install_LSB',
-  'prep_mesh_panel_install',
-];
+const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
 
 
 /// Save a new or edited action record
@@ -126,14 +121,44 @@ async function save(input, req) {
   // Use these to update the location information for each individual board or mesh referenced in this action
   // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
   if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
-    const uuid_format = new RegExp(/[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/);
+    if (newRecord.typeFormId === 'prep_mesh_panel_install') {
+      const uuid_format = new RegExp(/[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/);
 
-    for (const [key, value] of Object.entries(newRecord.data)) {
-      if (uuid_format.test(value)) {
-        if (req.query.location === 'installed_on_APA') {
+      for (const [key, value] of Object.entries(newRecord.data)) {
+        if (uuid_format.test(value)) {
           const result = await Components.updateLocation(value, req.query.location, req.query.date, newRecord.componentUuid);
-        } else {
-          const result = await Components.updateLocation(value, req.query.location, req.query.date, '');
+        }
+      }
+    } else {
+      for (const board of newRecord.data.headBoardsA) {
+        if (board.boardUuid !== '') {
+          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+        }
+      }
+
+      for (const board of newRecord.data.headBoardsB) {
+        if (board.boardUuid !== '') {
+          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+        }
+      }
+
+      for (const board of newRecord.data.footBoards) {
+        if (board.boardUuid !== '') {
+          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+        }
+      }
+
+      if (newRecord.data.sideBoardsHSB) {
+        for (const board of newRecord.data.sideBoardsHSB) {
+          if (board.boardUuid !== '') {
+            const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          }
+        }
+
+        for (const board of newRecord.data.sideBoardsLSB) {
+          if (board.boardUuid !== '') {
+            const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          }
         }
       }
     }
