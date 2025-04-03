@@ -9,6 +9,10 @@ const Forms = require('./Forms');
 const permissions = require('./permissions');
 const utils = require('./utils');
 
+// Declare a list of the available 'shipment transport' related action type forms
+// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
+const transport_typeFormIDs = ['APAShipmentTransport'];
+
 // Declare a list of the available 'reception' related action type forms
 // NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
 const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
@@ -109,6 +113,13 @@ async function save(input, req) {
   _lock.release();
 
   if (!result.acknowledged) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
+
+  // If the action is one of the shipment transport types, the transport location (always 'in_transit') and date will have been passed to this function in the 'req.query' object
+  // Use these to update the location information for each individual sub-component in the shipment
+  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  if (transport_typeFormIDs.includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
+  }
 
   // If the action is one of the shipment or batch reception types, the reception location and date will have been passed to this function in the 'req.query' object
   // Use these to update the location information for each individual sub-component in the shipment or batch
