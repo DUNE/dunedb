@@ -100,7 +100,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
     // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only two workflow types, so we can do this explicitly)
     // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
-    const list_workflowComponents = ['AssembledAPA', 'APAFrame'];
+    const list_workflowComponents = ['AssembledAPA', 'APAFrame', 'APAShipment'];
     const workflowComponent = list_workflowComponents.includes(component.formId);
 
     // If the specified component type is one that is the subject of a workflow, filter out any action types that should be performed through the workflow
@@ -117,6 +117,8 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
         workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
       } else if (component.formId === 'APAFrame') {
         workflowTypeForm = await Forms.retrieve('workflowForms', 'FrameAssembly');
+      } else if (component.formId === 'APAShipment') {
+        workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_PostProduction');
       }
 
       const list_workflowActions = [];
@@ -805,7 +807,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
     // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only two workflow types, so we can do this explicitly)
     // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
-    const list_workflowComponents = ['AssembledAPA', 'APAFrame'];
+    const list_workflowComponents = ['AssembledAPA', 'APAFrame', 'APAShipment'];
     const workflowComponent = list_workflowComponents.includes(req.params.typeFormId);
 
     // Render the interface page

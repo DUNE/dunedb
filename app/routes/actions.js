@@ -35,7 +35,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('ac
     // Set a variable to indicate if the specified action type is one that is part of a workflow
     // First set up a list of action type form names for all actions that are part of any workflow
     // Then check to see if the list of action type form names includes the type form name of the action type being specified
-    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly'];
+    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly', 'APA_PostProduction'];
     let list_workflowActions = [];
 
     for (const workflowTypeFormID of list_workflowTypeFormIDs) {
@@ -286,7 +286,7 @@ router.get('/actionTypes/list', permissions.checkPermission('actions:view'), asy
     let actionTypeForms = await Forms.listGrouped('actionForms');
 
     // Set up a list of action type form names for all actions that are part of any workflow
-    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly'];
+    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly', 'APA_PostProduction'];
     let list_workflowActions = [];
 
     for (const workflowTypeFormID of list_workflowTypeFormIDs) {
@@ -376,7 +376,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
     // Set a variable to indicate if the specified action type is one that is part of a workflow
     // First set up a list of action type form names for all actions that are part of any workflow
     // Then check to see if the list of action type form names includes the type form name of the action type being specified
-    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly'];
+    const list_workflowTypeFormIDs = ['APA_Assembly', 'FrameAssembly', 'APA_PostProduction'];
     let list_workflowActions = [];
 
     for (const workflowTypeFormID of list_workflowTypeFormIDs) {
