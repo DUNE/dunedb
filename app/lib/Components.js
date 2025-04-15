@@ -119,7 +119,9 @@ async function save(input, req) {
     // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
     if ((input.formId === 'APAFrame') || (input.formId === 'GroundingMeshPanel')) {
       newRecord.reception.location = 'ukWarehouse';
-    } else if ((input.formId === 'APAShipment') || (input.formId === 'BoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
+    } else if (input.formId === 'APAShipment') {
+      newRecord.reception.location = newRecord.data.originOfShipment;
+    } else if ((input.formId === 'BoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
       newRecord.reception.location = 'in_transit';
     } else if (input.formId === 'AssembledAPA') {
       newRecord.reception.location = newRecord.data.apaAssemblyLocation;
@@ -149,12 +151,16 @@ async function save(input, req) {
   if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
   // Once the component record has been successfully saved, deal with the reception information for any related components:
-  // - for various types of shipment, update the reception information of the various sub-components to indicate that they are in transit
+  // - for an 'APA Shipment', update the reception information of the underlying 'Assembled APA' components to be the same as the shipment
+  //    (they should already be at the same location as the shipment, but this is a double-check on that)
+  // - for other types of shipment, update the reception information of the various sub-components to indicate that they are in transit
   // - for an 'Assembled APA', update the reception information of the underlying 'APA Frame' to indicate that it is now being used
   // - for a 'Populated Board Shipment', update the reception information of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
   // - for a 'Return Geometry Board Batch', update the reception information of the individual geometry board sub-components to indicate they are at Lancaster (where the batch is put together)
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
-  if ((newRecord.formId === 'APAShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
+  if (newRecord.formId === 'APAShipment') {
+    const result = await updateLocations_inShipment(newRecord.componentUuid, newRecord.reception.location, (new Date()).toISOString().slice(0, 10));
+  } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.formId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);

@@ -479,6 +479,13 @@ block content
               p <b>Existing workflow actions can be accessed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
                 | workflow</b>
+          else if component.formId === 'APAShipment'
+            h4 Action History (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>Existing workflow actions can be accessed through this component's 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Post Production 
+                | workflow</b>
           else
             h4 Action History
 
@@ -522,8 +529,15 @@ block content
             h4 Select an Action Type to Perform (Non-Workflow Actions Only)
 
             .vert-space-x1
-              p <b>New workflow actions must be performed through this component's Frame Assembly 
+              p <b>New workflow actions must be performed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
+                | workflow</b>
+          else if component.formId === 'APAShipment'
+            h4 Select an Action Type to Perform (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>New workflow actions must be performed through this component's 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Post Production 
                 | workflow</b>
           else 
             h4 Select an Action Type to Perform

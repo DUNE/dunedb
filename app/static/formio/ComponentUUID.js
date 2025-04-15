@@ -312,12 +312,12 @@ class ComponentUUID extends TextFieldComponent {
                         if (action.data.actionComplete) {
                           info_target.text(`\xa0 [Click for Component Info] This ${component.formName} is ready for use`);
                         } else {
-                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName}'s Final QA Checklist is not complete!`);
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName}'s QA Checklist is not complete!`);
                         }
                       },
                     }).fail();
                   } else {
-                    info_target.text(`\xa0 [Click for Component Info] This ${component.formName} does not have a Final QA Checklist!`);
+                    info_target.text(`\xa0 [Click for Component Info] This ${component.formName} does not have a QA Checklist!`);
                   }
                 },
               }).fail();
@@ -376,6 +376,32 @@ class ComponentUUID extends TextFieldComponent {
                         }
                       },
                     }).fail();
+                  }
+                },
+              }).fail();
+            } else if (component.formId === 'AssembledAPA') {
+              $.ajax({
+                contentType: 'application/json',
+                method: 'GET',
+                url: `/json/actions/${'CompletedAPAQCChecklist'}/list?uuid=${value}`,
+                dataType: 'json',
+                success: function (actionIDsList) {
+                  if (actionIDsList.length > 0) {
+                    $.ajax({
+                      contentType: 'application/json',
+                      method: 'GET',
+                      url: `/json/action/${actionIDsList[0]}`,
+                      dataType: 'json',
+                      success: function (action) {
+                        if (action.data.actionComplete) {
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName} is ready for shipping`);
+                        } else {
+                          info_target.text(`\xa0 [Click for Component Info] This ${component.formName}'s QA Checklist is not complete!`);
+                        }
+                      },
+                    }).fail();
+                  } else {
+                    info_target.text(`\xa0 [Click for Component Info] This ${component.formName} does not have a QA Checklist!`);
                   }
                 },
               }).fail();
