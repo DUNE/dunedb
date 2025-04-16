@@ -117,8 +117,8 @@ async function save(input, req) {
     newRecord.reception.detail = '';
 
     // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
-    if ((input.formId === 'APAFrame') || (input.formId === 'GroundingMeshPanel')) {
-      newRecord.reception.location = 'ukWarehouse';
+    if ((input.formId === 'APAFrame') || (input.formId === 'wire_bobbin')) {
+      newRecord.reception.location = 'daresbury';
     } else if (input.formId === 'APAShipment') {
       newRecord.reception.location = newRecord.data.originOfShipment;
     } else if ((input.formId === 'BoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
@@ -131,8 +131,8 @@ async function save(input, req) {
       newRecord.reception.location = newRecord.data.productionLocation;
     } else if (input.formId === 'GeometryBoard') {
       newRecord.reception.location = 'lancaster';
-    } else if (input.formId === 'wire_bobbin') {
-      newRecord.reception.location = 'daresbury';
+    } else if (input.formId === 'GroundingMeshPanel') {
+      newRecord.reception.location = 'ukWarehouse';
     } else {
       newRecord.reception.location = '';
     }
