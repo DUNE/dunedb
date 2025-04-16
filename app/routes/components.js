@@ -90,7 +90,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
       actions.push({
         'typeFormName': 'Board DB Record Created',
         'componentUuid': req.params.uuid,
-        'lastEditDate': componentVersions[componentVersions.length - 1].validity.startDate,
+        'lastEditDate': new Date(componentVersions[componentVersions.length - 1].validity.startDate),
         'data': { 'originOfShipment': 'lancaster' },
       });
 
