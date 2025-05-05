@@ -83,8 +83,10 @@ async function save(input, req) {
     // The field will exist only when creating new records for individual sub-components in a batch, since in this situation the sub-component type record numbers are determined on the client side
     if (!input.data.typeRecordNumber) newRecord.data.typeRecordNumber = numberOfExistingComponents + 1;
 
-    // Components of certain types must have a specifically formatted name, consisting of some fixed prefix and suffix, plus the type record number padded to 5 digits
-    // Some other component types can just directly use the type record number as the name, and the remaining types don't need any name specified
+    // Most component types should have a name assigned when first created (and only at this time), to make it easier for users to identify them in the interface
+    // For some types, this name is a shortened version of the DUNE PID (which should also be assigned at this point) - a fixed prefix and suffix, plus the type record number padded to 5 digits
+    // For other types, the name will still include the type record number, but within a string of a different format specific to the type
+    // Note that components of some (but only a few) types should have names that can be changed even after creation - these are dealt with separately below
     if (input.formId === 'GeometryBoard') {
       newRecord.data.name = `${newRecord.data.typeRecordNumber}`;
     } else if (input.formId === 'GroundingMeshPanel') {
@@ -138,6 +140,27 @@ async function save(input, req) {
     }
   } else {
     newRecord.reception = input.reception;
+  }
+
+  // Components of some (but only a few) types should have names that can change even after creation, because they are based in some way on user-editable fields in the record
+  // In these cases, the simplest solution is to just reassign their names any and every time the record is edited (including at creation)
+  if (input.formId === 'APAShipment') {
+    let name_apa1 = '[not set]';
+    let name_apa2 = '[not set]';
+
+    if (newRecord.data.apaUuiDs[0].component_uuid !== '') {
+      const apa = await retrieve(newRecord.data.apaUuiDs[0].component_uuid);
+      const name_splits = apa.data.name.split('-');
+      name_apa1 = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+    }
+
+    if (newRecord.data.apaUuiDs[1].component_uuid !== '') {
+      const apa = await retrieve(newRecord.data.apaUuiDs[1].component_uuid);
+      const name_splits = apa.data.name.split('-');
+      name_apa2 = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+    }
+
+    newRecord.data.name = `APA Shipment (${name_apa1} and ${name_apa2})`;
   }
 
   // Insert the new record into the 'components' records collection, and throw an error if the insertion fails
