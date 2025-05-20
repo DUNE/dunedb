@@ -139,7 +139,17 @@ async function save(input, req) {
       newRecord.reception.location = '';
     }
   } else {
-    newRecord.reception = input.reception;
+    // For some unknown reason, sometimes the entire 'reception' object can be set to 'null' when editing a component (seems to happen rarely, and only with 'Board Shipment' components) ...
+    // ... if this does happen, just reconstruct the 'reception' object and its fields - giving them some default values (the actual values for shipment-type components are assigned below anyway)
+    // If this is not the case, i.e. the existing 'reception' object contains some information, simply copy it over to the new record
+    if (input.reception === null) {
+      newRecord.reception = {};
+      newRecord.reception.location = '';
+      newRecord.reception.date = (new Date()).toISOString().slice(0, 10);
+      newRecord.reception.detail = '';
+    } else {
+      newRecord.reception = input.reception;
+    }
   }
 
   // Components of some (but only a few) types should have names that can change even after creation, because they are based in some way on user-editable fields in the record

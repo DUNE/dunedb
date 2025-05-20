@@ -20,7 +20,7 @@ services:
         condition: service_healthy
 
   db:
-    image: mongo:6.0
+    image: mongo:7.0
     environment:
       MONGO_INITDB_DATABASE: dunedb
     volumes:
