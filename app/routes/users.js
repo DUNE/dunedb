@@ -56,4 +56,10 @@ router.get('/users/list', permissions.checkPermission('users:view'), async funct
 });
 
 
+/// ADMINISTRATOR UTILITY ... run a specific server-side library function appropriate for the currently required utility, with user input supplied from the Administrator Utility interface page 
+router.get('/administratorUtility', async function (req, res, next) {
+  res.render('administratorUtility.pug');
+});
+
+
 module.exports = router;
