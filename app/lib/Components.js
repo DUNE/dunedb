@@ -129,13 +129,13 @@ async function save(input, req) {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400003-${typeRecordNumber}-US200-010000`;
     } else if (newRecord.formId === 'CEAdapterBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${validityStartDate.substring(0, 10)})`;
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.formId === 'CRBoard') {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400001-${typeRecordNumber}-US200-010000`;
     } else if (newRecord.formId === 'CRBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${validityStartDate.substring(0, 10)})`;
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.formId === 'CableHarness') {
       if (newRecord.data.cableHarnessSide === 'a') {
@@ -155,7 +155,7 @@ async function save(input, req) {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
     } else if (newRecord.formId === 'GBiasBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${validityStartDate.substring(0, 10)})`;
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.formId === 'GeometryBoard') {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.partString})`;
@@ -265,13 +265,13 @@ async function save(input, req) {
     newRecord.data.componentName = `Geometry ${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'CEAdapterBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'CRBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'CableHarnessShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'DWAComponentShipment') {
     newRecord.data.componentName = `${newRecord.formName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
@@ -280,7 +280,7 @@ async function save(input, req) {
     newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'GBiasBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'GroundingMeshShipment') {
     newRecord.data.componentName = `Grounding Mesh Panel Shipment (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
@@ -289,7 +289,7 @@ async function save(input, req) {
     newRecord.data.componentName = `Multi-Type Populated Board Shipment (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'SHVBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } 
 
