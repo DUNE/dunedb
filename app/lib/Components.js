@@ -780,7 +780,7 @@ async function setComponentNames(typeFormId) {
     const typeFormName = component.formName;
     const data = component.data;
     const typeRecordNumber = String(data.typeRecordNumber).padStart(5, '0');
-    const validityStartDate = component.validity.startDate;
+    const validityStartDate = component.validity.startDate.toISOString();
 
     let componentName = '';
     let dunePid = '';
