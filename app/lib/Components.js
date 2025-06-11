@@ -9,6 +9,8 @@ const Forms = require('./Forms');
 const permissions = require('./permissions');
 const utils = require('./utils');
 
+const logger = require('./logger');
+
 
 /// Generate a new component UUID
 function newUuid() {
@@ -764,7 +766,7 @@ async function setComponentNames(typeFormId) {
     const typeFormName = component.formName;
     const data = component.data;
     const typeRecordNumber = String(data.typeRecordNumber).padStart(5, '0');
-    const validityStartDate = component.validity.startDate.toISOString();
+    const validityStartDate = (typeof component.validity.startDate === 'string') ? component.validity.startDate : component.validity.startDate.toISOString();
 
     let componentName = '';
     let dunePid = '';
