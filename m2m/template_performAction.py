@@ -20,7 +20,7 @@ if __name__ == '__main__':
     actionTypeFormID = 'my_action'
     componentUUID = '5f9ea420-3e88-11ed-9114-03f8483882ff'
     actionData = {
-        'name': 'M2M Action',
+        'actionName': 'M2M Action',
         'actionPerformedAfterFormsCleanup': True,
         'measurement': 12.04,
     }

@@ -34,14 +34,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
 
     if (workflow.path[0].result.length > 0) {
       const component = await Components.retrieve(workflow.path[0].result);
-
-      if (component) {
-        if (component.data.name) {
-          componentName = component.data.name;
-        } else {
-          componentName = workflow.path[0].result;
-        }
-      }
+      componentName = component.data.componentName;
     }
 
     // Retrieve and store the status of each action that has been performed (i.e. that has a result) - that is, the value (true or false) of the action's 'data.actionComplete' field

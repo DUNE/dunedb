@@ -19,7 +19,7 @@ if __name__ == '__main__':
     #   - the new values of any data fields to be edited
     actionID = '63340ac79708eb30e6403cb9'
     actionData_fields = [
-        'name',
+        'actionName',
         'measurement',
     ]
     actionData_values = [

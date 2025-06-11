@@ -157,7 +157,7 @@ async function collateInfo(componentUUID) {
   const frameUUID = assembledAPA.data.frameUuid;
 
   // Add relevant information from the APA's component record to the 'general' section of the collated information object
-  collatedInfo.general.dunePID = assembledAPA.data.name;
+  collatedInfo.general.dunePID = assembledAPA.data.dunePid;
   collatedInfo.general.productionSite = utils.dictionary_locations[assembledAPA.data.apaAssemblyLocation];
   collatedInfo.general.configuration = assembledAPA.data.apaConfiguration[0].toUpperCase() + assembledAPA.data.apaConfiguration.slice(1);
 

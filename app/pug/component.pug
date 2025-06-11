@@ -20,35 +20,29 @@ block extrascripts
     script(src = '/pages/component.js')
 
 block vars
-  - const page_title = `Component: ${component.formName}`;
+  - const page_title = `Component: ${component.data.componentName}`;
 
 block content
   .container-fluid
     .vert-space-x2
-      h2 #{component.formName}
+      h2 #{component.data.componentName}
 
     .vert-space-x1
       .row
         .col-sm-5
           dl
-            dt Component UUID
-            dd
+            dt Component Name and UUID:
+            dd #{component.data.componentName}
+              |  
               .form-inline
                 a(href = `/component/${component.componentUuid}`) #{component.componentUuid}
 
                 .hori-space-x1
                   a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
 
-            if component.data.name
-              dt Name or ID
-
-                if component.formId == 'GroundingMeshPanel'
-                  dd #{component.data.typeRecordNumber}
-                else
-                  dd #{component.data.name}
-
+            
             if component.reception && component.reception.location !== ''
-              dt Location
+              dt Current Location:
 
               if component.reception.detail && component.reception.detail != ''
                 dd
@@ -92,7 +86,7 @@ block content
             .vert-space-x1
               .panel.panel-default
               .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#versionsBox')
-                | All Versions: 
+                | All Component Versions: 
                 i.chevron.fa.fa-fw 
 
               .collapse#versionsBox
@@ -152,7 +146,7 @@ block content
 
         .col-sm-3
           #qr-code
-            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, component.data.name)
+            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, component.data.componentName)
 
           p.small.text-center #{base_url}/c/#{component.shortUuid.toString()}
 

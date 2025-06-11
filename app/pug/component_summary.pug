@@ -1,9 +1,6 @@
 extend default
 include common.pug
 
-block vars
-  - const page_title = 'Component Summary';
-
 block extrascripts
   script(type = 'text/javascript').
     const component = !{JSON.stringify(component, null, 4)};
@@ -16,6 +13,9 @@ block extrascripts
 
   block workscripts
     script(src = '/pages/component_summary.js')
+
+block vars
+  - const page_title = `Component Summary: ${component.data.componentName}`;
 
 block allbody
   .vert-space-x2.hori-space-x1.noprint
@@ -35,19 +35,12 @@ block allbody
 
           .vert-space-x1.hori-space-x1.h4
             dl
-              dt Type
-              dd #{component.formName}
+              dt Component Name
+              dd #{component.data.componentName}
 
               dt Component UUID
               dd #{component.componentUuid}
-
-              dt Name
-
-              if component.data.name
-                dd #{component.data.name}
-              else
-                dd (none)
-
+              
               if component.formId == 'BoardShipment' || component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
                 dt Number of Boards in Shipment
                 dd #{component.data.boardUuiDs.length}
@@ -58,7 +51,7 @@ block allbody
 
         .col-sm-5
           #qr-code
-            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, 'component.data.name')
+            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, `${component.data.componentName}`)
 
       .vert-space-x1
         dl

@@ -1,12 +1,12 @@
 extend default
 include common.pug
 
-block vars
-  - const page_title = 'Component QR Codes';
-
 block extrascripts
   script(type = 'text/javascript').
     const base_url = '!{base_url}';
+
+block vars
+  - const page_title = `Component QR Codes: ${component.data.componentName}`;
 
 block allbody
   .vert-space-x2.hori-space-x1.noprint
@@ -47,7 +47,7 @@ block allbody
             +qr-panel-topText(qrCodeText, qrCodeDesc)
 
       else
-        - const qrCodeDesc = component.data.name
+        - const qrCodeDesc = component.data.componentName
 
         .row.qr-row
           .col-sm-6.qr-col

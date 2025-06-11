@@ -274,9 +274,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
     if (component.data.apaAssemblyLocation === location) {
       uuids_apasCompletedToStep_atLocation.push(action.componentUuid);
 
-      const name_splits = component.data.name.split('-');
-
-      action.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      action.componentName = component.data.componentName;
       action.workflowId = component.workflowId;
 
       apasCompletedToStep_atLocation.push(action);
@@ -314,11 +312,10 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
     .aggregate(comp_aggregation_stages)
     .toArray();
 
-  // Add the corresponding shortened Assembled APA component name to each matching record
+  // Add the corresponding component name to each matching record
   for (let record of apasNotCompletedToStep_atLocation) {
     const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
-    const name_splits = component.data.name.split('-');
-    record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+    record.componentName = component.data.componentName;
   }
 
   // Re-sort the records by the component name ... in reverse alphanumerical order
@@ -337,7 +334,7 @@ async function componentsByDUNEPID(dunePID) {
 
   // Match against the DUNE PID to get records of all components that have the same name as the specified one
   aggregation_stages.push({
-    $match: { 'data.name': dunePID }
+    $match: { 'data.dunePid': dunePID }
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
@@ -546,8 +543,7 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
             if (board.reception.detail) {
               const apa = await Components.retrieve(board.reception.detail);
 
-              const name_splits = apa.data.name.split('-');
-              cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+              cleanedBoardGroup.installedOnAPA.push(apa.data.componentName);
             } else {
               cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
             }
@@ -574,7 +570,7 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
         const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
 
         cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-        cleanedMeshGroup.dunePids.push(mesh.data.name);
+        cleanedMeshGroup.dunePids.push(mesh.data.dunePid);
 
         if (mesh.reception) {
           cleanedMeshGroup.receptionDates.push(mesh.reception.date);
@@ -586,8 +582,7 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
           if (mesh.reception.detail) {
             const apa = await Components.retrieve(mesh.reception.detail);
 
-            const name_splits = apa.data.name.split('-');
-            cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+            cleanedMeshGroup.installedOnAPA.push(apa.data.componentName);
           } else {
             cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
           }
@@ -735,8 +730,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
             if (board.reception.detail) {
               const apa = await Components.retrieve(board.reception.detail);
 
-              const name_splits = apa.data.name.split('-');
-              cleanedBoardGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+              cleanedBoardGroup.installedOnAPA.push(apa.data.componentName);
             } else {
               cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
             }
@@ -763,7 +757,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
         const mesh = await Components.retrieve(MUUID.from(meshUuid).toString());
 
         cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
-        cleanedMeshGroup.dunePids.push(mesh.data.name);
+        cleanedMeshGroup.dunePids.push(mesh.data.dunePid);
 
         if (mesh.reception) {
           cleanedMeshGroup.receptionDates.push(mesh.reception.date);
@@ -775,8 +769,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
           if (mesh.reception.detail) {
             const apa = await Components.retrieve(mesh.reception.detail);
 
-            const name_splits = apa.data.name.split('-');
-            cleanedMeshGroup.installedOnAPA.push(`${name_splits[1]}-${name_splits[2]}`.slice(0, -3));
+            cleanedMeshGroup.installedOnAPA.push(apa.data.componentName);
           } else {
             cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
           }
