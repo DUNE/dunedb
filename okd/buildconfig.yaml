@@ -14,7 +14,7 @@ objects:
           ref: ${RELEASE_BRANCH}
         contextDir: "./app"
         dockerfile: |-
-          FROM node:16.15.0-alpine
+          FROM imageregistry.fnal.gov/docker.io/node:16.15.0-alpine
 
           WORKDIR /app
           COPY . .
