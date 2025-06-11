@@ -7,6 +7,7 @@ const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
 const permissions = require('./permissions');
+const utils = require('./utils');
 
 
 /// Generate a new component UUID
@@ -83,32 +84,100 @@ async function save(input, req) {
     // The field will exist only when creating new records for individual sub-components in a batch, since in this situation the sub-component type record numbers are determined on the client side
     if (!input.data.typeRecordNumber) newRecord.data.typeRecordNumber = numberOfExistingComponents + 1;
 
-    // Most component types should have a name assigned when first created (and only at this time), to make it easier for users to identify them in the interface
-    // For some types, this name is a shortened version of the DUNE PID (which should also be assigned at this point) - a fixed prefix and suffix, plus the type record number padded to 5 digits
-    // For other types, the name will still include the type record number, but within a string of a different format specific to the type
-    // Note that components of some (but only a few) types should have names that can be changed even after creation - these are dealt with separately below
-    if (input.formId === 'GeometryBoard') {
-      newRecord.data.name = `${newRecord.data.typeRecordNumber}`;
-    } else if (input.formId === 'GroundingMeshPanel') {
-      newRecord.data.name = `D00300200004-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-UK106-01-00-00`;
-    } else if (input.formId === 'CRBoard') {
-      newRecord.data.name = `D00300400001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-    } else if (input.formId === 'GBiasBoard') {
-      newRecord.data.name = `D00300400002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-    } else if (input.formId === 'CEAdapterBoard') {
-      newRecord.data.name = `D00300400003-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-    } else if (input.formId === 'SHVBoard') {
-      newRecord.data.name = `D00300500001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-    } else if (input.formId === 'CableHarness') {
-      if (newRecord.data.cableHarnessSide === 'a') {
-        newRecord.data.name = `D00300500002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
-      } else if (newRecord.data.cableHarnessSide === 'b') {
-        newRecord.data.name = `D00300500003-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US200-01-00-00`;
+    // Every component should have a name and DUNE PID assigned to it ... if the name is based on unchangable or rarely changed fields in the record, it can be assigned here during creation
+    // ... on the other hand, if the name is based on fields that are more likely to be changed by the user, it should be assigned and re-assigned any time the record is edited (see below)
+    // The format of the name is dependent on the component type ... some are simply a combination of the type form name and type record number, whereas others have more information included
+    const typeRecordNumber = String(newRecord.data.typeRecordNumber).padStart(5, '0');
+
+    if (newRecord.formId === 'APAFrame') {
+      const frameNumber = String(newRecord.data.frameNumber).padStart(5, '0');
+      let pidSuffix = '';
+
+      if (newRecord.data.frameProductionLocation === 'dsm') {
+        newRecord.data.componentName = `APA Frame ${frameNumber}-UK`;
+        pidSuffix = 'UK106-010000';
+      } else if (newRecord.data.frameProductionLocation === 'wisconsin') {
+        newRecord.data.componentName = `APA Frame ${frameNumber}-US`;
+        pidSuffix = 'US200-010000';
       }
-    } else if (input.formId === 'DWA') {
-      newRecord.data.name = `D00300800001-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US136-01-00-00`;
-    } else if (input.formId === 'DWAPDB') {
-      newRecord.data.name = `D00300800002-${String(newRecord.data.typeRecordNumber).padStart(5, '0')}-US136-01-00-00`;
+
+      newRecord.data.dunePid = `D00300200001-${frameNumber}-${pidSuffix}`;
+    } else if (newRecord.formId === 'AssembledAPA') {
+      const apaNumber = String(newRecord.data.apaNumberAtLocation).padStart(5, '0');
+      let pidPrefix = '';
+      let pidSuffix = '';
+
+      if (newRecord.data.apaConfiguration === 'top') {
+        pidPrefix = 'D00300100001';
+      } else {
+        pidPrefix = 'D00300100002';
+      }
+
+      if (newRecord.data.apaAssemblyLocation === 'chicago') {
+        newRecord.data.componentName = `APA ${apaNumber}-US`;
+        pidSuffix = 'US175-010000';
+      } else if (newRecord.data.apaAssemblyLocation === 'daresbury') {
+        newRecord.data.componentName = `APA ${apaNumber}-UK`;
+        pidSuffix = 'UK106-010000';
+      } else if (newRecord.data.apaAssemblyLocation === 'wisconsin') {
+        newRecord.data.componentName = `APA ${apaNumber}-US`;
+        pidSuffix = 'US200-010000';
+      }
+
+      newRecord.data.dunePid = `${pidPrefix}-${apaNumber}-${pidSuffix}`;
+    } else if (newRecord.formId === 'CEAdapterBoard') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00300400003-${typeRecordNumber}-US200-010000`;
+    } else if (newRecord.formId === 'CEAdapterBoardBatch') {
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (newRecord.formId === 'CRBoard') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00300400001-${typeRecordNumber}-US200-010000`;
+    } else if (newRecord.formId === 'CRBoardBatch') {
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (newRecord.formId === 'CableHarness') {
+      if (newRecord.data.cableHarnessSide === 'a') {
+        newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (Side A)`;
+        newRecord.data.dunePid = `D00300500002-${typeRecordNumber}-US200-010000`;
+      } else if (newRecord.data.cableHarnessSide === 'b') {
+        newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (Side B)`;
+        newRecord.data.dunePid = `D00300500003-${typeRecordNumber}-US200-010000`;
+      }
+    } else if (newRecord.formId === 'DWA') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00300800001-${typeRecordNumber}-US136-010000`;
+    } else if (newRecord.formId === 'DWAPDB') {
+      newRecord.data.componentName = `DWA PDB ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00300800002-${typeRecordNumber}-US136-010000`;
+    } else if (newRecord.formId === 'GBiasBoard') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
+    } else if (newRecord.formId === 'GBiasBoardBatch') {
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (newRecord.formId === 'GeometryBoard') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.partString})`;
+      newRecord.data.dunePid = `D003003${utils.dictionary_geometryBoardPIDs[newRecord.data.partNumber]}-${typeRecordNumber}-UK109-010000`;
+    } else if (newRecord.formId === 'GeometryBoardBatch') {
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.PN${newRecord.data.subComponent_partNumber}.ON${newRecord.data.orderNumber})`;
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (newRecord.formId === 'GroundingMeshPanel') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00300200004-${typeRecordNumber}-UK106-010000`;
+    } else if (newRecord.formId === 'ReturnedGeometryBoardBatch') {
+      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.PN${newRecord.data.subComponent_partNumber}.ON${newRecord.data.orderNumber})`;
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (newRecord.formId === 'SHVBoard') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00300500001-${typeRecordNumber}-US200-010000`;
+    } else if (newRecord.formId === 'Yoke') {
+      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+      newRecord.data.dunePid = `D00301000001-${typeRecordNumber}-US200-010000`;
+    } else if (newRecord.formId === 'wire_bobbin') {
+      newRecord.data.componentName = `${newRecord.formName} ${newRecord.data.bobbinId} (Lot ${newRecord.data.wireLot})`;
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     }
 
     // Set up a new 'Reception' object to hold the component's current location and the date at which it was received at this location ... and we can immediately set the date to be the current one
@@ -119,32 +188,60 @@ async function save(input, req) {
     newRecord.reception.detail = '';
 
     // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
-    if ((input.formId === 'APAFrame') || (input.formId === 'wire_bobbin')) {
+    if ((newRecord.formId === 'APAFrame') || (newRecord.formId === 'wire_bobbin')) {
       newRecord.reception.location = 'daresbury';
-    } else if (input.formId === 'APAShipment') {
+    } else if (newRecord.formId === 'APAShipment') {
       newRecord.reception.location = newRecord.data.originOfShipment;
-    } else if ((input.formId === 'BoardShipment') || (input.formId === 'DWAComponentShipment') || (input.formId === 'FrameShipment') || (input.formId === 'GroundingMeshShipment') || (input.formId === 'PopulatedBoardShipment')) {
+    } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
       newRecord.reception.location = 'in_transit';
-    } else if (input.formId === 'AssembledAPA') {
+    } else if (newRecord.formId === 'AssembledAPA') {
       newRecord.reception.location = newRecord.data.apaAssemblyLocation;
-    } else if ((input.formId === 'CEAdapterBoard') || (input.formId === 'CEAdapterBoardShipment') || (input.formId === 'CRBoard') || (input.formId === 'CRBoardShipment') || (input.formId === 'CableHarness') || (input.formId === 'CableHarnessShipment') || (input.formId === 'GBiasBoard') || (input.formId === 'GBiasBoardShipment') || (input.formId === 'SHVBoard') || (input.formId === 'SHVBoardShipment')) {
+    } else if ((newRecord.formId === 'CEAdapterBoard') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'CRBoard') || (newRecord.formId === 'CRBoardShipment') || (newRecord.formId === 'CableHarness') || (newRecord.formId === 'CableHarnessShipment') || (newRecord.formId === 'GBiasBoard') || (newRecord.formId === 'GBiasBoardShipment') || (newRecord.formId === 'SHVBoard') || (newRecord.formId === 'SHVBoardShipment')) {
       newRecord.reception.location = 'wisconsin';
-    } else if ((input.formId === 'DWA') || (input.formId === 'DWAPDB')) {
+    } else if ((newRecord.formId === 'DWA') || (newRecord.formId === 'DWAPDB')) {
       newRecord.reception.location = newRecord.data.productionLocation;
-    } else if (input.formId === 'GeometryBoard') {
+    } else if (newRecord.formId === 'GeometryBoard') {
       newRecord.reception.location = 'lancaster';
-    } else if (input.formId === 'GroundingMeshPanel') {
+    } else if (newRecord.formId === 'GroundingMeshPanel') {
       newRecord.reception.location = 'ukWarehouse';
     } else {
       newRecord.reception.location = '';
     }
   } else {
-    newRecord.reception = input.reception;
+    // For some unknown reason, sometimes the entire 'reception' object can be set to 'null' when editing a component (seems to happen rarely, and only with 'Board Shipment' components) ...
+    // ... if this does happen, just reconstruct the 'reception' object and its fields - giving them some default values (the actual values for shipment-type components are assigned below anyway)
+    // If this is not the case, i.e. the existing 'reception' object contains some information, simply copy it over to the new record
+    if (input.reception === null) {
+      newRecord.reception = {};
+      newRecord.reception.location = '';
+      newRecord.reception.date = (new Date()).toISOString().slice(0, 10);
+      newRecord.reception.detail = '';
+    } else {
+      newRecord.reception = input.reception;
+    }
   }
 
-  // Components of some (but only a few) types should have names that can change even after creation, because they are based in some way on user-editable fields in the record
-  // In these cases, the simplest solution is to just reassign their names any and every time the record is edited (including at creation)
-  if (input.formId === 'APAShipment') {
+  // If the component name is based on fields that are more likely to be changed by the user, it should be assigned and re-assigned any time the record is edited
+  // The DUNE PID of such components should technically be fixed at creation, but it is simpler code-wise to assign and re-assign that here as well
+  const typeRecordNumber = String(newRecord.data.typeRecordNumber).padStart(5, '0');
+  
+  if (newRecord.formId === 'APADoublet') {
+    let name_topApa = '[not set]';
+    let name_bottomApa = '[not set]';
+
+    if (newRecord.data.topApa !== '') {
+      const apa = await retrieve(newRecord.data.topApa);
+      name_topApa = apa.data.componentName;
+    }
+
+    if (newRecord.data.bottomApa !== '') {
+      const apa = await retrieve(newRecord.data.bottomApa);
+      name_bottomApa = apa.data.componentName;
+    }
+
+    newRecord.data.componentName = `${newRecord.formName} (${name_topApa} and ${name_bottomApa})`;
+    newRecord.data.dunePid = `D00200000000-${typeRecordNumber}-US000-010000`;
+  } else if (newRecord.formId === 'APAShipment') {
     let name_apa1 = '[not set]';
     let name_apa2 = '[not set]';
 
@@ -160,8 +257,39 @@ async function save(input, req) {
       name_apa2 = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
     }
 
-    newRecord.data.name = `APA Shipment (${name_apa1} and ${name_apa2})`;
-  }
+    newRecord.data.componentName = `${newRecord.formName} (${name_apa1} and ${name_apa2})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'BoardShipment') {
+    newRecord.data.componentName = `Geometry ${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'CEAdapterBoardShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'CRBoardShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'CableHarnessShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'DWAComponentShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'FrameShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'GBiasBoardShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'GroundingMeshShipment') {
+    newRecord.data.componentName = `Grounding Mesh Panel Shipment (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'PopulatedBoardShipment') {
+    newRecord.data.componentName = `Multi-Type Populated Board Shipment (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'SHVBoardShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } 
 
   // Insert the new record into the 'components' records collection, and throw an error if the insertion fails
   let _lock = await dbLock(`saveComponent_${newRecord.componentUuid}`, 1000);
@@ -633,6 +761,177 @@ async function autoCompleteUuid(inputString, limit = 10) {
 }
 
 
+/// 
+async function setComponentNames(typeFormId) {
+  // Retrieve a list of component UUIDs corresponding to all components with 'formId' matching the specified component type form ID
+  let aggregation_stages = [];
+
+  aggregation_stages.push({ $match: { formId: typeFormId } });
+  aggregation_stages.push({ $project: { componentUuid: true } });
+
+  let uuids = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // For each retrieved UUID ...
+  for (let uuid of uuids) {
+    // Get the full component record corresponding to the UUID, and construct the component name and DUNE PID
+    const component = await retrieve(uuid.componentUuid);
+    const typeFormName = component.formName;
+    const data = component.data;
+    const typeRecordNumber = String(data.typeRecordNumber).padStart(5, '0');
+    const validityStartDate = component.validity.startDate.toISOString();
+
+    let componentName = '';
+    let dunePid = '';
+
+    if (typeFormId === 'APAFrame') {
+      const frameNumber = String(data.frameNumber).padStart(5, '0');
+      let pidSuffix = '';
+
+      if (data.frameProductionLocation === 'dsm') {
+        componentName = `APA Frame ${frameNumber}-UK`;
+        pidSuffix = 'UK106-010000';
+      } else if (data.frameProductionLocation === 'wisconsin') {
+        componentName = `APA Frame ${frameNumber}-US`;
+        pidSuffix = 'US200-010000';
+      }
+
+      dunePid = `D00300200001-${frameNumber}-${pidSuffix}`;
+    } else if (typeFormId === 'AssembledAPA') {
+      const apaNumber = String(data.apaNumberAtLocation).padStart(5, '0');
+      let pidPrefix = '';
+      let pidSuffix = '';
+
+      if (data.apaConfiguration === 'top') {
+        pidPrefix = 'D00300100001';
+      } else {
+        pidPrefix = 'D00300100002';
+      }
+
+      if (data.apaAssemblyLocation === 'chicago') {
+        componentName = `APA ${apaNumber}-US`;
+        pidSuffix = 'US175-010000';
+      } else if (data.apaAssemblyLocation === 'daresbury') {
+        componentName = `APA ${apaNumber}-UK`;
+        pidSuffix = 'UK106-010000';
+      } else if (data.apaAssemblyLocation === 'wisconsin') {
+        componentName = `APA ${apaNumber}-US`;
+        pidSuffix = 'US200-010000';
+      }
+
+      dunePid = `${pidPrefix}-${apaNumber}-${pidSuffix}`;
+    } else if (typeFormId === 'BoardShipment') {
+      componentName = `Geometry ${typeFormName} (${data.boardUuiDs.length}.${utils.dictionary_locations[data.originOfShipment]}.${utils.dictionary_locations[data.destinationOfShipment]})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'CEAdapterBoard') {
+      componentName = `${typeFormName} ${typeRecordNumber}`;
+      dunePid = `D00300400003-${typeRecordNumber}-US200-010000`;
+    } else if (typeFormId === 'CEAdapterBoardBatch') {
+      componentName = `${typeFormName} (${data.subComponent_count}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'CEAdapterBoardShipment') {
+      componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'CRBoard') {
+      componentName = `${typeFormName} ${typeRecordNumber}`;
+      dunePid = `D00300400001-${typeRecordNumber}-US200-010000`;
+    } else if (typeFormId === 'CRBoardBatch') {
+      componentName = `${typeFormName} (${data.subComponent_count}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'CRBoardShipment') {
+      componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'CableHarness') {
+      if (data.cableHarnessSide === 'a') {
+        componentName = `${typeFormName} ${typeRecordNumber} (Side A)`;
+        dunePid = `D00300500002-${typeRecordNumber}-US200-010000`;
+      } else if (data.cableHarnessSide === 'b') {
+        componentName = `${typeFormName} ${typeRecordNumber} (Side B)`;
+        dunePid = `D00300500003-${typeRecordNumber}-US200-010000`;
+      }
+    } else if (typeFormId === 'CableHarnessShipment') {
+      componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'DWA') {
+      componentName = `${typeFormName} ${typeRecordNumber}`;
+      dunePid = `D00300800001-${typeRecordNumber}-US136-010000`;
+    } else if (typeFormId === 'DWAComponentShipment') {
+      componentName = `${typeFormName} (${utils.dictionary_locations[data.originOfShipment]}.${utils.dictionary_locations[data.destinationOfShipment]})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'DWAPDB') {
+      componentName = `DWA PDB ${typeRecordNumber}`;
+      dunePid = `D00300800002-${typeRecordNumber}-US136-010000`;
+    } else if (typeFormId === 'GBiasBoard') {
+      componentName = `${typeFormName} ${typeRecordNumber}`;
+      dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
+    } else if (typeFormId === 'GBiasBoardBatch') {
+      componentName = `${typeFormName} (${data.subComponent_count}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'GBiasBoardShipment') {
+      componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'GeometryBoard') {
+      componentName = `${typeFormName} ${typeRecordNumber} (${data.partString})`;
+      dunePid = `D003003${utils.dictionary_geometryBoardPIDs[data.partNumber]}-${typeRecordNumber}-UK109-010000`;
+    } else if (typeFormId === 'GeometryBoardBatch') {
+      componentName = `${typeFormName} (${data.subComponent_count}.PN${data.subComponent_partNumber}.ON${data.orderNumber})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'GroundingMeshPanel') {
+      componentName = `${typeFormName} ${typeRecordNumber}`;
+      dunePid = `D00300200004-${typeRecordNumber}-UK106-010000`;
+    } else if (typeFormId === 'GroundingMeshShipment') {
+      componentName = `Grounding Mesh Panel Shipment (${data.apaUuiDs.length}.${utils.dictionary_locations[data.originOfShipment]}.${utils.dictionary_locations[data.destinationOfShipment]})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'PopulatedBoardShipment') {
+      componentName = `Multi-Type Populated Board Shipment (${utils.dictionary_locations[data.originOfShipment]}.${utils.dictionary_locations[data.destinationOfShipment]})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'ReturnedGeometryBoardBatch') {
+      componentName = `${typeFormName} (${data.subComponent_count}.PN${data.subComponent_partNumber}.ON${data.orderNumber})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'SHVBoard') {
+      componentName = `${typeFormName} ${typeRecordNumber}`;
+      dunePid = `D00300500001-${typeRecordNumber}-US200-010000`;
+    } else if (typeFormId === 'SHVBoardShipment') {
+      componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    } else if (typeFormId === 'Yoke') {
+      componentName = `${typeFormName} ${typeRecordNumber}`;
+      dunePid = `D00301000001-${typeRecordNumber}-US200-010000`;
+    } else if (typeFormId === 'wire_bobbin') {
+      componentName = `${typeFormName} ${data.bobbinId} (Lot ${data.wireLot})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+    }
+
+    // Set up a 'matching condition' object containing the component UUID (remembering that the UUID has to be of 'MUUID' type, not a string)
+    const componentUuid = component.componentUuid;
+    let match_condition = { componentUuid };
+
+    if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+    match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+    // Update the component name and DUNE PID fields of ALL records with the matching component UUID (i.e. all versions of the component in question)
+    const result = db.collection('components')
+      .updateMany(
+        match_condition,
+        [
+          {
+            $set: {
+              'data.componentName': componentName,
+              'data.dunePid': dunePid,
+            }
+          },
+        ]
+      )
+
+    if (result.ok === 0) throw new Error(`Components::setComponentNames() - failed to update the component records!`);
+  }
+
+  return typeFormId;
+}
+
+
 module.exports = {
   newUuid,
   save,
@@ -644,4 +943,5 @@ module.exports = {
   counts_byType,
   boardCounts_byPartNumberAndLocation,
   autoCompleteUuid,
+  setComponentNames,
 }

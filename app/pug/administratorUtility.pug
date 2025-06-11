@@ -1,0 +1,61 @@
+extend default
+
+block vars
+  - const page_title = 'Administrator Utility';
+
+block extrascripts
+  block workscripts
+    script(src = '/pages/administratorUtility.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Administrator Utility
+
+    .vert-space-x2 
+      hr
+
+      .row 
+        .col-md-5
+          p Select an input string for the current utility
+
+          select.form-control#inputStringSelection
+            option(value = '')
+            option(value = 'APAFrame') APA Frame 
+            option(value = 'AssembledAPA') Assembled APA 
+            option(value = 'BoardShipment') Board Shipment 
+            option(value = 'CEAdapterBoard') CE Adapter Board
+            option(value = 'CEAdapterBoardBatch') CE Adapter Board Batch 
+            option(value = 'CEAdapterBoardShipment') CE Adapter Board Shipment 
+            option(value = 'CRBoard') CR Board
+            option(value = 'CRBoardBatch') CR Board Batch 
+            option(value = 'CRBoardShipment') CR Board Kit 
+            option(value = 'CableHarness') Cable Harness
+            option(value = 'CableHarnessShipment') Cable Harness Kit 
+            option(value = 'DWA') DWA
+            option(value = 'DWAComponentShipment') DWA Component Shipment
+            option(value = 'DWAPDB') DWA PDB 
+            option(value = 'GBiasBoard') G-Bias Board
+            option(value = 'GBiasBoardBatch') G-Bias Board Batch
+            option(value = 'GBiasBoardShipment') G-Bias Board Kit
+            option(value = 'GeometryBoard') Geometry Board
+            option(value = 'GeometryBoardBatch') Geometry Board Batch
+            option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+            option(value = 'GroundingMeshShipment') Grounding Mesh Shipment 
+            option(value = 'PopulatedBoardShipment') Multi-Type Populated Board Shipment
+            option(value = 'ReturnedGeometryBoardBatch') Returned Geometry Board Batch
+            option(value = 'SHVBoard') SHV Board
+            option(value = 'SHVBoardShipment') SHV Board Kit
+            option(value = 'Yoke') Yoke
+            option(value = 'wire_bobbin') Wire Bobbin
+
+          .vert-space-x2 
+            button.btn-primary.btn-lg#confirmButton Confirm
+
+      .vert-space-x2 
+        hr
+
+      .vert-space-x1
+        #messages
+
+    .vert-space-x2

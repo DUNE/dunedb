@@ -399,12 +399,16 @@ block content
                   td #{dictionary_locations[entry.data.originOfShipment]}
 
                   if entry.typeFormName === 'Board Shipment'
-                    if entry.reception.location === 'in_transit'
-                      td #{dictionary_locations[entry.data.destinationOfShipment]}
-                      td [not yet received]
+                    if entry.reception
+                      if entry.reception.location === 'in_transit'
+                        td #{dictionary_locations[entry.data.destinationOfShipment]}
+                        td [not yet received]
+                      else
+                        td #{dictionary_locations[entry.reception.location]}
+                        td #{entry.reception.date}
                     else
-                      td #{dictionary_locations[entry.reception.location]}
-                      td #{entry.reception.date}
+                      td [reception object missing!]
+                      td [reception object missing!]
                   else 
                     td -
                     td -

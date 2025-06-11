@@ -2,6 +2,7 @@ const ManagementClient = require('auth0').ManagementClient;
 const router = require('express').Router();
 
 const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../../lib/constants');
+const Components = require('../../lib/Components');
 const logger = require('../../lib/logger');
 const permissions = require('../../lib/permissions');
 const utils = require('../../lib/utils');
@@ -276,5 +277,21 @@ router.get('/apaFactoryLeads.json', async function (req, res, next) {
     res.status(500).json({ error: err.toString() });
   }
 });
+
+
+/// ADMINISTRATOR UTILITY ... run a specific server-side library function appropriate for the currently required utility, with user input supplied from the Administrator Utility interface page 
+router.get('/administratorUtility/:inputString', async function (req, res, next) {
+  try {
+    logger.info(req.body, 'Submission to /administratorUtility');
+
+    const result = await Components.setComponentNames(req.params.inputString);    // Change as appropriate for the required utility
+
+    return res.json(result);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
 
 module.exports = router;

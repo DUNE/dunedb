@@ -46,6 +46,40 @@ module.exports = {
     wisconsin: 'Wisconsin',
   },
 
+  // A dictionary of DUNE PID 'component ID' strings for Geometry Boards, related to the board part numbers
+  // Note that cover boards are not included (even though they do technically have DUNE PIDs), because they are not individually recorded in the DB ... either as components or during installation
+  dictionary_geometryBoardPIDs: {
+    '8760104': '00001',
+    '8760034': '00002',
+    '8760032': '00003',
+    '8760109': '00003',
+    '8760057': '00004',
+    '8760111': '00004',
+    '8760044': '00005',
+    '8760059': '00006',
+    '8760040': '00007',
+    '8760042': '00008',
+    '8760038': '00009',
+    '8760115': '00010',
+    '8760119': '00011',
+    '8760123': '00012',
+    '8760108': '00013',
+    '8760116': '00014',
+    '8760030': '00015',
+    '8760107': '00015',
+    '8760036': '00016',
+    '8760026': '00017',
+    '8760028': '00018',
+    '8760024': '00019',
+    '8760054': '00020',
+    '8760113': '00020',
+    '8760051': '00021',
+    '8760062': '00022',
+    '8760121': '00023',
+    '8760122': '00024',
+    '8760120': '00025',
+  },
+
   // The dictionaries below list various groups of UK and US personnel, whose names should be entered as appropriate in various component and action type forms
   // Using these centralised dictionaries allows names to be consistently displayed in the DB interface, and also for them to be selected via drop-down menu when filling out the type forms
 
