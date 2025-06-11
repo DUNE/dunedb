@@ -270,27 +270,20 @@ async function list(match_condition, options) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (i.e. use shortened DUNE PIDs)
-  // NOTE: all workflows must have some kind of component name in order to determine where they are being performed in the section below ...
+  // Add the corresponding component name to each matching record
+  // NOTE: all 'APA Assembly' workflows must have some kind of component name in order to determine where they are being performed in the section below ...
   // ... so any workflow that does not yet have an associated component will be given a temporary fake UK-based component name here, purely for location matching
   for (let record of records) {
     if (record.path[0].result != '') {
       const component = await Components.retrieve(record.path[0].result);
 
-      if (component) {
-        if (component.data.name) {
-          if (['APAFrame', 'AssembledAPA'].includes(component.formId)) {
-            const name_splits = component.data.name.split('-');
-            record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-          } else {
-            record.componentName = component.data.name;
-          }
-        } else {
-          record.componentName = record.path[0].result;
-        }
+      if (!component) {
+        record.componentName = 'APA 00000-UK';
+      } else {
+        record.componentName = component.data.componentName;
       }
     } else {
-      record.componentName = '99999-UK';
+      record.componentName = 'APA 99999-UK';
     }
   }
 
@@ -301,7 +294,7 @@ async function list(match_condition, options) {
   if (options) {
     if (options.location) {
       for (let record of records) {
-        if (record.componentName.slice(6) === options.location) filtered_records.push(record);
+        if (record.componentName.slice(10) === options.location) filtered_records.push(record);
       }
     } else {
       filtered_records = [...records];

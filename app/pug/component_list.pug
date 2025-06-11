@@ -26,7 +26,7 @@ block content
         thead
           tr
             th.col-md-2 Type Name
-            th.col-md-3 Component Name / UUID 
+            th.col-md-3 Component Name
             th.col-md-1
             th.col-md-2 Last Edited On:
             th.col-md-1
@@ -40,16 +40,8 @@ block content
 
               tr          
                 td #{component.typeFormName}
-
-                if component.name
-                  td
-                    a(href = `/component/${uuid}`) #{component.name}
-                else if component.data.bobbinId
-                  td 
-                    a(href = `/component/${uuid}`) #{component.data.bobbinId}
-                else
-                  td 
-                    a(href = `/component/${uuid}`) #{uuid}
+                td
+                  a(href = `/component/${uuid}`) #{component.data.componentName}
 
                 if component.typeFormId == 'AssembledAPA'
                   td
