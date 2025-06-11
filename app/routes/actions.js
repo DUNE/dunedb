@@ -189,7 +189,7 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
     res.render('action_specComponent.pug', {
       actionTypeForm,
       componentUuid: req.params.uuid,
-      componentName: component.data.name,
+      componentName: component.data.componentName,
       workflowId,
       stepIndex,
     });
@@ -226,7 +226,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermissio
       action,
       actionTypeForm,
       componentUuid: action.componentUuid,
-      componentName: component.data.name,
+      componentName: component.data.componentName,
       workflowId,
       stepIndex: '-99',
     });

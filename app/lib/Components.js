@@ -9,6 +9,8 @@ const Forms = require('./Forms');
 const permissions = require('./permissions');
 const utils = require('./utils');
 
+const logger = require('./logger');
+
 
 /// Generate a new component UUID
 function newUuid() {
@@ -247,14 +249,12 @@ async function save(input, req) {
 
     if (newRecord.data.apaUuiDs[0].component_uuid !== '') {
       const apa = await retrieve(newRecord.data.apaUuiDs[0].component_uuid);
-      const name_splits = apa.data.name.split('-');
-      name_apa1 = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      name_apa1 = apa.data.componentName;
     }
 
     if (newRecord.data.apaUuiDs[1].component_uuid !== '') {
       const apa = await retrieve(newRecord.data.apaUuiDs[1].component_uuid);
-      const name_splits = apa.data.name.split('-');
-      name_apa2 = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
+      name_apa2 = apa.data.componentName;
     }
 
     newRecord.data.componentName = `${newRecord.formName} (${name_apa1} and ${name_apa2})`;
@@ -518,7 +518,6 @@ async function list(match_condition, options) {
       formId: true,
       formName: true,
       data: true,
-      shortName: { $substr: ['$data.name', 13, 5] },
       validity: true,
     }
   })
@@ -535,15 +534,14 @@ async function list(match_condition, options) {
       typeFormId: { '$first': '$formId' },
       typeFormName: { '$first': '$formName' },
       data: { '$first': '$data' },
-      name: { '$first': '$data.name' },
-      shortName: { '$first': '$shortName' },
+      componentName: { '$first': '$data.componentName' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
 
   // Re-sort the records ... by (alphanumerical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
   if ((match_condition) && (match_condition.formId) && ((match_condition.formId === 'APAFrame') || (match_condition.formId === 'AssembledAPA'))) {
-    aggregation_stages.push({ $sort: { shortName: -1 } });
+    aggregation_stages.push({ $sort: { componentName: -1 } });
   } else {
     aggregation_stages.push({ $sort: { lastEditDate: -1 } });
   }
@@ -559,20 +557,8 @@ async function list(match_condition, options) {
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
-  // Additionally, adjust the displayed names of certain component types for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
   for (let record of records) {
     record.componentUuid = MUUID.from(record.componentUuid).toString();
-
-    if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(record.typeFormId)) {
-      if ((record.name !== null) && (record.name !== '')) {
-        const name_splits = record.name.split('-');
-        record.name = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-      } else {
-        record.name = record.componentUuid;
-      }
-    } else if (record.typeFormId === 'GeometryBoard') {
-      record.name = record.data.typeRecordNumber;
-    }
   }
 
   // Return the entire list of matching records
@@ -735,7 +721,7 @@ async function autoCompleteUuid(inputString, limit = 10) {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       typeFormName: { '$first': '$formName' },
-      name: { '$first': '$data.name' },
+      componentName: { '$first': '$data.componentName' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
@@ -780,7 +766,7 @@ async function setComponentNames(typeFormId) {
     const typeFormName = component.formName;
     const data = component.data;
     const typeRecordNumber = String(data.typeRecordNumber).padStart(5, '0');
-    const validityStartDate = component.validity.startDate.toISOString();
+    const validityStartDate = (typeof component.validity.startDate === 'string') ? component.validity.startDate : component.validity.startDate.toISOString();
 
     let componentName = '';
     let dunePid = '';

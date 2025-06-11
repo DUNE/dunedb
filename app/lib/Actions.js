@@ -329,27 +329,14 @@ async function list(match_condition, options) {
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
-  // Then add the corresponding component name to each matching record, adjusting it depending on component type for easier readability (shorten DUNE PIDs, and use UKIDs for geometry boards)
+  // Then add the corresponding component name to each matching record
   for (let record of records) {
-    record.componentUuid = MUUID.from(record.componentUuid).toString();
-
-    const component = await Components.retrieve(record.componentUuid);
+    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
 
     if (!component) {
       record.componentName = '[UUID does not exist!]';
     } else {
-      if (component.data.name) {
-        if (['APAFrame', 'AssembledAPA', 'GroundingMeshPanel', 'CRBoard', 'GBiasBoard', 'CEAdapterBoard', 'SHVBoard', 'CableHarness'].includes(component.formId)) {
-          const name_splits = component.data.name.split('-');
-          record.componentName = `${name_splits[1]}-${name_splits[2]}`.slice(0, -3);
-        } else if (component.formId === 'GeometryBoard') {
-          record.componentName = component.data.typeRecordNumber;
-        } else {
-          record.componentName = component.data.name;
-        }
-      } else {
-        record.componentName = record.componentUuid;
-      }
+      record.componentName = component.data.componentName;
     }
   }
 

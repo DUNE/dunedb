@@ -37,7 +37,7 @@ async function populateTypeForm() {
                   },
                   {
                     "label": "Name",
-                    "key": "name",
+                    "key": "componentName",
                     "type": "textfield",
                     "input": false
                   }

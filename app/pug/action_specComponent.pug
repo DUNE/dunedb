@@ -25,16 +25,12 @@ block content
         dt Action Type
         dd #{actionTypeForm.formName}
 
+        dt Component Name
+        dd #{componentName}
+        
         dt Component UUID
         dd
           a(href = `/component/${componentUuid}`) #{componentUuid}
-
-        dt Component Name
-
-        if componentName
-          dd #{componentName}
-        else
-          dd (none)
 
     .vert-space-x1
       hr

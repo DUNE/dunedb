@@ -18,7 +18,7 @@ if __name__ == '__main__':
     #   - the component's data (a Python dictionary, corresponding to the data to be entered into the type form)
     componentTypeFormID = 'basic_component'
     componentData = {
-        'name': 'New M2M Component',
+        'componentName': 'New M2M Component',
         'textField': 'This is a component created through the M2M application',
     }
 
