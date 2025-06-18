@@ -132,6 +132,7 @@ module.exports = {
     callumHolt: 'Callum Holt',
     gwennMouster: 'Gwenn Mouster',
     sotirisVlachos: 'Sotiris Vlachos',
+    danWenman: 'Dan Wenman',
     kyleZeug: 'Kyle Zeug',
   },
 
