@@ -226,7 +226,7 @@ async function save(input, req) {
   // If the component name is based on fields that are more likely to be changed by the user, it should be assigned and re-assigned any time the record is edited
   // The DUNE PID of such components should technically be fixed at creation, but it is simpler code-wise to assign and re-assign that here as well
   const typeRecordNumber = String(newRecord.data.typeRecordNumber).padStart(5, '0');
-  
+
   if (newRecord.formId === 'APADoublet') {
     let name_topApa = '[not set]';
     let name_bottomApa = '[not set]';
@@ -289,7 +289,7 @@ async function save(input, req) {
   } else if (newRecord.formId === 'SHVBoardShipment') {
     newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } 
+  }
 
   // Insert the new record into the 'components' records collection, and throw an error if the insertion fails
   let _lock = await dbLock(`saveComponent_${newRecord.componentUuid}`, 1000);
@@ -807,6 +807,22 @@ async function setComponentNames(typeFormId) {
       }
 
       dunePid = `${pidPrefix}-${apaNumber}-${pidSuffix}`;
+    } else if (typeFormId === 'APAShipment') {
+      let name_apa1 = '[not set]';
+      let name_apa2 = '[not set]';
+
+      if (data.apaUuiDs[0].component_uuid !== '') {
+        const apa = await retrieve(data.apaUuiDs[0].component_uuid);
+        name_apa1 = apa.data.componentName;
+      }
+
+      if (data.apaUuiDs[1].component_uuid !== '') {
+        const apa = await retrieve(data.apaUuiDs[1].component_uuid);
+        name_apa2 = apa.data.componentName;
+      }
+
+      componentName = `${typeFormName} (${name_apa1} and ${name_apa2})`;
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (typeFormId === 'BoardShipment') {
       componentName = `Geometry ${typeFormName} (${data.boardUuiDs.length}.${utils.dictionary_locations[data.originOfShipment]}.${utils.dictionary_locations[data.destinationOfShipment]})`;
       dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
