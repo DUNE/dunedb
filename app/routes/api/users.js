@@ -79,7 +79,27 @@ router.get('/technicians.json', async function (req, res, next) {
 });
 
 
-/// List personnel who are authorised to sign-off on APA frame and grounding mesh intake (including both types of frame survey results)
+/// List personnel who are authorised to sign-off on Grounding Mesh Panel intake
+router.get('/meshPanelIntakeSignoff.json', async function (req, res, next) {
+  try {
+    let data = [];
+
+    for (const person in utils.dictionary_meshPanelIntakeSignoff) {
+      data.push({
+        api_name: person,
+        display_name: utils.dictionary_meshPanelIntakeSignoff[person],
+      });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List personnel who are authorised to sign-off on APA frame intake (including both types of frame survey results)
 router.get('/frameIntakeSignoff.json', async function (req, res, next) {
   try {
     let data = [];

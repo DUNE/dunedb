@@ -37,6 +37,7 @@ module.exports = {
     lsu: 'LSU',
     manchester: 'Manchester',
     merlin: 'Merlin',
+    rokeby: 'Rokeby',
     sheffield: 'Sheffield',
     surf: 'SURF',
     sussex: 'Sussex',
@@ -129,7 +130,15 @@ module.exports = {
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
-  // Personnel who are authorised to sign-off on APA frame and grounding mesh intake (including both types of frame survey results)
+  // Personnel who are authorised to sign-off on Grounding Mesh Panel intake
+  dictionary_meshPanelIntakeSignoff: {
+    nicholasHays: 'Nicholas Hays',
+    grahamMitchell: 'Graham Mitchell',
+    danielSalisbury: 'Daniel Salisbury',
+    kimWilliams: 'Kim Williams',
+  },
+
+  // Personnel who are authorised to sign-off on APA frame intake (including both types of frame survey results)
   dictionary_frameIntakeSignoff: {
     gedBell: 'Ged Bell',
     callumHolt: 'Callum Holt',
