@@ -9,7 +9,7 @@ const utils = require('../lib/utils');
 
 
 /// View a single action record
-router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermission('actions:view'), async function (req, res, next) {
+router.get('/action/:actionId', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified action ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { actionId: req.params.actionId };
@@ -164,7 +164,7 @@ router.get('/action/:typeFormId/unspec', permissions.checkPermission('actions:pe
 
 
 /// Perform a new action on a specified component
-router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermission('actions:perform'), async function (req, res, next) {
+router.get('/action/:typeFormId/new/:uuid', permissions.checkPermission('actions:perform'), async function (req, res, next) {
   try {
     // Retrieve the action type form corresponding to the specified type form ID, and throw an error if there is no such type form
     const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
@@ -201,7 +201,7 @@ router.get('/action/:typeFormId/' + utils.uuid_regex, permissions.checkPermissio
 
 
 /// Edit an existing action
-router.get('/action/:actionId([A-Fa-f0-9]{24})/edit', permissions.checkPermission('actions:perform'), async function (req, res, next) {
+router.get('/action/:actionId/edit', permissions.checkPermission('actions:perform'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified action ID, and throw an error if there is no such record
     const action = await Actions.retrieve(req.params.actionId);
@@ -256,7 +256,7 @@ router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:ed
     }
 
     // Redirect the user to the interface page for editing an existing action type form
-    res.redirect(`/actionTypes/${req.params.typeFormId}/edit`);
+    res.redirect(302, `/actionTypes/${req.params.typeFormId}/edit`);
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

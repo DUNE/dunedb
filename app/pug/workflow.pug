@@ -159,7 +159,7 @@ block content
                           a.btn-sm.btn-danger
                             | Create Component First
                         else 
-                          a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
+                          a.btn-sm.btn-primary(href = `/action/${stepFormId}/new/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
                             img.small-icon(src = '/images/run_icon.svg')
                             | &nbsp; Perform Action
 
@@ -189,7 +189,7 @@ block content
                               a.btn-sm.btn-danger
                                 | Complete Step #{freeSection_bgn - 1} First
                             else 
-                              a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
+                              a.btn-sm.btn-primary(href = `/action/${stepFormId}/new/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
                                 img.small-icon(src = '/images/run_icon.svg')
                                 | &nbsp; Perform Action
 
@@ -224,7 +224,7 @@ block content
                                 a.btn-sm.btn-danger
                                   | Complete Previous Action First
                               else 
-                                a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
+                                a.btn-sm.btn-primary(href = `/action/${stepFormId}/new/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
                                   img.small-icon(src = '/images/run_icon.svg')
                                   | &nbsp; Perform Action
 
@@ -248,7 +248,7 @@ block content
                             a.btn-sm.btn-danger
                               | Complete Previous Action First
                           else 
-                            a.btn-sm.btn-primary(href = `/action/${stepFormId}/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
+                            a.btn-sm.btn-primary(href = `/action/${stepFormId}/new/${componentUuid}?workflowId=${workflow.workflowId}&stepIndex=${index}`)
                               img.small-icon(src = '/images/run_icon.svg')
                               | &nbsp; Perform Action
 

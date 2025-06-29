@@ -140,7 +140,7 @@ block content
                   img.small-icon(src = '/images/run_icon.svg')
                   | &nbsp; Create New Components of This Type via Workflows
               else
-                a.btn.btn-primary(href = `/component/${component.formId}`)
+                a.btn.btn-primary(href = `/component/${component.formId}/new`)
                   img.small-icon(src = '/images/run_icon.svg')
                   | &nbsp; Create New Component of This Type
 
@@ -544,6 +544,6 @@ block content
 
           each typeForm in actionTypeForms
             if typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash')
-              a.actionbutton.btn.btn-success(href = `/action/${typeForm.formId}/${component.componentUuid}`) #{typeForm.formName}
+              a.actionbutton.btn.btn-success(href = `/action/${typeForm.formId}/new/${component.componentUuid}`) #{typeForm.formName}
 
     .vert-space-x2

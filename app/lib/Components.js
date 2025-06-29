@@ -346,7 +346,7 @@ async function updateLocation(componentUuid, location, date, detail) {
     match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
     // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
-    const result = db.collection('components')
+    const result = await db.collection('components')
       .findOneAndUpdate(
         match_condition,
         {
@@ -359,6 +359,7 @@ async function updateLocation(componentUuid, location, date, detail) {
         {
           sort: { 'validity.version': -1 },
           returnNewDocument: true,
+          includeResultMetadata: true,
         },
       );
 
@@ -696,8 +697,8 @@ async function autoCompleteUuid(inputString, limit = 10) {
 
   // Calculate the minimum and maximum possible binary values of the input string
   // The component UUID is 32 alphanumeric characters long (excluding dashes), so the minimum value is given by the input string padded out to this length with '0' characters, and the maximum by padding using 'F' characters
-  const bitlow = Binary(Buffer.from(q.padEnd(32, '0'), 'hex'), Binary.SUBTYPE_UUID);
-  const bithigh = Binary(Buffer.from(q.padEnd(32, 'F'), 'hex'), Binary.SUBTYPE_UUID);
+  const bitlow = new Binary(Buffer.from(q.padEnd(32, '0'), 'hex'), Binary.SUBTYPE_UUID);
+  const bithigh = new Binary(Buffer.from(q.padEnd(32, 'F'), 'hex'), Binary.SUBTYPE_UUID);
 
   let aggregation_stages = [];
 
@@ -914,7 +915,7 @@ async function setComponentNames(typeFormId) {
     match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
     // Update the component name and DUNE PID fields of ALL records with the matching component UUID (i.e. all versions of the component in question)
-    const result = db.collection('components')
+    const result = await db.collection('components')
       .updateMany(
         match_condition,
         [

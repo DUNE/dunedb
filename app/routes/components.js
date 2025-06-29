@@ -14,7 +14,7 @@ const Workflows = require('../lib/Workflows');
 
 
 /// View a single component record
-router.get('/component/' + utils.uuid_regex, permissions.checkPermission('components:view'), async function (req, res, next) {
+router.get('/component/:uuid', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { componentUuid: req.params.uuid };
@@ -284,13 +284,13 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermission('compon
 
 
 /// Redirect a shortened component record page URL (used by a component's QR code) to the full URL
-router.get('/c/' + utils.short_uuid_regex, async function (req, res, next) {
+router.get('/c/:shortuuid', async function (req, res, next) {
   try {
     // Reconstruct the full UUID from the shortened UUID
     const componentUuid = ShortUUID().toUUID(req.params.shortuuid);
 
     // Redirect the user to the interface page for viewing a component record
-    res.redirect(`/component/${componentUuid}`);
+    res.redirect(302, `/component/${componentUuid}`);
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
@@ -299,7 +299,7 @@ router.get('/c/' + utils.short_uuid_regex, async function (req, res, next) {
 
 
 /// View and print the QR codes of all sub-components in a single shipment- or batch-type component
-router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.checkPermission('components:view'), async function (req, res, next) {
+router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
     const component = await Components.retrieve(req.params.uuid);
@@ -409,7 +409,7 @@ router.get('/component/' + utils.uuid_regex + '/batchQRCodes', permissions.check
 
 
 /// View and print a single component's QR codes
-router.get('/component/' + utils.uuid_regex + '/qrCodes', permissions.checkPermission('components:view'), async function (req, res, next) {
+router.get('/component/:uuid/qrCodes', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
     const component = await Components.retrieve(req.params.uuid);
@@ -426,7 +426,7 @@ router.get('/component/' + utils.uuid_regex + '/qrCodes', permissions.checkPermi
 
 
 /// View and print a single component's summary
-router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermission('components:view'), async function (req, res, next) {
+router.get('/component/:uuid/summary', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
     const component = await Components.retrieve({ componentUuid: req.params.uuid });
@@ -595,7 +595,7 @@ router.get('/component/' + utils.uuid_regex + '/summary', permissions.checkPermi
 
 /// View and print an assembled APA's executive summary
 /// Note that this is different from an assembled APA's more general component summary, and executive summaries are only generated for assembled APAs 
-router.get('/component/' + utils.uuid_regex + '/execSummary', permissions.checkPermission('components:view'), async function (req, res, next) {
+router.get('/component/:uuid/execSummary', permissions.checkPermission('components:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified APA's component UUID, and throw an error if there is no such record
     const component = await Components.retrieve({ componentUuid: req.params.uuid });
@@ -619,7 +619,7 @@ router.get('/component/' + utils.uuid_regex + '/execSummary', permissions.checkP
 
 
 /// Create a new component of a given type
-router.get('/component/:typeFormId', permissions.checkPermission('components:edit'), async function (req, res, next) {
+router.get('/component/:typeFormId/new', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
     // Retrieve the component type form corresponding to the specified type form ID, and throw an error if there is no such type form
     const componentTypeForm = await Forms.retrieve('componentForms', req.params.typeFormId);
@@ -681,7 +681,7 @@ router.get('/component/:typeFormId', permissions.checkPermission('components:edi
 
 
 /// Edit an existing component
-router.get('/component/' + utils.uuid_regex + '/edit', permissions.checkPermission('components:edit'), async function (req, res, next) {
+router.get('/component/:uuid/edit', permissions.checkPermission('components:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
     const component = await Components.retrieve(req.params.uuid);
@@ -728,7 +728,7 @@ router.get('/componentTypes/:typeFormId/new', permissions.checkPermission('forms
     }
 
     // Redirect the user to the interface page for editing an existing component type form
-    res.redirect(`/componentTypes/${req.params.typeFormId}/edit`);
+    res.redirect(302, `/componentTypes/${req.params.typeFormId}/edit`);
   } catch (err) {
     logger.info(err);
     res.status(500).send(err.toString());

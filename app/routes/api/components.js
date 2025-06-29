@@ -6,11 +6,10 @@ const Components = require('../../lib/Components');
 const logger = require('../../lib/logger');
 const permissions = require('../../lib/permissions');
 const Search_OtherComponents = require('../../lib/Search_OtherComponents');
-const utils = require('../../lib/utils');
 
 
 /// Retrieve a single version of a component record via its UUID (either the most recent, or a specified one)
-router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('components:view'), async function (req, res, next) {
+router.get('/component/:uuid', permissions.checkPermissionJson('components:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { componentUuid: req.params.uuid };
@@ -22,7 +21,7 @@ router.get('/component/' + utils.uuid_regex, permissions.checkPermissionJson('co
     const component = await Components.retrieve(query);
 
     // Return the record in JSON format
-    return res.json(component);
+    return res.status(201).json(component);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -38,9 +37,9 @@ router.get('/component/:typeFormId/:typeRecordNumber', permissions.checkPermissi
 
     // If at least one record has been returned, return it in JSON format ... otherwise, return 'null' explicitly (also in JSON format)
     if (componentsList.length > 0) {
-      return res.json(componentsList[0]);
+      return res.status(201).json(componentsList[0]);
     } else {
-      return res.json(null);
+      return res.status(201).json(null);
     }
 
   } catch (err) {
@@ -51,7 +50,7 @@ router.get('/component/:typeFormId/:typeRecordNumber', permissions.checkPermissi
 
 
 /// Confirm that a specified short UUID corresponds to the full UUID in an existing component record
-router.get('/confirmShortUUID/' + utils.short_uuid_regex, async function (req, res, next) {
+router.get('/confirmShortUUID/:shortuuid', async function (req, res, next) {
   try {
     // A short UUID may be encoded in one of two formats: base 58 (the default encoding alphabet used by the 'short-uuid' library), or base 57
 
@@ -69,7 +68,7 @@ router.get('/confirmShortUUID/' + utils.short_uuid_regex, async function (req, r
     if (!component) return res.status(404).json({ error: `There is no component record with component UUID = ${uuid}` });
 
     // Otherwise, return the full UUID that corresponded to an existing component record
-    return res.json(uuid);
+    return res.status(201).json(uuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -87,7 +86,7 @@ router.post('/component', permissions.checkPermissionJson('components:edit'), as
     const componentUuid = await Components.save(req.body, req);
 
     // Return the record's component UUID
-    return res.json(componentUuid);
+    return res.status(201).json(componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -110,7 +109,7 @@ router.post('/componentBatch', permissions.checkPermissionJson('components:edit'
     });
 
     // Return the array of sub-component component UUIDs
-    return res.json(componentUuids);
+    return res.status(201).json(componentUuids);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -125,7 +124,7 @@ router.get('/newComponentUUID', async function (req, res, next) {
     const componentUuid = Components.newUuid().toString();
 
     // Return the newly generated UUID
-    return res.json(componentUuid);
+    return res.status(201).json(componentUuid);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -148,7 +147,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermissionJson('comp
     }
 
     // Return the list of UUIDs
-    return res.json(componentUUIDs);
+    return res.status(201).json(componentUUIDs);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -163,7 +162,7 @@ router.get('/components/boardCounts_byPartNumberAndLocation', permissions.checkP
     const boardCounts_byPartNumberAndLocation = await Components.boardCounts_byPartNumberAndLocation();
 
     // Return the list of geometry board counts
-    return res.json(boardCounts_byPartNumberAndLocation);
+    return res.status(201).json(boardCounts_byPartNumberAndLocation);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

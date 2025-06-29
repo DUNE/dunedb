@@ -4,12 +4,11 @@ const Actions = require('../../lib/Actions');
 const logger = require('../../lib/logger');
 const Search_ActionsWorkflows = require('../../lib/Search_ActionsWorkflows');
 const permissions = require('../../lib/permissions');
-const utils = require('../../lib/utils');
 const Workflows = require('../../lib/Workflows');
 
 
 /// Retrieve a single version of an action record (either the most recent, or a specified one)
-router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+router.get('/action/:actionId', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified action ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { actionId: req.params.actionId };
@@ -21,7 +20,7 @@ router.get('/action/:actionId([A-Fa-f0-9]{24})', permissions.checkPermissionJson
     const action = await Actions.retrieve(query);
 
     // Return the record in JSON format
-    return res.json(action);
+    return res.status(201).json(action);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -39,7 +38,7 @@ router.post('/action', permissions.checkPermissionJson('actions:perform'), async
     const actionId = await Actions.save(req.body, req);
 
     // Return the record's action ID
-    return res.json(actionId);
+    return res.status(201).json(actionId);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -48,14 +47,14 @@ router.post('/action', permissions.checkPermissionJson('actions:perform'), async
 
 
 /// Add one or more base64-encoded strings, each one representing a single image, to an action record
-router.post('/action/:actionId([A-Fa-f0-9]{24})/addImages', permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
+router.post('/action/:actionId/addImages', permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
   try {
     // Add the encoded strings to the action record corresponding to the specified action ID ... if successful, the function returns the action ID
     // The encoded strings are contained as an array in the 'req.body.image' parameter (it is passed as a [key, value] pair, with the key being 'images' and the value being the array)
     const result = await Actions.addImageStrings(req.params.actionId, req.body.images);
 
     // Return the record's action ID
-    return res.json(result);
+    return res.status(201).json(result);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -84,7 +83,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions
     }
 
     // Return the list of action IDs
-    return res.json(actionIDs);
+    return res.status(201).json(actionIDs);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -93,7 +92,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermissionJson('actions
 
 
 /// Retrieve all versions of all actions that have been performed as part of a specified workflow
-router.get('/actions_fromWorkflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+router.get('/actions_fromWorkflow/:workflowId', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified workflow ID
     const workflow = await Workflows.retrieve(req.params.workflowId);
@@ -125,7 +124,7 @@ router.get('/actions_fromWorkflow/:workflowId([A-Fa-f0-9]{24})', permissions.che
     }
 
     // Return the list containing all versions of all actions
-    return res.json(workflowActions);
+    return res.status(201).json(workflowActions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -134,7 +133,7 @@ router.get('/actions_fromWorkflow/:workflowId([A-Fa-f0-9]{24})', permissions.che
 
 
 /// Retrieve all versions of all Non-Conformance Report (NCR) actions that have been performed on a specified component
-router.get('/actions_NCRs/' + utils.uuid_regex, permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+router.get('/actions_NCRs/:uuid', permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
     // Set up an object containing the conditions to match to ... the action type form ID and the component UUID
     let match_condition = {
@@ -154,7 +153,7 @@ router.get('/actions_NCRs/' + utils.uuid_regex, permissions.checkPermissionJson(
     }
 
     // Return the list containing all versions of all NCRs
-    return res.json(ncrActions);
+    return res.status(201).json(ncrActions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -169,7 +168,7 @@ router.get('/actions/boardRejectionCounts_byPartNumberAndLocation', permissions.
     const boardRejectionCounts_byPartNumberAndLocation = await Actions.boardRejectionCounts_byPartNumberAndLocation();
 
     // Return the list of geometry board rejection counts
-    return res.json(boardRejectionCounts_byPartNumberAndLocation);
+    return res.status(201).json(boardRejectionCounts_byPartNumberAndLocation);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -178,14 +177,14 @@ router.get('/actions/boardRejectionCounts_byPartNumberAndLocation', permissions.
 
 
 /// Compare wire tension measurements across locations
-router.get('/actions/tensionComparisonAcrossLocations/' + utils.uuid_regex + '/:wireLayer/:origin/:destination', async function (req, res, next) {
+router.get('/actions/tensionComparisonAcrossLocations/:uuid/:wireLayer/:origin/:destination', async function (req, res, next) {
   try {
     // Retrieve wire tension measurements that have been performed on a specified wire layer of a specified Assembled APA at two specified locations
     // If successful, this returns an object containing the measured tensions on both sides at both locations, along with the pre-calculated differences between tensions
     const tensions = await Search_ActionsWorkflows.tensionComparisonAcrossLocations(req.params.uuid, req.params.wireLayer, req.params.origin, req.params.destination);
 
     // Return the object in JSON format
-    return res.json(tensions);
+    return res.status(201).json(tensions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
