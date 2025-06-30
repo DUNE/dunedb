@@ -136,7 +136,7 @@ async function boardsByVisualInspection(disposition, issue) {
         }
       });
 
-      // Order the records by the '_id' field (highest value first) - this ObjectID is generated sequentially for each record (higher ones for newer records) ... 
+      // Order the records by the '_id' field (highest value first) - this ObjectId is generated sequentially for each record (higher ones for newer records) ... 
       // ... this is a work-around for the fact that we don't save the record insertion dates as actual date objects which can be sorted, but instead as strings which are more tricky to order)
       perBoard_action_aggregation_stages.push({ $sort: { _id: -1 } });
 
@@ -271,7 +271,7 @@ async function boardsByOrderNumber(orderNumber) {
 
     // At this point, we have the latest version of every 'Visual Inspection' action performed on each board
     // Select the single action that was mostly recently performed on each board, and pass through only the fields required for later use
-    // Note that this starts by ordering the records by the '_id' field (highest value first) - this ObjectID is generated sequentially for each record (higher ones for newer records) ... 
+    // Note that this starts by ordering the records by the '_id' field (highest value first) - this ObjectId is generated sequentially for each record (higher ones for newer records) ... 
     // ... this is a work-around for the fact that we don't save the record insertion dates as actual date objects which can be sorted, but instead as strings which are more tricky to order)
     action_aggregation_stages.push({ $sort: { _id: -1 } });
     action_aggregation_stages.push({

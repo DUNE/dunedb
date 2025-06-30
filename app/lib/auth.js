@@ -15,7 +15,7 @@ router.get('/login', passport.authenticate('auth0', {
   scope: 'openid email profile',
   audience: 'https://apa.dunedb.org/api/',
 }), function (req, res) {
-  res.redirect('/');
+  res.redirect(302, '/');
 });
 
 
@@ -31,16 +31,16 @@ router.get('/callback', function (req, res, next) {
 
     // if (err) return next(err);
     if (err) return res.status(302).location('/').send();
-    if (!user) return res.send(`NO USER:\n\n${JSON.stringify(err)} \n \n ${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
+    if (!user) return res.status(200).send(`NO USER:\n\n${JSON.stringify(err)} \n \n ${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
 
     req.logIn(user, function (err) {
       // if (err) return next(err);
-      if (err) return res.send(`ERROR LOGGING IN:\n\n${JSON.stringify(err)}\n\n${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
+      if (err) return res.status(200).send(`ERROR LOGGING IN:\n\n${JSON.stringify(err)}\n\n${JSON.stringify(user)}\n\n${JSON.stringify(info)}`);
 
       const returnTo = req.session.returnTo;
       delete req.session.returnTo;
 
-      res.redirect(returnTo || '/');
+      res.redirect(302, returnTo || '/');
     });
   })(req, res, next);
 });
@@ -66,7 +66,7 @@ router.get('/logout', (req, res) => {
 
     logoutURL.search = searchString;
 
-    res.redirect(logoutURL);
+    res.redirect(302, logoutURL);
   });
 });
 

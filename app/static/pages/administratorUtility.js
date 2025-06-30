@@ -16,7 +16,7 @@ async function renderInputForm() {
     if (inputString) {
       $.ajax({
         contentType: 'application/json',
-        method: 'GET',
+        method: 'POST',
         url: `/json/administratorUtility/${inputString}`,
         dataType: 'json',
         success: postSuccess,

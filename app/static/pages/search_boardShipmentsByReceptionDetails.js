@@ -92,7 +92,7 @@ async function renderSearchForms() {
     if (shipmentStatus !== '') {
       $.ajax({
         contentType: 'application/json',
-        method: 'GET',
+        method: 'POST',
         url: `/json/search/boardShipmentsByReceptionDetails?shipmentStatus=${shipmentStatus}&originLocation=${originLocation}&destinationLocation=${destinationLocation}&earliestDate=${earliestDate}&latestDate=${latestDate}&receptionComment=${receptionComment}`,
         dataType: 'json',
         success: postSuccess,

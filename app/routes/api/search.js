@@ -14,7 +14,7 @@ router.get('/search/geoBoardsByVisualInspection/:disposition/:issue', async func
     const boardsByPartNumber = await Search_GeoBoards.boardsByVisualInspection(req.params.disposition, req.params.issue);
 
     // Return the list in JSON format
-    return res.json(boardsByPartNumber);
+    return res.status(201).json(boardsByPartNumber);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -29,7 +29,7 @@ router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, r
     const boardsByDisposition = await Search_GeoBoards.boardsByOrderNumber(req.params.orderNumber);
 
     // Return the list in JSON format
-    return res.json(boardsByDisposition);
+    return res.status(201).json(boardsByDisposition);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -38,7 +38,7 @@ router.get('/search/geoBoardsByOrderNumber/:orderNumber', async function (req, r
 
 
 /// Search for geometry board shipments using various shipment reception details
-router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
+router.post('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
   try {
     // This search query can have multiple query strings, most of which are optional
     // So first, parse out the strings which have actually been provided (as non-empty strings), and set the rest to 'null'
@@ -59,7 +59,7 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
     const shipments = await Search_OtherComponents.boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
 
     // Return the list in JSON format
-    return res.json(shipments);
+    return res.status(201).json(shipments);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -68,13 +68,13 @@ router.get('/search/boardShipmentsByReceptionDetails', async function (req, res,
 
 
 /// Search for workflows that involve a particular component, specified by its UUID
-router.get('/search/workflowsByUUID/' + utils.uuid_regex, async function (req, res, next) {
+router.get('/search/workflowsByUUID/:uuid', async function (req, res, next) {
   try {
     // Retrieve a list of workflows that involve the component corresponding to the specified UUID
     const workflows = await Search_ActionsWorkflows.workflowsByUUID(req.params.uuid);
 
     // Return the list in JSON format
-    return res.json(workflows);
+    return res.status(201).json(workflows);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -89,7 +89,7 @@ router.get('/search/apasByProductionLocationAndNumber/:apaLocation/:apaNumber', 
     const assembledAPAs = await Search_OtherComponents.apasByProductionLocationAndNumber(req.params.apaLocation, req.params.apaNumber);
 
     // Return the list in JSON format
-    return res.json(assembledAPAs);
+    return res.status(201).json(assembledAPAs);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -106,7 +106,7 @@ router.get('/search/apasByProductionLocationAndAssemblyStep/:apaLocation/:assemb
     const assembledAPAs = await Search_OtherComponents.apasByProductionLocationAndAssemblyStep(req.params.apaLocation, req.params.assemblyStep);
 
     // Return the list in JSON format
-    return res.json(assembledAPAs);
+    return res.status(201).json(assembledAPAs);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -121,7 +121,7 @@ router.get('/search/componentsByDUNEPID/:dunePID', async function (req, res, nex
     const components = await Search_OtherComponents.componentsByDUNEPID(req.params.dunePID);
 
     // Return the list in JSON format
-    return res.json(components);
+    return res.status(201).json(components);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -136,7 +136,7 @@ router.get('/search/componentsByTypeAndNumber/:typeFormId/:typeRecordNumber', as
     const components = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, req.params.typeRecordNumber);
 
     // Return the list in JSON format
-    return res.json(components);
+    return res.status(201).json(components);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -152,7 +152,7 @@ router.get('/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanc
     const components = await Search_OtherComponents.componentsByTypeAndLocation(req.params.typeFormId, req.params.location, req.params.acceptanceStatus, req.params.toothStripStatus);
 
     // Return the list in JSON format
-    return res.json(components);
+    return res.status(201).json(components);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -168,7 +168,7 @@ router.get('/search/componentsByTypeAndPartNumber/:typeFormId/:partNumber/:accep
     const components = await Search_OtherComponents.componentsByTypeAndPartNumber(req.params.typeFormId, req.params.partNumber, req.params.acceptanceStatus, req.params.toothStripStatus);
 
     // Return the list in JSON format
-    return res.json(components);
+    return res.status(201).json(components);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -183,7 +183,7 @@ router.get('/search/nonConformanceByComponentType/:componentType/:disposition/:s
     const actions = await Search_ActionsWorkflows.nonConformanceByComponentType(req.params.componentType, req.params.disposition, req.params.status);
 
     // Return the list in JSON format
-    return res.json(actions);
+    return res.status(201).json(actions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -192,13 +192,13 @@ router.get('/search/nonConformanceByComponentType/:componentType/:disposition/:s
 
 
 /// Search for non-conformance actions performed on a single component, specified by its UUID
-router.get('/search/nonConformanceByUUID/' + utils.uuid_regex, async function (req, res, next) {
+router.get('/search/nonConformanceByUUID/:uuid', async function (req, res, next) {
   try {
     // Retrieve a list of non-conformance actions that have been performed on the component corresponding to the specified UUID
     const actions = await Search_ActionsWorkflows.nonConformanceByUUID(req.params.uuid);
 
     // Return the list in JSON format
-    return res.json(actions);
+    return res.status(201).json(actions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -207,7 +207,7 @@ router.get('/search/nonConformanceByUUID/' + utils.uuid_regex, async function (r
 
 
 /// Search for actions of a specified type that reference a specified component UUID
-router.get('/search/actionsByReferencedUUID/' + utils.uuid_regex + '/:actionType', async function (req, res, next) {
+router.get('/search/actionsByReferencedUUID/:uuid/:actionType', async function (req, res, next) {
   try {
     // Depending on the specified action type, retrieve a list of actions of the specified type that reference the specified component UUID
     let actions = null;
@@ -219,7 +219,7 @@ router.get('/search/actionsByReferencedUUID/' + utils.uuid_regex + '/:actionType
     }
 
     // Return the list in JSON format
-    return res.json(actions);
+    return res.status(201).json(actions);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

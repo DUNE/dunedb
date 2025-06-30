@@ -23,9 +23,9 @@ const manager = new ManagementClient({
 router.get('/user', async function (req, res, next) {
   try {
     // Retrieve the user's information and roles via the Auth0 manager and the user ID taken from the session information
-    const [userProfile, userRoles] = await Promise.all([
-      manager.getUser({ id: req.user.user_id }),
-      manager.getUserRoles({ id: req.user.user_id }),
+    const [{ data: userProfile }, { data: userRoles }] = await Promise.all([
+      manager.users.get({ id: req.user.user_id }),
+      manager.users.getRoles({ id: req.user.user_id }),
     ]);
 
     // Throw an appropriate error if there is not exactly one user with the provided ID
@@ -37,18 +37,6 @@ router.get('/user', async function (req, res, next) {
       userProfile,
       userRoles,
     });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).send(err.toString());
-  }
-});
-
-
-/// List all human users
-router.get('/users/list', permissions.checkPermission('users:view'), async function (req, res, next) {
-  try {
-    // Render the interface page
-    res.render('user_list.pug');
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
