@@ -148,11 +148,11 @@ async function save(input, req) {
         newRecord.data.dunePid = `D00300500003-${typeRecordNumber}-US200-010000`;
       }
     } else if (newRecord.formId === 'DWA') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
-      newRecord.data.dunePid = `D00300800001-${typeRecordNumber}-US136-010000`;
+      newRecord.data.componentName = `${newRecord.formName} ${newRecord.data.dwaNumber}`;
+      newRecord.data.dunePid = `D00300800001-${newRecord.data.dwaNumber}-US136-010000`;
     } else if (newRecord.formId === 'DWAPDB') {
-      newRecord.data.componentName = `DWA PDB ${typeRecordNumber}`;
-      newRecord.data.dunePid = `D00300800002-${typeRecordNumber}-US136-010000`;
+      newRecord.data.componentName = `DWA PDB ${newRecord.data.pdbNumber}`;
+      newRecord.data.dunePid = `D00300800002-${newRecord.data.pdbNumber}-US136-010000`;
     } else if (newRecord.formId === 'GBiasBoard') {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
@@ -857,14 +857,14 @@ async function setComponentNames(typeFormId) {
       componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
       dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (typeFormId === 'DWA') {
-      componentName = `${typeFormName} ${typeRecordNumber}`;
-      dunePid = `D00300800001-${typeRecordNumber}-US136-010000`;
+      componentName = `${typeFormName} ${data.dwaNumber}`;
+      dunePid = `D00300800001-${data.dwaNumber}-US136-010000`;
     } else if (typeFormId === 'DWAComponentShipment') {
       componentName = `${typeFormName} (${utils.dictionary_locations[data.originOfShipment]}.${utils.dictionary_locations[data.destinationOfShipment]})`;
       dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (typeFormId === 'DWAPDB') {
-      componentName = `DWA PDB ${typeRecordNumber}`;
-      dunePid = `D00300800002-${typeRecordNumber}-US136-010000`;
+      componentName = `DWA PDB ${data.pdbNumber}`;
+      dunePid = `D00300800002-${data.pdbNumber}-US136-010000`;
     } else if (typeFormId === 'GBiasBoard') {
       componentName = `${typeFormName} ${typeRecordNumber}`;
       dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
