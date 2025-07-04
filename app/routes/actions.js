@@ -5,10 +5,12 @@ const Components = require('../lib/Components');
 const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 const permissions = require('../lib/permissions');
+const Search_ActionsWorkflows = require('../lib/Search_ActionsWorkflows');
 const utils = require('../lib/utils');
+const Workflows = require('../lib/Workflows');
 
 
-/// View a single action record
+/// Retrieve an existing action record
 router.get('/action/:actionId', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified action ID and a version number if one is provided (if not, the most recent version is assumed)
@@ -143,64 +145,7 @@ router.get('/action/:actionId', permissions.checkPermission('actions:view'), asy
 });
 
 
-/// Perform a new action on an unspecified component
-router.get('/action/:typeFormId/unspec', permissions.checkPermission('actions:perform'), async function (req, res, next) {
-  try {
-    // Retrieve the action type form corresponding to the specified type form ID, and throw an error if there is no such type form
-    const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
-
-    if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${req.params.typeFormId}`);
-
-    // Render the interface page
-    res.render('action_unspecComponent.pug', {
-      actionTypeFormId: req.params.typeFormId,
-      actionTypeFormName: actionTypeForm.formName,
-    });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).send(err.toString());
-  }
-});
-
-
-/// Perform a new action on a specified component
-router.get('/action/:typeFormId/new/:uuid', permissions.checkPermission('actions:perform'), async function (req, res, next) {
-  try {
-    // Retrieve the action type form corresponding to the specified type form ID, and throw an error if there is no such type form
-    const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
-
-    if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${req.params.typeFormId}`);
-
-    // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
-    const component = await Components.retrieve(req.params.uuid);
-
-    if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
-
-    // Set both the workflow ID and workflow step index if the former is provided (either both or neither will be present)
-    let workflowId = '';
-    let stepIndex = '-99';
-
-    if (req.query.workflowId) {
-      workflowId = req.query.workflowId;
-      stepIndex = req.query.stepIndex;
-    }
-
-    // Render the interface page
-    res.render('action_specComponent.pug', {
-      actionTypeForm,
-      componentUuid: req.params.uuid,
-      componentName: component.data.componentName,
-      workflowId,
-      stepIndex,
-    });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).send(err.toString());
-  }
-});
-
-
-/// Edit an existing action
+/// Edit an existing action record
 router.get('/action/:actionId/edit', permissions.checkPermission('actions:perform'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified action ID, and throw an error if there is no such record
@@ -237,7 +182,64 @@ router.get('/action/:actionId/edit', permissions.checkPermission('actions:perfor
 });
 
 
-/// Create a new action type form
+/// Perform a new action on an unspecified component
+router.get('/action/:typeFormId/unspec', permissions.checkPermission('actions:perform'), async function (req, res, next) {
+  try {
+    // Retrieve the action type form corresponding to the specified type form ID, and throw an error if there is no such type form
+    const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
+
+    if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${req.params.typeFormId}`);
+
+    // Render the interface page
+    res.render('action_unspecComponent.pug', {
+      actionTypeFormId: req.params.typeFormId,
+      actionTypeFormName: actionTypeForm.formName,
+    });
+  } catch (err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+
+/// Perform a new action on a specified component
+router.get('/action/:typeFormId/spec/:uuid', permissions.checkPermission('actions:perform'), async function (req, res, next) {
+  try {
+    // Retrieve the action type form corresponding to the specified type form ID, and throw an error if there is no such type form
+    const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
+
+    if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${req.params.typeFormId}`);
+
+    // Retrieve the most recent version of the record corresponding to the specified component UUID, and throw an error if there is no such record
+    const component = await Components.retrieve(req.params.uuid);
+
+    if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
+
+    // Set both the workflow ID and workflow step index if the former is provided (either both or neither will be present)
+    let workflowId = '';
+    let stepIndex = '-99';
+
+    if (req.query.workflowId) {
+      workflowId = req.query.workflowId;
+      stepIndex = req.query.stepIndex;
+    }
+
+    // Render the interface page
+    res.render('action_specComponent.pug', {
+      actionTypeForm,
+      componentUuid: req.params.uuid,
+      componentName: component.data.componentName,
+      workflowId,
+      stepIndex,
+    });
+  } catch (err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+
+/// Create a new action type
 router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
     // Check that the specified type form ID is not already being used - attempt to retrieve any and all existing action type forms with this type form ID
@@ -264,7 +266,7 @@ router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:ed
 });
 
 
-/// Edit an existing action type form
+/// Edit an existing action type
 router.get('/actionTypes/:typeFormId/edit', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
     // Render the interface page
@@ -407,10 +409,194 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
 });
 
 
-/// Compare wire tension measurements across locations
+/// Retrieve an existing action record
+router.get(['/json/action/:actionId', '/api/action/:actionId'], permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Set up a query object consisting of the specified action ID and a version number if one is provided (if not, the most recent version is assumed)
+    let query = { actionId: req.params.actionId };
+
+    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+
+    // Retrieve the specified version of the record
+    // If there is no record corresponding to the ID, or the version number is not valid, this returns 'null'
+    const action = await Actions.retrieve(query);
+
+    // Return the record in JSON format
+    return res.status(200).json(action);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Perform a new action or edit an existing action record
+router.post(['/json/action', '/api/action'], permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
+  try {
+    logger.info(req.body, 'Submission to /json/action');
+
+    // Save the record ... if successful, this returns the action ID
+    const actionId = await Actions.save(req.body, req);
+
+    // Return the record's action ID
+    return res.status(201).json(actionId);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Add one or more base64-encoded strings, each one representing a single image, to an action record
+router.post(['/json/action/:actionId/addImages', '/api/action/:actionId/addImages'], permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
+  try {
+    // Add the encoded strings to the action record corresponding to the specified action ID ... if successful, the function returns the action ID
+    // The encoded strings are contained as an array in the 'req.body.image' parameter (it is passed as a [key, value] pair, with the key being 'images' and the value being the array)
+    const result = await Actions.addImageStrings(req.params.actionId, req.body.images);
+
+    // Return the record's action ID
+    return res.status(201).json(result);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List all actions of a single action type
+router.get(['/json/actions/:typeFormId/list', '/api/actions/:typeFormId/list'], permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Set up the object containing the matching conditions ... to start with, this only consists of the specified action type
+    // If a component UUID has been provided in the query, add it to the object under the appropriate field
+    let match_condition = { typeFormId: req.params.typeFormId };
+
+    if (req.query.uuid) { match_condition.componentUuid = req.query.uuid; }
+
+    // Retrieve records of all actions with the specified action type, and optionally further match to those that were performed on the specified component
+    // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
+    const actions = await Actions.list(match_condition, { limit: 200 });
+
+    // Extract only the ID field (in string format) from each action record, and save it into a list to be returned
+    let actionIDs = [];
+
+    for (const action of actions) {
+      actionIDs.push(action.actionId);
+    }
+
+    // Return the list of action IDs
+    return res.status(200).json(actionIDs);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List all versions of all actions that have been performed as part of a specified workflow
+router.get(['/json/actions/allFromWorkflow/:workflowId', '/api/actions/allFromWorkflow/:workflowId'], permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Retrieve the most recent version of the record corresponding to the specified workflow ID
+    const workflow = await Workflows.retrieve(req.params.workflowId);
+
+    // Loop over the action steps in the workflow path (i.e. not including the first one relating to component creation)
+    // If the step has been performed, retrieve and save all versions of the corresponding action (first removing any fields that contain large amounts of unneeded information)
+    // If the step has not yet been performed, set up and save a list containing a single entry ... with this entry consisting of an object containing only the action type form name
+    let workflowActions = [];
+
+    for (const step of workflow.path.slice(1)) {
+      if (step.result !== '') {
+        let actionVersions = await Actions.versions(step.result);
+
+        for (let singleVersion of actionVersions) {
+          if ('images' in singleVersion) delete singleVersion.images;
+          if ('comments' in singleVersion.data) delete singleVersion.data.comments;
+          if ('replacedWires' in singleVersion.data) delete singleVersion.data.replacedWires;
+          if ('badSolderJoints' in singleVersion.data) delete singleVersion.data.badSolderJoints;
+          if ('measuredTensions_sideA' in singleVersion.data) delete singleVersion.data.measuredTensions_sideA;
+          if ('measuredTensions_sideB' in singleVersion.data) delete singleVersion.data.measuredTensions_sideB;
+          if ('changedTensions_sideA' in singleVersion.data) delete singleVersion.data.changedTensions_sideA;
+          if ('changedTensions_sideB' in singleVersion.data) delete singleVersion.data.changedTensions_sideB;
+        }
+
+        workflowActions.push(actionVersions);
+      } else {
+        workflowActions.push([{ 'typeFormName': step.formName }]);
+      }
+    }
+
+    // Return the list containing all versions of all actions
+    return res.status(200).json(workflowActions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List all versions of all Non-Conformance Report (NCR) actions that have been performed on a specified component
+router.get(['/json/actions/ncrsByComponent/:uuid', '/api/actions/ncrsByComponent/:uuid'], permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Set up an object containing the conditions to match to ... the action type form ID and the component UUID
+    let match_condition = {
+      typeFormId: 'APANonConformance',
+      componentUuid: req.params.uuid,
+    };
+
+    // Retrieve the latest version of all records of all actions that match the specified conditions - in this case, NCRs that have been performed on the component
+    const latestVersions = await Actions.list(match_condition);
+
+    // Loop over the returned actions, and retrieve and save ALL versions of each action
+    let ncrActions = [];
+
+    for (const action of latestVersions) {
+      let ncrVersions = await Actions.versions(action.actionId);
+      ncrActions.push(ncrVersions);
+    }
+
+    // Return the list containing all versions of all NCRs
+    return res.status(200).json(ncrActions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List geometry board rejection counts across all [board part number, rejection location] combinations
+router.get(['/json/actions/boardRejectionCounts_byPartNumberAndLocation', '/api/actions/boardRejectionCounts_byPartNumberAndLocation'], permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry board rejection counts across all [board part number, rejection location] combinations
+    const boardRejectionCounts_byPartNumberAndLocation = await Actions.boardRejectionCounts_byPartNumberAndLocation();
+
+    // Return the list of geometry board rejection counts
+    return res.status(200).json(boardRejectionCounts_byPartNumberAndLocation);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Compare wire tension measurements across locations (client-side interface)
 router.get('/actions/tensionComparisonAcrossLocations', async function (req, res, next) {
   // Render the interface page
   res.render('action_tensionComparisonAcrossLocations.pug', { dictionary_locations: utils.dictionary_locations });
+});
+
+
+/// Compare wire tension measurements across locations (query to server-side)
+router.get(['/json/actions/tensionComparisonAcrossLocations/:uuid/:wireLayer/:origin/:destination', '/api/actions/tensionComparisonAcrossLocations/:uuid/:wireLayer/:origin/:destination'], async function (req, res, next) {
+  try {
+    // Retrieve wire tension measurements that have been performed on a specified wire layer of a specified Assembled APA at two specified locations
+    // If successful, this returns an object containing the measured tensions on both sides at both locations, along with the pre-calculated differences between tensions
+    const tensions = await Search_ActionsWorkflows.tensionComparisonAcrossLocations(req.params.uuid, req.params.wireLayer, req.params.origin, req.params.destination);
+
+    // Return the object in JSON format
+    return res.status(200).json(tensions);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
 });
 
 

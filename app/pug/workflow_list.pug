@@ -8,7 +8,7 @@ block content
   .container-fluid
     .vert-space-x2
       if singleType && workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash')
-        a.btn.btn-primary(href = `/workflow/${workflowTypeForm.formId}`)
+        a.btn.btn-primary(href = `/workflow/${workflowTypeForm.formId}/new`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Create New Workflow of This Type
 

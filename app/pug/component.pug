@@ -544,6 +544,6 @@ block content
 
           each typeForm in actionTypeForms
             if typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash')
-              a.actionbutton.btn.btn-success(href = `/action/${typeForm.formId}/new/${component.componentUuid}`) #{typeForm.formName}
+              a.actionbutton.btn.btn-success(href = `/action/${typeForm.formId}/spec/${component.componentUuid}`) #{typeForm.formName}
 
     .vert-space-x2
