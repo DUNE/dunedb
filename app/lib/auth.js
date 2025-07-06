@@ -113,7 +113,7 @@ module.exports = function (app) {
     profile.user_metadata = decodedToken[`${BASE_URL}/user_metadata`];
     profile.roles = decodedToken[`${BASE_URL}/roles`];
 
-    logger.info(decodedToken, profile);
+    logger.info(profile, 'User Profile');
 
     // Return the complete user profile
     return done(null, profile);

@@ -11,7 +11,7 @@ router.get('/autocomplete/uuid', async function (req, res, next) {
   let matches = await Components.autoCompleteUuid(req.query.q);
 
   // If there are no matches, simply return an empty JSON document
-  if (matches instanceof Error) return res.status(201).json([]);
+  if (matches instanceof Error) return res.status(200).json([]);
 
   // For each retrieved record, construct a string consisting of the component's UUID, name and type form name
   for (let m of matches) {
@@ -20,7 +20,7 @@ router.get('/autocomplete/uuid', async function (req, res, next) {
   }
 
   // Return a JSON document containing the retrieved records, including the newly constructed strings
-  return res.status(201).json(matches);
+  return res.status(200).json(matches);
 });
 
 
@@ -30,7 +30,7 @@ router.get('/autocomplete/actionId', async function (req, res, next) {
   let matches = await Actions.autoCompleteId(req.query.q);
 
   // If there are no matches, simply return an empty JSON document
-  if (matches instanceof Error) return res.status(201).json([]);
+  if (matches instanceof Error) return res.status(200).json([]);
 
   // For each retrieved record, construct a string consisting of the action's ID and type form name
   for (let m of matches) {
@@ -39,7 +39,7 @@ router.get('/autocomplete/actionId', async function (req, res, next) {
   }
 
   // Return a JSON document containing the retrieved records, including the newly constructed strings
-  return res.status(201).json(matches);
+  return res.status(200).json(matches);
 });
 
 
@@ -49,7 +49,7 @@ router.get('/autocomplete/workflowId', async function (req, res, next) {
   let matches = await Workflows.autoCompleteId(req.query.q);
 
   // If there are no matches, simply return an empty JSON document
-  if (matches instanceof Error) return res.status(201).json([]);
+  if (matches instanceof Error) return res.status(200).json([]);
 
   // For each retrieved record, construct a string consisting of the workflow's ID and type form name
   for (let m of matches) {
@@ -58,7 +58,7 @@ router.get('/autocomplete/workflowId', async function (req, res, next) {
   }
 
   // Return a JSON document containing the retrieved records, including the newly constructed strings
-  return res.status(201).json(matches);
+  return res.status(200).json(matches);
 });
 
 

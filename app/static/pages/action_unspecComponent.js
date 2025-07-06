@@ -35,7 +35,7 @@ async function renderUUIDForm() {
           url: `/json/component/${inputString}`,
           dataType: 'json',
           success: function (data) {
-            if (data) window.location.href = `/action/${actionTypeFormId}/${inputString}`;
+            if (data) window.location.href = `/action/${actionTypeFormId}/spec/${inputString}`;
           },
         })
       }

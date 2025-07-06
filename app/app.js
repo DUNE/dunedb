@@ -121,8 +121,7 @@ async function createApp(app) {
   require('./lib/auth.js')(app, session_config);
 
   // Set up all routes
-  routes.routes.forEach(route => app.use(route));
-  routes.paths.forEach(({ path, route }) => app.use(path, route));
+  routes.forEach(route => app.use(route));
 
   // Return the fully configured app
   return app;
