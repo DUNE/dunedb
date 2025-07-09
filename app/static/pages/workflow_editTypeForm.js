@@ -279,7 +279,7 @@ const metaschema = {
           label: '',
           value: '',
         }],
-        url: '/json/{{row.type}}Forms/list',
+        url: '/json/collection/{{row.type}}Forms/list',
         headers: [{
           key: '',
           value: '',
