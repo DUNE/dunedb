@@ -93,6 +93,11 @@ async function onPageLoad() {
         sub_submission.data.typeRecordNumber = numberOfExistingSubComponents + s + 1;
         subComponent_typeRecordNumbers.push(numberOfExistingSubComponents + s + 1);
 
+        // Add any other information to the sub-component's 'data' field that might be specific to certain component types
+        if (['CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(submission.data.subComponent_formId)) {
+          sub_submission.data.boardIsConformant = 'yes';
+        }
+
         // Since there is nothing more to be added to the sub-component submission object, add it to the array of sub-component submission objects
         subComponent_objects.push(sub_submission);
       }
