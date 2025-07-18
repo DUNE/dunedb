@@ -15,7 +15,7 @@ head
   //- Note that libraries are loaded at the end of the page, so as to not slow down the page rendering
   link(rel = 'icon', href = '/images/browser_icon.png', type = 'image/png')
   link(rel = 'stylesheet', href = '/css/dashboard.css')
-  link(rel = 'stylesheet', href = '/css/custom.scss')
+  link(rel = 'stylesheet', href = '/css/custom.css')
   link(rel = 'stylesheet', href = '/css/action.css')
   link(rel = 'stylesheet', href = '/css/common.css')
   link(rel = 'stylesheet', href = '/css/component.css')
@@ -110,11 +110,6 @@ body(class = `deployment-${NODE_ENV}`)
                 li.nav-item
                   +navlink(href = '/workflowTypes/list')
                     |      Workflow Types
-
-            li.nav-item
-              +navlink(href = '/users/list')
-                i.fa.fa-user(aria-hidden = 'true')
-                | Users
 
             li.nav-item
               +navlink(href = '/search')

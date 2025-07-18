@@ -1,4 +1,4 @@
-const ObjectID = require('mongodb').ObjectId;
+const ObjectId = require('mongodb').ObjectId;
 
 const Actions = require('./Actions');
 const commonSchema = require('./commonSchema');
@@ -47,7 +47,7 @@ async function save(input, req) {
   let newRecord = {};
 
   newRecord.recordType = 'workflow';
-  newRecord.workflowId = new ObjectID(input.workflowId);
+  newRecord.workflowId = new ObjectId(input.workflowId);
   newRecord.typeFormId = input.typeFormId;
   newRecord.typeFormName = typeForm.formName;
   newRecord.data = input.data;
@@ -95,11 +95,12 @@ async function updatePathStep(workflowId, stepIndex, stepResult) {
 
   const result = await db.collection('workflows')
     .findOneAndUpdate(
-      { 'workflowId': ObjectID(workflowId) },
+      { 'workflowId': new ObjectId(workflowId) },
       update,
       {
         sort: { 'validity.version': -1 },
         returnNewDocument: true,
+        includeResultMetadata: true,
       },
     );
 
@@ -140,7 +141,7 @@ async function updateCompletionStatus(workflowId) {
 
   const result = await db.collection('workflows')
     .findOneAndUpdate(
-      { 'workflowId': ObjectID(workflowId) },
+      { 'workflowId': new ObjectId(workflowId) },
       {
         $set: {
           'completionStatus': completionStatus,
@@ -150,6 +151,7 @@ async function updateCompletionStatus(workflowId) {
       {
         sort: { 'validity.version': -1 },
         returnNewDocument: true,
+        includeResultMetadata: true,
       },
     );
 
@@ -167,11 +169,11 @@ async function retrieve(workflowId, projection) {
   /// Set up the DB query match condition to be that a record's workflow ID must match the specified one, and throw an error if no workflow ID has been specified
   let match_condition = { workflowId };
 
-  if (typeof workflowId === 'object' && !(workflowId instanceof ObjectID)) match_condition = workflowId;
+  if (typeof workflowId === 'object' && !(workflowId instanceof ObjectId)) match_condition = workflowId;
 
   if (!match_condition.workflowId) throw new Error(`Workflows::retrieve(): the 'workflowId' has not been specified!`);
 
-  match_condition.workflowId = new ObjectID(match_condition.workflowId);
+  match_condition.workflowId = new ObjectId(match_condition.workflowId);
 
   // Set up any additional options that have been specified via the 'projection' argument
   let options = {};
@@ -201,11 +203,11 @@ async function versions(workflowId) {
   // Set up the DB query match condition to be that a record's workflow ID must match the specified one, and throw an error if no workflow ID has been specified
   let match_condition = { workflowId };
 
-  if (typeof workflowId === 'object' && !(workflowId instanceof ObjectID)) match_condition = workflowId;
+  if (typeof workflowId === 'object' && !(workflowId instanceof ObjectId)) match_condition = workflowId;
 
   if (!match_condition.workflowId) throw new Error(`Workflows::versions(): the 'workflowId' has not been specified!`);
 
-  match_condition.workflowId = new ObjectID(match_condition.workflowId);
+  match_condition.workflowId = new ObjectId(match_condition.workflowId);
 
   // Query the 'workflows' records collection for records matching the match condition
   // Then sort any matching records such that the most recent version is first in the list
@@ -320,8 +322,8 @@ async function autoCompleteId(inputString, limit = 10) {
 
   // Calculate the minimum and maximum possible hexadecimal values of the input string
   // The workflow ID is 24 alphanumeric characters long, so the minimum value is given by the input string padded out to this length with '0' characters, and the maximum by padding using 'F' characters
-  const bitlow = ObjectID(q.padEnd(24, '0'));
-  const bithigh = ObjectID(q.padEnd(24, 'F'));
+  const bitlow = new ObjectId(q.padEnd(24, '0'));
+  const bithigh = new ObjectId(q.padEnd(24, 'F'));
 
   let aggregation_stages = [];
 

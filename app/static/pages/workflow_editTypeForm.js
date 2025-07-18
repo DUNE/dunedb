@@ -154,7 +154,7 @@ const metaschema = {
             label: '',
             value: '',
           }],
-          url: '/json/componentForms/list',
+          url: '/json/collection/componentForms/list',
           headers: [{
             key: '',
             value: '',
@@ -279,7 +279,7 @@ const metaschema = {
           label: '',
           value: '',
         }],
-        url: '/json/{{row.type}}Forms/list',
+        url: '/json/collection/{{row.type}}Forms/list',
         headers: [{
           key: '',
           value: '',

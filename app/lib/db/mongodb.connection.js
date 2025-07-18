@@ -11,8 +11,6 @@ class MongoConnection {
 
   async open() {
     const mongoParameters = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       connectTimeoutMS: 1000,
       socketTimeoutMS: 30000,
       tls: !!DB_CERTKEY,

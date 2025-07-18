@@ -18,7 +18,7 @@ async function populateSummarySections() {
     // Retrieve the corresponding page element, the action data to be entered, and the action type form (using the direct URL to its JSON record)
     const actiontypeform = $('.actiontypeform', this);
     const action = actiontypeform.data('record');
-    const actionTypeForm_url = `/json/actionForms/${action.typeFormId}`;
+    const actionTypeForm_url = `/json/collection/actionForms/singleType/${action.typeFormId}`;
 
     $.get(actionTypeForm_url, function (actionTypeForm) {
       // Render the action type form in the corresponding page element

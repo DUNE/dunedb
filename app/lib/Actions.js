@@ -1,5 +1,5 @@
 const MUUID = require('uuid-mongodb');
-const ObjectID = require('mongodb').ObjectId;
+const ObjectId = require('mongodb').ObjectId;
 
 const commonSchema = require('./commonSchema');
 const Components = require('./Components');
@@ -62,7 +62,7 @@ async function save(input, req) {
   let newRecord = {};
 
   newRecord.recordType = 'action';
-  newRecord.actionId = new ObjectID(input.actionId);
+  newRecord.actionId = new ObjectId(input.actionId);
   newRecord.typeFormId = input.typeFormId;
   newRecord.typeFormName = typeForm.formName;
   newRecord.componentUuid = MUUID.from(input.componentUuid);
@@ -185,12 +185,12 @@ async function addImageStrings(actionId, imageStringsArray) {
   // Set up the DB query match condition to be that a record's action ID must match the specified one
   let match_condition = { actionId };
 
-  if (typeof actionId === 'object' && !(actionId instanceof ObjectID)) match_condition = actionId;
+  if (typeof actionId === 'object' && !(actionId instanceof ObjectId)) match_condition = actionId;
 
-  match_condition.actionId = new ObjectID(match_condition.actionId);
+  match_condition.actionId = new ObjectId(match_condition.actionId);
 
   // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the action record, and throw an error if the edit fails
-  const result = db.collection('actions')
+  const result = await db.collection('actions')
     .findOneAndUpdate(
       match_condition,
       {
@@ -199,6 +199,7 @@ async function addImageStrings(actionId, imageStringsArray) {
       {
         sort: { 'validity.version': -1 },
         returnNewDocument: true,
+        includeResultMetadata: true,
       },
     );
 
@@ -214,11 +215,11 @@ async function retrieve(actionId, projection) {
   // Set up the DB query match condition to be that a record's action ID must match the specified one, and throw an error if no action ID has been specified
   let match_condition = { actionId };
 
-  if (typeof actionId === 'object' && !(actionId instanceof ObjectID)) match_condition = actionId;
+  if (typeof actionId === 'object' && !(actionId instanceof ObjectId)) match_condition = actionId;
 
   if (!match_condition.actionId) throw new Error(`Actions::retrieve(): the 'actionId' has not been specified!`);
 
-  match_condition.actionId = new ObjectID(match_condition.actionId);
+  match_condition.actionId = new ObjectId(match_condition.actionId);
 
   // Set up any additional options that have been specified via the 'projection' argument
   let options = {};
@@ -251,11 +252,11 @@ async function versions(actionId) {
   // Set up the DB query match condition to be that a record's action ID must match the specified one, and throw an error if no action ID has been specified
   let match_condition = { actionId };
 
-  if (typeof actionId === 'object' && !(actionId instanceof ObjectID)) match_condition = actionId;
+  if (typeof actionId === 'object' && !(actionId instanceof ObjectId)) match_condition = actionId;
 
   if (!match_condition.actionId) throw new Error(`Actions::versions(): the 'actionId' has not been specified!`);
 
-  match_condition.actionId = new ObjectID(match_condition.actionId);
+  match_condition.actionId = new ObjectId(match_condition.actionId);
 
   // Query the 'actions' records collection for records matching the match condition
   // Then sort any matching records such that the most recent version is first in the list
@@ -438,8 +439,8 @@ async function autoCompleteId(inputString, limit = 10) {
 
   // Calculate the minimum and maximum possible hexadecimal values of the input string
   // The action ID is 24 alphanumeric characters long, so the minimum value is given by the input string padded out to this length with '0' characters, and the maximum by padding using 'F' characters
-  const bitlow = ObjectID(q.padEnd(24, '0'));
-  const bithigh = ObjectID(q.padEnd(24, 'F'));
+  const bitlow = new ObjectId(q.padEnd(24, '0'));
+  const bithigh = new ObjectId(q.padEnd(24, 'F'));
 
   let aggregation_stages = [];
 

@@ -8,8 +8,8 @@ const permissions = require('../lib/permissions');
 const Workflows = require('../lib/Workflows');
 
 
-/// View a single workflow record
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission('workflows:view'), async function (req, res, next) {
+/// Retrieve an existing workflow record
+router.get('/workflow/:workflowId', permissions.checkPermission('workflows:view'), async function (req, res, next) {
   try {
     // Set up a query object consisting of the specified workflow ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { workflowId: req.params.workflowId };
@@ -75,28 +75,8 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})', permissions.checkPermission
 });
 
 
-/// Create a new workflow
-router.get('/workflow/:typeFormId', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
-  try {
-    // Retrieve the workflow type form corresponding to the specified type form ID, and throw an error if there is no such type form
-    const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
-
-    if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${req.params.typeFormId}`);
-
-    // Render the interface page
-    res.render('workflow_edit.pug', {
-      workflowTypeForm,
-      newWorkflow: true,
-    });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).send(err.toString());
-  }
-});
-
-
-/// Edit an existing workflow
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
+/// Edit an existing workflow record
+router.get('/workflow/:workflowId/edit', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
     // Retrieve the most recent version of the record corresponding to the specified workflow ID, and throw an error if there is no such record
     const workflow = await Workflows.retrieve(req.params.workflowId);
@@ -122,7 +102,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/edit', permissions.checkPermi
 
 
 /// Update a single step result in the path of an existing workflow, and re-determine the workflow completion status
-router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepIndex/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
+router.get('/workflow/:workflowId/:stepIndex/:stepResult', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
   try {
     // This route is accessed in one of two situations:
     // 1) when submitting a completely new workflow-related action ... in which case, the step index will be a positive integer and the workflow path step result will need to be updated
@@ -140,7 +120,7 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepIndex/:stepResult', perm
     result = await Workflows.updateCompletionStatus(req.params.workflowId);
 
     // Redirect the user to the interface page for viewing the workflow record
-    res.redirect(`/workflow/${req.params.workflowId}`);
+    res.redirect(302, `/workflow/${req.params.workflowId}`);
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
@@ -148,7 +128,27 @@ router.get('/workflow/:workflowId([A-Fa-f0-9]{24})/:stepIndex/:stepResult', perm
 });
 
 
-/// Create a new workflow type form
+/// Create a new workflow
+router.get('/workflow/:typeFormId/new', permissions.checkPermission('workflows:edit'), async function (req, res, next) {
+  try {
+    // Retrieve the workflow type form corresponding to the specified type form ID, and throw an error if there is no such type form
+    const workflowTypeForm = await Forms.retrieve('workflowForms', req.params.typeFormId);
+
+    if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${req.params.typeFormId}`);
+
+    // Render the interface page
+    res.render('workflow_edit.pug', {
+      workflowTypeForm,
+      newWorkflow: true,
+    });
+  } catch (err) {
+    logger.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+
+/// Create a new workflow type
 router.get('/workflowTypes/:typeFormId/new', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
     // Check that the specified type form ID is not already being used - attempt to retrieve any and all existing type forms with this type form ID
@@ -167,7 +167,7 @@ router.get('/workflowTypes/:typeFormId/new', permissions.checkPermission('forms:
     }
 
     // Redirect the user to the interface page for editing an existing workflow type form
-    res.redirect(`/workflowTypes/${req.params.typeFormId}/edit`);
+    res.redirect(302, `/workflowTypes/${req.params.typeFormId}/edit`);
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
@@ -175,7 +175,7 @@ router.get('/workflowTypes/:typeFormId/new', permissions.checkPermission('forms:
 });
 
 
-/// Edit an existing workflow type form
+/// Edit an existing workflow type
 router.get('/workflowTypes/:typeFormId/edit', permissions.checkPermission('forms:edit'), async function (req, res) {
   try {
     // Render the interface page
@@ -267,6 +267,75 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
+  }
+});
+
+
+/// Retrieve an existing workflow record
+router.get(['/json/workflow/:workflowId', '/api/workflow/:workflowId'], permissions.checkPermissionJson('workflows:view'), async function (req, res, next) {
+  try {
+    // Set up a query object consisting of the specified workflow ID and a version number if one is provided (if not, the most recent version is assumed)
+    let query = { workflowId: req.params.workflowId };
+
+    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+
+    // Retrieve the specified version of the record
+    // If there is no record corresponding to the ID, or the version number is not valid, this returns 'null'
+    const workflow = await Workflows.retrieve(query);
+
+    // Return the record in JSON format
+    return res.status(200).json(workflow);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// Create a new workflow or edit an existing workflow record
+router.post(['/json/workflow', '/api/workflow'], permissions.checkPermissionJson('workflows:edit'), async function (req, res, next) {
+  try {
+    logger.info(req.body, 'Submission to /json/workflow');
+
+    // Save the record ... if successful, this returns the workflow ID
+    const workflowId = await Workflows.save(req.body, req);
+
+    // Return the record's workflow ID
+    return res.status(201).json(workflowId);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List all workflows of a single workflow type
+router.get(['/json/workflows/:typeFormId/list', '/api/workflows/:typeFormId/list'], permissions.checkPermissionJson('workflows:view'), async function (req, res, next) {
+  try {
+    // Retrieve records of all workflows with the specified workflow type
+    // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
+    const workflows = await Workflows.list({ typeFormId: req.params.typeFormId });
+
+    // Extract the ID field (in string format) from each workflow record, and save it into a list
+    // Additionally, attempt to extract the overall workflow status ... save it into a separate list if it exists as a field in the record, or set it as '0.0' if not (but still save it)
+    let workflowIDs = [];
+    let workflowStatuses = [];
+
+    for (const workflow of workflows) {
+      workflowIDs.push(workflow.workflowId);
+
+      if (workflow.completionStatus != null) {
+        workflowStatuses.push(workflow.completionStatus);
+      } else {
+        workflowStatuses.push(0.0);
+      }
+    }
+
+    // Return a list containing both the list of workflow IDs and the list of workflow statuses
+    return res.status(200).json([workflowIDs, workflowStatuses]);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
 });
 

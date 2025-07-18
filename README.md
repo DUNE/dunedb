@@ -7,19 +7,26 @@ Please note that this README is intended for <u>**database developers**</u> - fo
 
 ## Getting Started
 
-The DB code is designed to run on a **docker** system, so you will need to have a (relatively) recent version of Docker installed on the computer or server on which you intend to run the DB.  Once this is done, and you have performed a `git clone` of this (`dunedb`) repository, executing the following command when in the `app` directory will set up and start a new DB instance:
+The DB code is designed to run on a `docker` system, so you will need to have a (relatively) recent version of Docker installed on the computer or server on which you intend to run the DB, as well as the `npm` toolset.  Once these are in place, the following steps should be performed to build and deploy a locally running development instance of the APA DB.
+
+1. `git clone` this (`dunedb`) repository
+2. navigate to the `/app` directory, and run `npm install` (this may require `sudo` access privileges)
+3. if there are no errors with step (2), run `docker compose build` (this may also require `sudo` access privileges)
+
+If there are no errors with step (3) above, the DB will now be built but not actually running.  To start it, please run the following command in the `/app` directory:
+
 
 ```
 docker compose up -d
 ```
 
-Note that the `-d` flag above indicates that the DB will run in 'detached' mode, i.e. the live logs will not be shown.  To access the logs once the DB is running, please run the following command in the `app` directory:
+Note that the `-d` flag in the above command indicates that the DB will run in 'detached' mode, i.e. the live logs will not be shown.  To access the logs once the DB is running, please run the following command in the `/app` directory:
 
 ```
 docker compose logs -f app
 ```
 
-To stop the DB instance at any point, simply run the following command in the `app` directory:
+To stop the DB instance at any point, simply run the following command in the `/app` directory:
 
 ```
 docker compose down
@@ -34,7 +41,7 @@ The code in this respository is organised as follows (for simplicity, normally h
     * `/lib` : server-side JavaScript functions that operate directly on and with the MongoDB database
     * `/pug` : Pug templates for the client-side web interface pages
     * `/routes` : JavaScript functions that connect the client-side web interface with the server-side functions
-    * `/scss` : static CSS styling, compiled at DB startup
+    * `/scss` : static CSS styling, which should be recompiled only when changes are made to any local and/or imported .scss files
     * `/static` : various functions that operate within the client-side web interface
         * `/css` : additional CSS style guides for specific web interface pages
         * `/formio` : JavaScript code that governs the behaviour and appearance of the various Formio form components used by the web interface
@@ -50,6 +57,6 @@ The code in this respository is organised as follows (for simplicity, normally h
 ## Authors
 
 * [**Krish Majumdar**](https://github.com/krishmaj)
-* [**Micah Henning**](https://micah.soy)
 * [**Brian Rebel**](https://github.com/bjrebel)
+* [**Micah Henning**](https://micah.soy)
 * [**Nathaniel Tagg**](https://github.com/nathanieltagg) (former)

@@ -1,7 +1,9 @@
 const express = require('express');
 const MUUID = require('uuid-mongodb');
 const MongoStore = require('connect-mongo');
+const sass = require('sass');
 const session = require('express-session');
+const { writeFileSync } = require('fs');
 
 const { DB_NAME, BASE_URL, NODE_ENV, SESSION_SECRET } = require('./lib/constants');
 const { db } = require('./lib/db');
@@ -52,18 +54,12 @@ async function createApp(app) {
 
   app.use(my_express_logger);
 
-  // Set the Sass/Scss precompiler
-  var compileSass = require('express-compile-sass');
-
-  app.use('/css', compileSass({
-    root: `${__dirname}/scss`,
-    sourceMap: true,       // include Base64 encoded source maps in output css
-    sourceComments: true,  // includes source comments in output css
-    watchFiles: true,      // watch sass files and update mtime on main files for each change
-    logToConsole: false    // if true, the app will log to 'logger.error' on errors
-  }));
-
-  app.use('/css', express.static('../scss'));
+  // Recompile the .scss style file ... this will recreate the '/static/css/custom.css' file
+  // Recompilation only needs to be done if there are any changes in the 'custom.scss' file (or any .scss files which that file imports), and only once in order to recreate the .css file
+  // Uncomment the line below to allow the compilation to run automatically at DB startup, and once the .css file is recreated, it can be commented out again  
+////  writeFileSync(`${__dirname}/static/css/custom.css`, sass.compile(`${__dirname}/scss/custom.scss`).css, 'utf-8');
+  
+  app.use('/css', express.static(`${__dirname}/static/css`));
 
   // Set any local overrides required for testing purposes
   app.use(express.static(`${__dirname}/local/static`));
@@ -125,8 +121,7 @@ async function createApp(app) {
   require('./lib/auth.js')(app, session_config);
 
   // Set up all routes
-  routes.routes.forEach(route => app.use(route));
-  routes.paths.forEach(({ path, route }) => app.use(path, route));
+  routes.forEach(route => app.use(route));
 
   // Return the fully configured app
   return app;

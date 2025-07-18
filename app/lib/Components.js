@@ -148,11 +148,11 @@ async function save(input, req) {
         newRecord.data.dunePid = `D00300500003-${typeRecordNumber}-US200-010000`;
       }
     } else if (newRecord.formId === 'DWA') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
-      newRecord.data.dunePid = `D00300800001-${typeRecordNumber}-US136-010000`;
+      newRecord.data.componentName = `${newRecord.formName} ${newRecord.data.dwaNumber}`;
+      newRecord.data.dunePid = `D00300800001-${newRecord.data.dwaNumber}-US136-010000`;
     } else if (newRecord.formId === 'DWAPDB') {
-      newRecord.data.componentName = `DWA PDB ${typeRecordNumber}`;
-      newRecord.data.dunePid = `D00300800002-${typeRecordNumber}-US136-010000`;
+      newRecord.data.componentName = `DWA PDB ${newRecord.data.pdbNumber}`;
+      newRecord.data.dunePid = `D00300800002-${newRecord.data.pdbNumber}-US136-010000`;
     } else if (newRecord.formId === 'GBiasBoard') {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
@@ -346,7 +346,7 @@ async function updateLocation(componentUuid, location, date, detail) {
     match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
     // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
-    const result = db.collection('components')
+    const result = await db.collection('components')
       .findOneAndUpdate(
         match_condition,
         {
@@ -359,6 +359,7 @@ async function updateLocation(componentUuid, location, date, detail) {
         {
           sort: { 'validity.version': -1 },
           returnNewDocument: true,
+          includeResultMetadata: true,
         },
       );
 
@@ -696,8 +697,8 @@ async function autoCompleteUuid(inputString, limit = 10) {
 
   // Calculate the minimum and maximum possible binary values of the input string
   // The component UUID is 32 alphanumeric characters long (excluding dashes), so the minimum value is given by the input string padded out to this length with '0' characters, and the maximum by padding using 'F' characters
-  const bitlow = Binary(Buffer.from(q.padEnd(32, '0'), 'hex'), Binary.SUBTYPE_UUID);
-  const bithigh = Binary(Buffer.from(q.padEnd(32, 'F'), 'hex'), Binary.SUBTYPE_UUID);
+  const bitlow = new Binary(Buffer.from(q.padEnd(32, '0'), 'hex'), Binary.SUBTYPE_UUID);
+  const bithigh = new Binary(Buffer.from(q.padEnd(32, 'F'), 'hex'), Binary.SUBTYPE_UUID);
 
   let aggregation_stages = [];
 
@@ -856,14 +857,14 @@ async function setComponentNames(typeFormId) {
       componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
       dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (typeFormId === 'DWA') {
-      componentName = `${typeFormName} ${typeRecordNumber}`;
-      dunePid = `D00300800001-${typeRecordNumber}-US136-010000`;
+      componentName = `${typeFormName} ${data.dwaNumber}`;
+      dunePid = `D00300800001-${data.dwaNumber}-US136-010000`;
     } else if (typeFormId === 'DWAComponentShipment') {
       componentName = `${typeFormName} (${utils.dictionary_locations[data.originOfShipment]}.${utils.dictionary_locations[data.destinationOfShipment]})`;
       dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (typeFormId === 'DWAPDB') {
-      componentName = `DWA PDB ${typeRecordNumber}`;
-      dunePid = `D00300800002-${typeRecordNumber}-US136-010000`;
+      componentName = `DWA PDB ${data.pdbNumber}`;
+      dunePid = `D00300800002-${data.pdbNumber}-US136-010000`;
     } else if (typeFormId === 'GBiasBoard') {
       componentName = `${typeFormName} ${typeRecordNumber}`;
       dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
@@ -914,7 +915,7 @@ async function setComponentNames(typeFormId) {
     match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
     // Update the component name and DUNE PID fields of ALL records with the matching component UUID (i.e. all versions of the component in question)
-    const result = db.collection('components')
+    const result = await db.collection('components')
       .updateMany(
         match_condition,
         [

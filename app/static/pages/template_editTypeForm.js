@@ -91,7 +91,7 @@ $(function () {
 
       // Attempt to retrieve the current type form record for the specified type form ID in the specified record collection, and throw an error if no such type form exists
       // If the retrieval is successful, continue to the function that deals with changes to the metadata and type forms
-      $.get(`/json/${collection}/${formId}`, ChangeRecordData)
+      $.get(`/json/collection/${collection}/singleType/${formId}`, ChangeRecordData)
         .fail(function () {
           $('#builder').html(`Error - no type form currently exists for type form ID = ${formId}`);
         });
@@ -203,7 +203,7 @@ function SubmitData(submission) {
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: `/json/${collection}/${formId}`,
+    url: `/json/collection/${collection}/singleType/${formId}/edit`,
     data: JSON.stringify(submission.data),
     dataType: 'json',
     success: postSuccess,
