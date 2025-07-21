@@ -62,6 +62,14 @@ block content
           li <b>board acceptance status</b> - that is, whether a board has been <u>rejected</u> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <u>accepted</u> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediated</u>)
           li <b>tooth strip attachment status</b> - whether a tooth strip has been attached to the board (by performing a <u>Tooth Strip Attachment</u> action on it)
 
+      p When selecting any of the 'populated board' component types (i.e. 'CE Adapter', 'CR', 'G-Bias' or 'SHV'), the search results may be optionally refined using the following parameter: 
+        ul
+          li <b>board conformance status</b> - that is, whether a board has been deemed conformant or not (this is information provided during component creation, and not tied to an explicit action that has been performed on the board in question)
+
+      p When selecting any of the 'populated board' component types or the 'Cable Harness' component type, the search results may be optionally refined using the following parameter: 
+        ul 
+          li <b>QA checks status</b> - that is, whether a component has passed or failed the relevant QA checks that have been performed on it via a <u>Populated Board/Cable Harness QA</u> action
+
       hr
 
     .vert-space-x2

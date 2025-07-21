@@ -254,7 +254,7 @@ class ComponentUUID extends TextFieldComponent {
   }
 
   // Set the input field to a provided string, and if it is a valid UUID string, do the appropriate action based on the current page URL
-  //   - if on the 'Search for Components by UUID or Type and Number' page, redirect to the component information page
+  //   - if on the 'Search for Components by Identifier' page, redirect to the component information page
   //   - if on the 'Search for Workflows by ID or UUID' page, retrieve the relevant workflow information and redirect to the workflow information page
   //     (note that the 'ajax' query in this scenario uses the 'postSuccess' and 'postFail' functions already defined on the 'Search for Workflows by ID or UUID' page)
   //   - if on any 'Perform Action on Unspecified Component' page, redirect to the page for performing the action on the specified component
@@ -268,7 +268,7 @@ class ComponentUUID extends TextFieldComponent {
 
       const currentURL = window.location.pathname;
 
-      if (currentURL === '/search/componentsByUUIDOrTypeAndNumber') {
+      if (currentURL === '/search/componentsByIdentifier') {
         window.location.href = `/component/${value}`;
       } else if (currentURL === '/search/workflowsByIDOrUUID') {
         $.ajax({
@@ -280,7 +280,7 @@ class ComponentUUID extends TextFieldComponent {
         }).fail(postFail);
       } else if ((currentURL.substring(0, 8) === '/action/') && (currentURL.substring(currentURL.length - 7) === '/unspec')) {
         const baseURL = currentURL.substring(0, currentURL.length - 7);
-        window.location.href = `${baseURL}/${value}`;
+        window.location.href = `${baseURL}/spec/${value}`;
       } else {
         let info_target = $(this.refs.compUuidInfo[index]);
         info_target.prop('href', `/component/${value}`).text('link');

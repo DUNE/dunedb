@@ -100,7 +100,7 @@ module.exports = routes;
   /json/search/componentsByDUNEPID/:dunePID
   /json/search/componentsByTypeAndNumber/:typeFormId/:typeRecordNumber
   /search/componentsByTypeAndLocation
-  /json/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus
+  /json/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus/:conformanceStatus/:qaChecksStatus
   /search/componentsByTypeAndPartNumber
   /json/search/componentsByTypeAndPartNumber/:typeFormId/:partNumber/:acceptanceStatus/:toothStripStatus
   /search/geoBoardsByVisInspectOrOrderNumber

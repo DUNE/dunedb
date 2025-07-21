@@ -377,6 +377,7 @@ async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
       typeRecordNumber: { '$first': '$data.typeRecordNumber' },
       formName: { '$first': '$formName' },
       shortUuid: { '$first': '$shortUuid' },
+      data: { '$first': '$data' },
     },
   });
 
@@ -391,19 +392,31 @@ async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
 
 
 /// Retrieve a list of components that match the specified type and that are at a specified location
-async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatus, toothStripStatus) {
+async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatus, toothStripStatus, conformanceStatus, qaChecksStatus) {
   let aggregation_stages = [];
 
   // Allow for a 'null' location to be specified, to make debugging of components with missing locations easier
   if (location == 'none') location = null;
 
-  // Match against the type form ID and specified location to get records of all components of the specified type currently at this location
-  aggregation_stages.push({
-    $match: {
+  // Depending on which parameters have been passed to this function, match to get:
+  // ... either records of all components of the specified type at the specified location with the specified conformance (for one of the 'populated board' types where a conformance was specified)
+  // ... or records of all components of the specified type at the specified location (for one of the 'populated board' types where a conformance was not specified, or all other component types)
+  let match_condition = {};
+
+  if (['CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(typeFormId) && (conformanceStatus !== 'any')) {
+    match_condition = {
       'formId': typeFormId,
       'reception.location': location,
-    }
-  });
+      'data.boardIsConformant': conformanceStatus,
+    };
+  } else {
+    match_condition = {
+      'formId': typeFormId,
+      'reception.location': location,
+    };
+  }
+
+  aggregation_stages.push({ $match: match_condition });
 
   // Select the latest version of each record, and pass through only the fields required for later use (dependent on the specified component type)
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
@@ -474,6 +487,7 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
 
   // Reorganise the query results to make it easier to display them on the interface page ... the format of the reorganised results depends on the specified component type
   // Additionally for the 'Geometry Board' component type, filter the results based on the optional 'board acceptance status' and 'tooth strip attachment status' search parameters
+  // Alternatively for any of the 'populated board' or 'Cable Harness' component types, filter the results based on the optional 'QA checks status' search parameters
   let cleanedResults = [];
 
   if (typeFormId === 'GeometryBoard') {
@@ -593,6 +607,42 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
 
       if (cleanedMeshGroup.componentUuids.length > 0) cleanedResults.push(cleanedMeshGroup);
     }
+  } else if (['CableHarness', 'CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(typeFormId)) {
+    for (const result of results) {
+      const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
+
+      let qaChecksPassed = false;
+
+      let match_condition = {
+        typeFormId: 'PopulatedBoardQC',
+        componentUuid: MUUID.from(result.componentUuid).toString(),
+      };
+
+      const qaChecksActions = await Actions.list(match_condition);
+
+      if (qaChecksActions.length > 0) {
+        const qaChecksAction = await Actions.retrieve(qaChecksActions[0].actionId);
+
+        if (['CableHarness', 'CEAdapterBoard', 'SHVBoard'].includes(typeFormId)) {
+          if (qaChecksAction.data.qaTestResult === 'passed') {
+            qaChecksPassed = true;
+          }
+        } else if (['CRBoard', 'GBiasBoard'].includes(typeFormId)) {
+          if ((qaChecksAction.data.preColdCycleTest === 'passed') && (qaChecksAction.data.postColdCycleTest === 'passed')) {
+            qaChecksPassed = true;
+          }
+        }
+      }
+
+      if ((qaChecksStatus === 'any') || ((qaChecksStatus === 'passed') && (qaChecksPassed == true)) || (qaChecksStatus === 'failed') && (qaChecksPassed == false)) {
+        cleanedResults.push({
+          'componentUuid': result.componentUuid,
+          'typeRecordNumber': component.data.typeRecordNumber,
+          'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
+          'qaChecksPassed': (qaChecksPassed == true) ? 'Yes' : 'No',
+        });
+      }
+    }
   } else {
     for (const result of results) {
       const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
@@ -601,7 +651,7 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
         'componentUuid': result.componentUuid,
         'typeRecordNumber': component.data.typeRecordNumber,
         'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
-      })
+      });
     }
   }
 
