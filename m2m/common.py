@@ -409,11 +409,16 @@ def GetAction(actionID, connection, headers, version = 0):
 ################################################
 ## Get a list of all actions of a single type ##
 ################################################
-def GetListOfActions(actionTypeFormID, connection, headers):
+def GetListOfActions(actionTypeFormID, connection, headers, componentUUID = ''):
     # Request a response from the API route that gets a list of action IDs for a given action type form ID
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     try:
-        connection.request('GET', '/api/actions/' + actionTypeFormID + '/list', headers = headers)
+        url = f'/api/actions/{actionTypeFormID}/list'
+        
+        if componentUUID != '':
+            url += f'?uuid={componentUUID}'
+        
+        connection.request('GET', url, headers = headers)
 
         # The route returns the list of action IDs as a JSON document (which must be deserialised to get the list as a Python list)
         actionIDs = json.loads(connection.getresponse().read().decode('utf-8'))
