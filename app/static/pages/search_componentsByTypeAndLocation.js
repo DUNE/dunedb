@@ -3,6 +3,8 @@ let componentType = null;
 let componentLocation = null;
 let acceptanceStatus = 'any';
 let toothStripStatus = 'any';
+let conformanceStatus = 'any';
+let qaChecksStatus = 'any';
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -27,6 +29,14 @@ async function renderSearchForms() {
     toothStripStatus = $('#toothStripStatusSelection').val();
   });
 
+  $('#conformanceStatusSelection').on('change', async function () {
+    conformanceStatus = $('#conformanceStatusSelection').val();
+  });
+
+  $('#qaChecksStatusSelection').on('change', async function () {
+    qaChecksStatus = $('#qaChecksStatusSelection').val();
+  });
+
   // When the confirmation button is pressed, perform the search using the appropriate jQuery 'ajax' call and the current values of the search parameters
   // Additionally, disable the button while the current search is being performed
   $('#confirmButton').on('click', function () {
@@ -36,7 +46,7 @@ async function renderSearchForms() {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/componentsByTypeAndLocation/${componentType}/${componentLocation}/${acceptanceStatus}/${toothStripStatus}`,
+        url: `/json/search/componentsByTypeAndLocation/${componentType}/${componentLocation}/${acceptanceStatus}/${toothStripStatus}/${conformanceStatus}/${qaChecksStatus}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
@@ -161,6 +171,34 @@ function postSuccess(result) {
         }
 
         $('#results').append('<br>');
+      }
+    } else if (['CableHarness', 'CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes($('#typeSelection option:selected').val())) {
+      const resultsStart = `
+        <tr>
+          <td colspan = "3">Found ${result.length} components with matching criteria</td>
+        </tr>`;
+
+      $('#results').append(resultsStart);
+      $('#results').append('<br>');
+
+      const tableStart = `
+        <tr>
+          <th scope = 'col' width = '25%'>Type Record Number</th>
+          <th scope = 'col' width = '25%'>Date at Location</th>
+          <th scope = 'col' width = '50%'>QA Checks Passed</th>
+        </tr>`;
+
+      $('#results').append(tableStart);
+
+      for (const component of result) {
+        const componentText = `
+        <tr>
+          <td><a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.typeRecordNumber}</td>
+          <td>${component.receptionDate}</td>
+          <td>${component.qaChecksPassed}</td>
+        </tr>`;
+
+        $('#results').append(componentText);
       }
     } else {
       const tableStart = `

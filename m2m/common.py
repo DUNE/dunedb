@@ -132,13 +132,13 @@ def CreateComponent(componentTypeFormID, componentData, connection, headers):
         try:
             connection.request('POST', '/api/component', body = componentJSON, headers = headers)
 
-            # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+            # The route returns differently based on success (response code between 200 and 299) or failure (response code = anything else)
             #  - if successful, the full UUID of the submitted component is returned as a JSON document (which must be deserialised to get the UUID as a string)
             #  - if not successful, an error is returned and displayed on screen
             submissionResponse = connection.getresponse()
             result = 'none'
 
-            if submissionResponse.status == 200:
+            if submissionResponse.status >= 200 and submissionResponse.status < 300:
                 result = json.loads(submissionResponse.read().decode('utf-8'))
             else:
                 print(submissionResponse.status, submissionResponse.reason)
@@ -185,13 +185,13 @@ def EditComponent(componentUUID, componentData_fields, componentData_values, con
         try:
             connection.request('POST', '/api/component', body = componentJSON, headers = headers)
 
-            # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+            # The route returns differently based on success (response code between 200 and 299) or failure (response code = anything else)
             #  - if successful, the full UUID of the submitted component is returned as a JSON document (which must be deserialised to get the UUID as a string)
             #  - if not successful, an error is returned and displayed on screen
             submissionResponse = connection.getresponse()
             result = 'none'
 
-            if submissionResponse.status == 200:
+            if submissionResponse.status >= 200 and submissionResponse.status < 300:
                 result = json.loads(submissionResponse.read().decode('utf-8'))
             else:
                 print(submissionResponse.status, submissionResponse.reason)
@@ -305,13 +305,13 @@ def PerformAction(actionTypeFormID, componentUUID, actionData, connection, heade
     try:
         connection.request('POST', '/api/action', body = actionJSON, headers = headers)
 
-        # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+        # The route returns differently based on success (response code between 200 and 299) or failure (response code = anything else)
         #  - if successful, the ID of the submitted action is returned as a JSON document (which must be deserialised to get the ID as a string)
         #  - if not successful, an error is returned and displayed on screen
         submissionResponse = connection.getresponse()
         result = 'none'
 
-        if submissionResponse.status == 200:
+        if submissionResponse.status >= 200 and submissionResponse.status < 300:
             result = json.loads(submissionResponse.read().decode('utf-8'))
         else:
             print(submissionResponse.status, submissionResponse.reason)
@@ -354,13 +354,13 @@ def EditAction(actionID, actionData_fields, actionData_values, connection, heade
         try:
             connection.request('POST', '/api/action', body = actionJSON, headers = headers)
 
-            # The route returns differently based on success (response code = 200) or failure (response code = anything else)
+            # The route returns differently based on success (response code between 200 and 299) or failure (response code = anything else)
             #  - if successful, the ID of the submitted action is returned as a JSON document (which must be deserialised to get the ID as a string)
             #  - if not successful, an error is returned and displayed on screen
             submissionResponse = connection.getresponse()
             result = 'none'
 
-            if submissionResponse.status == 200:
+            if submissionResponse.status >= 200 and submissionResponse.status < 300:
                 result = json.loads(submissionResponse.read().decode('utf-8'))
             else:
                 print(submissionResponse.status, submissionResponse.reason)

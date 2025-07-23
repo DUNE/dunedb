@@ -39,7 +39,7 @@ block content
                 option(value = 'GroundingMeshPanel') Grounding Mesh Panel
                 option(value = 'SHVBoard') SHV Board
                 option(value = 'Yoke') Yoke
-                
+
               .vert-space-x2
 
             .col-md-6
@@ -101,6 +101,36 @@ block content
                 option(value = 'any') (any)
                 option(value = 'attached') Tooth Strip Attached
                 option(value = 'notAttached') Tooth Strip Not Yet Attached
+
+          .vert-space-x2 
+            hr
+
+          .row 
+            .col-md-6
+              h4 Board Conformance Status
+
+              .vert-space-x1 
+                p Select a status below ... this is an optional parameter.
+                  br
+                  | It only applies when selecting <b>any populated board</b> above.
+
+              select.form-control#conformanceStatusSelection
+                option(value = 'any') (any)
+                option(value = 'yes') Board is Conformant 
+                option(value = 'no') Board is Not Conformant
+
+            .col-md-6
+              h4 QA Checks Status
+
+              .vert-space-x1 
+                p Select a status below ... this is an optional parameter.
+                  br
+                  | It only applies when selecting <b>any populated board</b> or <b>'Cable Harness'</b> above.
+
+              select.form-control#qaChecksStatusSelection
+                option(value = 'any') (any)
+                option(value = 'passed') QA Checks Passed
+                option(value = 'failed') QA Checks Failed
 
         .col-md-1
 

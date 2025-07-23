@@ -59,11 +59,11 @@ router.get('/search/componentsByTypeAndLocation', async function (req, res, next
 
 
 /// Search for components by type and current location (query to server-side)
-router.get(['/json/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus', '/api/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus'], async function (req, res, next) {
+router.get(['/json/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus/:conformanceStatus/:qaChecksStatus', '/api/search/componentsByTypeAndLocation/:typeFormId/:location/:acceptanceStatus/:toothStripStatus/:conformanceStatus/:qaChecksStatus'], async function (req, res, next) {
   try {
     // Retrieve a list of components that match the specified record details
     // Geometry boards and grounding mesh panels are grouped by part number, other component types are ungrouped
-    const components = await Search_OtherComponents.componentsByTypeAndLocation(req.params.typeFormId, req.params.location, req.params.acceptanceStatus, req.params.toothStripStatus);
+    const components = await Search_OtherComponents.componentsByTypeAndLocation(req.params.typeFormId, req.params.location, req.params.acceptanceStatus, req.params.toothStripStatus, req.params.conformanceStatus, req.params.qaChecksStatus);
 
     // Return the list in JSON format
     return res.status(200).json(components);
