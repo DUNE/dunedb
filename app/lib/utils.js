@@ -209,6 +209,7 @@ module.exports = {
     gwennMouster: 'Gwenn Mouster',
     radosavPantelic: 'Radosav Pantelic',
     danielSalisbury: 'Daniel Salisbury',
+    stephenSumner: 'Stephen Sumner',
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
@@ -221,6 +222,7 @@ module.exports = {
     'auth0|6283d0da53955b00670866fa',                                                                     // Gwenn Mouster (Production)
     'auth0|6543ac95a5b46c922b92fc5b',                                                                     // Radosav Pantelic (Production)
     'auth0|62cc5cd824d68a7b806288dc',                                                                     // Daniel Salisbury (Production)
+    'auth0|660d6fdc89987529cfbb11d9',                                                                     // Stephen Sumner (Production)
     'auth0|6419d07e67b64413cd0679f5',                                                                     // Sotiris Vlachos (Production)
     'auth0|62c1f26dd68f53308071c91a', 'auth0|6247211d7ca173006f55b951',                                   // Brian Rebel (Staging, Production)
     'auth0|62366229e644f4006ff1b144', 'auth0|6236627bcd1229006a1e5c54', 'auth0|623662b39e63f500683a210f', // Krish Majumdar (Staging, Production, Development)
