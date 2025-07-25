@@ -261,7 +261,7 @@ async function save(input, req) {
     newRecord.data.componentName = `Geometry ${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'CEAdapterBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'CRBoardShipment') {
     newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;

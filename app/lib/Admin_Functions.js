@@ -93,7 +93,7 @@ async function setComponentNames(typeFormId) {
       componentName = `${typeFormName} (${data.subComponent_count}.${validityStartDate.substring(0, 10)})`;
       dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (typeFormId === 'CEAdapterBoardShipment') {
-      componentName = `${typeFormName} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
+      componentName = `${typeFormName} ${typeRecordNumber} (${data.boardUuiDs.length}.${validityStartDate.substring(0, 10)})`;
       dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (typeFormId === 'CRBoard') {
       componentName = `${typeFormName} ${typeRecordNumber}`;
