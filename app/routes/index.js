@@ -54,6 +54,7 @@ module.exports = routes;
   /json/action/:actionId
   /json/action
   /json/action/:actionId/addImages
+  /json/action/:actionId/removeImage/:imageNumber
   /json/actions/:typeFormId/list
   /json/actions/allFromWorkflow/:workflowId
   /json/actions/ncrsByComponent/:uuid

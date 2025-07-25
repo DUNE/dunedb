@@ -463,6 +463,21 @@ router.post(['/json/action/:actionId/addImages', '/api/action/:actionId/addImage
 });
 
 
+/// Remove an image from an action record
+router.post(['/json/action/:actionId/removeImage/:imageNumber', '/api/action/:actionId/removeImage/:imageNumber'], permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
+  try {
+    // Remove the specified image (by number, NOT INDEX) from the action record corresponding to the specified action ID ... if successful, the function returns the action ID
+    const result = await Actions.removeImageString(req.params.actionId, req.params.imageNumber);
+
+    // Return the record's action ID
+    return res.status(201).json(result);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// List all actions of a single action type
 router.get(['/json/actions/:typeFormId/list', '/api/actions/:typeFormId/list'], permissions.checkPermissionJson('actions:view'), async function (req, res, next) {
   try {
