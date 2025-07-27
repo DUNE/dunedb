@@ -189,7 +189,7 @@ async function addImageStrings(actionId, imageStringsArray) {
 
   match_condition.actionId = new ObjectId(match_condition.actionId);
 
-  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the action record, and throw an error if the edit fails
+  // Use the MongoDB '$push' operator to populate the images to the 'images' array in the action record, and throw an error if the edit fails
   const result = await db.collection('actions')
     .findOneAndUpdate(
       match_condition,
@@ -204,6 +204,40 @@ async function addImageStrings(actionId, imageStringsArray) {
     );
 
   if (result.ok === 0) throw new Error(`Actions::addImageStrings() - failed to update the action record!`);
+
+  // If the edit is successful, return the record's action ID as confirmation
+  return actionId;
+}
+
+
+/// Remove an image from an action record
+async function removeImageString(actionId, imageNumber) {
+  // Retrieve the action record, and then the string corresponding to the image
+  const action = await retrieve(actionId);
+  const imageString = action.images[imageNumber - 1];
+
+  // Set up the DB query match condition to be that a record's action ID must match the specified one
+  let match_condition = { actionId };
+
+  if (typeof actionId === 'object' && !(actionId instanceof ObjectId)) match_condition = actionId;
+
+  match_condition.actionId = new ObjectId(match_condition.actionId);
+
+  // Use the MongoDB '$pull' operator to remove the images' array entry which has a value matching the image string, and throw an error if the edit fails
+  const result = await db.collection('actions')
+    .findOneAndUpdate(
+      match_condition,
+      {
+        $pull: { 'images': imageString }
+      },
+      {
+        sort: { 'validity.version': -1 },
+        returnNewDocument: true,
+        includeResultMetadata: true,
+      },
+    );
+
+  if (result.ok === 0) throw new Error(`Actions::removeImageString() - failed to update the action record!`);
 
   // If the edit is successful, return the record's action ID as confirmation
   return actionId;
@@ -487,6 +521,7 @@ async function autoCompleteId(inputString, limit = 10) {
 module.exports = {
   save,
   addImageStrings,
+  removeImageString,
   retrieve,
   versions,
   list,

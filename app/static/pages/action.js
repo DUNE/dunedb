@@ -1,3 +1,6 @@
+// Declare variables to hold the user-specified parameters
+let imageNumber = null;
+
 // Run a specific function when the page is loaded
 window.addEventListener('load', populateTypeForm);
 
@@ -11,9 +14,15 @@ async function populateTypeForm() {
   typeForm.submission = action;
   typeForm.nosubmit = true;
 
-  // Reset any selected image files and the associated filename display text
+  // Reset any selected image files and the associated filename display text, as well as any image numbers for removal
   $('#image-selector').val('');
   $('#image-filenames').text('');
+  $('#image-remover').val('');
+
+  // Get and set the value of any parameter that is changed
+  $('#image-remover').on('change', async function () {
+    imageNumber = $('#image-remover').val();
+  });
 }
 
 
@@ -60,11 +69,11 @@ function DisplayFileNames(element) {
 
   $('#image-filenames').text(fileNames);
 
-  document.getElementById('confirm-button').style.backgroundColor = 'green';
+  document.getElementById('confirm-upload').style.backgroundColor = 'green';
 };
 
 
-// When the confirmation button is pressed, read in any selected images, convert them to base64-encoded strings, and store the strings in an array
+// When the 'Confirm Upload' button is pressed, read in any selected images, convert them to base64-encoded strings, and store the strings in an array
 // Then perform the submission of this array to the database, so the image strings can be added to the appropriate action record
 function EncodeStoreImages() {
   // The 'FileReader.readAsDataURL()' function used to read each image is asynchronous, so we must set up each read as a promise
@@ -97,42 +106,61 @@ function EncodeStoreImages() {
     let submission = {};
     submission.images = result;
 
-    SubmitData(submission);
+    $.ajax({
+      contentType: 'application/json',
+      method: 'post',
+      url: `/json/action/${action.actionId}/addImages`,
+      data: JSON.stringify(submission),
+      dataType: 'json',
+      success: postSuccess,
+    }).fail(postFail);
   });
 }
 
 
-// Function to submit the array of image strings to the database
-function SubmitData(submission) {
-  $.ajax({
-    contentType: 'application/json',
-    method: 'post',
-    url: `/json/action/${action.actionId}/addImages`,
-    data: JSON.stringify(submission),
-    dataType: 'json',
-    success: postSuccess,
-  }).fail(postFail);
+// When the 'Confirm Removal' button is pressed, check that the user-specified image number is valid and within range
+// Then navigate to the appropriate API route for removing the image from this action record
+// NOTE: keep the console output for this function ... it's a dangerous thing to be directly removing data from records like this, so we want to see as much information as we can
+function DeleteSelectedImage() {
+  if (imageNumber) {
+    if (imageNumber <= action.images.length) {
+      console.log(`Deleting image with number ${imageNumber}`);
 
-
-  // Function to run for a successful submission
-  function postSuccess(result) {
-    // If the submission result contains an error (even with a successful submission), display it
-    if (result.error) {
-      console.log('POSTSUCCESS error: ', result.error);
-    }
-
-    // Reload the page for viewing the action record
-    window.location.reload();
-  }
-
-
-  // Function to run for a failed submission
-  function postFail(result, statusCode, statusMsg) {
-    // If the query result contains a response message, display it, and if not, display any status message and error code instead
-    if (result.responseText) {
-      console.log('POSTFAIL: ', result.responseText);
+      $.ajax({
+        contentType: 'application/json',
+        method: 'post',
+        url: `/json/action/${action.actionId}/removeImage/${imageNumber}`,
+        data: JSON.stringify({}),
+        dataType: 'json',
+        success: postSuccess,
+      }).fail(postFail);
     } else {
-      console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
+      console.log(`[ERRO] Image number is out of range (number ${imageNumber} entered, but the action only has ${action.images.length} images!)`);
     }
+  } else {
+    console.log('[ERRO] Image number is null!');
   }
-};
+}
+
+
+// Function to run for a successful submission of any kind
+function postSuccess(result) {
+  // If the submission result contains an error (even with a successful submission), display it
+  if (result.error) {
+    console.log('POSTSUCCESS error: ', result.error);
+  }
+
+  // Reload the page for viewing the action record
+  window.location.reload();
+}
+
+
+// Function to run for a failed submission of any kind
+function postFail(result, statusCode, statusMsg) {
+  // If the query result contains a response message, display it, and if not, display any status message and error code instead
+  if (result.responseText) {
+    console.log('POSTFAIL: ', result.responseText);
+  } else {
+    console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
+  }
+}

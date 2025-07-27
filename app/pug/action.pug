@@ -488,7 +488,7 @@ block content
               label.label-info#image-filenames 
 
             .hori-space-x2
-              a.btn-danger.btn-sm#confirm-button(onclick = 'EncodeStoreImages()') Confirm Upload
+              a.btn-danger.btn-sm#confirm-upload(onclick = 'EncodeStoreImages()') Confirm Upload
 
           if action.images
             .vert-space-x1
@@ -500,5 +500,19 @@ block content
               .collapse#imagesBox
                 each imageString in action.images
                   img.in-gallery(src = imageString)
+
+              .vert-space-x2 
+                hr
+            
+                dt Remove Image from Action Record:</b>
+                dd Please enter the number of the image you want to remove below (i.e. '1' for the first image, '2' for the second, etc.).  Please note that only one image can be removed at a time.  Once you are happy with your entry, please use the 'Confirm Removal' button to finalise.
+                
+                .vert-space-x1.form-inline
+                  input.form-control#image-remover
+
+                  .hori-space-x2
+                    a.btn-danger.btn-sm#confirm-removal(onclick = 'DeleteSelectedImage()') Confirm Removal
+
+                .vert-space-x2
 
     .vert-space-x2
