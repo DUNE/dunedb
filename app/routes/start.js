@@ -2,7 +2,7 @@ const ManagementClient = require('auth0').ManagementClient;
 const router = require('express').Router();
 
 const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = require('../lib/constants');
-const Components = require('../lib/Components');
+const Admin_Functions = require('../lib/Admin_Functions');
 const logger = require('../lib/logger');
 const utils = require('../lib/utils');
 
@@ -215,7 +215,7 @@ router.post(['/json/administratorUtility/:inputString', '/api/administratorUtili
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
 
-    const result = await Components.setComponentNames(req.params.inputString);    // Change as appropriate for the required utility
+    const result = await Admin_Functions.setComponentNames(req.params.inputString);    // Change as appropriate for the required utility
 
     return res.status(201).json(result);
   } catch (err) {
