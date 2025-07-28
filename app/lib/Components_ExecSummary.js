@@ -50,16 +50,21 @@ const dictionary_tensionSystems = {
 };
 
 const dictionary_apaNCRs_types = {
+  damagedWireSegment: 'Damaged Wire Segment',
   missingWireSegment: 'Missing Wire Segment',
   misplacedWireSegment: 'Misplaced Wire Segment',
   shortedWireSegment: 'Shorted Wire Segment',
-  geometryBoardIssue: 'Geometry Board Issue',
   combIssue: 'Comb Issue',
-  machiningIssue: 'Machining Issue',
   conduitIssue: 'Conduit Issue',
-  incorrectFasteners: 'Incorrect Fasteners',
+  geometryBoardIssue: 'Geometry Board Issue',
+  incorrectFasteners: 'Fastener Issue',
   frameIssue: 'Issue with the Frame',
   meshIssue: 'Issue with Mesh Panel',
+  machiningIssue: 'Machining Issue',
+  protectionKit: 'Protection Kit',
+  pdCables: 'PD Cables',
+  temperatureCables: 'Temperature Cables',
+  other: 'Other',
 };
 
 const dictionary_meshPanelNCRs_types = {
@@ -603,6 +608,8 @@ async function collateInfo(componentUUID) {
       'typeFormId': 'APANonConformance',
       'componentUuid': MUUID.from(componentUUID),
       $or: [{
+        'data.nonConformanceType.damagedWireSegment': true
+      }, {
         'data.nonConformanceType.missingWireSegment': true
       }, {
         'data.nonConformanceType.misplacedWireSegment': true
@@ -618,7 +625,9 @@ async function collateInfo(componentUUID) {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
       nonConf_type: { '$first': '$data.nonConformanceType' },
+      damagedWireData: { '$first': '$data.damagedWireGrid' },
       missingWireData: { '$first': '$data.dataGrid' },
+      misplacedWireData: { '$first': '$data.misplacedGrid' },
       shortedWireData: { '$first': '$data.shortedGrid' },
     },
   });
@@ -629,7 +638,47 @@ async function collateInfo(componentUUID) {
 
   if (results.length > 0) {
     for (const result of results) {
+      for (const entry of result.damagedWireData) {
+        if (entry.wireLayer !== '') {
+          let nonConfType = '';
+
+          for (const [key, value] of Object.entries(result.nonConf_type)) {
+            if (value) nonConfType = key;
+          }
+
+          collatedInfo.apaNCRs_wires.push({
+            type: dictionary_apaNCRs_types[nonConfType],
+            layerSide: entry.wireLayer.toUpperCase(),
+            boardPad: entry.headBoardAndPad,
+            endpoints: entry.endPointsForMissingSegment,
+            fembChannel: entry.coldElectronicsChannel,
+            offlineChannel: entry.offlineChannel,
+            actionId: result.actionId,
+          });
+        }
+      }
+
       for (const entry of result.missingWireData) {
+        if (entry.wireLayer !== '') {
+          let nonConfType = '';
+
+          for (const [key, value] of Object.entries(result.nonConf_type)) {
+            if (value) nonConfType = key;
+          }
+
+          collatedInfo.apaNCRs_wires.push({
+            type: dictionary_apaNCRs_types[nonConfType],
+            layerSide: entry.wireLayer.toUpperCase(),
+            boardPad: entry.headBoardAndPad,
+            endpoints: entry.endPointsForMissingSegment,
+            fembChannel: entry.coldElectronicsChannel,
+            offlineChannel: entry.offlineChannel,
+            actionId: result.actionId,
+          });
+        }
+      }
+
+      for (const entry of result.misplacedWireData) {
         if (entry.wireLayer !== '') {
           let nonConfType = '';
 
@@ -683,19 +732,27 @@ async function collateInfo(componentUUID) {
       'typeFormId': 'APANonConformance',
       'componentUuid': MUUID.from(componentUUID),
       $or: [{
-        'data.nonConformanceType.geometryBoardIssue': true
-      }, {
         'data.nonConformanceType.combIssue': true
       }, {
-        'data.nonConformanceType.machiningIssue': true
-      }, {
         'data.nonConformanceType.conduitIssue': true
+      }, {
+        'data.nonConformanceType.geometryBoardIssue': true
       }, {
         'data.nonConformanceType.incorrectFasteners': true
       }, {
         'data.nonConformanceType.frameIssue': true
       }, {
         'data.nonConformanceType.meshIssue': true
+      }, {
+        'data.nonConformanceType.machiningIssue': true
+      }, {
+        'data.nonConformanceType.protectionKit': true
+      }, {
+        'data.nonConformanceType.pdCables': true
+      }, {
+        'data.nonConformanceType.temperatureCables': true
+      }, {
+        'data.nonConformanceType.other': true
       }],
     }
   });
