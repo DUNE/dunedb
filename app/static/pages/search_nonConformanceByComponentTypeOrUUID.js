@@ -92,9 +92,9 @@ function postSuccess(result) {
   };
 
   const dispositionsDictionary = {
-    useAsIs: 'Use As Is',
-    repair: 'Repair',
-    rework: 'Rework',
+    useAsIs: 'Use As Is (NC concession granted)',
+    repair: 'Repair (no modification to base design or functionality)',
+    rework: 'Rework (modification to base design but no impact to function)',
     returnToSupplier: 'Return to Supplier',
     rejectRePurpose: 'Reject/Re-purpose',
     scrap: 'Scrap',

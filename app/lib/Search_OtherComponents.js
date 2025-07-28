@@ -209,7 +209,7 @@ async function apasByProductionLocationAndNumber(location, number) {
   aggregation_stages.push({
     $match: {
       'data.apaAssemblyLocation': location,
-      'data.apaNumberAtLocation': parseInt(number, 10),
+      'data.typeRecordNumber': parseInt(number, 10),
     }
   });
 
