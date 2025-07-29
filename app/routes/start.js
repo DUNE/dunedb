@@ -215,7 +215,7 @@ router.post(['/json/administratorUtility/:inputString', '/api/administratorUtili
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
 
-    const result = await Admin_Functions.setComponentNames(req.params.inputString);    // Change as appropriate for the required utility
+    const result = await Admin_Functions.syncTypeRecordNumbers(req.params.inputString);    // Change as appropriate for the required utility
 
     return res.status(201).json(result);
   } catch (err) {

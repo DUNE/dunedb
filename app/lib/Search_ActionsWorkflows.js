@@ -5,16 +5,21 @@ const { db } = require('./db');
 const utils = require('./utils');
 
 const dictionary_apaNCRs_types = {
+  damagedWireSegment: 'Damaged Wire Segment',
   missingWireSegment: 'Missing Wire Segment',
   misplacedWireSegment: 'Misplaced Wire Segment',
   shortedWireSegment: 'Shorted Wire Segment',
-  geometryBoardIssue: 'Geometry Board Issue',
   combIssue: 'Comb Issue',
-  machiningIssue: 'Machining Issue',
   conduitIssue: 'Conduit Issue',
-  incorrectFasteners: 'Incorrect Fasteners',
+  geometryBoardIssue: 'Geometry Board Issue',
+  incorrectFasteners: 'Fastener Issue',
   frameIssue: 'Issue with the Frame',
   meshIssue: 'Issue with Mesh Panel',
+  machiningIssue: 'Machining Issue',
+  protectionKit: 'Protection Kit',
+  pdCables: 'PD Cables',
+  temperatureCables: 'Temperature Cables',
+  other: 'Other',
 };
 
 const dictionary_meshPanelNCRs_types = {

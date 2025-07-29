@@ -6,8 +6,6 @@ const Components = require('./Components');
 const utils = require('./utils');
 
 
-
-/// 
 async function setComponentNames(typeFormId) {
   // Retrieve a list of component UUIDs corresponding to all components with 'formId' matching the specified component type form ID
   let aggregation_stages = [];
@@ -32,20 +30,18 @@ async function setComponentNames(typeFormId) {
     let dunePid = '';
 
     if (typeFormId === 'APAFrame') {
-      const frameNumber = String(data.frameNumber).padStart(5, '0');
       let pidSuffix = '';
 
       if (data.frameProductionLocation === 'dsm') {
-        componentName = `APA Frame ${frameNumber}-UK`;
+        componentName = `APA Frame ${typeRecordNumber}-UK`;
         pidSuffix = 'UK106-010000';
       } else if (data.frameProductionLocation === 'wisconsin') {
-        componentName = `APA Frame ${frameNumber}-US`;
+        componentName = `APA Frame ${typeRecordNumber}-US`;
         pidSuffix = 'US200-010000';
       }
 
-      dunePid = `D00300200001-${frameNumber}-${pidSuffix}`;
+      dunePid = `D00300200001-${typeRecordNumber}-${pidSuffix}`;
     } else if (typeFormId === 'AssembledAPA') {
-      const apaNumber = String(data.apaNumberAtLocation).padStart(5, '0');
       let pidPrefix = '';
       let pidSuffix = '';
 
@@ -56,17 +52,17 @@ async function setComponentNames(typeFormId) {
       }
 
       if (data.apaAssemblyLocation === 'chicago') {
-        componentName = `APA ${apaNumber}-US`;
+        componentName = `APA ${typeRecordNumber}-US`;
         pidSuffix = 'US175-010000';
       } else if (data.apaAssemblyLocation === 'daresbury') {
-        componentName = `APA ${apaNumber}-UK`;
+        componentName = `APA ${typeRecordNumber}-UK`;
         pidSuffix = 'UK106-010000';
       } else if (data.apaAssemblyLocation === 'wisconsin') {
-        componentName = `APA ${apaNumber}-US`;
+        componentName = `APA ${typeRecordNumber}-US`;
         pidSuffix = 'US200-010000';
       }
 
-      dunePid = `${pidPrefix}-${apaNumber}-${pidSuffix}`;
+      dunePid = `${pidPrefix}-${typeRecordNumber}-${pidSuffix}`;
     } else if (typeFormId === 'APAShipment') {
       let name_apa1 = '[not set]';
       let name_apa2 = '[not set]';
@@ -194,6 +190,57 @@ async function setComponentNames(typeFormId) {
 }
 
 
+async function syncTypeRecordNumbers(typeFormId) {
+  // Retrieve a list of component UUIDs corresponding to all components with 'formId' matching the specified component type form ID
+  let aggregation_stages = [];
+
+  aggregation_stages.push({ $match: { formId: typeFormId } });
+  aggregation_stages.push({ $project: { componentUuid: true } });
+
+  let uuids = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // For each retrieved UUID ...
+  for (let uuid of uuids) {
+    // Get the full component record corresponding to the UUID, and retrieve the DESIRED type record number ...
+    // ... for APA frames, this will be the existing 'data.frameNumber'
+    // ... for Assembled APAs, this will be the existing 'data.apaNumberAtLocation'
+    const component = await Components.retrieve(uuid.componentUuid);
+    let desiredTypeRecordNumber = null;
+
+    if (typeFormId === 'APAFrame') {
+      desiredTypeRecordNumber = component.data.frameNumber;
+    } else if (typeFormId === 'AssembledAPA') {
+      desiredTypeRecordNumber = component.data.apaNumberAtLocation;
+    }
+
+    // Set up a 'matching condition' object containing the component UUID (remembering that the UUID has to be of 'MUUID' type, not a string)
+    const componentUuid = component.componentUuid;
+    let match_condition = { componentUuid };
+
+    if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+    match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+    // Update the type record number field of ALL records with the matching component UUID (i.e. all versions of the component in question)
+    const result = await db.collection('components')
+      .updateMany(
+        match_condition,
+        [
+          { $set: { 'data.typeRecordNumber': desiredTypeRecordNumber } },
+        ]
+      )
+
+    if (result.ok === 0) throw new Error(`Admin_Functions::syncTypeRecordNumbers() - failed to update the component records!`);
+  }
+
+  return typeFormId;
+
+}
+
+
 module.exports = {
   setComponentNames,
+  syncTypeRecordNumbers,
 }

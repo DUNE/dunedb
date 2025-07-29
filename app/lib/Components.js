@@ -90,20 +90,18 @@ async function save(input, req) {
     const typeRecordNumber = String(newRecord.data.typeRecordNumber).padStart(5, '0');
 
     if (newRecord.formId === 'APAFrame') {
-      const frameNumber = String(newRecord.data.frameNumber).padStart(5, '0');
       let pidSuffix = '';
 
       if (newRecord.data.frameProductionLocation === 'dsm') {
-        newRecord.data.componentName = `APA Frame ${frameNumber}-UK`;
+        newRecord.data.componentName = `APA Frame ${typeRecordNumber}-UK`;
         pidSuffix = 'UK106-010000';
       } else if (newRecord.data.frameProductionLocation === 'wisconsin') {
-        newRecord.data.componentName = `APA Frame ${frameNumber}-US`;
+        newRecord.data.componentName = `APA Frame ${typeRecordNumber}-US`;
         pidSuffix = 'US200-010000';
       }
 
-      newRecord.data.dunePid = `D00300200001-${frameNumber}-${pidSuffix}`;
+      newRecord.data.dunePid = `D00300200001-${typeRecordNumber}-${pidSuffix}`;
     } else if (newRecord.formId === 'AssembledAPA') {
-      const apaNumber = String(newRecord.data.apaNumberAtLocation).padStart(5, '0');
       let pidPrefix = '';
       let pidSuffix = '';
 
@@ -114,17 +112,17 @@ async function save(input, req) {
       }
 
       if (newRecord.data.apaAssemblyLocation === 'chicago') {
-        newRecord.data.componentName = `APA ${apaNumber}-US`;
+        newRecord.data.componentName = `APA ${typeRecordNumber}-US`;
         pidSuffix = 'US175-010000';
       } else if (newRecord.data.apaAssemblyLocation === 'daresbury') {
-        newRecord.data.componentName = `APA ${apaNumber}-UK`;
+        newRecord.data.componentName = `APA ${typeRecordNumber}-UK`;
         pidSuffix = 'UK106-010000';
       } else if (newRecord.data.apaAssemblyLocation === 'wisconsin') {
-        newRecord.data.componentName = `APA ${apaNumber}-US`;
+        newRecord.data.componentName = `APA ${typeRecordNumber}-US`;
         pidSuffix = 'US200-010000';
       }
 
-      newRecord.data.dunePid = `${pidPrefix}-${apaNumber}-${pidSuffix}`;
+      newRecord.data.dunePid = `${pidPrefix}-${typeRecordNumber}-${pidSuffix}`;
     } else if (newRecord.formId === 'CEAdapterBoard') {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400003-${typeRecordNumber}-US200-010000`;
