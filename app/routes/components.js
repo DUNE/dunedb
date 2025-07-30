@@ -841,11 +841,12 @@ router.get('/components/bulkQRCodes/:typeFormId/:firstNumber/:lastNumber', permi
     let shortUUIDs = [];
 
     // For each value of the type record number in the specified range (including both the first and last ones) ...
+    // ... and each returned component with that type record number (since certain component types can have multiple components sharing the same type record number) ...
     // ... retrieve a reduced instance of the component record corresponding to the specified type form ID and type record number value, and add the information in the correct order to the  list
     for (let typeRecordNumber = parseInt(req.params.firstNumber, 10); typeRecordNumber <= parseInt(req.params.lastNumber, 10); typeRecordNumber++) {
       const componentsList = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, typeRecordNumber);
 
-      if (componentsList.length > 0) shortUUIDs.push([componentsList[0].typeRecordNumber, componentsList[0].shortUuid, componentsList[0].formName]);
+      for (const componentRecord of componentsList) { shortUUIDs.push([componentRecord.componentName, componentRecord.shortUuid]); }
     }
 
     // Render the interface page

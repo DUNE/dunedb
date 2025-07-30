@@ -23,6 +23,6 @@ block allbody
     .container.fluid 
       .qr-grid
         each info in shortUUIDs
-          +qr-panel-topText(`${base_url}/c/${info[1]}`, `${info[2]} #${info[0]}`)
+          +qr-panel-topText(`${base_url}/c/${info[1]}`, `${info[0]}`)
 
   .vert-space-x2
