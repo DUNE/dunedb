@@ -87,19 +87,33 @@ function postSuccess(result) {
   $('#messages').empty();
 
   // If there are no search results, display a message to indicate this, and then re-enable both confirmation buttons for the next search
-  // Similarly, if there is more than one search result, also display a message and re-enable both buttons
+  // Similarly, if there is more than one search result and the component type is NOT 'Cable Harness', also display a message and re-enable both buttons
+  // If there is more than one search result and the component type is 'Cable Harness', display some information about all results so that the user can choose which one to explore further
   // Otherwise (i.e. there is exactly one component in the search results), redirect the user to the page for viewing the component record
   if (result.length === 0) {
     $('#messages').append('<b>The specified search parameters do not match an existing component.</b>');
     $('#confirmButton_dunePID').prop('disabled', false);
     $('#confirmButton_typeAndNumber').prop('disabled', false);
   } else if (result.length > 1) {
-    const output = `
-      <b>The specified search parameters match <u>multiple</u> components.</b>
-      <br>This should not happen, since each component should have a unique DUNE PID, and each component of a single type should have a unique type record number.
-      <br>Please bring this to the attention of one of the database development team, indicating the search parameters that you specified above.`;
+    if (componentType === 'CableHarness') {
+      const output = `
+        <b>The specified search parameters match <u>multiple</u> components:</b><br><br>`;
 
-    $('#messages').append(output);
+      $('#messages').append(output);
+
+      for (const component of result) {
+        const componentText = `<a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.componentName}<br>`;
+        $('#messages').append(componentText);
+      }
+    } else {
+      const output = `
+        <b>The specified search parameters match <u>multiple</u> components.</b>
+        <br>This should not happen, since each component should have a unique DUNE PID, and each component of the selected type should have a unique type record number.
+        <br>Please bring this to the attention of one of the database development team, indicating the search parameters that you specified above.`;
+
+      $('#messages').append(output);
+    }
+
     $('#confirmButton_dunePID').prop('disabled', false);
     $('#confirmButton_typeAndNumber').prop('disabled', false);
   } else {
