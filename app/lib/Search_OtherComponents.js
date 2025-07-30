@@ -374,12 +374,16 @@ async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$data.componentName' },
       typeRecordNumber: { '$first': '$data.typeRecordNumber' },
       formName: { '$first': '$formName' },
       shortUuid: { '$first': '$shortUuid' },
       data: { '$first': '$data' },
     },
   });
+
+  // Sort the records into alphabetical order by the component name
+  aggregation_stages.push({ $sort: { componentName: 1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let results = await db.collection('components')

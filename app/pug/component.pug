@@ -183,6 +183,13 @@ block content
           | &nbsp; Print all sub-component QR codes
     else if component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
       .vert-space-x1.border-success.border.rounded.p-2
+        if component.formId === 'CEAdapterBoardShipment'
+          dt Origin Location 
+          dd #{dictionary_locations[component.data.originOfShipment]}
+
+          dt Destination Location
+          dd #{dictionary_locations[component.data.destinationOfShipment]}
+
         dt Boards in Shipment / Kit
         dd
           table.table
