@@ -516,6 +516,7 @@ async function list(match_condition, options) {
       formName: true,
       data: true,
       validity: true,
+      reception: true,
     }
   })
 
@@ -533,6 +534,7 @@ async function list(match_condition, options) {
       data: { '$first': '$data' },
       componentName: { '$first': '$data.componentName' },
       lastEditDate: { '$first': '$validity.startDate' },
+      reception: { '$first': '$reception' },
     },
   });
 

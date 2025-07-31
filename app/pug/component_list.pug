@@ -2,40 +2,26 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'Created / Edited Components';
+  - const page_title = 'Components List (All Types)';
 
 block content
   .container-fluid
     .vert-space-x2
-      if singleType && componentTypeForm.tags && !componentTypeForm.tags.includes('Trash')
-        if workflowComponent
-          a.btn.btn-secondary.disabled(href = '')
-            img.small-icon(src = '/images/run_icon.svg')
-            | &nbsp; Create New Components of This Type via Workflows
-        else
-          a.btn.btn-primary(href = `/component/${componentTypeForm.formId}/new`)
-            img.small-icon(src = '/images/run_icon.svg')
-            | &nbsp; Create New Component of This Type
-
-        .vert-space-x2
-
-      h2 #{title}
+      h2 Components List (All Types)
 
     .vert-space-x1
       table.table
         thead
           tr
-            th.col-md-2 Type Name
+            th.col-md-2 Component Type
             th.col-md-3 Component Name
-            th.col-md-1
             th.col-md-2 Last Edited On:
+            th.col-md-1
             th.col-md-1
 
         tbody
           each component in components
-            - const notSingleType_notTrashed = !singleType && !allComponentTypeForms[component.typeFormId].tags.includes('Trash');
-
-            if notSingleType_notTrashed || singleType
+            if !allComponentTypeForms[component.typeFormId].tags.includes('Trash')
               - const uuid = MUUID.from(component.componentUuid).toString();
 
               tr          
@@ -43,6 +29,9 @@ block content
                 td
                   a(href = `/component/${uuid}`) #{component.data.componentName}
 
+                td
+                  +dateTimeFormat(component.lastEditDate)
+                
                 if component.typeFormId == 'AssembledAPA'
                   td
                     a.btn-sm.btn-secondary(href = `/component/${uuid}/execSummary`, target = '_blank')
@@ -51,8 +40,6 @@ block content
                 else 
                   td
 
-                td
-                  +dateTimeFormat(component.lastEditDate)
                 td
                   a.btn-sm.btn-secondary(href = `/json/component/${uuid}`, target = '_blank')
                     img.small-icon(src = '/images/checklist_icon.svg')

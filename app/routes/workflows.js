@@ -226,8 +226,6 @@ router.get('/workflows/list', permissions.checkPermission('workflows:view'), asy
     // Render the interface page
     res.render('workflow_list.pug', {
       workflows,
-      singleType: false,
-      title: 'All Created / Edited Workflows (All Types)',
       allWorkflowTypeForms,
     });
   } catch (err) {
@@ -257,10 +255,8 @@ router.get('/workflows/:typeFormId/list', permissions.checkPermission('workflows
     const allWorkflowTypeForms = await Forms.list('workflowForms');
 
     // Render the interface page
-    res.render('workflow_list.pug', {
+    res.render('workflow_listOfSingleType.pug', {
       workflows,
-      singleType: true,
-      title: 'All Created / Edited Workflows (Single Type)',
       workflowTypeForm,
       allWorkflowTypeForms,
     });
