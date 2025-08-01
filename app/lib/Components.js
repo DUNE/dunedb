@@ -101,6 +101,21 @@ async function save(input, req) {
       }
 
       newRecord.data.dunePid = `D00300200001-${typeRecordNumber}-${pidSuffix}`;
+    } else if (newRecord.formId === 'APAShippingFrame') {
+      let pidSuffix = '';
+
+      if (newRecord.data.asfLocation === 'chicago') {
+        newRecord.data.componentName = `ASF ${typeRecordNumber}-US`;
+        pidSuffix = 'US175-010000';
+      } else if (newRecord.data.asfLocation === 'daresbury') {
+        newRecord.data.componentName = `ASF ${typeRecordNumber}-UK`;
+        pidSuffix = 'UK106-010000';
+      } else if (newRecord.data.asfLocation === 'wisconsin') {
+        newRecord.data.componentName = `ASF ${typeRecordNumber}-US`;
+        pidSuffix = 'US200-010000';
+      }
+
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-${pidSuffix}`;
     } else if (newRecord.formId === 'AssembledAPA') {
       let pidPrefix = '';
       let pidSuffix = '';
