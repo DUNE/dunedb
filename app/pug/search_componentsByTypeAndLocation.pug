@@ -15,129 +15,173 @@ block content
     .vert-space-x2
       h2 Search for Components by Type and Location
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>components</b> that match <b>both</b> of the following user-specified details: 
+          ul
+            li <b>the component type</b>
+            li <b>the current location of the component</b> 
+
+        p Users must select <b>both</b> parameters from their respective lists below, and a summary of information about each found component will be displayed in the results panel below the input selections.
+
+        p If selecting 'Geometry Board' as the component type, the search results may be optionally filtered using the following parameters: 
+          ul
+            li <b>board acceptance status</b> - whether a board has been <u>rejected</u> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <u>accepted</u> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediated</u>)
+            li <b>tooth strip attachment status</b> - whether a tooth strip has been attached to the board (by performing a <u>Tooth Strip Attachment</u> action on it)
+
+        p If selecting any of the 'populated board' component types (i.e. 'CE Adapter', 'CR', 'G-Bias' or 'SHV'), the search results may be optionally filtered using the following parameter: 
+          ul
+            li <b>board conformance status</b> - whether a board has been deemed conformant or not (this is information provided during the board's component creation, and not tied to an explicit action that has been performed on it)
+
+        p If selecting any of the 'populated board' component types or the 'Cable Harness' component type, the search results may be optionally filtered using the following parameter: 
+          ul 
+            li <b>QA checks status</b> - whether a component has passed or failed the relevant QA checks that have been performed on it via a <u>Populated Board/Cable Harness QA</u> action
+
     .vert-space-x2
       hr
 
       .row 
-        .col-md-6 
-          .row
-            .col-md-6
-              h4 Select Component Type
-
-              .vert-space-x1
-                p Select a component type below <b>and</b> a location to the right.
-                  br
-                  | <b>This is a <u>required</u> parameter.</b>
-
-              select.form-control#typeSelection
-                option(value = '')
-                option(value = 'CableHarness') Cable Harness
-                option(value = 'CEAdapterBoard') CE Adapter Board
-                option(value = 'CRBoard') CR Board
-                option(value = 'GBiasBoard') G-Bias Board
-                option(value = 'GeometryBoard') Geometry Board 
-                option(value = 'GroundingMeshPanel') Grounding Mesh Panel
-                option(value = 'SHVBoard') SHV Board
-                option(value = 'Yoke') Yoke
-
-              .vert-space-x2
-
-            .col-md-6
-              h4 Select Location
-
-              .vert-space-x1
-                p Select a location below <b>and</b> a component type to the left.
-                  br
-                  | <b>This is a <u>required</u> parameter.</b>
-
-              select.form-control#locationSelection
-                option(value = '')
-                option(value = 'cambridge') #{dictionary_locations['cambridge']} 
-                option(value = 'cern') #{dictionary_locations['cern']} 
-                option(value = 'chicago') #{dictionary_locations['chicago']} 
-                option(value = 'daresbury') #{dictionary_locations['daresbury']} 
-                option(value = 'in_transit') #{dictionary_locations['in_transit']} 
-                option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
-                option(value = 'lancaster') #{dictionary_locations['lancaster']} 
-                option(value = 'manchester') #{dictionary_locations['manchester']} 
-                option(value = 'merlin') #{dictionary_locations['merlin']} 
-                option(value = 'sheffield') #{dictionary_locations['sheffield']} 
-                option(value = 'surf') #{dictionary_locations['surf']} 
-                option(value = 'sussex') #{dictionary_locations['sussex']} 
-                option(value = 'ukWarehouse') #{dictionary_locations['ukWarehouse']} 
-                option(value = 'unknown') #{dictionary_locations['unknown']} 
-                option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
-                option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
-
-              .vert-space-x2
-                button.btn-primary.btn-lg#confirmButton Search by Type and Location
-
-          .vert-space-x2 
-            hr
-
-          .row 
-            .col-md-6
-              h4 Board Acceptance Status
-
-              .vert-space-x1 
-                p Select a status below ... this is an optional parameter.
-                  br
-                  | It only applies when selecting <b>'Geometry Board'</b> above.
-
-              select.form-control#acceptanceStatusSelection
-                option(value = 'any') (any)
-                option(value = 'accepted') Board Accepted at Factory 
-                option(value = 'rejected') Board Rejected at Factory
-
-            .col-md-6
-              h4 Tooth Strip Attachment Status
-
-              .vert-space-x1 
-                p Select a status below ... this is an optional parameter.
-                  br
-                  | It only applies when selecting <b>'Geometry Board'</b> above.
-
-              select.form-control#toothStripStatusSelection
-                option(value = 'any') (any)
-                option(value = 'attached') Tooth Strip Attached
-                option(value = 'notAttached') Tooth Strip Not Yet Attached
-
-          .vert-space-x2 
-            hr
-
-          .row 
-            .col-md-6
-              h4 Board Conformance Status
-
-              .vert-space-x1 
-                p Select a status below ... this is an optional parameter.
-                  br
-                  | It only applies when selecting <b>any populated board</b> above.
-
-              select.form-control#conformanceStatusSelection
-                option(value = 'any') (any)
-                option(value = 'yes') Board is Conformant 
-                option(value = 'no') Board is Not Conformant
-
-            .col-md-6
-              h4 QA Checks Status
-
-              .vert-space-x1 
-                p Select a status below ... this is an optional parameter.
-                  br
-                  | It only applies when selecting <b>any populated board</b> or <b>'Cable Harness'</b> above.
-
-              select.form-control#qaChecksStatusSelection
-                option(value = 'any') (any)
-                option(value = 'passed') QA Checks Passed
-                option(value = 'failed') QA Checks Failed
-
-        .col-md-1
-
-        .col-md-5
-          h4 Search Results
+        .col-md-4 
+          h4 Select Component Type
 
           .vert-space-x1
-            table#results
+            p 
+            | Select a component type below.<br>
+            | <b>This is a <u>required</u> parameter.</b>
+
+          .vert-space-x1 
+            select.form-control#typeSelection
+              option(value = '')
+              option(value = 'CableHarness') Cable Harness
+              option(value = 'CEAdapterBoard') CE Adapter Board
+              option(value = 'CRBoard') CR Board
+              option(value = 'GBiasBoard') G-Bias Board
+              option(value = 'GeometryBoard') Geometry Board 
+              option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+              option(value = 'SHVBoard') SHV Board
+
+        .col-md-4
+          h4 Filter by Board Acceptance Status
+
+          .vert-space-x1 
+            p 
+            | This is an optional parameter.<br>
+            | It only applies to <b>Geometry Boards</b>.
+
+          .vert-space-x1 
+            select.form-control#acceptanceStatusSelection
+              option(value = 'any') (any)
+              option(value = 'accepted') Board Accepted at Factory 
+              option(value = 'rejected') Board Rejected at Factory
+
+        .col-md-4
+          h4 Filter by Tooth Strip Attachment Status
+
+          .vert-space-x1 
+            p 
+            | This is an optional parameter.<br>
+            | It only applies to <b>Geometry Boards</b>.
+
+          .vert-space-x1 
+            select.form-control#toothStripStatusSelection
+              option(value = 'any') (any)
+              option(value = 'attached') Tooth Strip Attached
+              option(value = 'notAttached') Tooth Strip Not Yet Attached
+
+      .vert-space-x2.row
+        .col-md-4
+          h4 Select Component Location 
+
+          .vert-space-x1
+            p 
+            | Select a location below.<br>
+            | <b>This is a <u>required</u> parameter.</b>
+
+          .vert-space-x1 
+            select.form-control#locationSelection
+              option(value = '')
+              option(value = 'cambridge') #{dictionary_locations['cambridge']} 
+              option(value = 'cern') #{dictionary_locations['cern']} 
+              option(value = 'chicago') #{dictionary_locations['chicago']} 
+              option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+              option(value = 'in_transit') #{dictionary_locations['in_transit']} 
+              option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
+              option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+              option(value = 'manchester') #{dictionary_locations['manchester']} 
+              option(value = 'merlin') #{dictionary_locations['merlin']} 
+              option(value = 'sheffield') #{dictionary_locations['sheffield']} 
+              option(value = 'surf') #{dictionary_locations['surf']} 
+              option(value = 'sussex') #{dictionary_locations['sussex']} 
+              option(value = 'ukWarehouse') #{dictionary_locations['ukWarehouse']} 
+              option(value = 'unknown') #{dictionary_locations['unknown']} 
+              option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
+              option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
+
+          .vert-space-x2
+            button.btn-primary.btn-lg#confirmButton Search by Type and Location
+
+        .col-md-4
+          h4 Filter by Board Conformance Status
+
+          .vert-space-x1 
+            p
+            | This is an optional parameter.<br>
+            | It only applies to <b>populated boards</b>.
+
+          .vert-space-x1 
+            select.form-control#conformanceStatusSelection
+              option(value = 'any') (any)
+              option(value = 'yes') Board is Conformant 
+              option(value = 'no') Board is Not Conformant
+
+        .col-md-4
+          h4 Filter by QA Checks Status
+
+          .vert-space-x1 
+            p 
+            | This is an optional parameter.<br>
+            | It only applies to <b>populated boards</b> and <b>Cable Harnesses</b>.
+
+          .vert-space-x1 
+            select.form-control#qaChecksStatusSelection
+              option(value = 'any') (any)
+              option(value = 'passed') QA Checks Passed
+              option(value = 'failed') QA Checks Failed
+
+      .vert-space-x2 
+        hr
+
+      .vert-space-x1
+        h4 Search Results
+
+        .vert-space-x1
+          .row 
+            .col-md-4 
+              table#summary1 
+
+            .col-md-4 
+              table#summary2 
+
+            .col-md-4 
+              table#summary3 
+
+          .vert-space-x2.row
+            .col-md-3 
+              table#results1 
+
+            .col-md-1 
+            .col-md-3 
+              table#results2 
+
+            .col-md-1 
+            .col-md-3 
+              table#results3 
+
+            .col-md-1
 
     .vert-space-x2

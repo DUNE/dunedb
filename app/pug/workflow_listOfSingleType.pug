@@ -2,18 +2,25 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'Workflows List (All Types)';
+  - const page_title = `Workflows List (${workflowTypeForm.formName})`;
 
 block content
   .container-fluid
     .vert-space-x2
-      h2 Workflows List (All Types)
+      if workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash')
+        a.btn.btn-primary(href = `/workflow/${workflowTypeForm.formId}/new`)
+          img.small-icon(src = '/images/run_icon.svg')
+          | &nbsp; Create New Workflow of This Type
+
+        .vert-space-x2
+
+      h2 Workflows List (#{workflowTypeForm.formName})
 
     .vert-space-x1
       table.table
         thead
           tr
-            th.col-md-2 Workflow Type
+            th.col-md-2 Workflow ID
             th.col-md-3 Associated Component
             th.col-md-1 Completion %
             th.col-md-3 Next Action to Complete
@@ -24,7 +31,7 @@ block content
             if !allWorkflowTypeForms[workflow.typeFormId].tags.includes('Trash')
               tr
                 td
-                  a(href = `/workflow/${workflow.workflowId}`) #{workflow.typeFormName}
+                  a(href = `/workflow/${workflow.workflowId}`) #{workflow.workflowId}
 
                 if workflow.path[0].result != ''
                   td

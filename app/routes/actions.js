@@ -350,10 +350,7 @@ router.get('/actions/list', permissions.checkPermission('actions:view'), async f
     // Render the interface page
     res.render('action_list.pug', {
       actions,
-      singleType: false,
-      title: 'All Performed Actions (All Types)',
       allActionTypeForms,
-      workflowAction: false,
     });
   } catch (err) {
     logger.error(err);
@@ -394,10 +391,8 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
     const workflowAction = list_workflowActions.includes(actionTypeForm.formName);
 
     // Render the interface page
-    res.render('action_list.pug', {
+    res.render('action_listOfSingleType.pug', {
       actions,
-      singleType: true,
-      title: 'All Performed Actions (Single Type)',
       actionTypeForm,
       allActionTypeForms,
       workflowAction,

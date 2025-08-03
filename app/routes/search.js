@@ -7,13 +7,6 @@ const Search_OtherComponents = require('../lib/Search_OtherComponents');
 const utils = require('../lib/utils');
 
 
-/// View descriptions of the available search pages
-router.get('/search', async function (req, res, next) {
-  // Render the interface page
-  res.render('search.pug');
-});
-
-
 /// Search for components by UUID, DUNE PID, or type and type record number (client-side interface)
 router.get('/search/componentsByIdentifier', async function (req, res, next) {
   // Render the interface page

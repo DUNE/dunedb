@@ -27,6 +27,10 @@ async function renderSearchForms() {
   $('#confirmButton_disposition').on('click', function () {
     $('#confirmButton_disposition').prop('disabled', true);
     $('#confirmButton_orderNumber').prop('disabled', true);
+    $('#summary1').empty().append('<b>Working ...</b>');
+    $('#summary2').empty();
+    $('#summary3').empty();
+    $('#results1').empty();
 
     if (disposition) {
       $.ajax({
@@ -44,6 +48,10 @@ async function renderSearchForms() {
   $('#confirmButton_orderNumber').on('click', function () {
     $('#confirmButton_disposition').prop('disabled', true);
     $('#confirmButton_orderNumber').prop('disabled', true);
+    $('#summary1').empty().append('<b>Working ...</b>');
+    $('#summary2').empty();
+    $('#summary3').empty();
+    $('#results1').empty();
 
     if (orderNumber) {
       $.ajax({
@@ -115,52 +123,67 @@ function formatInspectionResults(results) {
 
 // Function to run for a successful search query by disposition
 function postSuccess_disposition(result) {
-  // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
-  $('#results').empty();
+  // Make sure that the page elements where the results will be displayed are all empty
+  $('#summary1').empty();
+  $('#summary2').empty();
+  $('#summary3').empty();
+  $('#results1').empty();
 
-  const resultsStart = `
-    <tr>
-      <td colspan = "5">The following geometry boards have been visually inspected and found to have the disposition: <b>${$('#dispositionSelection option:selected').text()}</b> and the issue: <b>${$('#issueSelection option:selected').text()}</b>.</td>
-    </tr>
-    <tr>
-      <td colspan = "5"><hr></td>
-    </tr>`;
-
-  $('#results').append(resultsStart);
-
-  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
+  // If there are no search results, display a message to indicate this
+  // // Otherwise, set up an initial message to display, and a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>There are no geometry boards with the specified disposition and issue</b>');
+    $('#summary1').append('<b>There are no geometry boards with the specified disposition and issue</b>');
   } else {
-    for (const boardGroup of result) {
+    for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
       const groupCount = `
         <tr>
-          <td colspan = "5">Found ${boardGroup.componentUuids.length} boards of part number ${boardGroup.partNumber}  (${boardGroup.partString})</td>
+          <td colspan = "5"><b>P/N: ${boardGroup.partNumber} (${boardGroup.partString})</b> - ${boardGroup.componentUuids.length} boards</td>
         </tr>`;
 
-      $('#results').append(groupCount);
+      $('#summary1').append(groupCount);
     }
 
-    $('#results').append('<br>');
+    $('#summary1').append('<br>');
+
+    for (const boardGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
+      const groupCount = `
+        <tr>
+          <td colspan = "5"><b>P/N: ${boardGroup.partNumber} (${boardGroup.partString})</b> - ${boardGroup.componentUuids.length} boards</td>
+        </tr>`;
+
+      $('#summary2').append(groupCount);
+    }
+
+    $('#summary2').append('<br>');
+
+    for (const boardGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
+      const groupCount = `
+        <tr>
+          <td colspan = "5"><b>P/N: ${boardGroup.partNumber} (${boardGroup.partString})</b> - ${boardGroup.componentUuids.length} boards</td>
+        </tr>`;
+
+      $('#summary3').append(groupCount);
+    }
+
+    $('#summary3').append('<br>');
+
+    const tableStart = `
+      <tr>
+        <th scope = 'col' width = '7%'>UKID</th>
+        <th scope = 'col' width = '8%'>Order No.</th>
+        <th scope = 'col' width = '15%'>Visual Inspection Action</th>
+        <th scope = 'col' width = '35%'>Issue(s) Identified</th>
+        <th scope = 'col' width = '34%'>Repairs Description (if applicable)</th>
+      </tr>`;
 
     for (const boardGroup of result) {
       const groupTitle = `
         <tr>
-          <td colspan = "5"><b>Part Number: ${boardGroup.partNumber}  (${boardGroup.partString})</b></td>
+          <td colspan = "5"><b>P/N: ${boardGroup.partNumber} (${boardGroup.partString})</b></td>
         </tr>`;
 
-      $('#results').append(groupTitle);
-
-      const tableStart = `
-        <tr>
-          <th scope = 'col' width = '8%'>Board UKID</th>
-          <th scope = 'col' width = '10%'>Order Number</th>
-          <th scope = 'col' width = '17%'>Visual Inspection Action</th>
-          <th scope = 'col' width = '35%'>Issue(s) Identified</th>
-          <th scope = 'col' width = '30%'>Repairs Description (if applicable)</th>
-        </tr>`;
-
-      $('#results').append(tableStart);
+      $('#results1').append(groupTitle);
+      $('#results1').append(tableStart);
 
       for (const i in boardGroup.componentUuids) {
         const inspectionData = formatInspectionResults(boardGroup.inspectionData[i]);
@@ -174,10 +197,10 @@ function postSuccess_disposition(result) {
             <td>${inspectionData.repairsDescription}</td>
           </tr>`;
 
-        $('#results').append(boardText);
+        $('#results1').append(boardText);
       }
 
-      $('#results').append('<br>');
+      $('#results1').append('<br>');
     }
   }
 
@@ -199,33 +222,57 @@ function postSuccess_orderNumber(result) {
     boardIsConformant: 'Board Is Conformant',
   };
 
-  // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
-  $('#results').empty();
+  // Make sure that the page elements where the results will be displayed are all empty
+  $('#summary1').empty();
+  $('#summary2').empty();
+  $('#summary3').empty();
+  $('#results1').empty();
 
-  const resultsStart = `
-    <tr>
-      <td colspan = "5">The following geometry boards with order number: <b>${$('#orderNumberSelection').val()}</b> and at least one recorded visual inspection have been found.</td>
-    </tr>
-    <tr>
-      <td colspan = "5"><b>Please note that only boards which have had a Visual Inspection action performed on them are shown here - there may be additional boards in this order that have not yet had inspections performed.</b><br><hr></td>
-    </tr>`;
-
-  $('#results').append(resultsStart);
-
-  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
+  // If there are no search results, display a message to indicate this
+  // // Otherwise, set up an initial message to display, and a table of the search results
   if (Object.keys(result).length === 0) {
     $('#results').append('<b>There are no geometry boards with the specified order number and at least one Visual Inspection</b>');
   } else {
-    for (const boardGroup of result) {
+    for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
       const groupCount = `
         <tr>
-          <td colspan = "5">Found ${boardGroup.actionIds.length} boards with disposition: <b>${dispositionsDictionary[boardGroup.disposition]}</b></td>
+          <td colspan = "5"><b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b> - ${boardGroup.actionIds.length} boards</td>
         </tr>`;
 
-      $('#results').append(groupCount);
+      $('#summary1').append(groupCount);
     }
 
-    $('#results').append('<br>');
+    $('#summary1').append('<br>');
+
+    for (const boardGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
+      const groupCount = `
+        <tr>
+          <td colspan = "5"><b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b> - ${boardGroup.actionIds.length} boards</td>
+        </tr>`;
+
+      $('#summary2').append(groupCount);
+    }
+
+    $('#summary2').append('<br>');
+
+    for (const boardGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
+      const groupCount = `
+        <tr>
+          <td colspan = "5"><b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b> - ${boardGroup.actionIds.length} boards</td>
+        </tr>`;
+
+      $('#summary3').append(groupCount);
+    }
+
+    $('#summary3').append('<br>');
+
+    const tableStart = `
+      <tr>
+        <th scope = 'col' width = '15%'>UKID</th>
+        <th scope = 'col' width = '15%'>Visual Inspection Action</th>
+        <th scope = 'col' width = '35%'>Issue(s) Identified</th>
+        <th scope = 'col' width = '34%'>Repairs Description (if applicable)</th>
+      </tr>`;
 
     for (const boardGroup of result) {
       const groupTitle = `
@@ -233,18 +280,8 @@ function postSuccess_orderNumber(result) {
           <td colspan = "5"><b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b></td>
         </tr>`;
 
-      $('#results').append(groupTitle);
-
-      const tableStart = `
-        <tr>
-          <th scope = 'col' width = '8%'>Board UKID</th>
-          <th scope = 'col' width = '10%'></th>
-          <th scope = 'col' width = '17%'>Visual Inspection Action</th>
-          <th scope = 'col' width = '35%'>Issue(s) Identified</th>
-          <th scope = 'col' width = '30%'>Repairs Description (if applicable)</th>
-        </tr>`;
-
-      $('#results').append(tableStart);
+      $('#results1').append(groupTitle);
+      $('#results1').append(tableStart);
 
       for (const i in boardGroup.actionIds) {
         const inspectionData = formatInspectionResults(boardGroup.inspectionData[i]);
@@ -252,16 +289,15 @@ function postSuccess_orderNumber(result) {
         const boardText = `
           <tr>
             <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
-            <td></td>
             <td><a href = '/action/${boardGroup.actionIds[i]}' target = '_blank'</a>${boardGroup.actionIds[i]}</td>
             <td>${inspectionData.issues}</td>
             <td>${inspectionData.repairsDescription}</td>
           </tr>`;
 
-        $('#results').append(boardText);
+        $('#results1').append(boardText);
       }
 
-      $('#results').append('<br>');
+      $('#results1').append('<br>');
     }
   }
 

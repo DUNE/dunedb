@@ -12,43 +12,55 @@ block content
     .vert-space-x2
       h2 Search for Components by Identifier
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>components</b> using one of the following methods: 
+          ul
+            li <b>by component UUID</b>
+            li <b>by DUNE PID</b>
+            li <b>by component type and type record number</b>
+
+        p Every component is assigned a UUID and a type record number, but the latter is only really useful for certain component types - in these cases, it is equivalent to a production number or similar.  Components of some (but not all) types are also assigned a DUNE PID.  
+
+        p If searching by UUID, the input box uses auto-complete - users may begin manually entering a UUID, and up to 10 matching entries currently in the database will be displayed.  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.  At any time, if the UUID corresponds to a single component record in the database, the user will be automatically redirected to the information page for that component.  If there is no corresponding record even after the entire UUID has been provided, an error will be displayed.
+          br
+          |  The UUID may alternatively be provided in full by scanning a component's QR code.  This can be done by simply pressing the 'camera' icon to the right of the UUID input box, and directing your device's camera view to the QR code in question.
+
+        p If searching by component type and type record number, users must specify both pieces of information - the component type from the dropdown list and the type record number as an integer, and then press the button to begin the search.  If the specified information corresponds to a single component record in the database, the user will be automatically redirected to the corresponding component information page.  If there is no corresponding record, a message will be displayed below.
+          br
+          |  There are certain component types which allow multiple components to share the same type record number - if this is the case, all matching components will be listed (and linked to) below.  However, for most component types it should not be possible for multiple components of the same type to have the same type record number - in these cases, an error will be displayed below.
+
+        p If searching by DUNE PID, users must specify the component DUNE PID in the form: D00300XXXXXX-XXXXX-XXXXX-01-00-00, and then press the button to begin the search.  If the specified DUNE PID corresponds to a single component record in the database, the user will be automatically redirected to the corresponding component information page.  If there is no corresponding record, a message will be displayed below.
+
     .vert-space-x2 
       hr
 
       .row 
-        .col-md-5
-          .row 
-            .col-md-12 
-              h4 Search by Component UUID
+        .col-md-4
+          h4 Search by Component UUID
 
-              .vert-space-x1
-                p Enter a component UUID below or take a picture of the component's QR code.
+          .vert-space-x1
+            p 
+            | Enter a component UUID below.<br>
+            | Alternatively, take a picture of the component's QR code.
 
-              .vert-space-x1
-                #componentuuidform
+          .vert-space-x1
+            #componentuuidform
 
-          hr
-
-          .row 
-            .col-md-12 
-              h4 Search by DUNE PID 
-
-              .vert-space-x1
-                p Enter a DUNE PID (in the form D00300XXXXXX-XXXXX-XXXXX-010000) below.
-
-              input.form-control#dunePIDSelection
-
-              .vert-space-x2
-                button.btn-primary.btn-lg#confirmButton_dunePID Search by DUNE PID
-
-        .col-md-1 
-
-        .col-md-5
+        .col-md-4
           h4 Search by Type and Number
 
           .vert-space-x1
-            p Select a component type below.
+            p 
+            | Select a component type from the list.<br>
+            | Then enter a type record number into the text box.
 
+          .vert-space-x1
             select.form-control#componentTypeSelection
               option(value = '')
               option(value = 'CEAdapterBoard') CE Adapter Board
@@ -60,13 +72,28 @@ block content
               option(value = 'SHVBoard') SHV Board
               option(value = 'Yoke') Yoke
 
-          .vert-space-x2
-            p Enter a type record number below.
-
+          .vert-space-x1
             input.form-control#typeRecordNumberSelection
 
           .vert-space-x2
             button.btn-primary.btn-lg#confirmButton_typeAndNumber Search by Type and Number
+
+        .col-md-4
+          h4 Search by DUNE PID 
+
+          .vert-space-x1
+            p 
+            | Enter a DUNE PID below.<br>
+            | Please use the format: D00300XXXXXX-XXXXX-XXXXX-010000
+
+          .vert-space-x1 
+            input.form-control#dunePIDSelection
+
+          .vert-space-x1
+            input.form-control.spacer
+
+          .vert-space-x2
+            button.btn-primary.btn-lg#confirmButton_dunePID Search by DUNE PID
 
       .vert-space-x2 
         hr

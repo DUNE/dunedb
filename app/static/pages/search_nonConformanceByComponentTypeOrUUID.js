@@ -51,6 +51,7 @@ async function renderSearchForms() {
   $('#confirmButton_type').on('click', function () {
     $('#confirmButton_type').prop('disabled', true);
     $('#confirmButton_uuid').prop('disabled', true);
+    $('#results1').empty().append('<b>Working ...</b>');
 
     if (componentType) {
       $.ajax({
@@ -68,6 +69,7 @@ async function renderSearchForms() {
   $('#confirmButton_uuid').on('click', function () {
     $('#confirmButton_type').prop('disabled', true);
     $('#confirmButton_uuid').prop('disabled', true);
+    $('#results1').empty().append('<b>Working ...</b>');
 
     if (componentUuid) {
       $.ajax({
@@ -105,47 +107,36 @@ function postSuccess(result) {
     closed: 'Closed',
   };
 
-  // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
-  $('#results').empty();
+  // Make sure that the page element where the results will be displayed is empty
+  $('#results1').empty();
 
-  const resultsStart = `
-    <tr>
-      <td colspan = "5">The following ${result.length} non-conformance actions have been found matching the specified search criteria.</td>
-    </tr>
-    <tr>
-      <td colspan = "5"><br></td>
-    </tr>`;
-
-  $('#results').append(resultsStart);
-
-  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
+  // If there are no search results, display a message to indicate this
+  // Otherwise, set up an initial message to display, and a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>Found no matching non-conformance actions</b>');
+    $('#results1').append('<b>Found no matching non-conformance actions</b>');
   } else {
     const tableStart = `
       <tr>
-        <th scope = 'col' width = '12%'>Component Type</th>
-        <th scope = 'col' width = '23%'>Component Name</th>
-        <th scope = 'col' width = '15%'>NC Type</th>
-        <th scope = 'col' width = '22%'>NC Title</th>
-        <th scope = 'col' width = '10%'>Disposition</th>
-        <th scope = 'col' width = '8%'>Status</th>
+        <th scope = 'col' width = '17%'>Component</th>
+        <th scope = 'col' width = '23%'>NC Type</th>
+        <th scope = 'col' width = '25%'>NC Title</th>
+        <th scope = 'col' width = '33%'>Disposition</th>
+        <th scope = 'col' width = '5%'>Status</th>
       </tr>`;
 
-    $('#results').append(tableStart);
+    $('#results1').append(tableStart);
 
     for (const action of result) {
       const actionText = `
         <tr>
-          <td>${componentTypesDictionary[action.componentType]}</td>
           <td><a href = '/component/${action.componentUuid}' target = '_blank'</a>${action.componentName}</td>
-          <td>${action.nonConfType}</td>
+          <td>${componentTypesDictionary[action.componentType]} - ${action.nonConfType}</td>
           <td><a href = '/action/${action.actionId}' target = '_blank'</a>${action.title ? action.title : action.actionId}</td>
           <td>${dispositionsDictionary[action.disposition]}</td>
           <td>${statusDictionary[action.status]}</td>
         </tr>`;
 
-      $('#results').append(actionText);
+      $('#results1').append(actionText);
     }
   }
 

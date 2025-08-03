@@ -1,7 +1,7 @@
 // Declare variables to hold the user-specified search parameters
-let dunePID = null;
 let componentType = null;
 let typeRecordNumber = null;
+let dunePID = null;
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -15,8 +15,8 @@ async function renderSearchForms() {
       type: 'ComponentUUID',
       label: 'Component UUID',
       key: 'componentUuid',
-      validate: { 'required': true, },
       input: true,
+      hideLabel: true,
     }],
   }
 
@@ -33,10 +33,6 @@ async function renderSearchForms() {
   });
 
   // Get and set the value of any search parameter that is changed
-  $('#dunePIDSelection').on('change', async function () {
-    dunePID = $('#dunePIDSelection').val();
-  });
-
   $('#componentTypeSelection').on('change', async function () {
     componentType = $('#componentTypeSelection').val();
   });
@@ -45,34 +41,40 @@ async function renderSearchForms() {
     typeRecordNumber = $('#typeRecordNumberSelection').val();
   });
 
-  // When the appropriate confirmation button is pressed, perform the search by DUNE PID using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable both confirmation buttons while the current search is being performed
-  $('#confirmButton_dunePID').on('click', function () {
-    $('#confirmButton_dunePID').prop('disabled', true);
-    $('#confirmButton_typeAndNumber').prop('disabled', true);
-
-    if (dunePID) {
-      $.ajax({
-        contentType: 'application/json',
-        method: 'GET',
-        url: `/json/search/componentsByDUNEPID/${dunePID}`,
-        dataType: 'json',
-        success: postSuccess,
-      }).fail(postFail);
-    }
-  })
+  $('#dunePIDSelection').on('change', async function () {
+    dunePID = $('#dunePIDSelection').val();
+  });
 
   // When the appropriate confirmation button is pressed, perform the search by component type and type record number using the appropriate jQuery 'ajax' call and the current values of the search parameters
   // Additionally, disable both confirmation buttons while the current search is being performed
   $('#confirmButton_typeAndNumber').on('click', function () {
-    $('#confirmButton_dunePID').prop('disabled', true);
     $('#confirmButton_typeAndNumber').prop('disabled', true);
+    $('#confirmButton_dunePID').prop('disabled', true);
+    $('#messages').empty().append('<b>Working ...</b>');
 
     if (componentType && typeRecordNumber) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
         url: `/json/search/componentsByTypeAndNumber/${componentType}/${typeRecordNumber}`,
+        dataType: 'json',
+        success: postSuccess,
+      }).fail(postFail);
+    }
+  })
+
+  // When the appropriate confirmation button is pressed, perform the search by DUNE PID using the appropriate jQuery 'ajax' call and the current values of the search parameters
+  // Additionally, disable both confirmation buttons while the current search is being performed
+  $('#confirmButton_dunePID').on('click', function () {
+    $('#confirmButton_typeAndNumber').prop('disabled', true);
+    $('#confirmButton_dunePID').prop('disabled', true);
+    $('#messages').empty().append('<b>Working ...</b>');
+
+    if (dunePID) {
+      $.ajax({
+        contentType: 'application/json',
+        method: 'GET',
+        url: `/json/search/componentsByDUNEPID/${dunePID}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
@@ -109,7 +111,7 @@ function postSuccess(result) {
       const output = `
         <b>The specified search parameters match <u>multiple</u> components.</b>
         <br>This should not happen, since each component should have a unique DUNE PID, and each component of the selected type should have a unique type record number.
-        <br>Please bring this to the attention of one of the database development team, indicating the search parameters that you specified above.`;
+        <br>Please bring this to the attention of one of the DB Admins, indicating the search parameters that you specified above.`;
 
       $('#messages').append(output);
     }
