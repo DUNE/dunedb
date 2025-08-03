@@ -105,7 +105,7 @@ class WorkflowID extends TextFieldComponent {
     if (this.refs.workflowIdInfo && value && value.length === 24) {
       $.get(`/json/workflow/${value}`);
 
-      if (window.location.pathname === '/search/byUUIDorID') window.location.href = `/workflow/${value}`;
+      if (window.location.pathname === '/search/workflowsByIDOrUUID') window.location.href = `/workflow/${value}`;
     }
 
     return changed;

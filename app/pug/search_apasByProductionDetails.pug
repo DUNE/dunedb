@@ -15,47 +15,70 @@ block content
     .vert-space-x2
       h2 Search for Assembled APAs by Production Details
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>assembled APAs</b> by one of the following methods:
+        ul
+          li <b>by <u>production number</u></b> (the order in which the APAs have been assembled at a specified production location)
+          li <b>by the <u>last completed QA action</u></b>
+
+        p The <b><u>production location</u></b> is a required parameter for both scenarios - this <b>must</b> be selected from the associated dropdown menu.  Users may then either manually enter an (integer) production number, or select one of the QA action types from the associated dropdown menu.
+
+        p If searching by production number, if the specified information corresponds to a single Assembled APA component record in the database, the user will be automatically redirected to the corresponding component information page.
+          br
+          |  If there is no such APA, i.e. the information does not match an existing component record, a message will be displayed in the results panel below the input selections.
+          br
+          |  It should not be possible for multiple APA component records to match against both the production location and production number, since they should together uniquely identify a single APA.  In the unlikely case of this situation occurring, a message will also be displayed indicating so.
+
+        p If searching by the last completed QA action, a list of all Assembled APAs that have been produced at the specified location and completed up to <u>and including</u> that QA action will be displayed in the results panel below the input selections.  Alongside this, a list of Assembled APAs that have <b>not</b> had the specified QA action completed will also be displayed.
+
     .vert-space-x2
       hr
 
       .row
-        .col-md-5
-          .vert-space-x1
-            p Select a production location below.
-              br
-              | <b>This is a <u>required</u> parameter for both searches.</b>
+        .col-md-4
+          h4 Select Production Location
 
+          .vert-space-x1
+            p
+            | Select a production location below.<br>
+            | <b>This is a <u>required</u> parameter for both searches.</b>
+
+          .vert-space-x1
             select.form-control#locationSelection
               option(value = '')          
               option(value = 'chicago') #{dictionary_locations['chicago']} 
               option(value = 'daresbury') #{dictionary_locations['daresbury']} 
               option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
 
-          .vert-space-x2
-            hr
+        .col-md-4
+          h4 Search by Production Number
 
-            h4 Search by Production Number
+          .vert-space-x1
+            p 
+            | Enter an APA production number below.<br>
+            | <b>This is a <u>required</u> parameter.</b>
 
-            .vert-space-x1
-              p <b>Either</b> enter an APA production number here <b>or</b> select an assembly step below.
-                br
-                | <b>This is a <u>required</u> parameter.</b>
-
+          .vert-space-x1
             input.form-control#numberSelection
 
-            .vert-space-x2
-              button.btn-primary.btn-lg#confirmButton_number Search by Production Number
-
           .vert-space-x2
-            hr  
+            button.btn-primary.btn-lg#confirmButton_number Search by Production Number
 
-            h4 Search by Last Completed Assembly Step
+        .col-md-4
+          h4 Search by Last Completed QA Action
 
-            .vert-space-x1
-              p <b>Either</b> select an assembly step here <b>or</b> enter an APA production number above.
-                br
-                | <b>This is a <u>required</u> parameter.</b>
+          .vert-space-x1
+            p 
+            | Select a QA action type below.<br>
+            | <b>This is an <u>alternative required</u> parameter.</b>
 
+          .vert-space-x1
             select.form-control#assemblyStepSelection
               option(value = '')
               option(value = 'framePreparation') Frame Preparation QA Check
@@ -66,26 +89,43 @@ block content
               option(value = 'coverBoardsAndCaps') Cover Boards / Cap Installation QA Check
               option(value = 'assemblyComplete') Completed APA QA Checklist
 
-            .vert-space-x2
-              button.btn-primary.btn-lg#confirmButton_assemblyStep Search by Last Completed Assembly Step
+          .vert-space-x2
+            button.btn-primary.btn-lg#confirmButton_assemblyStep Search by Last Completed QA Action
 
-        .col-md-1
+      .vert-space-x2 
+        hr
 
-        .col-md-6
-          h4 Search Results
+      .vert-space-x1
+        h4 Search Results 
 
-          .vert-space-x1 
-            #messages
+        .vert-space-x1 
+          #messages
 
-          .row 
-            .col-md-5.vert-space-x1
-              table#results1
+        .row 
+          .col-md-6.vert-space-x1
+            #summary1 
 
-            .col-md-1
+            .row 
+              .col-md-5
+                table#results11 
 
-            .col-md-5.vert-space-x1
-              table#results2
+              .col-md-1
+              .col-md-5
+                table#results12
 
-            .col-md-1
+              .col-md-1
+
+          .col-md-6.vert-space-x1
+            #summary2 
+
+            .row 
+              .col-md-5
+                table#results21 
+
+              .col-md-1
+              .col-md-5
+                table#results22
+
+              .col-md-1
 
     .vert-space-x2

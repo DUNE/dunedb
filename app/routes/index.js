@@ -96,7 +96,6 @@ module.exports = routes;
   /administratorUtility
   /json/administratorUtility/:inputString
 
-  /search
   /search/componentsByIdentifier
   /json/search/componentsByDUNEPID/:dunePID
   /json/search/componentsByTypeAndNumber/:typeFormId/:typeRecordNumber

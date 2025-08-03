@@ -14,8 +14,8 @@ async function renderSearchForms() {
       type: 'ActionID',
       label: 'Action ID',
       key: 'actionId',
-      validate: { 'required': true, },
       input: true,
+      hideLabel: true,
     }],
   }
 
@@ -27,8 +27,8 @@ async function renderSearchForms() {
       type: 'ComponentUUID',
       label: 'Component UUID',
       key: 'componentUuid',
-      validate: { 'required': true, },
       input: true,
+      hideLabel: true,
     }],
   }
 
@@ -63,6 +63,7 @@ async function renderSearchForms() {
   // Additionally, disable the button while the current search is being performed
   $('#confirmButton').on('click', function () {
     $('#confirmButton').prop('disabled', true);
+    $('#results1').empty().append('<b>Working ...</b>');
 
     if (componentUuid && actionType) {
       $.ajax({
@@ -79,30 +80,21 @@ async function renderSearchForms() {
 
 // Function to run for a successful search query
 function postSuccess(result) {
-  // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
-  $('#results').empty();
+  // Make sure that the page element where the results will be displayed is empty
+  $('#results1').empty();
 
-  const resultsStart = `
-    <tr>
-      <td colspan = "2">The following <b>${$('#actionTypeSelection option:selected').text()}</b> actions reference the specified component UUID.</td>
-    </tr>
-    <tr>
-      <td colspan = "2"><br></td>
-    </tr>`;
-
-  $('#results').append(resultsStart);
-
-  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results
+  // If there are no search results, display a message to indicate this
+  // Otherwise, set up an initial message to display, and a table of the search results
   if (result.length === 0) {
-    $('#results').append('<b>The specified component UUID is not referenced by any existing actions of this type.</b>');
+    $('#results1').append('<b>The specified component UUID is not referenced by any existing actions of this type.</b>');
   } else {
     const tableStart = `
         <tr>
-          <th scope = 'col' width = '30%'>Component</th>
-          <th scope = 'col' width = '70%'>Action</th>
+          <th scope = 'col' width = '50%'>Component</th>
+          <th scope = 'col' width = '50%'>Action</th>
         </tr>`;
 
-    $('#results').append(tableStart);
+    $('#results1').append(tableStart);
 
     for (const action of result) {
       const actionText = `
@@ -111,7 +103,7 @@ function postSuccess(result) {
             <td><a href = '/action/${action.actionId}' target = '_blank'</a>${action.typeFormName}</td>
           </tr>`;
 
-      $('#results').append(actionText);
+      $('#results1').append(actionText);
     }
   }
 
