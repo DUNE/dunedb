@@ -15,124 +15,165 @@ block content
     .vert-space-x2
       h2 Search for Components by Type and Part Number
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>components</b> that match <b>both</b> of the following user-specified record details: 
+        ul
+          li <b>the component type</b>
+          li <b>the component part number</b>
+
+        p Users must select <b>both</b> parameters from their respective lists below, and a summary of information about each found component will be displayed in the results panel below the input selections.
+          br
+          | Please note that there are <u>separate</u> lists for 'Geometry Board' and 'Grounding Mesh Panel' part numbers - the search will not be performed if the selected part number does not correspond to the component type (i.e. if the user selects 'Geometry Board' as the component type, but then selects a part number from the 'Grounding Mesh Panel' part numbers list).
+
+        p If selecting 'Geometry Board' as the component type, the search results may be optionally filtered using the following parameters: 
+          ul
+            li <b>board acceptance status</b> - whether a board has been <u>rejected</u> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <u>accepted</u> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediated</u>)
+            li <b>tooth strip attachment status</b> - whether a tooth strip has been attached to the board (by performing a <u>Tooth Strip Attachment</u> action on it)
+
     .vert-space-x2
       hr
 
       .row 
-        .col-md-6 
-          .row
-            .col-md-6
-              h4 Select Component Type
-
-              .vert-space-x1
-                p Select a component type <b>and</b> a part number below.
-                  br
-                  | <b>This is a <u>required</u> parameter.</b>
-
-              select.form-control#typeSelection
-                option(value = '')
-                option(value = 'GeometryBoard') Geometry Board 
-                option(value = 'GroundingMeshPanel') Grounding Mesh Panel
-
-            .col-md-6
-              .vert-space-x2
-                button.btn-primary.btn-lg.float-right#confirmButton Search by Type and Part No. 
-
-          .vert-space-x2 
-
-          .row
-            .col-md-6
-              h4 Select Geometry Board Part No.
-
-              .vert-space-x1
-                p Select a part number below if searching for <b>Geometry Boards</b>.
-                  br
-                  | <b>This is a <u>required</u> parameter.</b>
-
-              select.form-control#boardPartNumberSelection
-                option(value = '')
-                option(value = '8760024') 8760024 (V Side Board End)
-                option(value = '8760026') 8760026 (V Middle Side Board w/o Slot)
-                option(value = '8760028') 8760028 (V Middle Side Board w/ Slot)
-                option(value = '8760030') 8760030 (V Foot Board Middle)
-                option(value = '8760032') 8760032 (X Foot Board End)
-                option(value = '8760034') 8760034 (X Foot Board Middle)
-                option(value = '8760036') 8760036 (V Foot Board End)
-                option(value = '8760038') 8760038 (U Side Board End)
-                option(value = '8760040') 8760040 (U Side Board w/o Slot Middle) 
-                option(value = '8760042') 8760042 (U Side Board w/ Slot Middle) 
-                option(value = '8760044') 8760044 (U Foot Board High Slot End)
-                option(value = '8760051') 8760051 (G Foot Board Low Slot End) 
-                option(value = '8760054') 8760054 (G Foot Board Middle)
-                option(value = '8760057') 8760057 (U Foot Board Middle) 
-                option(value = '8760059') 8760059 (U Foot Board Low Slot End)
-                option(value = '8760062') 8760062 (G Foot Board High Slot End) 
-                option(value = '8760104') 8760104 (X Head Board)
-                option(value = '8760107') 8760107 (V Foot Board Middle Position 4 & 7)
-                option(value = '8760108') 8760108 (V Head Board Middle & Right End)
-                option(value = '8760109') 8760109 (X Foot Board Position 4 & 7)
-                option(value = '8760111') 8760111 (U Foot Board Position 4 & 7)
-                option(value = '8760113') 8760113 (G Foot Board Position 4 & 7) 
-                option(value = '8760115') 8760115 (U Head Board Middle)
-                option(value = '8760116') 8760116 (V Head Board Left End)
-                option(value = '8760119') 8760119 (U Head Board Left End)
-                option(value = '8760120') 8760120 (G Head Board Right End)
-                option(value = '8760121') 8760121 (G Head Board Middle)
-                option(value = '8760122') 8760122 (G Head Board Left End)
-                option(value = '8760123') 8760123 (U Head Board Right End)
-
-            .col-md-6
-              h4 Select Mesh Panel Part No.
-
-              .vert-space-x1
-                p Select a part number below if searching for <b>Grounding Mesh Panels</b>.
-                  br
-                  | <b>This is a <u>required</u> parameter.</b>
-
-              select.form-control#meshPartNumberSelection
-                option(value = '')
-                option(value = 'mesh29410560HeadEndLH') 294-10560 HEAD END - L/H 
-                option(value = 'mesh29410561HeadEndRH') 294-10561 HEAD END - R/H
-                option(value = 'mesh29410562FootEndRH') 294-10562 FOOT END - R/H 
-                option(value = 'mesh29410563FootEndLH') 294-10563 FOOT END - L/H 
-                option(value = 'mesh29410564Centre') 294-10564 CENTRE
-
-          .vert-space-x2 
-            hr
-
-          .row 
-            .col-md-6
-              h4 Board Acceptance Status
-
-              .vert-space-x1 
-                p Select a status below ... this is an optional parameter.
-                  br
-                  | It only applies when selecting <b>'Geometry Board'</b> above.
-
-              select.form-control#acceptanceStatusSelection
-                option(value = 'any') (any)
-                option(value = 'accepted') Board Accepted at Factory 
-                option(value = 'rejected') Board Rejected at Factory
-
-            .col-md-6
-              h4 Tooth Strip Attachment Status
-
-              .vert-space-x1 
-                p Select a status below ... this is an optional parameter.
-                  br
-                  | It only applies when selecting <b>'Geometry Board'</b> above.
-
-              select.form-control#toothStripStatusSelection
-                option(value = 'any') (any)
-                option(value = 'attached') Tooth Strip Attached
-                option(value = 'notAttached') Tooth Strip Not Yet Attached
-
-        .col-md-1
-
-        .col-md-5
-          h4 Search Results
+        .col-md-4 
+          h4 Select Component Type
 
           .vert-space-x1
-            table#results
+            p 
+            | Select a component type below.<br>
+            | <b>This is a <u>required</u> parameter.</b>
+
+          .vert-space-x1 
+            select.form-control#typeSelection
+              option(value = '')
+              option(value = 'GeometryBoard') Geometry Board 
+              option(value = 'GroundingMeshPanel') Grounding Mesh Panel
+
+        .col-md-4
+          h4 Select Geometry Board P/N
+
+          .vert-space-x1
+            p 
+            | Select a <b>Geometry Board</b> part number below.<br>
+            | <b>This is a <u>required</u> parameter.</b>
+
+          .vert-space-x1
+            select.form-control#boardPartNumberSelection
+              option(value = '')
+              option(value = '8760024') 8760024 (V Side Board End)
+              option(value = '8760026') 8760026 (V Middle Side Board w/o Slot)
+              option(value = '8760028') 8760028 (V Middle Side Board w/ Slot)
+              option(value = '8760030') 8760030 (V Foot Board Middle)
+              option(value = '8760032') 8760032 (X Foot Board End)
+              option(value = '8760034') 8760034 (X Foot Board Middle)
+              option(value = '8760036') 8760036 (V Foot Board End)
+              option(value = '8760038') 8760038 (U Side Board End)
+              option(value = '8760040') 8760040 (U Side Board w/o Slot Middle) 
+              option(value = '8760042') 8760042 (U Side Board w/ Slot Middle) 
+              option(value = '8760044') 8760044 (U Foot Board High Slot End)
+              option(value = '8760051') 8760051 (G Foot Board Low Slot End) 
+              option(value = '8760054') 8760054 (G Foot Board Middle)
+              option(value = '8760057') 8760057 (U Foot Board Middle) 
+              option(value = '8760059') 8760059 (U Foot Board Low Slot End)
+              option(value = '8760062') 8760062 (G Foot Board High Slot End) 
+              option(value = '8760104') 8760104 (X Head Board)
+              option(value = '8760107') 8760107 (V Foot Board Middle Position 4 & 7)
+              option(value = '8760108') 8760108 (V Head Board Middle & Right End)
+              option(value = '8760109') 8760109 (X Foot Board Position 4 & 7)
+              option(value = '8760111') 8760111 (U Foot Board Position 4 & 7)
+              option(value = '8760113') 8760113 (G Foot Board Position 4 & 7) 
+              option(value = '8760115') 8760115 (U Head Board Middle)
+              option(value = '8760116') 8760116 (V Head Board Left End)
+              option(value = '8760119') 8760119 (U Head Board Left End)
+              option(value = '8760120') 8760120 (G Head Board Right End)
+              option(value = '8760121') 8760121 (G Head Board Middle)
+              option(value = '8760122') 8760122 (G Head Board Left End)
+              option(value = '8760123') 8760123 (U Head Board Right End)
+
+        .col-md-4
+          h4 Filter by Board Acceptance Status
+
+          .vert-space-x1 
+            p 
+            | This is an optional parameter.<br>
+            | It only applies to <b>Geometry Boards</b>.
+
+          .vert-space-x1 
+            select.form-control#acceptanceStatusSelection
+              option(value = 'any') (any)
+              option(value = 'accepted') Board Accepted at Factory 
+              option(value = 'rejected') Board Rejected at Factory
+
+      .vert-space-x2.row
+        .col-md-4 
+          .vert-space-x1
+            button.btn-primary.btn-lg#confirmButton Search by Type and Part Number 
+
+        .col-md-4
+          h4 Select Mesh Panel P/N
+
+          .vert-space-x1
+            p 
+            | Select a <b>Mesh Panel</b> part number below.<br>
+            | <b>This is an <u>alternative required</u> parameter.</b>
+
+          .vert-space-x1 
+            select.form-control#meshPartNumberSelection
+              option(value = '')
+              option(value = 'mesh29410560HeadEndLH') 294-10560 HEAD END - L/H 
+              option(value = 'mesh29410561HeadEndRH') 294-10561 HEAD END - R/H
+              option(value = 'mesh29410562FootEndRH') 294-10562 FOOT END - R/H 
+              option(value = 'mesh29410563FootEndLH') 294-10563 FOOT END - L/H 
+              option(value = 'mesh29410564Centre') 294-10564 CENTRE
+
+        .col-md-4
+          h4 Filter by Tooth Strip Attachment Status
+
+          .vert-space-x1 
+            p 
+            | This is an optional parameter.<br>
+            | It only applies to <b>Geometry Boards</b>.
+
+          .vert-space-x1 
+            select.form-control#toothStripStatusSelection
+              option(value = 'any') (any)
+              option(value = 'attached') Tooth Strip Attached
+              option(value = 'notAttached') Tooth Strip Not Yet Attached
+
+      .vert-space-x2 
+        hr
+
+      .vert-space-x1
+        h4 Search Results
+
+        .vert-space-x1
+          .row 
+            .col-md-4 
+              table#summary1 
+
+            .col-md-4 
+              table#summary2 
+
+            .col-md-4 
+              table#summary3 
+
+          .vert-space-x2.row
+            .col-md-3 
+              table#results1 
+
+            .col-md-1 
+            .col-md-3 
+              table#results2 
+
+            .col-md-1 
+            .col-md-3 
+              table#results3 
+
+            .col-md-1
 
     .vert-space-x2

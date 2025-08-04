@@ -12,83 +12,95 @@ block content
     .vert-space-x2
       h2 Search for Non-Conformance by Component Type or UUID
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>non-conformance actions</b> under one of the following scenarios:
+        ul
+          li <b>either</b> all non-conformance actions performed on a specified <u>component type</u>
+          li <b>or</b> all non-conformance actions performed on a <u>single component</u>, specified by its UUID
+
+        p If searching by component type, the only required search parameter is the 'component type' - selectable from the dropdown menu.  The search may be optionally filtered by selecting a particular non-conformance disposition and/or status from their respective dropdown menus.
+
+        p If searching by component UUID, the UUID input box uses auto-complete - users may begin manually entering a UUID, and up to 10 matching entries currently in the database will be displayed.  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.
+          br
+          |  The component UUID may alternatively be provided in full by scanning a component's QR code.  This can be done by simply pressing the 'camera' icon to the right of the UUID input box, and directing your device's camera view to the QR code in question.
+
+        p In either scenario, a summary of the found non-conformance actions will be displayed in the results panel below the input selections.
+
     .vert-space-x2 
       hr
 
       .row
-        .col-md-5
+        .col-md-4
           h4 Select Component Type
 
           .vert-space-x1
-            p <b>Either</b> select a component type below <b>or</b> enter a component UUID to the right.
-              br
-              | <b>This is a <u>required</u> parameter.</b>
+            p 
+            | Select a component type below.<br>
+            | <b>This is a <u>required</u> parameter.</b>
 
-          select.form-control#componentTypeSelection
-            option(value = '')
-            option(value = 'assembledApa') Assembled APA 
-            option(value = 'groundingMeshPanel') Grounding Mesh Panel 
-
-          .vert-space-x2
-            button.btn-primary.btn-lg#confirmButton_type Search by Component Type
-
-        .col-md-1
-
-        .col-md-5 
-          h4 Enter Component UUID
+          .vert-space-x1 
+            select.form-control#componentTypeSelection
+              option(value = '')
+              option(value = 'assembledApa') Assembled APA 
+              option(value = 'groundingMeshPanel') Grounding Mesh Panel 
 
           .vert-space-x1
-            p <b>Either</b> enter a component UUID below <b>or</b> select a component type to the left.
-              br
-              | <b>This is a <u>required</u> parameter.</b>
+            input.form-control.spacer
+
+          .vert-space-x1
+            button.btn-primary.btn-lg#confirmButton_type Search by Component Type
+
+        .col-md-4 
+          h4 Filter by Disposition or Status
+
+          .vert-space-x1 
+            p 
+            | These are both optional parameters.<br>
+            | They only apply when searching by <b>component type</b>.
+
+          .vert-space-x1 
+            select.form-control#dispositionSelection
+              option(value = 'any') (any)
+              option(value = 'useAsIs') Use As Is (NC concession granted)
+              option(value = 'repair') Repair (no modification to base design or functionality)
+              option(value = 'rework') Rework (modification to base design but no impact to function)
+              option(value = 'returnToSupplier') Return to Supplier 
+              option(value = 'rejectRePurpose') Reject/Re-purpose
+              option(value = 'scrap') Scrap 
+
+          .vert-space-x1 
+            select.form-control#statusSelection
+              option(value = 'any') (any)
+              option(value = 'open') Open 
+              option(value = 'closed') Closed 
+
+        .col-md-4
+          h4 Search by Component UUID
+
+          .vert-space-x1
+            p 
+            | Enter a component UUID below.<br>
+            | Alternatively, take a picture of the component's QR code.
 
           .vert-space-x1 
             #componentUuidSelection
 
-          button.btn-primary.btn-lg#confirmButton_uuid Search by Component UUID
+          .vert-space-x1
+            button.btn-primary.btn-lg#confirmButton_uuid Search by Component UUID
 
-      .vert-space-x2 
+      .vert-space-x2
         hr
 
-      .row.vert-space-x2 
-        .col-md-5
-          h4 Select Disposition
+      .vert-space-x1 
+        h4 Search Results
 
-          .vert-space-x1 
-            p Select a disposition below ... this is an optional parameter.
-              br
-              | It is only used alongside the <b>component type</b> required parameter.
-
-          select.form-control#dispositionSelection
-            option(value = 'any') (any)
-            option(value = 'useAsIs') Use As Is (NC concession granted)
-            option(value = 'repair') Repair (no modification to base design or functionality)
-            option(value = 'rework') Rework (modification to base design but no impact to function)
-            option(value = 'returnToSupplier') Return to Supplier 
-            option(value = 'rejectRePurpose') Reject/Re-purpose
-            option(value = 'scrap') Scrap 
-
-        .col-md-1 
-
-        .col-md-5
-          h4 Select Status
-
-          .vert-space-x1 
-            p Select a status below ... this is an optional parameter.
-              br
-              | It is only used alongside the <b>component type</b> required parameter.
-
-          select.form-control#statusSelection
-            option(value = 'any') (any)
-            option(value = 'open') Open 
-            option(value = 'closed') Closed 
-
-    .vert-space-x2
-      hr
-
-      h4 Search Results
-
-      .vert-space-x1
-        table#results
+        .vert-space-x1
+          table#results1
 
     .vert-space-x2

@@ -13,8 +13,8 @@ async function renderSearchForms() {
       type: 'WorkflowID',
       label: 'Workflow ID',
       key: 'workflowId',
-      validate: { 'required': true, },
       input: true,
+      hideLabel: true,
     }],
   }
 
@@ -26,8 +26,8 @@ async function renderSearchForms() {
       type: 'ComponentUUID',
       label: 'Component UUID',
       key: 'componentUuid',
-      validate: { 'required': true, },
       input: true,
+      hideLabel: true,
     }],
   }
 
@@ -76,8 +76,8 @@ function postSuccess(result) {
   } else if (result.length > 1) {
     const output = `
       <b>The specified component is part of <u>multiple</u> workflows.</b>
-      <br>This should not happen, since each workflow should be uniquely related to a single component.
-      <br>Please bring this to the attention of one of the database development team, indicating the component UUID that you specified above.`;
+      <br>This should not happen, since each workflow should be uniquely associated with a single component.
+      <br>Please bring this to the attention of one of the DB Admins, indicating the component UUID that you specified above.`;
 
     $('#messages').append(output);
   } else {

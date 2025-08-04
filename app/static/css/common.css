@@ -21,6 +21,11 @@ html {
   margin-top: 2em
 }
 
+.form-control.spacer {
+  border: 0;
+  pointer-events: none;
+}
+
 .hori-space-x1 {
   margin-left: 1em
 }

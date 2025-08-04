@@ -105,7 +105,7 @@ class ActionID extends TextFieldComponent {
     if (this.refs.actionIdInfo && value && value.length === 24) {
       $.get(`/json/action/${value}`);
 
-      if (window.location.pathname === '/search/byUUIDorID') window.location.href = `/action/${value}`;
+      if (window.location.pathname === '/search/actionsByIDOrReferencedUUID') window.location.href = `/action/${value}`;
     }
 
     return changed;

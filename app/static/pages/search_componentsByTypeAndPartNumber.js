@@ -37,6 +37,13 @@ async function renderSearchForms() {
   // Additionally, disable the button while the current search is being performed
   $('#confirmButton').on('click', function () {
     $('#confirmButton').prop('disabled', true);
+    $('#summary1').empty().append('<b>Working ...</b>');
+    $('#summary2').empty();
+    $('#summary3').empty();
+    $('#results1').empty();
+    $('#results2').empty();
+    $('#results3').empty();
+
     let componentPartNumber = null;
 
     if (componentType) {
@@ -64,56 +71,68 @@ async function renderSearchForms() {
 
 // Function to run for a successful search query
 function postSuccess(result) {
-  // Make sure that the page element where the results will be displayed is empty, and then enter an initial message to display
-  $('#results').empty();
+  // Make sure that the page elements where the results will be displayed are all empty
+  $('#summary1').empty();
+  $('#summary2').empty();
+  $('#summary3').empty();
+  $('#results1').empty();
+  $('#results2').empty();
+  $('#results3').empty();
 
-  const resultsStart = `
-    <tr>
-      <td colspan = "3">The following <b>${$('#typeSelection option:selected').text()}</b> components with part number <b>${componentPartString}</b> have been received.</td>
-    </tr>
-    <tr>
-      <td colspan = "3">Geometry Boards and Grounding Mesh Panels are grouped by location, and then ordered by increasing type record number within each group.
-        <br>
-        Other component types are ungrouped, but still ordered by increasing type record number.
-        <br>
-        <hr>
-      </td>
-    </tr>`;
-
-  $('#results').append(resultsStart);
-
-  // If there are no search results, display a message to indicate this, but otherwise set up a table of the search results (with the layout being specific to the selected component type)
+  // If there are no search results, display a message to indicate this
+  // Otherwise, set up an initial message to display (dependent on the selected component type), and a table of the search results (with the layout being specific to the selected component type)
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>There are no components of this part number and with the specified options at any location</b>');
+    $('#summary1').append('<b>There are no components of this part number and with the specified optional filters at any location</b>');
   } else {
     if ($('#typeSelection option:selected').val() === 'GeometryBoard') {
-      for (const boardGroup of result) {
+      for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupCount = `
           <tr>
-            <td colspan = "3">Found ${boardGroup.componentUuids.length} boards at <b>${dictionary_locations[boardGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b> - ${boardGroup.componentUuids.length} boards</td>
           </tr>`;
 
-        $('#results').append(groupCount);
+        $('#summary1').append(groupCount);
       }
 
-      $('#results').append('<br>');
+      $('#summary1').append('<br>');
 
-      for (const boardGroup of result) {
+      for (const boardGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
+        const groupCount = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b> - ${boardGroup.componentUuids.length} boards</td>
+          </tr>`;
+
+        $('#summary2').append(groupCount);
+      }
+
+      $('#summary2').append('<br>');
+
+      for (const boardGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
+        const groupCount = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b> - ${boardGroup.componentUuids.length} boards</td>
+          </tr>`;
+
+        $('#summary3').append(groupCount);
+      }
+
+      $('#summary3').append('<br>');
+
+      const tableStart = `
+        <tr>
+          <th scope = 'col' style = 'width: 23%'>UKID</th>
+          <th scope = 'col' style = 'width: 32%'>Date at Location</th>
+          <th scope = 'col' style = 'width: 45%'>Installed on APA</th>
+        </tr>`;
+
+      for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupTitle = `
           <tr>
             <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b></td>
           </tr>`;
 
-        $('#results').append(groupTitle);
-
-        const tableStart = `
-          <tr>
-            <th scope = 'col' style = 'width: 25%'>Board UKID</th>
-            <th scope = 'col' style = 'width: 25%'>Date at Location</th>
-            <th scope = 'col' style = 'width: 50%'>Installed on APA</th>
-          </tr>`;
-
-        $('#results').append(tableStart);
+        $('#results1').append(groupTitle);
+        $('#results1').append(tableStart);
 
         for (const i in boardGroup.componentUuids) {
           const boardText = `
@@ -123,39 +142,106 @@ function postSuccess(result) {
               <td>${boardGroup.installedOnAPA[i]}</td>
             </tr>`;
 
-          $('#results').append(boardText);
+          $('#results1').append(boardText);
         }
 
-        $('#results').append('<br>');
+        $('#results1').append('<br>');
       }
-    } else if ($('#typeSelection option:selected').val() === 'GroundingMeshPanel') {
-      for (const meshGroup of result) {
-        const groupCount = `
+
+      for (const boardGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
+        const groupTitle = `
           <tr>
-            <td colspan = "3">Found ${meshGroup.componentUuids.length} meshes at <b>${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b></td>
           </tr>`;
 
-        $('#results').append(groupCount);
+        $('#results2').append(groupTitle);
+        $('#results2').append(tableStart);
+
+        for (const i in boardGroup.componentUuids) {
+          const boardText = `
+            <tr>
+              <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
+              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.installedOnAPA[i]}</td>
+            </tr>`;
+
+          $('#results2').append(boardText);
+        }
+
+        $('#results2').append('<br>');
       }
 
-      $('#results').append('<br>');
+      for (const boardGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
+        const groupTitle = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b></td>
+          </tr>`;
 
-      for (const meshGroup of result) {
+        $('#results3').append(groupTitle);
+        $('#results3').append(tableStart);
+
+        for (const i in boardGroup.componentUuids) {
+          const boardText = `
+            <tr>
+              <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
+              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.installedOnAPA[i]}</td>
+            </tr>`;
+
+          $('#results3').append(boardText);
+        }
+
+        $('#results3').append('<br>');
+      }
+    } else if ($('#typeSelection option:selected').val() === 'GroundingMeshPanel') {
+      for (const meshGroup of result.slice(0, (result.length / 3) + 1)) {
+        const groupCount = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
+          </tr>`;
+
+        $('#summary1').append(groupCount);
+      }
+
+      $('#summary1').append('<br>');
+
+      for (const meshGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
+        const groupCount = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
+          </tr>`;
+
+        $('#summary2').append(groupCount);
+      }
+
+      $('#summary2').append('<br>');
+
+      for (const meshGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
+        const groupCount = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
+          </tr>`;
+
+        $('#summary3').append(groupCount);
+      }
+
+      $('#summary3').append('<br>');
+
+      const tableStart = `
+        <tr>
+          <th scope = 'col' width = '23%'>Number</th>
+          <th scope = 'col' width = '32%'>Date at Location</th>
+          <th scope = 'col' width = '45%'>Installed on APA</th>
+        </tr>`;
+
+      for (const meshGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupTitle = `
           <tr>
             <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
           </tr>`;
 
-        $('#results').append(groupTitle);
-
-        const tableStart = `
-          <tr>
-            <th scope = 'col' width = '25%'>Mesh Number</th>
-            <th scope = 'col' width = '25%'>Date at Location</th>
-            <th scope = 'col' width = '50%'>Installed on APA</th>
-          </tr>`;
-
-        $('#results').append(tableStart);
+        $('#results1').append(groupTitle);
+        $('#results1').append(tableStart);
 
         for (const i in meshGroup.componentUuids) {
           const meshText = `
@@ -165,10 +251,56 @@ function postSuccess(result) {
               <td>${meshGroup.installedOnAPA[i]}</td>
             </tr>`;
 
-          $('#results').append(meshText);
+          $('#results1').append(meshText);
         }
 
-        $('#results').append('<br>');
+        $('#results1').append('<br>');
+      }
+
+      for (const meshGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
+        const groupTitle = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+          </tr>`;
+
+        $('#results2').append(groupTitle);
+        $('#results2').append(tableStart);
+
+        for (const i in meshGroup.componentUuids) {
+          const meshText = `
+            <tr>
+              <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
+              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.installedOnAPA[i]}</td>
+            </tr>`;
+
+          $('#results2').append(meshText);
+        }
+
+        $('#results2').append('<br>');
+      }
+
+      for (const meshGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
+        const groupTitle = `
+          <tr>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+          </tr>`;
+
+        $('#results3').append(groupTitle);
+        $('#results3').append(tableStart);
+
+        for (const i in meshGroup.componentUuids) {
+          const meshText = `
+            <tr>
+              <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
+              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.installedOnAPA[i]}</td>
+            </tr>`;
+
+          $('#results3').append(meshText);
+        }
+
+        $('#results3').append('<br>');
       }
     }
   }

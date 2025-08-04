@@ -12,50 +12,86 @@ block content
     .vert-space-x2
       h2 Search for Actions by ID or Referenced UUID
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>actions</b> by one of the following methods:
+        ul 
+          li <b>by action ID</b>
+          li <b>by referenced component</b> - i.e. if the component is somehow associated with the action, but it was <u>not</u> the component that the action was performed on
+
+        p As an example of the latter, 'Board Installation' actions are performed on 'Assembled APA' components, but must reference (i.e. contain the UUIDs of) the various 'Geometry Board' components that are being installed.
+
+        p If searching by action ID, the input box uses auto-complete - users may begin manually entering an ID, and up to 10 matching entries currently in the database will be displayed.  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the ID is entered.
+          br
+          | At any time, if the ID corresponds to a single action record in the database, the user will be automatically redirected to the information page for the action.  If there is no corresponding record even after the entire ID has been provided, an error will be displayed.
+
+        p If searching by referenced component, users must specify the following information:
+          ul
+            li the UUID of the component being referenced
+            li the type (or general grouping) of actions that could reference the component, selected from the provided dropdown menu
+
+        p The UUID input box uses auto-complete - users may begin manually entering a UUID, and up to 10 matching entries currently in the database will be displayed.  The auto-complete system is responsive - meaning that the list of displayed matches will be dynamically updated as more of the UUID is entered.
+          br
+          |  The component UUID may alternatively be provided in full by scanning a component's QR code.  This can be done by simply pressing the 'camera' icon to the right of the UUID input box, and directing your device's camera view to the QR code in question.
+
+        p Please note that <b>both pieces of information must be provided</b> for the search by referenced component to be performed.  If successful, a summary of information about each found action will be displayed in the results panel below the input selections.
+
     .vert-space-x2 
       hr
 
       .row 
-        .col-md-5
-          .row
-            .col-md-12
-              h4 Search by Action ID
-
-              .vert-space-x1
-                p Enter an action ID below.
-
-              .vert-space-x1
-                #actionidform
-
-          hr
-
-          .row 
-            .col-md-12
-              h4 Search by Referenced Component UUID
-
-              .vert-space-x1
-                p Enter a component UUID below or take a picture of the component's QR code.
-
-              .vert-space-x1 
-                #componentuuidform
-
-              .vert-space-x2
-                p Select an action type below.
-
-                select.form-control#actionTypeSelection
-                  option(value = '')          
-                  option(value = 'boardInstall') Board Installation (any layer) [Geometry Boards]
-                  option(value = 'winding') Winding (any layer) [Wire Bobbins]
-
-              .vert-space-x2
-                button.btn-primary.btn-lg#confirmButton Search by Action Type and UUID
-
-        .col-md-1
-
-        .col-md-6
-          h4 Search Results
+        .col-md-4
+          h4 Search by Action ID
 
           .vert-space-x1
-            table#results
+            p 
+            | Enter an action ID below.<br>
+            | &nbsp 
+
+        .col-md-8
+          h4 Search by Referenced Component UUID
+
+          .row 
+            .col-md-6 
+              .vert-space-x1
+                p 
+                | Enter a component UUID below.<br>
+                | Alternatively, take a picture of the component's QR code.
+
+            .col-md-6
+              .vert-space-x1
+                p 
+                | Select an action type below.<br>
+                | &nbsp 
+
+      .vert-space-x1.row 
+        .col-md-4 
+          #actionidform
+
+        .col-md-4 
+          #componentuuidform
+
+        .col-md-4 
+          select.form-control#actionTypeSelection
+            option(value = '')          
+            option(value = 'boardInstall') Board Installation (any layer) [Geometry Boards]
+            option(value = 'winding') Winding (any layer) [Wire Bobbins]
+
+          .vert-space-x2 
+            button.btn-primary.btn-lg#confirmButton Search by Referenced Component
+
+      .vert-space-x2
+        hr
+
+      .vert-space-x1
+        h4 Search Results
+
+        .vert-space-x1
+          table#results1
 
     .vert-space-x2

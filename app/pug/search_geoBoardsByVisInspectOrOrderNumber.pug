@@ -12,78 +12,107 @@ block content
     .vert-space-x2
       h2 Search for Geometry Boards by Visual Inspection Disposition or Order Number
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>geometry boards</b> under one of the following scenarios:
+        ul
+          li <b>either</b> all geometry boards of any batch order number that have a <u>specified visual inspection disposition</u>
+          li <b>or</b> all geometry boards of a <u>specified batch order number</u> that have any visual inspection disposition
+
+        p Users may select one of the available dispositions from the dropdown menu or enter an order number into the provided input box, and a summary of information about each found board will be displayed in the results panel below the input selections.
+          br
+          | The search by disposition may be optionally filtered by selecting a <u>visual inspection issue</u> from the corresponding dropdown menu.
+
+        p Please note that <b>a geometry board will only be displayed in the search results if a <u>Visual Inspection</u> action has been performed on it</b>.
+          
     .vert-space-x2 
       hr
 
       .row
-        .col-md-5
+        .col-md-4
           h4 Select Visual Inspection Disposition
 
           .vert-space-x1
-            p <b>Either</b> select a disposition below <b>or</b> enter an order number to the right.
-              br
-              | <b>This is a <u>required</u> parameter.</b>
+            p
+            | Select a disposition below.<br>
+            | <b>This is a <u>required</u> parameter.</b>
 
-          select.form-control#dispositionSelection
-            option(value = '')          
-            option(value = 'useAsIs') Use As Is 
-            option(value = 'repair') Repair 
-            option(value = 'return') Return 
-            option(value = 'scrap') Scrap 
-            option(value = 'toBeDetermined') To be determined 
-            option(value = 'boardIsConformant') Board Is Conformant
+          .vert-space-x1 
+            select.form-control#dispositionSelection
+              option(value = '')          
+              option(value = 'useAsIs') Use As Is 
+              option(value = 'repair') Repair 
+              option(value = 'return') Return 
+              option(value = 'scrap') Scrap 
+              option(value = 'toBeDetermined') To be determined 
+              option(value = 'boardIsConformant') Board Is Conformant
 
           .vert-space-x2
             button.btn-primary.btn-lg#confirmButton_disposition Search by Disposition
 
-        .col-md-1 
-
-        .col-md-5
-          h4 Enter Order Number
+        .col-md-4
+          h4 Filter by Issue
 
           .vert-space-x1
-            p <b>Either</b> enter an order number below <b>or</b> select a disposition to the left.
-              br
-              | <b>This is a <u>required</u> parameter.</b>
+            p
+            | This is an optional parameter.<br>
+            | It only applies when searching by <b>disposition</b>.
 
-          input.form-control#orderNumberSelection
+          .vert-space-x1 
+            select.form-control#issueSelection
+              option(value = 'any') (any)         
+              option(value = 'packagingDamaged') Packaging damaged 
+              option(value = 'scratches') Scratches 
+              option(value = 'exposedCopper') Exposed copper 
+              option(value = 'interruptedTraces') Copper trace(s) interrupted 
+              option(value = 'chipped') PCB chipped 
+              option(value = 'notFlat') PCB not flat
+              option(value = 'incorrectGeometry') Incorrect geometry 
+              option(value = 'incorrectThickness') Incorrect thickness
+              option(value = 'qrCodeProblem') QR code problem 
+              option(value = 'millMaxHolePlating') Issues with mill-max hole plating
+              option(value = 'extraneousMaterialOnBoard') Extraneous material on board 
+              option(value = 'fiducialPin') Fiducial pin more than 0.25 mm above board surface
+              option(value = 'other') Other
+
+        .col-md-4
+          h4 Search by Order Number
+
+          .vert-space-x1
+            p
+            | Enter an order number below.<br>
+            | <b>This is an <u>alternative required</u> parameter.</b>
+
+          .vert-space-x1
+            input.form-control#orderNumberSelection
 
           .vert-space-x2
             button.btn-primary.btn-lg#confirmButton_orderNumber Search by Order Number
 
-      .row 
-        .col-md-5
-          hr
+      .vert-space-x2
+        hr
 
-          h4 Select Issue
+      .vert-space-x1 
+        h4 Search Results
 
-          .vert-space-x1
-            p Select an issue below ... this is an optional parameter.
-              br
-              | It is only used alongside the <b>disposition</b> required parameter above.
+        .vert-space-x1
+          .row 
+            .col-md-4 
+              table#summary1 
 
-          select.form-control#issueSelection
-            option(value = 'any') (any)         
-            option(value = 'packagingDamaged') Packaging damaged 
-            option(value = 'scratches') Scratches 
-            option(value = 'exposedCopper') Exposed copper 
-            option(value = 'interruptedTraces') Copper trace(s) interrupted 
-            option(value = 'chipped') PCB chipped 
-            option(value = 'notFlat') PCB not flat
-            option(value = 'incorrectGeometry') Incorrect geometry 
-            option(value = 'incorrectThickness') Incorrect thickness
-            option(value = 'qrCodeProblem') QR code problem 
-            option(value = 'millMaxHolePlating') Issues with mill-max hole plating
-            option(value = 'extraneousMaterialOnBoard') Extraneous material on board 
-            option(value = 'fiducialPin') Fiducial pin more than 0.25 mm above board surface
-            option(value = 'other') Other
+            .col-md-4 
+              table#summary2 
 
-    .vert-space-x2
-      hr
+            .col-md-4 
+              table#summary3 
 
-      h4 Search Results
-
-      .vert-space-x1
-        table#results
+          .vert-space-x2.row
+            .col-md-12 
+              table#results1  
 
     .vert-space-x2

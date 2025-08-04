@@ -41,6 +41,21 @@ async function setComponentNames(typeFormId) {
       }
 
       dunePid = `D00300200001-${typeRecordNumber}-${pidSuffix}`;
+    } else if (typeFormId === 'APAShippingFrame') {
+      let pidSuffix = '';
+
+      if (data.asfLocation === 'chicago') {
+        componentName = `ASF ${typeRecordNumber}-US`;
+        pidSuffix = 'US175-010000';
+      } else if (data.asfLocation === 'daresbury') {
+        componentName = `ASF ${typeRecordNumber}-UK`;
+        pidSuffix = 'UK106-010000';
+      } else if (data.asfLocation === 'wisconsin') {
+        componentName = `ASF ${typeRecordNumber}-US`;
+        pidSuffix = 'US200-010000';
+      }
+
+      dunePid = `D003MMMNNNNN-${typeRecordNumber}-${pidSuffix}`;
     } else if (typeFormId === 'AssembledAPA') {
       let pidPrefix = '';
       let pidSuffix = '';

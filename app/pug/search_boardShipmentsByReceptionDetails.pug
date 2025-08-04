@@ -15,6 +15,26 @@ block content
     .vert-space-x2
       h2 Search for Geometry Board Shipments by Reception Details
 
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
+
+      .collapse#descriptionBox
+        p This page may be used to search for <b>geometry board shipments</b> that match <b>one or more</b> of the following user-specified record details:
+        ul
+          li <b>shipment status</b>: whether the shipment has been recorded as received or not
+          li <b>origin location</b>: the location from which the shipment was sent
+          li <b>destination location</b>: the location at which the shipment is to be (or has been) received
+          li <b>earliest reception date</b>: the earliest date on which the shipment could have been received (if not specified, 1st of January 2000 is used)
+          li <b>latest reception date</b>: the latest date on which the shipment could have been received (if not specified, today's date is used)
+          li <b>reception comment</b>: the presence of any comments noted in the shipment reception record
+
+        p The 'shipment status' is the only <b>required</b> parameter for any search - users may additionally use any combination of the other parameters to filter the search results.
+
+        p Upon a successful search, a summary of information about each matching shipment will be displayed in the results panel below the input selections.  In the case of shipments that have not been received, reception information will of course be left blank in the results.
+
     .vert-space-x2
       hr
 
@@ -23,96 +43,107 @@ block content
           h4 Select Shipment Status
 
           .vert-space-x1
-            p Select a status below.
-              br
-              | <b>This is a <u>required</u> parameter.</b>
+            p 
+            | Select a status below.<br>
+            | <b>This is the only <u>required</u> parameter.</b>
 
-          select.form-control#shipmentStatusSelection
-            option(value = '') (please select)
-            option(value = 'unreceived') Unreceived Shipments
-            option(value = 'received') Received Shipments
-
-        .col-md-3
-          h4 Select Origin Location
-
-          .vert-space-x1
-            p Select a location below ... this is an optional parameter. 
-
-          select.form-control#originLocationSelection
-            option(value = '') (any)
-            option(value = 'cambridge') #{dictionary_locations['cambridge']} 
-            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
-            option(value = 'lancaster') #{dictionary_locations['lancaster']} 
-            option(value = 'manchester') #{dictionary_locations['manchester']} 
-            option(value = 'merlin') #{dictionary_locations['merlin']} 
-            option(value = 'sheffield') #{dictionary_locations['sheffield']} 
-            option(value = 'sussex') #{dictionary_locations['sussex']} 
-            option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
+          .vert-space-x1 
+            select.form-control#shipmentStatusSelection
+              option(value = '') (please select)
+              option(value = 'unreceived') Unreceived Shipments
+              option(value = 'received') Received Shipments
 
         .col-md-3
-          h4 Select Destination Location
+          h4 Filter by Origin Location
 
           .vert-space-x1
-            p Select a location below ... this is an optional parameter.
+            p 
+            | Select a location below.<br>
+            | &nbsp 
 
-          select.form-control#destinationLocationSelection
-            option(value = '') (any)
-            option(value = 'cambridge') #{dictionary_locations['cambridge']} 
-            option(value = 'chicago') #{dictionary_locations['chicago']} 
-            option(value = 'daresbury') #{dictionary_locations['daresbury']} 
-            option(value = 'lancaster') #{dictionary_locations['lancaster']} 
-            option(value = 'manchester') #{dictionary_locations['manchester']} 
-            option(value = 'merlin') #{dictionary_locations['merlin']} 
-            option(value = 'sheffield') #{dictionary_locations['sheffield']} 
-            option(value = 'sussex') #{dictionary_locations['sussex']} 
-            option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
-            option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
+          .vert-space-x1 
+            select.form-control#originLocationSelection
+              option(value = '') (any)
+              option(value = 'cambridge') #{dictionary_locations['cambridge']} 
+              option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+              option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+              option(value = 'manchester') #{dictionary_locations['manchester']} 
+              option(value = 'merlin') #{dictionary_locations['merlin']} 
+              option(value = 'sheffield') #{dictionary_locations['sheffield']} 
+              option(value = 'sussex') #{dictionary_locations['sussex']} 
+              option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
+
+        .col-md-3
+          h4 Filter by Destination Location
+
+          .vert-space-x1
+            p
+            | Select a location below.<br>
+            | &nbsp 
+
+          .vert-space-x1 
+            select.form-control#destinationLocationSelection
+              option(value = '') (any)
+              option(value = 'cambridge') #{dictionary_locations['cambridge']} 
+              option(value = 'chicago') #{dictionary_locations['chicago']} 
+              option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+              option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+              option(value = 'manchester') #{dictionary_locations['manchester']} 
+              option(value = 'merlin') #{dictionary_locations['merlin']} 
+              option(value = 'sheffield') #{dictionary_locations['sheffield']} 
+              option(value = 'sussex') #{dictionary_locations['sussex']} 
+              option(value = 'williamAndMary') #{dictionary_locations['williamAndMary']} 
+              option(value = 'wisconsin') #{dictionary_locations['wisconsin']} 
 
         .col-md-3 
 
-      .row.vert-space-x2
+      .vert-space-x2.row
         .col-md-3 
-          button.btn-primary.btn-lg#confirmButton Search by Reception Details
+          .vert-space-x1
+            button.btn-primary.btn-lg#confirmButton Search by Reception Details
 
         .col-md-3
-          h4 Select Earliest Reception Date
+          h4 Filter by Earliest Reception Date
 
           .vert-space-x1
-            p Select a date below ... this is an optional parameter.
-              br
-              | Dates <b><u>on and after</u></b> this will be matched.
+            p
+            | Select a date below.<br>
+            | Dates <b><u>on and after</u></b> this will be matched.
 
+          .vert-space-x1 
             #earliestdateform
 
         .col-md-3
-          h4 Select Latest Reception Date
+          h4 Filter by Latest Reception Date
 
           .vert-space-x1
-            p Select a date below ... this is an optional parameter.
-              br
-              | Dates <b><u>on and before</u></b> this will be matched.
+            p 
+            | Select a date below.<br>
+            | Dates <b><u>on and before</u></b> this will be matched.
 
+          .vert-space-x1
             #latestdateform
 
         .col-md-3
-          h4 Select Reception Comment
+          h4 Filter by Reception Comment
 
           .vert-space-x1
-            p Indicate if you would like to query against reception comments.
-              br
-              | This is an optional parameter.
+            p 
+            | Indicate whether to query the presence of reception comments.
 
-          select.form-control#receptionCommentSelection
-            option(value = '') All shipments 
-            option(value = 'noComment') Only shipments received with no comments 
-            option(value = 'comment') Only shipments received with comments 
-
-    .vert-space-x1
-      hr
-
-      h4 Search Results
+          .vert-space-x1 
+            select.form-control#receptionCommentSelection
+              option(value = '') All shipments 
+              option(value = 'noComment') Only shipments received with no comments 
+              option(value = 'comment') Only shipments received with comments 
 
       .vert-space-x1
-        table#results
+        hr
+        
+      .vert-space-x1
+        h4 Search Results
+
+        .vert-space-x1
+          table#results1
 
     .vert-space-x2

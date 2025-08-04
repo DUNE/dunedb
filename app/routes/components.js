@@ -780,10 +780,7 @@ router.get('/components/list', permissions.checkPermission('components:view'), a
     // Render the interface page
     res.render('component_list.pug', {
       components,
-      singleType: false,
-      title: 'All Created / Edited Components (All Types)',
       allComponentTypeForms,
-      workflowComponent: false,
     });
   } catch (err) {
     logger.error(err);
@@ -806,16 +803,44 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
     const allComponentTypeForms = await Forms.list('componentForms');
 
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
-    // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only two workflow types, so we can do this explicitly)
+    // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only a small number of workflow types, so we can do this explicitly)
     // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
     const list_workflowComponents = ['AssembledAPA', 'APAFrame', 'APAShipment'];
     const workflowComponent = list_workflowComponents.includes(req.params.typeFormId);
 
+    // For certain component types, it is useful to display some extra information ... either directly about the component itself, or about a related component or action
+    // Add whatever information is relevant to each component record (but using the same generic field name regardless of what the information actually is)
+    if (componentTypeForm.formId === 'APAFrame') {
+      for (let apaFrame of components) {
+        const assembledAPA = await Components.retrieve(MUUID.from(apaFrame.reception.detail));
+
+        if (assembledAPA) { apaFrame.additionalInformation = assembledAPA.data.componentName; }
+        else { apaFrame.additionalInformation = '[Not Currently in Use on an APA!]'; }
+      }
+    } else if (componentTypeForm.formId === 'AssembledAPA') {
+      for (let assembledAPA of components) {
+        const apaFrame = await Components.retrieve(MUUID.from(assembledAPA.data.frameUuid));
+
+        if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
+        else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
+      }
+    } else if (['APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'FrameShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.formId)) {
+      for (let shipment of components) {
+        if (shipment.reception != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.reception.location]; }
+        else { shipment.additionalInformation = '[reception object missing!]'; }
+      }
+    } else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.formId)) {
+      for (let board of components) {
+        if (board.reception != null) { board.additionalInformation = utils.dictionary_locations[board.reception.location]; }
+        else { board.additionalInformation = '[reception object missing!]'; }
+      }
+    } else {
+      for (let component of components) { component.additionalInformation = ''; }
+    }
+
     // Render the interface page
-    res.render('component_list.pug', {
+    res.render('component_listOfSingleType.pug', {
       components,
-      singleType: true,
-      title: 'All Created / Edited Components (Single Type)',
       componentTypeForm,
       allComponentTypeForms,
       workflowComponent,

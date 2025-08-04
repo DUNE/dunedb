@@ -27,6 +27,13 @@ async function renderSearchForms() {
   $('#confirmButton_number').on('click', function () {
     $('#confirmButton_number').prop('disabled', true);
     $('#confirmButton_assemblyStep').prop('disabled', true);
+    $('#messages').empty().append('<b>Working ...</b>');
+    $('#summary1').empty();
+    $('#summary2').empty();
+    $('#results11').empty()
+    $('#results12').empty()
+    $('#results21').empty()
+    $('#results22').empty()
 
     if (apaLocation && apaNumber) {
       $.ajax({
@@ -44,6 +51,13 @@ async function renderSearchForms() {
   $('#confirmButton_assemblyStep').on('click', function () {
     $('#confirmButton_number').prop('disabled', true);
     $('#confirmButton_assemblyStep').prop('disabled', true);
+    $('#messages').empty().append('<b>Working ...</b>');
+    $('#summary1').empty();
+    $('#summary2').empty();
+    $('#results11').empty()
+    $('#results12').empty()
+    $('#results21').empty()
+    $('#results22').empty()
 
     if (apaLocation && assemblyStep) {
       $.ajax({
@@ -62,21 +76,25 @@ async function renderSearchForms() {
 function postSuccess_locationAndNumber(result) {
   // Make sure that all page elements where information messages or search results will be displayed are empty
   $('#messages').empty();
-  $('#results1').empty();
-  $('#results2').empty();
+  $('#summary1').empty();
+  $('#summary2').empty();
+  $('#results11').empty()
+  $('#results12').empty()
+  $('#results21').empty()
+  $('#results22').empty()
 
   // If there are no search results, display a message to indicate this, and then re-enable both confirmation buttons for the next search
   // Similarly, if there is more than one search result (i.e. more than one assembled APA matches the provided record details), also display a message and re-enable the buttons
   // Otherwise (i.e. there is exactly one assembled APA in the search results), redirect the user to the page for viewing the assembled APA component record
   if (result.length === 0) {
-    $('#messages').append('<b>There is no assembled APA matching the specified record details.</b>');
+    $('#messages').append('<b>There is no Assembled APA matching the specified record details.</b>');
     $('#confirmButton_locationNumber').prop('disabled', false);
     $('#confirmButton_assemblyStep').prop('disabled', false);
   } else if (result.length > 1) {
     const output = `
-      <b>The specified record details match <u>multiple</u> assembled APAs.</b>
-      <br>This should not happen, since these two pieces of information should uniquely identify a single APA.
-      <br>Please bring this to the attention of one of the database development team, indicating the APA record details that you specified on the left.`;
+      <b>The specified record details match <u>multiple</u> Assembled APAs.</b>
+      <br>This should not happen, since these two pieces of information should together uniquely identify a single one.
+      <br>Please bring this to the attention of one of the DB Admins, indicating the APA record details that you used for the search.`;
 
     $('#messages').append(output);
     $('#confirmButton_locationNumber').prop('disabled', false);
@@ -87,62 +105,89 @@ function postSuccess_locationAndNumber(result) {
 };
 
 
-// Function to run for a successful search query by production location and last completed assembly step
+// Function to run for a successful search query by production location and last completed QA action
 function postSuccess_locationAndAssemblyStep(result) {
   // Make sure that all page elements where information messages or search results will be displayed are empty
   $('#messages').empty();
-  $('#results1').empty();
-  $('#results2').empty();
+  $('#summary1').empty();
+  $('#summary2').empty();
+  $('#results11').empty()
+  $('#results12').empty()
+  $('#results21').empty()
+  $('#results22').empty()
+
+  let tableStart = `
+    <tr>
+      <th scope = 'col' width = '65%'>APA Name</th>
+      <th scope = 'col' width = '35%'>Workflow</th>
+    </tr>`;
 
   // Display the information about APAs that have had the specified assembly step completed
   let resultsStart = `
   <tr>
-    <td colspan = "3">The specified assembly step <b><u>has been completed</u></b> for <b>${result[0].length} APAs</b>
+    <td colspan = "3">The specified QA action <b><u>has been completed</u></b> for <b>${result[0].length} APAs</b>
       <br>
       <hr>
     </td>
   </tr>`;
 
-  $('#results1').append(resultsStart);
+  $('#summary1').append(resultsStart);
+  $('#results11').append(tableStart);
 
-  let tableStart = `
-    <tr>
-      <th scope = 'col' width = '40%'>APA Name</th>
-      <th scope = 'col' width = '60%'>Assembly Workflow</th>
-    </tr>`;
-
-  $('#results1').append(tableStart);
-
-  for (const apa of result[0]) {
+  for (const apa of result[0].slice(0, result[0].length / 2)) {
     const apaText = `
       <tr>
         <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
         <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
       </tr>`;
 
-    $('#results1').append(apaText);
+    $('#results11').append(apaText);
+  }
+
+  $('#results12').append(tableStart);
+
+  for (const apa of result[0].slice(result[0].length / 2, result[0].length)) {
+    const apaText = `
+      <tr>
+        <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
+        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
+      </tr>`;
+
+    $('#results12').append(apaText);
   }
 
   // Display the information about APAs that have not yet had the specified assembly step completed
   resultsStart = `
   <tr>
-    <td colspan = "3">The specified assembly step <b><u>has not yet been completed</u></b> for <b>${result[1].length} APAs</b>
+    <td colspan = "3">The specified QA action <b><u>has not yet been completed</u></b> for <b>${result[1].length} APAs</b>
       <br>
       <hr>
     </td>
   </tr>`;
 
-  $('#results2').append(resultsStart);
-  $('#results2').append(tableStart);
+  $('#summary2').append(resultsStart);
+  $('#results21').append(tableStart);
 
-  for (const apa of result[1]) {
+  for (const apa of result[1].slice(0, result[1].length / 2)) {
     const apaText = `
       <tr>
         <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
         <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
       </tr>`;
 
-    $('#results2').append(apaText);
+    $('#results21').append(apaText);
+  }
+
+  $('#results22').append(tableStart);
+
+  for (const apa of result[1].slice(result[1].length / 2, result[1].length)) {
+    const apaText = `
+      <tr>
+        <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
+        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
+      </tr>`;
+
+    $('#results22').append(apaText);
   }
 
   // Re-enable both confirmation buttons for the next search
