@@ -116,12 +116,6 @@ function postSuccess_locationAndAssemblyStep(result) {
   $('#results21').empty()
   $('#results22').empty()
 
-  let tableStart = `
-    <tr>
-      <th scope = 'col' width = '65%'>APA Name</th>
-      <th scope = 'col' width = '35%'>Workflow</th>
-    </tr>`;
-
   // Display the information about APAs that have had the specified assembly step completed
   let resultsStart = `
   <tr>
@@ -132,13 +126,20 @@ function postSuccess_locationAndAssemblyStep(result) {
   </tr>`;
 
   $('#summary1').append(resultsStart);
+
+  let tableStart = `
+    <tr>
+      <th style = 'width: 57%'>APA Name</th>
+      <th style = 'width: 43%'>Workflow</th>
+    </tr>`;
+
   $('#results11').append(tableStart);
 
   for (const apa of result[0].slice(0, result[0].length / 2)) {
     const apaText = `
       <tr>
         <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
-        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
+        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[Info Page]</td>
       </tr>`;
 
     $('#results11').append(apaText);
@@ -150,7 +151,7 @@ function postSuccess_locationAndAssemblyStep(result) {
     const apaText = `
       <tr>
         <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
-        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
+        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[Info Page]</td>
       </tr>`;
 
     $('#results12').append(apaText);
@@ -172,7 +173,7 @@ function postSuccess_locationAndAssemblyStep(result) {
     const apaText = `
       <tr>
         <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
-        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
+        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[Info Page]</td>
       </tr>`;
 
     $('#results21').append(apaText);
@@ -184,7 +185,7 @@ function postSuccess_locationAndAssemblyStep(result) {
     const apaText = `
       <tr>
         <td><a href = '/component/${apa.componentUuid}' target = '_blank'</a>${apa.componentName}</td>
-        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[link]</td>
+        <td><a href = '/workflow/${apa.workflowId}' target = '_blank'</a>[Info Page]</td>
       </tr>`;
 
     $('#results22').append(apaText);

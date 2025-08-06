@@ -90,8 +90,8 @@ function postSuccess(result) {
   } else {
     const tableStart = `
         <tr>
-          <th scope = 'col' width = '50%'>Component</th>
-          <th scope = 'col' width = '50%'>Action</th>
+          <th style = 'width: 40%'>Component</th>
+          <th style = 'width: 60%'>Action</th>
         </tr>`;
 
     $('#results1').append(tableStart);

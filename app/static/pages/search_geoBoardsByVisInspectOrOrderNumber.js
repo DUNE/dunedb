@@ -167,22 +167,17 @@ function postSuccess_disposition(result) {
 
     $('#summary3').append('<br>');
 
-    const tableStart = `
-      <tr>
-        <th scope = 'col' width = '7%'>UKID</th>
-        <th scope = 'col' width = '8%'>Order No.</th>
-        <th scope = 'col' width = '15%'>Visual Inspection Action</th>
-        <th scope = 'col' width = '35%'>Issue(s) Identified</th>
-        <th scope = 'col' width = '34%'>Repairs Description (if applicable)</th>
-      </tr>`;
-
     for (const boardGroup of result) {
-      const groupTitle = `
+      const tableStart = `
         <tr>
-          <td colspan = "5"><b>P/N: ${boardGroup.partNumber} (${boardGroup.partString})</b></td>
+          <th style = 'width: 7%'>Order No.</th>
+          <th style = 'width: 7%'>P/N</th>
+          <th style = 'width: 7%'>UKID</th>
+          <th style = 'width: 17%'>Visual Inspection Action</th>
+          <th style = 'width: 32%'>Issue(s) Identified</th>
+          <th style = 'width: 30%'>Repairs Description (if applicable)</th>
         </tr>`;
 
-      $('#results1').append(groupTitle);
       $('#results1').append(tableStart);
 
       for (const i in boardGroup.componentUuids) {
@@ -190,8 +185,9 @@ function postSuccess_disposition(result) {
 
         const boardText = `
           <tr>
-            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
             <td><a href = '/component/${boardGroup.batchUuids[i]}' target = '_blank'</a>${boardGroup.orderNumbers[i]}</td>
+            <td>${boardGroup.partNumber}</td>
+            <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
             <td><a href = '/action/${boardGroup.actionIds[i]}' target = '_blank'</a>${boardGroup.actionIds[i]}</td>
             <td>${inspectionData.issues}</td>
             <td>${inspectionData.repairsDescription}</td>
@@ -231,7 +227,7 @@ function postSuccess_orderNumber(result) {
   // If there are no search results, display a message to indicate this
   // // Otherwise, set up an initial message to display, and a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results').append('<b>There are no geometry boards with the specified order number and at least one Visual Inspection</b>');
+    $('#summary1').append('<b>There are no geometry boards with the specified order number and at least one Visual Inspection</b>');
   } else {
     for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
       const groupCount = `
@@ -266,21 +262,17 @@ function postSuccess_orderNumber(result) {
 
     $('#summary3').append('<br>');
 
-    const tableStart = `
-      <tr>
-        <th scope = 'col' width = '15%'>UKID</th>
-        <th scope = 'col' width = '15%'>Visual Inspection Action</th>
-        <th scope = 'col' width = '35%'>Issue(s) Identified</th>
-        <th scope = 'col' width = '34%'>Repairs Description (if applicable)</th>
-      </tr>`;
 
     for (const boardGroup of result) {
-      const groupTitle = `
+      const tableStart = `
         <tr>
-          <td colspan = "5"><b>Disposition: ${dispositionsDictionary[boardGroup.disposition]}</b></td>
+          <th style = 'width: 14%'>Disposition</th>
+          <th style = 'width: 7%'>UKID</th>
+          <th style = 'width: 17%'>Visual Inspection Action</th>
+          <th style = 'width: 32%'>Issue(s) Identified</th>
+          <th style = 'width: 30%'>Repairs Description (if applicable)</th>
         </tr>`;
 
-      $('#results1').append(groupTitle);
       $('#results1').append(tableStart);
 
       for (const i in boardGroup.actionIds) {
@@ -288,6 +280,7 @@ function postSuccess_orderNumber(result) {
 
         const boardText = `
           <tr>
+            <td>${dispositionsDictionary[boardGroup.disposition]}</td>
             <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
             <td><a href = '/action/${boardGroup.actionIds[i]}' target = '_blank'</a>${boardGroup.actionIds[i]}</td>
             <td>${inspectionData.issues}</td>

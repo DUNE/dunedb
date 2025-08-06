@@ -49,7 +49,7 @@ block content
 
           .vert-space-x1 
             select.form-control#shipmentStatusSelection
-              option(value = '') (please select)
+              option(value = '')
               option(value = 'unreceived') Unreceived Shipments
               option(value = 'received') Received Shipments
 
@@ -63,7 +63,7 @@ block content
 
           .vert-space-x1 
             select.form-control#originLocationSelection
-              option(value = '') (any)
+              option(value = '') (any origin location)
               option(value = 'cambridge') #{dictionary_locations['cambridge']} 
               option(value = 'daresbury') #{dictionary_locations['daresbury']} 
               option(value = 'lancaster') #{dictionary_locations['lancaster']} 
@@ -83,7 +83,7 @@ block content
 
           .vert-space-x1 
             select.form-control#destinationLocationSelection
-              option(value = '') (any)
+              option(value = '') (any destination location)
               option(value = 'cambridge') #{dictionary_locations['cambridge']} 
               option(value = 'chicago') #{dictionary_locations['chicago']} 
               option(value = 'daresbury') #{dictionary_locations['daresbury']} 
@@ -129,21 +129,25 @@ block content
 
           .vert-space-x1
             p 
-            | Indicate whether to query the presence of reception comments.
+            | Check for any reception comments.<br>
+            | &nbsp 
 
           .vert-space-x1 
             select.form-control#receptionCommentSelection
-              option(value = '') All shipments 
+              option(value = '') (all shipments)
               option(value = 'noComment') Only shipments received with no comments 
               option(value = 'comment') Only shipments received with comments 
 
       .vert-space-x1
         hr
-        
+
       .vert-space-x1
         h4 Search Results
 
+        .vert-space-x1 
+          #summary1 
+
         .vert-space-x1
-          table#results1
+          table.results-table#results1
 
     .vert-space-x2

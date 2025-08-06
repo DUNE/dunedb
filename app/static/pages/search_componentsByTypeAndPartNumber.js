@@ -120,9 +120,9 @@ function postSuccess(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' style = 'width: 23%'>UKID</th>
-          <th scope = 'col' style = 'width: 32%'>Date at Location</th>
-          <th scope = 'col' style = 'width: 45%'>Installed on APA</th>
+          <th style = 'width: 23%'>UKID</th>
+          <th style = 'width: 42%'>Date at Location</th>
+          <th style = 'width: 35%'>Installed on APA</th>
         </tr>`;
 
       for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
@@ -229,9 +229,9 @@ function postSuccess(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '23%'>Number</th>
-          <th scope = 'col' width = '32%'>Date at Location</th>
-          <th scope = 'col' width = '45%'>Installed on APA</th>
+          <th style = 'width: 23%'>UKID</th>
+          <th style = 'width: 42%'>Date at Location</th>
+          <th style = 'width: 35%'>Installed on APA</th>
         </tr>`;
 
       for (const meshGroup of result.slice(0, (result.length / 3) + 1)) {
