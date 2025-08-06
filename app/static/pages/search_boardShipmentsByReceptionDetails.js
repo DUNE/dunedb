@@ -88,7 +88,8 @@ async function renderSearchForms() {
   // Additionally, disable the button while the current search is being performed
   $('#confirmButton').on('click', function () {
     $('#confirmButton').prop('disabled', true);
-    $('#results1').empty().append('<b>Working ...</b>');
+    $('#summary1').empty().append('<b>Working ...</b>');
+    $('#results1').empty();
 
     if (shipmentStatus !== '') {
       $.ajax({
@@ -105,31 +106,34 @@ async function renderSearchForms() {
 
 // Function to run for a successful search query
 function postSuccess(result) {
-  // Make sure that the page element where the results will be displayed is empty
+  // Make sure that the page elements where the results will be displayed are all empty
+  $('#summary1').empty();
   $('#results1').empty();
 
   // If there are no search results, display a message to indicate this
   // Otherwise, set up an initial message to display, and a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results1').append('<b>There are no geometry board shipments matching the specified parameters</b>');
+    $('#summary1').append('<b>There are no geometry board shipments matching the specified parameters</b>');
   } else {
     const resultsCount = `
       <tr>
-        <td colspan = "7"><b>Found ${result.length} matching geometry board shipments</b></td>
+        <td colspan = "7"><b>Found ${result.length} matching geometry board shipments</b>
+          <br>
+          <hr>
+        </td>
       </tr>`;
 
-    $('#results1').append(resultsCount);
-    $('#results1').append('<br>');
+    $('#summary1').append(resultsCount);
 
     const tableStart = `
       <tr>
-        <th scope = 'col' width = '11%'>Shipment</th>
-        <th scope = 'col' width = '14%'>Origin</th>
-        <th scope = 'col' width = '14%'>Destination</th>
-        <th scope = 'col' width = '12%'>Creation Date</th>
-        <th scope = 'col' width = '12%'>Reception Date</th>
-        <th scope = 'col' width = '25%'>Shipment Reception Comment</th>
-        <th scope = 'col' width = '11%'>Search Comment</th>
+        <th style = 'width: 8%'>Shipment</th>
+        <th style = 'width: 12%'>Origin</th>
+        <th style = 'width: 12%'>Destination</th>
+        <th style = 'width: 12%'>Creation Date</th>
+        <th style = 'width: 12%'>Reception Date</th>
+        <th style = 'width: 25%'>Shipment Reception Comment</th>
+        <th style = 'width: 19%'>Search Comment</th>
       </tr>`;
 
     $('#results1').append(tableStart);
@@ -137,7 +141,7 @@ function postSuccess(result) {
     for (const shipment of result) {
       let actionIdLinkLine = `<td>${shipment.receptionDate}</td>`;
 
-      if (shipment.receptionDate !== '(none)') actionIdLinkLine = `<td><a href = '/action/${shipment.receptionActionId}' target = '_blank'</a>${shipment.receptionDate}</td>`;
+      if (shipment.receptionDate !== '[n.a.]') actionIdLinkLine = `<td><a href = '/action/${shipment.receptionActionId}' target = '_blank'</a>${shipment.receptionDate}</td>`;
 
       const boardText = `
         <tr>

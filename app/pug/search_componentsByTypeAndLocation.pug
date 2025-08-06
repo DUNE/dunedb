@@ -75,7 +75,7 @@ block content
 
           .vert-space-x1 
             select.form-control#acceptanceStatusSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any board acceptance status)
               option(value = 'accepted') Board Accepted at Factory 
               option(value = 'rejected') Board Rejected at Factory
 
@@ -89,7 +89,7 @@ block content
 
           .vert-space-x1 
             select.form-control#toothStripStatusSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any tooth strip attachment status)
               option(value = 'attached') Tooth Strip Attached
               option(value = 'notAttached') Tooth Strip Not Yet Attached
 
@@ -105,15 +105,22 @@ block content
           .vert-space-x1 
             select.form-control#locationSelection
               option(value = '')
+              option(value = 'bnl') #{dictionary_locations['bnl']} 
               option(value = 'cambridge') #{dictionary_locations['cambridge']} 
               option(value = 'cern') #{dictionary_locations['cern']} 
               option(value = 'chicago') #{dictionary_locations['chicago']} 
+              option(value = 'cincinnati') #{dictionary_locations['cincinnati']} 
               option(value = 'daresbury') #{dictionary_locations['daresbury']} 
+              option(value = 'fermilab') #{dictionary_locations['fermilab']} 
+              option(value = 'harvard') #{dictionary_locations['harvard']} 
               option(value = 'in_transit') #{dictionary_locations['in_transit']} 
               option(value = 'installed_on_APA') #{dictionary_locations['installed_on_APA']} 
+              option(value = 'isu') #{dictionary_locations['isu']} 
               option(value = 'lancaster') #{dictionary_locations['lancaster']} 
+              option(value = 'lsu') #{dictionary_locations['lsu']} 
               option(value = 'manchester') #{dictionary_locations['manchester']} 
               option(value = 'merlin') #{dictionary_locations['merlin']} 
+              option(value = 'rokeby') #{dictionary_locations['rokeby']} 
               option(value = 'sheffield') #{dictionary_locations['sheffield']} 
               option(value = 'surf') #{dictionary_locations['surf']} 
               option(value = 'sussex') #{dictionary_locations['sussex']} 
@@ -135,7 +142,7 @@ block content
 
           .vert-space-x1 
             select.form-control#conformanceStatusSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any board conformance status)
               option(value = 'yes') Board is Conformant 
               option(value = 'no') Board is Not Conformant
 
@@ -149,7 +156,7 @@ block content
 
           .vert-space-x1 
             select.form-control#qaChecksStatusSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any QA checks status)
               option(value = 'passed') QA Checks Passed
               option(value = 'failed') QA Checks Failed
 
@@ -170,17 +177,18 @@ block content
             .col-md-4 
               table#summary3 
 
-          .vert-space-x2.row
+        .vert-space-x1
+          .row
             .col-md-3 
-              table#results1 
+              table.results-table#results1 
 
             .col-md-1 
             .col-md-3 
-              table#results2 
+              table.results-table#results2 
 
             .col-md-1 
             .col-md-3 
-              table#results3 
+              table.results-table#results3 
 
             .col-md-1
 

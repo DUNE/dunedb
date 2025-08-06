@@ -201,6 +201,13 @@ module.exports = {
     joeMunski: 'Joe Munski',
   },
 
+  // Personnel from the CERN Compliance Office
+  dictionary_cernComplianceOffice: {
+    alexandreAcerraGil: 'Alexandre Acerra Gil',
+    olgaBeltramello: 'Olga Beltramello',
+    denisDiyakov: 'Denis Diyakov',
+  },
+
   // Lead personnel at the UK and US APA factories (also doubling for personnel who are authorised to sign-off on 'Assembled APA Quality Assurance Check' actions)
   dictionary_apaFactoryLeads: {
     edBlucher: 'Ed Blucher',

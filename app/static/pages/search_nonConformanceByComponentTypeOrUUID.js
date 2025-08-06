@@ -69,7 +69,8 @@ async function renderSearchForms() {
   $('#confirmButton_uuid').on('click', function () {
     $('#confirmButton_type').prop('disabled', true);
     $('#confirmButton_uuid').prop('disabled', true);
-    $('#results1').empty().append('<b>Working ...</b>');
+    $('#summary1').empty().append('<b>Working ...</b>');
+    $('#results1').empty();
 
     if (componentUuid) {
       $.ajax({
@@ -94,9 +95,9 @@ function postSuccess(result) {
   };
 
   const dispositionsDictionary = {
-    useAsIs: 'Use As Is (NC concession granted)',
-    repair: 'Repair (no modification to base design or functionality)',
-    rework: 'Rework (modification to base design but no impact to function)',
+    useAsIs: 'Use As Is',
+    repair: 'Repair',
+    rework: 'Rework',
     returnToSupplier: 'Return to Supplier',
     rejectRePurpose: 'Reject/Re-purpose',
     scrap: 'Scrap',
@@ -107,21 +108,22 @@ function postSuccess(result) {
     closed: 'Closed',
   };
 
-  // Make sure that the page element where the results will be displayed is empty
+  // Make sure that the page elements where the results will be displayed are all empty
+  $('#summary1').empty();
   $('#results1').empty();
 
   // If there are no search results, display a message to indicate this
   // Otherwise, set up an initial message to display, and a table of the search results
   if (Object.keys(result).length === 0) {
-    $('#results1').append('<b>Found no matching non-conformance actions</b>');
+    $('#summary1').append('<b>There are no non-conformance actions matching the specified parameters</b>');
   } else {
     const tableStart = `
       <tr>
-        <th scope = 'col' width = '17%'>Component</th>
-        <th scope = 'col' width = '23%'>NC Type</th>
-        <th scope = 'col' width = '25%'>NC Title</th>
-        <th scope = 'col' width = '33%'>Disposition</th>
-        <th scope = 'col' width = '5%'>Status</th>
+        <th style = 'width: 20%'>Component</th>
+        <th style = 'width: 25%'>NC Type</th>
+        <th style = 'width: 35%'>NC Title</th>
+        <th style = 'width: 12%'>Disposition</th>
+        <th style = 'width: 8%'>Status</th>
       </tr>`;
 
     $('#results1').append(tableStart);

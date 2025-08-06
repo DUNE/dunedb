@@ -105,7 +105,7 @@ block content
 
           .vert-space-x1 
             select.form-control#acceptanceStatusSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any board acceptance status)
               option(value = 'accepted') Board Accepted at Factory 
               option(value = 'rejected') Board Rejected at Factory
 
@@ -141,7 +141,7 @@ block content
 
           .vert-space-x1 
             select.form-control#toothStripStatusSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any tooth strip attachment status)
               option(value = 'attached') Tooth Strip Attached
               option(value = 'notAttached') Tooth Strip Not Yet Attached
 
@@ -162,17 +162,18 @@ block content
             .col-md-4 
               table#summary3 
 
-          .vert-space-x2.row
+        .vert-space-x1
+          .row
             .col-md-3 
-              table#results1 
+              table.results-table#results1 
 
             .col-md-1 
             .col-md-3 
-              table#results2 
+              table.results-table#results2 
 
             .col-md-1 
             .col-md-3 
-              table#results3 
+              table.results-table#results3 
 
             .col-md-1
 

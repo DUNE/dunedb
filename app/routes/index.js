@@ -92,6 +92,7 @@ module.exports = routes;
   /json/uwPCBApproval.json
   /json/uwInstallationTechnicians.json
   /json/uwInstallationApproval.json
+  /json/cernComplianceOffice.json
   /json/apaFactoryLeads.json
   /administratorUtility
   /json/administratorUtility/:inputString

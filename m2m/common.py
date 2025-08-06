@@ -237,28 +237,28 @@ def GetComponent(componentUUID, connection, headers, version = 0):
         print(f" GetComponent() [GET /api/component/componentUuid] - SOCKET TIMEOUT: {s} \n")
 
 
-###########################################################################
-## Get an existing component via its type form ID and type record number ##
-###########################################################################
-def GetComponent_byTypeRecordNumber(componentTypeFormID, typeRecordNumber, connection, headers):
+#####################################################################################
+## Get a list of existing components via their type form ID and type record number ##
+#####################################################################################
+def GetComponents_byTypeRecordNumber(componentTypeFormID, typeRecordNumber, connection, headers):
     # Request a response from the API route that retrieves the most recent version of an existing component record via its type form ID and type record number
     # If the request is successful, continue with the function ... otherwise print any raised exceptions
     try:
-        connection.request('GET', f'/api/component/{componentTypeFormID}/{typeRecordNumber}', headers = headers)
+        connection.request('GET', f'/api/search/componentsByTypeAndNumber/{componentTypeFormID}/{typeRecordNumber}', headers = headers)
 
-        # The route returns the component record as a JSON document (which must be deserialised to get the record as a Python dictionary)
-        component = json.loads(connection.getresponse().read().decode('utf-8'))
+        # The route returns a list of component records as a JSON document (which must be deserialised to get the list as a Python dictionary)
+        components = json.loads(connection.getresponse().read().decode('utf-8'))
 
         # If the provided type form ID and type record number together don't correspond to an existing component record, print an error and exit the function immediately
-        if component == None:
-            sys.exit(f" GetComponent_byTypeRecordNumber() - ERROR: there is no component record with type form ID = {componentTypeFormID} and type record number = {typeRecordNumber} \n")
+        if len(components) == 0:
+            sys.exit(f" GetComponents_byTypeRecordNumber() - ERROR: there are no component records with type form ID = {componentTypeFormID} and type record number = {typeRecordNumber} \n")
 
-        # Return the component record
-        return component
+        # Return the list of component records
+        return components
     except http.client.HTTPException as e:
-        print(f" GetComponent_byTypeRecordNumber() [GET /api/component/typeFormId/typeRecordNumber] - HTTP EXCEPTION: {e} \n")
+        print(f" GetComponents_byTypeRecordNumber() [GET /api/search/componentsByTypeAndNumber/typeFormId/typeRecordNumber] - HTTP EXCEPTION: {e} \n")
     except socket.timeout as s:
-        print(f" GetComponent_byTypeRecordNumber() [GET /api/component/typeFormId/typeRecordNumber] - SOCKET TIMEOUT: {s} \n")
+        print(f" GetComponents_byTypeRecordNumber() [GET /api/search/componentsByTypeAndNumber/typeFormId/typeRecordNumber] - SOCKET TIMEOUT: {s} \n")
 
 
 ###################################################
