@@ -66,7 +66,7 @@ block content
 
           .vert-space-x1 
             select.form-control#dispositionSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any disposition)
               option(value = 'useAsIs') Use As Is (NC concession granted)
               option(value = 'repair') Repair (no modification to base design or functionality)
               option(value = 'rework') Rework (modification to base design but no impact to function)
@@ -76,7 +76,7 @@ block content
 
           .vert-space-x1 
             select.form-control#statusSelection
-              option(value = 'any') (any)
+              option(value = 'any') (any status)
               option(value = 'open') Open 
               option(value = 'closed') Closed 
 
@@ -100,7 +100,10 @@ block content
       .vert-space-x1 
         h4 Search Results
 
+        .vert-space-x1 
+          #summary1 
+
         .vert-space-x1
-          table#results1
+          table.results-table#results1
 
     .vert-space-x2

@@ -639,12 +639,21 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
       }
 
       if ((qaChecksStatus === 'any') || ((qaChecksStatus === 'passed') && (qaChecksPassed == true)) || (qaChecksStatus === 'failed') && (qaChecksPassed == false)) {
-        cleanedResults.push({
-          'componentUuid': result.componentUuid,
-          'typeRecordNumber': component.data.typeRecordNumber,
-          'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
-          'qaChecksPassed': (qaChecksPassed == true) ? 'Yes' : 'No',
-        });
+        if (['CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(typeFormId)) {
+          cleanedResults.push({
+            'componentUuid': result.componentUuid,
+            'typeRecordNumber': component.data.typeRecordNumber,
+            'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
+            'qaChecksPassed': (qaChecksPassed == true) ? 'Yes' : 'No',
+          });
+        } else {
+          cleanedResults.push({
+            'componentUuid': result.componentUuid,
+            'typeRecordNumber': `${component.data.typeRecordNumber}${(component.data.cableHarnessSide).toUpperCase()}`,
+            'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
+            'qaChecksPassed': (qaChecksPassed == true) ? 'Yes' : 'No',
+          });
+        }
       }
     }
   } else {

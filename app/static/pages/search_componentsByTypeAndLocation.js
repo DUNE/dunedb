@@ -121,9 +121,9 @@ function postSuccess(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' style = 'width: 23%'>UKID</th>
-          <th scope = 'col' style = 'width: 32%'>Date at Location</th>
-          <th scope = 'col' style = 'width: 45%'>Installed on APA</th>
+          <th style = 'width: 23%'>UKID</th>
+          <th style = 'width: 42%'>Date at Location</th>
+          <th style = 'width: 35%'>Installed on APA</th>
         </tr>`;
 
       for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
@@ -230,9 +230,9 @@ function postSuccess(result) {
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '23%'>Number</th>
-          <th scope = 'col' width = '32%'>Date at Location</th>
-          <th scope = 'col' width = '45%'>Installed on APA</th>
+          <th style = 'width: 23%'>Number</th>
+          <th style = 'width: 42%'>Date at Location</th>
+          <th style = 'width: 35%'>Installed on APA</th>
         </tr>`;
 
       for (const meshGroup of result.slice(0, (result.length / 3) + 1)) {
@@ -306,17 +306,19 @@ function postSuccess(result) {
     } else if (['CableHarness', 'CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes($('#typeSelection option:selected').val())) {
       const resultsStart = `
         <tr>
-          <td colspan = "3"><b>Type: ${$('#typeSelection option:selected').text()}</b> - ${result.length} components</td>
+          <td colspan = "3"><b>Type: ${$('#typeSelection option:selected').text()}</b> - ${result.length} components
+            <br>
+            <hr>
+          </td>
         </tr>`;
 
       $('#summary1').append(resultsStart);
-      $('#summary1').append('<br>');
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '23%'>Number</th>
-          <th scope = 'col' width = '32%'>Date at Location</th>
-          <th scope = 'col' width = '45%'>QA Checks Passed</th>
+          <th style = 'width: 23%'>Number</th>
+          <th style = 'width: 42%'>Date at Location</th>
+          <th style = 'width: 35%'>QA Checks Passed</th>
         </tr>`;
 
       $('#results1').append(tableStart);
@@ -360,17 +362,19 @@ function postSuccess(result) {
     } else {
       const resultsStart = `
         <tr>
-          <td colspan = "3"><b>Type: ${$('#typeSelection option:selected').text()}</b> - ${result.length} components</td>
+          <td colspan = "3"><b>Type: ${$('#typeSelection option:selected').text()}</b> - ${result.length} components
+            <br>
+            <hr>
+          </td>
         </tr>`;
 
       $('#summary1').append(resultsStart);
-      $('#summary1').append('<br>');
 
       const tableStart = `
         <tr>
-          <th scope = 'col' width = '23%'>Number</th>
-          <th scope = 'col' width = '32%'>Date at Location</th>
-          <th scope = 'col' width = '45%'></th>
+          <th style = 'width: 23%'>Number</th>
+          <th style = 'width: 42%'>Date at Location</th>
+          <th style = 'width: 35%'></th>
         </tr>`;
 
       $('#results1').append(tableStart);
