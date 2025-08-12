@@ -402,25 +402,13 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
   // Allow for a 'null' location to be specified, to make debugging of components with missing locations easier
   if (location == 'none') location = null;
 
-  // Depending on which parameters have been passed to this function, match to get:
-  // ... either records of all components of the specified type at the specified location with the specified conformance (for one of the 'populated board' types where a conformance was specified)
-  // ... or records of all components of the specified type at the specified location (for one of the 'populated board' types where a conformance was not specified, or all other component types)
-  let match_condition = {};
-
-  if (['CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(typeFormId) && (conformanceStatus !== 'any')) {
-    match_condition = {
+  // Match against the type form ID and location to get records of all components of the specified type at the specified location
+  aggregation_stages.push({
+    $match: {
       'formId': typeFormId,
       'reception.location': location,
-      'data.boardIsConformant': conformanceStatus,
-    };
-  } else {
-    match_condition = {
-      'formId': typeFormId,
-      'reception.location': location,
-    };
-  }
-
-  aggregation_stages.push({ $match: match_condition });
+    }
+  });
 
   // Select the latest version of each record, and pass through only the fields required for later use (dependent on the specified component type)
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
@@ -450,11 +438,21 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
         _id: { componentUuid: '$componentUuid' },
         componentUuid: { '$first': '$componentUuid' },
         typeRecordNumber: { '$first': '$data.typeRecordNumber' },
+        data: { '$first': '$data' },
       },
     });
   }
 
   aggregation_stages.push({ $sort: { 'typeRecordNumber': 1 } });
+
+  // For populated boards, match against the board conformance if it has been specified
+  if (['CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(typeFormId) && (conformanceStatus !== 'any')) {
+    aggregation_stages.push({
+      $match: {
+        'data.boardIsConformant': conformanceStatus,
+      }
+    });
+  }
 
   // If the specified component type has an internal part number, group the records according to this, and pass through the fields required for later use
   // Then sort the record groups to be in numerical order of the part number
