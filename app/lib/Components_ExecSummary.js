@@ -233,7 +233,7 @@ async function collateInfo(componentUUID) {
   aggregation_stages.push({
     $match: {
       'typeFormId': 'InstallationIntoASF',
-      'componentUuid': MUUID.from(frameUUID),
+      'componentUuid': MUUID.from(componentUUID),
     }
   });
 
