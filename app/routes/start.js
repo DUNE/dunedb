@@ -72,7 +72,7 @@ router.get('/user', async function (req, res, next) {
 });
 
 
-/// List all technicians at the UK and US APA factories
+/// List all technicians and other personnel at the UK and US APA factories
 router.get(['/json/technicians.json', '/api/technicians.json'], async function (req, res, next) {
   try {
     return res.status(200).json(ConvertDictionaryToList(utils.dictionary_technicians));
@@ -83,18 +83,7 @@ router.get(['/json/technicians.json', '/api/technicians.json'], async function (
 });
 
 
-/// List personnel who are authorised to sign-off on Grounding Mesh Panel intake
-router.get(['/json/meshPanelIntakeSignoff.json', '/api/meshPanelIntakeSignoff.json'], async function (req, res, next) {
-  try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_meshPanelIntakeSignoff));
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List personnel who are authorised to sign-off on APA frame intake (including both types of frame survey results)
+/// List personnel who are authorised to signoff on APA frames
 router.get(['/json/frameIntakeSignoff.json', '/api/frameIntakeSignoff.json'], async function (req, res, next) {
   try {
     return res.status(200).json(ConvertDictionaryToList(utils.dictionary_frameIntakeSignoff));
@@ -105,10 +94,54 @@ router.get(['/json/frameIntakeSignoff.json', '/api/frameIntakeSignoff.json'], as
 });
 
 
-/// List personnel who are authorised to sign-off on APA frame NCR concessions
+/// List personnel who are authorised to signoff on APA frame NCR concessions
 router.get(['/json/frameNCRSignoff.json', '/api/frameNCRSignoff.json'], async function (req, res, next) {
   try {
     return res.status(200).json(ConvertDictionaryToList(utils.dictionary_frameNCRSignoff));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List Frame Prep D-band personnel
+router.get(['/json/dBandFramePrep.json', '/api/dBandFramePrep.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_dBandFramePrep));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List personnel who are authorised to signoff on tension control and winder maintenance verifications
+router.get(['/json/winderMaintenanceSignoff.json', '/api/winderMaintenanceSignoff.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_winderMaintenanceSignoff));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List Winding D-band personnel
+router.get(['/json/dBandWinding.json', '/api/dBandWinding.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_dBandWinding));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List Post-Production D-band personnel
+router.get(['/json/dBandPostProduction.json', '/api/dBandPostProduction.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_dBandPostProduction));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -120,28 +153,6 @@ router.get(['/json/frameNCRSignoff.json', '/api/frameNCRSignoff.json'], async fu
 router.get(['/json/manchesterTechnicians.json', '/api/manchesterTechnicians.json'], async function (req, res, next) {
   try {
     return res.status(200).json(ConvertDictionaryToList(utils.dictionary_manchesterTechnicians));
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List personnel who are authorised to sign-off on tension controls
-router.get(['/json/tensionControlSignoff.json', '/api/tensionControlSignoff.json'], async function (req, res, next) {
-  try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_tensionControlSignoff));
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List personnel who are authorised to sign-off on winder maintenance
-router.get(['/json/winderMaintenanceSignoff.json', '/api/winderMaintenanceSignoff.json'], async function (req, res, next) {
-  try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_winderMaintenanceSignoff));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
