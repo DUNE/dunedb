@@ -1539,7 +1539,7 @@ function SetEntry_wireLayer(layer, layerInfo) {
           key: 'wireLayer_maintenanceSignoff',
           type: 'textfield',
           input: false,
-          defaultValue: layerInfo.winderMaintenenceSignoff,
+          defaultValue: layerInfo.winderMaintenanceSignoff,
         }],
         width: 3,
         size: 'sm',
