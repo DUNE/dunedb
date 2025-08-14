@@ -223,12 +223,39 @@ async function collateInfo(componentUUID) {
       collatedInfo.coverCaps.qaCheckID = result.actionId;
       collatedInfo.coverCaps.name = utils.dictionary_apaFactoryLeads[result.name];
       collatedInfo.coverCaps.date = result.date;
-    } else if (result.section === 'shippingPreparation') {
-      collatedInfo.shippingPrep.qaCheckID = result.actionId;
-      collatedInfo.shippingPrep.name = utils.dictionary_apaFactoryLeads[result.name];
-      collatedInfo.shippingPrep.date = result.date;
     }
   };
+
+  // Signoff information relating to the Assembled APA's 'shipping information' can be ONLY found in the APA's 'Installation into ASF and Close Up' action
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'InstallationIntoASF',
+      'componentUuid': MUUID.from(frameUUID),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      name: { '$first': '$data.closeUpSignoff' },
+      date: { '$first': '$validity.startDate' },
+      actionId: { '$first': '$actionId' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  if (results.length > 0) {
+    collatedInfo.shippingPrep.qaCheckID = results[0].actionId;
+    collatedInfo.shippingPrep.name = utils.dictionary_apaFactoryLeads[results[0].name];
+    collatedInfo.shippingPrep.date = results[0].date;
+  }
 
   // Signoff information relating to APA frame construction can be ONLY found in the frame's 'Completed Frame QC Checklist', 'Intake Surveys' and 'Installation Surveys' actions
   aggregation_stages = [];
@@ -473,7 +500,7 @@ async function collateInfo(componentUUID) {
         winder: { '$first': '$data.winder' },
         winderHead: { '$first': '$data.winderHead' },
         wireBobbins: { '$first': '$data.bobbinGrid' },
-        winderMaintenenceSignoff: { '$first': '$data.winderMaintenanceVerification' },
+        winderMaintenanceSignoff: { '$first': '$data.winderMaintenanceVerification' },
         tensionControlSignoff: { '$first': '$data.tensionControlVerification' },
         replacedWires: { '$first': '$data.replacedWires' },
         numberOfTensionAlarms: { '$first': '$data.numberOfTensionAlarms' },
@@ -513,8 +540,8 @@ async function collateInfo(componentUUID) {
       collatedInfo[layerSection_names[i]].winder = dictionary_winders[results[0].winder];
       collatedInfo[layerSection_names[i]].winderHead = dictionary_winderHeads[results[0].winderHead];
       collatedInfo[layerSection_names[i]].bobbinManufacturers = bobbinManufacturers;
-      collatedInfo[layerSection_names[i]].winderMaintenenceSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].winderMaintenenceSignoff];
-      collatedInfo[layerSection_names[i]].tensionControlSignoff = utils.dictionary_tensionControlSignoff[results[0].tensionControlSignoff];
+      collatedInfo[layerSection_names[i]].winderMaintenanceSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].winderMaintenanceSignoff];
+      collatedInfo[layerSection_names[i]].tensionControlSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].tensionControlSignoff];
       collatedInfo[layerSection_names[i]].numberOfReplacedWires = numberOfReplacedWires;
       collatedInfo[layerSection_names[i]].numberOfTensionAlarms = results[0].numberOfTensionAlarms;
       collatedInfo[layerSection_names[i]].windingID = results[0].actionId;
