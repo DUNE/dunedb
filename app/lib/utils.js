@@ -186,31 +186,17 @@ module.exports = {
     jakeDeMaine: 'Jake De Maine',
   },
 
-  // PCB technicians at UW [TODO: WHERE IS THIS USED?]
-  dictionary_uwPCBTechnicians: {
-    andyArbuckle: 'Andy Arbuckle',
-    krishnaLakkaraju: 'Krishna Lakkaraju',
-    marySeverson: 'Mary Severson',
-    christineVerdico: 'Christine Verdico',
-  },
-
-  // Personnel who are authorised to approve PCBs at UW [TODO: WHERE IS THIS USED?]
-  dictionary_uwPCBApproval: {
-    andyArbuckle: 'Andy Arbuckle',
-    pamMarrLaundrie: 'Pam Marr-Laundrie',
-  },
-
-  // Hardware installation technicians at UW [TODO: WHERE IS THIS USED?]
-  dictionary_uwInstallationTechnicians: {
+  // Yoke load test technicians at UW [not currently used, but will be in the future]
+  dictionary_uwTechnicians: {
 
   },
 
-  // Personnel who are authorised to approve hardware installation at UW [TODO: WHERE IS THIS USED?]
-  dictionary_uwInstallationApproval: {
+  // Personnel who are authorised to signoff on hardware installation at UW [not currently used, but keep for the future]
+  dictionary_uwInstallationSignoff: {
     joeMunski: 'Joe Munski',
   },
 
-  // Personnel from the CERN Compliance Office [TODO: WHERE IS THIS USED?]
+  // Personnel from the CERN Compliance Office ('APA Shipment Signoff and Transport' APA Post Production workflow actions)
   dictionary_cernComplianceOffice: {
     alexandreAcerraGil: 'Alexandre Acerra Gil',
     olgaBeltramello: 'Olga Beltramello',
