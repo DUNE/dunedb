@@ -77,8 +77,9 @@ module.exports = {
 
   // The dictionaries below list various groups of UK and US personnel, whose names should be entered as appropriate in various component and action type forms
   // Using these centralised dictionaries allows names to be consistently displayed in the DB interface, and also for them to be selected via drop-down menu when filling out the type forms
+  // Note that for all dictionaries, past personnel must still be included - otherwise their names in older records will not display correctly
 
-  // General technicians at the UK and US APA factories
+  // All technicians and other personnel at the UK and US APA factories
   dictionary_technicians: {
     vincentBaker: 'Vincent Baker',
     davidBanner: 'David Banner',
@@ -124,15 +125,7 @@ module.exports = {
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
-  // Personnel who are authorised to sign-off on Grounding Mesh Panel intake
-  dictionary_meshPanelIntakeSignoff: {
-    nicholasHays: 'Nicholas Hays',
-    grahamMitchell: 'Graham Mitchell',
-    danielSalisbury: 'Daniel Salisbury',
-    kimWilliams: 'Kim Williams',
-  },
-
-  // Personnel who are authorised to sign-off on APA frame intake (including both types of frame survey results)
+  // Personnel who are authorised to signoff on APA frames (all Frame Assembly workflow actions)
   dictionary_frameIntakeSignoff: {
     gedBell: 'Ged Bell',
     callumHolt: 'Callum Holt',
@@ -142,31 +135,23 @@ module.exports = {
     kyleZeug: 'Kyle Zeug',
   },
 
-  // Personnel who are authorised to sign-off on APA frame NCR concessions
+  // Personnel who are authorised to signoff on APA frame NCR concessions ('Final Frame QA Checklist' Frame Assembly workflow actions)
   dictionary_frameNCRSignoff: {
     olgaBeltramello: 'Olga Beltramello',
     ericJames: 'Eric James',
     radosavPantelic: 'Radosav Pantelic',
   },
 
-  // Geometry board metrology technicians at Manchester
-  dictionary_manchesterTechnicians: {
-    hamzaNaseer: 'Hamza Naseer',
-    taabishAhmed: 'Taabish Ahmed',
-    jakeDeMaine: 'Jake De Maine',
-  },
-
-  // Personnel who are authorised to sign-off on tension controls
-  dictionary_tensionControlSignoff: {
-    vincentBaker: 'Vincent Baker',
-    carlosChavezBarajas: 'Carlos Chavez Barajas',
-    edBlucher: 'Ed Blucher',
-    albertoMarchionni: 'Alberto Marchionni',
-    benjaminOye: 'Benjamin Oye',
+  // Frame Prep D-band personnel (prep-related APA Assembly workflow actions and 'Final Inspection' Grounding Mesh Panel actions)
+  dictionary_dBandFramePrep: {
+    wayneGreen: 'Wayne Green',
+    nicholasHays: 'Nicholas Hays',
+    grahamMitchell: 'Graham Mitchell',
     danielSalisbury: 'Daniel Salisbury',
+    kimWilliams: 'Kim Williams',
   },
 
-  // Personnel who are authorised to sign-off on winder maintenance
+  // Personnel who are authorised to signoff on tension control and winder maintenance verifications ('? Layer - Winding' APA Assembly workflow actions)
   dictionary_winderMaintenanceSignoff: {
     vincentBaker: 'Vincent Baker',
     carlosChavezBarajas: 'Carlos Chavez Barajas',
@@ -177,7 +162,31 @@ module.exports = {
     daveSim: 'Dave Sim',
   },
 
-  // PCB technicians at UW
+  // Winding D-band personnel (winding-related APA Assembly workflow actions)
+  dictionary_dBandWinding: {
+    daveBrown: 'Dave Brown',
+    lewisGannon: 'Lewis Gannon',
+    darrenKaye: 'Darren Kaye',
+    andrewKelly: 'Andrew Kelly',
+    danielSalisbury: 'Daniel Salisbury',
+    stephenSumner: 'Stephen Sumner',
+  },
+
+  // Post-Production D-band personnel (post-winding APA Assembly workflow actions and all APA Post Production workflow actions)
+  dictionary_dBandPostProduction: {
+    danielSalisbury: 'Daniel Salisbury',
+    jasonThornhill: 'Jason Thornhill',
+  },
+
+
+  // Geometry board metrology technicians at Manchester ('Geometry Board Metrology' Geometry Board actions)
+  dictionary_manchesterTechnicians: {
+    hamzaNaseer: 'Hamza Naseer',
+    taabishAhmed: 'Taabish Ahmed',
+    jakeDeMaine: 'Jake De Maine',
+  },
+
+  // PCB technicians at UW [TODO: WHERE IS THIS USED?]
   dictionary_uwPCBTechnicians: {
     andyArbuckle: 'Andy Arbuckle',
     krishnaLakkaraju: 'Krishna Lakkaraju',
@@ -185,30 +194,30 @@ module.exports = {
     christineVerdico: 'Christine Verdico',
   },
 
-  // Personnel who are authorised to approve PCBs at UW
+  // Personnel who are authorised to approve PCBs at UW [TODO: WHERE IS THIS USED?]
   dictionary_uwPCBApproval: {
     andyArbuckle: 'Andy Arbuckle',
     pamMarrLaundrie: 'Pam Marr-Laundrie',
   },
 
-  // Hardware installation technicians at UW
+  // Hardware installation technicians at UW [TODO: WHERE IS THIS USED?]
   dictionary_uwInstallationTechnicians: {
 
   },
 
-  // Personnel who are authorised to approve hardware installation at UW
+  // Personnel who are authorised to approve hardware installation at UW [TODO: WHERE IS THIS USED?]
   dictionary_uwInstallationApproval: {
     joeMunski: 'Joe Munski',
   },
 
-  // Personnel from the CERN Compliance Office
+  // Personnel from the CERN Compliance Office [TODO: WHERE IS THIS USED?]
   dictionary_cernComplianceOffice: {
     alexandreAcerraGil: 'Alexandre Acerra Gil',
     olgaBeltramello: 'Olga Beltramello',
     denisDiyakov: 'Denis Diyakov',
   },
 
-  // Lead personnel at the UK and US APA factories (also doubling for personnel who are authorised to sign-off on 'Assembled APA Quality Assurance Check' actions)
+  // Lead personnel at the UK and US APA factories (top-level signoffs in various APA Assembly and APA Post Production workflow actions)
   dictionary_apaFactoryLeads: {
     edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
