@@ -160,10 +160,10 @@ router.get(['/json/manchesterTechnicians.json', '/api/manchesterTechnicians.json
 });
 
 
-/// List PCB technicians at UW
-router.get(['/json/uwPCBTechnicians.json', '/api/uwPCBTechnicians.json'], async function (req, res, next) {
+/// List yoke load test technicians at UW
+router.get(['/json/uwTechnicians.json', '/api/uwTechnicians.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwPCBTechnicians));
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwTechnicians));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -171,32 +171,10 @@ router.get(['/json/uwPCBTechnicians.json', '/api/uwPCBTechnicians.json'], async 
 });
 
 
-/// List personnel who are authorised to approve PCBs at UW
-router.get(['/json/uwPCBApproval.json', '/api/uwPCBApproval.json'], async function (req, res, next) {
+/// List personnel who are authorised to signoff on hardware installation at UW
+router.get(['/json/uwInstallationSignoff.json', '/api/uwInstallationSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwPCBApproval));
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List hardware installation technicians at UW
-router.get(['/json/uwInstallationTechnicians.json', '/api/uwInstallationTechnicians.json'], async function (req, res, next) {
-  try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwInstallationTechnicians));
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// List personnel who are authorised to approve hardware installation at UW
-router.get(['/json/uwInstallationApproval.json', '/api/uwInstallationApproval.json'], async function (req, res, next) {
-  try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwInstallationApproval));
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwInstallationSignoff));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
