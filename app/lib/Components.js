@@ -553,8 +553,8 @@ async function list(match_condition, options) {
     },
   });
 
-  // Re-sort the records ... by (alphanumerical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
-  if ((match_condition) && (match_condition.formId) && ((match_condition.formId === 'APAFrame') || (match_condition.formId === 'AssembledAPA'))) {
+  // Re-sort the records ... by (alphanumerical) component name for APA Frames, ASFs and Assembled APAs, or by last edit date (most recent first) for other component types
+  if ((match_condition) && (match_condition.formId) && (['APAFrame', 'APAShippingFrame', 'AssembledAPA'].includes(match_condition.formId))) {
     aggregation_stages.push({ $sort: { componentName: -1 } });
   } else {
     aggregation_stages.push({ $sort: { lastEditDate: -1 } });

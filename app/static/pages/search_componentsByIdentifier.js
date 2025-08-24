@@ -89,15 +89,16 @@ function postSuccess(result) {
   $('#messages').empty();
 
   // If there are no search results, display a message to indicate this, and then re-enable both confirmation buttons for the next search
-  // Similarly, if there is more than one search result and the component type is NOT 'Cable Harness', also display a message and re-enable both buttons
-  // If there is more than one search result and the component type is 'Cable Harness', display some information about all results so that the user can choose which one to explore further
-  // Otherwise (i.e. there is exactly one component in the search results), redirect the user to the page for viewing the component record
+  // Similarly, if there is more than one search result and the component type is NOT one of those that has non-unique type record numbers, also display a message and re-enable both buttons
+  // If there is more than one search result and the component type is one of those that has non-unique type record numbers ...
+  // ... display some information about all results so that the user can choose which one to explore further
+  // Otherwise (i.e. if there is exactly one component in the search results), redirect the user to the page for viewing the component record
   if (result.length === 0) {
     $('#messages').append('<b>The specified search parameters do not match an existing component.</b>');
     $('#confirmButton_dunePID').prop('disabled', false);
     $('#confirmButton_typeAndNumber').prop('disabled', false);
   } else if (result.length > 1) {
-    if (componentType === 'CableHarness') {
+    if (['APAFrame', 'APAShippingFrame', 'AssembledAPA', 'CableHarness', 'DWA', 'DWAPDB'].includes(componentType)) {
       const output = `
         <b>The specified search parameters match <u>multiple</u> components:</b><br><br>`;
 
