@@ -20,54 +20,52 @@ block allbody
 
   .vert-space-x2
     .container.fluid
-      - const qrCodeText = `${base_url}/c/${component.shortUuid.toString()}`;
+      - const qrCodeURL = `${base_url}/c/${component.shortUuid.toString()}`;
+      - const qrCodeLabelLine1 = component.data.componentName;
+      - const qrCodeLabelLine2 = component.componentUuid;
 
       if (component.formId === 'APAShipment') || (component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'DWAComponentShipment') || (component.formId === 'FrameShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'GroundingMeshShipment') || (component.formId === 'PopulatedBoardShipment') || (component.formId === 'SHVBoardShipment')
-        - const qrCodeDesc = component.componentUuid
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)
+
+          .col-sm-6.qr-col
+            +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)
 
         .row.qr-row
           .col-sm-6.qr-col
-            +qr-panel-topText(qrCodeText, qrCodeDesc)
+            +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)
 
           .col-sm-6.qr-col
-            +qr-panel-topText(qrCodeText, qrCodeDesc)
-
-        .row.qr-row
-          .col-sm-6.qr-col
-            +qr-panel-topText(qrCodeText, qrCodeDesc)
-
-          .col-sm-6.qr-col
-            +qr-panel-topText(qrCodeText, qrCodeDesc)
+            +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)
 
         .row.qr-row
           .col-sm-6.qr-col
-            +qr-panel-topText(qrCodeText, qrCodeDesc)
+            +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)
 
           .col-sm-6.qr-col
-            +qr-panel-topText(qrCodeText, qrCodeDesc)
+            +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)
 
       else
-        - const qrCodeDesc = component.data.componentName
+        .row.qr-row
+          .col-sm-6.qr-col
+            +qr-panel-noLabel(qrCodeURL)
+
+          .col-sm-6.qr-col
+            +qr-panel-noLabel(qrCodeURL)
 
         .row.qr-row
           .col-sm-6.qr-col
-            +qr-panel-noText(qrCodeText, qrCodeDesc)
+            +qr-panel-noLabel(qrCodeURL)
 
           .col-sm-6.qr-col
-            +qr-panel-noText(qrCodeText, qrCodeDesc)
-
-        .row.qr-row
-          .col-sm-6.qr-col
-            +qr-panel-noText(qrCodeText, qrCodeDesc)
-
-          .col-sm-6.qr-col
-            +qr-panel-noText(qrCodeText, qrCodeDesc)
+            +qr-panel-noLabel(qrCodeURL)
 
         .row.qr-row
           .col-sm-6.qr-col
-            +qr-panel-noText(qrCodeText, qrCodeDesc)
+            +qr-panel-noLabel(qrCodeURL)
 
           .col-sm-6.qr-col
-            +qr-panel-noText(qrCodeText, qrCodeDesc)
+            +qr-panel-noLabel(qrCodeURL)
 
   .vert-space-x2
