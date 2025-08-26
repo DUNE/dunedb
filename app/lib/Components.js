@@ -356,22 +356,19 @@ async function updateLocation(componentUuid, location, date, detail) {
 
     match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
-    // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
+    // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in ALL matching component records (i.e. all versions of the component), and throw an error if the edit fails
     const result = await db.collection('components')
-      .findOneAndUpdate(
+      .updateMany(
         match_condition,
-        {
-          $set: {
-            'reception.location': location,
-            'reception.date': date,
-            'reception.detail': detail,
-          }
-        },
-        {
-          sort: { 'validity.version': -1 },
-          returnNewDocument: true,
-          includeResultMetadata: true,
-        },
+        [
+          {
+            $set: {
+              'reception.location': location,
+              'reception.date': date,
+              'reception.detail': detail,
+            }
+          },
+        ]
       );
 
     if (result.ok === 0) throw new Error(`Components::updateLocation() - failed to update the component record!`);

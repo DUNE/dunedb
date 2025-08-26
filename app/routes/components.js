@@ -871,7 +871,7 @@ router.get('/components/bulkQRCodes/:typeFormId/:firstNumber/:lastNumber', permi
     for (let typeRecordNumber = parseInt(req.params.firstNumber, 10); typeRecordNumber <= parseInt(req.params.lastNumber, 10); typeRecordNumber++) {
       const componentsList = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, typeRecordNumber);
 
-      for (const componentRecord of componentsList) { shortUUIDs.push([componentRecord.componentName, componentRecord.shortUuid]); }
+      for (const componentRecord of componentsList) { shortUUIDs.push([componentRecord.componentName, componentRecord.componentUuid, componentRecord.shortUuid]); }
     }
 
     // Render the interface page

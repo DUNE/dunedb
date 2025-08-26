@@ -3,6 +3,7 @@ const MUUID = require('uuid-mongodb');
 
 const { db } = require('./db');
 const Components = require('./Components');
+const logger = require('../lib/logger');
 const utils = require('./utils');
 
 
@@ -255,7 +256,59 @@ async function syncTypeRecordNumbers(typeFormId) {
 }
 
 
+async function updateComponentLocations(typeFormId) {
+  // Retrieve a list of component UUIDs corresponding to all components with 'formId' matching the specified component type form ID
+  let aggregation_stages = [];
+
+  aggregation_stages.push({ $match: { formId: typeFormId } });
+  aggregation_stages.push({ $project: { componentUuid: true } });
+
+  let uuids = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // For each retrieved UUID ...
+  for (let uuid of uuids) {
+    // Get the full component record corresponding to the UUID
+    // This will always be the latest version, and therefore contain the most recently set reception information
+    const component = await Components.retrieve(uuid.componentUuid);
+
+    if (component.reception != null) {
+      // Set up a 'matching condition' object containing the component UUID (remembering that the UUID has to be of 'MUUID' type, not a string)
+      const componentUuid = component.componentUuid;
+      let match_condition = { componentUuid };
+
+      if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+      match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+      // Update the reception information of ALL records with the matching component UUID (i.e. all versions of the component in question)
+      const result = await db.collection('components')
+        .updateMany(
+          match_condition,
+          [
+            {
+              $set: {
+                'reception.location': component.reception.location,
+                'reception.date': component.reception.date,
+                'reception.detail': component.reception.detail,
+              }
+            },
+          ]
+        )
+
+      if (result.ok === 0) throw new Error(`Admin_Functions::setComponentNames() - failed to update the component records!`);
+    } else {
+      logger.info(uuid.componentUuid, 'Component reception object is null!');
+    }
+  }
+
+  return typeFormId;
+}
+
+
 module.exports = {
   setComponentNames,
   syncTypeRecordNumbers,
+  updateComponentLocations,
 }
