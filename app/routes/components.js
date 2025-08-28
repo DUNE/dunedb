@@ -637,10 +637,7 @@ router.get('/component/:uuid/execSummary', permissions.checkPermission('componen
     let collatedInfo = await Components_ExecSummary.collateInfo(req.params.uuid);
 
     // Render the interface page
-    res.render('component_execSummary.pug', {
-      component,
-      collatedInfo,
-    });
+    res.render('component_execSummary.pug', { collatedInfo });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());

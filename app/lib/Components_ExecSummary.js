@@ -5,8 +5,9 @@ const { db } = require('./db');
 const Search_ActionsWorkflows = require('./Search_ActionsWorkflows');
 const utils = require('./utils');
 
-const layerSection_names = ['layer_x', 'layer_v', 'layer_u', 'layer_g'];
+const layers = ['x', 'v', 'u', 'g'];
 const typeForms_winding = ['x_winding', 'v_winding', 'u_winding', 'g_winding'];
+const typeForms_soldering = ['x_solder', 'v_solder', 'u_solder', 'g_solder'];
 
 const dictionary_winders = {
   ukWinder1: 'UK Winder 1',
@@ -35,9 +36,6 @@ const dictionary_bobbinManufacturers = {
   wireAlloyInternational: 'Wire Alloy International',
 }
 
-const typeForms_soldering = ['x_solder', 'v_solder', 'u_solder', 'g_solder'];
-const layers = ['x', 'v', 'u', 'g'];
-
 const dictionary_tensionSystems = {
   dwa1: 'DWA #1',
   dwa2: 'DWA #2',
@@ -49,7 +47,7 @@ const dictionary_tensionSystems = {
   laser5: 'Laser #5',
 };
 
-const dictionary_apaNCRs_types = {
+const dictionary_ncrTypes = {
   damagedWireSegment: 'Damaged Wire Segment',
   missingWireSegment: 'Missing Wire Segment',
   misplacedWireSegment: 'Misplaced Wire Segment',
@@ -65,9 +63,6 @@ const dictionary_apaNCRs_types = {
   pdCables: 'PD Cables',
   temperatureCables: 'Temperature Cables',
   other: 'Other',
-};
-
-const dictionary_meshPanelNCRs_types = {
   holesInMesh: 'Holes in mesh',
   frameIssue: 'Frame issue',
   meshNotTight: 'Mesh not tight',
@@ -83,7 +78,10 @@ async function collateInfo(componentUUID) {
   // Information will be saved as [key, value] pairs for easier access on the interface page, and we know what keys are required ahead of time, so they can be hardcoded
   let collatedInfo = {};
 
-  collatedInfo.general = {
+  collatedInfo.assembledAPA = {
+    componentName: '',
+    componentUUID: '',
+    shortUUID: '',
     dunePID: '[no information found]',
     productionSite: '[no information found]',
     configuration: '[no information found]',
@@ -91,38 +89,38 @@ async function collateInfo(componentUUID) {
     assemblyStatus: -99.9,
   };
 
-  collatedInfo.frameConstr = {
-    qaCheckID: '[no record found]',
-    name: '[no information found]',
-    date: '',
-    intakeSurveysID: '',
-    installSurveysID: '',
+  collatedInfo.frameConstruction = {
+    signoff_actionID: '[no record found]',
+    signoff_name: '[no information found]',
+    signoff_date: '',
+    intakeSurveys_actionID: '',
+    installSurveys_actionID: '',
   };
 
-  collatedInfo.framePrep = {
-    qaCheckID: '[no record found]',
-    name: '[no information found]',
-    date: '',
-    meshInstallID: '',
-    rtdInstallID: '',
+  collatedInfo.framePreparation = {
+    signoff_actionID: '[no record found]',
+    signoff_name: '[no information found]',
+    signoff_date: '',
+    meshInstall_actionID: '',
+    rtdInstall_actionID: '',
   };
 
-  for (let i = 0; i < layerSection_names.length; i++) {
-    collatedInfo[layerSection_names[i]] = {
-      qaCheckID: '[no record found]',
-      name: '[no information found]',
-      date: '',
-      windingID: '',
-      winder: '[no information found]',
-      winderHead: '[no information found]',
-      bobbinManufacturers: '[no information found]',
-      winderMaintenenceSignoff: '[no information found]',
-      tensionControlSignoff: '[no information found]',
-      numberOfReplacedWires: 0,
-      numberOfTensionAlarms: 0,
-      numberOfBadSolders: 0,
-      solderingID: '',
-      tensionsID: '',
+  for (let i = 0; i < layers.length; i++) {
+    collatedInfo[layers[i]] = {
+      signoff_actionID: '[no record found]',
+      signoff_name: '[no information found]',
+      signoff_date: '',
+      winding_actionID: '',
+      winding_winder: '[no information found]',
+      winding_winderHead: '[no information found]',
+      winding_bobbinManufacturers: '[no information found]',
+      winding_winderMaintenenceSignoff: '[no information found]',
+      winding_tensionControlSignoff: '[no information found]',
+      winding_numberOfReplacedWires: 0,
+      winding_numberOfTensionAlarms: 0,
+      soldering_actionID: '',
+      soldering_numberOfBadSolders: 0,
+      tensions_actionID: '',
       tensions_location: '[no information found]',
       tensions_system: '[no information found]',
       tensions_A: [],
@@ -130,61 +128,66 @@ async function collateInfo(componentUUID) {
     };
   }
 
-  collatedInfo.coverCaps = {
-    qaCheckID: '[no record found]',
-    name: '[no information found]',
-    date: '',
+  collatedInfo.coverBoardsAndCaps = {
+    signoff_actionID: '[no record found]',
+    signoff_name: '[no information found]',
+    signoff_date: '',
   };
 
-  collatedInfo.shippingPrep = {
-    qaCheckID: '[no record found]',
-    name: '[no information found]',
-    date: '',
-    panelInstallID: '',
-    conduitInstallID: '',
+  collatedInfo.postProduction = {
+    signoff_actionID: '[no record found]',
+    signoff_name: '[no information found]',
+    signoff_date: '',
+    panelInstall_actionID: '',
+    conduitInstall_actionID: '',
   };
 
   collatedInfo.completedAPA = {
-    qaCheckID: '[no record found]',
-    name: '[no information found]',
-    date: '',
+    signoff_actionID: '[no record found]',
+    signoff_name: '[no information found]',
+    signoff_date: '',
   };
 
-  collatedInfo.apaNCRs_wires = [];
-  collatedInfo.apaNCRs_other = [];
-  collatedInfo.meshPanelNCRs = [];
+  collatedInfo.ncrs_useAsIs_withWires = [];
+  collatedInfo.ncrs_useAsIs_noWires = [];
+  collatedInfo.ncrs_repair = [];
+  collatedInfo.ncrs_rework = [];
+  collatedInfo.ncrs_other = [];
 
-  /////////////////////////
-  // GENERAL INFORMATION //
-  /////////////////////////
-  // Get the component record of the assembled APA, and the UUID of the underlying APA frame
+  /////////////////////
+  // APA INFORMATION //
+  /////////////////////
+  // Get the component record of the Assembled APA, and the UUID of the underlying APA Frame (needed later on for retrieving QC signoffs for frame construction)
   const assembledAPA = await Components.retrieve(componentUUID);
   const frameUUID = assembledAPA.data.frameUuid;
 
-  // Add relevant information from the APA's component record to the 'general' section of the collated information object
-  collatedInfo.general.dunePID = assembledAPA.data.dunePid;
-  collatedInfo.general.productionSite = utils.dictionary_locations[assembledAPA.data.apaAssemblyLocation];
-  collatedInfo.general.configuration = assembledAPA.data.apaConfiguration[0].toUpperCase() + assembledAPA.data.apaConfiguration.slice(1);
+  // Add relevant information from the Assembled APA component record to the 'assembledAPA' section of the collated information object
+  collatedInfo.assembledAPA.componentName = assembledAPA.data.componentName;
+  collatedInfo.assembledAPA.componentUUID = assembledAPA.componentUuid;
+  collatedInfo.assembledAPA.shortUUID = assembledAPA.shortUuid.toString();
+  collatedInfo.assembledAPA.dunePID = assembledAPA.data.dunePid;
+  collatedInfo.assembledAPA.productionSite = utils.dictionary_locations[assembledAPA.data.apaAssemblyLocation];
+  collatedInfo.assembledAPA.configuration = assembledAPA.data.apaConfiguration[0].toUpperCase() + assembledAPA.data.apaConfiguration.slice(1);
 
-  // Get a list of workflows that involve the assembled APA, specified by its UUID (there should only be one)
-  // From this, add relevant information about the workflow to the 'general' section of the collated information object
+  // Get a list of workflows that involve this Assembled APA, specified by its UUID (there should only be one)
+  // From this, add relevant information about the workflow to the 'apa' section of the collated information object
   const workflows = await Search_ActionsWorkflows.workflowsByUUID(componentUUID);
 
   if (workflows.length === 1) {
-    collatedInfo.general.workflowID = workflows[0].workflowId;
+    collatedInfo.assembledAPA.workflowID = workflows[0].workflowId;
 
     if (workflows[0].completionStatus) {
-      collatedInfo.general.assemblyStatus = workflows[0].completionStatus;
+      collatedInfo.assembledAPA.assemblyStatus = workflows[0].completionStatus;
     } else {
-      collatedInfo.general.assemblyStatus = -0.9;
+      collatedInfo.assembledAPA.assemblyStatus = -0.9;
     }
   }
 
   /////////////////
   // QC SIGNOFFS //
   /////////////////
-  // Some of the QC signoff information can be found in the various 'Assembled APA QA Check' type actions that have been performed on the APA
-  // The most efficient approach is to retrieve all of these at once from the DB, and then get the signoff information from each one depending on which part of the assembly it corresponds to
+  // The QC signoffs for frame preparation and winding layers can be found in the Assembled APA's 'Assembled APA QA Check' actions
+  // Additional information relating to frame preparation can be found in the Assembled APA's 'Mesh Panel Installation' and 'PD & RTD Installation' actions
   aggregation_stages = [];
   results = [];
 
@@ -212,135 +215,20 @@ async function collateInfo(componentUUID) {
 
   for (const result of results) {
     if (result.section === 'framePreparation') {
-      collatedInfo.framePrep.qaCheckID = result.actionId;
-      collatedInfo.framePrep.name = utils.dictionary_apaFactoryLeads[result.name];
-      collatedInfo.framePrep.date = result.date;
+      collatedInfo.framePreparation.signoff_actionID = result.actionId;
+      collatedInfo.framePreparation.signoff_name = utils.dictionary_apaFactoryLeads[result.name];
+      collatedInfo.framePreparation.signoff_date = result.date;
     } else if ((result.section === 'xLayerAssembly') || (result.section === 'vLayerAssembly') || (result.section === 'uLayerAssembly') || (result.section === 'gLayerAssembly')) {
-      collatedInfo[`layer_${result.section[0]}`].qaCheckID = result.actionId;
-      collatedInfo[`layer_${result.section[0]}`].name = utils.dictionary_apaFactoryLeads[result.name];
-      collatedInfo[`layer_${result.section[0]}`].date = result.date;
+      collatedInfo[`${result.section[0]}`].signoff_actionID = result.actionId;
+      collatedInfo[`${result.section[0]}`].signoff_name = utils.dictionary_apaFactoryLeads[result.name];
+      collatedInfo[`${result.section[0]}`].signoff_date = result.date;
     } else if (result.section === 'coverBoardsAndCaps') {
-      collatedInfo.coverCaps.qaCheckID = result.actionId;
-      collatedInfo.coverCaps.name = utils.dictionary_apaFactoryLeads[result.name];
-      collatedInfo.coverCaps.date = result.date;
+      collatedInfo.coverBoardsAndCaps.signoff_actionID = result.actionId;
+      collatedInfo.coverBoardsAndCaps.signoff_name = utils.dictionary_apaFactoryLeads[result.name];
+      collatedInfo.coverBoardsAndCaps.signoff_date = result.date;
     }
   };
 
-  // Signoff information relating to the Assembled APA's 'shipping information' can be ONLY found in the APA's 'Installation into ASF and Close Up' action
-  aggregation_stages = [];
-  results = [];
-
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'InstallationIntoASF',
-      'componentUuid': MUUID.from(componentUUID),
-    }
-  });
-
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      name: { '$first': '$data.closeUpSignoff' },
-      date: { '$first': '$validity.startDate' },
-      actionId: { '$first': '$actionId' },
-    },
-  });
-
-  results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  if (results.length > 0) {
-    collatedInfo.shippingPrep.qaCheckID = results[0].actionId;
-    collatedInfo.shippingPrep.name = utils.dictionary_apaFactoryLeads[results[0].name];
-    collatedInfo.shippingPrep.date = results[0].date;
-  }
-
-  // Signoff information relating to APA frame construction can be ONLY found in the frame's 'Completed Frame QC Checklist', 'Intake Surveys' and 'Installation Surveys' actions
-  aggregation_stages = [];
-  results = [];
-
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'CompletedFrameQCChecklist',
-      'componentUuid': MUUID.from(frameUUID),
-    }
-  });
-
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      name: { '$first': '$data.personSigningOff' },
-      date: { '$first': '$validity.startDate' },
-      actionId: { '$first': '$actionId' },
-    },
-  });
-
-  results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  if (results.length > 0) {
-    collatedInfo.frameConstr.qaCheckID = results[0].actionId;
-    collatedInfo.frameConstr.name = utils.dictionary_frameIntakeSignoff[results[0].name];
-    collatedInfo.frameConstr.date = results[0].date;
-  }
-
-  aggregation_stages = [];
-  results = [];
-
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'IntakeSurveys',
-      'componentUuid': MUUID.from(frameUUID),
-    }
-  });
-
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-    },
-  });
-
-  results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  if (results.length > 0) {
-    collatedInfo.frameConstr.intakeSurveysID = results[0].actionId;
-  }
-
-  aggregation_stages = [];
-  results = [];
-
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'InstallationSurveys',
-      'componentUuid': MUUID.from(frameUUID),
-    }
-  });
-
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-    },
-  });
-
-  results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  if (results.length > 0) {
-    collatedInfo.frameConstr.installSurveysID = results[0].actionId;
-  }
-
-  // Additional signoff information relating to APA frame preparation can also be found in the APA's 'Mesh Panel Installation' and 'PD & RTD Installation' actions
   aggregation_stages = [];
   results = [];
 
@@ -364,7 +252,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.framePrep.meshInstallID = results[0].actionId;
+    collatedInfo.framePreparation.meshInstall_actionID = results[0].actionId;
   }
 
   aggregation_stages = [];
@@ -390,10 +278,41 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.framePrep.rtdInstallID = results[0].actionId;
+    collatedInfo.framePreparation.rtdInstall_actionID = results[0].actionId;
   }
 
-  // Additional signoff information relating to APA shipping preparation can also be found in the APA's 'Protection Panel Installation' and 'Cable Conduit Installation' actions
+  // The QC signoff for post production can be found in the Assembled APA's 'Installation into ASF and Close Up' action
+  // Additional signoff information relating to post production can be found in the Assembled APA's 'Protection Panel Installation' and 'Cable Conduit Installation' actions
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'InstallationIntoASF',
+      'componentUuid': MUUID.from(componentUUID),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      name: { '$first': '$data.closeUpSignoff' },
+      date: { '$first': '$validity.startDate' },
+      actionId: { '$first': '$actionId' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  if (results.length > 0) {
+    collatedInfo.postProduction.signoff_actionID = results[0].actionId;
+    collatedInfo.postProduction.signoff_name = utils.dictionary_apaFactoryLeads[results[0].name];
+    collatedInfo.postProduction.signoff_date = results[0].date;
+  }
+
   aggregation_stages = [];
   results = [];
 
@@ -417,7 +336,7 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.shippingPrep.panelInstallID = results[0].actionId;
+    collatedInfo.postProduction.panelInstall_actionID = results[0].actionId;
   }
 
   aggregation_stages = [];
@@ -443,10 +362,94 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.shippingPrep.conduitInstallID = results[0].actionId;
+    collatedInfo.postProduction.conduitInstall_actionID = results[0].actionId;
   }
 
-  // Signoff information relating to the completed APA can ONLY be found in the APA's 'Completed APA QC Checklist' action
+  // The QC signoff for frame construction can be found in the APA Frame's 'Completed Frame QC Checklist'
+  // Additional signoff information related to frame construction can be found in the APA Frame's 'Intake Surveys' and 'Installation Surveys' actions
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'CompletedFrameQCChecklist',
+      'componentUuid': MUUID.from(frameUUID),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      name: { '$first': '$data.personSigningOff' },
+      date: { '$first': '$validity.startDate' },
+      actionId: { '$first': '$actionId' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  if (results.length > 0) {
+    collatedInfo.frameConstruction.signoff_actionID = results[0].actionId;
+    collatedInfo.frameConstruction.signoff_name = utils.dictionary_frameIntakeSignoff[results[0].name];
+    collatedInfo.frameConstruction.signoff_date = results[0].date;
+  }
+
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'IntakeSurveys',
+      'componentUuid': MUUID.from(frameUUID),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  if (results.length > 0) {
+    collatedInfo.frameConstruction.intakeSurveys_actionID = results[0].actionId;
+  }
+
+  aggregation_stages = [];
+  results = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'InstallationSurveys',
+      'componentUuid': MUUID.from(frameUUID),
+    }
+  });
+
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+    },
+  });
+
+  results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  if (results.length > 0) {
+    collatedInfo.frameConstruction.installSurveys_actionID = results[0].actionId;
+  }
+
+  // The QC signoff information relating to the completed APA can be found in the Assembled APA's 'Completed APA QC Checklist' action
   aggregation_stages = [];
   results = [];
 
@@ -472,17 +475,17 @@ async function collateInfo(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.completedAPA.qaCheckID = results[0].actionId;
-    collatedInfo.completedAPA.name = utils.dictionary_apaFactoryLeads[results[0].name];
-    collatedInfo.completedAPA.date = results[0].date;
+    collatedInfo.completedAPA.signoff_actionID = results[0].actionId;
+    collatedInfo.completedAPA.signoff_name = utils.dictionary_apaFactoryLeads[results[0].name];
+    collatedInfo.completedAPA.signoff_date = results[0].date;
   }
 
-  /////////////////
-  // WIRE LAYERS //
-  /////////////////
-  // Retrieve the winding, soldering and (most recent) tension measurements actions for each wire layer
-  // Fill in the remaining information in each layer-specific section of the collated information object
-  for (let i = 0; i < layerSection_names.length; i++) {
+  ////////////////////////////////////////////
+  // WINDING, SOLDERING AND TENSION TESTING //
+  ////////////////////////////////////////////
+  // Retrieve the (most recent) winding, soldering and tension measurements actions for each wire layer
+  // Fill in the remaining information in each layer's section of the collated information object
+  for (let i = 0; i < layers.length; i++) {
     aggregation_stages = [];
     results = [];
 
@@ -537,14 +540,14 @@ async function collateInfo(componentUUID) {
         numberOfReplacedWires += singleWire_solderPads.split(',').length;
       }
 
-      collatedInfo[layerSection_names[i]].winder = dictionary_winders[results[0].winder];
-      collatedInfo[layerSection_names[i]].winderHead = dictionary_winderHeads[results[0].winderHead];
-      collatedInfo[layerSection_names[i]].bobbinManufacturers = bobbinManufacturers;
-      collatedInfo[layerSection_names[i]].winderMaintenanceSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].winderMaintenanceSignoff];
-      collatedInfo[layerSection_names[i]].tensionControlSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].tensionControlSignoff];
-      collatedInfo[layerSection_names[i]].numberOfReplacedWires = numberOfReplacedWires;
-      collatedInfo[layerSection_names[i]].numberOfTensionAlarms = results[0].numberOfTensionAlarms;
-      collatedInfo[layerSection_names[i]].windingID = results[0].actionId;
+      collatedInfo[layers[i]].winding_actionID = results[0].actionId;
+      collatedInfo[layers[i]].winding_winder = dictionary_winders[results[0].winder];
+      collatedInfo[layers[i]].winding_winderHead = dictionary_winderHeads[results[0].winderHead];
+      collatedInfo[layers[i]].winding_bobbinManufacturers = bobbinManufacturers;
+      collatedInfo[layers[i]].winding_winderMaintenanceSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].winderMaintenanceSignoff];
+      collatedInfo[layers[i]].winding_tensionControlSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].tensionControlSignoff];
+      collatedInfo[layers[i]].winding_numberOfReplacedWires = numberOfReplacedWires;
+      collatedInfo[layers[i]].winding_numberOfTensionAlarms = results[0].numberOfTensionAlarms;
     }
 
     aggregation_stages = [];
@@ -583,8 +586,8 @@ async function collateInfo(componentUUID) {
         numberOfBadSolders += singleJoint_solderPads.split(',').length;
       }
 
-      collatedInfo[layerSection_names[i]].numberOfBadSolders = numberOfBadSolders;
-      collatedInfo[layerSection_names[i]].solderingID = results[0].actionId;
+      collatedInfo[layers[i]].soldering_actionID = results[0].actionId;
+      collatedInfo[layers[i]].soldering_numberOfBadSolders = numberOfBadSolders;
     }
 
     aggregation_stages = [];
@@ -615,18 +618,18 @@ async function collateInfo(componentUUID) {
       .toArray();
 
     if (results.length > 0) {
-      collatedInfo[layerSection_names[i]].tensions_location = utils.dictionary_locations[results[0].location];
-      collatedInfo[layerSection_names[i]].tensions_system = dictionary_tensionSystems[results[0].system];
-      collatedInfo[layerSection_names[i]].tensions_A = results[0].tensions_A;
-      collatedInfo[layerSection_names[i]].tensions_B = results[0].tensions_B;
-      collatedInfo[layerSection_names[i]].tensionsID = results[0].actionId;
+      collatedInfo[layers[i]].tensions_actionID = results[0].actionId;
+      collatedInfo[layers[i]].tensions_location = utils.dictionary_locations[results[0].location];
+      collatedInfo[layers[i]].tensions_system = dictionary_tensionSystems[results[0].system];
+      collatedInfo[layers[i]].tensions_A = results[0].tensions_A;
+      collatedInfo[layers[i]].tensions_B = results[0].tensions_B;
     }
   }
 
-  ///////////////////////////////////////
-  // WIRE-RELATED APA NON-CONFORMANCES //
-  ///////////////////////////////////////
-  // Get information about any wire related non-conformances on the assembled APA
+  //////////////////////////
+  // APA NON-CONFORMANCES //
+  //////////////////////////
+  // Get information about any and all non-conformance actions performed on the Assembled APA
   aggregation_stages = [];
   results = [];
 
@@ -634,15 +637,6 @@ async function collateInfo(componentUUID) {
     $match: {
       'typeFormId': 'APANonConformance',
       'componentUuid': MUUID.from(componentUUID),
-      $or: [{
-        'data.nonConformanceType.damagedWireSegment': true
-      }, {
-        'data.nonConformanceType.missingWireSegment': true
-      }, {
-        'data.nonConformanceType.misplacedWireSegment': true
-      }, {
-        'data.nonConformanceType.shortedWireSegment': true
-      }],
     }
   });
 
@@ -651,260 +645,84 @@ async function collateInfo(componentUUID) {
     $group: {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
+      disposition: { '$first': '$data.disposition' },
+      title: { '$first': '$data.nonConformanceTitle' },
+      description: { '$first': '$data.nonConformanceDescription' },
       nonConf_type: { '$first': '$data.nonConformanceType' },
-      damagedWireData: { '$first': '$data.damagedWireGrid' },
       missingWireData: { '$first': '$data.dataGrid' },
-      misplacedWireData: { '$first': '$data.misplacedGrid' },
       shortedWireData: { '$first': '$data.shortedGrid' },
     },
   });
 
-  results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  if (results.length > 0) {
-    for (const result of results) {
-      for (const entry of result.damagedWireData) {
-        if (entry.wireLayer !== '') {
-          let nonConfType = '';
-
-          for (const [key, value] of Object.entries(result.nonConf_type)) {
-            if (value) nonConfType = key;
-          }
-
-          collatedInfo.apaNCRs_wires.push({
-            type: dictionary_apaNCRs_types[nonConfType],
-            layerSide: entry.wireLayer.toUpperCase(),
-            boardPad: entry.headBoardAndPad,
-            endpoints: entry.endPointsForMissingSegment,
-            fembChannel: entry.coldElectronicsChannel,
-            offlineChannel: entry.offlineChannel,
-            actionId: result.actionId,
-          });
-        }
-      }
-
-      for (const entry of result.missingWireData) {
-        if (entry.wireLayer !== '') {
-          let nonConfType = '';
-
-          for (const [key, value] of Object.entries(result.nonConf_type)) {
-            if (value) nonConfType = key;
-          }
-
-          collatedInfo.apaNCRs_wires.push({
-            type: dictionary_apaNCRs_types[nonConfType],
-            layerSide: entry.wireLayer.toUpperCase(),
-            boardPad: entry.headBoardAndPad,
-            endpoints: entry.endPointsForMissingSegment,
-            fembChannel: entry.coldElectronicsChannel,
-            offlineChannel: entry.offlineChannel,
-            actionId: result.actionId,
-          });
-        }
-      }
-
-      for (const entry of result.misplacedWireData) {
-        if (entry.wireLayer !== '') {
-          let nonConfType = '';
-
-          for (const [key, value] of Object.entries(result.nonConf_type)) {
-            if (value) nonConfType = key;
-          }
-
-          collatedInfo.apaNCRs_wires.push({
-            type: dictionary_apaNCRs_types[nonConfType],
-            layerSide: entry.wireLayer.toUpperCase(),
-            boardPad: entry.headBoardAndPad,
-            endpoints: entry.endPointsForMissingSegment,
-            fembChannel: entry.coldElectronicsChannel,
-            offlineChannel: entry.offlineChannel,
-            actionId: result.actionId,
-          });
-        }
-      }
-
-      for (const entry of result.shortedWireData) {
-        if (entry.wireLayer !== '') {
-          let nonConfType = '';
-
-          for (const [key, value] of Object.entries(result.nonConf_type)) {
-            if (value) nonConfType = key;
-          }
-
-          collatedInfo.apaNCRs_wires.push({
-            type: dictionary_apaNCRs_types[nonConfType],
-            layerSide: entry.wireLayer.toUpperCase(),
-            boardPad: entry.headBoardAndPad,
-            endpoints: entry.endPointsForMissingSegment,
-            fembChannel: entry.coldElectronicsChannel,
-            offlineChannel: entry.offlineChannel,
-            actionId: result.actionId,
-          });
-        }
-      }
-    }
-  }
-
-  ////////////////////////////////
-  // OTHER APA NON-CONFORMANCES //
-  ////////////////////////////////
-  // Get information about any non-wire related non-conformances on the assembled APA
-  aggregation_stages = [];
-  results = [];
-
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'APANonConformance',
-      'componentUuid': MUUID.from(componentUUID),
-      $or: [{
-        'data.nonConformanceType.combIssue': true
-      }, {
-        'data.nonConformanceType.conduitIssue': true
-      }, {
-        'data.nonConformanceType.geometryBoardIssue': true
-      }, {
-        'data.nonConformanceType.incorrectFasteners': true
-      }, {
-        'data.nonConformanceType.frameIssue': true
-      }, {
-        'data.nonConformanceType.meshIssue': true
-      }, {
-        'data.nonConformanceType.machiningIssue': true
-      }, {
-        'data.nonConformanceType.protectionKit': true
-      }, {
-        'data.nonConformanceType.pdCables': true
-      }, {
-        'data.nonConformanceType.temperatureCables': true
-      }, {
-        'data.nonConformanceType.other': true
-      }],
-    }
-  });
-
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-      nonConf_type: { '$first': '$data.nonConformanceType' },
-      nonConf_description: { '$first': '$data.nonConformanceDescription' },
-    },
-  });
+  aggregation_stages.push({ $sort: { 'title': 1 } });
 
   results = await db.collection('actions')
     .aggregate(aggregation_stages)
     .toArray();
 
+  // Copy the information about each NCR into the corresponding 'ncrs_XXX' section of the collated information object, depending on the disposition and if there are missing or shorted wires present
+  // Note that the 'Use As Is', 'Repair' and 'Rework' dispositions each have separate sections, but the others ('Return to Supplier', 'Reject / Re-purpose' and 'Scrap') are grouped together
   if (results.length > 0) {
-    for (const result of results) {
-      let nonConfType = '';
+    for (let result of results) {
+      let typesString = '';
 
       for (const [key, value] of Object.entries(result.nonConf_type)) {
-        if (value) nonConfType = key;
+        if (value) {
+          typesString += `${dictionary_ncrTypes[key]}, `;
+        }
       }
 
-      const dictionary = {
-        component: 'Assembled APA',
-        type: dictionary_apaNCRs_types[nonConfType],
-        description: result.nonConf_description,
-        actionId: result.actionId,
-      }
+      result.types = typesString.substring(0, typesString.length - 2);
 
-      collatedInfo.apaNCRs_other.push(dictionary);
+      if (result.disposition === 'useAsIs') {
+        if ((result.missingWireData[0].wireLayer !== '') || (result.shortedWireData[0].wireLayer !== '')) {
+          let missingShortedWires = [];
+
+          if (result.missingWireData[0].wireLayer !== '') {
+            for (const missingWire of result.missingWireData) {
+              missingShortedWires.push({
+                wireType: 'Missing Wire / Wire Seg.',
+                wireLayer: missingWire.wireLayer.toUpperCase(),
+                headBoardAndPad: missingWire.headBoardAndPad,
+                endPointsForMissingSegment: missingWire.endPointsForMissingSegment,
+                offlineChannel: missingWire.offlineChannel,
+                coldElectronicsChannel: missingWire.coldElectronicsChannel,
+              })
+            }
+          }
+
+          if (result.shortedWireData[0].wireLayer !== '') {
+            for (const shortedWire of result.shortedWireData) {
+              missingShortedWires.push({
+                wireType: 'Shorted Wire / Wire Seg.',
+                wireLayer: shortedWire.wireLayer.toUpperCase(),
+                headBoardAndPad: shortedWire.headBoardAndPad,
+                endPointsForMissingSegment: shortedWire.endPointsForMissingSegment,
+                offlineChannel: shortedWire.offlineChannel,
+                coldElectronicsChannel: shortedWire.coldElectronicsChannel,
+              })
+            }
+          }
+
+          result.missingShortedWires = missingShortedWires;
+
+          delete result.nonConf_type;
+          delete result.missingWireData;
+          delete result.shortedWireData;
+
+          collatedInfo.ncrs_useAsIs_withWires.push(result);
+        } else {
+          collatedInfo.ncrs_useAsIs_noWires.push(result);
+        }
+      } else if (result.disposition === 'repair') {
+        collatedInfo.ncrs_repair.push(result);
+      } else if (result.disposition === 'rework') {
+        collatedInfo.ncrs_rework.push(result);
+      } else {
+        collatedInfo.ncrs_other.push(result);
+      }
     }
   }
-
-  /////////////////////////////////
-  // MESH PANEL NON-CONFORMANCES //
-  /////////////////////////////////
-  // Get information about any non-conformances on the mesh panels ...
-  // ... first retrieve the most recent 'Mesh Panel Installation' action record performed on the assembled APA, and from that a list of the mesh UUIDs ...
-  // ... then retrieve any non-conformance reports that contain any of the mesh UUIDs
-  aggregation_stages = [];
-  results = [];
-
-  aggregation_stages.push({
-    $match: {
-      'typeFormId': 'prep_mesh_panel_install',
-      'componentUuid': MUUID.from(componentUUID),
-    }
-  });
-
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-  aggregation_stages.push({
-    $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-      data: { '$first': '$data' },
-    },
-  });
-
-  results = await db.collection('actions')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  let meshUUIDs = null;
-
-  if (results.length > 0) {
-    meshUUIDs = [
-      MUUID.from(results[0].data.sideAMeshPanel1Uuid), MUUID.from(results[0].data.sideBMeshPanel1Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel2Uuid), MUUID.from(results[0].data.sideBMeshPanel2Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel3Uuid), MUUID.from(results[0].data.sideBMeshPanel3Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel4Uuid), MUUID.from(results[0].data.sideBMeshPanel4Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel5Uuid), MUUID.from(results[0].data.sideBMeshPanel5Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel6Uuid), MUUID.from(results[0].data.sideBMeshPanel6Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel7Uuid), MUUID.from(results[0].data.sideBMeshPanel7Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel8Uuid), MUUID.from(results[0].data.sideBMeshPanel8Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel9Uuid), MUUID.from(results[0].data.sideBMeshPanel9Uuid),
-      MUUID.from(results[0].data.sideAMeshPanel10Uuid), MUUID.from(results[0].data.sideBMeshPanel10Uuid),
-    ]
-
-    aggregation_stages = [];
-    results = [];
-
-    aggregation_stages.push({
-      $match: {
-        'typeFormId': 'APANonConformance',
-        'componentUuid': { $in: meshUUIDs }
-      }
-    });
-
-    aggregation_stages.push({ $sort: { 'validity.version': -1 } });
-    aggregation_stages.push({
-      $group: {
-        _id: { actionId: '$actionId' },
-        actionId: { '$first': '$actionId' },
-        nonConf_type: { '$first': '$data.frameNonConformanceType1' },
-        nonConf_description: { '$first': '$data.nonConformanceDescription' },
-      },
-    });
-
-    results = await db.collection('actions')
-      .aggregate(aggregation_stages)
-      .toArray();
-
-    if (results.length > 0) {
-      for (const result of results) {
-        let nonConfType = '';
-
-        for (const [key, value] of Object.entries(result.nonConf_type)) {
-          if (value) nonConfType = key;
-        }
-
-        const dictionary = {
-          component: 'Mesh Panel',
-          type: dictionary_meshPanelNCRs_types[nonConfType],
-          description: result.nonConf_description,
-          actionId: result.actionId,
-        }
-
-        collatedInfo.meshPanelNCRs.push(dictionary);
-      }
-    }
-  };
 
   // Return the completed collated information object
   return collatedInfo;
