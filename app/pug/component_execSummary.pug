@@ -2,11 +2,10 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = 'Assembled APA Executive Summary';
+  - const page_title = `Executive Summary: ${collatedInfo.assembledAPA.componentName}`;
 
 block extrascripts
   script(type = 'text/javascript').
-    const component = !{JSON.stringify(component, null, 4)};
     const collatedInfo = !{JSON.stringify(collatedInfo, null, 4)};
 
   block workscripts
@@ -23,106 +22,138 @@ block allbody
       hr
 
   .vert-space-x2
-    .container-fluid
-      .row
-        .col-sm-8
-          h1 Assembled APA Executive Summary
+    .row
+      .col-sm-8
+        h1 Executive Summary: #{collatedInfo.assembledAPA.componentName}
 
-          .vert-space-x1.hori-space-x1.h4
-            dl
-              dt DUNE PID
-              dd #{collatedInfo.general.dunePID}
+        .vert-space-x1.hori-space-x1.h4
+          dl
+            dt APA Construction DB Component UUID
+            dd
+              a(href = `/component/${collatedInfo.assembledAPA.componentUUID}`, target = '_blank') #{collatedInfo.assembledAPA.componentUUID}
 
-              dt Production Site
-              dd #{collatedInfo.general.productionSite}
+            dt DUNE PID
+            dd #{collatedInfo.assembledAPA.dunePID}
 
-              dt Configuration
-              dd #{collatedInfo.general.configuration}
+            dt Production Site
+            dd #{collatedInfo.assembledAPA.productionSite}
 
-              dt Component UUID
+            dt Configuration
+            dd #{collatedInfo.assembledAPA.configuration}
+
+            dt Assembly Completion [%]
+
+            if ((collatedInfo.assembledAPA.assemblyStatus) === -99.9)
+              dd [no associated workflow]
+            else if ((collatedInfo.assembledAPA.assemblyStatus) === -0.9)
+              dd [not found in workflow]
+            else
               dd
-                a(href = `/component/${component.componentUuid}`, target = '_blank') #{component.componentUuid}
+                a(href = `/workflow/${collatedInfo.assembledAPA.workflowID}`, target = '_blank') #{collatedInfo.assembledAPA.assemblyStatus.toFixed(2)}
 
-              dt Assembly Completion [%]
+        .vert-space-x1.hori-space-x1
+          p &nbsp; This document was generated on 
+            +dateTimeFormat(new Date())
+            |  (all times are given in GMT)
 
-              if ((collatedInfo.general.assemblyStatus) === -99.9)
-                dd [no associated workflow]
-              else if ((collatedInfo.general.assemblyStatus) === -0.9)
-                dd [not found in workflow]
-              else
-                dd
-                  a(href = `/workflow/${collatedInfo.general.workflowID}`, target = '_blank') #{collatedInfo.general.assemblyStatus.toFixed(2)}
-
-          .vert-space-x1.hori-space-x1
-            p &nbsp; This summary generated on: 
-              +dateTimeFormat(new Date())
-
-        .col-sm-4
-          #qr-code
-            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, 'component.data.componentName')
+      .col-sm-4
+        #qr-code
+          +qr-panel-noLabel(`${base_url}/c/${collatedInfo.assembledAPA.shortUUID}`)
 
     hr
 
   .vert-space-x2
     .entry_qcSignoffs
-      .form_qcSignoffs(data-record = [collatedInfo.frameConstr, collatedInfo.framePrep, collatedInfo.layer_x, collatedInfo.layer_v, collatedInfo.layer_u, collatedInfo.layer_g, collatedInfo.coverCaps, collatedInfo.shippingPrep, collatedInfo.completedAPA])
+      .form_entry_qcSignoffs(data-record = [collatedInfo.frameConstruction, collatedInfo.framePreparation, collatedInfo.x, collatedInfo.v, collatedInfo.u, collatedInfo.g, collatedInfo.coverBoardsAndCaps, collatedInfo.postProduction, collatedInfo.completedAPA])
 
   .pagebreak
 
   .vert-space-x2
-    .entry_wireLayers
-      .form_wireLayers(data-record = ['X', collatedInfo.layer_x])
+    .entry_wireLayer
+      .form_entry_wireLayer(data-record = ['X', collatedInfo.x])
+
+  .vert-space-x2 
+    hr
 
   .vert-space-x2
-    .entry_wireLayers
-      .form_wireLayers(data-record = ['V', collatedInfo.layer_v])
+    .entry_wireLayer
+      .form_entry_wireLayer(data-record = ['V', collatedInfo.v])
 
   .pagebreak
 
   .vert-space-x2
-    .entry_wireLayers
-      .form_wireLayers(data-record = ['U', collatedInfo.layer_u])
+    .entry_wireLayer
+      .form_entry_wireLayer(data-record = ['U', collatedInfo.u])
+
+  .vert-space-x2 
+    hr
 
   .vert-space-x2
-    .entry_wireLayers
-      .form_wireLayers(data-record = ['G', collatedInfo.layer_g])
+    .entry_wireLayer
+      .form_entry_wireLayer(data-record = ['G', collatedInfo.g])
 
   .pagebreak
 
   .vert-space-x2
-    .entry_apaNCRs_header
-      .form_apaNCRs_header(data-record = [])
+    .header_ncr 
+      .form_header_ncr(data-record = 'Use As Is (Missing or Shorted Wires)')
 
-    if collatedInfo.apaNCRs_wires.length > 0
-      each ncrInfo, index in collatedInfo.apaNCRs_wires
-        .entry_apaNCRs_wires
-          .form_apaNCRs_wires(data-record = [ncrInfo])
+    if collatedInfo.ncrs_useAsIs_withWires.length > 0
+      each ncrInfo, ncrIndex in collatedInfo.ncrs_useAsIs_withWires
+        .vert-space-x1 
+          .entry_ncr
+            .form_entry_ncr(data-record = ncrInfo)
 
-        hr
+            each wireInfo, wireIndex in ncrInfo.missingShortedWires
+              .entry_ncrWire
+                .form_entry_ncrWire(data-record = wireInfo)
     else 
-      p [no wire non-conformances reported]
+      p [no non-conformances found with this disposition and NCR type(s)]
 
+    .vert-space-x2
       hr
 
   .vert-space-x2
-    .entry_otherNCRs_header 
-      .form_otherNCRs_header(data-record = [])
+    .header_ncr 
+      .form_header_ncr(data-record = 'Use As Is (Other NCR Types)')
 
-    if (collatedInfo.apaNCRs_other.length > 0) || (collatedInfo.meshPanelNCRs.length > 0)
-      if collatedInfo.apaNCRs_other.length > 0
-        each ncrInfo, index in collatedInfo.apaNCRs_other
-          .entry_otherNCRs.vert-space-x1
-            .form_otherNCRs(data-record = [ncrInfo])
-
-          hr
-
-      if collatedInfo.meshPanelNCRs.length > 0
-        each ncrInfo, index in collatedInfo.meshPanelNCRs
-          .entry_otherNCRs.vert-space-x1
-            .form_otherNCRs(data-record = [ncrInfo])
-
-          hr
+    if collatedInfo.ncrs_useAsIs_noWires.length > 0
+      each ncrInfo, ncrIndex in collatedInfo.ncrs_useAsIs_noWires
+        .vert-space-x1 
+          .entry_ncr
+            .form_entry_ncr(data-record = ncrInfo)
     else 
-      p [no other non-conformances reported]
+      p [no non-conformances found with this disposition and NCR type(s)]
 
+    .vert-space-x2
+      hr
+
+  .vert-space-x2
+    .header_ncr 
+      .form_header_ncr(data-record = 'Rework')
+
+    if collatedInfo.ncrs_rework.length > 0
+      each ncrInfo, ncrIndex in collatedInfo.ncrs_rework
+        .vert-space-x1 
+          .entry_ncr
+            .form_entry_ncr(data-record = ncrInfo)
+    else 
+      p [no non-conformances found with this disposition]
+
+    .vert-space-x2
+      hr
+
+  .vert-space-x2
+    .header_ncr 
+      .form_header_ncr(data-record = 'Repair')
+
+    if collatedInfo.ncrs_repair.length > 0
+      each ncrInfo, ncrIndex in collatedInfo.ncrs_repair
+        .vert-space-x1 
+          .entry_ncr
+            .form_entry_ncr(data-record = ncrInfo)
+    else 
+      p [no non-conformances found with this disposition]
+
+    .vert-space-x2
       hr

@@ -51,7 +51,7 @@ block allbody
 
         .col-sm-5
           #qr-code
-            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, `${component.data.componentName}`)
+            +qr-panel-noLabel(`${base_url}/c/${component.shortUuid.toString()}`)
 
       .vert-space-x1
         dl

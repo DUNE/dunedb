@@ -165,6 +165,7 @@ module.exports = {
   // Winding D-band personnel (winding-related APA Assembly workflow actions)
   dictionary_dBandWinding: {
     daveBrown: 'Dave Brown',
+    markFarrell: 'Mark Farrell',
     lewisGannon: 'Lewis Gannon',
     darrenKaye: 'Darren Kaye',
     andrewKelly: 'Andrew Kelly',

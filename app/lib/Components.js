@@ -356,22 +356,19 @@ async function updateLocation(componentUuid, location, date, detail) {
 
     match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
-    // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in the component record, and throw an error if the edit fails
+    // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in ALL matching component records (i.e. all versions of the component), and throw an error if the edit fails
     const result = await db.collection('components')
-      .findOneAndUpdate(
+      .updateMany(
         match_condition,
-        {
-          $set: {
-            'reception.location': location,
-            'reception.date': date,
-            'reception.detail': detail,
-          }
-        },
-        {
-          sort: { 'validity.version': -1 },
-          returnNewDocument: true,
-          includeResultMetadata: true,
-        },
+        [
+          {
+            $set: {
+              'reception.location': location,
+              'reception.date': date,
+              'reception.detail': detail,
+            }
+          },
+        ]
       );
 
     if (result.ok === 0) throw new Error(`Components::updateLocation() - failed to update the component record!`);
@@ -553,8 +550,8 @@ async function list(match_condition, options) {
     },
   });
 
-  // Re-sort the records ... by (alphanumerical) component name for APA frames and assembled APAs, or by last edit date (most recent first) for other component types
-  if ((match_condition) && (match_condition.formId) && ((match_condition.formId === 'APAFrame') || (match_condition.formId === 'AssembledAPA'))) {
+  // Re-sort the records ... by (alphanumerical) component name for APA Frames, ASFs and Assembled APAs, or by last edit date (most recent first) for other component types
+  if ((match_condition) && (match_condition.formId) && (['APAFrame', 'APAShippingFrame', 'AssembledAPA'].includes(match_condition.formId))) {
     aggregation_stages.push({ $sort: { componentName: -1 } });
   } else {
     aggregation_stages.push({ $sort: { lastEditDate: -1 } });
