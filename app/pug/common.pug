@@ -24,14 +24,15 @@ mixin dateFormat(date)
 mixin arrayFormat(array)
   span #{JSON.stringify(array).replace(/["\[\]]/g, '').replace(/,/g, ', ')}
 
-mixin qr-panel-noText(text, desc)
+mixin qr-panel-noLabel(url)
   .qr&attributes(attributes)
     .canvas-holder
-      canvas.qr-code(data-QR-text = text, data-QR-desc = desc)
+      canvas.qr-code(data-QR-text = url)
 
-mixin qr-panel-topText(text, desc)
+mixin qr-panel-topLabel(url, labelLine1, labelLine2)
   .qr&attributes(attributes)
     .qr-label.qr-label-top
-      div=desc
+      div=labelLine1 
+      div=labelLine2
     .canvas-holder
-      canvas.qr-code(data-QR-text = text, data-QR-desc = desc)      
+      canvas.qr-code(data-QR-text = url)

@@ -637,10 +637,7 @@ router.get('/component/:uuid/execSummary', permissions.checkPermission('componen
     let collatedInfo = await Components_ExecSummary.collateInfo(req.params.uuid);
 
     // Render the interface page
-    res.render('component_execSummary.pug', {
-      component,
-      collatedInfo,
-    });
+    res.render('component_execSummary.pug', { collatedInfo });
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
@@ -871,7 +868,7 @@ router.get('/components/bulkQRCodes/:typeFormId/:firstNumber/:lastNumber', permi
     for (let typeRecordNumber = parseInt(req.params.firstNumber, 10); typeRecordNumber <= parseInt(req.params.lastNumber, 10); typeRecordNumber++) {
       const componentsList = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, typeRecordNumber);
 
-      for (const componentRecord of componentsList) { shortUUIDs.push([componentRecord.componentName, componentRecord.shortUuid]); }
+      for (const componentRecord of componentsList) { shortUUIDs.push([componentRecord.componentName, componentRecord.componentUuid, componentRecord.shortUuid]); }
     }
 
     // Render the interface page

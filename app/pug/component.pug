@@ -146,7 +146,7 @@ block content
 
         .col-sm-3
           #qr-code
-            +qr-panel-noText(`${base_url}/c/${component.shortUuid.toString()}`, component.data.componentName)
+            +qr-panel-noLabel(`${base_url}/c/${component.shortUuid.toString()}`)
 
           p.small.text-center #{base_url}/c/#{component.shortUuid.toString()}
 
