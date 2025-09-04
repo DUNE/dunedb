@@ -6,21 +6,21 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
   const meshInstall_link = (framePreparation.meshInstall_actionID !== '' ? `<a href = '/action/${framePreparation.meshInstall_actionID}' > Mesh Panel Installation </a>` : `[Mesh Panel Installation not found]`);
   const rtdInstall_link = (framePreparation.rtdInstall_actionID !== '' ? `<a href = '/action/${framePreparation.rtdInstall_actionID}' > PD & RTD Installation </a>` : `[PD & RTD Installation not found]`);
 
-  const xWinding_link = (x.winding_actionID !== '' ? `<a href = '/action/${x.winding_actionID}' > Winding </a>` : `[Winding not found]`);
-  const xSoldering_link = (x.soldering_actionID !== '' ? `<a href = '/action/${x.soldering_actionID}' > Soldering </a>` : `[Soldering not found]`);
-  const xTensions_link = (x.tensions_actionID !== '' ? `<a href = '/action/${x.tensions_actionID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+  const xWinding_link = (x.winding_actionID !== '' ? `<a href = '/action/${x.winding_actionID}' > X Winding </a>` : `[Winding not found]`);
+  const xSoldering_link = (x.soldering_actionID !== '' ? `<a href = '/action/${x.soldering_actionID}' > X Soldering </a>` : `[Soldering not found]`);
+  const xTensions_link = (x.tensions_actionID !== '' ? `<a href = '/action/${x.tensions_actionID}' > X Tension Measurements </a>` : `[Tension Measurements not found]`);
 
-  const vWinding_link = (v.winding_actionID !== '' ? `<a href = '/action/${v.winding_actionID}' > Winding </a>` : `[Winding not found]`);
-  const vSoldering_link = (v.soldering_actionID !== '' ? `<a href = '/action/${v.soldering_actionID}' > Soldering </a>` : `[Soldering not found]`);
-  const vTensions_link = (v.tensions_actionID !== '' ? `<a href = '/action/${v.tensions_actionID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+  const vWinding_link = (v.winding_actionID !== '' ? `<a href = '/action/${v.winding_actionID}' > V Winding </a>` : `[Winding not found]`);
+  const vSoldering_link = (v.soldering_actionID !== '' ? `<a href = '/action/${v.soldering_actionID}' > V Soldering </a>` : `[Soldering not found]`);
+  const vTensions_link = (v.tensions_actionID !== '' ? `<a href = '/action/${v.tensions_actionID}' > V Tension Measurements </a>` : `[Tension Measurements not found]`);
 
-  const uWinding_link = (u.winding_actionID !== '' ? `<a href = '/action/${u.winding_actionID}' > Winding </a>` : `[Winding not found]`);
-  const uSoldering_link = (u.soldering_actionID !== '' ? `<a href = '/action/${u.soldering_actionID}' > Soldering </a>` : `[Soldering not found]`);
-  const uTensions_link = (u.tensions_actionID !== '' ? `<a href = '/action/${u.tensions_actionID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+  const uWinding_link = (u.winding_actionID !== '' ? `<a href = '/action/${u.winding_actionID}' > U Winding </a>` : `[Winding not found]`);
+  const uSoldering_link = (u.soldering_actionID !== '' ? `<a href = '/action/${u.soldering_actionID}' > U Soldering </a>` : `[Soldering not found]`);
+  const uTensions_link = (u.tensions_actionID !== '' ? `<a href = '/action/${u.tensions_actionID}' > U Tension Measurements </a>` : `[Tension Measurements not found]`);
 
-  const gWinding_link = (g.winding_actionID !== '' ? `<a href = '/action/${g.winding_actionID}' > Winding </a>` : `[Winding not found]`);
-  const gSoldering_link = (g.soldering_actionID !== '' ? `<a href = '/action/${g.soldering_actionID}' > Soldering </a>` : `[Soldering not found]`);
-  const gTensions_link = (g.tensions_actionID !== '' ? `<a href = '/action/${g.tensions_actionID}' > Tension Measurements </a>` : `[Tension Measurements not found]`);
+  const gWinding_link = (g.winding_actionID !== '' ? `<a href = '/action/${g.winding_actionID}' > G Winding </a>` : `[Winding not found]`);
+  const gSoldering_link = (g.soldering_actionID !== '' ? `<a href = '/action/${g.soldering_actionID}' > G Soldering </a>` : `[Soldering not found]`);
+  const gTensions_link = (g.tensions_actionID !== '' ? `<a href = '/action/${g.tensions_actionID}' > G Tension Measurements </a>` : `[Tension Measurements not found]`);
 
   const panelInstall_link = (postProduction.panelInstall_actionID !== '' ? `<a href = '/action/${postProduction.panelInstall_actionID}' > Protection Panels </a>` : `[Protection Panels not found]`);
   const conduitInstall_link = (postProduction.conduitInstall_actionID !== '' ? `<a href = '/action/${postProduction.conduitInstall_actionID}' > Cable Conduits </a>` : `[Cable Conduits not found]`);
@@ -1730,11 +1730,13 @@ function SetEntry_wireLayer(layer, layerInfo) {
 }
 
 // Set up the schema for a single NCR section header
-function SetHeader_ncrsWithDisposition(disposition) {
+function SetHeader_ncrsWithDisposition(disposition, count) {
+  const plural = (count === 1) ? '' : 's';
+
   const schema_ncrs_header = {
     "components": [
       {
-        "html": `<h4><strong>Non-Conformances with Disposition: ${disposition}</strong></h4>`,
+        "html": `<h4><strong>${count} Non-Conformance${plural} with Disposition: ${disposition}</strong></h4>`,
         "label": "Content",
         "refreshOnChange": false,
         "key": "content",
@@ -2037,7 +2039,7 @@ async function populateExecutiveSummary() {
   $('div.header_ncr').each(function () {
     const form_header_ncr = $('.form_header_ncr', this);
     const disposition = form_header_ncr.data('record');
-    const schema_header_ncr = SetHeader_ncrsWithDisposition(disposition);
+    const schema_header_ncr = SetHeader_ncrsWithDisposition(disposition[0], disposition[1]);
 
     Formio.createForm(form_header_ncr[0], schema_header_ncr, { readOnly: true, });
   })
