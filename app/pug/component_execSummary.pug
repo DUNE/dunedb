@@ -96,7 +96,7 @@ block allbody
 
   .vert-space-x2
     .header_ncr 
-      .form_header_ncr(data-record = 'Use As Is (Missing or Shorted Wires)')
+      .form_header_ncr(data-record = ['Use As Is (Missing or Shorted Wires)', collatedInfo.ncrs_useAsIs_withWires.length])
 
     if collatedInfo.ncrs_useAsIs_withWires.length > 0
       each ncrInfo, ncrIndex in collatedInfo.ncrs_useAsIs_withWires
@@ -107,53 +107,45 @@ block allbody
             each wireInfo, wireIndex in ncrInfo.missingShortedWires
               .entry_ncrWire
                 .form_entry_ncrWire(data-record = wireInfo)
-    else 
-      p [no non-conformances found with this disposition and NCR type(s)]
 
     .vert-space-x2
       hr
 
   .vert-space-x2
     .header_ncr 
-      .form_header_ncr(data-record = 'Use As Is (Other NCR Types)')
+      .form_header_ncr(data-record = ['Use As Is (Other NCR Types)', collatedInfo.ncrs_useAsIs_noWires.length])
 
     if collatedInfo.ncrs_useAsIs_noWires.length > 0
       each ncrInfo, ncrIndex in collatedInfo.ncrs_useAsIs_noWires
         .vert-space-x1 
           .entry_ncr
             .form_entry_ncr(data-record = ncrInfo)
-    else 
-      p [no non-conformances found with this disposition and NCR type(s)]
 
     .vert-space-x2
       hr
 
   .vert-space-x2
     .header_ncr 
-      .form_header_ncr(data-record = 'Rework')
+      .form_header_ncr(data-record = ['Rework', collatedInfo.ncrs_rework.length])
 
     if collatedInfo.ncrs_rework.length > 0
       each ncrInfo, ncrIndex in collatedInfo.ncrs_rework
         .vert-space-x1 
           .entry_ncr
             .form_entry_ncr(data-record = ncrInfo)
-    else 
-      p [no non-conformances found with this disposition]
 
     .vert-space-x2
       hr
 
   .vert-space-x2
     .header_ncr 
-      .form_header_ncr(data-record = 'Repair')
+      .form_header_ncr(data-record = ['Repair', collatedInfo.ncrs_repair.length])
 
     if collatedInfo.ncrs_repair.length > 0
       each ncrInfo, ncrIndex in collatedInfo.ncrs_repair
         .vert-space-x1 
           .entry_ncr
             .form_entry_ncr(data-record = ncrInfo)
-    else 
-      p [no non-conformances found with this disposition]
 
     .vert-space-x2
       hr

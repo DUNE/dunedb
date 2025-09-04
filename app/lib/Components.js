@@ -70,7 +70,7 @@ async function save(input, req) {
   newRecord.validity.ancestor_id = input._id;
 
   // If saving a new component record, certain objects and fields need to be set up and populated
-  // If editing an existing component records, this same information will either already exist (from being included when the 'input.data' object was copied over above) or can be directly copied
+  // If editing an existing component record, this same information will either already exist (from being included when the 'input.data' object was copied over above) or can be directly copied
   if (oldRecord === null) {
     // Get a list of the current component count per type across all existing component types, and then get the count of existing components of the same type as this one
     // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
@@ -221,17 +221,7 @@ async function save(input, req) {
       newRecord.reception.location = '';
     }
   } else {
-    // For some unknown reason, sometimes the entire 'reception' object can be set to 'null' when editing a component (seems to happen rarely, and only with 'Board Shipment' components) ...
-    // ... if this does happen, just reconstruct the 'reception' object and its fields - giving them some default values (the actual values for shipment-type components are assigned below anyway)
-    // If this is not the case, i.e. the existing 'reception' object contains some information, simply copy it over to the new record
-    if (input.reception === null) {
-      newRecord.reception = {};
-      newRecord.reception.location = '';
-      newRecord.reception.date = (new Date()).toISOString().slice(0, 10);
-      newRecord.reception.detail = '';
-    } else {
-      newRecord.reception = input.reception;
-    }
+    newRecord.reception = input.reception;
   }
 
   // If the component name is based on fields that are more likely to be changed by the user, it should be assigned and re-assigned any time the record is edited
@@ -346,7 +336,11 @@ async function updateLocation(componentUuid, location, date, detail) {
 
   // First retrieve the component's record, then check for the current location, and only proceed to change the reception information if we are NOT in one of the situations described above
   const component = await retrieve(componentUuid);
-  const currentLocation = component.reception.location;
+  let currentLocation = 'null object';
+
+  if (component.reception != null) {
+    currentLocation = component.reception.location;
+  }
 
   if (currentLocation !== 'installed_on_APA') {
     // Set up the DB query match condition to be that a record's component UUID must match the specified one

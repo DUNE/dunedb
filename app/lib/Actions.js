@@ -8,6 +8,7 @@ const dbLock = require('./dbLock');
 const Forms = require('./Forms');
 const permissions = require('./permissions');
 const utils = require('./utils');
+const logger = require('./logger');
 
 // Declare a list of the available 'shipment transport' related action type forms
 // NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
@@ -353,10 +354,8 @@ async function list(match_condition, options) {
   // Re-sort the records by last edit date ... most recent first
   aggregation_stages.push({ $sort: { lastEditDate: -1 } });
 
-  // Add aggregation stages for any additionally specified options
-  if (options) {
-    if (options.limit) aggregation_stages.push({ $limit: options.limit });
-  }
+  // Limit the number of returned records to something reasonable ... this will be further reduced later on, but only after the optional filter on component type form ID has been applied if needed
+  aggregation_stages.push({ $limit: 1000 });
 
   // Query the 'actions' records collection using the aggregation stages defined above
   let records = await db.collection('actions')
@@ -365,6 +364,10 @@ async function list(match_condition, options) {
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
   // Then add the corresponding component name to each matching record
+  // Finally, apply the optional filter on the component type form ID if it is needed - if the action passes the filter, save it into a new list of matching and filtered records ...
+  // ... or if the optional filter is not needed, simply save all matching records into the list of matching and filtered records
+  let filteredRecords = [];
+
   for (let record of records) {
     const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
 
@@ -373,10 +376,22 @@ async function list(match_condition, options) {
     } else {
       record.componentName = component.data.componentName;
     }
+
+    if (options) {
+      if (options.componentTypeFormId) {
+        if (component.formId === options.componentTypeFormId) {
+          filteredRecords.push(record);
+        }
+      } else {
+        filteredRecords.push(record);
+      }
+    } else {
+      filteredRecords.push(record);
+    }
   }
 
-  // Return the entire list of matching records
-  return records;
+  // Return a limited slice of the matching (and possibly filtered) records
+  return filteredRecords.slice(0, 200);
 }
 
 

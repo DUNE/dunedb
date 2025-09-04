@@ -65,8 +65,29 @@ block content
 
                   if typeFormTags && !typeFormTags.includes('Trash')
                     tr
-                      td.col-md-4
-                        a(href = `/actions/${typeFormId}/list`) #{typeFormName}
+                      if typeFormId === 'APANonConformance' || typeFormId === 'PopulatedBoardQC'
+                        - let componentTypeFormId = null;
+
+                        if actionFormsGroup._id.componentType === 'Assembled APA'
+                          - componentTypeFormId = 'AssembledAPA';
+                        else if actionFormsGroup._id.componentType === 'CE Adapter Board'
+                          - componentTypeFormId = 'CEAdapterBoard'
+                        else if actionFormsGroup._id.componentType === 'CR Board'
+                          - componentTypeFormId = 'CRBoard'
+                        else if actionFormsGroup._id.componentType === 'Cable Harness'
+                          - componentTypeFormId = 'CableHarness'
+                        else if actionFormsGroup._id.componentType === 'G-Bias Board'
+                          - componentTypeFormId = 'GBiasBoard'
+                        else if actionFormsGroup._id.componentType === 'Grounding Mesh Panel'
+                          - componentTypeFormId = 'GroundingMeshPanel';
+                        else if actionFormsGroup._id.componentType === 'SHV Board'
+                          - componentTypeFormId = 'SHVBoard'
+
+                        td.col-md-4
+                          a(href = `/actions/${typeFormId}/list?componentTypeFormId=${componentTypeFormId}`) #{typeFormName}
+                      else
+                        td.col-md-4
+                          a(href = `/actions/${typeFormId}/list`) #{typeFormName}
                       td.col-md-2
                         if workflowAction
                           a.btn-sm.btn-secondary.disabled(href = '')
