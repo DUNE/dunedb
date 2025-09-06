@@ -405,19 +405,27 @@ async function updateLocations_inShipment(componentUuid, location, date) {
   } else if (shipment.formId === 'PopulatedBoardShipment') {
     // Extract the UUID and update the location information of each shipment in a multi-type populated board shipment
     for (const crBoardShipment of shipment.data.crBoardKitUuiDs) {
-      const result = await updateLocations_inShipment(crBoardShipment.component_uuid, location, date);
+      if (crBoardShipment.component_uuid !== '') {
+        const result = await updateLocations_inShipment(crBoardShipment.component_uuid, location, date);
+      }
     }
 
     for (const gBiasBoardShipment of shipment.data.gBiasBoardKitUuiDs) {
-      const result = await updateLocations_inShipment(gBiasBoardShipment.component_uuid, location, date);
+      if (gBiasBoardShipment.component_uuid !== '') {
+        const result = await updateLocations_inShipment(gBiasBoardShipment.component_uuid, location, date);
+      }
     }
 
     for (const shvBoardShipment of shipment.data.shvBoardKitUuiDs) {
-      const result = await updateLocations_inShipment(shvBoardShipment.component_uuid, location, date);
+      if (shvBoardShipment.component_uuid !== '') {
+        const result = await updateLocations_inShipment(shvBoardShipment.component_uuid, location, date);
+      }
     }
 
     for (const cableHarnessShipment of shipment.data.cableHarnessKitUuiDs) {
-      const result = await updateLocations_inShipment(cableHarnessShipment.component_uuid, location, date);
+      if (cableHarnessShipment.component_uuid !== '') {
+        const result = await updateLocations_inShipment(cableHarnessShipment.component_uuid, location, date);
+      }
     }
   }
 
