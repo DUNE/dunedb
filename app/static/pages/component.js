@@ -5,12 +5,17 @@ window.addEventListener('load', populateTypeForm);
 // Function to run when the page is loaded
 async function populateTypeForm() {
   if (component.formId !== 'ReturnedGeometryBoardBatch') {
-    // Render the component type form in the page element called 'typeform'
-    let typeForm = await Formio.createForm(document.getElementById('typeform'), componentTypeForm.schema, { readOnly: true, });
+    if (component.formId === 'PopulatedBoardShipment') {
+      // Fill the value of the 'comments' page element (defined as a Bootstrap text area in the .pug file) from the component record
+      $('#comments').val(component.data.comments);
+    } else {
+      // Render the component type form in the page element called 'typeform'
+      let typeForm = await Formio.createForm(document.getElementById('typeform'), componentTypeForm.schema, { readOnly: true, });
 
-    // Populate the type form with data from the component record and disable the submission functionality (since the form is only to be displayed, not used)
-    typeForm.submission = component;
-    typeForm.nosubmit = true;
+      // Populate the type form with data from the component record and disable the submission functionality (since the form is only to be displayed, not used)
+      typeForm.submission = component;
+      typeForm.nosubmit = true;
+    }
   } else {
     {
       const reducedComponentTypeForm_schema = {
