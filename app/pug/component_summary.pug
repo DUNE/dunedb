@@ -156,13 +156,13 @@ block allbody
           dt Destination Location
           dd #{dictionary_locations[component.data.destinationOfShipment]}
 
-          dt Single-Type Shipments in Multi-Type Shipment
+          dt Single-Type Shipments / Kits in Multi-Type Shipment
           dd
             table.table 
               thead 
                 tr 
-                  th.col-sm-1 UUID 
-                  th.col-sm-2 Type
+                  th.col-sm-2 UUID 
+                  th.col-sm-2 Shipment / Kit Name
 
               tbody 
                 each info in collectionDetails
