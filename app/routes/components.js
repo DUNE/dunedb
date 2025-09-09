@@ -150,102 +150,84 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
 
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const boardRecord = await Components.retrieve(uuid);
-
-          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.data.partNumber, boardRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber, componentRecord.shortUuid]);
         }
       }
     }
 
     if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const boardRecord = await Components.retrieve(uuid);
-
-          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.formName, boardRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
     }
 
     if (component.formId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const dwaRecord = await Components.retrieve(uuid);
-
-          if (dwaRecord) collectionDetails.push([uuid, dwaRecord.data.typeRecordNumber, dwaRecord.formName, dwaRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
         }
       }
     }
 
     if (component.formId === 'GroundingMeshShipment') {
       for (const info of component.data.apaUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const meshRecord = await Components.retrieve(uuid);
-
-          if (meshRecord) collectionDetails.push([uuid, meshRecord.data.typeRecordNumber, meshRecord.data.meshPanelPartNumber, meshRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.meshPanelPartNumber, componentRecord.shortUuid]);
         }
       }
     }
 
     if (component.formId === 'PopulatedBoardShipment') {
       for (const info of component.data.crBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName, componentRecord.shortUuid]);
         }
       }
 
       for (const info of component.data.gBiasBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName, componentRecord.shortUuid]);
         }
       }
 
       for (const info of component.data.shvBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName, componentRecord.shortUuid]);
         }
       }
 
       for (const info of component.data.cableHarnessKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName, componentRecord.shortUuid]);
         }
       }
     }
 
     if (component.formId === 'ReturnedGeometryBoardBatch') {
       for (const info of component.data.boardUuids) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const boardRecord = await Components.retrieve(uuid);
-
-          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.shortUuid]);
         }
       }
     }
@@ -360,78 +342,64 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
 
     if ((component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const boardRecord = await Components.retrieve(uuid);
-
-          if (boardRecord) shortUUIDs.push([boardRecord.data.typeRecordNumber, boardRecord.shortUuid, boardRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
     }
 
     if (component.formId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const dwaRecord = await Components.retrieve(uuid);
-
-          if (dwaRecord) shortUUIDs.push([dwaRecord.data.typeRecordNumber, dwaRecord.shortUuid, dwaRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
     }
 
     if (component.formId === 'GroundingMeshShipment') {
       for (const info of component.data.apaUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const meshRecord = await Components.retrieve(uuid);
-
-          if (meshRecord) shortUUIDs.push([meshRecord.data.typeRecordNumber, meshRecord.shortUuid, meshRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
     }
 
     if (component.formId === 'PopulatedBoardShipment') {
       for (const info of component.data.crBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) shortUUIDs.push([componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
 
       for (const info of component.data.gBiasBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) shortUUIDs.push([componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
 
       for (const info of component.data.shvBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) shortUUIDs.push([componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
 
       for (const info of component.data.cableHarnessKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) shortUUIDs.push([componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
     }
@@ -441,7 +409,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
 
-          if (componentRecord) shortUUIDs.push([componentRecord.data.typeRecordNumber, componentRecord.shortUuid, componentRecord.formName]);
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
       }
     }
@@ -518,90 +486,74 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
 
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const boardRecord = await Components.retrieve(uuid);
-
-          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.data.partNumber]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber]);
         }
       }
     }
 
     if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const boardRecord = await Components.retrieve(uuid);
-
-          if (boardRecord) collectionDetails.push([uuid, boardRecord.data.typeRecordNumber, boardRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
         }
       }
     }
 
     if (component.formId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const dwaRecord = await Components.retrieve(uuid);
-
-          if (dwaRecord) collectionDetails.push([uuid, dwaRecord.data.typeRecordNumber, dwaRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
         }
       }
     }
 
     if (component.formId === 'GroundingMeshShipment') {
       for (const info of component.data.apaUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const meshRecord = await Components.retrieve(uuid);
-
-          if (meshRecord) collectionDetails.push([uuid, meshRecord.data.typeRecordNumber, meshRecord.data.meshPanelPartNumber]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.meshPanelPartNumber]);
         }
       }
     }
 
     if (component.formId === 'PopulatedBoardShipment') {
       for (const info of component.data.crBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName]);
         }
       }
 
       for (const info of component.data.gBiasBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName]);
         }
       }
 
       for (const info of component.data.shvBoardKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName]);
         }
       }
 
       for (const info of component.data.cableHarnessKitUuiDs) {
-        let uuid = info.component_uuid;
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
-        if (uuid !== '') {
-          const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) collectionDetails.push([uuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName]);
         }
       }
     }

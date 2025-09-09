@@ -40,7 +40,7 @@ block content
                 .hori-space-x1
                   a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
 
-            
+
             if component.reception && component.reception.location !== ''
               dt Current Location:
 
@@ -289,7 +289,7 @@ block content
             thead 
               tr 
                 th.col-md-2 UUID 
-                th.col-md-2 Type
+                th.col-md-2 Shipment / Kit Name
                 th.col-md-3 QR Code Link 
 
             tbody 
@@ -304,6 +304,11 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
+
+        .vert-space-x1 
+          dt Comments 
+          dd 
+            textarea.form-control#comments(rows = 5)
     else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
       if component.formId === 'GeometryBoardBatch'
         .vert-space-x1.border-success.border.rounded.p-2
