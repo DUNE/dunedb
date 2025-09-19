@@ -175,6 +175,8 @@ module.exports = {
 
   // Post-Production D-band personnel (post-winding APA Assembly workflow actions and all APA Post Production workflow actions)
   dictionary_dBandPostProduction: {
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
     danielSalisbury: 'Daniel Salisbury',
     jasonThornhill: 'Jason Thornhill',
   },
@@ -202,6 +204,12 @@ module.exports = {
     alexandreAcerraGil: 'Alexandre Acerra Gil',
     olgaBeltramello: 'Olga Beltramello',
     denisDiyakov: 'Denis Diyakov',
+  },
+
+  // Personnel who are authorised to signoff on APA shipment reception ('APA Shipment Reception' APA Post Production workflow actions)
+  dictionary_apaShipmentReceptionSignoff: {
+    alexandreAcerraGil: 'Alexandre Acerra Gil',
+    brianRebel: 'Brian Rebel',
   },
 
   // Lead personnel at the UK and US APA factories (top-level signoffs in various APA Assembly and APA Post Production workflow actions)
