@@ -193,6 +193,17 @@ router.get(['/json/cernComplianceOffice.json', '/api/cernComplianceOffice.json']
 });
 
 
+/// List personnel who are authorised to signoff on APA shipment reception
+router.get(['/json/apaShipmentReceptionSignoff.json', '/api/apaShipmentReceptionSignoff.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_apaShipmentReceptionSignoff));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// List lead personnel at the UK and US APA factories
 router.get(['/json/apaFactoryLeads.json', '/api/apaFactoryLeads.json'], async function (req, res, next) {
   try {

@@ -204,6 +204,12 @@ module.exports = {
     denisDiyakov: 'Denis Diyakov',
   },
 
+  // Personnel who are authorised to signoff on APA shipment reception ('APA Shipment Reception' APA Post Production workflow actions)
+  dictionary_apaShipmentReceptionSignoff: {
+    alexandreAcerraGil: 'Alexandre Acerra Gil',
+    brianRebel: 'Brian Rebel',
+  },
+
   // Lead personnel at the UK and US APA factories (top-level signoffs in various APA Assembly and APA Post Production workflow actions)
   dictionary_apaFactoryLeads: {
     edBlucher: 'Ed Blucher',
