@@ -175,6 +175,8 @@ module.exports = {
 
   // Post-Production D-band personnel (post-winding APA Assembly workflow actions and all APA Post Production workflow actions)
   dictionary_dBandPostProduction: {
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
     danielSalisbury: 'Daniel Salisbury',
     jasonThornhill: 'Jason Thornhill',
   },
