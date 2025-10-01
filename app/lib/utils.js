@@ -22,6 +22,7 @@ module.exports = {
     chicago: 'Chicago',
     cincinnati: 'Cincinnati',
     daresbury: 'Daresbury Factory',
+    dsm: 'Durham Sheet Metal',
     fermilab: 'Fermilab',
     harvard: 'Harvard',
     in_transit: 'In Transit',
