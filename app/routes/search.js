@@ -164,6 +164,24 @@ router.get(['/json/search/boardShipmentsByReceptionDetails', '/api/search/boardS
 });
 
 
+/// Search for geometry board shipments that reference a single component, specified by its UUID (query to server-side)
+router.get(['/json/search/boardShipmentsByBoardUUID/:uuid', '/api/search/boardShipmentsByBoardUUID/:uuid'], async function (req, res, next) {
+  try {
+    // Retrieve a list of geometry boards shipments that reference the specified component UUID
+    const shipments = await Search_OtherComponents.boardShipmentsByBoardUUID(req.params.uuid);
+
+    // Sort the shipments by increasing 'lastEditDate', i.e. the most recent shipment will be first in the list
+    shipments.sort(utils.byField_decreasing('lastEditDate'));
+
+    // Return the list in JSON format
+    return res.status(200).json(shipments);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// Search for assembled APAs by production details - either location and number, or last completed assembly step (client-side interface)
 router.get('/search/apasByProductionDetails', async function (req, res, next) {
   // Render the interface page
