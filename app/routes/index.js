@@ -110,6 +110,7 @@ module.exports = routes;
   /json/search/geoBoardsByOrderNumber/:orderNumber
   /search/boardShipmentsByReceptionDetails
   /json/search/boardShipmentsByReceptionDetails
+  /json/search/boardShipmentsByBoardUUID
   /search/apasByProductionDetails
   /json/search/apasByProductionLocationAndNumber/:apaLocation/:apaNumber
   /json/search/apasByProductionLocationAndAssemblyStep/:apaLocation/:assemblyStep
