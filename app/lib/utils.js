@@ -145,8 +145,10 @@ module.exports = {
 
   // Frame Prep D-band personnel (prep-related APA Assembly workflow actions and 'Final Inspection' Grounding Mesh Panel actions)
   dictionary_dBandFramePrep: {
+    edBlucher: 'Ed Blucher',
     wayneGreen: 'Wayne Green',
     nicholasHays: 'Nicholas Hays',
+    albertoMarchionni: 'Alberto Marchionni',
     grahamMitchell: 'Graham Mitchell',
     danielSalisbury: 'Daniel Salisbury',
     kimWilliams: 'Kim Williams',
@@ -165,11 +167,13 @@ module.exports = {
 
   // Winding D-band personnel (winding-related APA Assembly workflow actions)
   dictionary_dBandWinding: {
+    edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
     markFarrell: 'Mark Farrell',
     lewisGannon: 'Lewis Gannon',
     darrenKaye: 'Darren Kaye',
     andrewKelly: 'Andrew Kelly',
+    albertoMarchionni: 'Alberto Marchionni',
     danielSalisbury: 'Daniel Salisbury',
     stephenSumner: 'Stephen Sumner',
   },
@@ -182,15 +186,7 @@ module.exports = {
     jasonThornhill: 'Jason Thornhill',
   },
 
-
-  // Geometry board metrology technicians at Manchester ('Geometry Board Metrology' Geometry Board actions)
-  dictionary_manchesterTechnicians: {
-    hamzaNaseer: 'Hamza Naseer',
-    taabishAhmed: 'Taabish Ahmed',
-    jakeDeMaine: 'Jake De Maine',
-  },
-
-  // Yoke load test technicians at UW [not currently used, but will be in the future]
+  // Yoke load test technicians at UW [not currently used, but keep for the future]
   dictionary_uwTechnicians: {
 
   },
