@@ -238,6 +238,8 @@ router.get(['/json/search/actionsByReferencedUUID/:uuid/:actionType', '/api/sear
       actions = await Search_ActionsWorkflows.boardInstallByReferencedComponent(req.params.uuid);
     } else if (req.params.actionType === 'winding') {
       actions = await Search_ActionsWorkflows.windingByReferencedComponent(req.params.uuid);
+    } else if (req.params.actionType === 'FactoryBoardRejection') {
+      actions = await Search_ActionsWorkflows.boardRejectionByReferencedComponent(req.params.uuid);
     }
 
     // Return the list in JSON format
