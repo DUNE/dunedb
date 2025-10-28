@@ -205,9 +205,7 @@ async function boardInstallByReferencedComponent(componentUUID) {
   // Match against the type form ID to get records of all 'Board Installation' actions
   aggregation_stages.push({
     $match: {
-      'typeFormId': {
-        $in: ['x_boards', 'v_boards', 'u_boards', 'g_boards']
-      },
+      'typeFormId': { $in: ['x_boards', 'v_boards', 'u_boards', 'g_boards'] },
     }
   });
 
@@ -324,6 +322,46 @@ async function windingByReferencedComponent(componentUUID) {
 }
 
 
+/// Retrieve a list of board rejection actions that reference a single component, specified by its UUID
+async function boardRejectionByReferencedComponent(componentUUID) {
+  let aggregation_stages = [];
+
+  // Match against the type form ID and component UUID to get records of all 'Factory Board Rejection'actions performed on the specified component
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': 'FactoryBoardRejection',
+      'componentUuid': MUUID.from(componentUUID),
+    }
+  });
+
+  // Select the latest version of each record, and pass through only the fields required for later use
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
+      typeFormName: { '$first': '$typeFormName' },
+      componentUuid: { '$first': '$componentUuid' },
+      data: { '$first': '$data' },
+    },
+  });
+
+  // Query the 'actions' records collection using the aggregation stages defined above
+  let results = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Add the corresponding component name to each matching record
+  for (let record of results) {
+    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
+    record.componentName = component.data.componentName;
+  }
+
+  // Return the list of matching actions
+  return results;
+}
+
+
 /// Retrieve wire tension measurements that have been performed on a specified wire layer of a specified Assembled APA at two specified locations
 async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin, destination) {
   let aggregation_stages = [];
@@ -405,5 +443,6 @@ module.exports = {
   nonConformanceByUUID,
   boardInstallByReferencedComponent,
   windingByReferencedComponent,
+  boardRejectionByReferencedComponent,
   tensionComparisonAcrossLocations,
 }
