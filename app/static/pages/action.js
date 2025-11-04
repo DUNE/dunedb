@@ -62,25 +62,38 @@ function DownloadChangedTensions(retensionedWires) {
 
 // When one or more images is selected, display their name(s) in the space between the selection and confirmation buttons
 // Also change the colour and text of the confirmation button to indicate that at least one image has been selected
-function DisplayFileNames(element) {
+function DisplayFileNames(element, imageType) {
   const files = Array.from(element.files);
   let fileNames = files.map(f => { return f.name }).join(' ] , [ ');
   fileNames = '[ ' + fileNames + ' ]';
 
-  $('#image-filenames').text(fileNames);
-
-  document.getElementById('confirm-upload').style.backgroundColor = 'green';
+  if (imageType === 'shocklogger') {
+    $('#plots-filename').text(fileNames);
+    document.getElementById('confirm-plots').style.backgroundColor = 'green';
+  } else if (imageType === 'general') {
+    $('#image-filenames').text(fileNames);
+    document.getElementById('confirm-images').style.backgroundColor = 'green';
+  }
 };
 
 
-// When the 'Confirm Upload' button is pressed, read in any selected images, convert them to base64-encoded strings, and store the strings in an array
+// When the 'Confirm Images' button is pressed, read in any selected images, convert them to base64-encoded strings, and store the strings in an array
 // Then perform the submission of this array to the database, so the image strings can be added to the appropriate action record
-function EncodeStoreImages() {
+function EncodeStoreImages(imageType) {
   // The 'FileReader.readAsDataURL()' function used to read each image is asynchronous, so we must set up each read as a promise
   // The encompassing 'GetAllImageData()' function returns a single promise that is fulfilled when all sub-promises are themselves fulfilled (i.e. all images have been read)
   // Each sub-promise 'resolves' to the image's base64-encoded string, i.e. that is the value associated with the sub-promise's fulfillment
   function GetAllImageData() {
-    const imageFiles = document.getElementById('image-selector').files;
+    let imageFiles = null;
+    console.log(imageType);
+    if (imageType === 'shocklogger') {
+      imageFiles = document.getElementById('plots-selector').files;
+    } else if (imageType === 'general') {
+      imageFiles = document.getElementById('image-selector').files;
+    }
+
+    console.log(imageFiles);
+
     let imagePromises = [];
 
     imageFiles.forEach(function (imageFile) {
@@ -109,7 +122,7 @@ function EncodeStoreImages() {
     $.ajax({
       contentType: 'application/json',
       method: 'post',
-      url: `/json/action/${action.actionId}/addImages`,
+      url: `/json/action/${action.actionId}/addImages/${imageType}`,
       data: JSON.stringify(submission),
       dataType: 'json',
       success: postSuccess,
