@@ -182,7 +182,7 @@ async function save(input, req) {
 
 
 /// Add one or more base64-encoded strings, each one representing a single image, to a specified action record
-async function addImageStrings(actionId, imageStringsArray) {
+async function addImageStrings(actionId, imageStringsArray, imageType) {
   // Set up the DB query match condition to be that a record's action ID must match the specified one
   let match_condition = { actionId };
 
@@ -190,19 +190,37 @@ async function addImageStrings(actionId, imageStringsArray) {
 
   match_condition.actionId = new ObjectId(match_condition.actionId);
 
-  // Use the MongoDB '$push' operator to populate the images to the 'images' array in the action record, and throw an error if the edit fails
-  const result = await db.collection('actions')
-    .findOneAndUpdate(
-      match_condition,
-      {
-        $push: { 'images': { $each: imageStringsArray } }
-      },
-      {
-        sort: { 'validity.version': -1 },
-        returnNewDocument: true,
-        includeResultMetadata: true,
-      },
-    );
+  let result = null;
+
+  if (imageType === 'shocklogger') {
+    // Use the MongoDB '$set' operator to populate the 'data.shockloggerPlots' field in the action record with the new image (overwriting any existing data), and throw an error if the edit fails
+    result = await db.collection('actions')
+      .findOneAndUpdate(
+        match_condition,
+        {
+          $set: { 'data.shocklogPlotsImage': imageStringsArray[0] }
+        },
+        {
+          sort: { 'validity.version': -1 },
+          returnNewDocument: true,
+          includeResultMetadata: true,
+        },
+      );
+  } else if (imageType === 'general') {
+    // Use the MongoDB '$push' operator to append all provided images to the 'images' array in the action record, and throw an error if the edit fails
+    result = await db.collection('actions')
+      .findOneAndUpdate(
+        match_condition,
+        {
+          $push: { 'images': { $each: imageStringsArray } }
+        },
+        {
+          sort: { 'validity.version': -1 },
+          returnNewDocument: true,
+          includeResultMetadata: true,
+        },
+      );
+  }
 
   if (result.ok === 0) throw new Error(`Actions::addImageStrings() - failed to update the action record!`);
 
