@@ -471,24 +471,57 @@ block content
               | Planarity Analysis using M6/10/20 Holes (no results found in record!) 
               i.chevron.fa.fa-fw 
 
+        .vert-space-x2
+
+      if action.typeFormId == 'APAShipmentReception'
         .vert-space-x2 
+          hr
+
+        .row 
+          .col-sm-4
+            dt Add Shocklogger Plots Image to Action Record:
+            dd 
+              p Use the 'Select Plots Image' button below to select an appropriate image from your device.
+
+              p Once you are happy with your selection, press the 'Confirm Plots Image' button to finalise the upload.
+
+            .vert-space-x1.form-inline
+              label.btn.btn-primary(for = 'plots-selector')
+                input.custom-file-input#plots-selector(type = 'file', style = 'display:none', onchange = 'DisplayFileNames(this, "shocklogger")')
+                | Select Plots Image
+
+              .hori-space-x2 
+                a.btn-danger.btn-sm#confirm-plots(onclick = 'EncodeStoreImages("shocklogger")') Confirm Plots Image
+
+            .vert-space-x1 
+              label.label-info#plots-filename
+
+
+          .col-sm-8
+            if action.data.shocklogPlotsImage
+              img.img-fluid.border-success.border.rounded.p-2(src = action.data.shocklogPlotsImage)
+            else 
+              p <b>[use the tool to the left to upload an image showing shocklogger data plots]</b>
 
       if action.typeFormId == 'APANonConformance' || action.typeFormId == 'APAShipmentReception' || action.typeFormId == 'x_tension_testing' || action.typeFormId == 'MeshQAInspection'
+        .vert-space-x2 
+          hr
+
         dt Add Images to Action Record:
-        dd Please use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, please use the 'Confirm Images' button to finalise the upload.
+        dd Use the 'Select Images' button below to select one or more images from your device to add to this action record.  Once you are happy with your selection, press the 'Confirm Images' button to finalise the upload.
           br
-          | Please make sure that your <b>images are individually no more than <u>1MB</u> in size</b>, and <b>please do not add more than <u>5 images</u> in total to any single record</b>.
+          | Please ensure that your <b>images are individually no more than <u>1MB</u> in size</b>, and <b>do not add more than <u>5 images</u> in total to any single record</b>.
 
           .vert-space-x1.form-inline
             label.btn.btn-primary(for = 'image-selector')
-              input.custom-file-input#image-selector(type = 'file', style = 'display:none', onchange = 'DisplayFileNames(this)', multiple)
+              input.custom-file-input#image-selector(type = 'file', style = 'display:none', onchange = 'DisplayFileNames(this, "general")', multiple)
               | Select Images
 
             .hori-space-x2
               label.label-info#image-filenames 
 
             .hori-space-x2
-              a.btn-danger.btn-sm#confirm-upload(onclick = 'EncodeStoreImages()') Confirm Upload
+              a.btn-danger.btn-sm#confirm-images(onclick = 'EncodeStoreImages("general")') Confirm Images
 
           if action.images
             .vert-space-x1
@@ -503,10 +536,10 @@ block content
 
               .vert-space-x2 
                 hr
-            
+
                 dt Remove Image from Action Record:</b>
                 dd Please enter the number of the image you want to remove below (i.e. '1' for the first image, '2' for the second, etc.).  Please note that only one image can be removed at a time.  Once you are happy with your entry, please use the 'Confirm Removal' button to finalise.
-                
+
                 .vert-space-x1.form-inline
                   input.form-control#image-remover
 

@@ -443,11 +443,11 @@ router.post(['/json/action', '/api/action'], permissions.checkPermissionJson('ac
 
 
 /// Add one or more base64-encoded strings, each one representing a single image, to an action record
-router.post(['/json/action/:actionId/addImages', '/api/action/:actionId/addImages'], permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
+router.post(['/json/action/:actionId/addImages/:imageType', '/api/action/:actionId/addImages/:imageType'], permissions.checkPermissionJson('actions:perform'), async function (req, res, next) {
   try {
     // Add the encoded strings to the action record corresponding to the specified action ID ... if successful, the function returns the action ID
     // The encoded strings are contained as an array in the 'req.body.image' parameter (it is passed as a [key, value] pair, with the key being 'images' and the value being the array)
-    const result = await Actions.addImageStrings(req.params.actionId, req.body.images);
+    const result = await Actions.addImageStrings(req.params.actionId, req.body.images, req.params.imageType);
 
     // Return the record's action ID
     return res.status(201).json(result);
