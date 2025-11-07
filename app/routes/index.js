@@ -41,6 +41,8 @@ module.exports = routes;
   /json/confirmShortUUID/:shortuuid
   /json/components/:typeFormId/list
   /json/components/boardCounts_byPartNumberAndLocation
+  /components/hwdbInformation
+  /json/components/hwdbInformation/:apa1uuid/:apa2uuid
 
   /action/:actionId
   /action/:actionId/edit
@@ -53,7 +55,7 @@ module.exports = routes;
   /actions/:typeFormId/list
   /json/action/:actionId
   /json/action
-  /json/action/:actionId/addImages
+  /json/action/:actionId/addImages/:imageType
   /json/action/:actionId/removeImage/:imageNumber
   /json/actions/:typeFormId/list
   /json/actions/allFromWorkflow/:workflowId

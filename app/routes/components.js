@@ -4,7 +4,7 @@ const ShortUUID = require('short-uuid');
 
 const Actions = require('../lib/Actions');
 const Components = require('../lib/Components');
-const Components_ExecSummary = require('../lib/Components_ExecSummary');
+const Components_CollateInfo = require('../lib/Components_CollateInfo');
 const Forms = require('../lib/Forms');
 const logger = require('../lib/logger');
 const permissions = require('../lib/permissions');
@@ -586,7 +586,7 @@ router.get('/component/:uuid/execSummary', permissions.checkPermission('componen
 
     // Retrieve the collated information about the APA - since this requires extracting specific field values from a number of DB records related to the APA ...
     // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
-    let collatedInfo = await Components_ExecSummary.collateInfo(req.params.uuid);
+    let collatedInfo = await Components_CollateInfo.forExecSummary(req.params.uuid);
 
     // Render the interface page
     res.render('component_execSummary.pug', { collatedInfo });
@@ -828,6 +828,29 @@ router.get('/components/bulkQRCodes/:typeFormId/:firstNumber/:lastNumber', permi
   } catch (err) {
     logger.error(err);
     res.status(500).send(err.toString());
+  }
+});
+
+
+/// View information about two specified APAs comprising a single doublet, for use in the DUNE HWDB (client-side interface)
+router.get('/components/hwdbInformation', async function (req, res, next) {
+  // Render the interface page
+  res.render('component_hwdbInformation.pug');
+});
+
+
+/// View information about two  specified APAs comprising a single doublet, for use in the DUNE HWDB (query to server-side)
+router.get(['/json/components/hwdbInformation/:apa1uuid/:apa2uuid', '/api/components/hwdbInformation/:apa1uuid/:apa2uuid'], async function (req, res, next) {
+  try {
+    // Retrieve the collated information about the APAs - since this requires extracting specific field values from a number of DB records related to the APAs ...
+    // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
+    let collatedInfo = await Components_CollateInfo.forHWDB(req.params.apa1uuid, req.params.apa2uuid);
+
+    // Return the information in JSON format
+    return res.status(200).json(collatedInfo);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
   }
 });
 
