@@ -69,8 +69,8 @@ const dictionary_ncrTypes = {
 };
 
 
-/// Retrieve collated information about a single assembled APA (and associated components and actions) that will be displayed in its executive summary
-async function collateInfo(componentUUID) {
+/// Retrieve collated information about a single assembled APA (and associated components and actions), for use in its executive summary
+async function forExecSummary(componentUUID) {
   let aggregation_stages = [];
   let results = [];
 
@@ -729,6 +729,66 @@ async function collateInfo(componentUUID) {
 }
 
 
+/// Retrieve collated information about two specified APAs comprising a single doublet, for use in the DUNE HWDB
+async function forHWDB(apa1UUID, apa2UUID) {
+  // Set up an object to store the collated information, and then set up the various sections of the collated information object
+  // Information will be saved as [key, value] pairs for easier access on the interface page, and we know what keys are required ahead of time, so they can be hardcoded
+  let collatedInfo = {};
+
+  collatedInfo.apa1 = {
+    componentName: '',
+    componentUUID: '',
+    shortUUID: '',
+    dunePID: '',
+    productionSite: '',
+    configuration: '',
+  };
+
+  collatedInfo.apa2 = {
+    componentName: '',
+    componentUUID: '',
+    shortUUID: '',
+    dunePID: '',
+    productionSite: '',
+    configuration: '',
+  };
+
+  ///////////////////////
+  // APA 1 INFORMATION //
+  ///////////////////////
+  // Get the component record of the first Assembled APA
+  const apa1 = await Components.retrieve(apa1UUID);
+
+  // Add relevant information from this Assembled APA component record to the 'apa1' section of the collated information object
+  collatedInfo.apa1.componentName = apa1.data.componentName;
+  collatedInfo.apa1.componentUUID = apa1.componentUuid;
+  collatedInfo.apa1.shortUUID = apa1.shortUuid.toString();
+  collatedInfo.apa1.dunePID = apa1.data.dunePid;
+  collatedInfo.apa1.productionSite = utils.dictionary_locations[apa1.data.apaAssemblyLocation];
+  collatedInfo.apa1.configuration = apa1.data.apaConfiguration[0].toUpperCase() + apa1.data.apaConfiguration.slice(1);
+
+  ///////////////////////
+  // APA 2 INFORMATION //
+  ///////////////////////
+  // Get the component record of the second Assembled APA
+  const apa2 = await Components.retrieve(apa2UUID);
+
+  // Add relevant information from this Assembled APA component record to the 'apa2' section of the collated information object
+  collatedInfo.apa2.componentName = apa2.data.componentName;
+  collatedInfo.apa2.componentUUID = apa2.componentUuid;
+  collatedInfo.apa2.shortUUID = apa2.shortUuid.toString();
+  collatedInfo.apa2.dunePID = apa2.data.dunePid;
+  collatedInfo.apa2.productionSite = utils.dictionary_locations[apa2.data.apaAssemblyLocation];
+  collatedInfo.apa2.configuration = apa2.data.apaConfiguration[0].toUpperCase() + apa2.data.apaConfiguration.slice(1);
+
+  ///////////////////////
+
+  // Return the completed collated information object
+  return collatedInfo;
+}
+
+
 module.exports = {
-  collateInfo,
+  forExecSummary,
+  forHWDB,
 }
