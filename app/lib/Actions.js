@@ -115,64 +115,90 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
 
-  // If the action is one of the shipment transport types, the transport location (always 'in_transit') and date will have been passed to this function in the 'req.query' object
-  // Use these to update the location information for each individual sub-component in the shipment
-  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  // Once the action record has been successfully saved, deal with the reception information for any related components
+  // - for shipment transport actions, update the reception information of each individual sub-component (as well as the shipment itself) to be 'In Transit'
+  // - for shipment or batch reception actions, update the reception information of each individual sub-component (as well as the shipment itself) to match where and when it was received
+  // - for board and mesh installation actions, update the reception information of each component referenced in the action to be 'Installed on APA' 
+  // - for 'Board Visual Inspection' actions ...
+  //   ... where the inspection disposition is 'Scrap', update the board's reception information to indicate that it has been 'Rejected'
+  //   ... where the inspection disposition is something other than 'Scrap', update the board's reception location to 'Lancaster' (since all visual inspections are performed there)
+  // - for 'Factory Board Rejection' actions ...
+  //   ... where the rejection disposition is 'Rejected', update the board's reception information to to indicate that it has been 'Rejected'
+  //   ... where the rejection disposition is something other than 'Rejected', update the board's reception information match where and when the action was performed
+  // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (transport_typeFormIDs.includes(newRecord.typeFormId)) {
-    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
-  }
-
-  // If the action is one of the shipment or batch reception types, the reception location and date will have been passed to this function in the 'req.query' object
-  // Use these to update the location information for each individual sub-component in the shipment or batch
-  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
-  if (reception_typeFormIDs.includes(newRecord.typeFormId)) {
-    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
-  }
-
-  // If the action is one of the board or mesh installation types, the installation location (always 'installed_on_APA') and date will have been passed to this function in the 'req.query' object
-  // Use these to update the location information for each individual board or mesh referenced in this action
-  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
-  if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
+  } else if (reception_typeFormIDs.includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, newRecord.data.receptionLocation, (newRecord.data.receptionDate).toString().slice(0, 10));
+  } else if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
     if (newRecord.typeFormId === 'prep_mesh_panel_install') {
       const uuid_format = new RegExp(/[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/);
 
       for (const [key, value] of Object.entries(newRecord.data)) {
         if (uuid_format.test(value)) {
-          const result = await Components.updateLocation(value, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(value, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
     } else {
       for (const board of newRecord.data.headBoardsA) {
         if (board.boardUuid !== '') {
-          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
 
       for (const board of newRecord.data.headBoardsB) {
         if (board.boardUuid !== '') {
-          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
 
       for (const board of newRecord.data.footBoards) {
         if (board.boardUuid !== '') {
-          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
 
       if (newRecord.data.sideBoardsHSB) {
         for (const board of newRecord.data.sideBoardsHSB) {
           if (board.boardUuid !== '') {
-            const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+            const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
           }
         }
 
         for (const board of newRecord.data.sideBoardsLSB) {
           if (board.boardUuid !== '') {
-            const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+            const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
           }
         }
       }
+    }
+  } else if (newRecord.typeFormId === 'BoardVisualInspection') {
+    if (newRecord.data.nonConformingDisposition === 'scrap') {
+      const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[Failed Visual Inspection]`);
+    } else {
+      const result = await Components.updateLocation(newRecord.componentUuid, 'lancaster', (new Date()).toISOString().slice(0, 10), '');
+    }
+  } else if (newRecord.typeFormId === 'FactoryBoardRejection') {
+    const rejectionLocation = utils.dictionary_locations[newRecord.data.boardRejectionLocation];
+
+    if (newRecord.data.disposition === 'rejected') {
+      let rejectionReason = '';
+
+      if (newRecord.data.reasonForRejectionFromInventory.step) { rejectionReason = 'Step Failure' }
+      else if (newRecord.data.reasonForRejectionFromInventory.solderMaskScratch) { rejectionReason = 'Solder Mask Scratch' }
+      else if (newRecord.data.reasonForRejectionFromInventory.scratchInCopperTrace) { rejectionReason = 'Copper Trace Scratch' }
+      else if (newRecord.data.reasonForRejectionFromInventory.brokenTooth) { rejectionReason = 'Broken Tooth' }
+      else if (newRecord.data.reasonForRejectionFromInventory.delaminationOfLayers) { rejectionReason = 'Delamination of Layers' }
+      else if (newRecord.data.reasonForRejectionFromInventory.bentPins) { rejectionReason = 'Bent Pins' }
+      else if (newRecord.data.reasonForRejectionFromInventory.epoxyOnSolderPadsOrToothStrip) { rejectionReason = 'Misplaced Epoxy' }
+      else if (newRecord.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
+      else if (newRecord.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
+      else if (newRecord.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
+      else if (newRecord.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Other' }
+
+      const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
+    } else {
+      const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.boardRejectionLocation, (new Date()).toISOString().slice(0, 10), '');
     }
   }
 

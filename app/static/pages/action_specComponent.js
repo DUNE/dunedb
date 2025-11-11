@@ -1,19 +1,6 @@
 // Declare a variable to hold the completed type form that will eventually be submitted to the database
 let typeForm;
 
-// Declare a list of the available 'shipment transport' related action type forms
-// NOTE: this must be the same as the equivalent list given in 'lib/Actions.js'
-const transport_typeFormIDs = ['APAShipmentTransport'];
-
-// Declare a list of the available 'reception' related action type forms
-// NOTE: this must be the same as the equivalent list given in 'lib/Actions.js'
-const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
-
-// Declare a list of the available 'board installation' and 'mesh installation' action type forms
-// NOTE: this must be the same as the equivalent list given in 'lib/Actions.js'
-const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
-
-
 // Run a specified function when the page is loaded
 window.addEventListener('load', onPageLoad);
 
@@ -66,20 +53,10 @@ async function onPageLoad() {
 
 // Function to submit the record to the database
 function SubmitData(submission) {
-  let url = '/json/action';
-
-  if (transport_typeFormIDs.includes(submission.typeFormId)) {
-    url += `?location=${'in_transit'}&date=${(new Date()).toISOString().slice(0, 10)}`;
-  } else if (reception_typeFormIDs.includes(submission.typeFormId)) {
-    url += `?location=${submission.data.receptionLocation}&date=${(submission.data.receptionDate).toString().slice(0, 10)}`;
-  } else if (installation_typeFormIDs.includes(submission.typeFormId)) {
-    url += `?location=${'installed_on_APA'}&date=${(new Date()).toISOString().slice(0, 10)}`;
-  }
-
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: url,
+    url: '/json/action',
     data: JSON.stringify(submission),
     dataType: 'json',
     success: postSuccess,

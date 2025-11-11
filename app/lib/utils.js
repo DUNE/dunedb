@@ -33,6 +33,7 @@ module.exports = {
     manchester: 'Manchester',
     merlin: 'Merlin',
     rokeby: 'Rokeby',
+    rejected: 'Rejected',
     sheffield: 'Sheffield',
     surf: 'SURF',
     sussex: 'Sussex',
