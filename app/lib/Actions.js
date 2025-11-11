@@ -185,7 +185,7 @@ async function save(input, req) {
       else if (newRecord.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
       else if (newRecord.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
       else if (newRecord.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
-      else if (newRecord.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Other' }
+      else if (newRecord.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
 
       const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
     } else {

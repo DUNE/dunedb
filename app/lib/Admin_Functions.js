@@ -206,56 +206,6 @@ async function setComponentNames(typeFormId) {
 }
 
 
-async function syncTypeRecordNumbers(typeFormId) {
-  // Retrieve a list of component UUIDs corresponding to all components with 'formId' matching the specified component type form ID
-  let aggregation_stages = [];
-
-  aggregation_stages.push({ $match: { formId: typeFormId } });
-  aggregation_stages.push({ $project: { componentUuid: true } });
-
-  let uuids = await db.collection('components')
-    .aggregate(aggregation_stages)
-    .toArray();
-
-  // For each retrieved UUID ...
-  for (let uuid of uuids) {
-    // Get the full component record corresponding to the UUID, and retrieve the DESIRED type record number ...
-    // ... for APA frames, this will be the existing 'data.frameNumber'
-    // ... for Assembled APAs, this will be the existing 'data.apaNumberAtLocation'
-    const component = await Components.retrieve(uuid.componentUuid);
-    let desiredTypeRecordNumber = null;
-
-    if (typeFormId === 'APAFrame') {
-      desiredTypeRecordNumber = component.data.frameNumber;
-    } else if (typeFormId === 'AssembledAPA') {
-      desiredTypeRecordNumber = component.data.apaNumberAtLocation;
-    }
-
-    // Set up a 'matching condition' object containing the component UUID (remembering that the UUID has to be of 'MUUID' type, not a string)
-    const componentUuid = component.componentUuid;
-    let match_condition = { componentUuid };
-
-    if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
-
-    match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
-
-    // Update the type record number field of ALL records with the matching component UUID (i.e. all versions of the component in question)
-    const result = await db.collection('components')
-      .updateMany(
-        match_condition,
-        [
-          { $set: { 'data.typeRecordNumber': desiredTypeRecordNumber } },
-        ]
-      )
-
-    if (result.ok === 0) throw new Error(`Admin_Functions::syncTypeRecordNumbers() - failed to update the component records!`);
-  }
-
-  return typeFormId;
-
-}
-
-
 async function updateComponentLocations(typeFormId) {
   // Retrieve a list of component UUIDs corresponding to all components with 'formId' matching the specified component type form ID
   let aggregation_stages = [];
@@ -297,7 +247,7 @@ async function updateComponentLocations(typeFormId) {
           ]
         )
 
-      if (result.ok === 0) throw new Error(`Admin_Functions::setComponentNames() - failed to update the component records!`);
+      if (result.ok === 0) throw new Error(`Admin_Functions::updateComponentLocations() - failed to update the component records!`);
     } else {
       logger.info(uuid.componentUuid, 'Component reception object is null!');
     }
@@ -307,8 +257,95 @@ async function updateComponentLocations(typeFormId) {
 }
 
 
+async function updateComponentLocations_viaActions(actionTypeFormId) {
+  // Retrieve a list of the UUIDs of all geometry boards which have had a 'Factory Board Rejection' action performed on them, and where the action's disposition is 'rejected'
+  let aggregation_stages = [];
+
+  aggregation_stages.push({
+    $match: {
+      'typeFormId': actionTypeFormId,
+      'data.disposition': 'rejected',
+    }
+  });
+
+  // Project only the fields that will be needed for the later steps
+  aggregation_stages.push({
+    $project: {
+      'componentUuid': true,
+      'data.reasonForRejectionFromInventory': true,
+      'data.boardRejectionLocation': true,
+      'validity': true,
+    }
+  });
+
+  let uuids = await db.collection('actions')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // For each retrieved UUID ...
+  for (let uuid of uuids) {
+    // Get the full component record corresponding to the UUID, and check if the 'reception' object actually exists (this function will cause a full crash if not)
+    const component = await Components.retrieve(uuid.componentUuid);
+
+    if (component.reception != null) {
+      // Set up a 'matching condition' object containing the component UUID (remembering that the UUID has to be of 'MUUID' type, not a string)
+      const componentUuid = component.componentUuid;
+      let match_condition = { componentUuid };
+
+      if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+      match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+      // Set the desired reception information:
+      // - location = 'rejected'
+      // - date = the date on which the Factory Board Rejection action was performed (or last edited)
+      // - detail = a string containing some additional information about why the board was rejected
+      const newBoardLocation = 'rejected';
+      const rejectionLocation = utils.dictionary_locations[uuid.data.boardRejectionLocation]
+      const rejectionDate = uuid.validity.startDate.toISOString().slice(0, 10);
+      let rejectionReason = '';
+
+      if (uuid.data.reasonForRejectionFromInventory.step) { rejectionReason = 'Step Failure' }
+      else if (uuid.data.reasonForRejectionFromInventory.solderMaskScratch) { rejectionReason = 'Solder Mask Scratch' }
+      else if (uuid.data.reasonForRejectionFromInventory.scratchInCopperTrace) { rejectionReason = 'Copper Trace Scratch' }
+      else if (uuid.data.reasonForRejectionFromInventory.brokenTooth) { rejectionReason = 'Broken Tooth' }
+      else if (uuid.data.reasonForRejectionFromInventory.delaminationOfLayers) { rejectionReason = 'Delamination of Layers' }
+      else if (uuid.data.reasonForRejectionFromInventory.bentPins) { rejectionReason = 'Bent Pins' }
+      else if (uuid.data.reasonForRejectionFromInventory.epoxyOnSolderPadsOrToothStrip) { rejectionReason = 'Misplaced Epoxy' }
+      else if (uuid.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
+      else if (uuid.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
+      else if (uuid.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
+      else if (uuid.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
+
+      const rejectionDetail = `[${rejectionLocation} - ${rejectionReason}]`;
+
+      // Update the reception information of ALL records with the matching component UUID (i.e. all versions of the component in question)
+      const result = await db.collection('components')
+        .updateMany(
+          match_condition,
+          [
+            {
+              $set: {
+                'reception.location': newBoardLocation,
+                'reception.date': rejectionDate,
+                'reception.detail': rejectionDetail,
+              }
+            },
+          ]
+        )
+
+      if (result.ok === 0) throw new Error(`Admin_Functions::updateComponentLocations_viaActions() - failed to update the component records!`);
+    } else {
+      logger.info(uuid.componentUuid, 'Component reception object is null!');
+    }
+  }
+
+  return actionTypeFormId;
+}
+
+
 module.exports = {
   setComponentNames,
-  syncTypeRecordNumbers,
   updateComponentLocations,
+  updateComponentLocations_viaActions,
 }
