@@ -119,9 +119,6 @@ async function save(input, req) {
   // - for shipment transport actions, update the reception information of each individual sub-component (as well as the shipment itself) to be 'In Transit'
   // - for shipment or batch reception actions, update the reception information of each individual sub-component (as well as the shipment itself) to match where and when it was received
   // - for board and mesh installation actions, update the reception information of each component referenced in the action to be 'Installed on APA' 
-  // - for 'Board Visual Inspection' actions ...
-  //   ... where the inspection disposition is 'Scrap', update the board's reception information to indicate that it has been 'Rejected'
-  //   ... where the inspection disposition is something other than 'Scrap', update the board's reception location to 'Lancaster' (since all visual inspections are performed there)
   // - for 'Factory Board Rejection' actions ...
   //   ... where the rejection disposition is 'Rejected', update the board's reception information to to indicate that it has been 'Rejected'
   //   ... where the rejection disposition is something other than 'Rejected', update the board's reception information match where and when the action was performed
@@ -171,12 +168,6 @@ async function save(input, req) {
           }
         }
       }
-    }
-  } else if (newRecord.typeFormId === 'BoardVisualInspection') {
-    if (newRecord.data.nonConformingDisposition === 'scrap') {
-      const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[Failed Visual Inspection]`);
-    } else {
-      const result = await Components.updateLocation(newRecord.componentUuid, 'lancaster', (new Date()).toISOString().slice(0, 10), '');
     }
   } else if (newRecord.typeFormId === 'FactoryBoardRejection') {
     const rejectionLocation = utils.dictionary_locations[newRecord.data.boardRejectionLocation];
