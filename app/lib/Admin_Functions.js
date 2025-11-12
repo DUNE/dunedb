@@ -258,7 +258,7 @@ async function updateComponentLocations(typeFormId) {
 
 
 async function updateComponentLocations_viaActions(actionTypeFormId) {
-  // Retrieve a list of the UUIDs of all geometry boards which have had a 'Factory Board Rejection' action performed on them, and where the action's disposition is 'rejected'
+  // Retrieve a list of 'Factory Board Rejection' actions where the action's disposition is 'rejected'
   let aggregation_stages = [];
 
   aggregation_stages.push({
@@ -272,20 +272,33 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
   aggregation_stages.push({
     $project: {
       'componentUuid': true,
-      'data.reasonForRejectionFromInventory': true,
-      'data.boardRejectionLocation': true,
+      'data': true,
       'validity': true,
     }
   });
 
-  let uuids = await db.collection('actions')
+  // Select only the latest version of each record
+  // First sort the matching records by validity ... highest version first
+  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { actionId: '$actionId' },
+      componentUuid: { '$first': '$componentUuid' },
+      data: { '$first': '$data' },
+      validity: { '$first': '$validity' },
+    },
+  });
+
+  let actions = await db.collection('actions')
     .aggregate(aggregation_stages)
     .toArray();
 
-  // For each retrieved UUID ...
-  for (let uuid of uuids) {
-    // Get the full component record corresponding to the UUID, and check if the 'reception' object actually exists (this function will cause a full crash if not)
-    const component = await Components.retrieve(uuid.componentUuid);
+  // For each retrieved action ...
+  for (let action of actions) {
+    // Get the full geometry board component record corresponding to the UUID, and check if the 'reception' object actually exists (this function will cause a full crash if not)
+    const component = await Components.retrieve(action.componentUuid);
 
     if (component.reception != null) {
       // Set up a 'matching condition' object containing the component UUID (remembering that the UUID has to be of 'MUUID' type, not a string)
@@ -296,26 +309,26 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
 
       match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
-      // Set the desired reception information:
+      // Set the desired reception information for the geometry board:
       // - location = 'rejected'
       // - date = the date on which the Factory Board Rejection action was performed (or last edited)
       // - detail = a string containing some additional information about why the board was rejected
       const newBoardLocation = 'rejected';
-      const rejectionLocation = utils.dictionary_locations[uuid.data.boardRejectionLocation]
-      const rejectionDate = uuid.validity.startDate.toISOString().slice(0, 10);
+      const rejectionLocation = utils.dictionary_locations[action.data.boardRejectionLocation]
+      const rejectionDate = action.validity.startDate.toISOString().slice(0, 10);
       let rejectionReason = '';
 
-      if (uuid.data.reasonForRejectionFromInventory.step) { rejectionReason = 'Step Failure' }
-      else if (uuid.data.reasonForRejectionFromInventory.solderMaskScratch) { rejectionReason = 'Solder Mask Scratch' }
-      else if (uuid.data.reasonForRejectionFromInventory.scratchInCopperTrace) { rejectionReason = 'Copper Trace Scratch' }
-      else if (uuid.data.reasonForRejectionFromInventory.brokenTooth) { rejectionReason = 'Broken Tooth' }
-      else if (uuid.data.reasonForRejectionFromInventory.delaminationOfLayers) { rejectionReason = 'Delamination of Layers' }
-      else if (uuid.data.reasonForRejectionFromInventory.bentPins) { rejectionReason = 'Bent Pins' }
-      else if (uuid.data.reasonForRejectionFromInventory.epoxyOnSolderPadsOrToothStrip) { rejectionReason = 'Misplaced Epoxy' }
-      else if (uuid.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
-      else if (uuid.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
-      else if (uuid.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
-      else if (uuid.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
+      if (action.data.reasonForRejectionFromInventory.step) { rejectionReason = 'Step Failure' }
+      else if (action.data.reasonForRejectionFromInventory.solderMaskScratch) { rejectionReason = 'Solder Mask Scratch' }
+      else if (action.data.reasonForRejectionFromInventory.scratchInCopperTrace) { rejectionReason = 'Copper Trace Scratch' }
+      else if (action.data.reasonForRejectionFromInventory.brokenTooth) { rejectionReason = 'Broken Tooth' }
+      else if (action.data.reasonForRejectionFromInventory.delaminationOfLayers) { rejectionReason = 'Delamination of Layers' }
+      else if (action.data.reasonForRejectionFromInventory.bentPins) { rejectionReason = 'Bent Pins' }
+      else if (action.data.reasonForRejectionFromInventory.epoxyOnSolderPadsOrToothStrip) { rejectionReason = 'Misplaced Epoxy' }
+      else if (action.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
+      else if (action.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
+      else if (action.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
+      else if (action.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
 
       const rejectionDetail = `[${rejectionLocation} - ${rejectionReason}]`;
 
@@ -336,7 +349,7 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
 
       if (result.ok === 0) throw new Error(`Admin_Functions::updateComponentLocations_viaActions() - failed to update the component records!`);
     } else {
-      logger.info(uuid.componentUuid, 'Component reception object is null!');
+      logger.info(action.componentUuid, 'Component reception object is null!');
     }
   }
 
