@@ -6,9 +6,9 @@ const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
+const logger = require('./logger');
 const permissions = require('./permissions');
 const utils = require('./utils');
-const logger = require('./logger');
 
 // Declare a list of the available 'shipment transport' related action type forms
 // NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
@@ -431,47 +431,36 @@ async function list(match_condition, options) {
 
 
 /// Get a list of geometry board rejection counts across all [board part number, rejection location] combinations
-/// This function is intended to be used ONLY for 'Factory Board Rejection' type actions, and therefore does not take any user-specified arguments
+/// This function does not take any user-specified arguments
 async function boardRejectionCounts_byPartNumberAndLocation() {
   let aggregation_stages = [];
 
-  // Match against the type form ID to get records of all 'Factory Board Rejection' actions (with any disposition)
+  // Match against the component type form ID and reception location to get records of all 'Geometry Board' components with a current reception location of 'rejected'
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'FactoryBoardRejection',
+      'formId': 'GeometryBoard',
+      'reception.location': 'rejected',
     }
   });
 
   // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-      typeFormId: { '$first': '$typeFormId' },
+      _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      disposition: { '$first': '$data.disposition' },
-      location: { '$first': '$data.boardRejectionLocation' },
+      partNumber: { '$first': '$data.partNumber' },
+      rejectionDetail: { '$first': '$reception.detail' },
     },
   });
 
-  // Match against the disposition to select only actions that result in a completely rejected board
-  aggregation_stages.push({
-    $match: {
-      'disposition': 'rejected',
-    }
-  });
-
-  // Query the 'actions' records collection using the aggregation stages defined above
-  let records = await db.collection('actions')
+  // Query the 'components' records collection using the aggregation stages defined above
+  let records = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
-
-  // At this point, we have a list of 'Factory Board Rejection' actions with the 'rejected' disposition
-  // But what we actually want is counts of how many geometry boards of each part number were rejected at each location
 
   // Set up arrays of the possible board rejection locations (taken from the 'Factory Board Rejection' action type form) ...
   // ... and the geometry board part numbers (taken from the 'Search for Geometry Boards by Location or Part Number' interface page .pug code) ...
@@ -483,16 +472,17 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
     '8760119', '8760115', '8760123', '8760122', '8760121', '8760120', '8760104', '8760116', '8760108'
   ];
 
-  let actionCounts_array = Array(rejectionLocations.length * boardPartNumbers.length).fill(0);
+  let rejectionCounts_array = Array(rejectionLocations.length * boardPartNumbers.length).fill(0);
 
-  // For each previously found 'Factory Board Rejection' action ...
-  for (const action of records) {
-    // Retrieve the corresponding component record
-    const component = await Components.retrieve(MUUID.from(action.componentUuid).toString());
+  // For each previously found 'Geometry Board' component ...
+  for (const board of records) {
+    // Extract the rejection location from the board's 'rejectionDetail' string
+    const rejectionLocation_stringValue = board.rejectionDetail.split(' - ')[0].substring(1);
+    const rejectionLocation = Object.keys(utils.dictionary_locations).find(key => utils.dictionary_locations[key] === rejectionLocation_stringValue);
 
     // Find which indices in their respective arrays correspond to the rejection location and the board part number ...
     // ... and from these, determine which index of the 'actionCounts' array this action's [location, part number] combination corresponds to, and increment it by 1
-    actionCounts_array[(rejectionLocations.indexOf(action.location) * boardPartNumbers.length) + boardPartNumbers.indexOf(component.data.partNumber)] += 1;
+    rejectionCounts_array[(rejectionLocations.indexOf(rejectionLocation) * boardPartNumbers.length) + boardPartNumbers.indexOf(board.partNumber)] += 1;
   }
 
   // We need the return of this function to be an array of OBJECTS, to match the return of the 'Components.counts_byPartNumberAndLocation()' function ...
@@ -503,7 +493,7 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
   for (const [locationIndex, location] of rejectionLocations.entries()) {
     for (const [partNumberIndex, partNumber] of boardPartNumbers.entries()) {
       actionCounts.push({
-        'count': actionCounts_array[(locationIndex * boardPartNumbers.length) + partNumberIndex],
+        'count': rejectionCounts_array[(locationIndex * boardPartNumbers.length) + partNumberIndex],
         'partNumber': partNumber,
         'location': location,
       })
