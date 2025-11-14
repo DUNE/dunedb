@@ -45,11 +45,17 @@ block content
               dt Current Location:
 
               if component.reception.detail && component.reception.detail != ''
-                dd
-                  a(href = `/component/${component.reception.detail}`, target = '_blank') #{dictionary_locations[component.reception.location]}
-                  |  (as of 
-                  +dateFormat(component.reception.date)
-                  | )
+                if component.reception.location === 'rejected'
+                  dd #{dictionary_locations[component.reception.location]} #{component.reception.detail}
+                    |  (as of 
+                    +dateFormat(component.reception.date)
+                    | )
+                else 
+                  dd
+                    a(href = `/component/${component.reception.detail}`, target = '_blank') #{dictionary_locations[component.reception.location]}
+                    |  (as of 
+                    +dateFormat(component.reception.date)
+                    | )
               else 
                 dd #{dictionary_locations[component.reception.location]} (as of 
                   +dateFormat(component.reception.date)

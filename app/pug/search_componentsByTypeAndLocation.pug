@@ -29,9 +29,8 @@ block content
 
         p Users must select <b>both</b> parameters from their respective lists below, and a summary of information about each found component will be displayed in the results panel below the input selections.
 
-        p If selecting 'Geometry Board' as the component type, the search results may be optionally filtered using the following parameters: 
+        p If selecting 'Geometry Board' as the component type, the search results may be optionally filtered using the following parameter: 
           ul
-            li <b>board acceptance status</b> - whether a board has been <u>rejected</u> (by performing a <u>Factory Rejection</u> action on it, and setting the action disposition to <u>Rejected</u>) or <u>accepted</u> (by either not performing a Factory Rejection action, or performing the action and setting the disposition to either <u>Use As Is</u> or <u>Remediated</u>)
             li <b>tooth strip attachment status</b> - whether a tooth strip has been attached to the board (by performing a <u>Tooth Strip Attachment</u> action on it)
 
         p If selecting any of the 'populated board' component types (i.e. 'CE Adapter', 'CR', 'G-Bias' or 'SHV'), the search results may be optionally filtered using the following parameter: 
@@ -66,20 +65,6 @@ block content
               option(value = 'SHVBoard') SHV Board
 
         .col-md-4
-          h4 Filter by Board Acceptance Status
-
-          .vert-space-x1 
-            p 
-            | This is an optional parameter.<br>
-            | It only applies to <b>Geometry Boards</b>.
-
-          .vert-space-x1 
-            select.form-control#acceptanceStatusSelection
-              option(value = 'any') (any board acceptance status)
-              option(value = 'accepted') Board Accepted at Factory 
-              option(value = 'rejected') Board Rejected at Factory
-
-        .col-md-4
           h4 Filter by Tooth Strip Attachment Status
 
           .vert-space-x1 
@@ -92,6 +77,20 @@ block content
               option(value = 'any') (any tooth strip attachment status)
               option(value = 'attached') Tooth Strip Attached
               option(value = 'notAttached') Tooth Strip Not Yet Attached
+
+        .col-md-4
+          h4 Filter by Board Conformance Status
+
+          .vert-space-x1 
+            p
+            | This is an optional parameter.<br>
+            | It only applies to <b>populated boards</b>.
+
+          .vert-space-x1 
+            select.form-control#conformanceStatusSelection
+              option(value = 'any') (any board conformance status)
+              option(value = 'yes') Board is Conformant 
+              option(value = 'no') Board is Not Conformant
 
       .vert-space-x2.row
         .col-md-4
@@ -120,6 +119,7 @@ block content
               option(value = 'lsu') #{dictionary_locations['lsu']} 
               option(value = 'manchester') #{dictionary_locations['manchester']} 
               option(value = 'merlin') #{dictionary_locations['merlin']} 
+              option(value = 'rejected') #{dictionary_locations['rejected']} (Geometry Boards only, via Factory Rejection action)
               option(value = 'rokeby') #{dictionary_locations['rokeby']} 
               option(value = 'sheffield') #{dictionary_locations['sheffield']} 
               option(value = 'surf') #{dictionary_locations['surf']} 
@@ -133,18 +133,6 @@ block content
             button.btn-primary.btn-lg#confirmButton Search by Type and Location
 
         .col-md-4
-          h4 Filter by Board Conformance Status
-
-          .vert-space-x1 
-            p
-            | This is an optional parameter.<br>
-            | It only applies to <b>populated boards</b>.
-
-          .vert-space-x1 
-            select.form-control#conformanceStatusSelection
-              option(value = 'any') (any board conformance status)
-              option(value = 'yes') Board is Conformant 
-              option(value = 'no') Board is Not Conformant
 
         .col-md-4
           h4 Filter by QA Checks Status

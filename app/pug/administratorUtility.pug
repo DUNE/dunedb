@@ -19,7 +19,7 @@ block content
         .col-md-5
           p Select an input string for the current utility
 
-          select.form-control#inputStringSelection
+          //select.form-control#inputStringSelection
             option(value = '')
             option(value = 'APADoublet') APA Doublet
             option(value = 'APAFrame') APA Frame 
@@ -52,6 +52,10 @@ block content
             option(value = 'SHVBoardShipment') SHV Board Kit
             option(value = 'Yoke') Yoke
             option(value = 'wire_bobbin') Wire Bobbin
+          
+          select.form-control#inputStringSelection
+            option(value = '')
+            option(value = 'FactoryBoardRejection') Factory Board Rejection
 
           .vert-space-x2 
             button.btn-primary.btn-lg#confirmButton Confirm

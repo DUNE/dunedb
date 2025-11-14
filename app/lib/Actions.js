@@ -6,9 +6,9 @@ const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
+const logger = require('./logger');
 const permissions = require('./permissions');
 const utils = require('./utils');
-const logger = require('./logger');
 
 // Declare a list of the available 'shipment transport' related action type forms
 // NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
@@ -115,64 +115,82 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
 
-  // If the action is one of the shipment transport types, the transport location (always 'in_transit') and date will have been passed to this function in the 'req.query' object
-  // Use these to update the location information for each individual sub-component in the shipment
-  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
+  // Once the action record has been successfully saved, deal with the reception information for any related components
+  // - for shipment transport actions, update the reception information of each individual sub-component (as well as the shipment itself) to be 'In Transit'
+  // - for shipment or batch reception actions, update the reception information of each individual sub-component (as well as the shipment itself) to match where and when it was received
+  // - for board and mesh installation actions, update the reception information of each component referenced in the action to be 'Installed on APA' 
+  // - for 'Factory Board Rejection' actions ...
+  //   ... where the rejection disposition is 'Rejected', update the board's reception information to to indicate that it has been 'Rejected'
+  //   ... where the rejection disposition is something other than 'Rejected', update the board's reception information match where and when the action was performed
+  // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (transport_typeFormIDs.includes(newRecord.typeFormId)) {
-    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
-  }
-
-  // If the action is one of the shipment or batch reception types, the reception location and date will have been passed to this function in the 'req.query' object
-  // Use these to update the location information for each individual sub-component in the shipment or batch
-  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
-  if (reception_typeFormIDs.includes(newRecord.typeFormId)) {
-    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, req.query.location, req.query.date);
-  }
-
-  // If the action is one of the board or mesh installation types, the installation location (always 'installed_on_APA') and date will have been passed to this function in the 'req.query' object
-  // Use these to update the location information for each individual board or mesh referenced in this action
-  // If successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
-  if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
+  } else if (reception_typeFormIDs.includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocations_inShipment(newRecord.componentUuid, newRecord.data.receptionLocation, (newRecord.data.receptionDate).toString().slice(0, 10));
+  } else if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
     if (newRecord.typeFormId === 'prep_mesh_panel_install') {
       const uuid_format = new RegExp(/[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/);
 
       for (const [key, value] of Object.entries(newRecord.data)) {
         if (uuid_format.test(value)) {
-          const result = await Components.updateLocation(value, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(value, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
     } else {
       for (const board of newRecord.data.headBoardsA) {
         if (board.boardUuid !== '') {
-          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
 
       for (const board of newRecord.data.headBoardsB) {
         if (board.boardUuid !== '') {
-          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
 
       for (const board of newRecord.data.footBoards) {
         if (board.boardUuid !== '') {
-          const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+          const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
         }
       }
 
       if (newRecord.data.sideBoardsHSB) {
         for (const board of newRecord.data.sideBoardsHSB) {
           if (board.boardUuid !== '') {
-            const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+            const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
           }
         }
 
         for (const board of newRecord.data.sideBoardsLSB) {
           if (board.boardUuid !== '') {
-            const result = await Components.updateLocation(board.boardUuid, req.query.location, req.query.date, newRecord.componentUuid);
+            const result = await Components.updateLocation(board.boardUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
           }
         }
       }
+    }
+  } else if (newRecord.typeFormId === 'FactoryBoardRejection') {
+    const rejectionLocation = utils.dictionary_locations[newRecord.data.boardRejectionLocation];
+
+    if (newRecord.data.disposition === 'rejected') {
+      let rejectionReason = '';
+
+      if (newRecord.data.reasonForRejectionFromInventory.step) { rejectionReason = 'Step Failure' }
+      else if (newRecord.data.reasonForRejectionFromInventory.solderMaskScratch) { rejectionReason = 'Solder Mask Scratch' }
+      else if (newRecord.data.reasonForRejectionFromInventory.scratchInCopperTrace) { rejectionReason = 'Copper Trace Scratch' }
+      else if (newRecord.data.reasonForRejectionFromInventory.brokenTooth) { rejectionReason = 'Broken Tooth' }
+      else if (newRecord.data.reasonForRejectionFromInventory.delaminationOfLayers) { rejectionReason = 'Delamination of Layers' }
+      else if (newRecord.data.reasonForRejectionFromInventory.bentPins) { rejectionReason = 'Bent Pins' }
+      else if (newRecord.data.reasonForRejectionFromInventory.epoxyOnSolderPadsOrToothStrip) { rejectionReason = 'Misplaced Epoxy' }
+      else if (newRecord.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
+      else if (newRecord.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
+      else if (newRecord.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
+      else if (newRecord.data.reasonForRejectionFromInventory.removedFromApa) { rejectionReason = 'Removed from APA' }
+      else if (newRecord.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
+
+      const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
+    } else {
+      const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.boardRejectionLocation, (new Date()).toISOString().slice(0, 10), '');
     }
   }
 
@@ -414,68 +432,58 @@ async function list(match_condition, options) {
 
 
 /// Get a list of geometry board rejection counts across all [board part number, rejection location] combinations
-/// This function is intended to be used ONLY for 'Factory Board Rejection' type actions, and therefore does not take any user-specified arguments
+/// This function does not take any user-specified arguments
 async function boardRejectionCounts_byPartNumberAndLocation() {
   let aggregation_stages = [];
 
-  // Match against the type form ID to get records of all 'Factory Board Rejection' actions (with any disposition)
+  // Match against the component type form ID and reception location to get records of all 'Geometry Board' components with a current reception location of 'rejected'
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'FactoryBoardRejection',
+      'formId': 'GeometryBoard',
+      'reception.location': 'rejected',
     }
   });
 
   // Select only the latest version of each record
   // First sort the matching records by validity ... highest version first
-  // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
+  // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
-      _id: { actionId: '$actionId' },
-      actionId: { '$first': '$actionId' },
-      typeFormId: { '$first': '$typeFormId' },
+      _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      disposition: { '$first': '$data.disposition' },
-      location: { '$first': '$data.boardRejectionLocation' },
+      partNumber: { '$first': '$data.partNumber' },
+      rejectionDetail: { '$first': '$reception.detail' },
     },
   });
 
-  // Match against the disposition to select only actions that result in a completely rejected board
-  aggregation_stages.push({
-    $match: {
-      'disposition': 'rejected',
-    }
-  });
-
-  // Query the 'actions' records collection using the aggregation stages defined above
-  let records = await db.collection('actions')
+  // Query the 'components' records collection using the aggregation stages defined above
+  let records = await db.collection('components')
     .aggregate(aggregation_stages)
     .toArray();
-
-  // At this point, we have a list of 'Factory Board Rejection' actions with the 'rejected' disposition
-  // But what we actually want is counts of how many geometry boards of each part number were rejected at each location
 
   // Set up arrays of the possible board rejection locations (taken from the 'Factory Board Rejection' action type form) ...
   // ... and the geometry board part numbers (taken from the 'Search for Geometry Boards by Location or Part Number' interface page .pug code) ...
   // ... and an empty array of zeroes, each of which represents a single [location, part number] combination ... i.e. [0] = ['cambridge', '8760051'], [1] = ['cambridge', '8760054'], etc.
-  const rejectionLocations = ['cambridge', 'chicago', 'daresbury', 'lancaster', 'sheffield', 'sussex', 'williamAndMary'];
+  const rejectionLocations = ['cambridge', 'chicago', 'daresbury', 'lancaster', 'manchester', 'sheffield', 'sussex', 'williamAndMary'];
   const boardPartNumbers = [
     '8760051', '8760054', '8760062', '8760113', '8760038', '8760040', '8760042', '8760044', '8760057', '8760059',
     '8760111', '8760024', '8760026', '8760030', '8760036', '8760107', '8760028', '8760032', '8760034', '8760109',
     '8760119', '8760115', '8760123', '8760122', '8760121', '8760120', '8760104', '8760116', '8760108'
   ];
 
-  let actionCounts_array = Array(rejectionLocations.length * boardPartNumbers.length).fill(0);
+  let rejectionCounts_array = Array(rejectionLocations.length * boardPartNumbers.length).fill(0);
 
-  // For each previously found 'Factory Board Rejection' action ...
-  for (const action of records) {
-    // Retrieve the corresponding component record
-    const component = await Components.retrieve(MUUID.from(action.componentUuid).toString());
+  // For each previously found 'Geometry Board' component ...
+  for (const board of records) {
+    // Extract the rejection location from the board's 'rejectionDetail' string
+    const rejectionLocation_stringValue = board.rejectionDetail.split(' - ')[0].substring(1);
+    const rejectionLocation = Object.keys(utils.dictionary_locations).find(key => utils.dictionary_locations[key] === rejectionLocation_stringValue);
 
     // Find which indices in their respective arrays correspond to the rejection location and the board part number ...
     // ... and from these, determine which index of the 'actionCounts' array this action's [location, part number] combination corresponds to, and increment it by 1
-    actionCounts_array[(rejectionLocations.indexOf(action.location) * boardPartNumbers.length) + boardPartNumbers.indexOf(component.data.partNumber)] += 1;
+    rejectionCounts_array[(rejectionLocations.indexOf(rejectionLocation) * boardPartNumbers.length) + boardPartNumbers.indexOf(board.partNumber)] += 1;
   }
 
   // We need the return of this function to be an array of OBJECTS, to match the return of the 'Components.counts_byPartNumberAndLocation()' function ...
@@ -486,7 +494,7 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
   for (const [locationIndex, location] of rejectionLocations.entries()) {
     for (const [partNumberIndex, partNumber] of boardPartNumbers.entries()) {
       actionCounts.push({
-        'count': actionCounts_array[(locationIndex * boardPartNumbers.length) + partNumberIndex],
+        'count': rejectionCounts_array[(locationIndex * boardPartNumbers.length) + partNumberIndex],
         'partNumber': partNumber,
         'location': location,
       })
