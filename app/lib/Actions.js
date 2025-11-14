@@ -185,6 +185,7 @@ async function save(input, req) {
       else if (newRecord.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
       else if (newRecord.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
       else if (newRecord.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
+      else if (newRecord.data.reasonForRejectionFromInventory.removedFromApa) { rejectionReason = 'Removed from APA' }
       else if (newRecord.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
 
       const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
@@ -465,7 +466,7 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
   // Set up arrays of the possible board rejection locations (taken from the 'Factory Board Rejection' action type form) ...
   // ... and the geometry board part numbers (taken from the 'Search for Geometry Boards by Location or Part Number' interface page .pug code) ...
   // ... and an empty array of zeroes, each of which represents a single [location, part number] combination ... i.e. [0] = ['cambridge', '8760051'], [1] = ['cambridge', '8760054'], etc.
-  const rejectionLocations = ['cambridge', 'chicago', 'daresbury', 'lancaster', 'sheffield', 'sussex', 'williamAndMary'];
+  const rejectionLocations = ['cambridge', 'chicago', 'daresbury', 'lancaster', 'manchester', 'sheffield', 'sussex', 'williamAndMary'];
   const boardPartNumbers = [
     '8760051', '8760054', '8760062', '8760113', '8760038', '8760040', '8760042', '8760044', '8760057', '8760059',
     '8760111', '8760024', '8760026', '8760030', '8760036', '8760107', '8760028', '8760032', '8760034', '8760109',
