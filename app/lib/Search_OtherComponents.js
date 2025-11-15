@@ -665,6 +665,8 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
 
     if (acceptanceStatus === 'rejected') {
       matchConditions['reception.location'] = acceptanceStatus;
+    } else if (acceptanceStatus === 'accepted') {
+      matchConditions['reception.location'] = { $not: { $eq: 'rejected' } };
     }
 
     aggregation_stages.push({ $match: matchConditions });
