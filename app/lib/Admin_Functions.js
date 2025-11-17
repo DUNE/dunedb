@@ -269,9 +269,10 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
   // Project only the fields that will be needed for the later steps
   aggregation_stages.push({
     $project: {
-      'componentUuid': true,
-      'data': true,
-      'validity': true,
+      actionId: true,
+      componentUuid: true,
+      data: true,
+      validity: true,
     }
   });
 
@@ -283,6 +284,7 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
+      actionId: { '$first': '$actionId' },
       componentUuid: { '$first': '$componentUuid' },
       data: { '$first': '$data' },
       validity: { '$first': '$validity' },
@@ -301,7 +303,7 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
 
     if (board.reception != null) {
       // Get the latest version of the MOST RECENT 'Factory Board Rejection' action performed on the board
-      match_condition = {
+      const match_condition = {
         typeFormId: 'FactoryBoardRejection',
         componentUuid: board.componentUuid,
       }
@@ -311,21 +313,7 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
 
       // If the most recent rejection action has a disposition of 'rejected' ...
       if (mostRecentRejectionAction.data.disposition === 'rejected') {
-        // Set up a 'matching condition' object containing the component UUID (remembering that the UUID has to be of 'MUUID' type, not a string)
-        const componentUuid = board.componentUuid;
-        let match_condition = { componentUuid };
-
-        if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
-
-        match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
-
-        // Set the desired reception information for the geometry board:
-        // - location = 'rejected'
-        // - date = the date on which the Factory Board Rejection action was performed (or last edited)
-        // - detail = a string containing some additional information about why the board was rejected
-        const newBoardLocation = 'rejected';
-        const rejectionLocation = utils.dictionary_locations[mostRecentRejectionAction.data.boardRejectionLocation]
-        const rejectionDate = mostRecentRejectionAction.validity.startDate.toISOString().slice(0, 10);
+        const rejectionLocation = utils.dictionary_locations[mostRecentRejectionAction.data.boardRejectionLocation];
         let rejectionReason = '';
 
         if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.step) { rejectionReason = 'Step Failure' }
@@ -341,24 +329,7 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
         else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.removedFromApa) { rejectionReason = 'Removed from APA' }
         else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
 
-        const rejectionDetail = `[${rejectionLocation} - ${rejectionReason}]`;
-
-        // Update the reception information of ALL records with the matching component UUID (i.e. all versions of the component in question)
-        const result = await db.collection('components')
-          .updateMany(
-            match_condition,
-            [
-              {
-                $set: {
-                  'reception.location': newBoardLocation,
-                  'reception.date': rejectionDate,
-                  'reception.detail': rejectionDetail,
-                }
-              },
-            ]
-          )
-
-        if (result.ok === 0) throw new Error(`Admin_Functions::updateComponentLocations_viaActions() - failed to update the component records!`);
+        const result = await Components.updateLocation(mostRecentRejectionAction.componentUuid, 'rejected', mostRecentRejectionAction.validity.startDate.toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
       }
     } else {
       logger.info(action.componentUuid, 'Component reception object is null!');
