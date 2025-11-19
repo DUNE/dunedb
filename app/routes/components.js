@@ -780,8 +780,15 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
       }
     } else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.formId)) {
       for (let board of components) {
-        if (board.reception != null) { board.additionalInformation = utils.dictionary_locations[board.reception.location]; }
-        else { board.additionalInformation = '[reception object missing!]'; }
+        if (board.reception != null) {
+          if (board.reception.location === 'rejected') {
+            board.additionalInformation = `${utils.dictionary_locations[board.reception.location]} ${board.reception.detail}`;
+          } else {
+            board.additionalInformation = utils.dictionary_locations[board.reception.location];
+          }
+        } else {
+          board.additionalInformation = '[reception object missing!]';
+        }
       }
     } else {
       for (let component of components) { component.additionalInformation = ''; }

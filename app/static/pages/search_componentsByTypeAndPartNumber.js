@@ -118,11 +118,18 @@ function postSuccess(result) {
 
       $('#summary3').append('<br>');
 
-      const tableStart = `
+      const tableStart_accepted = `
         <tr>
           <th style = 'width: 23%'>UKID</th>
           <th style = 'width: 42%'>Date at Location</th>
           <th style = 'width: 35%'>Installed on APA</th>
+        </tr>`;
+
+      const tableStart_rejected = `
+        <tr>
+          <th style = 'width: 23%'>UKID</th>
+          <th style = 'width: 42%'>Date at Location</th>
+          <th style = 'width: 35%'>Rejection info</th>
         </tr>`;
 
       for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
@@ -132,7 +139,12 @@ function postSuccess(result) {
           </tr>`;
 
         $('#results1').append(groupTitle);
-        $('#results1').append(tableStart);
+
+        if (boardGroup.receptionLocation === 'rejected') {
+          $('#results1').append(tableStart_rejected);
+        } else {
+          $('#results1').append(tableStart_accepted);
+        }
 
         for (const i in boardGroup.componentUuids) {
           const boardText = `
@@ -155,7 +167,12 @@ function postSuccess(result) {
           </tr>`;
 
         $('#results2').append(groupTitle);
-        $('#results2').append(tableStart);
+
+        if (boardGroup.receptionLocation === 'rejected') {
+          $('#results2').append(tableStart_rejected);
+        } else {
+          $('#results2').append(tableStart_accepted);
+        }
 
         for (const i in boardGroup.componentUuids) {
           const boardText = `
@@ -178,7 +195,12 @@ function postSuccess(result) {
           </tr>`;
 
         $('#results3').append(groupTitle);
-        $('#results3').append(tableStart);
+
+        if (boardGroup.receptionLocation === 'rejected') {
+          $('#results3').append(tableStart_rejected);
+        } else {
+          $('#results3').append(tableStart_accepted);
+        }
 
         for (const i in boardGroup.componentUuids) {
           const boardText = `

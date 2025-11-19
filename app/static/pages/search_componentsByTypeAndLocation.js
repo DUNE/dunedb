@@ -1,7 +1,6 @@
 // Declare variables to hold the user-specified search parameters
 let componentType = null;
 let componentLocation = null;
-let acceptanceStatus = 'any';
 let toothStripStatus = 'any';
 let conformanceStatus = 'any';
 let qaChecksStatus = 'any';
@@ -19,10 +18,6 @@ async function renderSearchForms() {
 
   $('#locationSelection').on('change', async function () {
     componentLocation = $('#locationSelection').val();
-  });
-
-  $('#acceptanceStatusSelection').on('change', async function () {
-    acceptanceStatus = $('#acceptanceStatusSelection').val();
   });
 
   $('#toothStripStatusSelection').on('change', async function () {
@@ -52,7 +47,7 @@ async function renderSearchForms() {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/componentsByTypeAndLocation/${componentType}/${componentLocation}/${acceptanceStatus}/${toothStripStatus}/${conformanceStatus}/${qaChecksStatus}`,
+        url: `/json/search/componentsByTypeAndLocation/${componentType}/${componentLocation}/${toothStripStatus}/${conformanceStatus}/${qaChecksStatus}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
@@ -119,12 +114,23 @@ function postSuccess(result) {
 
       $('#summary3').append('<br>');
 
-      const tableStart = `
-        <tr>
-          <th style = 'width: 23%'>UKID</th>
-          <th style = 'width: 42%'>Date at Location</th>
-          <th style = 'width: 35%'>Installed on APA</th>
-        </tr>`;
+      let tableStart = '';
+
+      if ($('#locationSelection option:selected').val() === 'rejected') {
+        tableStart = `
+          <tr>
+            <th style = 'width: 23%'>UKID</th>
+            <th style = 'width: 42%'>Date at Location</th>
+            <th style = 'width: 35%'>Rejection Info</th>
+          </tr>`;
+      } else {
+        tableStart = `
+          <tr>
+            <th style = 'width: 23%'>UKID</th>
+            <th style = 'width: 42%'>Date at Location</th>
+            <th style = 'width: 35%'>Installed on APA</th>
+          </tr>`;
+      }
 
       for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupTitle = `

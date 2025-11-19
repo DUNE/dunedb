@@ -396,7 +396,7 @@ async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
 
 
 /// Retrieve a list of components that match the specified type and that are at a specified location
-async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatus, toothStripStatus, conformanceStatus, qaChecksStatus) {
+async function componentsByTypeAndLocation(typeFormId, location, toothStripStatus, conformanceStatus, qaChecksStatus) {
   let aggregation_stages = [];
 
   // Allow for a 'null' location to be specified, to make debugging of components with missing locations easier
@@ -488,7 +488,7 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
     .toArray();
 
   // Reorganise the query results to make it easier to display them on the interface page ... the format of the reorganised results depends on the specified component type
-  // Additionally for the 'Geometry Board' component type, filter the results based on the optional 'board acceptance status' and 'tooth strip attachment status' search parameters
+  // Additionally for the 'Geometry Board' component type, filter the results based on the optional 'tooth strip attachment status' search parameter
   // Alternatively for any of the 'populated board' or 'Cable Harness' component types, filter the results based on the optional 'QA checks status' search parameters
   let cleanedResults = [];
 
@@ -505,28 +505,6 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
       cleanedBoardGroup.installedOnAPA = [];
 
       for (const boardUuid of boardGroup.componentUuid) {
-        let boardAccepted = false;
-        let includeBoard_basedOnAcceptanceStatus = false;
-
-        let match_condition = {
-          typeFormId: 'FactoryBoardRejection',
-          componentUuid: MUUID.from(boardUuid).toString(),
-        };
-
-        const rejectionActions = await Actions.list(match_condition);
-
-        if (rejectionActions.length === 0) boardAccepted = true;
-        else {
-          const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
-          const disposition = rejectionAction.data.disposition;
-
-          if (((disposition === 'useAsIs') || (disposition === 'remediated'))) boardAccepted = true;
-        }
-
-        if ((acceptanceStatus === 'any') || ((acceptanceStatus === 'accepted') && (boardAccepted == true)) || (acceptanceStatus == 'rejected') && (boardAccepted == false)) {
-          includeBoard_basedOnAcceptanceStatus = true;
-        }
-
         let toothStripAttached = false;
         let includeBoard_basedOnToothStripStatus = false;
 
@@ -540,10 +518,6 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
         if (toothStripAttachmentActions.length > 0) toothStripAttached = true;
 
         if ((toothStripStatus === 'any') || ((toothStripStatus === 'attached') && (toothStripAttached == true)) || (toothStripStatus == 'notAttached') && (toothStripAttached == false)) {
-          includeBoard_basedOnToothStripStatus = true;
-        }
-
-        if (includeBoard_basedOnAcceptanceStatus && includeBoard_basedOnToothStripStatus) {
           const board = await Components.retrieve(MUUID.from(boardUuid).toString());
 
           cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
@@ -562,6 +536,12 @@ async function componentsByTypeAndLocation(typeFormId, location, acceptanceStatu
               cleanedBoardGroup.installedOnAPA.push(apa.data.componentName);
             } else {
               cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+            }
+          } else if (location === 'rejected') {
+            if (board.reception.detail) {
+              cleanedBoardGroup.installedOnAPA.push(board.reception.detail.substring(1, board.reception.detail.length - 1));
+            } else {
+              cleanedBoardGroup.installedOnAPA.push('[No rejection info!]');
             }
           } else {
             cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
@@ -676,13 +656,20 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
   let aggregation_stages = [];
 
   // Match against the type form ID and specified part number to get records of all components of the specified type and part number
+  // For geometry boards, also match against the reception location if the specified 'acceptanceStatus' is 'rejected'
   if (typeFormId === 'GeometryBoard') {
-    aggregation_stages.push({
-      $match: {
-        'formId': typeFormId,
-        'data.partNumber': partNumber,
-      }
-    });
+    let matchConditions = {
+      'formId': typeFormId,
+      'data.partNumber': partNumber,
+    }
+
+    if (acceptanceStatus === 'rejected') {
+      matchConditions['reception.location'] = acceptanceStatus;
+    } else if (acceptanceStatus === 'accepted') {
+      matchConditions['reception.location'] = { $not: { $eq: 'rejected' } };
+    }
+
+    aggregation_stages.push({ $match: matchConditions });
   } else if (typeFormId === 'GroundingMeshPanel') {
     aggregation_stages.push({
       $match: {
@@ -722,7 +709,8 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
     .toArray();
 
   // Reorganise the query results to make it easier to display them on the interface page ... the format of the reorganised results depends on the specified component type
-  // Additionally for the 'Geometry Board' component type, filter the results based on the optional 'board acceptance status' and 'tooth strip attachment status' search parameters
+  // Additionally for the 'Geometry Board' component type, filter the results based on the optional 'tooth strip attachment status' search parameter
+  // (remembering that 'filtering' based on the other optional 'board acceptance status' parameter was already applied at the matching stage above)
   let cleanedResults = [];
 
   if (typeFormId === 'GeometryBoard') {
@@ -737,28 +725,6 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
       cleanedBoardGroup.installedOnAPA = [];
 
       for (const boardUuid of boardGroup.componentUuid) {
-        let boardAccepted = false;
-        let includeBoard_basedOnAcceptanceStatus = false;
-
-        let match_condition = {
-          typeFormId: 'FactoryBoardRejection',
-          componentUuid: MUUID.from(boardUuid).toString(),
-        };
-
-        const rejectionActions = await Actions.list(match_condition);
-
-        if (rejectionActions.length === 0) boardAccepted = true;
-        else {
-          const rejectionAction = await Actions.retrieve(rejectionActions[0].actionId);
-          const disposition = rejectionAction.data.disposition;
-
-          if (((disposition === 'useAsIs') || (disposition === 'remediated'))) boardAccepted = true;
-        }
-
-        if ((acceptanceStatus === 'any') || ((acceptanceStatus === 'accepted') && (boardAccepted == true)) || (acceptanceStatus == 'rejected') && (boardAccepted == false)) {
-          includeBoard_basedOnAcceptanceStatus = true;
-        }
-
         let toothStripAttached = false;
         let includeBoard_basedOnToothStripStatus = false;
 
@@ -772,10 +738,6 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
         if (toothStripAttachmentActions.length > 0) toothStripAttached = true;
 
         if ((toothStripStatus === 'any') || ((toothStripStatus === 'attached') && (toothStripAttached == true)) || (toothStripStatus == 'notAttached') && (toothStripAttached == false)) {
-          includeBoard_basedOnToothStripStatus = true;
-        }
-
-        if (includeBoard_basedOnAcceptanceStatus && includeBoard_basedOnToothStripStatus) {
           const board = await Components.retrieve(MUUID.from(boardUuid).toString());
 
           cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
@@ -794,6 +756,12 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
               cleanedBoardGroup.installedOnAPA.push(apa.data.componentName);
             } else {
               cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+            }
+          } else if (boardGroup._id.receptionLocation === 'rejected') {
+            if (board.reception.detail) {
+              cleanedBoardGroup.installedOnAPA.push(board.reception.detail.substring(1, board.reception.detail.length - 1));
+            } else {
+              cleanedBoardGroup.installedOnAPA.push('[No rejection info!]');
             }
           } else {
             cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
