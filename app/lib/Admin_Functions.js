@@ -315,21 +315,30 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
       if (mostRecentRejectionAction.data.disposition === 'rejected') {
         const rejectionLocation = utils.dictionary_locations[mostRecentRejectionAction.data.boardRejectionLocation];
         let rejectionReason = '';
+        let boardNeedsUpdating = false;
 
-        if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.step) { rejectionReason = 'Step Failure' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.solderMaskScratch) { rejectionReason = 'Solder Mask Scratch' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.scratchInCopperTrace) { rejectionReason = 'Copper Trace Scratch' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.brokenTooth) { rejectionReason = 'Broken Tooth' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.delaminationOfLayers) { rejectionReason = 'Delamination of Layers' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.bentPins) { rejectionReason = 'Bent Pins' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.epoxyOnSolderPadsOrToothStrip) { rejectionReason = 'Misplaced Epoxy' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.removedFromApa) { rejectionReason = 'Removed from APA' }
-        else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
+        if ((mostRecentRejectionAction.data.reasonForRejectionFromInventory.step) || (mostRecentRejectionAction.data.reasonForRejectionFromInventory.stepBetweenBoardAndStripTooLarge)) {
+          rejectionReason = 'Step Failure';
+          boardNeedsUpdating = true;
+        }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.solderMaskScratch) { rejectionReason = 'Solder Mask Scratch' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.scratchInCopperTrace) { rejectionReason = 'Copper Trace Scratch' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.brokenTooth) { rejectionReason = 'Broken Tooth' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.delaminationOfLayers) { rejectionReason = 'Delamination of Layers' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.bentPins) { rejectionReason = 'Bent Pins' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.epoxyOnSolderPadsOrToothStrip) { rejectionReason = 'Misplaced Epoxy' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.toothStripNotProperlyAttached) { rejectionReason = 'Misattached Tooth Strip' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.qrCodeIssue) { rejectionReason = 'QR Code Issue' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.installationCausedDamage) { rejectionReason = 'Installation Damage' }
+        //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.removedFromApa) { rejectionReason = 'Removed from APA' }
+        else if ((mostRecentRejectionAction.data.reasonForRejectionFromInventory.other) || (mostRecentRejectionAction.data.reasonForRejectionFromInventory.otherProvideDetailsInTheCommentsBoxOnTheRight)) {
+          rejectionReason = 'Unspecified Reason';
+          boardNeedsUpdating = true;
+        }
 
-        const result = await Components.updateLocation(mostRecentRejectionAction.componentUuid, 'rejected', mostRecentRejectionAction.validity.startDate.toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
+        if (boardNeedsUpdating) {
+          const result = await Components.updateLocation(mostRecentRejectionAction.componentUuid, 'rejected', mostRecentRejectionAction.validity.startDate.toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
+        }
       }
     } else {
       logger.info(action.componentUuid, 'Component reception object is null!');
