@@ -333,7 +333,12 @@ async function updateComponentLocations_viaActions(actionTypeFormId) {
         //    else if (mostRecentRejectionAction.data.reasonForRejectionFromInventory.removedFromApa) { rejectionReason = 'Removed from APA' }
         else if ((mostRecentRejectionAction.data.reasonForRejectionFromInventory.other) || (mostRecentRejectionAction.data.reasonForRejectionFromInventory.otherProvideDetailsInTheCommentsBoxOnTheRight)) {
           rejectionReason = 'Unspecified Reason';
-          boardNeedsUpdating = true;
+
+          if (board.reception.detail !== '[Chicago - Removed from APA]') {
+            boardNeedsUpdating = true;
+          } else {
+            boardNeedsUpdating = false;
+          }
         }
 
         if (boardNeedsUpdating) {
