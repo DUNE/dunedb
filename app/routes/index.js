@@ -34,7 +34,6 @@ module.exports = routes;
   /components/bulkQRCodes
   /components/bulkQRCodes/:typeFormId/:firstNumber/:lastNumber
   /json/component/:uuid
-  /json/component/:typeFormId/:typeRecordNumber
   /json/component
   /json/componentBatch
   /json/newComponentUUID

@@ -883,26 +883,6 @@ router.get(['/json/component/:uuid', '/api/component/:uuid'], permissions.checkP
 });
 
 
-/// Retrieve an existing component record via its type form ID and type record number
-router.get(['/json/component/:typeFormId/:typeRecordNumber', '/api/component/:typeFormId/:typeRecordNumber'], permissions.checkPermissionJson('components:view'), async function (req, res, next) {
-  try {
-    // Retrieve a reduced instance of the component record corresponding to the specified type form ID and type record number
-    const componentsList = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, req.params.typeRecordNumber);
-
-    // If at least one record has been returned, return it in JSON format ... otherwise, return 'null' explicitly (also in JSON format)
-    if (componentsList.length > 0) {
-      return res.status(200).json(componentsList[0]);
-    } else {
-      return res.status(200).json(null);
-    }
-
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
 /// Create a new component or edit an existing component record
 router.post(['/json/component', '/api/component'], permissions.checkPermissionJson('components:edit'), async function (req, res, next) {
   try {
