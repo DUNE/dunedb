@@ -119,7 +119,7 @@ async function forExecSummary(componentUUID) {
       winding_numberOfReplacedWires: 0,
       winding_numberOfTensionAlarms: 0,
       soldering_actionID: '',
-      soldering_numberOfBadSolders: 0,
+      soldering_numberOfReworkedSolders: 0,
       tensions_actionID: '',
       tensions_location: '[no information found]',
       tensions_system: '[no information found]',
@@ -574,7 +574,7 @@ async function forExecSummary(componentUUID) {
       .toArray();
 
     if (results.length > 0) {
-      let numberOfBadSolders = 0;
+      let numberOfReworkedSolders = 0;
 
       for (let i = 0; i < results[0].badSolderJoints.length; i++) {
         let singleJoint_solderPads = results[0].badSolderJoints[i].solderPad;
@@ -583,11 +583,11 @@ async function forExecSummary(componentUUID) {
           singleJoint_solderPads = `${singleJoint_solderPads}`;
         }
 
-        numberOfBadSolders += singleJoint_solderPads.split(',').length;
+        numberOfReworkedSolders += singleJoint_solderPads.split(',').length;
       }
 
       collatedInfo[layers[i]].soldering_actionID = results[0].actionId;
-      collatedInfo[layers[i]].soldering_numberOfBadSolders = numberOfBadSolders;
+      collatedInfo[layers[i]].soldering_numberOfReworkedSolders = numberOfReworkedSolders;
     }
 
     aggregation_stages = [];
