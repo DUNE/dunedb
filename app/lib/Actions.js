@@ -6,7 +6,6 @@ const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
-const logger = require('./logger');
 const permissions = require('./permissions');
 const utils = require('./utils');
 
