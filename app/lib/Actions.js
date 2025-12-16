@@ -6,7 +6,6 @@ const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
-const logger = require('./logger');
 const permissions = require('./permissions');
 const utils = require('./utils');
 
@@ -43,11 +42,24 @@ async function save(input, req) {
 
   if (!typeForm) throw new Error(`Actions:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known action type form!`);
 
-  // Check that the person performing or editing the action is permitted to do so ... this is an additional security check for specific action types, beyond a simple global 'permissions' check
-  // It is designed to make sure that these actions are not being performed by the logged-in user on behalf of someone else, without the latter's knowledge or permission 
+  // Some action types should be submitted only by the APA Factory Leads - these are typically the most important and/or highest level QA checks and signoffs
+  // Check that the submitter (i.e. the currently logged-in user) is the same as the person who's name is being used for the QA signoff ... if not, do not allow the action to be submitted
+  // Since the list of personnel for QA signoffs is always only the APA Factory Leads, this check should restrict such actions to only be submittable by leads WHEN LOGGED IN AS THEMSELVES
   if (input.typeFormId === 'AssembledAPAQACheck') {
-    if (!(utils.listIDs_apaFactoryLeads.includes(req.user.user_id))) {
-      throw new Error(`Actions:save() - you are not permitted to perform or edit this type of action ... it can only be done by one of the following personnel: ${Object.values(utils.dictionary_apaFactoryLeads).join(', ')}`);
+    if (req.user.displayName !== utils.dictionary_apaFactoryLeads[input.data.personSigningOff]) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off the QA Checks on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
+    }
+  }
+
+  if (input.typeFormId === 'CompletedAPAQCChecklist') {
+    if (req.user.displayName !== utils.dictionary_apaFactoryLeads[input.data.personSigningOff]) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off the APA Final Assembly on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
+    }
+  }
+
+  if (input.typeFormId === 'prep_mesh_panel_install') {
+    if ((req.user.displayName !== utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]) && (input.data.actionComplete)) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off the Installation QA and complete this action on behalf of someone else (${utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]}) - this is not permitted!`);
     }
   }
 

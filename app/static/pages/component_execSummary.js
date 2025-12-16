@@ -1626,17 +1626,17 @@ function SetEntry_wireLayer(layer, layerInfo) {
                     {
                       "components": [
                         {
-                          "label": "# Bad Solders",
+                          "label": "# Reworked Solders",
                           "mask": false,
                           "disabled": true,
                           "tableView": false,
                           "delimiter": false,
                           "requireDecimal": false,
                           "inputFormat": "plain",
-                          "key": "badSolders",
+                          "key": "reworkedSolders",
                           "type": "number",
                           "input": true,
-                          "defaultValue": layerInfo.soldering_numberOfBadSolders
+                          "defaultValue": layerInfo.soldering_numberOfReworkedSolders
                         }
                       ],
                       "size": "sm",
