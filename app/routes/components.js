@@ -56,7 +56,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       for (let entry of actions) {
         if (entry.typeFormId !== 'BoardShipment') {
           entry.data = {};
-          entry.data.checksPassed = 'No';
+          entry.data.checksPassed = '[n.a.]';
 
           const record = await Actions.retrieve(entry.actionId);
 
@@ -65,24 +65,48 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
 
             if ((record.data.nonConformingDisposition === 'boardIsConformant') || (record.data.nonConformingDisposition === 'useAsIs')) {
               entry.data.checksPassed = 'Yes';
+            } else if ((record.data.nonConformingDisposition === 'toBeDetermined') || (record.data.nonConformingDisposition === '')) {
+              entry.data.checksPassed = 'Unknown';
+            } else {
+              entry.data.checksPassed = 'No';
             }
           } else if (entry.typeFormId === 'BoardToothStripAttachment') {
             entry.data.originOfShipment = record.data.locationWorkPerformed;
 
-            if ((record.data.qcBoardDamage === 'no') && (record.data.qcGapWithBoard === 'no') && (record.data.qcToothStripDamage === 'no') && (record.data.qcStripFlushWithBoard === 'yes') && (record.data.qcCorrectEpoxyApplication === 'yes') && (record.data.qcSolderPadAlignment === 'yes')) {
-              entry.data.checksPassed = 'Yes';
-            }
-          } else if (entry.typeFormId === 'BoardMetrology') {
-            entry.data.originOfShipment = record.data.location;
+            let qcCheck_names = ['qcBoardDamage', 'qcGapWithBoard', 'qcToothStripDamage', 'qcStripFlushWithBoard', 'qcCorrectEpoxyApplication', 'qcSolderPadAlignment'];
+            let qcCheck_passValues = ['no', 'no', 'no', 'yes', 'yes', 'yes'];
+            let numberOfPassedChecks = 0;
+            let numberOfFailedChecks = 0;
+            let numberOfMissingChecks = 0;
 
-            if ((record.data.featurePositionChecks === 'passed') && (record.data.boardThicknessCheck === 'passed')) {
-              entry.data.checksPassed = 'Yes';
+            for (const [index, qcCheck] of qcCheck_names.entries()) {
+              if (record.data.hasOwnProperty(qcCheck)) {
+                if (record.data[qcCheck] === qcCheck_passValues[index]) {
+                  numberOfPassedChecks += 1;
+                } else {
+                  numberOfFailedChecks += 1;
+                }
+              } else {
+                numberOfMissingChecks += 1;
+              }
+            }
+
+            if (numberOfFailedChecks === 0) {
+              if (numberOfMissingChecks === 0) {
+                entry.data.checksPassed = 'Yes';
+              } else {
+                entry.data.checksPassed = 'Yes (partial)';
+              }
+            } else {
+              entry.data.checksPassed = 'No';
             }
           } else if (entry.typeFormId === 'FactoryBoardRejection') {
             entry.data.originOfShipment = record.data.boardRejectionLocation;
 
             if ((record.data.disposition === 'remediated') || (record.data.disposition === 'useAsIs')) {
               entry.data.checksPassed = 'Yes';
+            } else {
+              entry.data.checksPassed = 'No';
             }
           }
         }
@@ -99,7 +123,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     }
 
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
-    // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only two workflow types, so we can do this explicitly)
+    // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only a handful of workflow types, so we can do this explicitly)
     // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
     const list_workflowComponents = ['AssembledAPA', 'APAFrame', 'APAShipment'];
     const workflowComponent = list_workflowComponents.includes(component.formId);
@@ -876,26 +900,6 @@ router.get(['/json/component/:uuid', '/api/component/:uuid'], permissions.checkP
 
     // Return the record in JSON format
     return res.status(200).json(component);
-  } catch (err) {
-    logger.info({ route: req.route.path }, err.message);
-    res.status(500).json({ error: err.toString() });
-  }
-});
-
-
-/// Retrieve an existing component record via its type form ID and type record number
-router.get(['/json/component/:typeFormId/:typeRecordNumber', '/api/component/:typeFormId/:typeRecordNumber'], permissions.checkPermissionJson('components:view'), async function (req, res, next) {
-  try {
-    // Retrieve a reduced instance of the component record corresponding to the specified type form ID and type record number
-    const componentsList = await Search_OtherComponents.componentsByTypeAndNumber(req.params.typeFormId, req.params.typeRecordNumber);
-
-    // If at least one record has been returned, return it in JSON format ... otherwise, return 'null' explicitly (also in JSON format)
-    if (componentsList.length > 0) {
-      return res.status(200).json(componentsList[0]);
-    } else {
-      return res.status(200).json(null);
-    }
-
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
