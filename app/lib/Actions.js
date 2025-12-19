@@ -379,6 +379,7 @@ async function list(match_condition, options) {
       componentUuid: true,
       workflowId: true,
       validity: true,
+      data: true,
     }
   })
 
@@ -396,6 +397,7 @@ async function list(match_condition, options) {
       componentUuid: { '$first': '$componentUuid' },
       workflowId: { '$first': '$workflowId' },
       lastEditDate: { '$first': '$validity.startDate' },
+      data: { '$first': '$data' },
     },
   });
 
