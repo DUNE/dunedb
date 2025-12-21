@@ -105,6 +105,46 @@ async function save(input, req) {
     }
   }
 
+  // NCR actions each always contain (4) arrays of damaged, misplaced, missing and shorted wires ...
+  // ... however, depending on the specific user input, any number of them may not contain any information
+  // Formio doesn't like this, and can sometimes write a partial (single) non-empty entry to any unused array ... which can lead to the APA Executive Summary not being created correctly
+  // For these types of action, check if each array contains a single partial entry, and if so replace it with a correct and complete one
+  const correctedEntry = {
+    wireLayer: '',
+    readoutChannel: null,
+    headBoardAndPad: '',
+    coldElectronicsChannel: '',
+    textField: '',
+    offlineChannel: '',
+    endPointsForMissingSegments: '',
+  };
+
+  if (newRecord.typeFormId === 'APANonConformance') {
+    if (newRecord.data.damagedWireGrid.length === 1) {
+      if (!newRecord.data.damagedWireGrid[0].hasOwnProperty('wireLayer')) {
+        newRecord.data.damagedWireGrid[0] = correctedEntry;
+      }
+    }
+
+    if (newRecord.data.misplacedGrid.length === 1) {
+      if (!newRecord.data.misplacedGrid[0].hasOwnProperty('wireLayer')) {
+        newRecord.data.misplacedGrid[0] = correctedEntry;
+      }
+    }
+
+    if (newRecord.data.dataGrid.length === 1) {
+      if (!newRecord.data.dataGrid[0].hasOwnProperty('wireLayer')) {
+        newRecord.data.dataGrid[0] = correctedEntry;
+      }
+    }
+
+    if (newRecord.data.shortedGrid.length === 1) {
+      if (!newRecord.data.shortedGrid[0].hasOwnProperty('wireLayer')) {
+        newRecord.data.shortedGrid[0] = correctedEntry;
+      }
+    }
+  }
+
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
 
@@ -379,6 +419,7 @@ async function list(match_condition, options) {
       componentUuid: true,
       workflowId: true,
       validity: true,
+      data: true,
     }
   })
 
@@ -396,6 +437,7 @@ async function list(match_condition, options) {
       componentUuid: { '$first': '$componentUuid' },
       workflowId: { '$first': '$workflowId' },
       lastEditDate: { '$first': '$validity.startDate' },
+      data: { '$first': '$data' },
     },
   });
 

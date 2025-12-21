@@ -26,8 +26,13 @@ block content
         thead
           tr
             th.col-md-2 Action ID
-            th.col-md-3 Performed on Component:
-            th.col-md-1
+
+            if actionTypeForm.formId == 'APANonConformance'
+              th.col-md-2 Performed on Component:
+              th.col-md-5 NCR Title 
+            else 
+              th.col-md-4 Performed on Component:
+              th.col-md-3 
             th.col-md-2 Last Performed On:
             th.col-md-1
 
@@ -41,7 +46,9 @@ block content
                   a(href = `/action/${action.actionId}`) #{action.actionId}
                 td
                   a(href = `/component/${uuid}`) #{action.componentName}
-                td
+
+                td #{action.additionalInformation} 
+
                 td
                   +dateTimeFormat(action.lastEditDate)
                 td
