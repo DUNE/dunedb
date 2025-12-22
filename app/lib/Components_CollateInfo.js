@@ -675,9 +675,9 @@ async function forExecSummary(componentUUID) {
       result.types = typesString.substring(0, typesString.length - 2);
 
       if (result.disposition === 'useAsIs') {
-        if ((result.missingWireData[0].wireLayer !== '') || (result.shortedWireData[0].wireLayer !== '')) {
-          let missingShortedWires = [];
+        let missingShortedWires = [];
 
+        if (result.missingWireData[0].hasOwnProperty('wireLayer')) {
           if (result.missingWireData[0].wireLayer !== '') {
             for (const missingWire of result.missingWireData) {
               missingShortedWires.push({
@@ -690,7 +690,9 @@ async function forExecSummary(componentUUID) {
               })
             }
           }
+        }
 
+        if (result.shortedWireData[0].hasOwnProperty('wireLayer')) {
           if (result.shortedWireData[0].wireLayer !== '') {
             for (const shortedWire of result.shortedWireData) {
               missingShortedWires.push({
@@ -703,7 +705,9 @@ async function forExecSummary(componentUUID) {
               })
             }
           }
+        }
 
+        if (missingShortedWires.length > 0) {
           result.missingShortedWires = missingShortedWires;
 
           delete result.nonConf_type;

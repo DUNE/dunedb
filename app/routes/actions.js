@@ -388,6 +388,16 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
       }
     }
 
+    // For certain action types, it is useful to display some extra information
+    // Add whatever information is relevant to each action record (but using the same generic field name regardless of what the information actually is)
+    if (actionTypeForm.formId == 'APANonConformance') {
+      for (let ncrAction of actions) {
+        ncrAction.additionalInformation = ncrAction.data.nonConformanceTitle;
+      }
+    } else {
+      for (let action of actions) { action.additionalInformation = ''; }
+    }
+
     const workflowAction = list_workflowActions.includes(actionTypeForm.formName);
 
     // Render the interface page
