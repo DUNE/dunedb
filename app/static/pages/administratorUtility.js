@@ -26,8 +26,12 @@ async function renderInputForm() {
 }
 
 
-function postSuccess(result) {
-  window.location.href = `/actions/${result}/list`;    // Change as appropriate for the required utility
+function postSuccess(result) {    // Change as appropriate for the required utility
+  if (result === 'ALL_COMPONENTS') {
+    window.location.href = `/componentTypes/list`;
+  } else {
+    window.location.href = `/components/${result}/list`;
+  }
 }
 
 
