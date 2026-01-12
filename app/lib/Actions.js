@@ -79,6 +79,19 @@ async function save(input, req) {
   newRecord.typeFormId = input.typeFormId;
   newRecord.typeFormName = typeForm.formName;
   newRecord.componentUuid = MUUID.from(input.componentUuid);
+
+  const componentRecord = await Components.retrieve(newRecord.componentUuid);
+
+  if (componentRecord) {
+    newRecord.componentName = componentRecord.data.componentName;
+    newRecord.componentTypeFormId = componentRecord.formId;
+    newRecord.componentTypeFormName = componentRecord.formName;
+  } else {
+    newRecord.componentName = '[no component record found!]';
+    newRecord.componentTypeFormId = '[no component record found!]';
+    newRecord.componentTypeFormName = '[no component record found!]';
+  }
+
   newRecord.data = input.data;
 
   if (input.workflowId) newRecord.workflowId = input.workflowId;

@@ -225,8 +225,13 @@ router.get('/administratorUtility', async function (req, res, next) {
 router.post(['/json/administratorUtility/:inputString', '/api/administratorUtility/:inputString'], async function (req, res, next) {
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
+    let result = null;
 
-    const result = await Admin_Functions.cleanComponentRecords(req.params.inputString);    // Change as appropriate for the required utility
+    if (['ALL_COMPONENTS', 'APAFrame', 'AssembledAPA', 'DWA', 'DWAPDB'].includes(req.params.inputString)) {
+      result = await Admin_Functions.cleanComponentRecords(req.params.inputString);    // Change as appropriate for the required utility
+    } else {
+      result = await Admin_Functions.addComponentInfoToActionRecords(req.params.inputString);
+    }
 
     return res.status(201).json(result);
   } catch (err) {
