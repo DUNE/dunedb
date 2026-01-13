@@ -73,8 +73,12 @@ async function addComponentInfoToActionRecords(componentType) {
     filterCondition = { 'typeFormId': { $in: apaFramesAndShipments } }
   } else if (componentType === 'AssembledAPAs') {
     filterCondition = { 'typeFormId': { $in: assembledAPAs } }
-  } else if (componentType === 'GeometryBoards') {
-    filterCondition = { 'typeFormId': { $in: geometryBoards } }
+  } else if (componentType === 'GeometryBoards_BoardToothStripAttachment') {
+    filterCondition = { 'typeFormId': 'BoardToothStripAttachment' }
+  } else if (componentType === 'GeometryBoards_BoardVisualInspection') {
+    filterCondition = { 'typeFormId': 'BoardVisualInspection' }
+  } else if (componentType === 'GeometryBoards_FactoryBoardRejection') {
+    filterCondition = { 'typeFormId': 'FactoryBoardRejection' }
   } else if (componentType === 'GroundingMeshPanels') {
     filterCondition = { 'typeFormId': { $in: groundingMeshPanels } }
   } else if (componentType === 'OtherComponents') {
