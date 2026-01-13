@@ -52,10 +52,22 @@ block content
             option(value = 'SHVBoardShipment') SHV Board Kit
             option(value = 'Yoke') Yoke
             option(value = 'wire_bobbin') Wire Bobbin
-          
+
           select.form-control#inputStringSelection
             option(value = '')
-            option(value = 'FactoryBoardRejection') Factory Board Rejection
+            option(value = 'ALL_COMPONENTS') ALL COMPONENT TYPES
+            option(value = 'APAFrame') APA Frame 
+            option(value = 'AssembledAPA') Assembled APA 
+            option(value = 'DWA') DWA
+            option(value = 'DWAPDB') DWA PDB 
+            option(value = 'N.A.') ----------
+            option(value = 'APAFramesAndShipments') APA Frames and Shipments
+            option(value = 'AssembledAPAs') Assembled APAs
+            option(value = 'GeometryBoards_BoardToothStripAttachment') Geometry Boards (Tooth Strip Attachment)
+            option(value = 'GeometryBoards_BoardVisualInspection') Geometry Boards (Visual Inspection)
+            option(value = 'GeometryBoards_FactoryBoardRejection') Geometry Boards (Factory Rejection)
+            option(value = 'GroundingMeshPanels') Grounding Mesh Panels
+            option(value = 'OtherComponents') ALL OTHER COMPONENT TYPES
 
           .vert-space-x2 
             button.btn-primary.btn-lg#confirmButton Confirm
