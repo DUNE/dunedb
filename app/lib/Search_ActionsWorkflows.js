@@ -1,8 +1,6 @@
 const MUUID = require('uuid-mongodb');
 
-const Components = require('./Components');
 const { db } = require('./db');
-const utils = require('./utils');
 
 const dictionary_apaNCRs_types = {
   damagedWireSegment: 'Damaged Wire Segment',
@@ -71,12 +69,14 @@ async function nonConformanceByComponentType(componentType, disposition, status)
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
+  // Then sort the records reverse alphabetically by the 'componentName' field
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$componentName' },
       title: { '$first': '$data.nonConformanceTitle' },
       componentType: { '$first': '$data.componentType' },
       nonConfTypes_apas: { '$first': '$data.nonConformanceType' },
@@ -85,6 +85,8 @@ async function nonConformanceByComponentType(componentType, disposition, status)
       status: { '$first': '$data.status' },
     },
   });
+
+  aggregation_stages.push({ $sort: { 'componentName': -1 } });
 
   // Match against the specified component type, disposition and status
   // For the disposition and status, set up 'matching' strings that can be used by MongoDB to match against specific record field values, and then match against them
@@ -108,9 +110,6 @@ async function nonConformanceByComponentType(componentType, disposition, status)
   // Add the corresponding component name to each matching record
   // Additionally, get the first 'true' non-conformance type in each record, convert it to something more readable and save this new string to the record
   for (let result of results) {
-    const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
-    result.componentName = component.data.componentName;
-
     if (result.componentType === 'assembledApa') {
       if (result.nonConfTypes_apas != null) {
         result.nonConfType = dictionary_apaNCRs_types[Object.keys(result.nonConfTypes_apas).filter(k => result.nonConfTypes_apas[k])[0]];
@@ -125,10 +124,6 @@ async function nonConformanceByComponentType(componentType, disposition, status)
       }
     }
   }
-
-  // Re-sort the records by the component name, in reverse alphanumerical order
-  // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  results.sort(utils.byField_decreasing('componentName'));
 
   // Return the list of matching actions
   return results;
@@ -148,12 +143,14 @@ async function nonConformanceByUUID(componentUUID) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
+  // Then sort the records reverse alphabetically by the 'actionId' field
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$componentName' },
       title: { '$first': '$data.nonConformanceTitle' },
       componentType: { '$first': '$data.componentType' },
       nonConfTypes_apas: { '$first': '$data.nonConformanceType' },
@@ -163,6 +160,8 @@ async function nonConformanceByUUID(componentUUID) {
     },
   });
 
+  aggregation_stages.push({ $sort: { 'actionId': -1 } });
+
   // Query the 'actions' records collection using the aggregation stages defined above
   let results = await db.collection('actions')
     .aggregate(aggregation_stages)
@@ -171,9 +170,6 @@ async function nonConformanceByUUID(componentUUID) {
   // Add the corresponding component name to each matching record
   // Additionally, get the first 'true' non-conformance type in each record, convert it to something more readable and save this new string to the record
   for (let result of results) {
-    const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
-    result.componentName = component.data.componentName;
-
     if (result.componentType === 'assembledApa') {
       if (result.nonConfTypes_apas != null) {
         result.nonConfType = dictionary_apaNCRs_types[Object.keys(result.nonConfTypes_apas).filter(k => result.nonConfTypes_apas[k])[0]];
@@ -188,10 +184,6 @@ async function nonConformanceByUUID(componentUUID) {
       }
     }
   }
-
-  // Re-sort the records by the NCR action ID, in reverse alphanumerical order
-  // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  results.sort(utils.byField_decreasing('actionId'));
 
   // Return the list of  atching actions
   return results;
@@ -217,6 +209,7 @@ async function boardInstallByReferencedComponent(componentUUID) {
       actionId: { '$first': '$actionId' },
       typeFormName: { '$first': '$typeFormName' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$componentName' },
       data: { '$first': '$data' },
     },
   });
@@ -259,12 +252,6 @@ async function boardInstallByReferencedComponent(componentUUID) {
     }
   }
 
-  // Add the corresponding component name to each matching record
-  for (let record of boardInstalls) {
-    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
-    record.componentName = component.data.componentName;
-  }
-
   // Return the list of matching actions
   return boardInstalls;
 }
@@ -289,6 +276,7 @@ async function windingByReferencedComponent(componentUUID) {
       actionId: { '$first': '$actionId' },
       typeFormName: { '$first': '$typeFormName' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$componentName' },
       data: { '$first': '$data' },
     },
   });
@@ -309,12 +297,6 @@ async function windingByReferencedComponent(componentUUID) {
         if (bobbin.bobbinUuid === componentUUID) windings.push(action);
       }
     }
-  }
-
-  // Add the corresponding component name to each matching record
-  for (let record of windings) {
-    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
-    record.componentName = component.data.componentName;
   }
 
   // Return the list of matching actions
@@ -342,6 +324,7 @@ async function boardRejectionByReferencedComponent(componentUUID) {
       actionId: { '$first': '$actionId' },
       typeFormName: { '$first': '$typeFormName' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$componentName' },
       data: { '$first': '$data' },
     },
   });
@@ -350,12 +333,6 @@ async function boardRejectionByReferencedComponent(componentUUID) {
   let results = await db.collection('actions')
     .aggregate(aggregation_stages)
     .toArray();
-
-  // Add the corresponding component name to each matching record
-  for (let record of results) {
-    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
-    record.componentName = component.data.componentName;
-  }
 
   // Return the list of matching actions
   return results;

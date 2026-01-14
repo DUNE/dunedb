@@ -248,14 +248,18 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
   action_aggregation_stages.push({ $match: match_condition });
 
   // Select the latest version of each record, and pass through only the fields required for later use
+  // Then sort the records reverse alphabetically by the 'componentName' field
   action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   action_aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
       actionId: { '$first': '$actionId' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$componentName' },
     },
   });
+
+  action_aggregation_stages.push({ $sort: { 'componentName': -1 } });
 
   // Query the 'actions' records collection using the aggregation stages defined above
   let apasCompletedToStep_allLocations = await db.collection('actions')
@@ -274,16 +278,11 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
     if (component.data.apaAssemblyLocation === location) {
       uuids_apasCompletedToStep_atLocation.push(action.componentUuid);
 
-      action.componentName = component.data.componentName;
       action.workflowId = component.workflowId;
 
       apasCompletedToStep_atLocation.push(action);
     }
   }
-
-  // Re-sort the records by the component name, in reverse alphanumerical order
-  // This must be done here using JavaScript, rather than as part of the MongoDB aggregation, because component names are only added to the records after the aggregation is complete
-  apasCompletedToStep_atLocation.sort(utils.byField_decreasing('componentName'));
 
   let comp_aggregation_stages = [];
 
@@ -298,28 +297,23 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
+  // Then sort the records reverse alphabetically by the 'componentName' field
   comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       workflowId: { '$first': '$workflowId' },
+      componentName: { '$first': '$data.componentName' },
     },
   });
+
+  comp_aggregation_stages.push({ $sort: { 'componentName': -1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let apasNotCompletedToStep_atLocation = await db.collection('components')
     .aggregate(comp_aggregation_stages)
     .toArray();
-
-  // Add the corresponding component name to each matching record
-  for (let record of apasNotCompletedToStep_atLocation) {
-    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
-    record.componentName = component.data.componentName;
-  }
-
-  // Re-sort the records by the component name ... in reverse alphanumerical order
-  apasNotCompletedToStep_atLocation.sort(utils.byField_decreasing('componentName'));
 
   // Return a nested list, consisting of:
   // - [0] the list of all assembled APAs produced at the specified location that have had matching 'Assembled APA QA Check'  or 'Completed APA QA Checklist' actions performed on them and completed
