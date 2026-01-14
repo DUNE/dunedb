@@ -6,7 +6,6 @@ block extrascripts
     const action = !{JSON.stringify(action, null, 4)};
     const actionVersions = !{JSON.stringify(actionVersions, null, 4)};
     const actionTypeForm = !{JSON.stringify(actionTypeForm, null, 4)};
-    const component = !{JSON.stringify(component, null, 4)};
     const queryDictionary = !{JSON.stringify(queryDictionary, null, 4)};
     const retensionedWires_versions = !{JSON.stringify(retensionedWires_versions, null, 4)};
     const retensionedWires_values = !{JSON.stringify(retensionedWires_values, null, 4)};
@@ -39,7 +38,7 @@ block content
 
             dt Performed on Component:
             dd 
-              a(href = `/component/${uuid}`) #{component.data.componentName}
+              a(href = `/component/${uuid}`) #{action.componentName}
 
             if action.workflowId
               dt Part of Workflow:
@@ -101,7 +100,7 @@ block content
           if (action.typeFormId == 'x_tension_testing')
             .vert-space-x1 
               if retensionedWires_versions[0] !== null
-                a.btn.btn-secondary#download_changedTensions(onclick = 'DownloadChangedTensions(retensionedWires_values)', download = `retensions_${component.data.componentName.slice(5)}_${action.data.apaLayer.toUpperCase()}_v${retensionedWires_versions[1]}-v${retensionedWires_versions[0]}.txt`, href = '') Download List of Changed Tensions
+                a.btn.btn-secondary#download_changedTensions(onclick = 'DownloadChangedTensions(retensionedWires_values)', download = `retensions_${action.componentName.slice(5)}_${action.data.apaLayer.toUpperCase()}_v${retensionedWires_versions[1]}-v${retensionedWires_versions[0]}.txt`, href = '') Download List of Changed Tensions
               else 
                 a.btn.btn-secondary.disabled(href = '') Download List of Changed Tensions
 
