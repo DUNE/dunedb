@@ -412,11 +412,11 @@ async function versions(actionId) {
 
 
 /// Retrieve a list of action records matching a specified condition
-async function list(match_condition, options) {
+async function list(match_condition) {
   let aggregation_stages = [];
 
-  // If a matching condition has been specified, set it as the first aggregation stage
-  // If the matching condition additionally contains a (string format) component UUID, first convert it to binary format
+  // The passed match condition will usually contain an action type form ID ... set it as the first aggregation stage
+  // If the matching condition also contains a (string format) component UUID, convert it to binary format
   if (match_condition) {
     if (match_condition.componentUuid) match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
 
@@ -430,6 +430,7 @@ async function list(match_condition, options) {
       typeFormId: true,
       typeFormName: true,
       componentUuid: true,
+      componentName: true,
       workflowId: true,
       validity: true,
       data: true,
@@ -448,6 +449,7 @@ async function list(match_condition, options) {
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       componentUuid: { '$first': '$componentUuid' },
+      componentName: { '$first': '$componentName' },
       workflowId: { '$first': '$workflowId' },
       lastEditDate: { '$first': '$validity.startDate' },
       data: { '$first': '$data' },
@@ -465,36 +467,8 @@ async function list(match_condition, options) {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
-  // Then add the corresponding component name to each matching record
-  // Finally, apply the optional filter on the component type form ID if it is needed - if the action passes the filter, save it into a new list of matching and filtered records ...
-  // ... or if the optional filter is not needed, simply save all matching records into the list of matching and filtered records
-  let filteredRecords = [];
-
-  for (let record of records) {
-    const component = await Components.retrieve(MUUID.from(record.componentUuid).toString());
-
-    if (!component) {
-      record.componentName = '[UUID does not exist!]';
-    } else {
-      record.componentName = component.data.componentName;
-    }
-
-    if (options) {
-      if (options.componentTypeFormId) {
-        if (component.formId === options.componentTypeFormId) {
-          filteredRecords.push(record);
-        }
-      } else {
-        filteredRecords.push(record);
-      }
-    } else {
-      filteredRecords.push(record);
-    }
-  }
-
-  // Return a limited slice of the matching (and possibly filtered) records
-  return filteredRecords.slice(0, 200);
+  // Return a limited slice of the matching records
+  return records.slice(0, 200);
 }
 
 

@@ -31,9 +31,6 @@ router.get('/action/:actionId', permissions.checkPermission('actions:view'), asy
 
     if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${action.typeFormId}`);
 
-    // Retrieve the record of the component that the action was performed on, using its component UUID (also found in the action record)
-    const component = await Components.retrieve(action.componentUuid);
-
     // Set a variable to indicate if the specified action type is one that is part of a workflow
     // First set up a list of action type form names for all actions that are part of any workflow
     // Then check to see if the list of action type form names includes the type form name of the action type being specified
@@ -131,7 +128,6 @@ router.get('/action/:actionId', permissions.checkPermission('actions:view'), asy
       action,
       actionVersions,
       actionTypeForm,
-      component,
       queryDictionary: req.query,
       retensionedWires_versions,
       retensionedWires_values,
@@ -158,9 +154,6 @@ router.get('/action/:actionId/edit', permissions.checkPermission('actions:perfor
 
     if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${action.typeFormId}`);
 
-    // Retrieve the record of the component that the action was performed on, using its component UUID (found in the action record)
-    const component = await Components.retrieve(action.componentUuid);
-
     // Retrieve the workflow ID if the action record already contains such a field
     let workflowId = '';
 
@@ -171,7 +164,7 @@ router.get('/action/:actionId/edit', permissions.checkPermission('actions:perfor
       action,
       actionTypeForm,
       componentUuid: action.componentUuid,
-      componentName: component.data.componentName,
+      componentName: action.componentName,
       workflowId,
       stepIndex: '-99',
     });
@@ -362,9 +355,15 @@ router.get('/actions/list', permissions.checkPermission('actions:view'), async f
 /// List all actions of a single action type
 router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:view'), async function (req, res, next) {
   try {
-    // Retrieve records of all actions with the specified action type
+    // Set up the object containing the matching conditions ... to start with, this only consists of the specified action type
+    // If a component type form ID has been provided in the query, add it to the object under the appropriate field
+    let match_condition = { typeFormId: req.params.typeFormId };
+
+    if (req.query.componentTypeFormId) { match_condition.componentTypeFormId = req.query.componentTypeFormId; }
+
+    // Retrieve records of all actions with the specified action type, and optionally further match to those that were performed on the specified component type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const actions = await Actions.list({ typeFormId: req.params.typeFormId }, { componentTypeFormId: req.query.componentTypeFormId });
+    const actions = await Actions.list(match_condition);
 
     // Retrieve the action type form corresponding to the specified type form ID
     const actionTypeForm = await Forms.retrieve('actionForms', req.params.typeFormId);
