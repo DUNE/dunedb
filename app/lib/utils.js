@@ -158,12 +158,18 @@ module.exports = {
   // Personnel who are authorised to signoff on tension control and winder maintenance verifications ('? Layer - Winding' APA Assembly workflow actions)
   dictionary_winderMaintenanceSignoff: {
     vincentBaker: 'Vincent Baker',
+    daveBrown: 'Dave Brown',
     carlosChavezBarajas: 'Carlos Chavez Barajas',
     edBlucher: 'Ed Blucher',
+    markFarrell: 'Mark Farrell',
+    lewisGannon: 'Lewis Gannon',
+    darrenKaye: 'Darren Kaye',
+    andrewKelly: 'Andrew Kelly',
     albertoMarchionni: 'Alberto Marchionni',
     benjaminOye: 'Benjamin Oye',
     danielSalisbury: 'Daniel Salisbury',
     daveSim: 'Dave Sim',
+    stephenSumner: 'Stephen Sumner',
   },
 
   // Winding D-band personnel (winding-related APA Assembly workflow actions)
