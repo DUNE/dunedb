@@ -116,7 +116,18 @@ router.get(['/json/dBandFramePrep.json', '/api/dBandFramePrep.json'], async func
 });
 
 
-/// List personnel who are authorised to signoff on tension control and winder maintenance verifications
+/// List personnel who are authorised to signoff on tension control verification
+router.get(['/json/tensionControlSignoff.json', '/api/tensionControlSignoff.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_tensionControlSignoff));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
+/// List personnel who are authorised to signoff on winder maintenance verification
 router.get(['/json/winderMaintenanceSignoff.json', '/api/winderMaintenanceSignoff.json'], async function (req, res, next) {
   try {
     return res.status(200).json(ConvertDictionaryToList(utils.dictionary_winderMaintenanceSignoff));
