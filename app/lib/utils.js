@@ -155,7 +155,18 @@ module.exports = {
     kimWilliams: 'Kim Williams',
   },
 
-  // Personnel who are authorised to signoff on tension control and winder maintenance verifications ('? Layer - Winding' APA Assembly workflow actions)
+  // Personnel who are authorised to signoff on tension control verification ('? Layer - Winding' APA Assembly workflow actions)
+  dictionary_tensionControlSignoff: {
+    vincentBaker: 'Vincent Baker',
+    carlosChavezBarajas: 'Carlos Chavez Barajas',
+    edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
+    benjaminOye: 'Benjamin Oye',
+    danielSalisbury: 'Daniel Salisbury',
+    daveSim: 'Dave Sim',
+  },
+
+  // Personnel who are authorised to signoff on winder maintenance verification ('? Layer - Winding' APA Assembly workflow actions)
   dictionary_winderMaintenanceSignoff: {
     vincentBaker: 'Vincent Baker',
     daveBrown: 'Dave Brown',
