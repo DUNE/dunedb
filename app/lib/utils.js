@@ -39,6 +39,7 @@ module.exports = {
     sussex: 'Sussex',
     ukWarehouse: 'UK Warehouse',
     unknown: 'Unknown / Lost',
+    usWarehouse: 'US Warehouse',
     williamAndMary: 'William and Mary',
     wisconsin: 'Wisconsin',
   },
