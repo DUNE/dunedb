@@ -10,15 +10,12 @@ const permissions = require('./permissions');
 const utils = require('./utils');
 
 // Declare a list of the available 'shipment transport' related action type forms
-// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
-const transport_typeFormIDs = ['APAShipmentTransport'];
+const transport_typeFormIDs = ['APAShipmentTransport', 'CEAdapterBoardTransport'];
 
 // Declare a list of the available 'reception' related action type forms
-// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
-const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
+const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'FrameShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception', 'YokeShipmentReception'];
 
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
-// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
 const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
 
 

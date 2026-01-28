@@ -208,7 +208,7 @@ async function save(input, req) {
       newRecord.reception.location = newRecord.data.originOfShipment;
     } else if (newRecord.formId === 'APAShippingFrame') {
       newRecord.reception.location = newRecord.data.asfLocation;
-    } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
+    } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
       newRecord.reception.location = 'in_transit';
     } else if (newRecord.formId === 'AssembledAPA') {
       newRecord.reception.location = newRecord.data.apaAssemblyLocation;
@@ -279,7 +279,7 @@ async function save(input, req) {
     newRecord.data.componentName = `${newRecord.formName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'FrameShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.frameUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'GBiasBoardShipment') {
     newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
@@ -292,6 +292,9 @@ async function save(input, req) {
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'SHVBoardShipment') {
     newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'YokeShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.yokeUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   }
 
@@ -315,7 +318,7 @@ async function save(input, req) {
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (newRecord.formId === 'APAShipment') {
     const result = await updateLocations_inShipment(newRecord.componentUuid, newRecord.reception.location, (new Date()).toISOString().slice(0, 10));
-  } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
+  } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.formId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
@@ -402,6 +405,11 @@ async function updateLocations_inShipment(componentUuid, location, date) {
     for (const dwa of shipment.data.componentUUIDs) {
       const result = await updateLocation(dwa.component_uuid, location, date, '');
     }
+  } else if (shipment.formId === 'FrameShipment') {
+    // Extract the UUID and update the location information of each APA frame in a shipment of frames
+    for (const frame of shipment.data.frameUuiDs) {
+      const result = await updateLocation(frame.component_uuid, location, date, '');
+    }
   } else if (shipment.formId === 'GroundingMeshShipment') {
     // Extract the UUID and update the location information of each mesh in a shipment of meshes
     for (const mesh of shipment.data.apaUuiDs) {
@@ -431,6 +439,11 @@ async function updateLocations_inShipment(componentUuid, location, date) {
       if (cableHarnessShipment.component_uuid !== '') {
         const result = await updateLocations_inShipment(cableHarnessShipment.component_uuid, location, date);
       }
+    }
+  } else if (shipment.formId === 'YokeShipment') {
+    // Extract the UUID and update the location information of each yoke in a shipment of yokes
+    for (const yoke of shipment.data.yokeUuiDs) {
+      const result = await updateLocation(yoke.component_uuid, location, date, '');
     }
   }
 
