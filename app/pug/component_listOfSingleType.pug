@@ -35,6 +35,8 @@ block content
               th.col-md-2 Current Location
             else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.formId))
               th.col-md-2 Current Location
+            else if componentTypeForm.formId == 'Yoke'
+              th.col-md-2 Load Test Status
             else 
               th.col-md-2 
 
