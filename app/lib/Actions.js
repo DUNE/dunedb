@@ -10,15 +10,12 @@ const permissions = require('./permissions');
 const utils = require('./utils');
 
 // Declare a list of the available 'shipment transport' related action type forms
-// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
-const transport_typeFormIDs = ['APAShipmentTransport'];
+const transport_typeFormIDs = ['APAShipmentTransport', 'CEAdapterBoardTransport'];
 
 // Declare a list of the available 'reception' related action type forms
-// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
-const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception'];
+const reception_typeFormIDs = ['APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'FrameShipmentReception', 'GroundingMeshShipmentReception', 'PopulatedBoardKitReception', 'YokeShipmentReception'];
 
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
-// NOTE: this must be the same as the equivalent list given in 'static/pages/action_specComponent.js'
 const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
 
 
@@ -185,8 +182,10 @@ async function save(input, req) {
   // - for shipment or batch reception actions, update the reception information of each individual sub-component (as well as the shipment itself) to match where and when it was received
   // - for board and mesh installation actions, update the reception information of each component referenced in the action to be 'Installed on APA' 
   // - for 'Factory Board Rejection' actions ...
-  //   ... where the rejection disposition is 'Rejected', update the board's reception information to to indicate that it has been 'Rejected'
-  //   ... where the rejection disposition is something other than 'Rejected', update the board's reception information match where and when the action was performed
+  //   ... where the rejection disposition is 'Rejected', update the board's reception information to indicate that it has been 'Rejected'
+  //   ... where the rejection disposition is something other than 'Rejected', update the board's reception information to match where and when the action was performed
+  // - for 'Tooth Strip Attachment' actions, update the board's reception information to match where and when the action was performed
+  // - for some (but not all) actions performed on grounding mesh panels, update the mesh's reception information to match where and when the action was performed
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (transport_typeFormIDs.includes(newRecord.typeFormId)) {
     const result = await Components.updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
@@ -257,6 +256,10 @@ async function save(input, req) {
     } else {
       const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.boardRejectionLocation, (new Date()).toISOString().slice(0, 10), '');
     }
+  } else if (newRecord.typeFormId === 'BoardToothStripAttachment') {
+    const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.locationWorkPerformed, (new Date()).toISOString().slice(0, 10), '');
+  } else if (['EpoxyApplication', 'FinalInspection', 'ReceiptInspection'].includes(newRecord.typeFormId)) {
+    const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.location, newRecord.data.date.slice(0, 10), '');
   }
 
   // If the insertion and post-insertion changes are all successful, return the record's action ID as confirmation

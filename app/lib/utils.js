@@ -35,6 +35,7 @@ module.exports = {
     rokeby: 'Rokeby',
     rejected: 'Rejected',
     sheffield: 'Sheffield',
+    sdWarehouse: 'South Dakota Warehouse',
     surf: 'SURF',
     sussex: 'Sussex',
     ukWarehouse: 'UK Warehouse',
@@ -153,6 +154,7 @@ module.exports = {
     albertoMarchionni: 'Alberto Marchionni',
     grahamMitchell: 'Graham Mitchell',
     danielSalisbury: 'Daniel Salisbury',
+    stephenSumner: 'Stephen Sumner',
     kimWilliams: 'Kim Williams',
   },
 

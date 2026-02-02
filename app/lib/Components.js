@@ -200,16 +200,19 @@ async function save(input, req) {
     newRecord.reception.date = (new Date()).toISOString().slice(0, 10);
     newRecord.reception.detail = '';
 
-    // Components of certain types will always start at specific fixed locations, whereas the rest do not need any initial location set (only for the record field to exist)
+    // Almost all component types will always start at specific fixed locations ...
+    // ... the only exceptions are the 'batch' types (these still need the location field to exist, but it can be left as an empty string)
     if ((newRecord.formId === 'APAFrame') || (newRecord.formId === 'wire_bobbin')) {
       newRecord.reception.location = 'daresbury';
     } else if (newRecord.formId === 'APAShipment') {
       newRecord.reception.location = newRecord.data.originOfShipment;
-    } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
+    } else if (newRecord.formId === 'APAShippingFrame') {
+      newRecord.reception.location = newRecord.data.asfLocation;
+    } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
       newRecord.reception.location = 'in_transit';
     } else if (newRecord.formId === 'AssembledAPA') {
       newRecord.reception.location = newRecord.data.apaAssemblyLocation;
-    } else if ((newRecord.formId === 'CEAdapterBoard') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'CRBoard') || (newRecord.formId === 'CRBoardShipment') || (newRecord.formId === 'CableHarness') || (newRecord.formId === 'CableHarnessShipment') || (newRecord.formId === 'GBiasBoard') || (newRecord.formId === 'GBiasBoardShipment') || (newRecord.formId === 'SHVBoard') || (newRecord.formId === 'SHVBoardShipment')) {
+    } else if ((newRecord.formId === 'CEAdapterBoard') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'CRBoard') || (newRecord.formId === 'CRBoardShipment') || (newRecord.formId === 'CableHarness') || (newRecord.formId === 'CableHarnessShipment') || (newRecord.formId === 'GBiasBoard') || (newRecord.formId === 'GBiasBoardShipment') || (newRecord.formId === 'SHVBoard') || (newRecord.formId === 'SHVBoardShipment') || (newRecord.formId === 'Yoke')) {
       newRecord.reception.location = 'wisconsin';
     } else if ((newRecord.formId === 'DWA') || (newRecord.formId === 'DWAPDB')) {
       newRecord.reception.location = newRecord.data.productionLocation;
@@ -276,7 +279,7 @@ async function save(input, req) {
     newRecord.data.componentName = `${newRecord.formName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'FrameShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.frameUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'GBiasBoardShipment') {
     newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
@@ -289,6 +292,9 @@ async function save(input, req) {
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'SHVBoardShipment') {
     newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.formId === 'YokeShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.yokeUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   }
 
@@ -303,7 +309,7 @@ async function save(input, req) {
   if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
   // Once the component record has been successfully saved, deal with the reception information for any related components:
-  // - for an 'APA Shipment', update the reception information of the underlying 'Assembled APA' components to be the same as the shipment
+  // - for an 'APA Shipment', update the reception information of the underlying 'Assembled APA' and 'ASF' components to be the same as the shipment
   //    (they should already be at the same location as the shipment, but this is a double-check on that)
   // - for other types of shipment, update the reception information of the various sub-components to indicate that they are in transit
   // - for an 'Assembled APA', update the reception information of the underlying 'APA Frame' to indicate that it is now being used
@@ -312,7 +318,7 @@ async function save(input, req) {
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (newRecord.formId === 'APAShipment') {
     const result = await updateLocations_inShipment(newRecord.componentUuid, newRecord.reception.location, (new Date()).toISOString().slice(0, 10));
-  } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment')) {
+  } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.formId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
@@ -383,10 +389,12 @@ async function updateLocations_inShipment(componentUuid, location, date) {
   // Loop over all sub-components in the shipment, and update each one's location information appropriately for the shipment type and contents
   // In all cases, if successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
   if (shipment.formId === 'APAShipment') {
-    // Extract the UUID and update the location information of each assembled APA in a shipment of APAs
+    // Extract the UUID and update the location information of each assembled APA and the ASF in a shipment of APAs
     for (const apa of shipment.data.apaUuiDs) {
       const result = await updateLocation(apa.component_uuid, location, date, '');
     }
+
+    const result = await updateLocation(shipment.data.asfUuid, location, date, '');
   } else if ((shipment.formId === 'BoardShipment') || (shipment.formId === 'CEAdapterBoardShipment') || (shipment.formId === 'CRBoardShipment') || (shipment.formId === 'CableHarnessShipment') || (shipment.formId === 'GBiasBoardShipment') || (shipment.formId === 'SHVBoardShipment')) {
     // Extract the UUID and update the location information of each board in a shipment of (single type) boards
     for (const board of shipment.data.boardUuiDs) {
@@ -396,6 +404,11 @@ async function updateLocations_inShipment(componentUuid, location, date) {
     // Extract the UUID and update the location information of each component in a (combined) shipment of DWAs and DWAPDBs
     for (const dwa of shipment.data.componentUUIDs) {
       const result = await updateLocation(dwa.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'FrameShipment') {
+    // Extract the UUID and update the location information of each APA frame in a shipment of frames
+    for (const frame of shipment.data.frameUuiDs) {
+      const result = await updateLocation(frame.component_uuid, location, date, '');
     }
   } else if (shipment.formId === 'GroundingMeshShipment') {
     // Extract the UUID and update the location information of each mesh in a shipment of meshes
@@ -426,6 +439,11 @@ async function updateLocations_inShipment(componentUuid, location, date) {
       if (cableHarnessShipment.component_uuid !== '') {
         const result = await updateLocations_inShipment(cableHarnessShipment.component_uuid, location, date);
       }
+    }
+  } else if (shipment.formId === 'YokeShipment') {
+    // Extract the UUID and update the location information of each yoke in a shipment of yokes
+    for (const yoke of shipment.data.yokeUuiDs) {
+      const result = await updateLocation(yoke.component_uuid, location, date, '');
     }
   }
 

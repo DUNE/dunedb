@@ -13,6 +13,12 @@ const Search_OtherComponents = require('../lib/Search_OtherComponents');
 const utils = require('../lib/utils');
 const Workflows = require('../lib/Workflows');
 
+dict_yokeLoadTestResults = {
+  passed: 'Passed',
+  failed: 'Failed',
+  notYetTested: 'Not Yet Tested',
+}
+
 
 /// Retrieve an existing component record
 router.get('/component/:uuid', permissions.checkPermission('components:view'), async function (req, res, next) {
@@ -202,6 +208,16 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
+    if (component.formId === 'FrameShipment') {
+      for (const info of component.data.frameUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.dunePid, componentRecord.shortUuid]);
+        }
+      }
+    }
+
     if (component.formId === 'GroundingMeshShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
@@ -252,6 +268,16 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
           const componentRecord = await Components.retrieve(info.component_uuid);
 
           if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.shortUuid]);
+        }
+      }
+    }
+
+    if (component.formId === 'YokeShipment') {
+      for (const info of component.data.yokeUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, dict_yokeLoadTestResults[componentRecord.data.loadTestStatus], componentRecord.shortUuid]);
         }
       }
     }
@@ -384,6 +410,16 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
+    if (component.formId === 'FrameShipment') {
+      for (const info of component.data.frameUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
+        }
+      }
+    }
+
     if (component.formId === 'GroundingMeshShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
@@ -432,6 +468,16 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       for (const uuid of component.data.subComponent_fullUuids) {
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
+
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
+        }
+      }
+    }
+
+    if (component.formId === 'YokeShipment') {
+      for (const info of component.data.yokeUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
 
           if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
@@ -538,6 +584,16 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
+    if (component.formId === 'FrameShipment') {
+      for (const info of component.data.frameUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.dunePid]);
+        }
+      }
+    }
+
     if (component.formId === 'GroundingMeshShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
@@ -578,6 +634,16 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
           const componentRecord = await Components.retrieve(info.component_uuid);
 
           if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName]);
+        }
+      }
+    }
+
+    if (component.formId === 'YokeShipment') {
+      for (const info of component.data.yokeUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, dict_yokeLoadTestResults[componentRecord.data.loadTestStatus]]);
         }
       }
     }
@@ -797,7 +863,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
         if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
         else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
       }
-    } else if (['APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'FrameShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.formId)) {
+    } else if (['APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'FrameShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
       for (let shipment of components) {
         if (shipment.reception != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.reception.location]; }
         else { shipment.additionalInformation = '[reception object missing!]'; }
