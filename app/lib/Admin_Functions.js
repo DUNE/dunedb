@@ -3,8 +3,8 @@ const MUUID = require('uuid-mongodb');
 const Actions = require('./Actions');
 const { db } = require('./db');
 const Components = require('./Components');
-const Forms = require('../lib/Forms');
-const logger = require('../lib/logger');
+const Forms = require('./Forms');
+const logger = require('./logger');
 const utils = require('./utils');
 
 
