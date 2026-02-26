@@ -65,8 +65,8 @@ function postSuccess(result) {
   $('#apa2info').empty();
 
   // Show the APA and doublet information in their corresponding page elements
-  $('#apa1info').val(JSON.stringify(result.apa1, null, 2));
-  $('#apa2info').val(JSON.stringify(result.apa2, null, 2));
+  $('#apa1info').val(JSON.stringify(result[0], null, 2));
+  $('#apa2info').val(JSON.stringify(result[1], null, 2));
 
   // Re-enable the confirmation button for the next retrieval
   $('#confirmButton').prop('disabled', false);
