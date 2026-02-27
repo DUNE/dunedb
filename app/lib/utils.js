@@ -96,6 +96,7 @@ module.exports = {
     benFurey: 'Ben Furey',
     lewisGannon: 'Lewis Gannon',
     wayneGreen: 'Wayne Green',
+    rowanGreenhalgh: 'Rowan Greenhalgh',
     thomasHanley: 'Thomas Hanley',
     nicholasHays: 'Nicholas Hays',
     adamJones: 'Adam Jones',
