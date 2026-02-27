@@ -29,7 +29,7 @@ block content
 
         p The <b><u>production location</u></b> is a required parameter for both scenarios - this <b>must</b> be selected from the associated dropdown menu.  Users may then either manually enter an (integer) production number, or select one of the QA action types from the associated dropdown menu.
 
-        p If searching by production number, if the specified information corresponds to a single Assembled APA component record in the database, the user will be automatically redirected to the corresponding component information page.
+        p If searching by production number, if the specified information corresponds to a single Assembled APA component record in the database, the user will be automatically redirected to either the APA's component information page or directly to its Executive Summary - depending on which of the 'Search by Production Number' buttons is used.
           br
           |  If there is no such APA, i.e. the information does not match an existing component record, a message will be displayed in the results panel below the input selections.
           br
@@ -68,7 +68,10 @@ block content
             input.form-control#numberSelection
 
           .vert-space-x2
-            button.btn-primary.btn-lg#confirmButton_number Search by Production Number
+            .form-inline.font-weight-bold
+              button.btn-primary.btn-lg#confirmButton_numberToInfoPage Search by Production Number
+              br
+              | &nbsp; (Information page)
 
         .col-md-4
           h4 Search by Last Completed QA Action
@@ -91,6 +94,16 @@ block content
 
           .vert-space-x2
             button.btn-primary.btn-lg#confirmButton_assemblyStep Search by Last Completed QA Action
+      .row 
+        .col-md-4
+        .col-md-4
+          .vert-space-x2
+            .form-inline.font-weight-bold
+              button.btn-primary.btn-lg#confirmButton_numberToSummary Search by Production Number
+              br
+              | &nbsp; (Executive Summary)
+
+        .col-md-4
 
       .vert-space-x2 
         hr
