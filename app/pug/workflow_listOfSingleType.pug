@@ -21,7 +21,13 @@ block content
         thead
           tr
             th.col-md-2 Workflow ID
-            th.col-md-3 Associated Component
+
+            if workflowTypeForm.formName == 'APA Assembly'
+              th.col-md-1 Component
+              th.col-md-2 
+            else 
+              th.col-md-3 Component
+
             th.col-md-1 Completion %
             th.col-md-3 Next Action to Complete
             th.col-md-1
@@ -38,6 +44,12 @@ block content
                     a(href = `/component/${workflow.path[0].result}`) #{workflow.componentName}
                 else 
                   td (component not yet created)
+
+                if workflowTypeForm.formName == 'APA Assembly'
+                  td
+                    a.btn-sm.btn-secondary(href = `/component/${workflow.path[0].result}/execSummary`, target = '_blank')
+                      img.small-icon(src = '/images/checklist_icon.svg')
+                      | &nbsp; Exec. Summary
 
                 if workflow.completionStatus != null
                   if workflow.completionStatus < 50.0

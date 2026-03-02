@@ -2,6 +2,8 @@
 let apaLocation = null;
 let apaNumber = null;
 let assemblyStep = null;
+let userDirect_toInfoPage = false;
+let userDirect_toSummary = false;
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -23,9 +25,39 @@ async function renderSearchForms() {
   });
 
   // When the appropriate confirmation button is pressed, perform the search by location and number using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable both confirmation buttons while the current search is being performed
-  $('#confirmButton_number').on('click', function () {
-    $('#confirmButton_number').prop('disabled', true);
+  // Additionally, disable all confirmation buttons while the current search is being performed
+  $('#confirmButton_numberToInfoPage').on('click', function () {
+    userDirect_toInfoPage = true;
+    userDirect_toSummary = false;
+
+    $('#confirmButton_numberToInfoPage').prop('disabled', true);
+    $('#confirmButton_numberToSummary').prop('disabled', true);
+    $('#confirmButton_assemblyStep').prop('disabled', true);
+    $('#messages').empty().append('<b>Working ...</b>');
+    $('#summary1').empty();
+    $('#summary2').empty();
+    $('#results11').empty()
+    $('#results12').empty()
+    $('#results21').empty()
+    $('#results22').empty()
+
+    if (apaLocation && apaNumber) {
+      $.ajax({
+        contentType: 'application/json',
+        method: 'GET',
+        url: `/json/search/apasByProductionLocationAndNumber/${apaLocation}/${apaNumber}`,
+        dataType: 'json',
+        success: postSuccess_locationAndNumber,
+      }).fail(postFail);
+    }
+  });
+
+  $('#confirmButton_numberToSummary').on('click', function () {
+    userDirect_toInfoPage = false;
+    userDirect_toSummary = true;
+
+    $('#confirmButton_numberToInfoPage').prop('disabled', true);
+    $('#confirmButton_numberToSummary').prop('disabled', true);
     $('#confirmButton_assemblyStep').prop('disabled', true);
     $('#messages').empty().append('<b>Working ...</b>');
     $('#summary1').empty();
@@ -47,9 +79,13 @@ async function renderSearchForms() {
   });
 
   // When the appropriate confirmation button is pressed, perform the search by location and assembly step using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable both confirmation buttons while the current search is being performed
+  // Additionally, disable all confirmation buttons while the current search is being performed
   $('#confirmButton_assemblyStep').on('click', function () {
-    $('#confirmButton_number').prop('disabled', true);
+    userDirect_toInfoPage = false;
+    userDirect_toSummary = false;
+
+    $('#confirmButton_numberToInfoPage').prop('disabled', true);
+    $('#confirmButton_numberToSummary').prop('disabled', true);
     $('#confirmButton_assemblyStep').prop('disabled', true);
     $('#messages').empty().append('<b>Working ...</b>');
     $('#summary1').empty();
@@ -83,12 +119,13 @@ function postSuccess_locationAndNumber(result) {
   $('#results21').empty()
   $('#results22').empty()
 
-  // If there are no search results, display a message to indicate this, and then re-enable both confirmation buttons for the next search
+  // If there are no search results, display a message to indicate this, and then re-enable all confirmation buttons for the next search
   // Similarly, if there is more than one search result (i.e. more than one assembled APA matches the provided record details), also display a message and re-enable the buttons
-  // Otherwise (i.e. there is exactly one assembled APA in the search results), redirect the user to the page for viewing the assembled APA component record
+  // Otherwise (i.e. there is exactly one assembled APA in the search results), redirect the user to the page for viewing the assembled APA's component information page or Executive Summary
   if (result.length === 0) {
     $('#messages').append('<b>There is no Assembled APA matching the specified record details.</b>');
-    $('#confirmButton_locationNumber').prop('disabled', false);
+    $('#confirmButton_numberToInfoPage').prop('disabled', false);
+    $('#confirmButton_numberToSummary').prop('disabled', false);
     $('#confirmButton_assemblyStep').prop('disabled', false);
   } else if (result.length > 1) {
     const output = `
@@ -97,10 +134,15 @@ function postSuccess_locationAndNumber(result) {
       <br>Please bring this to the attention of one of the DB Admins, indicating the APA record details that you used for the search.`;
 
     $('#messages').append(output);
-    $('#confirmButton_locationNumber').prop('disabled', false);
+    $('#confirmButton_numberToInfoPage').prop('disabled', false);
+    $('#confirmButton_numberToSummary').prop('disabled', false);
     $('#confirmButton_assemblyStep').prop('disabled', false);
   } else {
-    window.location.href = `/component/${result[0].componentUuid}`;
+    if (userDirect_toInfoPage) {
+      window.location.href = `/component/${result[0].componentUuid}`;
+    } else if (userDirect_toSummary) {
+      window.location.href = `/component/${result[0].componentUuid}/execSummary`;
+    }
   }
 };
 
@@ -191,8 +233,9 @@ function postSuccess_locationAndAssemblyStep(result) {
     $('#results22').append(apaText);
   }
 
-  // Re-enable both confirmation buttons for the next search
-  $('#confirmButton_number').prop('disabled', false);
+  // Re-enable all confirmation buttons for the next search
+  $('#confirmButton_numberToInfoPage').prop('disabled', false);
+  $('#confirmButton_numberToSummary').prop('disabled', false);
   $('#confirmButton_assemblyStep').prop('disabled', false);
 }
 
@@ -207,6 +250,7 @@ function postFail(result, statusCode, statusMsg) {
   }
 
   // Re-enable both confirmation buttons for the next search
-  $('#confirmButton_number').prop('disabled', false);
+  $('#confirmButton_numberToInfoPage').prop('disabled', false);
+  $('#confirmButton_numberToSummary').prop('disabled', false);
   $('#confirmButton_assemblyStep').prop('disabled', false);
 };

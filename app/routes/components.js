@@ -880,6 +880,10 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
           board.additionalInformation = '[reception object missing!]';
         }
       }
+    } else if (componentTypeForm.formId === 'Yoke') {
+      for (let yoke of components) {
+        yoke.additionalInformation = dict_yokeLoadTestResults[yoke.data.loadTestStatus];
+      }
     } else {
       for (let component of components) { component.additionalInformation = ''; }
     }
