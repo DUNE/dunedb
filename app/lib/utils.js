@@ -111,6 +111,7 @@ module.exports = {
     albertoMarchionni: 'Alberto Marchionni',
     grahamMitchell: 'Graham Mitchell',
     jamesMcNally: 'James McNally',
+    stephenMcNally: 'Stephen McNally',
     gwennMouster: 'Gwenn Mouster',
     andrewNaylor: 'Andrew Naylor',
     jackNorwell: 'Jack Norwell',
