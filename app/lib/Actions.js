@@ -252,7 +252,11 @@ async function save(input, req) {
       else if (newRecord.data.reasonForRejectionFromInventory.removedFromApa) { rejectionReason = 'Removed from APA' }
       else if (newRecord.data.reasonForRejectionFromInventory.other) { rejectionReason = 'Unspecified Reason' }
 
-      const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
+      if (rejectionReason === 'Removed from APA') {
+        const result = await Components.updateLocation_geoBoardRemoval(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
+      } else {
+        const result = await Components.updateLocation(newRecord.componentUuid, 'rejected', (new Date()).toISOString().slice(0, 10), `[${rejectionLocation} - ${rejectionReason}]`);
+      }
     } else {
       const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.boardRejectionLocation, (new Date()).toISOString().slice(0, 10), '');
     }
