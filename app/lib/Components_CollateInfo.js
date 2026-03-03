@@ -37,6 +37,7 @@ const dictionary_bobbinManufacturers = {
   littleFalls: 'Little Falls',
   rstLocker: 'RST/Locker',
   wireAlloyInternational: 'Wire Alloy International',
+  fiskAlloy: 'Fisk Alloy',
 }
 
 const dictionary_tensionSystems = {

@@ -226,6 +226,17 @@ router.get(['/json/apaFactoryLeads.json', '/api/apaFactoryLeads.json'], async fu
 });
 
 
+/// List personnel who are authorised to signoff on APA cold tests
+router.get(['/json/apaColdTestSignoff.json', '/api/apaColdTestSignoff.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_apaColdTestSignoff));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// ADMINISTRATOR UTILITY (client-side interface) ... run a specific server-side library function appropriate for the currently required utility, with user input supplied from the Administrator Utility interface page 
 router.get('/administratorUtility', async function (req, res, next) {
   res.render('administratorUtility.pug');
