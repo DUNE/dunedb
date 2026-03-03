@@ -381,6 +381,40 @@ async function updateLocation(componentUuid, location, date, detail) {
 }
 
 
+/// Update the location of an already-installed geometry board to reflect removal from an Assembled APA
+async function updateLocation_geoBoardRemoval(componentUuid, location, date, detail) {
+  // This function operates in essentially the same way as the 'updateLocation' function, but is used specifically for updating the location of a board to show that it has been removed from an APA
+  // The 'updateLocation' function does not allow that to happen, since it safeguards against changing the location of any component with a current location of 'installed_on_APA'
+
+  // Set up the DB query match condition to be that a record's component UUID must match the specified one
+  let match_condition = { componentUuid };
+
+  if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+  match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+  // Use the MongoDB '$set' operator to directly edit the values of the relevant fields in ALL matching component records (i.e. all versions of the component), and throw an error if the edit fails
+  const result = await db.collection('components')
+    .updateMany(
+      match_condition,
+      [
+        {
+          $set: {
+            'reception.location': location,
+            'reception.date': date,
+            'reception.detail': detail,
+          }
+        },
+      ]
+    );
+
+  if (result.ok === 0) throw new Error(`Components::updateLocation_geoBoardRemoval() - failed to update the component record!`);
+
+  // If the edit is successful, return the status of the 'result.ok' property (which should be 1)
+  return result.ok;
+}
+
+
 /// Update the most recently logged reception locations and dates of all sub-components in a shipment-type component
 async function updateLocations_inShipment(componentUuid, location, date) {
   // Retrieve the most recent version of the shipment-like component record corresponding to the specified component UUID
@@ -782,6 +816,7 @@ module.exports = {
   newUuid,
   save,
   updateLocation,
+  updateLocation_geoBoardRemoval,
   updateLocations_inShipment,
   retrieve,
   versions,
