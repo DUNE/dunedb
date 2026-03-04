@@ -111,6 +111,7 @@ module.exports = {
     albertoMarchionni: 'Alberto Marchionni',
     grahamMitchell: 'Graham Mitchell',
     jamesMcNally: 'James McNally',
+    stephenMcNally: 'Stephen McNally',
     gwennMouster: 'Gwenn Mouster',
     andrewNaylor: 'Andrew Naylor',
     jackNorwell: 'Jack Norwell',
@@ -240,6 +241,14 @@ module.exports = {
     radosavPantelic: 'Radosav Pantelic',
     danielSalisbury: 'Daniel Salisbury',
     stephenSumner: 'Stephen Sumner',
+    sotirisVlachos: 'Sotiris Vlachos',
+  },
+
+  // Personnel who are authorised to signoff on APA cold tests ('APA Cold Test' Assembled APA actions)
+  dictionary_apaColdTestSignoff: {
+    pipHamilton: 'Pip Hamilton',
+    brianRebel: 'Brian Rebel',
+    jozefTrokanTenorio: 'Jozef Trokan-Tenorio',
     sotirisVlachos: 'Sotiris Vlachos',
   },
 }
