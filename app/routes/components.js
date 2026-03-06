@@ -933,19 +933,19 @@ router.get('/components/bulkQRCodes/:typeFormId/:firstNumber/:lastNumber', permi
 });
 
 
-/// View information about two specified APAs comprising a single doublet, for use in the DUNE HWDB (client-side interface)
+/// View information about a specified component in a format suitable for the DUNE HWDB (client-side interface)
 router.get('/components/hwdbInformation', async function (req, res, next) {
   // Render the interface page
   res.render('component_hwdbInformation.pug');
 });
 
 
-/// View information about two  specified APAs comprising a single doublet, for use in the DUNE HWDB (query to server-side)
-router.get(['/json/components/hwdbInformation/:apa1uuid/:apa2uuid', '/api/components/hwdbInformation/:apa1uuid/:apa2uuid'], async function (req, res, next) {
+/// View information about a specified component in a format suitable for the DUNE HWDB (query to server-side)
+router.get(['/json/components/hwdbInformation/:uuid', '/api/components/hwdbInformation/:uuid'], async function (req, res, next) {
   try {
-    // Retrieve the collated information about the APAs - since this requires extracting specific field values from a number of DB records related to the APAs ...
+    // Retrieve the collated information - since this may require extracting specific field values from a number of DB records related to the component ...
     // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
-    let collatedInfo = await Components_CollateInfo.forHWDB(req.params.apa1uuid, req.params.apa2uuid);
+    let collatedInfo = await Components_CollateInfo.forHWDB(req.params.uuid);
 
     // Return the information in JSON format
     return res.status(200).json(collatedInfo);
