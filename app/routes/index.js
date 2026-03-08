@@ -41,7 +41,7 @@ module.exports = routes;
   /json/components/:typeFormId/list
   /json/components/boardCounts_byPartNumberAndLocation
   /components/hwdbInformation
-  /json/components/hwdbInformation/:apa1uuid/:apa2uuid
+  /json/components/hwdbInformation/:uuid
 
   /action/:actionId
   /action/:actionId/edit

@@ -1,7 +1,7 @@
 extend default
 
 block vars 
-  - const page_title = 'View APA HWDB Information';
+  - const page_title = 'View HWDB Component Information';
 
 block extrascripts
   block workscripts
@@ -10,69 +10,55 @@ block extrascripts
 block content
   .container-fluid
     .vert-space-x2
-      h2 View APA HWDB Information
+      h2 View HWDB Component Information
 
     .vert-space-x2 
       hr
 
       .row 
-        .col-md-5 
-          h4 Select APA 1
+        .col-md-4 
+          h4 Select Component
 
           .vert-space-x1 
             p
-            | Enter the UUID of the doublet's first APA below.<br>
-            | Alternatively, take a picture of the APA's QR code 
+            | Enter the UUID of the component below.<br>
+            | Alternatively, take a picture of the component's QR code.
 
           .vert-space-x1 
-            #apa1uuidform
+            #componentuuidform
 
-        .col-md-5 
-          h4 Select APA 2
+        .col-md-1 
 
-          .vert-space-x1 
-            p
-            | Enter the UUID of the doublet's second APA below.<br>
-            | Alternatively, take a picture of the APA's QR code 
-
-          .vert-space-x1 
-            #apa2uuidform
-
-        .col-md-2
+        .col-md-3
           .vert-space-x2
             input.form-control.spacer
 
           .vert-space-x2
             button.btn-primary.btn-lg#confirmButton Retrieve HWDB Information 
 
+        .col-md-2
+          .vert-space-x2
+            input.form-control.spacer
+
+          .vert-space-x2
+            a#download_componentinfo(onclick = 'DownloadInfo()', download = `hwdbInformation.json`, href = '') Download Component Info
+
+        .col-md-2
+          .vert-space-x2
+            input.form-control.spacer
+
+          .vert-space-x2
+            a.button.btn.btn-primary(onclick = 'CopyInfoToClipboard()') Copy Component Info to Clipboard
+
     .vert-space-x2 
       hr
 
     .vert-space-x1 
       .row 
-        .col-md-5
-          | <b>APA 1:</b>
-          textarea.form-control#apa1info(rows = 10)
+        .col-md-8
+          | <b>Component Information:</b>
+          textarea.form-control#componentinfo(rows = 10)
 
-        .col-md-5
-          | <b>APA 2:</b>
-          textarea.form-control#apa2info(rows = 10)
-
-        .col-md-2
-
-      .row.vert-space-x1
-        .col-md-5
-          a#download_apa1info(onclick = 'DownloadInfo(1)', download = `APA1.json`, href = '') Download APA 1 Info
-
-          .vert-space-x1
-            a.button.btn.btn-primary(onclick = 'CopyInfoToClipboard(1)') Copy APA 1 Info to Clipboard
-
-        .col-md-5
-          a#download_apa2info(onclick = 'DownloadInfo(2)', download = `APA2.json`, href = '') Download APA 2 Info
-
-          .vert-space-x1
-            a.button.btn.btn-primary(onclick = 'CopyInfoToClipboard(2)') Copy APA 2 Info to Clipboard
-
-        .col-md-2
+        .col-md-4
 
     .vert-space-x2

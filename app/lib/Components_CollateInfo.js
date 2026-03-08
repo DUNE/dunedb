@@ -741,20 +741,24 @@ async function forExecSummary(componentUUID) {
 }
 
 
-/// Retrieve collated information about two specified APAs comprising a single doublet, for use in the DUNE HWDB
-async function forHWDB(apa1UUID, apa2UUID) {
-  // Set up an array of the APA UUIDs ... this will allow the collating of information to be done in a loop, instead of having to explicitly duplicate the code
-  // Then set up a corresponding array that will contain (and return) the combined collated information about both APAs
-  const apaUuids = [apa1UUID, apa2UUID];
-  let apaInformation = [];
+/// Retrieve information about a specified component in a format suitable for the DUNE HWDB
+async function forHWDB(componentUUID) {
+  // First retrieve the component record with the specified UUID, and then extract the component's type - the specific information to be retrieved for the HWDB will depend on this
+  const component = await Components.retrieve(componentUUID);
 
-  // For each APA UUID ...
-  for (const apaUuid of apaUuids) {
+  if (!component) {
+    return { error: `There is no component record with component UUID = ${componentUUID}` }
+  }
+
+  const componentTypeFormId = component.formId;
+
+  // Retrieve and return the information
+  if (componentTypeFormId === 'AssembledAPA') {
     // Retrieve collated information about the APA using the already-existing function that does the same for populating Executive Summaries
-    // Since the information is identical here, it doesn't make any sense to re-code the retrieval all over again for this function
-    const collatedInfo = await forExecSummary(apaUuid);
+    // The HWDB requires the same information (just in a different format), so it doesn't make any sense to re-code the retrieval all over again for this function
+    const collatedInfo = await forExecSummary(componentUUID);
 
-    // Define the object that will hold the information about a single APA in the structure required by the HWDB
+    // Define the object that will hold the APA information in the format required by the HWDB
     let singleAPA = {};
 
     singleAPA = {
@@ -802,7 +806,7 @@ async function forHWDB(apa1UUID, apa2UUID) {
     singleAPA.data.components.assembledAPA['assemblyStatus'] = collatedInfo.assembledAPA.assemblyStatus;
 
     // Additional information about the APA Frame is found in its component record
-    const assembledAPA = await Components.retrieve(apaUuid);
+    const assembledAPA = await Components.retrieve(componentUUID);
     const apaFrame = await Components.retrieve(assembledAPA.data.frameUuid);
 
     singleAPA.data.components.apaFrame['part_id'] = apaFrame.data.dunePid;
@@ -930,12 +934,11 @@ async function forHWDB(apa1UUID, apa2UUID) {
       singleAPA.data.measurements[`${layers[i]}Layer`]['apaDB_tensionMeasurements'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].tensions_actionID}`;
     }
 
-    // Save the collated information about this APA into the array
-    apaInformation.push(singleAPA);
+    // Return the information about this APA
+    return singleAPA;
+  } else {
+    return { error: `This component's type form ID (${componentTypeFormId}) does not have an HWDB format defined yet!` }
   }
-
-  // Return the array containing the combined collated information about both APAs
-  return apaInformation;
 }
 
 
