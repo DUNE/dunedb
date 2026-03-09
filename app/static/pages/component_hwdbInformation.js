@@ -1,6 +1,5 @@
-// Declare variables to hold the user-specified APA UUIDs
-let apa1Uuid = null;
-let apa2Uuid = null;
+// Declare a variable to hold the user-specified component UUID
+let componentUuid = null;
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -8,7 +7,7 @@ window.addEventListener('load', renderSearchForms);
 
 // Function to run when the page is loaded
 async function renderSearchForms() {
-  // Create a Formio form consisting of a component UUID input box, and render it in the page elements called 'apa1uuidform' and 'apa2uuidform'
+  // Create a Formio form consisting of a component UUID input box, and render it in the page element called 'componentuuidform'
   const componentUuidSchema = {
     components: [{
       type: 'ComponentUUID',
@@ -19,24 +18,15 @@ async function renderSearchForms() {
     }],
   }
 
-  const apa1UuidForm = await Formio.createForm(document.getElementById('apa1uuidform'), componentUuidSchema);
-  const apa2UuidForm = await Formio.createForm(document.getElementById('apa2uuidform'), componentUuidSchema);
+  const componentUuidForm = await Formio.createForm(document.getElementById('componentuuidform'), componentUuidSchema);
 
-  // When the content of either component UUID input box is changed, get the text string from the box
+  // When the content of the component UUID input box is changed, get the text string from the box
   // If the string is consistent with a valid UUID, set the value of the corresponding parameter
-  apa1UuidForm.on('change', function () {
-    if (apa1UuidForm.isValid()) {
-      const apa1UuidInput = apa1UuidForm.submission.data.componentUuid;
+  componentUuidForm.on('change', function () {
+    if (componentUuidForm.isValid()) {
+      const componentUuidInput = componentUuidForm.submission.data.componentUuid;
 
-      if (apa1UuidInput && apa1UuidInput.length === 36) apa1Uuid = apa1UuidInput;
-    }
-  });
-
-  apa2UuidForm.on('change', function () {
-    if (apa2UuidForm.isValid()) {
-      const apa2UuidInput = apa2UuidForm.submission.data.componentUuid;
-
-      if (apa2UuidInput && apa2UuidInput.length === 36) apa2Uuid = apa2UuidInput;
+      if (componentUuidInput && componentUuidInput.length === 36) componentUuid = componentUuidInput;
     }
   });
 
@@ -45,11 +35,11 @@ async function renderSearchForms() {
   $('#confirmButton').on('click', function () {
     $('#confirmButton').prop('disabled', true);
 
-    if (apa1Uuid && apa2Uuid) {
+    if (componentUuid) {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/components/hwdbInformation/${apa1Uuid}/${apa2Uuid}`,
+        url: `/json/components/hwdbInformation/${componentUuid}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);
@@ -60,13 +50,11 @@ async function renderSearchForms() {
 
 // Function to run for a successful retrieval query
 function postSuccess(result) {
-  // Make sure that the page elements where the information will be displayed are all empty
-  $('#apa1info').empty();
-  $('#apa2info').empty();
+  // Make sure that the page elements where the component information will be displayed are all empty
+  $('#componentinfo').empty();
 
-  // Show the APA and doublet information in their corresponding page elements
-  $('#apa1info').val(JSON.stringify(result[0], null, 2));
-  $('#apa2info').val(JSON.stringify(result[1], null, 2));
+  // Show the component information in its corresponding page element
+  $('#componentinfo').val(JSON.stringify(result, null, 2));
 
   // Re-enable the confirmation button for the next retrieval
   $('#confirmButton').prop('disabled', false);
@@ -87,37 +75,20 @@ function postFail(result, statusCode, statusMsg) {
 };
 
 
-// When any of the 'Download Info' links are clicked, write the contents of the corresponding JSON schema box to a file and then download the file
-function DownloadInfo(selector) {
-  let info = null;
-  let info_obj = null;
+// When the 'Download Info' link is clicked, write the contents of the JSON schema box to a file and then download the file
+function DownloadInfo() {
+  const info = $('#componentinfo').val();
+  const info_obj = window.URL.createObjectURL(new Blob([info], { type: 'application/JSON' }));
 
-  if (selector === 1) {
-    info = $('#apa1info').val();
-    info_obj = window.URL.createObjectURL(new Blob([info], { type: 'application/JSON' }));
-
-    $('#download_apa1info').attr('href', info_obj);
-  } else if (selector === 2) {
-    info = $('#apa2info').val();
-    info_obj = window.URL.createObjectURL(new Blob([info], { type: 'application/JSON' }));
-
-    $('#download_apa2info').attr('href', info_obj);
-  }
+  $('#download_componentinfo').attr('href', info_obj);
 }
 
 
-// When any of the 'Copy Info to Clipboard' buttons are pressed, copy the contents of the corresponding JSON schema box to the device's clipboard
-function CopyInfoToClipboard(selector) {
-  if (selector === 1) {
-    navigator.clipboard.writeText($('#apa1info').val()).then({
-    }, function (err) {
-      console.error('Error - could not copy APA 1 info', err);
-    })
-  } else if (selector === 2) {
-    navigator.clipboard.writeText($('#apa2info').val()).then({
-    }, function (err) {
-      console.error('Error - could not copy APA 2 info', err);
-    })
-  }
+// When the 'Copy Info to Clipboard' button is pressed, copy the contents of the JSON schema box to the device's clipboard
+function CopyInfoToClipboard() {
+  navigator.clipboard.writeText($('#componentinfo').val()).then({
+  }, function (err) {
+    console.error('Error - could not copy component info', err);
+  })
 };
 
