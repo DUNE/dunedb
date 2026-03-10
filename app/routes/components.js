@@ -178,6 +178,16 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // For the other shipment and batch component types, set up an array containing more detailed information about each sub-component
     let collectionDetails = [];
 
+    if (component.formId === 'APAFrameShipment') {
+      for (const info of component.data.frameUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.dunePid, componentRecord.shortUuid]);
+        }
+      }
+    }
+
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
@@ -204,16 +214,6 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
           const componentRecord = await Components.retrieve(info.component_uuid);
 
           if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
-        }
-      }
-    }
-
-    if (component.formId === 'FrameShipment') {
-      for (const info of component.data.frameUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.dunePid, componentRecord.shortUuid]);
         }
       }
     }
@@ -390,6 +390,16 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
     // ... but for batch-type components, they are already saved in the batch component's own record, so the individual sub-component records are not needed
     let shortUUIDs = [];
 
+    if (component.formId === 'APAFrameShipment') {
+      for (const info of component.data.frameUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
+        }
+      }
+    }
+
     if ((component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
@@ -402,16 +412,6 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
 
     if (component.formId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
-        }
-      }
-    }
-
-    if (component.formId === 'FrameShipment') {
-      for (const info of component.data.frameUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
 
@@ -554,6 +554,16 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
     // For specific shipment and batch component types, set up an array containing more detailed information about each sub-component
     let collectionDetails = [];
 
+    if (component.formId === 'APAFrameShipment') {
+      for (const info of component.data.frameUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.dunePid]);
+        }
+      }
+    }
+
     if (component.formId === 'BoardShipment') {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
@@ -580,16 +590,6 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
           const componentRecord = await Components.retrieve(info.component_uuid);
 
           if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
-        }
-      }
-    }
-
-    if (component.formId === 'FrameShipment') {
-      for (const info of component.data.frameUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.dunePid]);
         }
       }
     }
@@ -863,7 +863,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
         if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
         else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
       }
-    } else if (['APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'FrameShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
+    } else if (['APAFrameShipment', 'APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
       for (let shipment of components) {
         if (shipment.reception != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.reception.location]; }
         else { shipment.additionalInformation = '[reception object missing!]'; }

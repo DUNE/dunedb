@@ -208,7 +208,7 @@ async function save(input, req) {
       newRecord.reception.location = newRecord.data.originOfShipment;
     } else if (newRecord.formId === 'APAShippingFrame') {
       newRecord.reception.location = newRecord.data.asfLocation;
-    } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
+    } else if ((newRecord.formId === 'APAFrameShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
       newRecord.reception.location = 'in_transit';
     } else if (newRecord.formId === 'AssembledAPA') {
       newRecord.reception.location = newRecord.data.apaAssemblyLocation;
@@ -231,22 +231,9 @@ async function save(input, req) {
   // The DUNE PID of such components should technically be fixed at creation, but it is simpler code-wise to assign and re-assign that here as well
   const typeRecordNumber = String(newRecord.data.typeRecordNumber).padStart(5, '0');
 
-  if (newRecord.formId === 'APADoublet') {
-    let name_topApa = '[not set]';
-    let name_bottomApa = '[not set]';
-
-    if (newRecord.data.topApa !== '') {
-      const apa = await retrieve(newRecord.data.topApa);
-      name_topApa = apa.data.componentName;
-    }
-
-    if (newRecord.data.bottomApa !== '') {
-      const apa = await retrieve(newRecord.data.bottomApa);
-      name_bottomApa = apa.data.componentName;
-    }
-
-    newRecord.data.componentName = `${newRecord.formName} (${name_topApa} and ${name_bottomApa})`;
-    newRecord.data.dunePid = `D00200000000-${typeRecordNumber}-US000-010000`;
+  if (newRecord.formId === 'APAFrameShipment') {
+    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.frameUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'APAShipment') {
     let name_apa1 = '[not set]';
     let name_apa2 = '[not set]';
@@ -277,9 +264,6 @@ async function save(input, req) {
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'DWAComponentShipment') {
     newRecord.data.componentName = `${newRecord.formName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
-    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'FrameShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.frameUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.formId === 'GBiasBoardShipment') {
     newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
@@ -318,7 +302,7 @@ async function save(input, req) {
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (newRecord.formId === 'APAShipment') {
     const result = await updateLocations_inShipment(newRecord.componentUuid, newRecord.reception.location, (new Date()).toISOString().slice(0, 10));
-  } else if ((newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'FrameShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
+  } else if ((newRecord.formId === 'APAFrameShipment') || (newRecord.formId === 'BoardShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'GroundingMeshShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.formId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
@@ -422,7 +406,12 @@ async function updateLocations_inShipment(componentUuid, location, date) {
 
   // Loop over all sub-components in the shipment, and update each one's location information appropriately for the shipment type and contents
   // In all cases, if successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
-  if (shipment.formId === 'APAShipment') {
+  if (shipment.formId === 'APAFrameShipment') {
+    // Extract the UUID and update the location information of each APA frame in a shipment of frames
+    for (const frame of shipment.data.frameUuiDs) {
+      const result = await updateLocation(frame.component_uuid, location, date, '');
+    }
+  } else if (shipment.formId === 'APAShipment') {
     // Extract the UUID and update the location information of each assembled APA and the ASF in a shipment of APAs
     for (const apa of shipment.data.apaUuiDs) {
       const result = await updateLocation(apa.component_uuid, location, date, '');
@@ -438,11 +427,6 @@ async function updateLocations_inShipment(componentUuid, location, date) {
     // Extract the UUID and update the location information of each component in a (combined) shipment of DWAs and DWAPDBs
     for (const dwa of shipment.data.componentUUIDs) {
       const result = await updateLocation(dwa.component_uuid, location, date, '');
-    }
-  } else if (shipment.formId === 'FrameShipment') {
-    // Extract the UUID and update the location information of each APA frame in a shipment of frames
-    for (const frame of shipment.data.frameUuiDs) {
-      const result = await updateLocation(frame.component_uuid, location, date, '');
     }
   } else if (shipment.formId === 'GroundingMeshShipment') {
     // Extract the UUID and update the location information of each mesh in a shipment of meshes
