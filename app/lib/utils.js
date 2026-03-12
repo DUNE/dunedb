@@ -236,11 +236,13 @@ module.exports = {
   dictionary_apaFactoryLeads: {
     edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
+    carlosManuelGuerraGranjeiro: 'Carlos Manuel Guerra Granjeiro',
     albertoMarchionni: 'Alberto Marchionni',
     gwennMouster: 'Gwenn Mouster',
     radosavPantelic: 'Radosav Pantelic',
     danielSalisbury: 'Daniel Salisbury',
     stephenSumner: 'Stephen Sumner',
+    niklasTempleton: 'Niklas Templeton',
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
