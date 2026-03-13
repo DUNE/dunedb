@@ -40,7 +40,7 @@ block allbody
 
               dt Component UUID
               dd #{component.componentUuid}
-              
+
               if component.formId == 'BoardShipment' || component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
                 dt Number of Boards in Shipment
                 dd #{component.data.boardUuiDs.length}
@@ -62,7 +62,30 @@ block allbody
             if component.insertion.user
               |  by !{' '} #{component.insertion.user.displayName}
 
-      if component.formId === 'BoardShipment'
+      if component.formId === 'APAFrameShipment'
+        .vert-space-x1.border-success.border.rounded.p-2
+          dt Origin Location
+          dd #{dictionary_locations[component.data.originOfShipment]}
+
+          dt Destination Location
+          dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+          dt Frames in Shipment
+          dd
+            table.table 
+              thead 
+                tr 
+                  th.col-sm-1 UUID 
+                  th.col-sm-1 Factory ID
+                  th.col-sm-1 DUNE PID 
+
+              tbody 
+                each info in collectionDetails
+                  tr
+                    td #{info[0]}
+                    td #{info[1]}
+                    td #{info[2]}
+      else if component.formId === 'BoardShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location 
           dd #{dictionary_locations[component.data.originOfShipment]}
@@ -125,29 +148,6 @@ block allbody
                     td #{info[0]}
                     td #{info[2]}
                     td #{info[1]}
-      else if component.formId === 'FrameShipment'
-        .vert-space-x1.border-success.border.rounded.p-2
-          dt Origin Location
-          dd #{dictionary_locations[component.data.originOfShipment]}
-
-          dt Destination Location
-          dd #{dictionary_locations[component.data.destinationOfShipment]}
-
-          dt Frames in Shipment
-          dd
-            table.table 
-              thead 
-                tr 
-                  th.col-sm-1 UUID 
-                  th.col-sm-1 Factory ID
-                  th.col-sm-1 DUNE PID 
-
-              tbody 
-                each info in collectionDetails
-                  tr
-                    td #{info[0]}
-                    td #{info[1]}
-                    td #{info[2]}
       else if component.formId === 'GroundingMeshShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location
