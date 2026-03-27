@@ -88,6 +88,7 @@ module.exports = {
     davidBanner: 'David Banner',
     jacobBirkenhead: 'Jacob Birkenhead',
     carlosChavezBarajas: 'Carlos Chavez Barajas',
+    cernStaff: 'CERN Staff',
     edBlucher: 'Ed Blucher',
     josephBradwell: 'Joseph Bradwell',
     daveBrown: 'Dave Brown',
@@ -205,6 +206,7 @@ module.exports = {
   dictionary_dBandPostProduction: {
     edBlucher: 'Ed Blucher',
     albertoMarchionni: 'Alberto Marchionni',
+    radosavPantelic: 'Radosav Pantelic',
     danielSalisbury: 'Daniel Salisbury',
     jasonThornhill: 'Jason Thornhill',
   },
