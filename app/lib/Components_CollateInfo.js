@@ -744,27 +744,52 @@ async function forExecSummary(componentUUID) {
 /// Retrieve information about a specified component in a format suitable for the DUNE HWDB
 async function forHWDB(componentUUID) {
   // First retrieve the component record with the specified UUID, and then extract the component's type - the specific information to be retrieved for the HWDB will depend on this
-  const component = await Components.retrieve(componentUUID);
+  const componentRecord = await Components.retrieve(componentUUID);
 
-  if (!component) {
+  if (!componentRecord) {
     return { error: `There is no component record with component UUID = ${componentUUID}` }
   }
 
-  const componentTypeFormId = component.formId;
+  const componentTypeFormId = componentRecord.formId;
+  const componentDUNEPID = componentRecord.data.dunePid;
 
-  // Retrieve and return the information
+  // Set up the top-level information object that will hold the component information in the format required by the HWDB
+  // The general structure of this object is common and consistent across all component types, with only the field values changing depending on the specific component
+  // The data specific to a particular component type is all held within a single sub-object, the structure of which will be tailored to that type later on
+  let hwdbInfo = {
+    component_type: {
+      part_type_id: componentDUNEPID.substring(0, 12),
+    },
+    country_code: 'GB',     // (KRISH) The HWDB currently has a bug that means it uses 'GB' instead of 'UK' ... once that is fixed, change this to 'componentDUNEPID.substring(19, 21),'
+    institution: {
+      id: parseInt(componentDUNEPID.substring(21, 24)),
+    },
+    serial_number: '',      // This field is required to exist by the HWDB, but is not actually relevant for our purposes - it can be safely set as an empty string
+    status: {
+      id: 120,              // We will only send information to the HWDB about complete and finalised components, so this field will always have a value of '120' (signifying all QA/QC checks passed)
+    },
+    subcomponents: {},      // This sub-object will be populated below according to the specific component
+    certified_qaqc: true,   // We will only send information to the HWDB about complete and finalised components, so this field will always have a value of 'true'
+    qaqc_uploaded: true,    // We will only send information to the HWDB about complete and finalised components, so this field will always have a value of 'true'
+    comments: '',           // This field isn't actually required, but it may be useful in the future - in which case, it would be easier to just populate it rather than add it back in from scratch
+    specifications: {
+      component: {},        // This sub-object will be populated below according to the specific component
+    },
+  }
+
+  // Retrieve, save and return the information about the specified component
   if (componentTypeFormId === 'AssembledAPA') {
     // Retrieve collated information about the APA using the already-existing function that does the same for populating Executive Summaries
     // The HWDB requires the same information (just in a different format), so it doesn't make any sense to re-code the retrieval all over again for this function
     const collatedInfo = await forExecSummary(componentUUID);
 
-    // Define the object that will hold the APA information in the format required by the HWDB
-    let singleAPA = {};
-
-    singleAPA = {
-      part_id: "",
+    // Define the object that will hold the APA information ... the structure of this is specific to APA-type components
+    // The 'filename' field is used by the APA DB to set the name of the file when downloading the HWDB information in JSON format via the interface ...
+    // ... it should be accessed in the same way for any and all components and component types, but should not interfere with the HWDB-mandated fields in the top-level information object
+    let component = {
+      filename: `hwdbInfo_${collatedInfo.assembledAPA.componentName.replaceAll(' ', '-')}.json`,
       data: {
-        components: {
+        subComponents: {
           assembledAPA: {},
           apaFrame: {},
           tempSensors: {},
@@ -795,27 +820,27 @@ async function forHWDB(componentUUID) {
     // COMPONENT INFORMATION //
     ///////////////////////////
     // Information about the APA itself is found in the collated information object
-    singleAPA.part_id = collatedInfo.assembledAPA.dunePID;
-
-    singleAPA.data.components.assembledAPA['apaDB_componentName'] = collatedInfo.assembledAPA.componentName;
-    singleAPA.data.components.assembledAPA['apaDB_componentUUID'] = collatedInfo.assembledAPA.componentUUID;
-    singleAPA.data.components.assembledAPA['apaDB_componentQRCode'] = `https://apa.dunedb.org/c/${collatedInfo.assembledAPA.shortUUID}`;
-    singleAPA.data.components.assembledAPA['productionSite'] = collatedInfo.assembledAPA.productionSite;
-    singleAPA.data.components.assembledAPA['configuration'] = collatedInfo.assembledAPA.configuration;
-    singleAPA.data.components.assembledAPA['apaDB_assemblyWorkflow'] = `https://apa.dunedb.org/workflow/${collatedInfo.assembledAPA.workflowID}`;
-    singleAPA.data.components.assembledAPA['assemblyStatus'] = collatedInfo.assembledAPA.assemblyStatus;
+    component.data.subComponents.assembledAPA['dunePID'] = collatedInfo.assembledAPA.dunePID;
+    component.data.subComponents.assembledAPA['apaDB_componentName'] = collatedInfo.assembledAPA.componentName;
+    component.data.subComponents.assembledAPA['apaDB_componentUUID'] = collatedInfo.assembledAPA.componentUUID;
+    component.data.subComponents.assembledAPA['apaDB_componentQRCode'] = `https://apa.dunedb.org/c/${collatedInfo.assembledAPA.shortUUID}`;
+    component.data.subComponents.assembledAPA['productionSite'] = collatedInfo.assembledAPA.productionSite;
+    component.data.subComponents.assembledAPA['configuration'] = collatedInfo.assembledAPA.configuration;
+    component.data.subComponents.assembledAPA['apaDB_assemblyWorkflow'] = `https://apa.dunedb.org/workflow/${collatedInfo.assembledAPA.workflowID}`;
+    component.data.subComponents.assembledAPA['assemblyStatus'] = collatedInfo.assembledAPA.assemblyStatus;
 
     // Additional information about the APA Frame is found in its component record
     const assembledAPA = await Components.retrieve(componentUUID);
     const apaFrame = await Components.retrieve(assembledAPA.data.frameUuid);
 
-    singleAPA.data.components.apaFrame['part_id'] = apaFrame.data.dunePid;
-    singleAPA.data.components.apaFrame['apaDB_componentName'] = apaFrame.data.componentName;
-    singleAPA.data.components.apaFrame['apaDB_componentUUID'] = apaFrame.componentUuid;
-    singleAPA.data.components.apaFrame['apaDB_componentQRCode'] = `https://apa.dunedb.org/c/${apaFrame.shortUuid.toString()}`;
+    component.data.subComponents.apaFrame['dunePID'] = apaFrame.data.dunePid;
+    component.data.subComponents.apaFrame['apaDB_componentName'] = apaFrame.data.componentName;
+    component.data.subComponents.apaFrame['apaDB_componentUUID'] = apaFrame.componentUuid;
+    component.data.subComponents.apaFrame['apaDB_componentQRCode'] = `https://apa.dunedb.org/c/${apaFrame.shortUuid.toString()}`;
 
     // Additional information about the temperature sensors is found in the 'Frame Prep - Photon Detector Cable and Temperature Sensor Installation' action of the workflow ...
     // ... use the mapping document to find the temperature sensors' DUNE PIDs from the serial numbers stored in the action
+    // The temperature sensors also need to be added to the 'subcomponents' sub-object in the top-level information object
     const apaAssemblyWorkflow = await Workflows.retrieve(assembledAPA.workflowId);
     const tempSensorInstallAction = await Actions.retrieve(apaAssemblyWorkflow.path[5].result);
 
@@ -842,44 +867,45 @@ async function forHWDB(componentUUID) {
     ];
 
     for (const [index, serialNumber] of tempSensorSerialNumbers.entries()) {
-      singleAPA.data.components.tempSensors[`Temperature Sensor ${tempSensorLocations[index]} (${serialNumber})`] = tempSensorPIDs[index];
+      hwdbInfo.subcomponents[`Temperature Sensor ${tempSensorLocations[index]}`] = tempSensorPIDs[index];
+      component.data.subComponents.tempSensors[`Temperature Sensor ${tempSensorLocations[index]} (${serialNumber})`] = tempSensorPIDs[index];
     }
 
     /////////////////
     // QC SIGNOFFS //
     /////////////////
     // Information about the QC signoffs is found in the collated information object
-    singleAPA.data.signoffs.frameConstruction['name'] = collatedInfo.frameConstruction.signoff_name;
-    singleAPA.data.signoffs.frameConstruction['date'] = collatedInfo.frameConstruction.signoff_date;
-    singleAPA.data.signoffs.frameConstruction['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.signoff_actionID}`;
-    singleAPA.data.signoffs.frameConstruction['apaDB_intakeSurveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.intakeSurveys_actionID}`;
-    singleAPA.data.signoffs.frameConstruction['apaDB_installSurveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.installSurveys_actionID}`;
+    component.data.signoffs.frameConstruction['name'] = collatedInfo.frameConstruction.signoff_name;
+    component.data.signoffs.frameConstruction['date'] = collatedInfo.frameConstruction.signoff_date;
+    component.data.signoffs.frameConstruction['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.signoff_actionID}`;
+    component.data.signoffs.frameConstruction['apaDB_intakeSurveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.intakeSurveys_actionID}`;
+    component.data.signoffs.frameConstruction['apaDB_installSurveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.installSurveys_actionID}`;
 
-    singleAPA.data.signoffs.framePreparation['name'] = collatedInfo.framePreparation.signoff_name;
-    singleAPA.data.signoffs.framePreparation['date'] = collatedInfo.framePreparation.signoff_date;
-    singleAPA.data.signoffs.framePreparation['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.signoff_actionID}`;
-    singleAPA.data.signoffs.framePreparation['apaDB_meshInstall'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.meshInstall_actionID}`;
-    singleAPA.data.signoffs.framePreparation['apaDB_rtdInstall'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.rtdInstall_actionID}`;
+    component.data.signoffs.framePreparation['name'] = collatedInfo.framePreparation.signoff_name;
+    component.data.signoffs.framePreparation['date'] = collatedInfo.framePreparation.signoff_date;
+    component.data.signoffs.framePreparation['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.signoff_actionID}`;
+    component.data.signoffs.framePreparation['apaDB_meshInstall'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.meshInstall_actionID}`;
+    component.data.signoffs.framePreparation['apaDB_rtdInstall'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.rtdInstall_actionID}`;
 
     for (let i = 0; i < layers.length; i++) {
-      singleAPA.data.signoffs[`${layers[i]}Layer`]['name'] = collatedInfo[layers[i]].signoff_name;
-      singleAPA.data.signoffs[`${layers[i]}Layer`]['date'] = collatedInfo[layers[i]].signoff_date;
-      singleAPA.data.signoffs[`${layers[i]}Layer`]['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].signoff_actionID}`;
+      component.data.signoffs[`${layers[i]}Layer`]['name'] = collatedInfo[layers[i]].signoff_name;
+      component.data.signoffs[`${layers[i]}Layer`]['date'] = collatedInfo[layers[i]].signoff_date;
+      component.data.signoffs[`${layers[i]}Layer`]['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].signoff_actionID}`;
     };
 
-    singleAPA.data.signoffs.coverBoardsAndCaps['name'] = collatedInfo.coverBoardsAndCaps.signoff_name;
-    singleAPA.data.signoffs.coverBoardsAndCaps['date'] = collatedInfo.coverBoardsAndCaps.signoff_date;
-    singleAPA.data.signoffs.coverBoardsAndCaps['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.coverBoardsAndCaps.signoff_actionID}`;
+    component.data.signoffs.coverBoardsAndCaps['name'] = collatedInfo.coverBoardsAndCaps.signoff_name;
+    component.data.signoffs.coverBoardsAndCaps['date'] = collatedInfo.coverBoardsAndCaps.signoff_date;
+    component.data.signoffs.coverBoardsAndCaps['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.coverBoardsAndCaps.signoff_actionID}`;
 
-    singleAPA.data.signoffs.postProduction['name'] = collatedInfo.postProduction.signoff_name;
-    singleAPA.data.signoffs.postProduction['date'] = collatedInfo.postProduction.signoff_date;
-    singleAPA.data.signoffs.postProduction['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.signoff_actionID}`;
-    singleAPA.data.signoffs.postProduction['apaDB_panelInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.panelInstall_actionID}`;
-    singleAPA.data.signoffs.postProduction['apaDB_conduitInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.conduitInstall_actionID}`;
+    component.data.signoffs.postProduction['name'] = collatedInfo.postProduction.signoff_name;
+    component.data.signoffs.postProduction['date'] = collatedInfo.postProduction.signoff_date;
+    component.data.signoffs.postProduction['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.signoff_actionID}`;
+    component.data.signoffs.postProduction['apaDB_panelInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.panelInstall_actionID}`;
+    component.data.signoffs.postProduction['apaDB_conduitInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.conduitInstall_actionID}`;
 
-    singleAPA.data.signoffs.completedAPA['name'] = collatedInfo.completedAPA.signoff_name;
-    singleAPA.data.signoffs.completedAPA['date'] = collatedInfo.completedAPA.signoff_date;
-    singleAPA.data.signoffs.completedAPA['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
+    component.data.signoffs.completedAPA['name'] = collatedInfo.completedAPA.signoff_name;
+    component.data.signoffs.completedAPA['date'] = collatedInfo.completedAPA.signoff_date;
+    component.data.signoffs.completedAPA['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
 
     //////////////////
     // BROKEN WIRES //
@@ -887,7 +913,7 @@ async function forHWDB(componentUUID) {
     // Information about broken (damaged, missing or shorted) wires is found in the 'ncrs_useAsIs_withWires' section of the collated information object
     for (const ncr of collatedInfo.ncrs_useAsIs_withWires) {
       for (const wire of ncr.missingShortedWires) {
-        singleAPA.data.brokenWires.push({
+        component.data.brokenWires.push({
           type: wire.wireType,
           sideAndLayer: wire.wireLayer,
           headBoardAndPad: wire.headBoardAndPad,
@@ -910,32 +936,34 @@ async function forHWDB(componentUUID) {
     ];
 
     for (const [index, serialNumber] of tempSensorSerialNumbers.entries()) {
-      singleAPA.data.measurements.tempSensorResistances[`Temperature Sensor ${tempSensorLocations[index]} (${serialNumber})`] = tempSensorResistances[index];
+      component.data.measurements.tempSensorResistances[`Temperature Sensor ${tempSensorLocations[index]} (${serialNumber})`] = tempSensorResistances[index];
     }
 
     // Information about the layer assemblies is found in the collated information object
     for (let i = 0; i < layers.length; i++) {
-      singleAPA.data.measurements[`${layers[i]}Layer`]['winder'] = collatedInfo[layers[i]].winding_winder;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['winderHead'] = collatedInfo[layers[i]].winding_winderHead;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['wireBobbinManufacturers'] = collatedInfo[layers[i]].winding_bobbinManufacturers;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['winderMaintenanceSignoff'] = collatedInfo[layers[i]].winding_winderMaintenanceSignoff;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['tensionControlSignoff'] = collatedInfo[layers[i]].winding_tensionControlSignoff;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['numberOfReplacedWires'] = collatedInfo[layers[i]].winding_numberOfReplacedWires;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['numberOfTensionAlarms'] = collatedInfo[layers[i]].winding_numberOfTensionAlarms;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['apaDB_winding'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].winding_actionID}`;
+      component.data.measurements[`${layers[i]}Layer`]['winder'] = collatedInfo[layers[i]].winding_winder;
+      component.data.measurements[`${layers[i]}Layer`]['winderHead'] = collatedInfo[layers[i]].winding_winderHead;
+      component.data.measurements[`${layers[i]}Layer`]['wireBobbinManufacturers'] = collatedInfo[layers[i]].winding_bobbinManufacturers;
+      component.data.measurements[`${layers[i]}Layer`]['winderMaintenanceSignoff'] = collatedInfo[layers[i]].winding_winderMaintenanceSignoff;
+      component.data.measurements[`${layers[i]}Layer`]['tensionControlSignoff'] = collatedInfo[layers[i]].winding_tensionControlSignoff;
+      component.data.measurements[`${layers[i]}Layer`]['numberOfReplacedWires'] = collatedInfo[layers[i]].winding_numberOfReplacedWires;
+      component.data.measurements[`${layers[i]}Layer`]['numberOfTensionAlarms'] = collatedInfo[layers[i]].winding_numberOfTensionAlarms;
+      component.data.measurements[`${layers[i]}Layer`]['apaDB_winding'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].winding_actionID}`;
 
-      singleAPA.data.measurements[`${layers[i]}Layer`]['numberOfReworkedSolders'] = collatedInfo[layers[i]].soldering_numberOfReworkedSolders;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['apaDB_soldering'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].soldering_actionID}`;
+      component.data.measurements[`${layers[i]}Layer`]['numberOfReworkedSolders'] = collatedInfo[layers[i]].soldering_numberOfReworkedSolders;
+      component.data.measurements[`${layers[i]}Layer`]['apaDB_soldering'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].soldering_actionID}`;
 
-      singleAPA.data.measurements[`${layers[i]}Layer`]['tensionMeasurementLocation'] = collatedInfo[layers[i]].tensions_location;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['tensionSystem'] = collatedInfo[layers[i]].tensions_system;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['tensions_A'] = collatedInfo[layers[i]].tensions_A;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['tensions_B'] = collatedInfo[layers[i]].tensions_B;
-      singleAPA.data.measurements[`${layers[i]}Layer`]['apaDB_tensionMeasurements'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].tensions_actionID}`;
+      component.data.measurements[`${layers[i]}Layer`]['tensionMeasurementLocation'] = collatedInfo[layers[i]].tensions_location;
+      component.data.measurements[`${layers[i]}Layer`]['tensionSystem'] = collatedInfo[layers[i]].tensions_system;
+      component.data.measurements[`${layers[i]}Layer`]['tensions_A'] = collatedInfo[layers[i]].tensions_A;
+      component.data.measurements[`${layers[i]}Layer`]['tensions_B'] = collatedInfo[layers[i]].tensions_B;
+      component.data.measurements[`${layers[i]}Layer`]['apaDB_tensionMeasurements'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].tensions_actionID}`;
     }
 
-    // Return the information about this APA
-    return singleAPA;
+    // Copy the APA information object to the designated 'component-specific' sub-object in the top-level component object, and then return the latter
+    hwdbInfo.specifications.component = component;
+
+    return hwdbInfo;
   } else {
     return { error: `This component's type form ID (${componentTypeFormId}) does not have an HWDB format defined yet!` }
   }
