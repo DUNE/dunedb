@@ -945,10 +945,10 @@ router.get(['/json/components/hwdbInformation/:uuid', '/api/components/hwdbInfor
   try {
     // Retrieve the collated information - since this may require extracting specific field values from a number of DB records related to the component ...
     // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
-    let collatedInfo = await Components_CollateInfo.forHWDB(req.params.uuid);
+    let hwdbInfo = await Components_CollateInfo.forHWDB(req.params.uuid);
 
     // Return the information in JSON format
-    return res.status(200).json(collatedInfo);
+    return res.status(200).json(hwdbInfo);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
