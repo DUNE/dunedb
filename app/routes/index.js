@@ -109,9 +109,9 @@ module.exports = routes;
   /search/geoBoardsByVisInspectOrOrderNumber
   /json/search/geoBoardsByVisualInspection/:disposition/:issue
   /json/search/geoBoardsByOrderNumber/:orderNumber
-  /search/boardShipmentsByReceptionDetails
-  /json/search/boardShipmentsByReceptionDetails
-  /json/search/boardShipmentsByBoardUUID
+  /search/geoBoardShipmentsByReceptionDetails
+  /json/search/geoBoardShipmentsByReceptionDetails
+  /json/search/geoBoardShipmentsByBoardUUID
   /search/apasByProductionDetails
   /json/search/apasByProductionLocationAndNumber/:apaLocation/:apaNumber
   /json/search/apasByProductionLocationAndAssemblyStep/:apaLocation/:assemblyStep

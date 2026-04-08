@@ -56,11 +56,11 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // Add this information to the previously retrieved list of actions performed on the board, and make sure that all of the action entries contain the same (or equivalent) fields
     // Add an entry for the board itself (again, containing the same fields as the action entries), and finally sort all entries in the combined array by the 'lastEditDate' field
     if (component.formId === 'GeometryBoard') {
-      boardShipments = await Search_OtherComponents.boardShipmentsByBoardUUID(req.params.uuid);
-      actions = actions.concat(boardShipments);
+      geoBoardShipments = await Search_OtherComponents.geoBoardShipmentsByBoardUUID(req.params.uuid);
+      actions = actions.concat(geoBoardShipments);
 
       for (let entry of actions) {
-        if (entry.typeFormId !== 'BoardShipment') {
+        if (entry.typeFormId !== 'GeometryBoardShipment') {
           entry.data = {};
           entry.data.checksPassed = '[n.a.]';
 
@@ -188,16 +188,6 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'BoardShipment') {
-      for (const info of component.data.boardUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber, componentRecord.shortUuid]);
-        }
-      }
-    }
-
     if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
@@ -218,7 +208,17 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GeometryBoardShipment') {
+      for (const info of component.data.boardUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber, componentRecord.shortUuid]);
+        }
+      }
+    }
+
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -400,7 +400,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if ((component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
+    if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'GeometryBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -420,7 +420,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -564,16 +564,6 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'BoardShipment') {
-      for (const info of component.data.boardUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber]);
-        }
-      }
-    }
-
     if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
@@ -594,7 +584,17 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GeometryBoardShipment') {
+      for (const info of component.data.boardUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber]);
+        }
+      }
+    }
+
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -863,7 +863,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
         if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
         else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
       }
-    } else if (['APAFrameShipment', 'APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
+    } else if (['APAFrameShipment', 'APAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
       for (let shipment of components) {
         if (shipment.reception != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.reception.location]; }
         else { shipment.additionalInformation = '[reception object missing!]'; }

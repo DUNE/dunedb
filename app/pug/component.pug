@@ -187,37 +187,6 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
-    else if component.formId === 'BoardShipment'
-      .vert-space-x1.border-success.border.rounded.p-2
-        dt Origin Location 
-        dd #{dictionary_locations[component.data.originOfShipment]}
-
-        dt Destination Location
-        dd #{dictionary_locations[component.data.destinationOfShipment]}
-
-        dt Boards in Shipment
-        dd
-          table.table
-            thead
-              tr
-                th.col-md-2 UUID
-                th.col-md-1 UK ID
-                th.col-md-1 Part Number
-                th.col-md-3 QR Code Link 
-
-            tbody
-              each info in collectionDetails
-                tr
-                  td
-                    a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
-
-                  td #{info[1]}
-                  td #{info[2]}
-                  td #{`${base_url}/c/${info[3]}`}
-
-        a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-          img.small-icon(src = '/images/checklist_icon.svg')
-          | &nbsp; Print all sub-component QR codes
     else if component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         if component.formId === 'CEAdapterBoardShipment'
@@ -281,7 +250,38 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
-    else if component.formId === 'GroundingMeshShipment'
+    else if component.formId === 'GeometryBoardShipment'
+      .vert-space-x1.border-success.border.rounded.p-2
+        dt Origin Location 
+        dd #{dictionary_locations[component.data.originOfShipment]}
+
+        dt Destination Location
+        dd #{dictionary_locations[component.data.destinationOfShipment]}
+
+        dt Boards in Shipment
+        dd
+          table.table
+            thead
+              tr
+                th.col-md-2 UUID
+                th.col-md-1 UK ID
+                th.col-md-1 Part Number
+                th.col-md-3 QR Code Link 
+
+            tbody
+              each info in collectionDetails
+                tr
+                  td
+                    a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
+
+                  td #{info[1]}
+                  td #{info[2]}
+                  td #{`${base_url}/c/${info[3]}`}
+
+        a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+          img.small-icon(src = '/images/checklist_icon.svg')
+          | &nbsp; Print all sub-component QR codes
+    else if component.formId === 'GroundingMeshPanelShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location
         dd #{dictionary_locations[component.data.originOfShipment]}
@@ -462,7 +462,7 @@ block content
             tbody 
               each entry in actions
                 tr 
-                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Board Shipment')
+                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Geometry Board Shipment')
                     td 
                       a(href = `/component/${entry.componentUuid}`) #{entry.typeFormName}
                   else 
@@ -472,7 +472,7 @@ block content
                   td #{entry.lastEditDate.toISOString().slice(0, 10)}
                   td #{dictionary_locations[entry.data.originOfShipment]}
 
-                  if entry.typeFormName === 'Board Shipment'
+                  if entry.typeFormName === 'Geometry Board Shipment'
                     if entry.reception
                       if entry.reception.location === 'in_transit'
                         td #{dictionary_locations[entry.data.destinationOfShipment]}
@@ -487,7 +487,7 @@ block content
                     td -
                     td -
 
-                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Board Shipment')
+                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Geometry Board Shipment')
                     td -
                   else 
                     td #{entry.data.checksPassed}
