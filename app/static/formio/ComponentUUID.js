@@ -347,7 +347,7 @@ class ComponentUUID extends TextFieldComponent {
                   }
                 },
               }).fail();
-            } else if (component.formId === 'wire_bobbin') {
+            } else if (component.formId === 'WireBobbin') {
               if (component.data.meanBreakStrength >= 24.0) {
                 info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
               } else {

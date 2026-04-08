@@ -185,12 +185,12 @@ async function save(input, req) {
     } else if (newRecord.formId === 'SHVBoard') {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300500001-${typeRecordNumber}-US200-010000`;
+    } else if (newRecord.formId === 'WireBobbin') {
+      newRecord.data.componentName = `${newRecord.formName} ${newRecord.data.bobbinId} (Lot ${newRecord.data.wireLot})`;
+      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.formId === 'Yoke') {
       newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00301000001-${typeRecordNumber}-US200-010000`;
-    } else if (newRecord.formId === 'wire_bobbin') {
-      newRecord.data.componentName = `${newRecord.formName} ${newRecord.data.bobbinId} (Lot ${newRecord.data.wireLot})`;
-      newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     }
 
     // Set up a new 'Reception' object to hold the component's current location and the date at which it was received at this location ... and we can immediately set the date to be the current one
@@ -202,7 +202,7 @@ async function save(input, req) {
 
     // Almost all component types will always start at specific fixed locations ...
     // ... the only exceptions are the 'batch' types (these still need the location field to exist, but it can be left as an empty string)
-    if ((newRecord.formId === 'APAFrame') || (newRecord.formId === 'wire_bobbin')) {
+    if ((newRecord.formId === 'APAFrame') || (newRecord.formId === 'WireBobbin')) {
       newRecord.reception.location = 'daresbury';
     } else if (newRecord.formId === 'APAShipment') {
       newRecord.reception.location = newRecord.data.originOfShipment;

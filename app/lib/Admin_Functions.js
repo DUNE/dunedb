@@ -15,6 +15,9 @@ async function cleanComponentTypeFormIds(typeFormId) {
   if (typeFormId === 'GroundingMeshShipment') {
     newTypeFormId = 'GroundingMeshPanelShipment';
     newTypeFormName = 'Grounding Mesh Panel Shipment';
+  } else if (typeFormId === 'wire_bobbin') {
+    newTypeFormId = 'WireBobbin';
+    newTypeFormName = 'Wire Bobbin';
   }
 
   const result = await db.collection('components')
