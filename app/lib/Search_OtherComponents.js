@@ -6,7 +6,7 @@ const { db } = require('./db');
 
 
 /// Retrieve a list of geometry board shipments that match the specified reception details
-async function boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment) {
+async function geoBoardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment) {
   // Set up 'matching' strings that can be used by MongoDB to match against specific record field values
   // For each potential location (origin or destination), if it has been specified, just use it as the matching string ... otherwise use a fully wildcard regular expression
   const originString = (origin) ? origin : /(.*?)/;
@@ -14,10 +14,10 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 
   let comp_aggregation_stages = [];
 
-  // Match against the type form ID and both locations to get records of all 'Board Shipment' components that were supposed to travel between the specified locations
+  // Match against the type form ID and both locations to get records of all 'Geometry Board Shipment' components that were supposed to travel between the specified locations
   comp_aggregation_stages.push({
     $match: {
-      'formId': 'BoardShipment',
+      'formId': 'GeometryBoardShipment',
       'data.originOfShipment': originString,
       'data.destinationOfShipment': destinationString,
     }
@@ -39,7 +39,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
     .aggregate(comp_aggregation_stages)
     .toArray();
 
-  // At this point, we have a list of 'Board Shipment' component records that:
+  // At this point, we have a list of 'Geometry Board Shipment' component records that:
   //   - originated at the specified origin location (if one was specified), or at any location (if not)
   //   - were supposed to end up at the specified destination location (if one was specified), or at any location (if not)
   // But what we actually want is a combination of some information from both the shipment component record and the corresponding reception action record (if the shipment has been received)
@@ -49,7 +49,7 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
   for (const shipmentRecord of component_results) {
     let action_aggregation_stages = [];
 
-    // Match against the type form ID and component UUID to get records of all 'Board Reception' actions performed on the specified board shipment component
+    // Match against the type form ID and component UUID to get records of all 'Board Reception' actions performed on the specified geometry board shipment component
     action_aggregation_stages.push({
       $match: {
         'typeFormId': 'BoardReception',
@@ -145,11 +145,11 @@ async function boardShipmentsByReceptionDetails(status, origin, destination, ear
 
 
 /// Retrieve a list of geometry board shipments that reference a single component, specified by its UUID
-async function boardShipmentsByBoardUUID(componentUUID) {
+async function geoBoardShipmentsByBoardUUID(componentUUID) {
   let aggregation_stages = [];
 
-  // Match against the type form ID to get records of all 'Board Shipment' components
-  aggregation_stages.push({ $match: { 'formId': 'BoardShipment' } });
+  // Match against the type form ID to get records of all 'Geometry Board Shipment' components
+  aggregation_stages.push({ $match: { 'formId': 'GeometryBoardShipment' } });
 
   // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
@@ -810,8 +810,8 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
 
 
 module.exports = {
-  boardShipmentsByReceptionDetails,
-  boardShipmentsByBoardUUID,
+  geoBoardShipmentsByReceptionDetails,
+  geoBoardShipmentsByBoardUUID,
   apasByProductionLocationAndNumber,
   apasByProductionLocationAndAssemblyStep,
   componentsByDUNEPID,

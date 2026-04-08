@@ -18,6 +18,9 @@ async function cleanComponentTypeFormIds(typeFormId) {
   } else if (typeFormId === 'wire_bobbin') {
     newTypeFormId = 'WireBobbin';
     newTypeFormName = 'Wire Bobbin';
+  } else if (typeFormId === 'BoardShipment') {
+    newTypeFormId = 'GeometryBoardShipment';
+    newTypeFormName = 'Geometry Board Shipment';
   }
 
   const result = await db.collection('components')
