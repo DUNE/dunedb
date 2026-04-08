@@ -218,7 +218,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -420,7 +420,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -594,7 +594,7 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -863,7 +863,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
         if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
         else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
       }
-    } else if (['APAFrameShipment', 'APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
+    } else if (['APAFrameShipment', 'APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GroundingMeshPanelShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
       for (let shipment of components) {
         if (shipment.reception != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.reception.location]; }
         else { shipment.additionalInformation = '[reception object missing!]'; }

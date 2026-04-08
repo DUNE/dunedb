@@ -27,15 +27,7 @@ async function renderInputForm() {
 
 
 function postSuccess(result) {    // Change as appropriate for the required utility
-  if (['ALL_COMPONENTS', 'APAFrame', 'AssembledAPA', 'DWA', 'DWAPDB'].includes(result)) {
-    if (result === 'ALL_COMPONENTS') {
-      window.location.href = `/componentTypes/list`;
-    } else {
-      window.location.href = `/components/${result}/list`;
-    }
-  } else {
-    window.location.href = `/actionTypes/list`;
-  }
+  window.location.href = `/components/${result}/list`;
 }
 
 

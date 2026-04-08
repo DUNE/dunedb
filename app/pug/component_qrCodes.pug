@@ -24,7 +24,7 @@ block allbody
       - const qrCodeLabelLine1 = component.data.componentName;
       - const qrCodeLabelLine2 = component.componentUuid;
 
-      if (component.formId === 'APAFrameShipment') || (component.formId === 'APAShipment') || (component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'DWAComponentShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'GroundingMeshShipment') || (component.formId === 'PopulatedBoardShipment') || (component.formId === 'SHVBoardShipment') || (component.formId === 'YokeShipment')
+      if (component.formId === 'APAFrameShipment') || (component.formId === 'APAShipment') || (component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'DWAComponentShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'GroundingMeshPanelShipment') || (component.formId === 'PopulatedBoardShipment') || (component.formId === 'SHVBoardShipment') || (component.formId === 'YokeShipment')
         .row.qr-row
           .col-sm-6.qr-col
             +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)
