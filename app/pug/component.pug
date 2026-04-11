@@ -543,21 +543,21 @@ block content
     .vert-space-x1
       .row
         .col-sm-6
-          if component.formId === 'AssembledAPA'
-            h4 Action History (Non-Workflow Actions Only)
-
-            .vert-space-x1
-              p <b>Existing workflow actions can be accessed through this component's 
-                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
-                | workflow</b>
-          else if component.formId === 'APAFrame'
+          if component.formId === 'APAFrame'
             h4 Action History (Non-Workflow Actions Only)
 
             .vert-space-x1
               p <b>Existing workflow actions can be accessed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
                 | workflow</b>
-          else if component.formId === 'APAShipment'
+          else if component.formId === 'AssembledAPA'
+            h4 Action History (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>Existing workflow actions can be accessed through this component's 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
+                | workflow</b>
+          else if component.formId === 'AssembledAPAShipment'
             h4 Action History (Non-Workflow Actions Only)
 
             .vert-space-x1
@@ -596,21 +596,21 @@ block content
                         +dateTimeFormat(action.lastEditDate)
 
         .col-sm-6
-          if component.formId === 'AssembledAPA'
-            h4 Select an Action Type to Perform (Non-Workflow Actions Only)
-
-            .vert-space-x1
-              p <b>New workflow actions must be performed through this component's 
-                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
-                | workflow</b>
-          else if component.formId === 'APAFrame'
+          if component.formId === 'APAFrame'
             h4 Select an Action Type to Perform (Non-Workflow Actions Only)
 
             .vert-space-x1
               p <b>New workflow actions must be performed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
                 | workflow</b>
-          else if component.formId === 'APAShipment'
+          else if component.formId === 'AssembledAPA'
+            h4 Select an Action Type to Perform (Non-Workflow Actions Only)
+
+            .vert-space-x1
+              p <b>New workflow actions must be performed through this component's 
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
+                | workflow</b>
+          else if component.formId === 'AssembledAPAShipment'
             h4 Select an Action Type to Perform (Non-Workflow Actions Only)
 
             .vert-space-x1
