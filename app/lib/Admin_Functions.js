@@ -1,4 +1,5 @@
 const MUUID = require('uuid-mongodb');
+const ObjectId = require('mongodb').ObjectId;
 
 const Actions = require('./Actions');
 const { db } = require('./db');
@@ -6,111 +7,107 @@ const Components = require('./Components');
 const Forms = require('./Forms');
 const logger = require('./logger');
 const utils = require('./utils');
+const Workflows = require('./Workflows');
 
 
-async function cleanComponentRecords(typeFormId) {
-  let deleteCondition = null;
+async function cleanComponentTypeFormIds(typeFormId) {
+  let newTypeFormId = null;
+  let newTypeFormName = null;
 
-  if (typeFormId === 'ALL_COMPONENTS') {
-    deleteCondition = { $unset: { 'data.name': "" } };
-  } else if (typeFormId === 'APAFrame') {
-    deleteCondition = { $unset: { 'data.frameNumber': "" } };
-  } else if (typeFormId === 'AssembledAPA') {
-    deleteCondition = { $unset: { 'data.apaNumberAtLocation': "" } };
-  } else if (typeFormId === 'DWA') {
-    deleteCondition = { $unset: { 'data.dwaNumber': "" } };
-  } else if (typeFormId === 'DWAPDB') {
-    deleteCondition = { $unset: { 'data.pdbNumber': "" } };
+  if (typeFormId === 'GroundingMeshShipment') {
+    newTypeFormId = 'GroundingMeshPanelShipment';
+    newTypeFormName = 'Grounding Mesh Panel Shipment';
+  } else if (typeFormId === 'wire_bobbin') {
+    newTypeFormId = 'WireBobbin';
+    newTypeFormName = 'Wire Bobbin';
+  } else if (typeFormId === 'BoardShipment') {
+    newTypeFormId = 'GeometryBoardShipment';
+    newTypeFormName = 'Geometry Board Shipment';
+  } else if (typeFormId === 'APAShipment') {
+    newTypeFormId = 'AssembledAPAShipment';
+    newTypeFormName = 'Assembled APA Shipment';
   }
-
-  const matchCondition = (typeFormId === 'ALL_COMPONENTS') ? {} : { formId: typeFormId };
 
   const result = await db.collection('components')
     .updateMany(
-      matchCondition,
-      deleteCondition,
+      { formId: typeFormId },
+      [
+        {
+          $set: {
+            'formId': newTypeFormId,
+            'formName': newTypeFormName,
+          }
+        },
+      ]
     )
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::cleanComponentRecords() - failed to delete fields from the component records!`);
+  if (result.ok === 0) throw new Error(`Admin_Functions::cleanComponentTypeFormIds() - failed to change type form ID in the component records!`);
 
-  return typeFormId;
-}
+  if (typeFormId === 'APAShipment') {
+    let aggregation_stages = [];
 
+    aggregation_stages.push({ $match: { formId: newTypeFormId } });
+    aggregation_stages.push({ $project: { componentUuid: true } });
 
-async function addComponentInfoToActionRecords(componentType) {
-  const apaFramesAndShipments = ['DeliveredFrameQAChecks', 'CompletedFrameQCChecklist', 'InstallationSurveys', 'IntakeSurveys', 'APAShipmentReception', 'APAShipmentTransport', 'ASFCloseUp'];
-  let assembledAPAs = [];
+    let uuids = await db.collection('components')
+      .aggregate(aggregation_stages)
+      .toArray();
 
-  const apaWorkflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
-  let actionTypeForms = await Forms.list('actionForms');
-  let list_apaWorkflowActionNames = [];
+    for (let uuid of uuids) {
+      const component = await Components.retrieve(uuid.componentUuid);
+      const data = component.data;
 
-  for (const step of apaWorkflowTypeForm.path.slice(1)) {
-    list_apaWorkflowActionNames.push(step.formName);
-  }
+      let name_apa1 = '[not set]';
+      let name_apa2 = '[not set]';
 
-  for (const [typeFormID, typeForm] of Object.entries(actionTypeForms)) {
-    if (list_apaWorkflowActionNames.includes(typeForm.formName)) {
-      assembledAPAs.push(typeFormID);
+      if (data.apaUuiDs[0].component_uuid !== '') {
+        const apa = await Components.retrieve(data.apaUuiDs[0].component_uuid);
+        name_apa1 = apa.data.componentName.substring(4);
+      }
+
+      if (data.apaUuiDs[1].component_uuid !== '') {
+        const apa = await Components.retrieve(data.apaUuiDs[1].component_uuid);
+        name_apa2 = apa.data.componentName.substring(4);
+      }
+
+      const componentName = `Assembled APA Shipment (${name_apa1} + ${name_apa2})`;
+
+      const componentUuid = component.componentUuid;
+      let match_condition = { componentUuid };
+
+      if (typeof componentUuid === 'object' && !(componentUuid instanceof Binary)) match_condition = componentUuid;
+
+      match_condition.componentUuid = MUUID.from(match_condition.componentUuid);
+
+      let resultInner = await db.collection('components')
+        .updateMany(
+          match_condition,
+          [
+            {
+              $set: { 'data.componentName': componentName }
+            },
+          ]
+        )
+
+      if (resultInner.ok === 0) throw new Error(`Admin_Functions::cleanComponentTypeFormIds() - failed to update Assembled APA Shipment component names!`);
+
+      let update = { '$set': {} };
+      update['$set']['path.' + 0 + '.formName'] = newTypeFormName;
+
+      resultInner = await db.collection('workflows')
+        .updateMany(
+          { workflowId: new ObjectId(component.workflowId) },
+          update,
+        )
+
+      if (resultInner.ok === 0) throw new Error(`Admin_Functions::cleanComponentTypeFormIds() - failed to change type form name in the workflow records!`);
     }
   }
 
-  const geometryBoards = ['BoardToothStripAttachment', 'BoardVisualInspection', 'FactoryBoardRejection'];
-  const groundingMeshPanels = ['EpoxyApplication', 'FinalInspection', 'MeshQAInspection', 'APANonConformance', 'ReceiptInspection'];
-
-  const combined = apaFramesAndShipments.concat(assembledAPAs, geometryBoards, groundingMeshPanels);
-  let otherComponents = [];
-
-  for (const [typeFormID, typeForm] of Object.entries(actionTypeForms)) {
-    if (!(combined.includes(typeFormID)) && !(typeForm.tags.includes('Trash'))) {
-      otherComponents.push(typeFormID);
-    }
-  }
-
-  let filterCondition = null;
-
-  if (componentType === 'APAFramesAndShipments') {
-    filterCondition = { 'typeFormId': { $in: apaFramesAndShipments } }
-  } else if (componentType === 'AssembledAPAs') {
-    filterCondition = { 'typeFormId': { $in: assembledAPAs } }
-  } else if (componentType === 'GeometryBoards_BoardToothStripAttachment') {
-    filterCondition = { 'typeFormId': 'BoardToothStripAttachment' }
-  } else if (componentType === 'GeometryBoards_BoardVisualInspection') {
-    filterCondition = { 'typeFormId': 'BoardVisualInspection' }
-  } else if (componentType === 'GeometryBoards_FactoryBoardRejection') {
-    filterCondition = { 'typeFormId': 'FactoryBoardRejection' }
-  } else if (componentType === 'GroundingMeshPanels') {
-    filterCondition = { 'typeFormId': { $in: groundingMeshPanels } }
-  } else if (componentType === 'OtherComponents') {
-    filterCondition = { 'typeFormId': { $in: otherComponents } }
-  }
-
-  const result = await db.collection('actions')
-    .find(filterCondition)
-    .forEach(async function (actionRecord) {
-      const componentRecord = await Components.retrieve(actionRecord.componentUuid);
-      const componentName = (componentRecord) ? componentRecord.data.componentName : '[no component record found!]';
-      const componentTypeFormId = (componentRecord) ? componentRecord.formId : '[no component record found!]';
-      const componentTypeFormName = (componentRecord) ? componentRecord.formName : '[no component record found!]';
-
-      const innerResult = db.collection('actions')
-        .updateOne(
-          { _id: actionRecord._id },
-          {
-            $set: {
-              'componentName': componentName,
-              'componentTypeFormId': componentTypeFormId,
-              'componentTypeFormName': componentTypeFormName,
-            }
-          },
-        );
-
-    });
-
-  return 'ALL_ACTIONS';
+  return newTypeFormId;
 }
+
 
 module.exports = {
-  cleanComponentRecords,
-  addComponentInfoToActionRecords,
+  cleanComponentTypeFormIds,
 }

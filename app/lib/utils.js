@@ -125,6 +125,7 @@ module.exports = {
     stephenSumner: 'Stephen Sumner',
     chrisSutton: 'Chris Sutton',
     jasonThornhill: 'Jason Thornhill',
+    douglasTsim: 'Douglas Tsim',
     oliverUnwin: 'Oliver Unwin',
     anthonyWatling: 'Anthony Watling',
     lewisWatson: 'Lewis Watson',

@@ -1,5 +1,6 @@
 // Declare a variable to hold the user-specified component UUID
 let componentUuid = null;
+let filename = 'hwdbInfo_noComponentSpecified.json';
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderSearchForms);
@@ -53,8 +54,10 @@ function postSuccess(result) {
   // Make sure that the page elements where the component information will be displayed are all empty
   $('#componentinfo').empty();
 
-  // Show the component information in its corresponding page element
+  // Show the component information in its corresponding page element, and use the information to set the filename to be used for downloading the JSON file
   $('#componentinfo').val(JSON.stringify(result, null, 2));
+
+  filename = result['specifications']['component']['filename'];
 
   // Re-enable the confirmation button for the next retrieval
   $('#confirmButton').prop('disabled', false);
@@ -80,6 +83,7 @@ function DownloadInfo() {
   const info = $('#componentinfo').val();
   const info_obj = window.URL.createObjectURL(new Blob([info], { type: 'application/JSON' }));
 
+  $('#download_componentinfo').attr('download', filename);
   $('#download_componentinfo').attr('href', info_obj);
 }
 

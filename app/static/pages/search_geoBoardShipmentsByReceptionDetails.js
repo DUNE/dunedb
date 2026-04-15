@@ -1,4 +1,4 @@
-// Declare variables to hold the (initially empty) user-specified board shipment reception details
+// Declare variables to hold the (initially empty) user-specified geometry board shipment reception details
 let shipmentStatus = '';
 let originLocation = '';
 let destinationLocation = '';
@@ -95,7 +95,7 @@ async function renderSearchForms() {
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
-        url: `/json/search/boardShipmentsByReceptionDetails?shipmentStatus=${shipmentStatus}&originLocation=${originLocation}&destinationLocation=${destinationLocation}&earliestDate=${earliestDate}&latestDate=${latestDate}&receptionComment=${receptionComment}`,
+        url: `/json/search/geoBoardShipmentsByReceptionDetails?shipmentStatus=${shipmentStatus}&originLocation=${originLocation}&destinationLocation=${destinationLocation}&earliestDate=${earliestDate}&latestDate=${latestDate}&receptionComment=${receptionComment}`,
         dataType: 'json',
         success: postSuccess,
       }).fail(postFail);

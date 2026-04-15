@@ -128,14 +128,14 @@ router.get(['/json/search/geoBoardsByOrderNumber/:orderNumber', '/api/search/geo
 
 
 /// Search for geometry board shipments using various shipment reception details (client-side interface)
-router.get('/search/boardShipmentsByReceptionDetails', async function (req, res, next) {
+router.get('/search/geoBoardShipmentsByReceptionDetails', async function (req, res, next) {
   // Render the interface page
-  res.render('search_boardShipmentsByReceptionDetails.pug', { dictionary_locations: utils.dictionary_locations });
+  res.render('search_geoBoardShipmentsByReceptionDetails.pug', { dictionary_locations: utils.dictionary_locations });
 });
 
 
 /// Search for geometry board shipments using various shipment reception details (query to server-side)
-router.get(['/json/search/boardShipmentsByReceptionDetails', '/api/search/boardShipmentsByReceptionDetails'], async function (req, res, next) {
+router.get(['/json/search/geoBoardShipmentsByReceptionDetails', '/api/search/geoBoardShipmentsByReceptionDetails'], async function (req, res, next) {
   try {
     // This search query can have multiple query strings, most of which are optional
     // So first, parse out the strings which have actually been provided (as non-empty strings), and set the rest to 'null'
@@ -153,7 +153,7 @@ router.get(['/json/search/boardShipmentsByReceptionDetails', '/api/search/boardS
     if (latest) latest = latest.replace(' ', '+');
 
     // Retrieve a list of geometry boards shipments that match the specified reception details
-    const shipments = await Search_OtherComponents.boardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
+    const shipments = await Search_OtherComponents.geoBoardShipmentsByReceptionDetails(status, origin, destination, earliest, latest, comment);
 
     // Return the list in JSON format
     return res.status(200).json(shipments);
@@ -165,10 +165,10 @@ router.get(['/json/search/boardShipmentsByReceptionDetails', '/api/search/boardS
 
 
 /// Search for geometry board shipments that reference a single component, specified by its UUID (query to server-side)
-router.get(['/json/search/boardShipmentsByBoardUUID/:uuid', '/api/search/boardShipmentsByBoardUUID/:uuid'], async function (req, res, next) {
+router.get(['/json/search/geoBoardShipmentsByBoardUUID/:uuid', '/api/search/geoBoardShipmentsByBoardUUID/:uuid'], async function (req, res, next) {
   try {
     // Retrieve a list of geometry boards shipments that reference the specified component UUID
-    const shipments = await Search_OtherComponents.boardShipmentsByBoardUUID(req.params.uuid);
+    const shipments = await Search_OtherComponents.geoBoardShipmentsByBoardUUID(req.params.uuid);
 
     // Sort the shipments by increasing 'lastEditDate', i.e. the most recent shipment will be first in the list
     shipments.sort(utils.byField_decreasing('lastEditDate'));

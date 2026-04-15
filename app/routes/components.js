@@ -56,11 +56,11 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // Add this information to the previously retrieved list of actions performed on the board, and make sure that all of the action entries contain the same (or equivalent) fields
     // Add an entry for the board itself (again, containing the same fields as the action entries), and finally sort all entries in the combined array by the 'lastEditDate' field
     if (component.formId === 'GeometryBoard') {
-      boardShipments = await Search_OtherComponents.boardShipmentsByBoardUUID(req.params.uuid);
-      actions = actions.concat(boardShipments);
+      geoBoardShipments = await Search_OtherComponents.geoBoardShipmentsByBoardUUID(req.params.uuid);
+      actions = actions.concat(geoBoardShipments);
 
       for (let entry of actions) {
-        if (entry.typeFormId !== 'BoardShipment') {
+        if (entry.typeFormId !== 'GeometryBoardShipment') {
           entry.data = {};
           entry.data.checksPassed = '[n.a.]';
 
@@ -131,7 +131,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
     // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only a handful of workflow types, so we can do this explicitly)
     // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
-    const list_workflowComponents = ['AssembledAPA', 'APAFrame', 'APAShipment'];
+    const list_workflowComponents = ['APAFrame', 'AssembledAPA', 'AssembledAPAShipment'];
     const workflowComponent = list_workflowComponents.includes(component.formId);
 
     // If the specified component type is one that is the subject of a workflow, filter out any action types that should be performed through the workflow
@@ -144,11 +144,11 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     if (workflowComponent) {
       let workflowTypeForm = null;
 
-      if (component.formId === 'AssembledAPA') {
-        workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
-      } else if (component.formId === 'APAFrame') {
+      if (component.formId === 'APAFrame') {
         workflowTypeForm = await Forms.retrieve('workflowForms', 'FrameAssembly');
-      } else if (component.formId === 'APAShipment') {
+      } else if (component.formId === 'AssembledAPA') {
+        workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
+      } else if (component.formId === 'AssembledAPAShipment') {
         workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_PostProduction');
       }
 
@@ -188,16 +188,6 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'BoardShipment') {
-      for (const info of component.data.boardUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber, componentRecord.shortUuid]);
-        }
-      }
-    }
-
     if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
@@ -218,7 +208,17 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GeometryBoardShipment') {
+      for (const info of component.data.boardUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber, componentRecord.shortUuid]);
+        }
+      }
+    }
+
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -400,7 +400,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if ((component.formId === 'BoardShipment') || (component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
+    if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'GeometryBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -420,7 +420,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -564,16 +564,6 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'BoardShipment') {
-      for (const info of component.data.boardUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber]);
-        }
-      }
-    }
-
     if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
@@ -594,7 +584,17 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'GroundingMeshShipment') {
+    if (component.formId === 'GeometryBoardShipment') {
+      for (const info of component.data.boardUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.data.partNumber]);
+        }
+      }
+    }
+
+    if (component.formId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -844,7 +844,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
     // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only a small number of workflow types, so we can do this explicitly)
     // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
-    const list_workflowComponents = ['AssembledAPA', 'APAFrame', 'APAShipment'];
+    const list_workflowComponents = ['APAFrame', 'AssembledAPA', 'AssembledAPAShipment'];
     const workflowComponent = list_workflowComponents.includes(req.params.typeFormId);
 
     // For certain component types, it is useful to display some extra information ... either directly about the component itself, or about a related component or action
@@ -863,7 +863,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
         if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
         else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
       }
-    } else if (['APAFrameShipment', 'APAShipment', 'BoardShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GroundingMeshShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
+    } else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
       for (let shipment of components) {
         if (shipment.reception != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.reception.location]; }
         else { shipment.additionalInformation = '[reception object missing!]'; }
@@ -945,10 +945,10 @@ router.get(['/json/components/hwdbInformation/:uuid', '/api/components/hwdbInfor
   try {
     // Retrieve the collated information - since this may require extracting specific field values from a number of DB records related to the component ...
     // ... it is easier to collate this information through a single library function, rather than performing multiple library function calls from this route
-    let collatedInfo = await Components_CollateInfo.forHWDB(req.params.uuid);
+    let hwdbInfo = await Components_CollateInfo.forHWDB(req.params.uuid);
 
     // Return the information in JSON format
-    return res.status(200).json(collatedInfo);
+    return res.status(200).json(hwdbInfo);
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
