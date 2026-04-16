@@ -160,10 +160,10 @@ router.get(['/json/dBandPostProduction.json', '/api/dBandPostProduction.json'], 
 });
 
 
-/// List geometry board metrology technicians at Manchester
-router.get(['/json/manchesterTechnicians.json', '/api/manchesterTechnicians.json'], async function (req, res, next) {
+/// List FD-HD technical coordinators
+router.get(['/json/fdhdTechCoordSignoff.json', '/api/fdhdTechCoordSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_manchesterTechnicians));
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_fdhdTechCoordSignoff));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
