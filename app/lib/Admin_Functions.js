@@ -11,6 +11,52 @@ const Workflows = require('./Workflows');
 
 
 async function cleanComponentTypeFormIds(typeFormId) {
+  let typeFormName = null;
+  let actionTypeFormIDs = null;
+
+  if (typeFormId === 'AssembledAPAShipment') {
+    typeFormName = 'Assembled APA Shipment';
+    actionTypeFormIDs = ['APAShipmentReception', 'APAShipmentTransport', 'ASFCloseUp'];
+  }
+
+  for (const actionTypeFormID of actionTypeFormIDs) {
+    let aggregation_stages = [];
+
+    aggregation_stages.push({ $match: { typeFormId: actionTypeFormID } });
+    aggregation_stages.push({
+      $project: {
+        actionId: true,
+        componentUuid: true,
+      }
+    });
+
+    let actions = await db.collection('actions')
+      .aggregate(aggregation_stages)
+      .toArray();
+
+    for (let action of actions) {
+      const component = await Components.retrieve(action.componentUuid);
+      
+      const result = await db.collection('actions')
+        .updateMany(
+          { actionId: action.actionId },
+          [
+            {
+              $set: {
+                'componentName': component.data.componentName,
+                'componentTypeFormId': typeFormId,
+                'componentTypeFormName': typeFormName,
+              }
+            },
+          ]
+        )
+
+      if (result.ok === 0) throw new Error(`Admin_Functions::cleanComponentTypeFormIds() - failed to change type form ID in the component records!`);
+    }
+  }
+
+
+/*
   let newTypeFormId = null;
   let newTypeFormName = null;
 
@@ -103,8 +149,8 @@ async function cleanComponentTypeFormIds(typeFormId) {
       if (resultInner.ok === 0) throw new Error(`Admin_Functions::cleanComponentTypeFormIds() - failed to change type form name in the workflow records!`);
     }
   }
-
-  return newTypeFormId;
+*/
+  return typeFormId;
 }
 
 
