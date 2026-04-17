@@ -150,7 +150,7 @@ module.exports = {
     radosavPantelic: 'Radosav Pantelic',
   },
 
-  // Frame Prep D-band personnel (prep-related APA Assembly workflow actions and 'Final Inspection' Grounding Mesh Panel actions)
+  // Frame Prep D-band personnel ('Frame Prep - ???' APA Assembly workflow actions and 'Final Inspection' Grounding Mesh Panel actions)
   dictionary_dBandFramePrep: {
     edBlucher: 'Ed Blucher',
     wayneGreen: 'Wayne Green',
@@ -210,6 +210,11 @@ module.exports = {
     radosavPantelic: 'Radosav Pantelic',
     danielSalisbury: 'Daniel Salisbury',
     jasonThornhill: 'Jason Thornhill',
+  },
+
+  // FD-HD technical coordinators (final signoff in 'Completed APA QA Checklist' APA Assembly workflow actions)
+  dictionary_fdhdTechCoordSignoff: {
+    ericJames: 'Eric James',
   },
 
   // Yoke load test technicians at UW [not currently used, but keep for the future]
