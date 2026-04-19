@@ -39,24 +39,24 @@ async function save(input, req) {
 
   if (!typeForm) throw new Error(`Actions:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known action type form!`);
 
-  // Some action types should be submitted only by the APA Factory Leads - these are typically the most important and/or highest level QA checks and signoffs
-  // Check that the submitter (i.e. the currently logged-in user) is the same as the person who's name is being used for the QA signoff ... if not, do not allow the action to be submitted
-  // Since the list of personnel for QA signoffs is always only the APA Factory Leads, this check should restrict such actions to only be submittable by leads WHEN LOGGED IN AS THEMSELVES
+  // Some action types should be submitted only by the APA Factory Leads or other top-level personnel - these are typically the most important and/or highest level QA checks and signoffs
+  // Check that the submitter (i.e. the currently logged-in user) is the same as the person who's name is being used for the final signoff ... if not, do not allow the action to be submitted
+  // This check should restrict such actions to only be submittable by leads / top-level personnel WHEN LOGGED IN AS THEMSELVES
   if (input.typeFormId === 'AssembledAPAQACheck') {
     if (req.user.displayName !== utils.dictionary_apaFactoryLeads[input.data.personSigningOff]) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off the QA Checks on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off this action on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
     }
   }
 
   if (input.typeFormId === 'CompletedAPAQCChecklist') {
-    if (req.user.displayName !== utils.dictionary_apaFactoryLeads[input.data.personSigningOff]) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off the APA Final Assembly on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
+    if ((req.user.displayName !== utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]) && (input.data.actionComplete)) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]}) - this is not permitted!`);
     }
   }
 
   if (input.typeFormId === 'prep_mesh_panel_install') {
     if ((req.user.displayName !== utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]) && (input.data.actionComplete)) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off the Installation QA and complete this action on behalf of someone else (${utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]}) - this is not permitted!`);
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]}) - this is not permitted!`);
     }
   }
 
@@ -64,7 +64,7 @@ async function save(input, req) {
   // This is designed to stop users from performing and 'completing' blank actions in order to skip ahead in workflows, but this way it does not require any fields to be 'required' in the type form
   if (input.data.actionComplete) {
     if ((input.typeFormId === 'x_tension_testing') && (input.data.measuredTensions_sideA.length === 0) && (input.data.measuredTensions_sideB.length === 0)) {
-      throw new Error(`Actions:save() - this action does not contain any tension measurements, but has been set as 'complete' ... please uncheck the 'Action Complete' box to submit!`);
+      throw new Error(`Actions:save() - you are attempting to complete this action,  but it does not yet contain any tension measurements ... please uncheck the 'Action Complete' box to submit!`);
     }
   }
 
