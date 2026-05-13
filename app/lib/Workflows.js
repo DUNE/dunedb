@@ -24,11 +24,12 @@ async function save(input, req) {
   if (!input.hasOwnProperty('data')) throw new Error(`Workflows::save() - the 'input.data' has not been specified!`);
   if (!input.hasOwnProperty('path')) throw new Error(`Workflows::save() - the 'input.path' has not been specified!`);
 
-  // Check that there is an existing type form corresponding to the the provided type form ID
+  // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('workflowForms');
   const typeForm = typeFormsList[input.typeFormId];
 
   if (!typeForm) throw new Error(`Workflows:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known workflow type form!`);
+  if (typeForm.tags.includes('Trash')) throw new Error(`Workflows:save() - the specified workflow type form (${input.typeFormId}) is currently trashed, and cannot be used!`);
 
   // Check that each step of the workflow path has the minimum required information:
   //   - the type of the step (named as 'type', and taking either 'component' or 'action' as value)

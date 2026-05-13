@@ -33,11 +33,12 @@ async function save(input, req) {
   if (!input.hasOwnProperty('componentUuid')) throw new Error(`Actions::save() - the 'input.componentUuid' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Actions::save() - the 'input.data' has not been specified!`);
 
-  // Check that there is an existing type form corresponding to the the provided type form ID
+  // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('actionForms');
   const typeForm = typeFormsList[input.typeFormId];
 
   if (!typeForm) throw new Error(`Actions:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known action type form!`);
+  if (typeForm.tags.includes('Trash')) throw new Error(`Actions:save() - the specified action type form (${input.typeFormId}) is currently trashed, and cannot be used!`);
 
   // Some action types should be submitted only by the APA Factory Leads or other top-level personnel - these are typically the most important and/or highest level QA checks and signoffs
   // Check that the submitter (i.e. the currently logged-in user) is the same as the person who's name is being used for the final signoff ... if not, do not allow the action to be submitted
