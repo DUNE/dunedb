@@ -251,6 +251,7 @@ module.exports = {
     danielSalisbury: 'Daniel Salisbury',
     stephenSumner: 'Stephen Sumner',
     niklasTempleton: 'Niklas Templeton',
+    annaVikhoreva: 'Anna Vikhoreva',
     sotirisVlachos: 'Sotiris Vlachos',
   },
 

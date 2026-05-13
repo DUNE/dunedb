@@ -1431,7 +1431,109 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                   "type": "columns",
                   "input": false,
                   "tableView": false
-                }
+                },
+                {
+                  "label": "Columns",
+                  "columns": [
+                    {
+                      "components": [
+                        {
+                          "label": "Text Field",
+                          "placeholder": "FDHD Technical Coordinator",
+                          "hideLabel": true,
+                          "disabled": true,
+                          "tableView": true,
+                          "key": "completedAPA_labelFDHD",
+                          "type": "textfield",
+                          "input": true
+                        }
+                      ],
+                      "width": 2,
+                      "offset": 0,
+                      "push": 0,
+                      "pull": 0,
+                      "size": "sm",
+                      "currentWidth": 2
+                    },
+                    {
+                      "components": [
+                        {
+                          "label": "Text Field",
+                          "hideLabel": true,
+                          "disabled": true,
+                          "tableView": true,
+                          "key": "completedAPA_signoffFDHD",
+                          "type": "textfield",
+                          "input": true,
+                          "defaultValue": completedAPA.signoff_fdhd
+                        }
+                      ],
+                      "width": 2,
+                      "offset": 0,
+                      "push": 0,
+                      "pull": 0,
+                      "size": "sm",
+                      "currentWidth": 2
+                    },
+                    {
+                      "components": [
+                        {
+                          "label": "Date / Time",
+                          "hideLabel": true,
+                          "disabled": true,
+                          "tableView": false,
+                          "enableMinDateInput": false,
+                          "datePicker": {
+                            "disableWeekends": false,
+                            "disableWeekdays": false
+                          },
+                          "enableMaxDateInput": false,
+                          "key": "completedAPA_date",
+                          "type": "datetime",
+                          "input": true,
+                          "defaultValue": completedAPA.signoff_date,
+                          "widget": {
+                            "type": "calendar",
+                            "displayInTimezone": "viewer",
+                            "locale": "en",
+                            "useLocaleSettings": false,
+                            "allowInput": true,
+                            "mode": "single",
+                            "enableTime": true,
+                            "noCalendar": false,
+                            "format": "yyyy-MM-dd hh:mm a",
+                            "hourIncrement": 1,
+                            "minuteIncrement": 1,
+                            "time_24hr": false,
+                            "minDate": null,
+                            "disableWeekends": false,
+                            "disableWeekdays": false,
+                            "maxDate": null
+                          }
+                        }
+                      ],
+                      "size": "sm",
+                      "width": 3,
+                      "offset": 0,
+                      "push": 0,
+                      "pull": 0,
+                      "currentWidth": 3
+                    },
+                    {
+                      "components": [],
+                      "size": "sm",
+                      "width": 5,
+                      "offset": 0,
+                      "push": 0,
+                      "pull": 0,
+                      "currentWidth": 5
+                    },
+                  ],
+                  "key": "columns12",
+                  "type": "columns",
+                  "input": false,
+                  "tableView": false
+                },
               ]
             }
           ]
