@@ -154,6 +154,7 @@ async function forExecSummary(componentUUID) {
     signoff_actionID: '[no record found]',
     signoff_name: '[no information found]',
     signoff_date: '',
+    signoff_fdhd: '[no information found]',
   };
 
   collatedInfo.ncrs_useAsIs_withWires = [];
@@ -475,6 +476,7 @@ async function forExecSummary(componentUUID) {
       name: { '$first': '$data.personSigningOff' },
       date: { '$first': '$validity.startDate' },
       actionId: { '$first': '$actionId' },
+      fdhd: { '$first': '$data.fdhdTechCoordSigningOff' },
     },
   });
 
@@ -486,6 +488,7 @@ async function forExecSummary(componentUUID) {
     collatedInfo.completedAPA.signoff_actionID = results[0].actionId;
     collatedInfo.completedAPA.signoff_name = utils.dictionary_apaFactoryLeads[results[0].name];
     collatedInfo.completedAPA.signoff_date = results[0].date;
+    collatedInfo.completedAPA.signoff_fdhd = utils.dictionary_fdhdTechCoordSignoff[results[0].fdhd];
   }
 
   ////////////////////////////////////////////
