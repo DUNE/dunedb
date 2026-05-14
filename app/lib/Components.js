@@ -40,11 +40,12 @@ async function save(input, req) {
   if (!input.hasOwnProperty('formId')) throw new Error(`Components::save() - the 'input.formId' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Components::save() - the 'input.data' has not been specified!`);
 
-  // Check that there is an existing type form corresponding to the the provided type form ID
+  // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('componentForms');
   const typeForm = typeFormsList[input.formId];
 
   if (!typeForm) throw new Error(`Components:save() - the specified 'input.formId' (${input.formId}) does not match a known component type form!`);
+  if (typeForm.tags.includes('Trash')) throw new Error(`Components:save() - the specified component type form (${input.formId}) is currently trashed, and cannot be used!`);
 
   // Set up a new record object, and immediately add some information, either directly or inherited from the 'input' object
   let newRecord = {};

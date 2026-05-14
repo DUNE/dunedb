@@ -33,30 +33,36 @@ async function save(input, req) {
   if (!input.hasOwnProperty('componentUuid')) throw new Error(`Actions::save() - the 'input.componentUuid' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Actions::save() - the 'input.data' has not been specified!`);
 
-  // Check that there is an existing type form corresponding to the the provided type form ID
+  // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('actionForms');
   const typeForm = typeFormsList[input.typeFormId];
 
   if (!typeForm) throw new Error(`Actions:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known action type form!`);
+  if (typeForm.tags.includes('Trash')) throw new Error(`Actions:save() - the specified action type form (${input.typeFormId}) is currently trashed, and cannot be used!`);
 
-  // Some action types should be submitted only by the APA Factory Leads or other top-level personnel - these are typically the most important and/or highest level QA checks and signoffs
-  // Check that the submitter (i.e. the currently logged-in user) is the same as the person who's name is being used for the final signoff ... if not, do not allow the action to be submitted
-  // This check should restrict such actions to only be submittable by leads / top-level personnel WHEN LOGGED IN AS THEMSELVES
+  // Some action types - typically the highest level QA signoffs - should only be submittable by top-level personnel (i.e. the APA Factory Leads or equivalent)
+  // When submitting such actions, make sure that a) the required signoff has actually been entered, and b) the submitter is the same person as the person signing off
+  // This is intended to prevent users from completing these actions on behalf of someone else, i.e. putting someone else's name in for the signoff and then submitting it themselves
+  // Note that this check only applies if the action is being submitted as 'complete' ... if not, it should still be editable by any user with the appropriate permissions
+  if (input.typeFormId === 'prep_mesh_panel_install') {
+    if ((input.data.actionComplete) && (req.user.displayName !== utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy])) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]}) - this is not permitted!`);
+    }
+  }
+
   if (input.typeFormId === 'AssembledAPAQACheck') {
-    if (req.user.displayName !== utils.dictionary_apaFactoryLeads[input.data.personSigningOff]) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off this action on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
+    if ((input.data.actionComplete) && (req.user.displayName !== utils.dictionary_apaFactoryLeads[input.data.personSigningOff])) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
     }
   }
 
   if (input.typeFormId === 'CompletedAPAQCChecklist') {
-    if ((req.user.displayName !== utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]) && (input.data.actionComplete)) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]}) - this is not permitted!`);
-    }
-  }
-
-  if (input.typeFormId === 'prep_mesh_panel_install') {
-    if ((req.user.displayName !== utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]) && (input.data.actionComplete)) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]}) - this is not permitted!`);
+    if (input.data.actionComplete) {
+      if (input.data.fdhdTechCoordSigningOff === '') {
+        throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to complete this action without a signoff from the FDHD Technical Coordinator - this is not permitted!`);
+      } else if (req.user.displayName !== utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]) {
+        throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]}) - this is not permitted!`);
+      }
     }
   }
 
