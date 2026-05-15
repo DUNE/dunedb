@@ -247,7 +247,7 @@ router.get('/administratorUtility', async function (req, res, next) {
 router.post(['/json/administratorUtility/:inputString', '/api/administratorUtility/:inputString'], async function (req, res, next) {
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
-    let result = await Admin_Functions.cleanComponentTypeFormIds(req.params.inputString);    // Change as appropriate for the required utility
+    let result = await Admin_Functions.fixComponentFields(req.params.inputString);    // Change as appropriate for the required utility
 
     return res.status(201).json(result);
   } catch (err) {
