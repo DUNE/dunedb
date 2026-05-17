@@ -55,6 +55,8 @@ async function save(input, req) {
   newRecord.shortUuid = ShortUUID().fromUUID(input.componentUuid);
   newRecord.formId = input.formId;
   newRecord.formName = typeForm.formName;
+  newRecord.typeFormId = typeForm.formId;
+  newRecord.typeFormName = typeForm.formName;
   newRecord.data = input.data;
 
   if (input.workflowId) newRecord.workflowId = input.workflowId;

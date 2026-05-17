@@ -46,6 +46,7 @@ async function onPageLoad() {
     // Add the other required information, inheriting from the variables that were passed through the route to this page
     submission.componentUuid = component.componentUuid;
     submission.formId = componentTypeForm.formId;
+    submission.typeFormId = componentTypeForm.formId;
 
     // If the component originates from a workflow (and therefore a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
     if (!(workflowId === '')) submission.workflowId = workflowId;
@@ -67,8 +68,8 @@ async function onPageLoad() {
       // If the component is a 'Geometry Board' type, offset the count, to account for an unknown number of boards that might have been manufactured before the database was up and running
       let numberOfExistingSubComponents = 0;
 
-      if (componentCounts_byType[submission.data.subComponent_formId].count) numberOfExistingSubComponents = componentCounts_byType[submission.data.subComponent_formId].count;
-      if (submission.data.subComponent_formId === 'GeometryBoard') numberOfExistingSubComponents += 5000;
+      if (componentCounts_byType[submission.data.subComponent_typeFormId].count) numberOfExistingSubComponents = componentCounts_byType[submission.data.subComponent_typeFormId].count;
+      if (submission.data.subComponent_typeFormId === 'GeometryBoard') numberOfExistingSubComponents += 5000;
 
       // Set up an array to hold the sub-component type record numbers and submission objects (these will be populated in the sub-component loop below)
       let subComponent_typeRecordNumbers = [];
@@ -80,7 +81,8 @@ async function onPageLoad() {
         let sub_submission = Object.create(submission);
 
         sub_submission.componentUuid = slice_fullUuids[s];
-        sub_submission.formId = submission.data.subComponent_formId;
+        sub_submission.formId = submission.data.subComponent_typeFormId;
+        sub_submission.typeFormId = submission.data.subComponent_typeFormId;
         sub_submission.data = Object.create(submission.data);
 
         // Add information to the sub-component's 'data' field indicating the fields and values that are inherited from the batch component
@@ -94,7 +96,7 @@ async function onPageLoad() {
         subComponent_typeRecordNumbers.push(numberOfExistingSubComponents + s + 1);
 
         // Add any other information to the sub-component's 'data' field that might be specific to certain component types
-        if (['CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(submission.data.subComponent_formId)) {
+        if (['CEAdapterBoard', 'CRBoard', 'GBiasBoard', 'SHVBoard'].includes(submission.data.subComponent_typeFormId)) {
           sub_submission.data.boardIsConformant = 'yes';
         }
 

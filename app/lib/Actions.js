@@ -79,7 +79,7 @@ async function save(input, req) {
 
   newRecord.recordType = 'action';
   newRecord.actionId = new ObjectId(input.actionId);
-  newRecord.typeFormId = input.typeFormId;
+  newRecord.typeFormId = typeForm.formId;
   newRecord.typeFormName = typeForm.formName;
   newRecord.componentUuid = MUUID.from(input.componentUuid);
 
@@ -87,8 +87,8 @@ async function save(input, req) {
 
   if (componentRecord) {
     newRecord.componentName = componentRecord.data.componentName;
-    newRecord.componentTypeFormId = componentRecord.formId;
-    newRecord.componentTypeFormName = componentRecord.formName;
+    newRecord.componentTypeFormId = componentRecord.typeFormId;
+    newRecord.componentTypeFormName = componentRecord.typeFormName;
   } else {
     newRecord.componentName = '[no component record found!]';
     newRecord.componentTypeFormId = '[no component record found!]';

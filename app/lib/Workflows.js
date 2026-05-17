@@ -49,7 +49,7 @@ async function save(input, req) {
 
   newRecord.recordType = 'workflow';
   newRecord.workflowId = new ObjectId(input.workflowId);
-  newRecord.typeFormId = input.typeFormId;
+  newRecord.typeFormId = typeForm.formId;
   newRecord.typeFormName = typeForm.formName;
   newRecord.data = input.data;
   newRecord.path = input.path;
