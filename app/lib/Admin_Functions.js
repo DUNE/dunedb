@@ -10,12 +10,10 @@ const utils = require('./utils');
 const Workflows = require('./Workflows');
 
 
-async function fixComponentFields(currentFormId) {
-  const matchCondition = (currentFormId === 'ALL_COMPONENTS') ? {} : { formId: currentFormId };
-
+async function fixFields_allComponents() {
   const result = await db.collection('components')
     .updateMany(
-      matchCondition,
+      {},
       [
         {
           $set: {
@@ -26,12 +24,32 @@ async function fixComponentFields(currentFormId) {
       ]
     )
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::fixComponentFields() - failed to add fields to the component record!`);
+  if (result.ok === 0) throw new Error(`Admin_Functions::fixFields_allComponents() - failed to add fields to the component record!`);
 
-  return currentFormId;
+  return result;
+}
+
+
+async function fixFields_batchComponents() {
+  const result = await db.collection('components')
+    .updateMany(
+      { 'typeFormId': { $in: ['CEAdapterBoardBatch', 'CRBoardBatch', 'GBiasBoardBatch', 'GeometryBoardBatch', 'ReturnedGeometryBoardBatch'] }, },
+      [
+        {
+          $set: {
+            'data.subComponent_typeFormId': '$data.subComponent_formId',
+          }
+        },
+      ]
+    )
+
+  if (result.ok === 0) throw new Error(`Admin_Functions::fixFields_batchComponents() - failed to add fields to the component record!`);
+
+  return result;
 }
 
 
 module.exports = {
-  fixComponentFields,
+  fixFields_allComponents,
+  fixFields_batchComponents,
 }
