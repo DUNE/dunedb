@@ -45,7 +45,6 @@ async function onPageLoad() {
     // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' object)
     // Add the other required information, inheriting from the variables that were passed through the route to this page
     submission.componentUuid = component.componentUuid;
-    submission.formId = componentTypeForm.formId;
     submission.typeFormId = componentTypeForm.formId;
 
     // If the component originates from a workflow (and therefore a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object
@@ -81,7 +80,6 @@ async function onPageLoad() {
         let sub_submission = Object.create(submission);
 
         sub_submission.componentUuid = slice_fullUuids[s];
-        sub_submission.formId = submission.data.subComponent_typeFormId;
         sub_submission.typeFormId = submission.data.subComponent_typeFormId;
         sub_submission.data = Object.create(submission.data);
 

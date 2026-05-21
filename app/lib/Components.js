@@ -37,15 +37,15 @@ async function save(input, req) {
   //   - user-provided data (this may be an empty object, but must still exist)
   if (!(input instanceof Object)) throw new Error(`Components::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('componentUuid')) throw new Error(`Components::save() - the 'input.componentUuid' has not been specified!`);
-  if (!input.hasOwnProperty('formId')) throw new Error(`Components::save() - the 'input.formId' has not been specified!`);
+  if (!input.hasOwnProperty('typeFormId')) throw new Error(`Components::save() - the 'input.typeFormId' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Components::save() - the 'input.data' has not been specified!`);
 
   // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('componentForms');
-  const typeForm = typeFormsList[input.formId];
+  const typeForm = typeFormsList[input.typeFormId];
 
-  if (!typeForm) throw new Error(`Components:save() - the specified 'input.formId' (${input.formId}) does not match a known component type form!`);
-  if (typeForm.tags.includes('Trash')) throw new Error(`Components:save() - the specified component type form (${input.formId}) is currently trashed, and cannot be used!`);
+  if (!typeForm) throw new Error(`Components:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known component type form!`);
+  if (typeForm.tags.includes('Trash')) throw new Error(`Components:save() - the specified component type form (${input.typeFormId}) is currently trashed, and cannot be used!`);
 
   // Set up a new record object, and immediately add some information, either directly or inherited from the 'input' object
   let newRecord = {};
@@ -53,8 +53,6 @@ async function save(input, req) {
   newRecord.recordType = 'component';
   newRecord.componentUuid = MUUID.from(input.componentUuid);
   newRecord.shortUuid = ShortUUID().fromUUID(input.componentUuid);
-  newRecord.formId = input.formId;
-  newRecord.formName = typeForm.formName;
   newRecord.typeFormId = typeForm.formId;
   newRecord.typeFormName = typeForm.formName;
   newRecord.data = input.data;
@@ -80,8 +78,8 @@ async function save(input, req) {
     const componentCounts_byType = await counts_byType();
     let numberOfExistingComponents = 0;
 
-    if (componentCounts_byType[input.formId].count) numberOfExistingComponents = componentCounts_byType[input.formId].count;
-    if (input.formId === 'GeometryBoard') numberOfExistingComponents += 5000;
+    if (componentCounts_byType[input.typeFormId].count) numberOfExistingComponents = componentCounts_byType[input.typeFormId].count;
+    if (input.typeFormId === 'GeometryBoard') numberOfExistingComponents += 5000;
 
     // If the 'input.data' object does NOT contain a 'Type Record Number' field, add the component count to the new record's 'data' object under a new field
     // The field will exist only when creating new records for individual sub-components in a batch, since in this situation the sub-component type record numbers are determined on the client side
@@ -92,7 +90,7 @@ async function save(input, req) {
     // The format of the name is dependent on the component type ... some are simply a combination of the type form name and type record number, whereas others have more information included
     const typeRecordNumber = String(newRecord.data.typeRecordNumber).padStart(5, '0');
 
-    if (newRecord.formId === 'APAFrame') {
+    if (newRecord.typeFormId === 'APAFrame') {
       let pidSuffix = '';
 
       if (newRecord.data.frameProductionLocation === 'dsm') {
@@ -104,7 +102,7 @@ async function save(input, req) {
       }
 
       newRecord.data.dunePid = `D00300200001-${typeRecordNumber}-${pidSuffix}`;
-    } else if (newRecord.formId === 'APAShippingFrame') {
+    } else if (newRecord.typeFormId === 'APAShippingFrame') {
       let pidSuffix = '';
 
       if (newRecord.data.asfLocation === 'chicago') {
@@ -119,7 +117,7 @@ async function save(input, req) {
       }
 
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-${pidSuffix}`;
-    } else if (newRecord.formId === 'AssembledAPA') {
+    } else if (newRecord.typeFormId === 'AssembledAPA') {
       let pidPrefix = '';
       let pidSuffix = '';
 
@@ -141,58 +139,58 @@ async function save(input, req) {
       }
 
       newRecord.data.dunePid = `${pidPrefix}-${typeRecordNumber}-${pidSuffix}`;
-    } else if (newRecord.formId === 'CEAdapterBoard') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+    } else if (newRecord.typeFormId === 'CEAdapterBoard') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400003-${typeRecordNumber}-US200-010000`;
-    } else if (newRecord.formId === 'CEAdapterBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    } else if (newRecord.typeFormId === 'CEAdapterBoardBatch') {
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-    } else if (newRecord.formId === 'CRBoard') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+    } else if (newRecord.typeFormId === 'CRBoard') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400001-${typeRecordNumber}-US200-010000`;
-    } else if (newRecord.formId === 'CRBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    } else if (newRecord.typeFormId === 'CRBoardBatch') {
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-    } else if (newRecord.formId === 'CableHarness') {
+    } else if (newRecord.typeFormId === 'CableHarness') {
       if (newRecord.data.cableHarnessSide === 'a') {
-        newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (Side A)`;
+        newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (Side A)`;
         newRecord.data.dunePid = `D00300500002-${typeRecordNumber}-US200-010000`;
       } else if (newRecord.data.cableHarnessSide === 'b') {
-        newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (Side B)`;
+        newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (Side B)`;
         newRecord.data.dunePid = `D00300500003-${typeRecordNumber}-US200-010000`;
       }
-    } else if (newRecord.formId === 'DWA') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+    } else if (newRecord.typeFormId === 'DWA') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300800001-${typeRecordNumber}-US136-010000`;
-    } else if (newRecord.formId === 'DWAPDB') {
+    } else if (newRecord.typeFormId === 'DWAPDB') {
       newRecord.data.componentName = `DWA PDB ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300800002-${typeRecordNumber}-US136-010000`;
-    } else if (newRecord.formId === 'GBiasBoard') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+    } else if (newRecord.typeFormId === 'GBiasBoard') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
-    } else if (newRecord.formId === 'GBiasBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    } else if (newRecord.typeFormId === 'GBiasBoardBatch') {
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-    } else if (newRecord.formId === 'GeometryBoard') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.partString})`;
+    } else if (newRecord.typeFormId === 'GeometryBoard') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.partString})`;
       newRecord.data.dunePid = `D003003${utils.dictionary_geometryBoardPIDs[newRecord.data.partNumber]}-${typeRecordNumber}-UK109-010000`;
-    } else if (newRecord.formId === 'GeometryBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.PN${newRecord.data.subComponent_partNumber}.ON${newRecord.data.orderNumber})`;
+    } else if (newRecord.typeFormId === 'GeometryBoardBatch') {
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.PN${newRecord.data.subComponent_partNumber}.ON${newRecord.data.orderNumber})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-    } else if (newRecord.formId === 'GroundingMeshPanel') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+    } else if (newRecord.typeFormId === 'GroundingMeshPanel') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300200004-${typeRecordNumber}-UK106-010000`;
-    } else if (newRecord.formId === 'ReturnedGeometryBoardBatch') {
-      newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.subComponent_count}.PN${newRecord.data.subComponent_partNumber}.ON${newRecord.data.orderNumber})`;
+    } else if (newRecord.typeFormId === 'ReturnedGeometryBoardBatch') {
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.PN${newRecord.data.subComponent_partNumber}.ON${newRecord.data.orderNumber})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-    } else if (newRecord.formId === 'SHVBoard') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+    } else if (newRecord.typeFormId === 'SHVBoard') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300500001-${typeRecordNumber}-US200-010000`;
-    } else if (newRecord.formId === 'WireBobbin') {
-      newRecord.data.componentName = `${newRecord.formName} ${newRecord.data.bobbinId} (Lot ${newRecord.data.wireLot})`;
+    } else if (newRecord.typeFormId === 'WireBobbin') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${newRecord.data.bobbinId} (Lot ${newRecord.data.wireLot})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-    } else if (newRecord.formId === 'Yoke') {
-      newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber}`;
+    } else if (newRecord.typeFormId === 'Yoke') {
+      newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00301000001-${typeRecordNumber}-US200-010000`;
     }
 
@@ -205,23 +203,23 @@ async function save(input, req) {
 
     // Almost all component types will always start at specific fixed locations ...
     // ... the only exceptions are the 'batch' types (these still need the location field to exist, but it can be left as an empty string)
-    if ((newRecord.formId === 'APAFrame') || (newRecord.formId === 'WireBobbin')) {
+    if ((newRecord.typeFormId === 'APAFrame') || (newRecord.typeFormId === 'WireBobbin')) {
       newRecord.reception.location = 'daresbury';
-    } else if (newRecord.formId === 'APAShippingFrame') {
+    } else if (newRecord.typeFormId === 'APAShippingFrame') {
       newRecord.reception.location = newRecord.data.asfLocation;
-    } else if ((newRecord.formId === 'APAFrameShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'GeometryBoardShipment') || (newRecord.formId === 'GroundingMeshPanelShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
+    } else if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment') || (newRecord.typeFormId === 'YokeShipment')) {
       newRecord.reception.location = 'in_transit';
-    } else if (newRecord.formId === 'AssembledAPA') {
+    } else if (newRecord.typeFormId === 'AssembledAPA') {
       newRecord.reception.location = newRecord.data.apaAssemblyLocation;
-    } else if (newRecord.formId === 'AssembledAPAShipment') {
+    } else if (newRecord.typeFormId === 'AssembledAPAShipment') {
       newRecord.reception.location = newRecord.data.originOfShipment;
-    } else if ((newRecord.formId === 'CEAdapterBoard') || (newRecord.formId === 'CEAdapterBoardShipment') || (newRecord.formId === 'CRBoard') || (newRecord.formId === 'CRBoardShipment') || (newRecord.formId === 'CableHarness') || (newRecord.formId === 'CableHarnessShipment') || (newRecord.formId === 'GBiasBoard') || (newRecord.formId === 'GBiasBoardShipment') || (newRecord.formId === 'SHVBoard') || (newRecord.formId === 'SHVBoardShipment') || (newRecord.formId === 'Yoke')) {
+    } else if ((newRecord.typeFormId === 'CEAdapterBoard') || (newRecord.typeFormId === 'CEAdapterBoardShipment') || (newRecord.typeFormId === 'CRBoard') || (newRecord.typeFormId === 'CRBoardShipment') || (newRecord.typeFormId === 'CableHarness') || (newRecord.typeFormId === 'CableHarnessShipment') || (newRecord.typeFormId === 'GBiasBoard') || (newRecord.typeFormId === 'GBiasBoardShipment') || (newRecord.typeFormId === 'SHVBoard') || (newRecord.typeFormId === 'SHVBoardShipment') || (newRecord.typeFormId === 'Yoke')) {
       newRecord.reception.location = 'wisconsin';
-    } else if ((newRecord.formId === 'DWA') || (newRecord.formId === 'DWAPDB')) {
+    } else if ((newRecord.typeFormId === 'DWA') || (newRecord.typeFormId === 'DWAPDB')) {
       newRecord.reception.location = newRecord.data.productionLocation;
-    } else if (newRecord.formId === 'GeometryBoard') {
+    } else if (newRecord.typeFormId === 'GeometryBoard') {
       newRecord.reception.location = 'lancaster';
-    } else if (newRecord.formId === 'GroundingMeshPanel') {
+    } else if (newRecord.typeFormId === 'GroundingMeshPanel') {
       newRecord.reception.location = 'ukWarehouse';
     } else {
       newRecord.reception.location = '';
@@ -234,10 +232,10 @@ async function save(input, req) {
   // The DUNE PID of such components should technically be fixed at creation, but it is simpler code-wise to assign and re-assign that here as well
   const typeRecordNumber = String(newRecord.data.typeRecordNumber).padStart(5, '0');
 
-  if (newRecord.formId === 'APAFrameShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.frameUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+  if (newRecord.typeFormId === 'APAFrameShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.frameUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'AssembledAPAShipment') {
+  } else if (newRecord.typeFormId === 'AssembledAPAShipment') {
     let name_apa1 = '[not set]';
     let name_apa2 = '[not set]';
 
@@ -251,37 +249,37 @@ async function save(input, req) {
       name_apa2 = apa.data.componentName.substring(4);
     }
 
-    newRecord.data.componentName = `${newRecord.formName} (${name_apa1} + ${name_apa2})`;
+    newRecord.data.componentName = `${newRecord.typeFormName} (${name_apa1} + ${name_apa2})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'CEAdapterBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+  } else if (newRecord.typeFormId === 'CEAdapterBoardShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'CRBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+  } else if (newRecord.typeFormId === 'CRBoardShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'CableHarnessShipment') {
-    newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+  } else if (newRecord.typeFormId === 'CableHarnessShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'DWAComponentShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+  } else if (newRecord.typeFormId === 'DWAComponentShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'GBiasBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+  } else if (newRecord.typeFormId === 'GBiasBoardShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'GeometryBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.boardUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+  } else if (newRecord.typeFormId === 'GeometryBoardShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.boardUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'GroundingMeshPanelShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+  } else if (newRecord.typeFormId === 'GroundingMeshPanelShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'PopulatedBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+  } else if (newRecord.typeFormId === 'PopulatedBoardShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'SHVBoardShipment') {
-    newRecord.data.componentName = `${newRecord.formName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+  } else if (newRecord.typeFormId === 'SHVBoardShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.formId === 'YokeShipment') {
-    newRecord.data.componentName = `${newRecord.formName} (${newRecord.data.yokeUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+  } else if (newRecord.typeFormId === 'YokeShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.yokeUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   }
 
@@ -303,13 +301,13 @@ async function save(input, req) {
   // - for a 'Populated Board Shipment', update the reception information of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
   // - for a 'Return Geometry Board Batch', update the reception information of the individual geometry board sub-components to indicate they are at Lancaster (where the batch is put together)
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
-  if ((newRecord.formId === 'APAFrameShipment') || (newRecord.formId === 'DWAComponentShipment') || (newRecord.formId === 'GeometryBoardShipment') || (newRecord.formId === 'GroundingMeshPanelShipment') || (newRecord.formId === 'PopulatedBoardShipment') || (newRecord.formId === 'YokeShipment')) {
+  if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment') || (newRecord.typeFormId === 'YokeShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
-  } else if (newRecord.formId === 'AssembledAPA') {
+  } else if (newRecord.typeFormId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
-  } else if (newRecord.formId === 'AssembledAPAShipment') {
+  } else if (newRecord.typeFormId === 'AssembledAPAShipment') {
     const result = await updateLocations_inShipment(newRecord.componentUuid, newRecord.reception.location, (new Date()).toISOString().slice(0, 10));
-  } else if (newRecord.formId === 'ReturnedGeometryBoardBatch') {
+  } else if (newRecord.typeFormId === 'ReturnedGeometryBoardBatch') {
     for (const board of newRecord.data.boardUuids) {
       const result = await updateLocation(board.component_uuid, 'lancaster', (new Date()).toISOString().slice(0, 10), '');
     }
@@ -409,34 +407,34 @@ async function updateLocations_inShipment(componentUuid, location, date) {
 
   // Loop over all sub-components in the shipment, and update each one's location information appropriately for the shipment type and contents
   // In all cases, if successful, the updating function returns 'result = 1', but we don't actually use this value anywhere
-  if (shipment.formId === 'APAFrameShipment') {
+  if (shipment.typeFormId === 'APAFrameShipment') {
     // Extract the UUID and update the location information of each APA frame in a shipment of frames
     for (const frame of shipment.data.frameUuiDs) {
       const result = await updateLocation(frame.component_uuid, location, date, '');
     }
-  } else if (shipment.formId === 'AssembledAPAShipment') {
+  } else if (shipment.typeFormId === 'AssembledAPAShipment') {
     // Extract the UUID and update the location information of each assembled APA and the ASF in a shipment of APAs
     for (const apa of shipment.data.apaUuiDs) {
       const result = await updateLocation(apa.component_uuid, location, date, '');
     }
 
     const result = await updateLocation(shipment.data.asfUuid, location, date, '');
-  } else if ((shipment.formId === 'CEAdapterBoardShipment') || (shipment.formId === 'CRBoardShipment') || (shipment.formId === 'CableHarnessShipment') || (shipment.formId === 'GBiasBoardShipment') || (shipment.formId === 'GeometryBoardShipment') || (shipment.formId === 'SHVBoardShipment')) {
+  } else if ((shipment.typeFormId === 'CEAdapterBoardShipment') || (shipment.typeFormId === 'CRBoardShipment') || (shipment.typeFormId === 'CableHarnessShipment') || (shipment.typeFormId === 'GBiasBoardShipment') || (shipment.typeFormId === 'GeometryBoardShipment') || (shipment.typeFormId === 'SHVBoardShipment')) {
     // Extract the UUID and update the location information of each board in a shipment of (single type) boards
     for (const board of shipment.data.boardUuiDs) {
       const result = await updateLocation(board.component_uuid, location, date, '');
     }
-  } else if (shipment.formId === 'DWAComponentShipment') {
+  } else if (shipment.typeFormId === 'DWAComponentShipment') {
     // Extract the UUID and update the location information of each component in a (combined) shipment of DWAs and DWAPDBs
     for (const dwa of shipment.data.componentUUIDs) {
       const result = await updateLocation(dwa.component_uuid, location, date, '');
     }
-  } else if (shipment.formId === 'GroundingMeshPanelShipment') {
+  } else if (shipment.typeFormId === 'GroundingMeshPanelShipment') {
     // Extract the UUID and update the location information of each mesh in a shipment of meshes
     for (const mesh of shipment.data.apaUuiDs) {
       const result = await updateLocation(mesh.component_uuid, location, date, '');
     }
-  } else if (shipment.formId === 'PopulatedBoardShipment') {
+  } else if (shipment.typeFormId === 'PopulatedBoardShipment') {
     // Extract the UUID and update the location information of each shipment in a multi-type populated board shipment
     for (const crBoardShipment of shipment.data.crBoardKitUuiDs) {
       if (crBoardShipment.component_uuid !== '') {
@@ -461,7 +459,7 @@ async function updateLocations_inShipment(componentUuid, location, date) {
         const result = await updateLocations_inShipment(cableHarnessShipment.component_uuid, location, date);
       }
     }
-  } else if (shipment.formId === 'YokeShipment') {
+  } else if (shipment.typeFormId === 'YokeShipment') {
     // Extract the UUID and update the location information of each yoke in a shipment of yokes
     for (const yoke of shipment.data.yokeUuiDs) {
       const result = await updateLocation(yoke.component_uuid, location, date, '');
@@ -565,8 +563,8 @@ async function list(match_condition, options) {
   aggregation_stages.push({
     $project: {
       componentUuid: true,
-      formId: true,
-      formName: true,
+      typeFormId: true,
+      typeFormName: true,
       data: true,
       validity: true,
       reception: true,
@@ -582,8 +580,8 @@ async function list(match_condition, options) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      typeFormId: { '$first': '$formId' },
-      typeFormName: { '$first': '$formName' },
+      typeFormId: { '$first': '$typeFormId' },
+      typeFormName: { '$first': '$typeFormName' },
       data: { '$first': '$data' },
       componentName: { '$first': '$data.componentName' },
       lastEditDate: { '$first': '$validity.startDate' },
@@ -592,7 +590,7 @@ async function list(match_condition, options) {
   });
 
   // Re-sort the records ... by (alphanumerical) component name for APA Frames, ASFs and Assembled APAs, or by last edit date (most recent first) for other component types
-  if ((match_condition) && (match_condition.formId) && (['APAFrame', 'APAShippingFrame', 'AssembledAPA'].includes(match_condition.formId))) {
+  if ((match_condition) && (match_condition.typeFormId) && (['APAFrame', 'APAShippingFrame', 'AssembledAPA'].includes(match_condition.typeFormId))) {
     aggregation_stages.push({ $sort: { componentName: -1 } });
   } else {
     aggregation_stages.push({ $sort: { lastEditDate: -1 } });
@@ -627,7 +625,7 @@ async function counts_byType() {
   aggregation_stages.push({
     $group: {
       _id: {
-        formId: '$formId',
+        typeFormId: '$typeFormId',
         componentUuid: '$componentUuid',
       },
     },
@@ -637,15 +635,15 @@ async function counts_byType() {
   // Then determine the 'count' - i.e. how many records are in each group
   aggregation_stages.push({
     $group: {
-      _id: '$_id.formId',
+      _id: '$_id.typeFormId',
       count: { $sum: 1 },
     },
   });
 
-  // Flatten the returned groups by projecting the 'formId' group ID directly (along with the 'count'), and not projecting the group ID object
+  // Flatten the returned groups by projecting the 'typeFormId' group ID directly (along with the 'count'), and not projecting the group ID object
   aggregation_stages.push({
     $project: {
-      formId: '$_id',
+      typeFormId: '$_id',
       count: true,
       _id: false,
     },
@@ -660,15 +658,15 @@ async function counts_byType() {
   let keyedRecords = {};
 
   for (const record of records) {
-    keyedRecords[record.formId] = record;
+    keyedRecords[record.typeFormId] = record;
   }
 
   // Retrieve an object containing all component type forms, with each entry keyed by the type form ID
   // Then, for each type form, copy the component count from the entry in the results object (if it exists) into the corresponding entry in the type forms object
   let typeFormsList = await Forms.list('componentForms');
 
-  for (const formId of Object.keys(typeFormsList)) {
-    if (keyedRecords.hasOwnProperty(formId)) typeFormsList[formId].count = keyedRecords[formId].count;
+  for (const typeFormId of Object.keys(typeFormsList)) {
+    if (keyedRecords.hasOwnProperty(typeFormId)) typeFormsList[typeFormId].count = keyedRecords[typeFormId].count;
   }
 
   // Return the type forms object
@@ -682,7 +680,7 @@ async function boardCounts_byPartNumberAndLocation() {
   let aggregation_stages = [];
 
   // Match against the type form ID to get records of all components of the single specified component type
-  aggregation_stages.push({ $match: { formId: 'GeometryBoard' } });
+  aggregation_stages.push({ $match: { typeFormId: 'GeometryBoard' } });
 
   // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
   aggregation_stages.push({
@@ -772,7 +770,7 @@ async function autoCompleteUuid(inputString, limit = 10) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      typeFormName: { '$first': '$formName' },
+      typeFormName: { '$first': '$typeFormName' },
       componentName: { '$first': '$data.componentName' },
       lastEditDate: { '$first': '$validity.startDate' },
     },

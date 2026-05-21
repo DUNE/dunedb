@@ -295,7 +295,7 @@ class ComponentUUID extends TextFieldComponent {
                                              // ... meaning that it cannot find the 'component' variable in time, and throws an error as a result
                                              // It does eventually catch up if given enough time, but the box messages are purely for displaying information ...
                                              // ... it won't affect any record submission if they don't load fast enough
-            if (component.formId === 'APAFrame') {
+            if (component.typeFormId === 'APAFrame') {
               $.ajax({
                 contentType: 'application/json',
                 method: 'GET',
@@ -321,7 +321,7 @@ class ComponentUUID extends TextFieldComponent {
                   }
                 },
               }).fail();
-            } else if (component.formId === 'GroundingMeshPanel') {
+            } else if (component.typeFormId === 'GroundingMeshPanel') {
               $.ajax({
                 contentType: 'application/json',
                 method: 'GET',
@@ -347,13 +347,13 @@ class ComponentUUID extends TextFieldComponent {
                   }
                 },
               }).fail();
-            } else if (component.formId === 'WireBobbin') {
+            } else if (component.typeFormId === 'WireBobbin') {
               if (component.data.meanBreakStrength >= 24.0) {
                 info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
               } else {
                 info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - mean break strength is less than 24.0 N!`);
               }
-            } else if (component.formId === 'GeometryBoard') {
+            } else if (component.typeFormId === 'GeometryBoard') {
               $.ajax({
                 contentType: 'application/json',
                 method: 'GET',
@@ -379,7 +379,7 @@ class ComponentUUID extends TextFieldComponent {
                   }
                 },
               }).fail();
-            } else if (component.formId === 'AssembledAPA') {
+            } else if (component.typeFormId === 'AssembledAPA') {
               $.ajax({
                 contentType: 'application/json',
                 method: 'GET',
