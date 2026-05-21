@@ -41,7 +41,7 @@ block allbody
               dt Component UUID
               dd #{component.componentUuid}
 
-              if component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId == 'GeometryBoardShipment' || component.formId === 'SHVBoardShipment'
+              if component.typeFormId === 'CEAdapterBoardShipment' || component.typeFormId === 'CRBoardShipment' || component.typeFormId === 'CableHarnessShipment' || component.typeFormId === 'GBiasBoardShipment' || component.typeFormId == 'GeometryBoardShipment' || component.typeFormId === 'SHVBoardShipment'
                 dt Number of Boards in Shipment
                 dd #{component.data.boardUuiDs.length}
 
@@ -62,7 +62,7 @@ block allbody
             if component.insertion.user
               |  by !{' '} #{component.insertion.user.displayName}
 
-      if component.formId === 'APAFrameShipment'
+      if component.typeFormId === 'APAFrameShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location
           dd #{dictionary_locations[component.data.originOfShipment]}
@@ -85,7 +85,7 @@ block allbody
                     td #{info[0]}
                     td #{info[1]}
                     td #{info[2]}
-      else if component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
+      else if component.typeFormId === 'CEAdapterBoardShipment' || component.typeFormId === 'CRBoardShipment' || component.typeFormId === 'CableHarnessShipment' || component.typeFormId === 'GBiasBoardShipment' || component.typeFormId === 'SHVBoardShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Boards in Shipment / Kit
           dd
@@ -102,7 +102,7 @@ block allbody
                     td #{info[0]}
                     td #{info[2]}
                     td #{info[1]}
-      else if component.formId === 'DWAComponentShipment'
+      else if component.typeFormId === 'DWAComponentShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location
           dd #{dictionary_locations[component.data.originOfShipment]}
@@ -125,7 +125,7 @@ block allbody
                     td #{info[0]}
                     td #{info[2]}
                     td #{info[1]}
-      else if component.formId === 'GeometryBoardShipment'
+      else if component.typeFormId === 'GeometryBoardShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location 
           dd #{dictionary_locations[component.data.originOfShipment]}
@@ -148,7 +148,7 @@ block allbody
                     td #{info[0]}
                     td #{info[1]}
                     td #{info[2]}
-      else if component.formId === 'GroundingMeshPanelShipment'
+      else if component.typeFormId === 'GroundingMeshPanelShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location
           dd #{dictionary_locations[component.data.originOfShipment]}
@@ -171,7 +171,7 @@ block allbody
                     td #{info[0]}
                     td #{info[1]}
                     td #{info[2]}
-      else if component.formId === 'PopulatedBoardShipment'
+      else if component.typeFormId === 'PopulatedBoardShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location
           dd #{dictionary_locations[component.data.originOfShipment]}
@@ -192,14 +192,14 @@ block allbody
                   tr
                     td #{info[0]}
                     td #{info[1]}
-      else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
-        if component.formId === 'GeometryBoardBatch'
+      else if component.typeFormId === 'CEAdapterBoardBatch' || component.typeFormId === 'CRBoardBatch' || component.typeFormId === 'GBiasBoardBatch' || component.typeFormId === 'GeometryBoardBatch'
+        if component.typeFormId === 'GeometryBoardBatch'
           .vert-space-x1.border-success.border.rounded.p-2
             #typeform
 
         - let columnHeader = ''
 
-        if component.data.subComponent_formId == 'CEAdapterBoard' || component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
+        if component.data.subComponent_typeFormId == 'CEAdapterBoard' || component.data.subComponent_typeFormId == 'CRBoard' || component.data.subComponent_typeFormId == 'GBiasBoard'
           - columnHeader = 'UW ID'
         else 
           - columnHeader = 'UK ID'
@@ -222,7 +222,7 @@ block allbody
                       td #{component.data.subComponent_typeRecordNumbers[index]}
                     else
                       td (not retrievable)
-      else if component.formId === 'YokeShipment'
+      else if component.typeFormId === 'YokeShipment'
         .vert-space-x1.border-success.border.rounded.p-2
           dt Origin Location
           dd #{dictionary_locations[component.data.originOfShipment]}
@@ -253,7 +253,7 @@ block allbody
 
       each action in nonConformActions
         .section.actionSection
-          .section-side.formName #{action.typeFormName}
+          .section-side.typeFormName #{action.typeFormName}
 
           .vert-space-x1
             dl
@@ -282,7 +282,7 @@ block allbody
 
       each action in workflowActions
         .section.actionSection
-          .section-side.formName (workflow) #{action.typeFormName}
+          .section-side.typeFormName (workflow) #{action.typeFormName}
 
           .vert-space-x1
             dl
@@ -311,7 +311,7 @@ block allbody
 
       each action in otherActions
         .section.actionSection
-          .section-side.formName (other) #{action.typeFormName}
+          .section-side.typeFormName (other) #{action.typeFormName}
 
           .vert-space-x1
             dl

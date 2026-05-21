@@ -493,7 +493,7 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
   // Match against the component type form ID and reception location to get records of all 'Geometry Board' components with a current reception location of 'rejected'
   aggregation_stages.push({
     $match: {
-      'formId': 'GeometryBoard',
+      'typeFormId': 'GeometryBoard',
       'reception.location': 'rejected',
     }
   });

@@ -17,7 +17,7 @@ async function geoBoardShipmentsByReceptionDetails(status, origin, destination, 
   // Match against the type form ID and both locations to get records of all 'Geometry Board Shipment' components that were supposed to travel between the specified locations
   comp_aggregation_stages.push({
     $match: {
-      'formId': 'GeometryBoardShipment',
+      'typeFormId': 'GeometryBoardShipment',
       'data.originOfShipment': originString,
       'data.destinationOfShipment': destinationString,
     }
@@ -149,7 +149,7 @@ async function geoBoardShipmentsByBoardUUID(componentUUID) {
   let aggregation_stages = [];
 
   // Match against the type form ID to get records of all 'Geometry Board Shipment' components
-  aggregation_stages.push({ $match: { 'formId': 'GeometryBoardShipment' } });
+  aggregation_stages.push({ $match: { 'typeFormId': 'GeometryBoardShipment' } });
 
   // Select the latest version of each record, and pass through only the fields required for later use
   aggregation_stages.push({ $sort: { 'validity.version': -1 } });
@@ -157,8 +157,8 @@ async function geoBoardShipmentsByBoardUUID(componentUUID) {
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      typeFormId: { '$first': '$formId' },
-      typeFormName: { '$first': '$formName' },
+      typeFormId: { '$first': '$typeFormId' },
+      typeFormName: { '$first': '$typeFormName' },
       data: { '$first': '$data' },
       reception: { '$first': '$reception' },
       lastEditDate: { '$first': '$validity.startDate' },
@@ -190,7 +190,7 @@ async function apasByProductionLocationAndNumber(location, number) {
   // Match against the type form ID to get records of all 'Assembled APA' components
   aggregation_stages.push({
     $match: {
-      'formId': 'AssembledAPA',
+      'typeFormId': 'AssembledAPA',
     }
   });
 
@@ -289,7 +289,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
   // Match against the type form ID, component UUID and production location to get records of all 'Assembled APA' components that have a UUID that is NOT in the previously constructed list
   comp_aggregation_stages.push({
     $match: {
-      'formId': 'AssembledAPA',
+      'typeFormId': 'AssembledAPA',
       'componentUuid': { $nin: uuids_apasCompletedToStep_atLocation },
       'data.apaAssemblyLocation': location,
     }
@@ -356,7 +356,7 @@ async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
   // Match against the type form ID and type record number to get records of all components that have the same type and number as the specified ones
   aggregation_stages.push({
     $match: {
-      'formId': typeFormId,
+      'typeFormId': typeFormId,
       'data.typeRecordNumber': parseInt(typeRecordNumber, 10),
     }
   });
@@ -369,7 +369,7 @@ async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
       componentUuid: { '$first': '$componentUuid' },
       componentName: { '$first': '$data.componentName' },
       typeRecordNumber: { '$first': '$data.typeRecordNumber' },
-      formName: { '$first': '$formName' },
+      typeFormName: { '$first': '$typeFormName' },
       shortUuid: { '$first': '$shortUuid' },
       data: { '$first': '$data' },
     },
@@ -398,7 +398,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
   // Match against the type form ID and location to get records of all components of the specified type at the specified location
   aggregation_stages.push({
     $match: {
-      'formId': typeFormId,
+      'typeFormId': typeFormId,
       'reception.location': location,
     }
   });
@@ -652,7 +652,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
   // For geometry boards, also match against the reception location if the specified 'acceptanceStatus' is 'rejected'
   if (typeFormId === 'GeometryBoard') {
     let matchConditions = {
-      'formId': typeFormId,
+      'typeFormId': typeFormId,
       'data.partNumber': partNumber,
     }
 
@@ -666,7 +666,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
   } else if (typeFormId === 'GroundingMeshPanel') {
     aggregation_stages.push({
       $match: {
-        'formId': typeFormId,
+        'typeFormId': typeFormId,
         'data.meshPanelPartNumber': partNumber,
       }
     });
