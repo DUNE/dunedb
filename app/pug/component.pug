@@ -131,7 +131,7 @@ block content
               img.small-icon(src = '/images/checklist_icon.svg')
               | &nbsp; View and print the component's summary
 
-          if component.formId == 'AssembledAPA'
+          if component.typeFormId == 'AssembledAPA'
             .vert-space-x1
               a.btn.btn-primary(href = `/component/${component.componentUuid}/execSummary`)
                 img.small-icon(src = '/images/checklist_icon.svg')
@@ -146,7 +146,7 @@ block content
                   img.small-icon(src = '/images/run_icon.svg')
                   | &nbsp; Create New Components of This Type via Workflows
               else
-                a.btn.btn-primary(href = `/component/${component.formId}/new`)
+                a.btn.btn-primary(href = `/component/${component.typeFormId}/new`)
                   img.small-icon(src = '/images/run_icon.svg')
                   | &nbsp; Create New Component of This Type
 
@@ -156,7 +156,7 @@ block content
 
           p.small.text-center #{base_url}/c/#{component.shortUuid.toString()}
 
-    if component.formId === 'APAFrameShipment'
+    if component.typeFormId === 'APAFrameShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location
         dd #{dictionary_locations[component.data.originOfShipment]}
@@ -187,9 +187,9 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
-    else if component.formId === 'CEAdapterBoardShipment' || component.formId === 'CRBoardShipment' || component.formId === 'CableHarnessShipment' || component.formId === 'GBiasBoardShipment' || component.formId === 'SHVBoardShipment'
+    else if component.typeFormId === 'CEAdapterBoardShipment' || component.typeFormId === 'CRBoardShipment' || component.typeFormId === 'CableHarnessShipment' || component.typeFormId === 'GBiasBoardShipment' || component.typeFormId === 'SHVBoardShipment'
       .vert-space-x1.border-success.border.rounded.p-2
-        if component.formId === 'CEAdapterBoardShipment'
+        if component.typeFormId === 'CEAdapterBoardShipment'
           dt Origin Location 
           dd #{dictionary_locations[component.data.originOfShipment]}
 
@@ -219,7 +219,7 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
-    else if component.formId === 'DWAComponentShipment'
+    else if component.typeFormId === 'DWAComponentShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location
         dd #{dictionary_locations[component.data.originOfShipment]}
@@ -250,7 +250,7 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
-    else if component.formId === 'GeometryBoardShipment'
+    else if component.typeFormId === 'GeometryBoardShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location 
         dd #{dictionary_locations[component.data.originOfShipment]}
@@ -281,7 +281,7 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
-    else if component.formId === 'GroundingMeshPanelShipment'
+    else if component.typeFormId === 'GroundingMeshPanelShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location
         dd #{dictionary_locations[component.data.originOfShipment]}
@@ -312,7 +312,7 @@ block content
         a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
           img.small-icon(src = '/images/checklist_icon.svg')
           | &nbsp; Print all sub-component QR codes
-    else if component.formId === 'PopulatedBoardShipment'
+    else if component.typeFormId === 'PopulatedBoardShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location
         dd #{dictionary_locations[component.data.originOfShipment]}
@@ -346,14 +346,14 @@ block content
           dt Comments 
           dd 
             textarea.form-control#comments(rows = 5)
-    else if component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch'
-      if component.formId === 'GeometryBoardBatch'
+    else if component.typeFormId === 'CEAdapterBoardBatch' || component.typeFormId === 'CRBoardBatch' || component.typeFormId === 'GBiasBoardBatch' || component.typeFormId === 'GeometryBoardBatch'
+      if component.typeFormId === 'GeometryBoardBatch'
         .vert-space-x1.border-success.border.rounded.p-2
           #typeform
 
       - let columnHeader = ''
 
-      if component.data.subComponent_formId == 'CEAdapterBoard' || component.data.subComponent_formId == 'CRBoard' || component.data.subComponent_formId == 'GBiasBoard'
+      if component.data.subComponent_typeFormId == 'CEAdapterBoard' || component.data.subComponent_typeFormId == 'CRBoard' || component.data.subComponent_typeFormId == 'GBiasBoard'
         - columnHeader = 'UW ID'
       else 
         - columnHeader = 'UK ID'
@@ -388,7 +388,7 @@ block content
 
           .hori-space-x2 
             a.btn.btn-secondary#download_links(onclick = 'DownloadLinks(component.data.subComponent_shortUuids)', download = `links_${component.data.orderNumber}.txt`, href = '') Download List of Links
-    else if component.formId === 'ReturnedGeometryBoardBatch'
+    else if component.typeFormId === 'ReturnedGeometryBoardBatch'
       .vert-space-x1.border-success.border.rounded.p-2
         #typeform
 
@@ -410,7 +410,7 @@ block content
 
                   td #{info[1]}
                   td #{`${base_url}/c/${info[2]}`}
-    else if component.formId === 'YokeShipment'
+    else if component.typeFormId === 'YokeShipment'
       .vert-space-x1.border-success.border.rounded.p-2
         dt Origin Location
         dd #{dictionary_locations[component.data.originOfShipment]}
@@ -445,7 +445,7 @@ block content
       .vert-space-x1.border-success.border.rounded.p-2
         #typeform
 
-    if component.formId === 'GeometryBoard'
+    if component.typeFormId === 'GeometryBoard'
       .vert-space-x2.border-success.border.rounded.p-2
         dt Geometry Board History
         dd 
@@ -492,7 +492,7 @@ block content
                   else 
                     td #{entry.data.checksPassed}
 
-    if component.formId === 'AssembledAPA'
+    if component.typeFormId === 'AssembledAPA'
       .vert-space-x2.border-success.border.rounded.p-2
         dt Installed Geometry Boards (#{installedGeometryBoardsCount})
         dd
@@ -543,21 +543,21 @@ block content
     .vert-space-x1
       .row
         .col-sm-6
-          if component.formId === 'APAFrame'
+          if component.typeFormId === 'APAFrame'
             h4 Action History (Non-Workflow Actions Only)
 
             .vert-space-x1
               p <b>Existing workflow actions can be accessed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
                 | workflow</b>
-          else if component.formId === 'AssembledAPA'
+          else if component.typeFormId === 'AssembledAPA'
             h4 Action History (Non-Workflow Actions Only)
 
             .vert-space-x1
               p <b>Existing workflow actions can be accessed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
                 | workflow</b>
-          else if component.formId === 'AssembledAPAShipment'
+          else if component.typeFormId === 'AssembledAPAShipment'
             h4 Action History (Non-Workflow Actions Only)
 
             .vert-space-x1
@@ -567,7 +567,7 @@ block content
           else
             h4 Action History
 
-            if component.formId === 'GeometryBoard'
+            if component.typeFormId === 'GeometryBoard'
               .vert-space-x1
                 p <b> Please see the table above for the action history of geometry boards</b>
 
@@ -576,7 +576,7 @@ block content
           if !actions || actions.length == 0
             p None
           else
-            if component.formId !== 'GeometryBoard'
+            if component.typeFormId !== 'GeometryBoard'
               table.table
                 thead
                   tr
@@ -596,21 +596,21 @@ block content
                         +dateTimeFormat(action.lastEditDate)
 
         .col-sm-6
-          if component.formId === 'APAFrame'
+          if component.typeFormId === 'APAFrame'
             h4 Select an Action Type to Perform (Non-Workflow Actions Only)
 
             .vert-space-x1
               p <b>New workflow actions must be performed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') Frame Assembly 
                 | workflow</b>
-          else if component.formId === 'AssembledAPA'
+          else if component.typeFormId === 'AssembledAPA'
             h4 Select an Action Type to Perform (Non-Workflow Actions Only)
 
             .vert-space-x1
               p <b>New workflow actions must be performed through this component's 
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') APA Assembly 
                 | workflow</b>
-          else if component.formId === 'AssembledAPAShipment'
+          else if component.typeFormId === 'AssembledAPAShipment'
             h4 Select an Action Type to Perform (Non-Workflow Actions Only)
 
             .vert-space-x1
@@ -623,7 +623,7 @@ block content
           hr
 
           each typeForm in actionTypeForms
-            if typeForm.componentTypes.includes(component.formName) && !typeForm.tags.includes('Trash')
+            if typeForm.componentTypes.includes(component.typeFormName) && !typeForm.tags.includes('Trash')
               a.actionbutton.btn.btn-success(href = `/action/${typeForm.formId}/spec/${component.componentUuid}`) #{typeForm.formName}
 
     .vert-space-x2

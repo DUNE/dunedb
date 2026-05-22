@@ -41,12 +41,12 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     //  - records of all actions that have already been performed on this component
     //  - all currently available action type forms
     let [componentTypeForm, actions, actionTypeForms] = await Promise.all([
-      Forms.retrieve('componentForms', component.formId),
+      Forms.retrieve('componentForms', component.typeFormId),
       Actions.list({ componentUuid: req.params.uuid }),
       Forms.list('actionForms'),
     ]);
 
-    if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
+    if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.typeFormId}`);
 
     // Extract the most recently performed / edited action from the list of all actions above
     // This should be done explicitly here, since that list could be modified below depending on the component's type
@@ -55,7 +55,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // If the specified component is a 'Geometry Board' type, retrieve some more detailed information about any shipments that the board has been part of
     // Add this information to the previously retrieved list of actions performed on the board, and make sure that all of the action entries contain the same (or equivalent) fields
     // Add an entry for the board itself (again, containing the same fields as the action entries), and finally sort all entries in the combined array by the 'lastEditDate' field
-    if (component.formId === 'GeometryBoard') {
+    if (component.typeFormId === 'GeometryBoard') {
       geoBoardShipments = await Search_OtherComponents.geoBoardShipmentsByBoardUUID(req.params.uuid);
       actions = actions.concat(geoBoardShipments);
 
@@ -132,7 +132,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // First set up a list of component type form IDs for all components that are the subject of any workflow (there are only a handful of workflow types, so we can do this explicitly)
     // Then check to see if the list of component type form IDs includes the type form ID of the component type being specified
     const list_workflowComponents = ['APAFrame', 'AssembledAPA', 'AssembledAPAShipment'];
-    const workflowComponent = list_workflowComponents.includes(component.formId);
+    const workflowComponent = list_workflowComponents.includes(component.typeFormId);
 
     // If the specified component type is one that is the subject of a workflow, filter out any action types that should be performed through the workflow
     // First, retrieve the workflow type form, and then build an array of the workflow's action type form names from its path steps
@@ -144,11 +144,11 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     if (workflowComponent) {
       let workflowTypeForm = null;
 
-      if (component.formId === 'APAFrame') {
+      if (component.typeFormId === 'APAFrame') {
         workflowTypeForm = await Forms.retrieve('workflowForms', 'FrameAssembly');
-      } else if (component.formId === 'AssembledAPA') {
+      } else if (component.typeFormId === 'AssembledAPA') {
         workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
-      } else if (component.formId === 'AssembledAPAShipment') {
+      } else if (component.typeFormId === 'AssembledAPAShipment') {
         workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_PostProduction');
       }
 
@@ -178,7 +178,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // For the other shipment and batch component types, set up an array containing more detailed information about each sub-component
     let collectionDetails = [];
 
-    if (component.formId === 'APAFrameShipment') {
+    if (component.typeFormId === 'APAFrameShipment') {
       for (const info of component.data.frameUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -188,27 +188,27 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
+    if ((component.typeFormId === 'CEAdapterBoardShipment') || (component.typeFormId === 'CRBoardShipment') || (component.typeFormId === 'CableHarnessShipment') || (component.typeFormId === 'GBiasBoardShipment') || (component.typeFormId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
 
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.typeFormName, componentRecord.shortUuid]);
         }
       }
     }
 
-    if (component.formId === 'DWAComponentShipment') {
+    if (component.typeFormId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
 
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName, componentRecord.shortUuid]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.typeFormName, componentRecord.shortUuid]);
         }
       }
     }
 
-    if (component.formId === 'GeometryBoardShipment') {
+    if (component.typeFormId === 'GeometryBoardShipment') {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -218,7 +218,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'GroundingMeshPanelShipment') {
+    if (component.typeFormId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -228,7 +228,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'PopulatedBoardShipment') {
+    if (component.typeFormId === 'PopulatedBoardShipment') {
       for (const info of component.data.crBoardKitUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -262,7 +262,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'ReturnedGeometryBoardBatch') {
+    if (component.typeFormId === 'ReturnedGeometryBoardBatch') {
       for (const info of component.data.boardUuids) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -272,7 +272,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.formId === 'YokeShipment') {
+    if (component.typeFormId === 'YokeShipment') {
       for (const info of component.data.yokeUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -286,7 +286,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     let installedGeometryBoards = [];
     let installedGeometryBoardsCount = 0;
 
-    if (component.formId === 'AssembledAPA') {
+    if (component.typeFormId === 'AssembledAPA') {
       installedGeometryBoards = await Search_GeoBoards.boardsByAPA(req.params.uuid);
 
       for (const boardGroup of installedGeometryBoards) {
@@ -340,9 +340,9 @@ router.get('/component/:uuid/edit', permissions.checkPermission('components:edit
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
     // Retrieve the component type form corresponding to the type form ID in the component record, and throw an error if there is no such type form
-    const componentTypeForm = await Forms.retrieve('componentForms', component.formId);
+    const componentTypeForm = await Forms.retrieve('componentForms', component.typeFormId);
 
-    if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
+    if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.typeFormId}`);
 
     // Render the interface page
     res.render('component_edit.pug', {
@@ -390,7 +390,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
     // ... but for batch-type components, they are already saved in the batch component's own record, so the individual sub-component records are not needed
     let shortUUIDs = [];
 
-    if (component.formId === 'APAFrameShipment') {
+    if (component.typeFormId === 'APAFrameShipment') {
       for (const info of component.data.frameUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -400,7 +400,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'GeometryBoardShipment') || (component.formId === 'SHVBoardShipment')) {
+    if ((component.typeFormId === 'CEAdapterBoardShipment') || (component.typeFormId === 'CRBoardShipment') || (component.typeFormId === 'CableHarnessShipment') || (component.typeFormId === 'GBiasBoardShipment') || (component.typeFormId === 'GeometryBoardShipment') || (component.typeFormId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -410,7 +410,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'DWAComponentShipment') {
+    if (component.typeFormId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -420,7 +420,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'GroundingMeshPanelShipment') {
+    if (component.typeFormId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -430,7 +430,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'PopulatedBoardShipment') {
+    if (component.typeFormId === 'PopulatedBoardShipment') {
       for (const info of component.data.crBoardKitUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -464,7 +464,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'CEAdapterBoardBatch' || component.formId === 'CRBoardBatch' || component.formId === 'GBiasBoardBatch' || component.formId === 'GeometryBoardBatch') {
+    if (component.typeFormId === 'CEAdapterBoardBatch' || component.typeFormId === 'CRBoardBatch' || component.typeFormId === 'GBiasBoardBatch' || component.typeFormId === 'GeometryBoardBatch') {
       for (const uuid of component.data.subComponent_fullUuids) {
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
@@ -474,7 +474,7 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
-    if (component.formId === 'YokeShipment') {
+    if (component.typeFormId === 'YokeShipment') {
       for (const info of component.data.yokeUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -505,11 +505,11 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
     //  - the component type form corresponding to the type form ID in the component record (and throw an error if there is no such type form)
     //  - records of all actions that have already been performed on this component
     const [componentTypeForm, actions] = await Promise.all([
-      Forms.retrieve('componentForms', component.formId),
+      Forms.retrieve('componentForms', component.typeFormId),
       Actions.list({ componentUuid: req.params.uuid }),
     ]);
 
-    if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.formId}`);
+    if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.typeFormId}`);
 
     // We would like the actions to be ordered in a specific way in the summary document, to make it easier to find any given action (particularly when there are a lot of actions):
     //   - first, all non-conformance actions in chronological order (earliest to latest)
@@ -554,7 +554,7 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
     // For specific shipment and batch component types, set up an array containing more detailed information about each sub-component
     let collectionDetails = [];
 
-    if (component.formId === 'APAFrameShipment') {
+    if (component.typeFormId === 'APAFrameShipment') {
       for (const info of component.data.frameUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -564,27 +564,27 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if ((component.formId === 'CEAdapterBoardShipment') || (component.formId === 'CRBoardShipment') || (component.formId === 'CableHarnessShipment') || (component.formId === 'GBiasBoardShipment') || (component.formId === 'SHVBoardShipment')) {
+    if ((component.typeFormId === 'CEAdapterBoardShipment') || (component.typeFormId === 'CRBoardShipment') || (component.typeFormId === 'CableHarnessShipment') || (component.typeFormId === 'GBiasBoardShipment') || (component.typeFormId === 'SHVBoardShipment')) {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
 
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.typeFormName]);
         }
       }
     }
 
-    if (component.formId === 'DWAComponentShipment') {
+    if (component.typeFormId === 'DWAComponentShipment') {
       for (const info of component.data.componentUUIDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
 
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.formName]);
+          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, componentRecord.typeFormName]);
         }
       }
     }
 
-    if (component.formId === 'GeometryBoardShipment') {
+    if (component.typeFormId === 'GeometryBoardShipment') {
       for (const info of component.data.boardUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -594,7 +594,7 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'GroundingMeshPanelShipment') {
+    if (component.typeFormId === 'GroundingMeshPanelShipment') {
       for (const info of component.data.apaUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -604,7 +604,7 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'PopulatedBoardShipment') {
+    if (component.typeFormId === 'PopulatedBoardShipment') {
       for (const info of component.data.crBoardKitUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -638,7 +638,7 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
       }
     }
 
-    if (component.formId === 'YokeShipment') {
+    if (component.typeFormId === 'YokeShipment') {
       for (const info of component.data.yokeUuiDs) {
         if (info.component_uuid !== '') {
           const componentRecord = await Components.retrieve(info.component_uuid);
@@ -833,7 +833,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
   try {
     // Retrieve records of all components with the specified component type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const components = await Components.list({ formId: req.params.typeFormId }, { limit: 500 });
+    const components = await Components.list({ typeFormId: req.params.typeFormId }, { limit: 500 });
 
     // Retrieve the component type form corresponding to the specified type form ID
     const componentTypeForm = await Forms.retrieve('componentForms', req.params.typeFormId);
@@ -1065,7 +1065,7 @@ router.get(['/json/components/:typeFormId/list', '/api/components/:typeFormId/li
   try {
     // Retrieve records of all components with the specified component type
     // The first argument should be an object consisting of the match condition, i.e. the type form ID to match to
-    const components = await Components.list({ formId: req.params.typeFormId }, { limit: 500 });
+    const components = await Components.list({ typeFormId: req.params.typeFormId }, { limit: 500 });
 
     // Extract only the UUID field (in string format) from each component record, and save it into a list to be returned
     let componentUUIDs = [];

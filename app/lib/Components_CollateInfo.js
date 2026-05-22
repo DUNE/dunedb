@@ -753,7 +753,7 @@ async function forHWDB(componentUUID) {
     return { error: `There is no component record with component UUID = ${componentUUID}` }
   }
 
-  const componentTypeFormId = componentRecord.formId;
+  const componentTypeFormId = componentRecord.typeFormId;
   const componentDUNEPID = componentRecord.data.dunePid;
 
   // Set up the top-level information object that will hold the component information in the format required by the HWDB

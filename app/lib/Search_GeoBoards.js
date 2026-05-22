@@ -63,7 +63,7 @@ async function boardsByVisualInspection(disposition, issue) {
   // Match against the type form ID and component UUID to get records of all 'Geometry Board' components that the previously found 'Visual Inspection' actions were performed on
   comp_aggregation_stages.push({
     $match: {
-      'formId': 'GeometryBoard',
+      'typeFormId': 'GeometryBoard',
       'componentUuid': { $in: componentUUIDs }
     }
   });
@@ -157,7 +157,7 @@ async function boardsByVisualInspection(disposition, issue) {
         let perBoard_comp_aggregation_stages = [];
 
         perBoard_comp_aggregation_stages.push({
-          $match: { 'formId': 'ReturnedGeometryBoardBatch' }
+          $match: { 'typeFormId': 'ReturnedGeometryBoardBatch' }
         });
 
         perBoard_comp_aggregation_stages.push({ $unwind: '$data.boardUuids' });
@@ -199,7 +199,7 @@ async function boardsByOrderNumber(orderNumber) {
   // Match against the type form ID to get records of all 'Geometry Board Batch' and 'Returned Geometry Board Batch' components
   comp_aggregation_stages.push({
     $match: {
-      'formId': { $in: ['GeometryBoardBatch', 'ReturnedGeometryBoardBatch'] },
+      'typeFormId': { $in: ['GeometryBoardBatch', 'ReturnedGeometryBoardBatch'] },
     }
   });
 
@@ -210,7 +210,7 @@ async function boardsByOrderNumber(orderNumber) {
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
-      typeFormId: { '$first': '$formId' },
+      typeFormId: { '$first': '$typeFormId' },
       orderNumber: { '$first': '$data.orderNumber' },
       boardUuids_batch: { '$first': '$data.subComponent_fullUuids' },
       boardUuids_returnedBatch: { '$first': '$data.boardUuids' },
@@ -346,7 +346,7 @@ async function boardsByAPA(apaUUID) {
   // Match against the type form ID to get records of all 'Geometry Board' components
   aggregation_stages.push({
     $match: {
-      'formId': 'GeometryBoard',
+      'typeFormId': 'GeometryBoard',
     }
   });
 
