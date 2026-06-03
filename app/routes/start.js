@@ -72,6 +72,17 @@ router.get('/user', async function (req, res, next) {
 });
 
 
+/// List wire spool manufacturers
+router.get(['/json/wireSpoolManufacturers.json', '/api/wireSpoolManufacturers.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_wireSpoolManufacturers));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 /// List all technicians and other personnel at the UK and US APA factories
 router.get(['/json/technicians.json', '/api/technicians.json'], async function (req, res, next) {
   try {
@@ -247,12 +258,13 @@ router.get('/administratorUtility', async function (req, res, next) {
 router.post(['/json/administratorUtility/:inputString', '/api/administratorUtility/:inputString'], async function (req, res, next) {
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
+
     let result = null;
 
     if (req.params.inputString === 'ALL_COMPONENTS') {
-      result = await Admin_Functions.fixFields_allComponents();    // Change as appropriate for the required utility
+      result = await Admin_Functions.removeFields_allComponents(req.params.inputString);    // Change as appropriate for the required utility
     } else {
-      result = await Admin_Functions.fixFields_batchComponents();
+      result = await Admin_Functions.fixNames_wireBobbins(req.params.inputString);
     }
 
     return res.status(201).json(result);

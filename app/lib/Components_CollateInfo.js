@@ -33,13 +33,6 @@ const dictionary_winderHeads = {
   us1: 'US 2',
 };
 
-const dictionary_bobbinManufacturers = {
-  littleFalls: 'Little Falls',
-  rstLocker: 'RST/Locker',
-  wireAlloyInternational: 'Wire Alloy International',
-  fiskAlloy: 'Fisk Alloy',
-}
-
 const dictionary_tensionSystems = {
   dwa1: 'DWA #1',
   dwa2: 'DWA #2',
@@ -534,7 +527,7 @@ async function forExecSummary(componentUUID) {
 
         const bobbin = await Components.retrieve(MUUID.from(bobbinUuid).toString());
 
-        if (bobbin) bobbinManufacturers += `${dictionary_bobbinManufacturers[bobbin.data.manufacturer]}, `;
+        if (bobbin) bobbinManufacturers += `${utils.dictionary_wireSpoolManufacturers[bobbin.data.manufacturer]}, `;
       }
 
       bobbinManufacturers = bobbinManufacturers.substring(0, bobbinManufacturers.length - 2);
