@@ -187,7 +187,12 @@ async function save(input, req) {
       newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300500001-${typeRecordNumber}-US200-010000`;
     } else if (newRecord.typeFormId === 'WireBobbin') {
-      newRecord.data.componentName = `${newRecord.typeFormName} ${newRecord.data.bobbinId} (Lot ${newRecord.data.wireLot})`;
+      if (newRecord.data.manufacturer !== 'fiskAlloy') {
+        newRecord.data.componentName = `${newRecord.typeFormName} ${newRecord.data.bobbinId} (${utils.dictionary_wireSpoolManufacturers[newRecord.data.manufacturer]} - Lot ${newRecord.data.wireLot})`;
+      } else {
+        newRecord.data.componentName = `${newRecord.typeFormName} ${newRecord.data.bobbinId} (${utils.dictionary_wireSpoolManufacturers[newRecord.data.manufacturer]} - RM ${newRecord.data.wireLot})`;
+      }
+
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.typeFormId === 'Yoke') {
       newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
