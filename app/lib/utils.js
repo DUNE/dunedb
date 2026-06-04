@@ -13,8 +13,7 @@ module.exports = {
     }
   },
 
-  // A dictionary of locations that are used across all component and action type forms
-  // Using this centralised dictionary allows locations to be consistently displayed in the DB interface
+  // Locations (used in various places by both components and actions)
   dictionary_locations: {
     bnl: 'BNL',
     cambridge: 'Cambridge',
@@ -44,7 +43,7 @@ module.exports = {
     wisconsin: 'Wisconsin',
   },
 
-  // A dictionary of DUNE PID 'component ID' strings for Geometry Boards, related to the board part numbers
+  // DUNE PID 'component ID' strings for Geometry Boards, related to the board part numbers (used for setting the full DUNE PIDs of Geometry Board components at creation)
   // Note that cover boards are not included (even though they do technically have DUNE PIDs), because they are not individually recorded in the DB ... either as components or during installation
   dictionary_geometryBoardPIDs: {
     '8760104': '00001',
@@ -76,6 +75,15 @@ module.exports = {
     '8760121': '00023',
     '8760122': '00024',
     '8760120': '00025',
+  },
+
+  // Wire Spool Manufacturers (used for setting the names of Wire Bobbin components at creation)
+  dictionary_wireSpoolManufacturers: {
+    littleFalls: 'Little Falls',
+    rstLocker: 'RST/Locker',
+    wireAlloyInternational: 'Wire Alloy Intl.',
+    fiskAlloy: 'Fisk Alloy',
+    newLfa: 'Little Falls (NEW)',
   },
 
   // The dictionaries below list various groups of UK and US personnel, whose names should be entered as appropriate in various component and action type forms
