@@ -229,8 +229,16 @@ async function save(input, req) {
     } else {
       newRecord.reception.location = '';
     }
+
+    newRecord.location = newRecord.reception.location;
+    newRecord.dateAtLocation = newRecord.reception.date;
+    newRecord.locationDetail = newRecord.reception.detail;
   } else {
     newRecord.reception = input.reception;
+
+    newRecord.location = input.reception.location;
+    newRecord.dateAtLocation = input.reception.date;
+    newRecord.locationDetail = input.reception.detail;
   }
 
   // If the component name is based on fields that are more likely to be changed by the user, it should be assigned and re-assigned any time the record is edited
@@ -356,6 +364,9 @@ async function updateLocation(componentUuid, location, date, detail) {
               'reception.location': location,
               'reception.date': date,
               'reception.detail': detail,
+              'location': location,
+              'dateAtLocation': date,
+              'locationDetail': detail,
             }
           },
         ]
@@ -393,6 +404,9 @@ async function updateLocation_geoBoardRemoval(componentUuid, location, date, det
             'reception.location': location,
             'reception.date': date,
             'reception.detail': detail,
+            'location': location,
+            'dateAtLocation': date,
+            'locationDetail': detail,
           }
         },
       ]

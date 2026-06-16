@@ -259,13 +259,7 @@ router.post(['/json/administratorUtility/:inputString', '/api/administratorUtili
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
 
-    let result = null;
-
-    if (req.params.inputString === 'ALL_COMPONENTS') {
-      result = await Admin_Functions.removeFields_allComponents(req.params.inputString);    // Change as appropriate for the required utility
-    } else {
-      result = await Admin_Functions.fixNames_wireBobbins(req.params.inputString);
-    }
+    let result = await Admin_Functions.setLocationInfo_allComponents();    // Change as appropriate for the required utility
 
     return res.status(201).json(result);
   } catch (err) {
