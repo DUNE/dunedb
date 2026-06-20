@@ -145,7 +145,7 @@ function postSuccess(result) {
           const boardText = `
             <tr>
               <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
-              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.datesAtLocation[i]}</td>
               <td>${boardGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -168,7 +168,7 @@ function postSuccess(result) {
           const boardText = `
             <tr>
               <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
-              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.datesAtLocation[i]}</td>
               <td>${boardGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -191,7 +191,7 @@ function postSuccess(result) {
           const boardText = `
             <tr>
               <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
-              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.datesAtLocation[i]}</td>
               <td>${boardGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -254,7 +254,7 @@ function postSuccess(result) {
           const meshText = `
             <tr>
               <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
-              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.datesAtLocation[i]}</td>
               <td>${meshGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -277,7 +277,7 @@ function postSuccess(result) {
           const meshText = `
             <tr>
               <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
-              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.datesAtLocation[i]}</td>
               <td>${meshGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -300,7 +300,7 @@ function postSuccess(result) {
           const meshText = `
             <tr>
               <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
-              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.datesAtLocation[i]}</td>
               <td>${meshGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -333,7 +333,7 @@ function postSuccess(result) {
         const componentText = `
         <tr>
           <td><a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.typeRecordNumber}</td>
-          <td>${component.receptionDate}</td>
+          <td>${component.dateAtLocation}</td>
           <td>${component.qaChecksPassed}</td>
         </tr>`;
 
@@ -346,7 +346,7 @@ function postSuccess(result) {
         const componentText = `
         <tr>
           <td><a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.typeRecordNumber}</td>
-          <td>${component.receptionDate}</td>
+          <td>${component.dateAtLocation}</td>
           <td>${component.qaChecksPassed}</td>
         </tr>`;
 
@@ -359,7 +359,7 @@ function postSuccess(result) {
         const componentText = `
         <tr>
           <td><a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.typeRecordNumber}</td>
-          <td>${component.receptionDate}</td>
+          <td>${component.dateAtLocation}</td>
           <td>${component.qaChecksPassed}</td>
         </tr>`;
 
@@ -389,7 +389,7 @@ function postSuccess(result) {
         const componentText = `
         <tr>
           <td><a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.typeRecordNumber}</td>
-          <td>${component.receptionDate}</td>
+          <td>${component.dateAtLocation}</td>
           <td></td>
         </tr>`;
 
@@ -402,7 +402,7 @@ function postSuccess(result) {
         const componentText = `
         <tr>
           <td><a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.typeRecordNumber}</td>
-          <td>${component.receptionDate}</td>
+          <td>${component.dateAtLocation}</td>
           <td></td>
         </tr>`;
 
@@ -415,7 +415,7 @@ function postSuccess(result) {
         const componentText = `
         <tr>
           <td><a href = '/component/${component.componentUuid}' target = '_blank'</a>${component.typeRecordNumber}</td>
-          <td>${component.receptionDate}</td>
+          <td>${component.dateAtLocation}</td>
           <td></td>
         </tr>`;
 

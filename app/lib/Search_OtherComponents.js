@@ -160,7 +160,8 @@ async function geoBoardShipmentsByBoardUUID(componentUUID) {
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       data: { '$first': '$data' },
-      reception: { '$first': '$reception' },
+      location: { '$first': '$location' },
+      dateAtLocation: { '$first': '$dateAtLocation' },
       lastEditDate: { '$first': '$validity.startDate' },
     },
   });
@@ -399,7 +400,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
   aggregation_stages.push({
     $match: {
       'typeFormId': typeFormId,
-      'reception.location': location,
+      'location': location,
     }
   });
 
@@ -494,7 +495,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
 
       cleanedBoardGroup.componentUuids = [];
       cleanedBoardGroup.ukids = [];
-      cleanedBoardGroup.receptionDates = [];
+      cleanedBoardGroup.datesAtLocation = [];
       cleanedBoardGroup.installedOnAPA = [];
 
       for (const boardUuid of boardGroup.componentUuid) {
@@ -516,28 +517,28 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
           cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
           cleanedBoardGroup.ukids.push(board.data.typeRecordNumber);
 
-          if (board.reception) {
-            cleanedBoardGroup.receptionDates.push(board.reception.date);
+          if (board.dateAtLocation) {
+            cleanedBoardGroup.datesAtLocation.push(board.dateAtLocation);
           } else {
-            cleanedBoardGroup.receptionDates.push('[No Date Found!]');
+            cleanedBoardGroup.datesAtLocation.push('[No Date Found!]');
           }
 
           if (location === 'installed_on_APA') {
-            if (board.reception.detail) {
-              const apa = await Components.retrieve(board.reception.detail);
+            if (board.locationDetail) {
+              const apa = await Components.retrieve(board.locationDetail);
 
               cleanedBoardGroup.installedOnAPA.push(apa.data.componentName);
             } else {
-              cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+              cleanedBoardGroup.installedOnAPA.push('[No APA UUID Found!]');
             }
           } else if (location === 'rejected') {
-            if (board.reception.detail) {
-              cleanedBoardGroup.installedOnAPA.push(board.reception.detail.substring(1, board.reception.detail.length - 1));
+            if (board.locationDetail) {
+              cleanedBoardGroup.installedOnAPA.push(board.locationDetail.substring(1, board.locationDetail.length - 1));
             } else {
-              cleanedBoardGroup.installedOnAPA.push('[No rejection info!]');
+              cleanedBoardGroup.installedOnAPA.push('[No Rejection Info!]');
             }
           } else {
-            cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
+            cleanedBoardGroup.installedOnAPA.push('[Not Installed]');
           }
         }
       }
@@ -552,7 +553,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
 
       cleanedMeshGroup.componentUuids = [];
       cleanedMeshGroup.dunePids = [];
-      cleanedMeshGroup.receptionDates = [];
+      cleanedMeshGroup.datesAtLocation = [];
       cleanedMeshGroup.installedOnAPA = [];
 
       for (const meshUuid of meshGroup.componentUuid) {
@@ -561,22 +562,22 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
         cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
         cleanedMeshGroup.dunePids.push(mesh.data.dunePid);
 
-        if (mesh.reception) {
-          cleanedMeshGroup.receptionDates.push(mesh.reception.date);
+        if (mesh.dateAtLocation) {
+          cleanedMeshGroup.datesAtLocation.push(mesh.dateAtLocation);
         } else {
-          cleanedMeshGroup.receptionDates.push('[No Date Found!]');
+          cleanedMeshGroup.datesAtLocation.push('[No Date Found!]');
         }
 
         if (location === 'installed_on_APA') {
-          if (mesh.reception.detail) {
-            const apa = await Components.retrieve(mesh.reception.detail);
+          if (mesh.locationDetail) {
+            const apa = await Components.retrieve(mesh.locationDetail);
 
             cleanedMeshGroup.installedOnAPA.push(apa.data.componentName);
           } else {
-            cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
+            cleanedMeshGroup.installedOnAPA.push('[No APA UUID Found!]');
           }
         } else {
-          cleanedMeshGroup.installedOnAPA.push('[Not installed on APA]');
+          cleanedMeshGroup.installedOnAPA.push('[Not Installed]');
         }
       }
 
@@ -614,14 +615,14 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
           cleanedResults.push({
             'componentUuid': result.componentUuid,
             'typeRecordNumber': component.data.typeRecordNumber,
-            'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
+            'dateAtLocation': (component.dateAtLocation != null) ? component.dateAtLocation : 'unknown',
             'qaChecksPassed': (qaChecksPassed == true) ? 'Yes' : 'No',
           });
         } else {
           cleanedResults.push({
             'componentUuid': result.componentUuid,
             'typeRecordNumber': `${component.data.typeRecordNumber}${(component.data.cableHarnessSide).toUpperCase()}`,
-            'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
+            'dateAtLocation': (component.dateAtLocation != null) ? component.dateAtLocation : 'unknown',
             'qaChecksPassed': (qaChecksPassed == true) ? 'Yes' : 'No',
           });
         }
@@ -634,7 +635,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
       cleanedResults.push({
         'componentUuid': result.componentUuid,
         'typeRecordNumber': component.data.typeRecordNumber,
-        'receptionDate': (component.reception != null) ? component.reception.date : 'unknown',
+        'dateAtLocation': (component.dateAtLocation != null) ? component.dateAtLocation : 'unknown',
       });
     }
   }
@@ -649,7 +650,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
   let aggregation_stages = [];
 
   // Match against the type form ID and specified part number to get records of all components of the specified type and part number
-  // For geometry boards, also match against the reception location if the specified 'acceptanceStatus' is 'rejected'
+  // For geometry boards, also match against the location if the specified 'acceptanceStatus' is 'rejected'
   if (typeFormId === 'GeometryBoard') {
     let matchConditions = {
       'typeFormId': typeFormId,
@@ -657,9 +658,9 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
     }
 
     if (acceptanceStatus === 'rejected') {
-      matchConditions['reception.location'] = acceptanceStatus;
+      matchConditions['location'] = acceptanceStatus;
     } else if (acceptanceStatus === 'accepted') {
-      matchConditions['reception.location'] = { $not: { $eq: 'rejected' } };
+      matchConditions['location'] = { $not: { $eq: 'rejected' } };
     }
 
     aggregation_stages.push({ $match: matchConditions });
@@ -678,7 +679,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
     $group: {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
-      receptionLocation: { '$first': '$reception.location' },
+      location: { '$first': '$location' },
       typeRecordNumber: { '$first': '$data.typeRecordNumber' },
     },
   });
@@ -688,13 +689,13 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
   // Group the records according to the location, and pass through the fields required for later use
   aggregation_stages.push({
     $group: {
-      _id: { receptionLocation: '$receptionLocation' },
+      _id: { location: '$location' },
       componentUuid: { $push: '$componentUuid' },
     }
   });
 
   // Sort the record groups to be in alphabetical order of the location
-  aggregation_stages.push({ $sort: { '_id.receptionLocation': 1 } });
+  aggregation_stages.push({ $sort: { '_id.location': 1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let results = await db.collection('components')
@@ -710,11 +711,11 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
     for (const boardGroup of results) {
       let cleanedBoardGroup = {};
 
-      cleanedBoardGroup.receptionLocation = boardGroup._id.receptionLocation;
+      cleanedBoardGroup.location = boardGroup._id.location;
 
       cleanedBoardGroup.componentUuids = [];
       cleanedBoardGroup.ukids = [];
-      cleanedBoardGroup.receptionDates = [];
+      cleanedBoardGroup.datesAtLocation = [];
       cleanedBoardGroup.installedOnAPA = [];
 
       for (const boardUuid of boardGroup.componentUuid) {
@@ -736,28 +737,28 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
           cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
           cleanedBoardGroup.ukids.push(board.data.typeRecordNumber);
 
-          if (board.reception) {
-            cleanedBoardGroup.receptionDates.push(board.reception.date);
+          if (board.dateAtLocation) {
+            cleanedBoardGroup.datesAtLocation.push(board.dateAtLocation);
           } else {
-            cleanedBoardGroup.receptionDates.push('[No Date Found!]');
+            cleanedBoardGroup.datesAtLocation.push('[No Date Found!]');
           }
 
-          if (boardGroup._id.receptionLocation === 'installed_on_APA') {
-            if (board.reception.detail) {
-              const apa = await Components.retrieve(board.reception.detail);
+          if (boardGroup._id.location === 'installed_on_APA') {
+            if (board.locationDetail) {
+              const apa = await Components.retrieve(board.locationDetail);
 
               cleanedBoardGroup.installedOnAPA.push(apa.data.componentName);
             } else {
-              cleanedBoardGroup.installedOnAPA.push('[No APA UUID found!]');
+              cleanedBoardGroup.installedOnAPA.push('[No APA UUID Found!]');
             }
-          } else if (boardGroup._id.receptionLocation === 'rejected') {
-            if (board.reception.detail) {
-              cleanedBoardGroup.installedOnAPA.push(board.reception.detail.substring(1, board.reception.detail.length - 1));
+          } else if (boardGroup._id.location === 'rejected') {
+            if (board.locationDetail) {
+              cleanedBoardGroup.installedOnAPA.push(board.locationDetail.substring(1, board.locationDetail.length - 1));
             } else {
-              cleanedBoardGroup.installedOnAPA.push('[No rejection info!]');
+              cleanedBoardGroup.installedOnAPA.push('[No Rejection Info!]');
             }
           } else {
-            cleanedBoardGroup.installedOnAPA.push('[Not installed on APA]');
+            cleanedBoardGroup.installedOnAPA.push('[Not Installed]');
           }
         }
       }
@@ -768,11 +769,11 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
     for (const meshGroup of results) {
       let cleanedMeshGroup = {};
 
-      cleanedMeshGroup.receptionLocation = meshGroup._id.receptionLocation;
+      cleanedMeshGroup.location = meshGroup._id.location;
 
       cleanedMeshGroup.componentUuids = [];
       cleanedMeshGroup.dunePids = [];
-      cleanedMeshGroup.receptionDates = [];
+      cleanedMeshGroup.datesAtLocation = [];
       cleanedMeshGroup.installedOnAPA = [];
 
       for (const meshUuid of meshGroup.componentUuid) {
@@ -781,22 +782,22 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
         cleanedMeshGroup.componentUuids.push(MUUID.from(meshUuid).toString());
         cleanedMeshGroup.dunePids.push(mesh.data.dunePid);
 
-        if (mesh.reception) {
-          cleanedMeshGroup.receptionDates.push(mesh.reception.date);
+        if (mesh.dateAtLocation) {
+          cleanedMeshGroup.datesAtLocation.push(mesh.dateAtLocation);
         } else {
-          cleanedMeshGroup.receptionDates.push('[No Date Found!]');
+          cleanedMeshGroup.datesAtLocation.push('[No Date Found!]');
         }
 
-        if (meshGroup._id.receptionLocation === 'installed_on_APA') {
-          if (mesh.reception.detail) {
-            const apa = await Components.retrieve(mesh.reception.detail);
+        if (meshGroup._id.location === 'installed_on_APA') {
+          if (mesh.locationDetail) {
+            const apa = await Components.retrieve(mesh.locationDetail);
 
             cleanedMeshGroup.installedOnAPA.push(apa.data.componentName);
           } else {
-            cleanedMeshGroup.installedOnAPA.push('[No APA UUID found!]');
+            cleanedMeshGroup.installedOnAPA.push('[No APA UUID Found!]');
           }
         } else {
-          cleanedMeshGroup.installedOnAPA.push('[Not installed on APA]');
+          cleanedMeshGroup.installedOnAPA.push('[Not Installed]');
         }
       }
 
@@ -804,7 +805,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
     }
   }
 
-  // Return the list of components, possibly grouped by reception locations
+  // Return the list of components, possibly grouped by location
   return cleanedResults;
 }
 

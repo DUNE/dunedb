@@ -851,7 +851,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
     // Add whatever information is relevant to each component record (but using the same generic field name regardless of what the information actually is)
     if (componentTypeForm.formId === 'APAFrame') {
       for (let apaFrame of components) {
-        const assembledAPA = await Components.retrieve(MUUID.from(apaFrame.reception.detail));
+        const assembledAPA = await Components.retrieve(MUUID.from(apaFrame.locationDetail));
 
         if (assembledAPA) { apaFrame.additionalInformation = assembledAPA.data.componentName; }
         else { apaFrame.additionalInformation = '[Not Currently in Use on an APA!]'; }
@@ -865,19 +865,19 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
       }
     } else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
       for (let shipment of components) {
-        if (shipment.reception != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.reception.location]; }
-        else { shipment.additionalInformation = '[reception object missing!]'; }
+        if (shipment.location != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.location]; }
+        else { shipment.additionalInformation = '[location field missing!]'; }
       }
     } else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.formId)) {
       for (let board of components) {
-        if (board.reception != null) {
-          if (board.reception.location === 'rejected') {
-            board.additionalInformation = `${utils.dictionary_locations[board.reception.location]} ${board.reception.detail}`;
+        if (board.location != null) {
+          if (board.location === 'rejected') {
+            board.additionalInformation = `${utils.dictionary_locations[board.location]} ${board.locationDetail}`;
           } else {
-            board.additionalInformation = utils.dictionary_locations[board.reception.location];
+            board.additionalInformation = utils.dictionary_locations[board.location];
           }
         } else {
-          board.additionalInformation = '[reception object missing!]';
+          board.additionalInformation = '[location field missing!]';
         }
       }
     } else if (componentTypeForm.formId === 'Yoke') {
