@@ -55,7 +55,7 @@ block content
 
                 if (component.typeFormId == 'APAFrame') && (component.additionalInformation[0] != '[')
                   td 
-                    a(href = `/component/${component.reception.detail}`, target = '_blank') #{component.additionalInformation}
+                    a(href = `/component/${component.locationDetail}`, target = '_blank') #{component.additionalInformation}
                 else if (component.typeFormId == 'AssembledAPA') && (component.additionalInformation[0] != '[')
                   td
                     a(href = `/component/${component.data.frameUuid}`, target = '_blank') #{component.additionalInformation}

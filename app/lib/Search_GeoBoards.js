@@ -359,17 +359,17 @@ async function boardsByAPA(apaUUID) {
       partString: { '$first': '$data.partString' },
       componentUuid: { '$first': '$componentUuid' },
       ukid: { '$first': '$data.typeRecordNumber' },
-      receptionLocation: { '$first': '$reception.location' },
-      receptionDetail: { '$first': '$reception.detail' },
+      location: { '$first': '$location' },
+      locationDetail: { '$first': '$locationDetail' },
     },
   });
 
-  // Match against the reception location and detail to get only those boards that have been installed on the specified APA
-  // Note that for some reason, the APA UUID can be saved into the 'reception.detail' field as EITHER a string OR a MUUID-type object, so we have to account for both possibilities
+  // Match against the location and location detail to get only those boards that have been installed on the specified APA
+  // Note that for some reason, the APA UUID can be saved into the 'locationDetail' field as EITHER a string OR a MUUID-type object, so we have to account for both possibilities
   aggregation_stages.push({
     $match: {
-      'receptionLocation': 'installed_on_APA',
-      'receptionDetail': { $in: [apaUUID, MUUID.from(apaUUID)] },
+      'location': 'installed_on_APA',
+      'locationDetail': { $in: [apaUUID, MUUID.from(apaUUID)] },
     }
   });
 
@@ -405,14 +405,14 @@ async function boardsByAPA(apaUUID) {
 
     cleanedBoardGroup.componentUuids = [];
     cleanedBoardGroup.ukids = [];
-    cleanedBoardGroup.receptionDates = [];
+    cleanedBoardGroup.installationDates = [];
 
     for (const boardUuid of boardGroup.componentUuid) {
       const board = await Components.retrieve(MUUID.from(boardUuid).toString());
 
       cleanedBoardGroup.componentUuids.push(MUUID.from(boardUuid).toString());
       cleanedBoardGroup.ukids.push(board.data.typeRecordNumber);
-      cleanedBoardGroup.receptionDates.push(board.reception.date);
+      cleanedBoardGroup.installationDates.push(board.dateAtLocation);
     }
 
     if (cleanedBoardGroup.componentUuids.length > 0) cleanedResults.push(cleanedBoardGroup);

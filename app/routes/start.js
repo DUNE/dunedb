@@ -259,7 +259,7 @@ router.post(['/json/administratorUtility/:inputString', '/api/administratorUtili
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
 
-    let result = await Admin_Functions.setLocationInfo_allComponents();    // Change as appropriate for the required utility
+    let result = await Admin_Functions.removeReceptionObject_allComponents();    // Change as appropriate for the required utility
 
     return res.status(201).json(result);
   } catch (err) {
