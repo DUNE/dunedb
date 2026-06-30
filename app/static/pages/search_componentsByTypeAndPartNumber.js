@@ -88,7 +88,7 @@ function postSuccess(result) {
       for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupCount = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b> - ${boardGroup.componentUuids.length} boards</td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.location]}</b> - ${boardGroup.componentUuids.length} boards</td>
           </tr>`;
 
         $('#summary1').append(groupCount);
@@ -99,7 +99,7 @@ function postSuccess(result) {
       for (const boardGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
         const groupCount = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b> - ${boardGroup.componentUuids.length} boards</td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.location]}</b> - ${boardGroup.componentUuids.length} boards</td>
           </tr>`;
 
         $('#summary2').append(groupCount);
@@ -110,7 +110,7 @@ function postSuccess(result) {
       for (const boardGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
         const groupCount = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b> - ${boardGroup.componentUuids.length} boards</td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.location]}</b> - ${boardGroup.componentUuids.length} boards</td>
           </tr>`;
 
         $('#summary3').append(groupCount);
@@ -135,12 +135,12 @@ function postSuccess(result) {
       for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupTitle = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.location]}</b></td>
           </tr>`;
 
         $('#results1').append(groupTitle);
 
-        if (boardGroup.receptionLocation === 'rejected') {
+        if (boardGroup.location === 'rejected') {
           $('#results1').append(tableStart_rejected);
         } else {
           $('#results1').append(tableStart_accepted);
@@ -150,7 +150,7 @@ function postSuccess(result) {
           const boardText = `
             <tr>
               <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
-              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.datesAtLocation[i]}</td>
               <td>${boardGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -163,12 +163,12 @@ function postSuccess(result) {
       for (const boardGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
         const groupTitle = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.location]}</b></td>
           </tr>`;
 
         $('#results2').append(groupTitle);
 
-        if (boardGroup.receptionLocation === 'rejected') {
+        if (boardGroup.location === 'rejected') {
           $('#results2').append(tableStart_rejected);
         } else {
           $('#results2').append(tableStart_accepted);
@@ -178,7 +178,7 @@ function postSuccess(result) {
           const boardText = `
             <tr>
               <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
-              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.datesAtLocation[i]}</td>
               <td>${boardGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -191,12 +191,12 @@ function postSuccess(result) {
       for (const boardGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
         const groupTitle = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[boardGroup.location]}</b></td>
           </tr>`;
 
         $('#results3').append(groupTitle);
 
-        if (boardGroup.receptionLocation === 'rejected') {
+        if (boardGroup.location === 'rejected') {
           $('#results3').append(tableStart_rejected);
         } else {
           $('#results3').append(tableStart_accepted);
@@ -206,7 +206,7 @@ function postSuccess(result) {
           const boardText = `
             <tr>
               <td><a href = '/component/${boardGroup.componentUuids[i]}' target = '_blank'</a>${boardGroup.ukids[i]}</td>
-              <td>${boardGroup.receptionDates[i]}</td>
+              <td>${boardGroup.datesAtLocation[i]}</td>
               <td>${boardGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -219,7 +219,7 @@ function postSuccess(result) {
       for (const meshGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupCount = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.location]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
           </tr>`;
 
         $('#summary1').append(groupCount);
@@ -230,7 +230,7 @@ function postSuccess(result) {
       for (const meshGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
         const groupCount = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.location]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
           </tr>`;
 
         $('#summary2').append(groupCount);
@@ -241,7 +241,7 @@ function postSuccess(result) {
       for (const meshGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
         const groupCount = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.location]}</b> - ${meshGroup.componentUuids.length} mesh panels</td>
           </tr>`;
 
         $('#summary3').append(groupCount);
@@ -259,7 +259,7 @@ function postSuccess(result) {
       for (const meshGroup of result.slice(0, (result.length / 3) + 1)) {
         const groupTitle = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.location]}</b></td>
           </tr>`;
 
         $('#results1').append(groupTitle);
@@ -269,7 +269,7 @@ function postSuccess(result) {
           const meshText = `
             <tr>
               <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
-              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.datesAtLocation[i]}</td>
               <td>${meshGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -282,7 +282,7 @@ function postSuccess(result) {
       for (const meshGroup of result.slice((result.length / 3) + 1, (2 * (result.length / 3)) + 1)) {
         const groupTitle = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.location]}</b></td>
           </tr>`;
 
         $('#results2').append(groupTitle);
@@ -292,7 +292,7 @@ function postSuccess(result) {
           const meshText = `
             <tr>
               <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
-              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.datesAtLocation[i]}</td>
               <td>${meshGroup.installedOnAPA[i]}</td>
             </tr>`;
 
@@ -305,7 +305,7 @@ function postSuccess(result) {
       for (const meshGroup of result.slice((2 * (result.length / 3)) + 1, result.length)) {
         const groupTitle = `
           <tr>
-            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.receptionLocation]}</b></td>
+            <td colspan = "3"><b>Location: ${dictionary_locations[meshGroup.location]}</b></td>
           </tr>`;
 
         $('#results3').append(groupTitle);
@@ -315,7 +315,7 @@ function postSuccess(result) {
           const meshText = `
             <tr>
               <td><a href = '/component/${meshGroup.componentUuids[i]}' target = '_blank'</a>${meshGroup.dunePids[i].split('-')[1]}</td>
-              <td>${meshGroup.receptionDates[i]}</td>
+              <td>${meshGroup.datesAtLocation[i]}</td>
               <td>${meshGroup.installedOnAPA[i]}</td>
             </tr>`;
 

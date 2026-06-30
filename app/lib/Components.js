@@ -199,46 +199,39 @@ async function save(input, req) {
       newRecord.data.dunePid = `D00301000001-${typeRecordNumber}-US200-010000`;
     }
 
-    // Set up a new 'Reception' object to hold the component's current location and the date at which it was received at this location ... and we can immediately set the date to be the current one
+    // Set the component's current location and the date on which it arrived (we can immediately set the latter to be the current date)
     // This location information will eventually be changed later for certain component types, but it must exist first in order to do that
-    // The 'detail' field can be used to store a string that might contain other addtional information about the component's location
-    newRecord.reception = {};
-    newRecord.reception.date = (new Date()).toISOString().slice(0, 10);
-    newRecord.reception.detail = '';
-
+    // The 'location detail' field can be used to store a string that might contain other addtional information about the component's location
     // Almost all component types will always start at specific fixed locations ...
     // ... the only exceptions are the 'batch' types (these still need the location field to exist, but it can be left as an empty string)
     if ((newRecord.typeFormId === 'APAFrame') || (newRecord.typeFormId === 'WireBobbin')) {
-      newRecord.reception.location = 'daresbury';
+      newRecord.location = 'daresbury';
     } else if (newRecord.typeFormId === 'APAShippingFrame') {
-      newRecord.reception.location = newRecord.data.asfLocation;
+      newRecord.location = newRecord.data.asfLocation;
     } else if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment') || (newRecord.typeFormId === 'YokeShipment')) {
-      newRecord.reception.location = 'in_transit';
+      newRecord.location = 'in_transit';
     } else if (newRecord.typeFormId === 'AssembledAPA') {
-      newRecord.reception.location = newRecord.data.apaAssemblyLocation;
+      newRecord.location = newRecord.data.apaAssemblyLocation;
     } else if (newRecord.typeFormId === 'AssembledAPAShipment') {
-      newRecord.reception.location = newRecord.data.originOfShipment;
+      newRecord.location = newRecord.data.originOfShipment;
     } else if ((newRecord.typeFormId === 'CEAdapterBoard') || (newRecord.typeFormId === 'CEAdapterBoardShipment') || (newRecord.typeFormId === 'CRBoard') || (newRecord.typeFormId === 'CRBoardShipment') || (newRecord.typeFormId === 'CableHarness') || (newRecord.typeFormId === 'CableHarnessShipment') || (newRecord.typeFormId === 'GBiasBoard') || (newRecord.typeFormId === 'GBiasBoardShipment') || (newRecord.typeFormId === 'SHVBoard') || (newRecord.typeFormId === 'SHVBoardShipment') || (newRecord.typeFormId === 'Yoke')) {
-      newRecord.reception.location = 'wisconsin';
+      newRecord.location = 'wisconsin';
     } else if ((newRecord.typeFormId === 'DWA') || (newRecord.typeFormId === 'DWAPDB')) {
-      newRecord.reception.location = newRecord.data.productionLocation;
+      newRecord.location = newRecord.data.productionLocation;
     } else if (newRecord.typeFormId === 'GeometryBoard') {
-      newRecord.reception.location = 'lancaster';
+      newRecord.location = 'lancaster';
     } else if (newRecord.typeFormId === 'GroundingMeshPanel') {
-      newRecord.reception.location = 'ukWarehouse';
+      newRecord.location = 'ukWarehouse';
     } else {
-      newRecord.reception.location = '';
+      newRecord.location = '';
     }
 
-    newRecord.location = newRecord.reception.location;
-    newRecord.dateAtLocation = newRecord.reception.date;
-    newRecord.locationDetail = newRecord.reception.detail;
+    newRecord.dateAtLocation = (new Date()).toISOString().slice(0, 10);
+    newRecord.locationDetail = '';
   } else {
-    newRecord.reception = input.reception;
-
-    newRecord.location = input.reception.location;
-    newRecord.dateAtLocation = input.reception.date;
-    newRecord.locationDetail = input.reception.detail;
+    newRecord.location = input.location;
+    newRecord.dateAtLocation = input.dateAtLocation;
+    newRecord.locationDetail = input.locationDetail;
   }
 
   // If the component name is based on fields that are more likely to be changed by the user, it should be assigned and re-assigned any time the record is edited
@@ -306,20 +299,20 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Components::save() - failed to insert a new component record into the database!`);
 
-  // Once the component record has been successfully saved, deal with the reception information for any related components:
-  // - for an 'Assembled APA', update the reception information of the underlying 'APA Frame' to indicate that it is now being used
-  // - for an 'Assembled APA Shipment', update the reception information of the underlying 'Assembled APA' and 'ASF' components to be the same as the shipment
+  // Once the component record has been successfully saved, deal with the locations of any related components:
+  // - for an 'Assembled APA', update the location of the underlying 'APA Frame' to indicate that it is now being used
+  // - for an 'Assembled APA Shipment', update the locations of the underlying 'Assembled APA' and 'ASF' components to be the same as the shipment
   //    (they should already be at the same location as the shipment, but this is a double-check on that)
-  // - for other types of shipment, update the reception information of the various sub-components to indicate that they are in transit
-  // - for a 'Populated Board Shipment', update the reception information of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
-  // - for a 'Return Geometry Board Batch', update the reception information of the individual geometry board sub-components to indicate they are at Lancaster (where the batch is put together)
+  // - for other types of shipment, update the locations of the various sub-components to indicate that they are in transit
+  // - for a 'Populated Board Shipment', update the locations of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
+  // - for a 'Return Geometry Board Batch', update the locations of the individual geometry board sub-components to indicate they are at Lancaster (where the batch is put together)
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment') || (newRecord.typeFormId === 'YokeShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.typeFormId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
   } else if (newRecord.typeFormId === 'AssembledAPAShipment') {
-    const result = await updateLocations_inShipment(newRecord.componentUuid, newRecord.reception.location, (new Date()).toISOString().slice(0, 10));
+    const result = await updateLocations_inShipment(newRecord.componentUuid, newRecord.location, (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.typeFormId === 'ReturnedGeometryBoardBatch') {
     for (const board of newRecord.data.boardUuids) {
       const result = await updateLocation(board.component_uuid, 'lancaster', (new Date()).toISOString().slice(0, 10), '');
@@ -331,19 +324,19 @@ async function save(input, req) {
 }
 
 
-/// Update the most recently logged reception information of a single component
+/// Update the location of a single component
 async function updateLocation(componentUuid, location, date, detail) {
-  // The reception information should NOT be changed in the following situations:
+  // The location should NOT be changed in the following situations:
   //  - if the location is currently set to 'installed_on_APA' ... this can happen in the following circumstances:
   //      * if a geometry board shipment is being retroactively received
   //      * when a board installation action has previously been only partially completed, and is now being edited with additional board entries
 
-  // First retrieve the component's record, then check for the current location, and only proceed to change the reception information if we are NOT in one of the situations described above
+  // First retrieve the component's record, then check for the current location, and only proceed to change it if we are NOT in one of the situations described above
   const component = await retrieve(componentUuid);
   let currentLocation = 'null object';
 
-  if (component.reception != null) {
-    currentLocation = component.reception.location;
+  if (component.location != null) {
+    currentLocation = component.location;
   }
 
   if (currentLocation !== 'installed_on_APA') {
@@ -361,9 +354,6 @@ async function updateLocation(componentUuid, location, date, detail) {
         [
           {
             $set: {
-              'reception.location': location,
-              'reception.date': date,
-              'reception.detail': detail,
               'location': location,
               'dateAtLocation': date,
               'locationDetail': detail,
@@ -401,9 +391,6 @@ async function updateLocation_geoBoardRemoval(componentUuid, location, date, det
       [
         {
           $set: {
-            'reception.location': location,
-            'reception.date': date,
-            'reception.detail': detail,
             'location': location,
             'dateAtLocation': date,
             'locationDetail': detail,
@@ -419,7 +406,7 @@ async function updateLocation_geoBoardRemoval(componentUuid, location, date, det
 }
 
 
-/// Update the most recently logged reception locations and dates of all sub-components in a shipment-type component
+/// Update the locations of all sub-components in a shipment-type component
 async function updateLocations_inShipment(componentUuid, location, date) {
   // Retrieve the most recent version of the shipment-like component record corresponding to the specified component UUID
   const shipment = await retrieve(componentUuid);
@@ -586,7 +573,8 @@ async function list(match_condition, options) {
       typeFormName: true,
       data: true,
       validity: true,
-      reception: true,
+      location: true,
+      locationDetail: true,
     }
   })
 
@@ -604,7 +592,8 @@ async function list(match_condition, options) {
       data: { '$first': '$data' },
       componentName: { '$first': '$data.componentName' },
       lastEditDate: { '$first': '$validity.startDate' },
-      reception: { '$first': '$reception' },
+      location: { '$first': '$location' },
+      locationDetail: { '$first': '$locationDetail' },
     },
   });
 
@@ -706,7 +695,7 @@ async function boardCounts_byPartNumberAndLocation() {
     $project: {
       componentUuid: true,
       data: true,
-      reception: true,
+      location: true,
       validity: true,
     }
   })
@@ -721,7 +710,7 @@ async function boardCounts_byPartNumberAndLocation() {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       partNumber: { '$first': '$data.partNumber' },
-      location: { '$first': '$reception.location' },
+      location: { '$first': '$location' },
     },
   });
 

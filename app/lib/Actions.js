@@ -183,15 +183,15 @@ async function save(input, req) {
 
   if (!result.acknowledged) throw new Error(`Actions::save() - failed to insert a new action record into the database!`);
 
-  // Once the action record has been successfully saved, deal with the reception information for any related components
-  // - for shipment transport actions, update the reception information of each individual sub-component (as well as the shipment itself) to be 'In Transit'
-  // - for shipment or batch reception actions, update the reception information of each individual sub-component (as well as the shipment itself) to match where and when it was received
-  // - for board and mesh installation actions, update the reception information of each component referenced in the action to be 'Installed on APA' 
+  // Once the action record has been successfully saved, deal with the locations of any related components
+  // - for shipment transport actions, update the location of each individual sub-component (as well as the shipment itself) to be 'In Transit'
+  // - for shipment or batch reception actions, update the location of each individual sub-component (as well as the shipment itself) to match where and when it was received
+  // - for board and mesh installation actions, update the location of each component referenced in the action to be 'Installed on APA' 
   // - for 'Factory Board Rejection' actions ...
-  //   ... where the rejection disposition is 'Rejected', update the board's reception information to indicate that it has been 'Rejected'
-  //   ... where the rejection disposition is something other than 'Rejected', update the board's reception information to match where and when the action was performed
-  // - for 'Tooth Strip Attachment' actions, update the board's reception information to match where and when the action was performed
-  // - for some (but not all) actions performed on grounding mesh panels, update the mesh's reception information to match where and when the action was performed
+  //   ... where the rejection disposition is 'Rejected', update the board's location to indicate as such
+  //   ... where the rejection disposition is something other than 'Rejected', update the board's location to match where and when the action was performed
+  // - for 'Tooth Strip Attachment' actions, update the board's location to match where and when the action was performed
+  // - for some (but not all) actions performed on grounding mesh panels, update the mesh's location to match where and when the action was performed
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (transport_typeFormIDs.includes(newRecord.typeFormId)) {
     const result = await Components.updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
@@ -490,11 +490,11 @@ async function list(match_condition) {
 async function boardRejectionCounts_byPartNumberAndLocation() {
   let aggregation_stages = [];
 
-  // Match against the component type form ID and reception location to get records of all 'Geometry Board' components with a current reception location of 'rejected'
+  // Match against the component type form ID and location to get records of all 'Geometry Board' components with a current location of 'rejected'
   aggregation_stages.push({
     $match: {
       'typeFormId': 'GeometryBoard',
-      'reception.location': 'rejected',
+      'location': 'rejected',
     }
   });
 
@@ -508,7 +508,7 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
       _id: { componentUuid: '$componentUuid' },
       componentUuid: { '$first': '$componentUuid' },
       partNumber: { '$first': '$data.partNumber' },
-      rejectionDetail: { '$first': '$reception.detail' },
+      rejectionDetail: { '$first': '$locationDetail' },
     },
   });
 

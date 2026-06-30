@@ -41,24 +41,24 @@ block content
                   a.copybutton.btn-sm#copy_uuid(onclick = 'CopyUUID(component.componentUuid)') Copy
 
 
-            if component.reception && component.reception.location !== ''
+            if component.location && component.location !== ''
               dt Current Location:
 
-              if component.reception.detail && component.reception.detail != ''
-                if component.reception.location === 'rejected'
-                  dd #{dictionary_locations[component.reception.location]} #{component.reception.detail}
+              if component.locationDetail && component.locationDetail != ''
+                if component.location === 'rejected'
+                  dd #{dictionary_locations[component.location]} #{component.locationDetail}
                     |  (as of 
-                    +dateFormat(component.reception.date)
+                    +dateFormat(component.dateAtLocation)
                     | )
                 else 
                   dd
-                    a(href = `/component/${component.reception.detail}`, target = '_blank') #{dictionary_locations[component.reception.location]}
+                    a(href = `/component/${component.locationDetail}`, target = '_blank') #{dictionary_locations[component.location]}
                     |  (as of 
-                    +dateFormat(component.reception.date)
+                    +dateFormat(component.dateAtLocation)
                     | )
               else 
-                dd #{dictionary_locations[component.reception.location]} (as of 
-                  +dateFormat(component.reception.date)
+                dd #{dictionary_locations[component.location]} (as of 
+                  +dateFormat(component.dateAtLocation)
                   | )
 
             if component.workflowId
@@ -473,16 +473,16 @@ block content
                   td #{dictionary_locations[entry.data.originOfShipment]}
 
                   if entry.typeFormName === 'Geometry Board Shipment'
-                    if entry.reception
-                      if entry.reception.location === 'in_transit'
+                    if entry.location
+                      if entry.location === 'in_transit'
                         td #{dictionary_locations[entry.data.destinationOfShipment]}
                         td [not yet received]
                       else
-                        td #{dictionary_locations[entry.reception.location]}
-                        td #{entry.reception.date}
+                        td #{dictionary_locations[entry.location]}
+                        td #{entry.dateAtLocation}
                     else
-                      td [reception object missing!]
-                      td [reception object missing!]
+                      td [location field missing!]
+                      td [location field missing!]
                   else 
                     td -
                     td -
@@ -513,7 +513,7 @@ block content
                         td
                           a(href = `/component/${uuid}`) #{entry.ukids[index]}
 
-                        td #{entry.receptionDates[index]}
+                        td #{entry.installationDates[index]}
 
             .col-sm-1 
 
@@ -533,7 +533,7 @@ block content
                         td
                           a(href = `/component/${uuid}`) #{entry.ukids[index]}
 
-                        td #{entry.receptionDates[index]}
+                        td #{entry.installationDates[index]}
 
             .col-sm-1
 
