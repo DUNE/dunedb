@@ -211,9 +211,20 @@ module.exports = {
     stephenSumner: 'Stephen Sumner',
   },
 
-  // Post-Production D-band personnel (post-winding APA Assembly workflow actions and all APA Post Production workflow actions)
+  // Post-Production D-band personnel (post-winding APA Assembly workflow actions except for 'Conduit Insertion', and all APA Post Production workflow actions)
   dictionary_dBandPostProduction: {
     edBlucher: 'Ed Blucher',
+    albertoMarchionni: 'Alberto Marchionni',
+    radosavPantelic: 'Radosav Pantelic',
+    danielSalisbury: 'Daniel Salisbury',
+    jasonThornhill: 'Jason Thornhill',
+  },
+
+  // Personnel who are authorised to signoff on Conduit Insertion checks ('Conduit Insertion' APA Assembly workflow actions)
+  // These are the same personnel as in 'dictionary_dBandPostProduction' above, plus an additional name (Dave Brown) specifically for this action type
+  dictionary_dBandConduitInsertion: {
+    edBlucher: 'Ed Blucher',
+    daveBrown: 'Dave Brown',
     albertoMarchionni: 'Alberto Marchionni',
     radosavPantelic: 'Radosav Pantelic',
     danielSalisbury: 'Daniel Salisbury',
