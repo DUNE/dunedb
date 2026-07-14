@@ -170,6 +170,15 @@ router.get(['/json/dBandPostProduction.json', '/api/dBandPostProduction.json'], 
   }
 });
 
+/// List personnel who are authorised to signoff on Conduit Insertion checks
+router.get(['/json/dBandConduitInsertion.json', '/api/dBandConduitInsertion.json'], async function (req, res, next) {
+  try {
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_dBandConduitInsertion));
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
 
 /// List FD-HD technical coordinators
 router.get(['/json/fdhdTechCoordSignoff.json', '/api/fdhdTechCoordSignoff.json'], async function (req, res, next) {

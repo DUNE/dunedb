@@ -93,7 +93,7 @@ async function save(input, req) {
     if (newRecord.typeFormId === 'APAFrame') {
       let pidSuffix = '';
 
-      if (newRecord.data.frameProductionLocation === 'dsm') {
+      if ((newRecord.data.frameProductionLocation === 'dsm') || (newRecord.data.frameProductionLocation === 'evt')) {
         newRecord.data.componentName = `APA Frame ${typeRecordNumber}-UK`;
         pidSuffix = 'UK106-010000';
       } else if (newRecord.data.frameProductionLocation === 'wisconsin') {
