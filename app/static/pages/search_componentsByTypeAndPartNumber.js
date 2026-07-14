@@ -129,7 +129,7 @@ function postSuccess(result) {
         <tr>
           <th style = 'width: 23%'>UKID</th>
           <th style = 'width: 42%'>Date at Location</th>
-          <th style = 'width: 35%'>Rejection info</th>
+          <th style = 'width: 35%'>Rejection Info</th>
         </tr>`;
 
       for (const boardGroup of result.slice(0, (result.length / 3) + 1)) {
