@@ -237,9 +237,9 @@ module.exports = {
     ericJames: 'Eric James',
   },
 
-  // Yoke load test technicians at UW [not currently used, but keep for the future]
-  dictionary_uwTechnicians: {
-
+  // Personnel who are authorised to signoff on yokes ('Yoke' components)
+  dictionary_yokeSignoff: {
+    joeMunski: 'Joe Munski',
   },
 
   // Personnel who are authorised to signoff on hardware installation at UW [not currently used, but keep for the future]
