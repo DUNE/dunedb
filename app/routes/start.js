@@ -191,10 +191,10 @@ router.get(['/json/fdhdTechCoordSignoff.json', '/api/fdhdTechCoordSignoff.json']
 });
 
 
-/// List yoke load test technicians at UW
-router.get(['/json/uwTechnicians.json', '/api/uwTechnicians.json'], async function (req, res, next) {
+/// List personnel who are authorised to signoff on yokes
+router.get(['/json/yokeSignoff.json', '/api/yokeSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwTechnicians));
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_yokeSignoff));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
