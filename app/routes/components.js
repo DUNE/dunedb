@@ -282,16 +282,24 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    // If the specified component is an 'Assembled APA' type, retrieve some more detailed information about any geometry boards that have been installed on it
+    // If the specified component is an 'APA Shipping Frame' type, retrieve some more detailed information about any assembled APA shipments that contain it
+    // If the specified component is an 'Assembled APA' type, also retrieve the same information, plus that about any geometry boards that have been installed on it
     let installedGeometryBoards = [];
     let installedGeometryBoardsCount = 0;
+    let apaPostProductionWorkflowId = null;
 
-    if (component.typeFormId === 'AssembledAPA') {
+    if (component.typeFormId === 'APAShippingFrame') {
+      const assembledAPAShipments = await Search_OtherComponents.apaShipmentsByAPAorASFUUID(req.params.uuid);
+      apaPostProductionWorkflowId = (assembledAPAShipments.length > 0) ? assembledAPAShipments[0].workflowId : null;
+    } else if (component.typeFormId === 'AssembledAPA') {
       installedGeometryBoards = await Search_GeoBoards.boardsByAPA(req.params.uuid);
 
       for (const boardGroup of installedGeometryBoards) {
         installedGeometryBoardsCount += boardGroup.componentUuids.length;
       }
+
+      const assembledAPAShipments = await Search_OtherComponents.apaShipmentsByAPAorASFUUID(req.params.uuid);
+      apaPostProductionWorkflowId = (assembledAPAShipments.length > 0) ? assembledAPAShipments[0].workflowId : null;
     }
 
     // Render the interface page
@@ -302,6 +310,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       collectionDetails,
       installedGeometryBoards,
       installedGeometryBoardsCount,
+      apaPostProductionWorkflowId,
       actions: nonWorkflowActions,
       mostRecentAction,
       actionTypeForms,
@@ -855,6 +864,17 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
 
         if (assembledAPA) { apaFrame.additionalInformation = assembledAPA.data.componentName; }
         else { apaFrame.additionalInformation = '[Not Currently in Use on an APA!]'; }
+      }
+    } else if (componentTypeForm.formId === 'APAShippingFrame') {
+      for (let asf of components) {
+        const assembledAPAShipments = await Search_OtherComponents.apaShipmentsByAPAorASFUUID(asf.componentUuid);
+
+        if (assembledAPAShipments.length > 0) {
+          asf.additionalInformation = assembledAPAShipments[0].data.componentName;
+          asf.evenMoreInformation = assembledAPAShipments[0].componentUuid;
+        } else {
+          asf.additionalInformation = '[Not Currently in Use on a Shipment!]';
+        }
       }
     } else if (componentTypeForm.formId === 'AssembledAPA') {
       for (let assembledAPA of components) {

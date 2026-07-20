@@ -9,6 +9,7 @@ block extrascripts
     const collectionDetails = !{JSON.stringify(collectionDetails, null, 4)};
     const installedGeometryBoards = !{JSON.stringify(installedGeometryBoards, null, 4)};
     const installedGeometryBoardsCount = !{JSON.stringify(installedGeometryBoardsCount, null, 4)};
+    const apaPostProductionWorkflowId = !{JSON.stringify(apaPostProductionWorkflowId, null, 4)};
     const actions = !{JSON.stringify(actions, null, 4)};
     const mostRecentAction = !{JSON.stringify(mostRecentAction, null, 4)};
     const actionTypeForms = !{JSON.stringify(actionTypeForms, null, 4)};
@@ -61,10 +62,36 @@ block content
                   +dateFormat(component.dateAtLocation)
                   | )
 
-            if component.workflowId
+            if component.typeFormId === 'APAFrame'
               dt Part of Workflow:
               dd
                 a(href = `/workflow/${component.workflowId}`, target = '_blank') #{component.workflowId}
+                |  (Frame Assembly)
+            else if component.typeFormId === 'APAShippingFrame'
+              if apaPostProductionWorkflowId
+                dt Part of Workflow:
+                dd
+                  a(href = `/workflow/${apaPostProductionWorkflowId}`, target = '_blank') #{apaPostProductionWorkflowId}
+                  |  (APA Post Production)
+            else if component.typeFormId === 'AssembledAPA'
+              dt Part of Workflow:
+
+              if !apaPostProductionWorkflowId
+                dd
+                  a(href = `/workflow/${component.workflowId}`, target = '_blank') #{component.workflowId}
+                  |  (APA Assembly)
+              else 
+                dd
+                  a(href = `/workflow/${component.workflowId}`, target = '_blank') #{component.workflowId}
+                  |  (APA Assembly)
+                  br
+                  a(href = `/workflow/${apaPostProductionWorkflowId}`, target = '_blank') #{apaPostProductionWorkflowId}
+                  |  (APA Post Production)
+            else if component.typeFormId === 'AssembledAPAShipment'
+              dt Part of Workflow:
+              dd
+                a(href = `/workflow/${component.workflowId}`, target = '_blank') #{component.workflowId}
+                |  (APA Post Production)
 
             if component.data.fromBatch
               dt Part of Batch:
