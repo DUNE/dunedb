@@ -306,6 +306,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       actionTypeForms,
       dictionary_queries: req.query,
       dictionary_locations: utils.dictionary_locations,
+      dictionary_populatedBoardShipmentSignoff: utils.dictionary_populatedBoardShipmentSignoff,
       workflowComponent,
     });
   } catch (err) {
