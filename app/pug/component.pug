@@ -163,6 +163,11 @@ block content
               a.btn.btn-primary(href = `/component/${component.componentUuid}/execSummary`)
                 img.small-icon(src = '/images/checklist_icon.svg')
                 | &nbsp; View and print this APA's Executive Summary
+          else if component.typeFormId == 'InstallationHardwareShipment'
+            .vert-space-x1 
+              a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
+                img.small-icon(src = '/images/checklist_icon.svg')
+                | &nbsp; Print all Yoke QR codes
 
           .vert-space-x2
             hr
@@ -437,37 +442,6 @@ block content
 
                   td #{info[1]}
                   td #{`${base_url}/c/${info[2]}`}
-    else if component.typeFormId === 'YokeShipment'
-      .vert-space-x1.border-success.border.rounded.p-2
-        dt Origin Location
-        dd #{dictionary_locations[component.data.originOfShipment]}
-
-        dt Destination Location
-        dd #{dictionary_locations[component.data.destinationOfShipment]}
-
-        dt Yokes in Shipment
-        dd
-          table.table 
-            thead 
-              tr 
-                th.col-md-2 UUID 
-                th.col-md-1 Number
-                th.col-md-1 Load Test Status
-                th.col-md-3 QR Code Link 
-
-            tbody 
-              each info in collectionDetails
-                tr
-                  td
-                    a(href = `/component/${info[0]}`, target = '_blank') #{info[0]}
-
-                  td #{info[1]}
-                  td #{info[2]}
-                  td #{`${base_url}/c/${info[3]}`}
-
-        a.btn.btn-secondary(href = `/component/${component.componentUuid}/batchQRCodes`, target = '_blank')
-          img.small-icon(src = '/images/checklist_icon.svg')
-          | &nbsp; Print all sub-component QR codes
     else
       .vert-space-x1.border-success.border.rounded.p-2
         #typeform

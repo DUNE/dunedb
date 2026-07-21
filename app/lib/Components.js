@@ -208,7 +208,7 @@ async function save(input, req) {
       newRecord.location = 'daresbury';
     } else if (newRecord.typeFormId === 'APAShippingFrame') {
       newRecord.location = newRecord.data.asfLocation;
-    } else if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment') || (newRecord.typeFormId === 'YokeShipment')) {
+    } else if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'InstallationHardwareShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment')) {
       newRecord.location = 'in_transit';
     } else if (newRecord.typeFormId === 'AssembledAPA') {
       newRecord.location = newRecord.data.apaAssemblyLocation;
@@ -278,14 +278,14 @@ async function save(input, req) {
   } else if (newRecord.typeFormId === 'GroundingMeshPanelShipment') {
     newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.apaUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
+  } else if (newRecord.typeFormId === 'InstallationHardwareShipment') {
+    newRecord.data.componentName = `${newRecord.typeFormName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
+    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'PopulatedBoardShipment') {
     newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'SHVBoardShipment') {
     newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
-    newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
-  } else if (newRecord.typeFormId === 'YokeShipment') {
-    newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.yokeUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   }
 
@@ -307,7 +307,7 @@ async function save(input, req) {
   // - for a 'Populated Board Shipment', update the locations of the various sub-components to indicate that they are at Wisconsin (where the kit is put together)
   // - for a 'Return Geometry Board Batch', update the locations of the individual geometry board sub-components to indicate they are at Lancaster (where the batch is put together)
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
-  if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment') || (newRecord.typeFormId === 'YokeShipment')) {
+  if ((newRecord.typeFormId === 'APAFrameShipment') || (newRecord.typeFormId === 'DWAComponentShipment') || (newRecord.typeFormId === 'GeometryBoardShipment') || (newRecord.typeFormId === 'GroundingMeshPanelShipment') || (newRecord.typeFormId === 'InstallationHardwareShipment') || (newRecord.typeFormId === 'PopulatedBoardShipment')) {
     const result = await updateLocations_inShipment(newRecord.componentUuid, 'in_transit', (new Date()).toISOString().slice(0, 10));
   } else if (newRecord.typeFormId === 'AssembledAPA') {
     const result = await updateLocation(newRecord.data.frameUuid, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
@@ -440,6 +440,11 @@ async function updateLocations_inShipment(componentUuid, location, date) {
     for (const mesh of shipment.data.apaUuiDs) {
       const result = await updateLocation(mesh.component_uuid, location, date, '');
     }
+  } else if (shipment.typeFormId === 'InstallationHardwareShipment') {
+    // Extract the UUID and update the location information of each yoke in a shipment of installation hardware components
+    for (const yoke of shipment.data.yokeUuiDs) {
+      const result = await updateLocation(yoke.component_uuid, location, date, '');
+    }
   } else if (shipment.typeFormId === 'PopulatedBoardShipment') {
     // Extract the UUID and update the location information of each shipment in a multi-type populated board shipment
     for (const crBoardShipment of shipment.data.crBoardKitUuiDs) {
@@ -464,11 +469,6 @@ async function updateLocations_inShipment(componentUuid, location, date) {
       if (cableHarnessShipment.component_uuid !== '') {
         const result = await updateLocations_inShipment(cableHarnessShipment.component_uuid, location, date);
       }
-    }
-  } else if (shipment.typeFormId === 'YokeShipment') {
-    // Extract the UUID and update the location information of each yoke in a shipment of yokes
-    for (const yoke of shipment.data.yokeUuiDs) {
-      const result = await updateLocation(yoke.component_uuid, location, date, '');
     }
   }
 
