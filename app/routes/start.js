@@ -202,10 +202,10 @@ router.get(['/json/yokeSignoff.json', '/api/yokeSignoff.json'], async function (
 });
 
 
-/// List personnel who are authorised to signoff on hardware installation at UW
-router.get(['/json/uwInstallationSignoff.json', '/api/uwInstallationSignoff.json'], async function (req, res, next) {
+/// List personnel who are authorised to signoff on populated board shipments
+router.get(['/json/populatedBoardShipmentSignoff.json', '/api/populatedBoardShipmentSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_uwInstallationSignoff));
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_populatedBoardShipmentSignoff));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });

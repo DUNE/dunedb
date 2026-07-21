@@ -21,10 +21,13 @@ block allbody
   .vert-space-x2
     .container.fluid
       - const qrCodeURL = `${base_url}/c/${component.shortUuid.toString()}`;
-      - const qrCodeLabelLine1 = component.data.componentName;
+      - let qrCodeLabelLine1 = component.data.componentName;
       - const qrCodeLabelLine2 = component.componentUuid;
 
-      if (component.typeFormId === 'APAFrameShipment') || (component.typeFormId === 'AssembledAPAShipment') || (component.typeFormId === 'CEAdapterBoardShipment') || (component.typeFormId === 'CRBoardShipment') || (component.typeFormId === 'CableHarnessShipment') || (component.typeFormId === 'DWAComponentShipment') || (component.typeFormId === 'GBiasBoardShipment') || (component.typeFormId === 'GeometryBoardShipment') || (component.typeFormId === 'GroundingMeshPanelShipment') || (component.typeFormId === 'PopulatedBoardShipment') || (component.typeFormId === 'SHVBoardShipment') || (component.typeFormId === 'YokeShipment')
+      if (component.typeFormId === 'APAFrameShipment') || (component.typeFormId === 'AssembledAPAShipment') || (component.typeFormId === 'CEAdapterBoardShipment') || (component.typeFormId === 'CRBoardShipment') || (component.typeFormId === 'CableHarnessShipment') || (component.typeFormId === 'DWAComponentShipment') || (component.typeFormId === 'GBiasBoardShipment') || (component.typeFormId === 'GeometryBoardShipment') || (component.typeFormId === 'GroundingMeshPanelShipment') || (component.typeFormId === 'InstallationHardwareShipment') || (component.typeFormId === 'PopulatedBoardShipment') || (component.typeFormId === 'SHVBoardShipment')
+        if (component.typeFormId === 'InstallationHardwareShipment')
+          - qrCodeLabelLine1 = `InstallHardwShip. ${component.data.componentName.substring(31)}`;
+
         .row.qr-row
           .col-sm-6.qr-col
             +qr-panel-topLabel(qrCodeURL, qrCodeLabelLine1, qrCodeLabelLine2)

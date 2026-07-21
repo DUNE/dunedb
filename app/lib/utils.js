@@ -242,9 +242,9 @@ module.exports = {
     joeMunski: 'Joe Munski',
   },
 
-  // Personnel who are authorised to signoff on hardware installation at UW [not currently used, but keep for the future]
-  dictionary_uwInstallationSignoff: {
-    joeMunski: 'Joe Munski',
+  // Personnel who are authorised to signoff on populated board shipments ('CE Adapter Board' and 'Multi-Type Populated Board' shipment components)
+  dictionary_populatedBoardShipmentSignoff: {
+    pamMarrLaundrie: 'Pam Marr-Laundrie',
   },
 
   // Personnel from the CERN Compliance Office ('APA Shipment Signoff and Transport' APA Post Production workflow actions)

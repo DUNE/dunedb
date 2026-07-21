@@ -272,16 +272,6 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
     }
 
-    if (component.typeFormId === 'YokeShipment') {
-      for (const info of component.data.yokeUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, dict_yokeLoadTestResults[componentRecord.data.loadTestStatus], componentRecord.shortUuid]);
-        }
-      }
-    }
-
     // If the specified component is an 'APA Shipping Frame' type, retrieve some more detailed information about any assembled APA shipments that contain it
     // If the specified component is an 'Assembled APA' type, also retrieve the same information, plus that about any geometry boards that have been installed on it
     let installedGeometryBoards = [];
@@ -316,6 +306,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       actionTypeForms,
       dictionary_queries: req.query,
       dictionary_locations: utils.dictionary_locations,
+      dictionary_populatedBoardShipmentSignoff: utils.dictionary_populatedBoardShipmentSignoff,
       workflowComponent,
     });
   } catch (err) {
@@ -439,6 +430,16 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       }
     }
 
+    if (component.typeFormId === 'InstallationHardwareShipment') {
+      for (const info of component.data.yokeUuiDs) {
+        if (info.component_uuid !== '') {
+          const componentRecord = await Components.retrieve(info.component_uuid);
+
+          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
+        }
+      }
+    }
+
     if (component.typeFormId === 'PopulatedBoardShipment') {
       for (const info of component.data.crBoardKitUuiDs) {
         if (info.component_uuid !== '') {
@@ -477,16 +478,6 @@ router.get('/component/:uuid/batchQRCodes', permissions.checkPermission('compone
       for (const uuid of component.data.subComponent_fullUuids) {
         if (uuid !== '') {
           const componentRecord = await Components.retrieve(uuid);
-
-          if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
-        }
-      }
-    }
-
-    if (component.typeFormId === 'YokeShipment') {
-      for (const info of component.data.yokeUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
 
           if (componentRecord) shortUUIDs.push([componentRecord.data.componentName, componentRecord.componentUuid, componentRecord.shortUuid]);
         }
@@ -643,16 +634,6 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
           const componentRecord = await Components.retrieve(info.component_uuid);
 
           if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.componentName]);
-        }
-      }
-    }
-
-    if (component.typeFormId === 'YokeShipment') {
-      for (const info of component.data.yokeUuiDs) {
-        if (info.component_uuid !== '') {
-          const componentRecord = await Components.retrieve(info.component_uuid);
-
-          if (componentRecord) collectionDetails.push([componentRecord.componentUuid, componentRecord.data.typeRecordNumber, dict_yokeLoadTestResults[componentRecord.data.loadTestStatus]]);
         }
       }
     }
@@ -883,7 +864,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
         if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
         else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
       }
-    } else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId)) {
+    } else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'InstallationHardwareShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.formId)) {
       for (let shipment of components) {
         if (shipment.location != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.location]; }
         else { shipment.additionalInformation = '[location field missing!]'; }
