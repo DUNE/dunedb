@@ -25,13 +25,18 @@ block content
       table.table
         thead
           tr
-            th.col-md-3 Component Name
+            if componentTypeForm.formId == 'APAShippingFrame'
+              th.col-md-2 Component Name
+            else 
+              th.col-md-3 Component Name
 
             if componentTypeForm.formId == 'APAFrame'
               th.col-md-2 Installed on APA
+            else if componentTypeForm.formId == 'APAShippingFrame'
+              th.col-md-3 Assembled APA Shipment
             else if componentTypeForm.formId == 'AssembledAPA'
               th.col-md-2 APA Frame
-            else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'PopulatedBoardShipment', 'SHVBoardShipment', 'YokeShipment'].includes(componentTypeForm.formId))
+            else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'InstallationHardwareShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.formId))
               th.col-md-2 Current Location
             else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.formId))
               th.col-md-2 Current Location
@@ -56,6 +61,9 @@ block content
                 if (component.typeFormId == 'APAFrame') && (component.additionalInformation[0] != '[')
                   td 
                     a(href = `/component/${component.locationDetail}`, target = '_blank') #{component.additionalInformation}
+                else if (component.typeFormId == 'APAShippingFrame') && (component.additionalInformation[0] != '[')
+                  td 
+                    a(href = `/component/${component.evenMoreInformation}`, target = '_blank') #{component.additionalInformation}
                 else if (component.typeFormId == 'AssembledAPA') && (component.additionalInformation[0] != '[')
                   td
                     a(href = `/component/${component.data.frameUuid}`, target = '_blank') #{component.additionalInformation}

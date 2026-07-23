@@ -322,6 +322,50 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
 }
 
 
+/// Retrieve a list of assembled APA shipments that reference a single Assembled APA or ASF component, specified by its UUID
+async function apaShipmentsByAPAorASFUUID(componentUUID) {
+  let aggregation_stages = [];
+
+  // Match against the type form ID to get records of all 'Assembled APA Shipment' components
+  aggregation_stages.push({ $match: { 'typeFormId': 'AssembledAPAShipment' } });
+
+  // Select the latest version of each record, and pass through only the fields required for later use
+  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({
+    $group: {
+      _id: { componentUuid: '$componentUuid' },
+      componentUuid: { '$first': '$componentUuid' },
+      workflowId: { '$first': '$workflowId' },
+      data: { '$first': '$data' },
+    },
+  });
+
+  // Match against the specified component UUID
+  // Since the Assembled APA UUIDs are stored as an ARRAY in the shipment record, this requires first unwinding the array (to temporarily produce a single record per array entry)
+  aggregation_stages.push({ $unwind: '$data.apaUuiDs' });
+
+  aggregation_stages.push({
+    $match: {
+      $or: [
+        { 'data.apaUuiDs.component_uuid': MUUID.from(componentUUID).toString() },
+        { 'data.asfUuid': MUUID.from(componentUUID).toString() },
+      ]
+    }
+  });
+
+  // Re-sort the records by last edit date ... most recent first
+  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+
+  // Query the 'components' records collection using the aggregation stages defined above
+  let shipments = await db.collection('components')
+    .aggregate(aggregation_stages)
+    .toArray();
+
+  // Return the list of shipments
+  return shipments;
+}
+
+
 /// Retrieve a list of components that match the specified DUNE PID
 async function componentsByDUNEPID(dunePID) {
   let aggregation_stages = [];
@@ -815,6 +859,7 @@ module.exports = {
   geoBoardShipmentsByBoardUUID,
   apasByProductionLocationAndNumber,
   apasByProductionLocationAndAssemblyStep,
+  apaShipmentsByAPAorASFUUID,
   componentsByDUNEPID,
   componentsByTypeAndNumber,
   componentsByTypeAndLocation,

@@ -5,7 +5,7 @@ window.addEventListener('load', populateTypeForm);
 // Function to run when the page is loaded
 async function populateTypeForm() {
   if (component.typeFormId !== 'ReturnedGeometryBoardBatch') {
-    if (component.typeFormId === 'PopulatedBoardShipment') {
+    if ((component.typeFormId === 'CEAdapterBoardShipment') || (component.typeFormId === 'CRBoardShipment') || (component.typeFormId === 'CableHarnessShipment') || (component.typeFormId === 'GBiasBoardShipment') || (component.typeFormId === 'PopulatedBoardShipment') || (component.typeFormId === 'SHVBoardShipment')) {
       // Fill the value of the 'comments' page element (defined as a Bootstrap text area in the .pug file) from the component record
       $('#comments').val(component.data.comments);
     } else {
