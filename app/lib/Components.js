@@ -35,10 +35,13 @@ async function save(input, req) {
   //   - the component UUID
   //   - the component type form ID
   //   - user-provided data (this may be an empty object, but must still exist)
+  //   - the submitting user's profile information
   if (!(input instanceof Object)) throw new Error(`Components::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('componentUuid')) throw new Error(`Components::save() - the 'input.componentUuid' has not been specified!`);
   if (!input.hasOwnProperty('typeFormId')) throw new Error(`Components::save() - the 'input.typeFormId' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Components::save() - the 'input.data' has not been specified!`);
+  if (!(req instanceof Object)) throw new Error(`Components::save() - the 'req' object has not been specified!`);
+  if (!req.hasOwnProperty('user')) throw new Error(`Components::save() - the 'req.user' has not been specified!`);
 
   // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('componentForms');
@@ -47,28 +50,38 @@ async function save(input, req) {
   if (!typeForm) throw new Error(`Components:save() - the specified 'input.typeFormId' (${input.typeFormId}) does not match a known component type form!`);
   if (typeForm.tags.includes('Trash')) throw new Error(`Components:save() - the specified component type form (${input.typeFormId}) is currently trashed, and cannot be used!`);
 
-  // Set up a new record object, and immediately add some information, either directly or inherited from the 'input' object
-  let newRecord = {};
-
-  newRecord.recordType = 'component';
-  newRecord.componentUuid = MUUID.from(input.componentUuid);
-  newRecord.shortUuid = ShortUUID().fromUUID(input.componentUuid);
-  newRecord.typeFormId = typeForm.formId;
-  newRecord.typeFormName = typeForm.formName;
-  newRecord.data = input.data;
-
-  if (input.workflowId) newRecord.workflowId = input.workflowId;
-
-  // Generate and add an 'insertion' field to the new record
-  newRecord.insertion = commonSchema.insertion(req);
-
   // Check if a record with the same component UUID as the specified one already exists
   // If so (i.e. the returned object is not 'null'), this indicates that we are editing an existing component, and if not (the returned object is 'null'), this is a new component
   let oldRecord = await retrieve(input.componentUuid);
 
+  // Set up a new record object, and immediately add some information, either directly or inherited from the 'input' object
+  let newRecord = {};
+
+  newRecord.recordType = 'component';
+  newRecord.recordDate = new Date();
+  newRecord.recordVersion = (oldRecord === null) ? 1 : parseInt(oldRecord.recordVersion) + 1;
+  newRecord.typeFormId = typeForm.formId;
+  newRecord.typeFormName = typeForm.formName;
+  newRecord.componentUuid = MUUID.from(input.componentUuid);
+  newRecord.shortUuid = ShortUUID().fromUUID(input.componentUuid);
+
+  if (input.workflowId) newRecord.workflowId = input.workflowId;
+
+  newRecord.userId = req.user.user_id;
+  newRecord.userName = req.user.displayName;
+  newRecord.userEmail = req.user.emails[0].value;
+
+  ///////////////////////////////
+  ////// DELETE THIS STUFF //////
+  // Generate and add an 'insertion' field to the new record
+  newRecord.insertion = commonSchema.insertion(req);
+
   // Generate and add a 'validity' field to the new record, either from scratch for a new component, or via incrementing that from the existing component's record
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
+  ///////////////////////////////
+
+  newRecord.data = input.data;
 
   // If saving a new component record, certain objects and fields need to be set up and populated
   // If editing an existing component record, this same information will either already exist (from being included when the 'input.data' object was copied over above) or can be directly copied
