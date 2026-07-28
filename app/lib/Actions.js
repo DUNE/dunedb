@@ -28,10 +28,13 @@ async function save(input, req) {
   //   - the action type form ID
   //   - the UUID of the component on which the action has been performed
   //   - user-provided data (may be empty of content, but must still exist)
+  //   - the submitting user's profile information
   if (!(input instanceof Object)) throw new Error(`Actions::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('typeFormId')) throw new Error(`Actions::save() - the 'input.typeFormId' has not been specified!`);
   if (!input.hasOwnProperty('componentUuid')) throw new Error(`Actions::save() - the 'input.componentUuid' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Actions::save() - the 'input.data' has not been specified!`);
+  if (!(req instanceof Object)) throw new Error(`Components::save() - the 'req' object has not been specified!`);
+  if (!req.hasOwnProperty('user')) throw new Error(`Components::save() - the 'req.user' has not been specified!`);
 
   // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('actionForms');
@@ -74,13 +77,19 @@ async function save(input, req) {
     }
   }
 
+  // Check if a record with the same action ID as the specified one already exists
+  // If so (i.e. the returned object is not 'null'), this indicates that we are editing an existing action, and if not (the returned object is 'null'), this is a new action
+  let oldRecord = (input.actionId) ? await retrieve(input.actionId) : null;
+
   // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
   let newRecord = {};
 
   newRecord.recordType = 'action';
-  newRecord.actionId = new ObjectId(input.actionId);
+  newRecord.recordDate = new Date();
+  newRecord.recordVersion = (oldRecord === null) ? 1 : parseInt(oldRecord.recordVersion) + 1;
   newRecord.typeFormId = typeForm.formId;
   newRecord.typeFormName = typeForm.formName;
+  newRecord.actionId = new ObjectId(input.actionId);
   newRecord.componentUuid = MUUID.from(input.componentUuid);
 
   const componentRecord = await Components.retrieve(newRecord.componentUuid);
@@ -95,9 +104,24 @@ async function save(input, req) {
     newRecord.componentTypeFormName = '[no component record found!]';
   }
 
+  if (input.workflowId) newRecord.workflowId = input.workflowId;
+
+  newRecord.userId = req.user.user_id;
+  newRecord.userName = req.user.displayName;
+  newRecord.userEmail = req.user.emails[0].value;
+
+  ///////////////////////////////
+  ////// DELETE THIS STUFF //////
+  // Generate and add an 'insertion' field to the new record
+  newRecord.insertion = commonSchema.insertion(req);
+
+  // Generate and add a 'validity' field to the new record, either from scratch (for a new record), or via incrementing that of the existing record (if editing)
+  newRecord.validity = commonSchema.validity(oldRecord);
+  newRecord.validity.ancestor_id = input._id;
+  ///////////////////////////////
+
   newRecord.data = input.data;
 
-  if (input.workflowId) newRecord.workflowId = input.workflowId;
   if (input.images) newRecord.images = input.images;
 
   // Winding and soldering actions each always contain an array of replaced wires or bad solder joints respectively ...
@@ -160,18 +184,6 @@ async function save(input, req) {
       }
     }
   }
-
-  // Generate and add an 'insertion' field to the new record
-  newRecord.insertion = commonSchema.insertion(req);
-
-  // Attempt to retrieve an existing record with the same action ID as the specified one (relevant if we are editing an existing record)
-  let oldRecord = null;
-
-  if (input.actionId) oldRecord = await retrieve(input.actionId);
-
-  // Generate and add a 'validity' field to the new record, either from scratch (for a new record), or via incrementing that of the existing record (if editing)
-  newRecord.validity = commonSchema.validity(oldRecord);
-  newRecord.validity.ancestor_id = input._id;
 
   // Insert the new record into the 'actions' records collection, and throw an error if the insertion fails
   let _lock = await dbLock(`saveAction_${newRecord.actionId}`, 1000);
