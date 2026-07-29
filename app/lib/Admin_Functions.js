@@ -10,43 +10,49 @@ const utils = require('./utils');
 const Workflows = require('./Workflows');
 
 
-async function setLocationInfo_allComponents() {
-  const result = await db.collection('components')
+async function setSubmissionInfo_singleCollection(collection) {
+  let result = await db.collection(collection)
     .updateMany(
       {},
       [
         {
           $set: {
-            'location': '$reception.location',
-            'dateAtLocation': '$reception.date',
-            'locationDetail': '$reception.detail',
+            'recordDate': '$insertion.insertDate',
+            'recordVersion': '$validity.version',
+            'userId': '$insertion.user.user_id',
+            'userName': '$insertion.user.displayName',
+            'userEmails': { $arrayElemAt: ["$insertion.user.emails", 0] },
           }
         },
       ]
     )
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::setLocationInfo_allComponents() - failed to add fields to the component record!`);
-
-  return result;
-}
-
-
-async function removeReceptionObject_allComponents() {
-  const result = await db.collection('components')
+  result = await db.collection(collection)
     .updateMany(
       {},
       [
-        { $unset: ['reception'] },
+        {
+          $set: {
+            'userEmail': '$userEmails.value',
+          }
+        },
       ]
     )
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::removeReceptionObject_allComponents() - failed to remove object from the component record!`);
+  result = await db.collection(collection)
+    .updateMany(
+      {},
+      [
+        { $unset: ['userEmails'] },
+      ]
+    )
+
+  if (result.ok === 0) throw new Error(`Admin_Functions::setSubmissionInfo_singleCollection() - failed to add fields to the collection records!`);
 
   return result;
 }
 
 
 module.exports = {
-  setLocationInfo_allComponents,
-  removeReceptionObject_allComponents,
+  setSubmissionInfo_singleCollection,
 }

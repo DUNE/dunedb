@@ -19,10 +19,13 @@ async function save(input, req) {
   //   - the workflow type form ID
   //   - user-provided data (may be empty of content, but must still exist)
   //   - a workflow path (the path steps will be checked later in this function)
+  //   - the submitting user's profile information
   if (!(input instanceof Object)) throw new Error(`Workflows::save() - the 'input' object has not been specified!`);
   if (!input.hasOwnProperty('typeFormId')) throw new Error(`Workflows::save() - the 'input.typeFormId' has not been specified!`);
   if (!input.hasOwnProperty('data')) throw new Error(`Workflows::save() - the 'input.data' has not been specified!`);
   if (!input.hasOwnProperty('path')) throw new Error(`Workflows::save() - the 'input.path' has not been specified!`);
+  if (!(req instanceof Object)) throw new Error(`Components::save() - the 'req' object has not been specified!`);
+  if (!req.hasOwnProperty('user')) throw new Error(`Components::save() - the 'req.user' has not been specified!`);
 
   // Check that there is an existing type form corresponding to the the provided type form ID, and that the type form is not currently 'trashed'
   const typeFormsList = await Forms.list('workflowForms');
@@ -43,30 +46,38 @@ async function save(input, req) {
   // Check that the first step of the workflow path is 'component' type (since component creation must always be performed first)
   if (!(input.path[0].type === 'component')) throw new Error(`Workflows::save() - the 'step.type' of the first step is not 'component'!`);
 
+  // Check if a record with the same workflow ID as the specified one already exists
+  // If so (i.e. the returned object is not 'null'), this indicates that we are editing an existing workflow, and if not (the returned object is 'null'), this is a new workflow
+  let oldRecord = (input.workflowId) ? await retrieve(input.workflowId) : null;
+
   // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
-  // If no type form name has been specified in the 'input' object, use the value from the type form instead
   let newRecord = {};
 
   newRecord.recordType = 'workflow';
-  newRecord.workflowId = new ObjectId(input.workflowId);
+  newRecord.recordDate = new Date();
+  newRecord.recordVersion = (oldRecord === null) ? 1 : parseInt(oldRecord.recordVersion) + 1;
   newRecord.typeFormId = typeForm.formId;
   newRecord.typeFormName = typeForm.formName;
-  newRecord.data = input.data;
-  newRecord.path = input.path;
-  newRecord.completionStatus = input.completionStatus;
-  newRecord.firstIncompleteAction = input.firstIncompleteAction;
+  newRecord.workflowId = new ObjectId(input.workflowId);
 
+  newRecord.userId = req.user.user_id;
+  newRecord.userName = req.user.displayName;
+  newRecord.userEmail = req.user.emails[0].value;
+
+  ///////////////////////////////
+  ////// DELETE THIS STUFF //////
   // Generate and add an 'insertion' field to the new record
   newRecord.insertion = commonSchema.insertion(req);
-
-  // Attempt to retrieve an existing record with the same workflow ID as the specified one (relevant if we are editing an existing record)
-  let oldRecord = null;
-
-  if (input.workflowId) oldRecord = await retrieve(input.workflowId);
 
   // Generate and add a 'validity' field to the new record, either from scratch (for a new record), or via incrementing that of the existing record (if editing)
   newRecord.validity = commonSchema.validity(oldRecord);
   newRecord.validity.ancestor_id = input._id;
+  ///////////////////////////////
+
+  newRecord.data = input.data;
+  newRecord.path = input.path;
+  newRecord.completionStatus = input.completionStatus;
+  newRecord.firstIncompleteAction = input.firstIncompleteAction;
 
   // Insert the new record into the 'workflows' records collection, and throw and error if the insertion fails
   let _lock = await dbLock(`saveWorkflow_${newRecord.workflowId}`, 1000);
