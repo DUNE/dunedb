@@ -110,16 +110,6 @@ async function save(input, req) {
   newRecord.userName = req.user.displayName;
   newRecord.userEmail = req.user.emails[0].value;
 
-  ///////////////////////////////
-  ////// DELETE THIS STUFF //////
-  // Generate and add an 'insertion' field to the new record
-  newRecord.insertion = commonSchema.insertion(req);
-
-  // Generate and add a 'validity' field to the new record, either from scratch (for a new record), or via incrementing that of the existing record (if editing)
-  newRecord.validity = commonSchema.validity(oldRecord);
-  newRecord.validity.ancestor_id = input._id;
-  ///////////////////////////////
-
   newRecord.data = input.data;
 
   if (input.images) newRecord.images = input.images;
@@ -309,7 +299,7 @@ async function addImageStrings(actionId, imageStringsArray, imageType) {
           $set: { 'data.shocklogPlotsImage': imageStringsArray[0] }
         },
         {
-          sort: { 'validity.version': -1 },
+          sort: { 'recordVersion': -1 },
           returnNewDocument: true,
           includeResultMetadata: true,
         },
@@ -323,7 +313,7 @@ async function addImageStrings(actionId, imageStringsArray, imageType) {
           $push: { 'images': { $each: imageStringsArray } }
         },
         {
-          sort: { 'validity.version': -1 },
+          sort: { 'recordVersion': -1 },
           returnNewDocument: true,
           includeResultMetadata: true,
         },
@@ -358,7 +348,7 @@ async function removeImageString(actionId, imageNumber) {
         $pull: { 'images': imageString }
       },
       {
-        sort: { 'validity.version': -1 },
+        sort: { 'recordVersion': -1 },
         returnNewDocument: true,
         includeResultMetadata: true,
       },
@@ -391,7 +381,7 @@ async function retrieve(actionId, projection) {
   // Then sort any matching records such that the most recent version is first in the list
   let records = await db.collection('actions')
     .find(match_condition, options)
-    .sort({ 'validity.version': -1 })
+    .sort({ 'recordVersion': -1 })
     .toArray();
 
   // If there is at least one matching record ...
@@ -423,7 +413,7 @@ async function versions(actionId) {
   // Then sort any matching records such that the most recent version is first in the list
   let records = await db.collection('actions')
     .find(match_condition)
-    .sort({ 'validity.version': -1 })
+    .sort({ 'recordVersion': -1 })
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
@@ -451,38 +441,39 @@ async function list(match_condition) {
   // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
   aggregation_stages.push({
     $project: {
+      recordDate: true,
+      recordVersion: true,
       actionId: true,
       typeFormId: true,
       typeFormName: true,
       componentUuid: true,
       componentName: true,
       workflowId: true,
-      validity: true,
       data: true,
     }
   })
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by the record version ... highest first
   // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
+      recordDate: { '$first': '$recordDate' },
       actionId: { '$first': '$actionId' },
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       componentUuid: { '$first': '$componentUuid' },
       componentName: { '$first': '$componentName' },
       workflowId: { '$first': '$workflowId' },
-      lastEditDate: { '$first': '$validity.startDate' },
       data: { '$first': '$data' },
     },
   });
 
-  // Re-sort the records by last edit date ... most recent first
-  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+  // Re-sort the records by record date ... most recent first
+  aggregation_stages.push({ $sort: { recordDate: -1 } });
 
   // Limit the number of returned records to something reasonable ... this will be further reduced later on, but only after the optional filter on component type form ID has been applied if needed
   aggregation_stages.push({ $limit: 1000 });
@@ -511,10 +502,10 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
   });
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by record version ... highest first
   // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -596,21 +587,21 @@ async function autoCompleteId(inputString, limit = 10) {
   aggregation_stages.push({ $match: match_condition });
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by record version ... highest first
   // Then group the records by the action ID (i.e. each group contains all versions of the same action), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
+      recordDate: { '$first': '$recordDate' },
       actionId: { '$first': '$actionId' },
       typeFormName: { '$first': '$typeFormName' },
-      lastEditDate: { '$first': '$validity.startDate' },
     },
   });
 
-  // Re-sort the records by last edit date ... most recent first
-  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+  // Re-sort the records by record date ... most recent first
+  aggregation_stages.push({ $sort: { recordDate: -1 } });
 
   // Limit the number of returned matching records, just so the interface doesn't get too busy
   aggregation_stages.push({ $limit: limit });

@@ -26,7 +26,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
     // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { componentUuid: req.params.uuid };
 
-    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+    if (req.query.version) query['recordVersion'] = parseInt(req.query.version, 10);
 
     // Simultaneously retrieve the specified version and all versions of the record, and throw an error if there is no record corresponding to the component UUID
     const [component, componentVersions] = await Promise.all([
@@ -54,7 +54,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
 
     // If the specified component is a 'Geometry Board' type, retrieve some more detailed information about any shipments that the board has been part of
     // Add this information to the previously retrieved list of actions performed on the board, and make sure that all of the action entries contain the same (or equivalent) fields
-    // Add an entry for the board itself (again, containing the same fields as the action entries), and finally sort all entries in the combined array by the 'lastEditDate' field
+    // Add an entry for the board itself (again, containing the same fields as the action entries), and finally sort all entries in the combined array by the 'recordDate' field
     if (component.typeFormId === 'GeometryBoard') {
       geoBoardShipments = await Search_OtherComponents.geoBoardShipmentsByBoardUUID(req.params.uuid);
       actions = actions.concat(geoBoardShipments);
@@ -121,11 +121,11 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       actions.push({
         'typeFormName': 'Board DB Record Created',
         'componentUuid': req.params.uuid,
-        'lastEditDate': new Date(componentVersions[componentVersions.length - 1].validity.startDate),
+        'recordDate': new Date(componentVersions[componentVersions.length - 1].recordDate),
         'data': { 'originOfShipment': 'lancaster' },
       });
 
-      actions.sort(utils.byField_increasing('lastEditDate'));
+      actions.sort(utils.byField_increasing('recordDate'));
     }
 
     // Set a variable to indicate if the specified component type is one that is the subject of a workflow
@@ -963,7 +963,7 @@ router.get(['/json/component/:uuid', '/api/component/:uuid'], permissions.checkP
     // Set up a query object consisting of the specified component UUID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { componentUuid: req.params.uuid };
 
-    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+    if (req.query.version) query['recordVersion'] = parseInt(req.query.version, 10);
 
     // Retrieve the specified version of the record
     // If there is no record corresponding to the UUID, or the version number is not valid, this returns 'null'

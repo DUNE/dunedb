@@ -16,7 +16,7 @@ async function boardsByVisualInspection(disposition, issue) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  action_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   action_aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -69,7 +69,7 @@ async function boardsByVisualInspection(disposition, issue) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  comp_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -136,7 +136,7 @@ async function boardsByVisualInspection(disposition, issue) {
       });
 
       // Order the records by the '_id' field (highest value first) - this ObjectId is generated sequentially for each record (higher ones for newer records) ... 
-      // ... this is a work-around for the fact that we don't save the record insertion dates as actual date objects which can be sorted, but instead as strings which are more tricky to order)
+      // ... this is a work-around for the fact that we previously didn't save the record dates as actual date objects which can be sorted, but instead as strings which are more tricky to order
       perBoard_action_aggregation_stages.push({ $sort: { _id: -1 } });
 
       // Query the 'actions' records collection using the aggregation stages defined above
@@ -206,7 +206,7 @@ async function boardsByOrderNumber(orderNumber) {
   // Select the latest version of each record, and pass through only the fields required for later use
   // Note that because the sub-component geometry board UUID structure is different between the two types of batches, we must attempt to pass both of them ...
   // ... the one that doesn't exist for the given batch type will just be an empty field
-  comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  comp_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -257,7 +257,7 @@ async function boardsByOrderNumber(orderNumber) {
     });
 
     // Select the latest version of each record, and pass through only the fields required for later use
-    action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+    action_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
     action_aggregation_stages.push({
       $group: {
         _id: { actionId: '$actionId' },
@@ -271,7 +271,7 @@ async function boardsByOrderNumber(orderNumber) {
     // At this point, we have the latest version of every 'Visual Inspection' action performed on each board
     // Select the single action that was mostly recently performed on each board, and pass through only the fields required for later use
     // Note that this starts by ordering the records by the '_id' field (highest value first) - this ObjectId is generated sequentially for each record (higher ones for newer records) ... 
-    // ... this is a work-around for the fact that we don't save the record insertion dates as actual date objects which can be sorted, but instead as strings which are more tricky to order)
+    // ... this is a work-around for the fact that we previously didn't save the record dates as actual date objects which can be sorted, but instead as strings which are more tricky to order
     action_aggregation_stages.push({ $sort: { _id: -1 } });
     action_aggregation_stages.push({
       $group: {
@@ -351,7 +351,7 @@ async function boardsByAPA(apaUUID) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },

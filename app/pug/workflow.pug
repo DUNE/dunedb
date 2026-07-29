@@ -56,14 +56,12 @@ block content
               td [Not Found!]
 
             dt Current Version:
-            dd This is version #{workflow.validity.version} of the workflow.
+            dd This is version #{workflow.recordVersion} of the workflow.
               br
               | It was last edited on !{' '}
-              +dateTimeFormat(workflow.insertion.insertDate)
-
-              if workflow.insertion.user
-                |  by !{' '}
-                a(href = `mailto:${user_email(workflow.insertion.user)}`) #{workflow.insertion.user.displayName}
+              +dateTimeFormat(workflow.recordDate)
+              |  by !{' '}
+              a(href = `mailto:${workflow.userEmail}`) #{workflow.userName}
 
             .vert-space-x1
               .panel.panel-default
@@ -75,13 +73,11 @@ block content
                 ul
                   each v in workflowVersions
                     li 
-                      a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
+                      a(href = `?version=${v.recordVersion}`) Version #{v.recordVersion}
                       |  on 
-                      +dateTimeFormat(v.insertion.insertDate)
-
-                      if v.insertion.user
-                        |  by !{' '}
-                        a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
+                      +dateTimeFormat(v.recordDate)
+                      |  by !{' '}
+                      a(href = `mailto:${v.userEmail}`) #{v.userName}
 
         .col-sm-4
           .vert-space-x2.form-inline

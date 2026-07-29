@@ -200,13 +200,13 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
       section: { '$first': '$data.workflowSectionBeingQAed' },
       name: { '$first': '$data.personSigningOff' },
-      date: { '$first': '$validity.startDate' },
+      date: { '$first': '$recordDate' },
       actionId: { '$first': '$actionId' },
     },
   });
@@ -241,7 +241,7 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -267,7 +267,7 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -295,12 +295,12 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
       name: { '$first': '$data.closeUpSignoff' },
-      date: { '$first': '$validity.startDate' },
+      date: { '$first': '$recordDate' },
       actionId: { '$first': '$actionId' },
     },
   });
@@ -325,7 +325,7 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -351,7 +351,7 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -379,12 +379,12 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
       name: { '$first': '$data.personSigningOff' },
-      date: { '$first': '$validity.startDate' },
+      date: { '$first': '$recordDate' },
       actionId: { '$first': '$actionId' },
     },
   });
@@ -409,7 +409,7 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -435,7 +435,7 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -462,12 +462,12 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
       name: { '$first': '$data.personSigningOff' },
-      date: { '$first': '$validity.startDate' },
+      date: { '$first': '$recordDate' },
       actionId: { '$first': '$actionId' },
       fdhd: { '$first': '$data.fdhdTechCoordSigningOff' },
     },
@@ -500,7 +500,7 @@ async function forExecSummary(componentUUID) {
       }
     });
 
-    aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+    aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
     aggregation_stages.push({
       $group: {
         _id: { actionId: '$actionId' },
@@ -564,7 +564,7 @@ async function forExecSummary(componentUUID) {
       }
     });
 
-    aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+    aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
     aggregation_stages.push({
       $group: {
         _id: { actionId: '$actionId' },
@@ -605,7 +605,7 @@ async function forExecSummary(componentUUID) {
       }
     });
 
-    aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+    aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
     aggregation_stages.push({
       $group: {
         _id: { actionId: '$actionId' },
@@ -644,7 +644,7 @@ async function forExecSummary(componentUUID) {
     }
   });
 
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },

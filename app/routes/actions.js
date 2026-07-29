@@ -16,7 +16,7 @@ router.get('/action/:actionId', permissions.checkPermission('actions:view'), asy
     // Set up a query object consisting of the specified action ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { actionId: req.params.actionId };
 
-    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+    if (req.query.version) query['recordVersion'] = parseInt(req.query.version, 10);
 
     // Simultaneously retrieve the specified version and all versions of the record, and throw an error if there is no record corresponding to the action ID
     const [action, actionVersions] = await Promise.all([
@@ -67,13 +67,13 @@ router.get('/action/:actionId', permissions.checkPermission('actions:view'), asy
       let filteredVersions = [];
 
       for (const action of actionVersions) {
-        if ((action.insertion.user.displayName == 'M2M Client') && (action.validity.version <= versionNumber)) filteredVersions.push(action);
+        if ((action.userName == 'M2M Client') && (action.recordVersion <= versionNumber)) filteredVersions.push(action);
       }
 
       // If there are at least two matching versions of the action (i.e. so that some comparison can actually be made) ...
       if (filteredVersions.length > 1) {
         // Save the version numbers of the two most recent versions (these are the ones whose tension measurements will be compared)
-        retensionedWires_versions = [filteredVersions[0].validity.version, filteredVersions[1].validity.version];
+        retensionedWires_versions = [filteredVersions[0].recordVersion, filteredVersions[1].recordVersion];
 
         // Loop through the tension measurements on both sides, compare them across the versions, and save any that are different (including the wire or wire segment number)
         // Note that we can use a single loop here, since the number of wire (segments) is always the same on both sides
@@ -419,7 +419,7 @@ router.get(['/json/action/:actionId', '/api/action/:actionId'], permissions.chec
     // Set up a query object consisting of the specified action ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { actionId: req.params.actionId };
 
-    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+    if (req.query.version) query['recordVersion'] = parseInt(req.query.version, 10);
 
     // Retrieve the specified version of the record
     // If there is no record corresponding to the ID, or the version number is not valid, this returns 'null'
