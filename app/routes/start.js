@@ -268,7 +268,7 @@ router.post(['/json/administratorUtility/:inputString', '/api/administratorUtili
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
 
-    let result = await Admin_Functions.setSubmissionInfo_singleCollection(req.params.inputString);    // Change as appropriate for the required utility
+    let result = await Admin_Functions.removeValidityInsertion_singleCollection(req.params.inputString);    // Change as appropriate for the required utility
 
     return res.status(201).json(result);
   } catch (err) {

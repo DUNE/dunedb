@@ -170,8 +170,8 @@ router.get(['/json/search/geoBoardShipmentsByBoardUUID/:uuid', '/api/search/geoB
     // Retrieve a list of geometry boards shipments that reference the specified component UUID
     const shipments = await Search_OtherComponents.geoBoardShipmentsByBoardUUID(req.params.uuid);
 
-    // Sort the shipments by increasing 'lastEditDate', i.e. the most recent shipment will be first in the list
-    shipments.sort(utils.byField_decreasing('lastEditDate'));
+    // Sort the shipments by increasing 'recordDate', i.e. the most recent shipment will be first in the list
+    shipments.sort(utils.byField_decreasing('recordDate'));
 
     // Return the list in JSON format
     return res.status(200).json(shipments);

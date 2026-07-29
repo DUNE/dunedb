@@ -24,13 +24,13 @@ async function geoBoardShipmentsByReceptionDetails(status, origin, destination, 
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  comp_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
+      recordDate: { '$first': '$recordDate' },
       componentUuid: { '$first': '$componentUuid' },
       data: { '$first': '$data' },
-      startDate: { '$first': '$validity.startDate' },
     },
   });
 
@@ -58,7 +58,7 @@ async function geoBoardShipmentsByReceptionDetails(status, origin, destination, 
     });
 
     // Select the latest version of each record, and pass through only the fields required for later use
-    action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+    action_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
     action_aggregation_stages.push({
       $group: {
         _id: { actionId: '$actionId' },
@@ -77,7 +77,7 @@ async function geoBoardShipmentsByReceptionDetails(status, origin, destination, 
     let shipment = {
       uuid: shipmentRecord.componentUuid,
       numberOfBoards: shipmentRecord.data.boardUuiDs.length,
-      creationDate: (shipmentRecord.startDate.toISOString().split('T'))[0],
+      creationDate: (shipmentRecord.recordDate.toISOString().split('T'))[0],
       origin: shipmentRecord.data.originOfShipment,
       destination: shipmentRecord.data.destinationOfShipment,
       receptionDate: '[n.a.]',
@@ -152,17 +152,17 @@ async function geoBoardShipmentsByBoardUUID(componentUUID) {
   aggregation_stages.push({ $match: { 'typeFormId': 'GeometryBoardShipment' } });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
+      recordDate: { '$first': '$recordDate' },
       componentUuid: { '$first': '$componentUuid' },
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       data: { '$first': '$data' },
       location: { '$first': '$location' },
       dateAtLocation: { '$first': '$dateAtLocation' },
-      lastEditDate: { '$first': '$validity.startDate' },
     },
   });
 
@@ -196,7 +196,7 @@ async function apasByProductionLocationAndNumber(location, number) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -249,7 +249,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
 
   // Select the latest version of each record, and pass through only the fields required for later use
   // Then sort the records reverse alphabetically by the 'componentName' field
-  action_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  action_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   action_aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -298,7 +298,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
 
   // Select the latest version of each record, and pass through only the fields required for later use
   // Then sort the records reverse alphabetically by the 'componentName' field
-  comp_aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  comp_aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   comp_aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -330,7 +330,7 @@ async function apaShipmentsByAPAorASFUUID(componentUUID) {
   aggregation_stages.push({ $match: { 'typeFormId': 'AssembledAPAShipment' } });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -353,8 +353,8 @@ async function apaShipmentsByAPAorASFUUID(componentUUID) {
     }
   });
 
-  // Re-sort the records by last edit date ... most recent first
-  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+  // Re-sort the records by the record date ... most recent first
+  aggregation_stages.push({ $sort: { recordDate: -1 } });
 
   // Query the 'components' records collection using the aggregation stages defined above
   let shipments = await db.collection('components')
@@ -376,7 +376,7 @@ async function componentsByDUNEPID(dunePID) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -407,7 +407,7 @@ async function componentsByTypeAndNumber(typeFormId, typeRecordNumber) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -449,7 +449,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use (dependent on the specified component type)
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
 
   if (typeFormId === 'GeometryBoard') {
     aggregation_stages.push({
@@ -718,7 +718,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
   }
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },

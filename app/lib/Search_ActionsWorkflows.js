@@ -38,7 +38,7 @@ async function workflowsByUUID(componentUUID) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { workflowId: '$workflowId' },
@@ -70,7 +70,7 @@ async function nonConformanceByComponentType(componentType, disposition, status)
 
   // Select the latest version of each record, and pass through only the fields required for later use
   // Then sort the records reverse alphabetically by the 'componentName' field
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -144,7 +144,7 @@ async function nonConformanceByUUID(componentUUID) {
 
   // Select the latest version of each record, and pass through only the fields required for later use
   // Then sort the records reverse alphabetically by the 'actionId' field
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -185,7 +185,7 @@ async function nonConformanceByUUID(componentUUID) {
     }
   }
 
-  // Return the list of  atching actions
+  // Return the list of matching actions
   return results;
 }
 
@@ -202,7 +202,7 @@ async function boardInstallByReferencedComponent(componentUUID) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -269,7 +269,7 @@ async function windingByReferencedComponent(componentUUID) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -317,7 +317,7 @@ async function boardRejectionByReferencedComponent(componentUUID) {
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },
@@ -354,7 +354,7 @@ async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin
   });
 
   // Select the latest version of each record, and pass through only the fields required for later use
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { actionId: '$actionId' },

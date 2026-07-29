@@ -56,11 +56,9 @@ block allbody
       .vert-space-x1
         dl
           dt Current Version:
-          dd This is version #{component.validity.version} of the component, and it was last edited on !{' '}
-            +dateTimeFormat(component.insertion.insertDate)
-
-            if component.insertion.user
-              |  by !{' '} #{component.insertion.user.displayName}
+          dd This is version #{component.recordVersion} of the component, and it was last edited on !{' '}
+            +dateTimeFormat(component.recordDate)
+            |  by !{' '} #{component.userName}
 
       if component.typeFormId === 'APAFrameShipment'
         .vert-space-x1.border-success.border.rounded.p-2
@@ -241,11 +239,9 @@ block allbody
               dd #{action.actionId}
 
               dt Performance Data:
-              dd This is version #{action.validity.version} of the action, performed on !{' '}
-                +dateTimeFormat(action.insertion.insertDate)
-
-                if action.insertion.user
-                  |  by !{' '} #{action.insertion.user.displayName}
+              dd This is version #{action.recordVersion} of the action, performed on !{' '}
+                +dateTimeFormat(action.recordDate)
+                |  by !{' '} #{action.userName}
 
                 .vert-space-x1.border-success.border.rounded.p-2
                   .actiontypeform(data-record = action)
@@ -270,11 +266,9 @@ block allbody
               dd #{action.actionId}
 
               dt Performance Data:
-              dd This is version #{action.validity.version} of the action, performed on !{' '}
-                +dateTimeFormat(action.insertion.insertDate)
-
-                if action.insertion.user
-                  |  by !{' '} #{action.insertion.user.displayName}
+              dd This is version #{action.recordVersion} of the action, performed on !{' '}
+                +dateTimeFormat(action.recordDate)
+                |  by !{' '} #{action.userName}
 
                 .vert-space-x1.border-success.border.rounded.p-2
                   .actiontypeform(data-record = action)
@@ -299,11 +293,9 @@ block allbody
               dd #{action.actionId}
 
               dt Performance Data:
-              dd This is version #{action.validity.version} of the action, performed on !{' '}
-                +dateTimeFormat(action.insertion.insertDate)
-
-                if action.insertion.user
-                  |  by !{' '} #{action.insertion.user.displayName}
+              dd This is version #{action.recordVersion} of the action, performed on !{' '}
+                +dateTimeFormat(action.recordDate)
+                |  by !{' '} #{action.userName}
 
                 .vert-space-x1.border-success.border.rounded.p-2
                   .actiontypeform(data-record = action)

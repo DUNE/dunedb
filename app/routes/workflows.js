@@ -14,7 +14,7 @@ router.get('/workflow/:workflowId', permissions.checkPermission('workflows:view'
     // Set up a query object consisting of the specified workflow ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { workflowId: req.params.workflowId };
 
-    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+    if (req.query.version) query['recordVersion'] = parseInt(req.query.version, 10);
 
     // Simultaneously retrieve the specified version and all versions of the record, and throw an error if there is no record corresponding to the workflow ID
     const [workflow, workflowVersions] = await Promise.all([
@@ -273,7 +273,7 @@ router.get(['/json/workflow/:workflowId', '/api/workflow/:workflowId'], permissi
     // Set up a query object consisting of the specified workflow ID and a version number if one is provided (if not, the most recent version is assumed)
     let query = { workflowId: req.params.workflowId };
 
-    if (req.query.version) query['validity.version'] = parseInt(req.query.version, 10);
+    if (req.query.version) query['recordVersion'] = parseInt(req.query.version, 10);
 
     // Retrieve the specified version of the record
     // If there is no record corresponding to the ID, or the version number is not valid, this returns 'null'
