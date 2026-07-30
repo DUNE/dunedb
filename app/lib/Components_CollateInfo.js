@@ -48,7 +48,7 @@ const dictionary_tensionSystems = {
   laser9: 'Laser #9',
 };
 
-const dictionary_ncrTypes = {
+const dictionary_ncrTypes_APA = {
   damagedWireSegment: 'Damaged Wire Segment',
   missingWireSegment: 'Missing Wire Segment',
   misplacedWireSegment: 'Misplaced Wire Segment',
@@ -67,6 +67,23 @@ const dictionary_ncrTypes = {
   holesInMesh: 'Holes in mesh',
   frameIssue: 'Frame issue',
   meshNotTight: 'Mesh not tight',
+};
+
+const dictionary_ncrTypes_Frame = {
+  assembly: 'Assembly',
+  beams: 'Beams',
+  cleaning: 'Cleaning',
+  etching: 'Etching',
+  machiningIssue: 'Machining Issue',
+  survey: 'Survey',
+  traveler: 'Traveler',
+  welding: 'Welding',
+};
+
+const dictionary_ncrTypes_Mesh = {
+  holesInMesh: 'Holes in Mesh',
+  frameIssue: 'Frame Issue',
+  meshNotTight: 'Mesh Not Tight',
 };
 
 
@@ -652,7 +669,9 @@ async function forExecSummary(componentUUID) {
       disposition: { '$first': '$data.disposition' },
       title: { '$first': '$data.nonConformanceTitle' },
       description: { '$first': '$data.nonConformanceDescription' },
-      nonConf_type: { '$first': '$data.nonConformanceType' },
+      nonConfType_APA: { '$first': '$data.nonConformanceType' },
+      nonConfType_Frame: { '$first': '$data.frameNonConformanceType' },
+      nonConfType_Mesh: { '$first': '$data.frameNonConformanceType1' },
       missingWireData: { '$first': '$data.dataGrid' },
       shortedWireData: { '$first': '$data.shortedGrid' },
     },
@@ -670,9 +689,23 @@ async function forExecSummary(componentUUID) {
     for (let result of results) {
       let typesString = '';
 
-      for (const [key, value] of Object.entries(result.nonConf_type)) {
-        if (value) {
-          typesString += `${dictionary_ncrTypes[key]}, `;
+      if ((result.nonConfType_APA !== null) && (result.nonConfType_Frame === null) && (result.nonConfType_Mesh === null)) {
+        for (const [key, value] of Object.entries(result.nonConfType_APA)) {
+          if (value) {
+            typesString += `${dictionary_ncrTypes_APA[key]}, `;
+          }
+        }
+      } else if ((result.nonConfType_APA === null) && (result.nonConfType_Frame !== null) && (result.nonConfType_Mesh === null)) {
+        for (const [key, value] of Object.entries(result.nonConfType_Frame)) {
+          if (value) {
+            typesString += `${dictionary_ncrTypes_Frame[key]}, `;
+          }
+        }
+      } else if ((result.nonConfType_APA === null) && (result.nonConfType_Frame === null) && (result.nonConfType_Mesh !== null)) {
+        for (const [key, value] of Object.entries(result.nonConfType_Mesh)) {
+          if (value) {
+            typesString += `${dictionary_ncrTypes_Mesh[key]}, `;
+          }
         }
       }
 
