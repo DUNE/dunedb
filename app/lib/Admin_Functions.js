@@ -53,6 +53,22 @@ async function setSubmissionInfo_singleCollection(collection) {
 }
 
 
+async function removeValidityInsertion_singleCollection(collection) {
+  let result = await db.collection(collection)
+    .updateMany(
+      {},
+      [
+        { $unset: ['validity', 'insertion'] },
+      ]
+    )
+
+  if (result.ok === 0) throw new Error(`Admin_Functions::removeValidityInsertion_singleCollection() - failed to remove fields from the collection records!`);
+
+  return result;
+}
+
+
 module.exports = {
   setSubmissionInfo_singleCollection,
+  removeValidityInsertion_singleCollection,
 }

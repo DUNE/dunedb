@@ -71,16 +71,6 @@ async function save(input, req) {
   newRecord.userName = req.user.displayName;
   newRecord.userEmail = req.user.emails[0].value;
 
-  ///////////////////////////////
-  ////// DELETE THIS STUFF //////
-  // Generate and add an 'insertion' field to the new record
-  newRecord.insertion = commonSchema.insertion(req);
-
-  // Generate and add a 'validity' field to the new record, either from scratch for a new component, or via incrementing that from the existing component's record
-  newRecord.validity = commonSchema.validity(oldRecord);
-  newRecord.validity.ancestor_id = input._id;
-  ///////////////////////////////
-
   newRecord.data = input.data;
 
   // If saving a new component record, certain objects and fields need to be set up and populated
@@ -156,13 +146,13 @@ async function save(input, req) {
       newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400003-${typeRecordNumber}-US200-010000`;
     } else if (newRecord.typeFormId === 'CEAdapterBoardBatch') {
-      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.typeFormId === 'CRBoard') {
       newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400001-${typeRecordNumber}-US200-010000`;
     } else if (newRecord.typeFormId === 'CRBoardBatch') {
-      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.typeFormId === 'CableHarness') {
       if (newRecord.data.cableHarnessSide === 'a') {
@@ -182,7 +172,7 @@ async function save(input, req) {
       newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber}`;
       newRecord.data.dunePid = `D00300400002-${typeRecordNumber}-US200-010000`;
     } else if (newRecord.typeFormId === 'GBiasBoardBatch') {
-      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+      newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.subComponent_count}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
       newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
     } else if (newRecord.typeFormId === 'GeometryBoard') {
       newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.partString})`;
@@ -271,19 +261,19 @@ async function save(input, req) {
     newRecord.data.componentName = `${newRecord.typeFormName} (${name_apa1} + ${name_apa2})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'CEAdapterBoardShipment') {
-    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'CRBoardShipment') {
-    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'CableHarnessShipment') {
-    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'DWAComponentShipment') {
     newRecord.data.componentName = `${newRecord.typeFormName} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'GBiasBoardShipment') {
-    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'GeometryBoardShipment') {
     newRecord.data.componentName = `${newRecord.typeFormName} (${newRecord.data.boardUuiDs.length}.${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
@@ -298,7 +288,7 @@ async function save(input, req) {
     newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${utils.dictionary_locations[newRecord.data.originOfShipment]}.${utils.dictionary_locations[newRecord.data.destinationOfShipment]})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   } else if (newRecord.typeFormId === 'SHVBoardShipment') {
-    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.validity.startDate.toISOString().substring(0, 10)})`;
+    newRecord.data.componentName = `${newRecord.typeFormName} ${typeRecordNumber} (${newRecord.data.boardUuiDs.length}.${newRecord.recordDate.toISOString().substring(0, 10)})`;
     newRecord.data.dunePid = `D003MMMNNNNN-${typeRecordNumber}-COIII-010000`;
   }
 
@@ -516,7 +506,7 @@ async function retrieve(componentUuid, projection) {
   // Then sort any matching records such that the most recent version is first in the list
   let records = await db.collection('components')
     .find(match_condition, options)
-    .sort({ 'validity.version': -1 })
+    .sort({ 'recordVersion': -1 })
     .toArray();
 
   // If there is at least one matching record ...
@@ -551,7 +541,7 @@ async function versions(componentUuid) {
   // Then sort any matching records such that the most recent version is first in the list
   let records = await db.collection('components')
     .find(match_condition)
-    .sort({ 'validity.version': -1 })
+    .sort({ 'recordVersion': -1 })
     .toArray();
 
   // Convert the 'componentUuid' of each matching record from binary to string format, for better readability and consistent display
@@ -581,40 +571,41 @@ async function list(match_condition, options) {
   // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
   aggregation_stages.push({
     $project: {
+      recordDate: true,
+      recordVersion: true,
       componentUuid: true,
       typeFormId: true,
       typeFormName: true,
       data: true,
-      validity: true,
       location: true,
       locationDetail: true,
     }
   })
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by record version ... highest first
   // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
+      recordDate: { '$first': '$recordDate' },
       componentUuid: { '$first': '$componentUuid' },
       typeFormId: { '$first': '$typeFormId' },
       typeFormName: { '$first': '$typeFormName' },
       data: { '$first': '$data' },
       componentName: { '$first': '$data.componentName' },
-      lastEditDate: { '$first': '$validity.startDate' },
       location: { '$first': '$location' },
       locationDetail: { '$first': '$locationDetail' },
     },
   });
 
-  // Re-sort the records ... by (alphanumerical) component name for APA Frames, ASFs and Assembled APAs, or by last edit date (most recent first) for other component types
+  // Re-sort the records ... by (alphanumerical) component name for APA Frames, ASFs and Assembled APAs, or by record date (most recent first) for other component types
   if ((match_condition) && (match_condition.typeFormId) && (['APAFrame', 'APAShippingFrame', 'AssembledAPA'].includes(match_condition.typeFormId))) {
     aggregation_stages.push({ $sort: { componentName: -1 } });
   } else {
-    aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+    aggregation_stages.push({ $sort: { recordDate: -1 } });
   }
 
   // Add aggregation stages for any additionally specified options
@@ -706,18 +697,18 @@ async function boardCounts_byPartNumberAndLocation() {
   // Keep only the minimal required fields from each record for subsequent aggregation stages (this reduces memory usage)
   aggregation_stages.push({
     $project: {
+      recordVersion: true,
       componentUuid: true,
       data: true,
       location: true,
-      validity: true,
     }
   })
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by record version ... highest first
   // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
@@ -783,22 +774,22 @@ async function autoCompleteUuid(inputString, limit = 10) {
   aggregation_stages.push({ $match: match_condition });
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by record version ... highest first
   // Then group the records by the component UUID (i.e. each group contains all versions of the same component), and select only the first (highest version number) entry in each group
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
   aggregation_stages.push({
     $group: {
       _id: { componentUuid: '$componentUuid' },
+      recordDate: { '$first': '$recordDate' },
       componentUuid: { '$first': '$componentUuid' },
       typeFormName: { '$first': '$typeFormName' },
       componentName: { '$first': '$data.componentName' },
-      lastEditDate: { '$first': '$validity.startDate' },
     },
   });
 
-  // Re-sort the records by last edit date ... most recent first
-  aggregation_stages.push({ $sort: { lastEditDate: -1 } });
+  // Re-sort the records by record date ... most recent first
+  aggregation_stages.push({ $sort: { recordDate: -1 } });
 
   // Limit the number of returned matching records, just so the interface doesn't get too busy
   aggregation_stages.push({ $limit: limit });

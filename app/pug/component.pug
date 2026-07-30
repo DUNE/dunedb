@@ -105,17 +105,15 @@ block content
                 a(href = `/action/${mostRecentAction.actionId}`, target = '_blank') #{mostRecentAction.typeFormName}
                 br
                 | This action was last edited on !{' '}
-                +dateTimeFormat(mostRecentAction.lastEditDate)
+                +dateTimeFormat(mostRecentAction.recordDate)
 
             dt Current Component Version:
-            dd This is version #{component.validity.version} of the component.
+            dd This is version #{component.recordVersion} of the component.
               br
               | It was last edited on !{' '}
-              +dateTimeFormat(component.insertion.insertDate)
-
-              if component.insertion.user
-                |  by !{' '}
-                a(href = `mailto:${user_email(component.insertion.user)}`) #{component.insertion.user.displayName}
+              +dateTimeFormat(component.recordDate)
+              |  by !{' '}
+              a(href = `mailto:${component.userEmail}`) #{component.userName}
 
             .vert-space-x1
               .panel.panel-default
@@ -127,13 +125,11 @@ block content
                 ul
                   each v in componentVersions
                     li 
-                      a(href = `?version=${v.validity.version}`) Version #{v.validity.version}
+                      a(href = `?version=${v.recordVersion}`) Version #{v.recordVersion}
                       |  on 
-                      +dateTimeFormat(v.insertion.insertDate)
-
-                      if v.insertion.user
-                        |  by !{' '}
-                        a(href = `mailto:${user_email(v.insertion.user)}`) #{v.insertion.user.displayName}
+                      +dateTimeFormat(v.recordDate)
+                      |  by !{' '}
+                      a(href = `mailto:${v.userEmail}`) #{v.userName}
 
         .col-sm-4
           .vert-space-x2.form-inline
@@ -480,7 +476,7 @@ block content
                     td 
                       a(href = `/action/${entry.actionId}`) #{entry.typeFormName}
 
-                  td #{entry.lastEditDate.toISOString().slice(0, 10)}
+                  td #{entry.recordDate.toISOString().slice(0, 10)}
                   td #{dictionary_locations[entry.data.originOfShipment]}
 
                   if entry.typeFormName === 'Geometry Board Shipment'
@@ -604,7 +600,7 @@ block content
                         a(href = `/action/${action.actionId}`) #{action.actionId}
 
                       td
-                        +dateTimeFormat(action.lastEditDate)
+                        +dateTimeFormat(action.recordDate)
 
         .col-sm-6
           if component.typeFormId === 'APAFrame'

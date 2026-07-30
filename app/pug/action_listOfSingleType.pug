@@ -50,7 +50,7 @@ block content
                 td #{action.additionalInformation} 
 
                 td
-                  +dateTimeFormat(action.lastEditDate)
+                  +dateTimeFormat(action.recordDate)
                 td
                   a.btn-sm.btn-secondary(href = `/json/action/${action.actionId}`, target = '_blank')
                     img.small-icon(src = '/images/checklist_icon.svg')

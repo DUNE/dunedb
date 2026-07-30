@@ -30,7 +30,7 @@ block content
                   a(href = `/component/${uuid}`) #{component.data.componentName}
 
                 td
-                  +dateTimeFormat(component.lastEditDate)
+                  +dateTimeFormat(component.recordDate)
                 
                 if component.typeFormId == 'AssembledAPA'
                   td
