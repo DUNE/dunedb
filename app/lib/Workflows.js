@@ -56,8 +56,8 @@ async function save(input, req) {
   newRecord.recordType = 'workflow';
   newRecord.recordDate = new Date();
   newRecord.recordVersion = (oldRecord === null) ? 1 : parseInt(oldRecord.recordVersion) + 1;
-  newRecord.typeFormId = typeForm.formId;
-  newRecord.typeFormName = typeForm.formName;
+  newRecord.typeFormId = typeForm.typeFormId;
+  newRecord.typeFormName = typeForm.typeFormName;
   newRecord.workflowId = new ObjectId(input.workflowId);
 
   newRecord.userId = req.user.user_id;

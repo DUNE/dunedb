@@ -27,7 +27,7 @@ block content
                 br
                 | NOTE: this ID must have only underscores and alphanumerics (no spaces, hyphens or special characters).  A human-readable name can be set on the next page.
               .vert-space-x1
-                input.form-control#formId(type = 'text')
+                input.form-control#typeFormId(type = 'text')
             .modal-footer
               button.btn.btn-danger(type = 'button', data-dismiss = 'modal') Close
               button.btn.btn-success#NewTypeButton(type = 'button') Create
@@ -58,8 +58,8 @@ block content
           .collapse(id = `${collapseId}`, class = `${startingDisplay}`)
             table.table
               tbody
-                each typeFormName, i in actionFormsGroup.formName
-                  - const typeFormId = actionFormsGroup.formId[i];
+                each typeFormName, i in actionFormsGroup.typeFormName
+                  - const typeFormId = actionFormsGroup.typeFormId[i];
                   - const typeFormTags = actionFormsGroup.tags[i];
                   - const workflowAction = actionFormsGroup.workflowAction[i]
 
@@ -128,8 +128,8 @@ block content
             .collapse(id = `${collapseId}`)
               table.table
                 tbody
-                  each typeFormName, i in actionFormsGroup.formName
-                    - const typeFormId = actionFormsGroup.formId[i];
+                  each typeFormName, i in actionFormsGroup.typeFormName
+                    - const typeFormId = actionFormsGroup.typeFormId[i];
                     - const typeFormTags = actionFormsGroup.tags[i];
 
                     if typeFormTags && typeFormTags.includes('Trash') 

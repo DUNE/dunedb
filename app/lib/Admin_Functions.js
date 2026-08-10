@@ -10,7 +10,7 @@ const utils = require('./utils');
 const Workflows = require('./Workflows');
 
 
-async function setSubmissionInfo_singleCollection(collection) {
+async function setAdditionalInfo_singleCollection(collection) {
   let result = await db.collection(collection)
     .updateMany(
       {},
@@ -19,6 +19,8 @@ async function setSubmissionInfo_singleCollection(collection) {
           $set: {
             'recordDate': '$insertion.insertDate',
             'recordVersion': '$validity.version',
+            'typeFormId': '$formId',
+            'typeFormName': '$formName',
             'userId': '$insertion.user.user_id',
             'userName': '$insertion.user.displayName',
             'userEmails': { $arrayElemAt: ["$insertion.user.emails", 0] },
@@ -47,7 +49,7 @@ async function setSubmissionInfo_singleCollection(collection) {
       ]
     )
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::setSubmissionInfo_singleCollection() - failed to add fields to the collection records!`);
+  if (result.ok === 0) throw new Error(`Admin_Functions::setAdditionalInfo_singleCollection() - failed to add fields to the collection records!`);
 
   return result;
 }
@@ -69,6 +71,6 @@ async function removeValidityInsertion_singleCollection(collection) {
 
 
 module.exports = {
-  setSubmissionInfo_singleCollection,
+  setAdditionalInfo_singleCollection,
   removeValidityInsertion_singleCollection,
 }

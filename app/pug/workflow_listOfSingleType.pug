@@ -2,19 +2,19 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = `Workflows List (${workflowTypeForm.formName})`;
+  - const page_title = `Workflows List (${workflowTypeForm.typeFormName})`;
 
 block content
   .container-fluid
     .vert-space-x2
       if workflowTypeForm.tags && !workflowTypeForm.tags.includes('Trash')
-        a.btn.btn-primary(href = `/workflow/${workflowTypeForm.formId}/new`)
+        a.btn.btn-primary(href = `/workflow/${workflowTypeForm.typeFormId}/new`)
           img.small-icon(src = '/images/run_icon.svg')
           | &nbsp; Create New Workflow of This Type
 
         .vert-space-x2
 
-      h2 Workflows List (#{workflowTypeForm.formName})
+      h2 Workflows List (#{workflowTypeForm.typeFormName})
 
     .vert-space-x1
       table.table
@@ -22,7 +22,7 @@ block content
           tr
             th.col-md-2 Workflow ID
 
-            if workflowTypeForm.formName == 'APA Assembly'
+            if workflowTypeForm.typeFormName == 'APA Assembly'
               th.col-md-1 Component
               th.col-md-2 
             else 
@@ -45,7 +45,7 @@ block content
                 else 
                   td (component not yet created)
 
-                if workflowTypeForm.formName == 'APA Assembly'
+                if workflowTypeForm.typeFormName == 'APA Assembly'
                   td
                     a.btn-sm.btn-secondary(href = `/component/${workflow.path[0].result}/execSummary`, target = '_blank')
                       img.small-icon(src = '/images/checklist_icon.svg')

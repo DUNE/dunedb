@@ -14,7 +14,7 @@ const metaschema = {
       components: [{
         type: 'textfield',
         label: 'Type Form Name:',
-        key: 'formName',
+        key: 'typeFormName',
         validate: {
           required: true,
           unique: false,
@@ -30,7 +30,7 @@ const metaschema = {
       components: [{
         type: 'textfield',
         label: 'Type Form ID:',
-        key: 'formId',
+        key: 'typeFormId',
         validate: {
           required: true,
           unique: false,
@@ -47,7 +47,7 @@ const metaschema = {
       components: [{
         type: 'datetime',
         label: 'Last Revised On:',
-        key: 'insertion.insertDate',
+        key: 'recordDate',
         input: true,
         disabled: true,
         enableMinDateInput: false,
@@ -83,7 +83,7 @@ const metaschema = {
       components: [{
         type: 'number',
         label: 'New Version Number:',
-        key: 'validity.version',
+        key: 'recordVersion',
         input: true,
         disabled: true,
         inputFormat: 'plain',
@@ -96,7 +96,7 @@ const metaschema = {
       components: [{
         type: 'textfield',
         label: 'Last Revised By:',
-        key: 'insertion.user.displayName',
+        key: 'userName',
         input: true,
         disabled: true,
       }],
@@ -108,7 +108,7 @@ const metaschema = {
       components: [{
         type: 'datetime',
         label: 'New Version Valid:',
-        key: 'validity.startDate',
+        key: 'recordDate',
         input: true,
         enableMinDateInput: false,
         enableMaxDateInput: false,
@@ -160,9 +160,9 @@ const metaschema = {
             value: '',
           }],
         },
-        valueProperty: 'formName',
+        valueProperty: 'typeFormName',
         selectThreshold: 0.3,
-        template: '<span>{{ item.formName }}</span>',
+        template: '<span>{{ item.typeFormName }}</span>',
         indexeddb: { 'filter': {} },
       }],
     },

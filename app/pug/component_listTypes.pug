@@ -27,7 +27,7 @@ block content
                 br
                 | NOTE: this ID must have only underscores and alphanumerics (no spaces, hyphens or special characters).  A human-readable name can be set on the next page.
               .vert-space-x1
-                input.form-control#formId(type = 'text')
+                input.form-control#typeFormId(type = 'text')
             .modal-footer
               button.btn.btn-danger(type = 'button', data-dismiss = 'modal') Close
               button.btn.btn-success#NewTypeButton(type = 'button') Create
@@ -51,7 +51,7 @@ block content
             if typeForm.tags && !typeForm.tags.includes('Trash')
               tr
                 td
-                  a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
+                  a(href = `/components/${typeFormId}/list`) #{typeForm.typeFormName}
 
                 if typeForm.count
                   td #{typeForm.count}
@@ -93,7 +93,7 @@ block content
               if typeForm.tags && typeForm.tags.includes('Trash')
                 tr
                   td
-                    a(href = `/components/${typeFormId}/list`) #{typeForm.formName}
+                    a(href = `/components/${typeFormId}/list`) #{typeForm.typeFormName}
 
                   if typeForm.count
                     td #{typeForm.count}

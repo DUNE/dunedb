@@ -158,8 +158,8 @@ router.get('/workflowTypes/:typeFormId/new', permissions.checkPermission('forms:
     // Use the form ID as the form name to start with - the user will have the option of changing the name later via the interface
     if (!typeForm) {
       typeForm = {
-        formId: req.params.typeFormId,
-        formName: req.params.typeFormId,
+        typeFormId: req.params.typeFormId,
+        typeFormName: req.params.typeFormId,
         schema: { components: [] },
       };
 
@@ -181,7 +181,7 @@ router.get('/workflowTypes/:typeFormId/edit', permissions.checkPermission('forms
     // Render the interface page
     res.render('workflow_editTypeForm.pug', {
       collection: 'workflowForms',
-      formId: req.params.typeFormId,
+      typeFormId: req.params.typeFormId,
     });
   } catch (err) {
     logger.error(err);

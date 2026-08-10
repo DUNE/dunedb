@@ -10,45 +10,51 @@ async function save(input, collection, req) {
   if (!permissions.hasPermission(req, 'forms:edit')) throw new Error(`Forms::save() - you do not have permission [forms:edit] to create and/or edit type forms!`);
 
   // Check that the minimum required type form information has been provided:
-  //   - the form ID
-  //   - the form name
-  //   - the schema, i.e. Formio components and layout (may be empty of content, but must still exist)
+  //   - the type form ID
+  //   - the type form name
+  //   - the schema, i.e. Formio components and layout (this may be an empty object, but must still exist)
+  //   - the submitting user's profile information
   if (!(input instanceof Object)) throw new Error(`Forms::save() - the 'input' object has not been specified!`);
-  if (!input.hasOwnProperty('formId')) throw new Error(`Forms::save() - the 'input.formId' has not been specified!`);
-  if (!input.hasOwnProperty('formName')) throw new Error(`Forms::save() - the 'input.formName' has not been specified!`);
+  if (!input.hasOwnProperty('typeFormId')) throw new Error(`Forms::save() - the 'input.typeFormId' has not been specified!`);
+  if (!input.hasOwnProperty('typeFormName')) throw new Error(`Forms::save() - the 'input.typeFormName' has not been specified!`);
   if (!input.hasOwnProperty('schema')) throw new Error(`Forms::save() - the 'input.schema' has not been specified!`);
+  if (!(req instanceof Object)) throw new Error(`Forms::save() - the 'req' object has not been specified!`);
+  if (!req.hasOwnProperty('user')) throw new Error(`Forms::save() - the 'req.user' has not been specified!`);
 
-  // Set up a new record object, and immediately add information, either directly or inherited from the 'input' object
+  // Check if a record with the same type form ID as the specified one already exists in the records collection
+  // If so (i.e. the returned object is not 'null'), this indicates that we are editing an existing type form, and if not (the returned object is 'null'), this is a new type form
+  let oldRecord = await retrieve(collection, input.typeFormId);
+
+  // Set up a new record object, and immediately add some information, either directly or inherited from the 'input' object
   let newRecord = {};
 
   newRecord.recordType = 'form';
-  newRecord.formId = input.formId;
-  newRecord.formName = input.formName;
+  newRecord.recordDate = new Date();
+  newRecord.recordVersion = (oldRecord === null) ? 1 : parseInt(oldRecord.recordVersion) + 1;
   newRecord.collection = collection;
+  newRecord.typeFormId = input.typeFormId;
+  newRecord.typeFormName = input.typeFormName;
+  newRecord.tags = input.tags || [];
 
-  if (collection !== 'componentForms') newRecord.componentTypes = input.componentTypes || [];
-  if (collection === 'workflowForms') {
+  if (collection === 'componentForms') {
+    newRecord.isBatch = input.isBatch || false;
+  } else if (collection === 'actionForms') {
+    newRecord.componentTypes = input.componentTypes || [];
+  } else if (collection === 'workflowForms') {
+    newRecord.componentTypes = input.componentTypes || [];
     newRecord.description = input.description || '';
     newRecord.path = input.path || [];
   }
 
-  newRecord.tags = input.tags || [];
+  newRecord.userId = req.user.user_id;
+  newRecord.userName = req.user.displayName;
+  newRecord.userEmail = req.user.emails[0].value;
+
   newRecord.schema = input.schema;
-  newRecord.isBatch = input.isBatch || false;
-
-  // Generate and add an 'insertion' field to the new record
-  newRecord.insertion = commonSchema.insertion(req);
-
-  let _lock = await dbLock(`saveTypeForm_${newRecord.formId}`, 1000);
-
-  // Attempt to retrieve an existing record with the same type form ID as the specified one (relevant if we are editing an existing record)
-  let oldRecord = await retrieve(collection, input.formId);
-
-  // Generate and add a 'validity' field to the new record, either from scratch (for a new record), or via incrementing that of the existing record (if editing)
-  newRecord.validity = commonSchema.validity(oldRecord);
-  newRecord.validity.ancestor_id = input._id;
 
   // Insert the new record into the specified records collection, and throw an error if the insertion fails
+  let _lock = await dbLock(`saveTypeForm_${newRecord.typeFormId}`, 1000);
+
   const result = await db.collection(collection)
     .insertOne(newRecord);
 
@@ -57,18 +63,18 @@ async function save(input, collection, req) {
   if (!result.acknowledged) throw new Error(`Forms::save() - failed to insert a new type form record into the database!`);
 
   // If the insertion is successful, return the record's type form ID as confirmation
-  return newRecord.formId;
+  return newRecord.typeFormId;
 }
 
 
 /// Retrieve a single version of a type form record (either the most recent, or a specified one)
-async function retrieve(collection, formId, projection) {
+async function retrieve(collection, typeFormId, projection) {
   // Throw an appropriate error if no collection or type form ID has been specified
   if (!collection) throw new Error(`Forms::retrieve(): the 'collection' has not been specified!`);
-  if (!formId) throw new Error(`Forms::retrieve(): the 'formId' has not been specified!`);
+  if (!typeFormId) throw new Error(`Forms::retrieve(): the 'typeFormId' has not been specified!`);
 
   // Set up the DB query match condition to be that a record's type form ID must match the specified one
-  let match_condition = { formId };
+  let match_condition = { typeFormId };
 
   // Set up any additional options that have been specified via the 'projection' argument
   let options = {};
@@ -79,7 +85,7 @@ async function retrieve(collection, formId, projection) {
   // Then sort any matching records such that the most recent version is first in the list
   let records = await db.collection(collection)
     .find(match_condition, options)
-    .sort({ 'validity.version': -1 })
+    .sort({ 'recordVersion': -1 })
     .toArray();
 
   // If there is at least one matching record ...
@@ -98,17 +104,17 @@ async function list(collection) {
   let aggregation_stages = [];
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by record version ... highest first
   // Then group the records by the type form ID (i.e. each group contains all versions of the same type form), and select only the first (highest version number) entry in each group
   // Note that to start with, this must cover ALL possible groupings across ALL type form collections, but certain groupings do not apply to certain collections, so remove them as necessary
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
 
   let grouping = {
     $group: {
-      _id: '$formId',
-      formId: { '$first': '$formId' },
-      formName: { '$first': '$formName' },
+      _id: '$typeFormId',
+      typeFormId: { '$first': '$typeFormId' },
+      typeFormName: { '$first': '$typeFormName' },
       tags: { '$first': '$tags' },
       componentTypes: { '$first': '$componentTypes' },
       path: { '$first': '$path' },
@@ -123,7 +129,7 @@ async function list(collection) {
   aggregation_stages.push(grouping);
 
   // Sort the records into alphabetical order
-  aggregation_stages.push({ $sort: { formName: 1 } });
+  aggregation_stages.push({ $sort: { typeFormName: 1 } });
 
   // Query the specified records collection using the aggregation stages defined above
   let records = await db.collection(collection)
@@ -134,7 +140,7 @@ async function list(collection) {
   let keyedRecords = {};
 
   for (const record of records) {
-    keyedRecords[record.formId] = record;
+    keyedRecords[record.typeFormId] = record;
   }
 
   // Return the keyed results object
@@ -147,17 +153,17 @@ async function listGrouped(collection) {
   let aggregation_stages = [];
 
   // Select only the latest version of each record
-  // First sort the matching records by validity ... highest version first
+  // First sort the matching records by record version ... highest first
   // Then group the records by the type form ID (i.e. each group contains all versions of the same type form), and select only the first (highest version number) entry in each group
   // Note that to start with, this must cover ALL possible groupings across ALL type form collections, but certain groupings do not apply to certain collections, so remove them as necessary
   // Finally, set which fields in the first record are to be returned for use in subsequent aggregation stages
-  aggregation_stages.push({ $sort: { 'validity.version': -1 } });
+  aggregation_stages.push({ $sort: { 'recordVersion': -1 } });
 
   let grouping = {
     $group: {
-      _id: '$formId',
-      formId: { '$first': '$formId' },
-      formName: { '$first': '$formName' },
+      _id: '$typeFormId',
+      typeFormId: { '$first': '$typeFormId' },
+      typeFormName: { '$first': '$typeFormName' },
       tags: { '$first': '$tags' },
       componentTypes: { '$first': '$componentTypes' },
       path: { '$first': '$path' },
@@ -181,8 +187,8 @@ async function listGrouped(collection) {
     aggregation_stages.push({
       $group: {
         _id: { componentType: '$componentTypes' },
-        formId: { $push: '$formId' },
-        formName: { $push: '$formName' },
+        typeFormId: { $push: '$typeFormId' },
+        typeFormName: { $push: '$typeFormName' },
         tags: { $push: '$tags' },
       }
     });
@@ -201,7 +207,7 @@ async function listGrouped(collection) {
     let keyedRecords = {};
 
     for (const record of records) {
-      keyedRecords[record.formId] = record;
+      keyedRecords[record.typeFormId] = record;
     }
 
     return keyedRecords;
