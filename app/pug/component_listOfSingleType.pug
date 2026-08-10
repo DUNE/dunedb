@@ -2,7 +2,7 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = `Components List (${componentTypeForm.formName})`;
+  - const page_title = `Components List (${componentTypeForm.typeFormName})`;
 
 block content
   .container-fluid
@@ -13,34 +13,34 @@ block content
             img.small-icon(src = '/images/run_icon.svg')
             | &nbsp; Create New Components of This Type via Workflows
         else
-          a.btn.btn-primary(href = `/component/${componentTypeForm.formId}/new`)
+          a.btn.btn-primary(href = `/component/${componentTypeForm.typeFormId}/new`)
             img.small-icon(src = '/images/run_icon.svg')
             | &nbsp; Create New Component of This Type
 
         .vert-space-x2
 
-      h2 Components List (#{componentTypeForm.formName})
+      h2 Components List (#{componentTypeForm.typeFormName})
 
     .vert-space-x1
       table.table
         thead
           tr
-            if componentTypeForm.formId == 'APAShippingFrame'
+            if componentTypeForm.typeFormId == 'APAShippingFrame'
               th.col-md-2 Component Name
             else 
               th.col-md-3 Component Name
 
-            if componentTypeForm.formId == 'APAFrame'
+            if componentTypeForm.typeFormId == 'APAFrame'
               th.col-md-2 Installed on APA
-            else if componentTypeForm.formId == 'APAShippingFrame'
+            else if componentTypeForm.typeFormId == 'APAShippingFrame'
               th.col-md-3 Assembled APA Shipment
-            else if componentTypeForm.formId == 'AssembledAPA'
+            else if componentTypeForm.typeFormId == 'AssembledAPA'
               th.col-md-2 APA Frame
-            else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'InstallationHardwareShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.formId))
+            else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'InstallationHardwareShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.typeFormId))
               th.col-md-2 Current Location
-            else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.formId))
+            else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.typeFormId))
               th.col-md-2 Current Location
-            else if componentTypeForm.formId == 'Yoke'
+            else if componentTypeForm.typeFormId == 'Yoke'
               th.col-md-2 Load Test Status
             else 
               th.col-md-2 

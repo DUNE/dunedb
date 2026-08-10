@@ -91,9 +91,9 @@ $(function () {
 
       // Attempt to retrieve the current type form record for the specified type form ID in the specified record collection, and throw an error if no such type form exists
       // If the retrieval is successful, continue to the function that deals with changes to the metadata and type forms
-      $.get(`/json/collection/${collection}/singleType/${formId}`, ChangeRecordData)
+      $.get(`/json/collection/${collection}/singleType/${typeFormId}`, ChangeRecordData)
         .fail(function () {
-          $('#builder').html(`Error - no type form currently exists for type form ID = ${formId}`);
+          $('#builder').html(`Error - no type form currently exists for type form ID = ${typeFormId}`);
         });
 
       // When the 'Submit' button is pressed, run the appropriate event handler callback function
@@ -109,11 +109,11 @@ $(function () {
 // Function for populating and changing the metadata and type forms
 function ChangeRecordData(record) {
   // If no type form name is present (i.e. if creating a new type form), set it to be the same as the type form ID
-  if (!record.formName || (record.formName.length == 0)) record.formName = record.formId;
+  if (!record.typeFormName || (record.typeFormName.length == 0)) record.typeFormName = record.typeFormId;
 
   // Increment the type form's version number and set the type form's validity start date to be now
-  record.validity.version += 1;
-  record.validity.startDate = (new Date()).toISOString();
+  record.recordVersion += 1;
+  record.recordDate = (new Date()).toISOString();
 
   // Populate the metadata form's submission object with the current form's contents
   metaForm.submission = { data: record };
@@ -203,7 +203,7 @@ function SubmitData(submission) {
   $.ajax({
     contentType: 'application/json',
     method: 'post',
-    url: `/json/collection/${collection}/singleType/${formId}/edit`,
+    url: `/json/collection/${collection}/singleType/${typeFormId}/edit`,
     data: JSON.stringify(submission.data),
     dataType: 'json',
     success: postSuccess,

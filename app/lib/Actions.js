@@ -87,8 +87,8 @@ async function save(input, req) {
   newRecord.recordType = 'action';
   newRecord.recordDate = new Date();
   newRecord.recordVersion = (oldRecord === null) ? 1 : parseInt(oldRecord.recordVersion) + 1;
-  newRecord.typeFormId = typeForm.formId;
-  newRecord.typeFormName = typeForm.formName;
+  newRecord.typeFormId = typeForm.typeFormId;
+  newRecord.typeFormName = typeForm.typeFormName;
   newRecord.actionId = new ObjectId(input.actionId);
   newRecord.componentUuid = MUUID.from(input.componentUuid);
 

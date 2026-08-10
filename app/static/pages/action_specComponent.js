@@ -39,7 +39,7 @@ async function onPageLoad() {
   typeForm.on('submit', function (submission) {
     // At this point, the 'submission' object contains ONLY the information that has been entered into the type form (i.e. the 'data' field)
     // Add all other required information, inheriting from the variables that were passed through the route to this page
-    submission.typeFormId = actionTypeForm.formId;
+    submission.typeFormId = actionTypeForm.typeFormId;
     submission.componentUuid = componentUuid;
 
     // If the action originates from a workflow (and therefore a non-empty workflow ID has been provided), save the workflow ID into the 'submission' object

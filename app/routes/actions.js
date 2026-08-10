@@ -186,7 +186,7 @@ router.get('/action/:typeFormId/unspec', permissions.checkPermission('actions:pe
     // Render the interface page
     res.render('action_unspecComponent.pug', {
       actionTypeFormId: req.params.typeFormId,
-      actionTypeFormName: actionTypeForm.formName,
+      actionTypeFormName: actionTypeForm.typeFormName,
     });
   } catch (err) {
     logger.error(err);
@@ -242,8 +242,8 @@ router.get('/actionTypes/:typeFormId/new', permissions.checkPermission('forms:ed
     // Use the form ID as the form name to start with - the user will have the option of changing the name later via the interface
     if (!typeForm) {
       typeForm = {
-        formId: req.params.typeFormId,
-        formName: req.params.typeFormId,
+        typeFormId: req.params.typeFormId,
+        typeFormName: req.params.typeFormId,
         schema: { components: [] },
       };
 
@@ -265,7 +265,7 @@ router.get('/actionTypes/:typeFormId/edit', permissions.checkPermission('forms:e
     // Render the interface page
     res.render('action_editTypeForm.pug', {
       collection: 'actionForms',
-      formId: req.params.typeFormId,
+      typeFormId: req.params.typeFormId,
     });
   } catch (err) {
     logger.error(err);
@@ -297,7 +297,7 @@ router.get('/actionTypes/list', permissions.checkPermission('actions:view'), asy
     // For each group of action type forms ...
     for (let actionFormsGroup of actionTypeForms) {
       // Make a copy of the list of type form names, and sort this new copy alphabetically (the order of the original list is preserved)
-      let sorted_formNames = [...actionFormsGroup.formName];
+      let sorted_formNames = [...actionFormsGroup.typeFormName];
       sorted_formNames.sort();
 
       // Make new lists of the type form IDs and tags, now ordered accordingly to the sorted type form names ...
@@ -307,16 +307,16 @@ router.get('/actionTypes/list', permissions.checkPermission('actions:view'), asy
       let sorted_tags = [];
       let sorted_workflowActions = [];
 
-      for (const formName of sorted_formNames) {
-        const index = actionFormsGroup.formName.indexOf(formName);
-        sorted_formIds.push(actionFormsGroup.formId[index]);
+      for (const typeFormName of sorted_formNames) {
+        const index = actionFormsGroup.typeFormName.indexOf(typeFormName);
+        sorted_formIds.push(actionFormsGroup.typeFormId[index]);
         sorted_tags.push(actionFormsGroup.tags[index]);
-        sorted_workflowActions.push(list_workflowActions.includes(formName));
+        sorted_workflowActions.push(list_workflowActions.includes(typeFormName));
       }
 
       // Overwrite the previously unordered type form name, ID and tags lists with the alphabetically ordered versions, and add the list of flags indicating workflow actions
-      actionFormsGroup.formName.splice(0, actionFormsGroup.formName.length, ...sorted_formNames);
-      actionFormsGroup.formId.splice(0, actionFormsGroup.formId.length, ...sorted_formIds);
+      actionFormsGroup.typeFormName.splice(0, actionFormsGroup.typeFormName.length, ...sorted_formNames);
+      actionFormsGroup.typeFormId.splice(0, actionFormsGroup.typeFormId.length, ...sorted_formIds);
       actionFormsGroup.tags.splice(0, actionFormsGroup.tags.length, ...sorted_tags);
       actionFormsGroup.workflowAction = [...sorted_workflowActions];
     }
@@ -389,7 +389,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
 
     // For certain action types, it is useful to display some extra information
     // Add whatever information is relevant to each action record (but using the same generic field name regardless of what the information actually is)
-    if (actionTypeForm.formId == 'APANonConformance') {
+    if (actionTypeForm.typeFormId == 'APANonConformance') {
       for (let ncrAction of actions) {
         ncrAction.additionalInformation = ncrAction.data.nonConformanceTitle;
       }
@@ -397,7 +397,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
       for (let action of actions) { action.additionalInformation = ''; }
     }
 
-    const workflowAction = list_workflowActions.includes(actionTypeForm.formName);
+    const workflowAction = list_workflowActions.includes(actionTypeForm.typeFormName);
 
     // Render the interface page
     res.render('action_listOfSingleType.pug', {

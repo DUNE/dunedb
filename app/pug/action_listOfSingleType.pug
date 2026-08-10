@@ -2,7 +2,7 @@ extend default
 include common.pug
 
 block vars
-  - const page_title = `Actions List (${actionTypeForm.formName})`;
+  - const page_title = `Actions List (${actionTypeForm.typeFormName})`;
 
 block content
   .container-fluid
@@ -13,13 +13,13 @@ block content
             img.small-icon(src = '/images/run_icon.svg')
             | &nbsp; Perform New Actions of This Type via Workflows
         else
-          a.btn.btn-primary(href = `/action/${actionTypeForm.formId}/unspec`)
+          a.btn.btn-primary(href = `/action/${actionTypeForm.typeFormId}/unspec`)
             img.small-icon(src = '/images/run_icon.svg')
             | &nbsp; Perform New Action of This Type
 
         .vert-space-x2
 
-      h2 Actions List (#{actionTypeForm.formName})
+      h2 Actions List (#{actionTypeForm.typeFormName})
 
     .vert-space-x1
       table.table
@@ -27,7 +27,7 @@ block content
           tr
             th.col-md-2 Action ID
 
-            if actionTypeForm.formId == 'APANonConformance'
+            if actionTypeForm.typeFormId == 'APANonConformance'
               th.col-md-2 Performed on Component:
               th.col-md-5 NCR Title 
             else 
