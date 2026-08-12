@@ -7,7 +7,7 @@ extend default
 block extrascripts
   script(type = 'text/javascript').
     const collection = !{JSON.stringify(collection, null, 4)};
-    const formId = !{JSON.stringify(formId, null, 4)};
+    const typeFormId = !{JSON.stringify(typeFormId, null, 4)};
 
   block metaschema
 
@@ -35,7 +35,7 @@ block content
             textarea.form-control#schema(rows = 20)
 
         .col
-          a#download_schema(onclick = 'DownloadSchema()', download = `${formId}.json`, href = '') Download Schema
+          a#download_schema(onclick = 'DownloadSchema()', download = `${typeFormId}.json`, href = '') Download Schema
 
           .vert-space-x1
             a.button.btn.btn-primary(onclick = 'CopySchemaToClipboard()') Copy Schema to Clipboard

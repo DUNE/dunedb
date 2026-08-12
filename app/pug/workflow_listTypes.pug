@@ -27,7 +27,7 @@ block content
                 br
                 | NOTE: this ID must have only underscores and alphanumerics (no spaces, hyphens or special characters).  A human-readable name can be set on the next page.
               .vert-space-x1
-                input.form-control#formId(type = 'text')
+                input.form-control#typeFormId(type = 'text')
             .modal-footer
               button.btn.btn-danger(type = 'button', data-dismiss = 'modal') Close
               button.btn.btn-success#NewTypeButton(type = 'button') Create
@@ -50,14 +50,14 @@ block content
 
             if typeForm.tags && !typeForm.tags.includes('Trash')
               tr
-                if typeForm.formId === 'APA_Assembly'
+                if typeForm.typeFormId === 'APA_Assembly'
                   - const location = typeFormId.slice(-2)
 
                   td
-                    a(href = `/workflows/${typeForm.formId}/list?location=${location}`) #{typeForm.formName} (#{location})
+                    a(href = `/workflows/${typeForm.typeFormId}/list?location=${location}`) #{typeForm.typeFormName} (#{location})
                 else 
                   td
-                    a(href = `/workflows/${typeForm.formId}/list`) #{typeForm.formName}
+                    a(href = `/workflows/${typeForm.typeFormId}/list`) #{typeForm.typeFormName}
 
                 if typeForm.componentTypes && typeForm.componentTypes.length > 0
                   td 
@@ -66,11 +66,11 @@ block content
                   td (none)
 
                 td
-                  a.btn-sm.btn-primary(href = `/workflow/${typeForm.formId}/new`)
+                  a.btn-sm.btn-primary(href = `/workflow/${typeForm.typeFormId}/new`)
                     img.small-icon(src = '/images/run_icon.svg')
                     | &nbsp; Create New Workflow of This Type
                 td
-                  a.btn-sm.btn-warning(href = `/workflowTypes/${typeForm.formId}/edit`)
+                  a.btn-sm.btn-warning(href = `/workflowTypes/${typeForm.typeFormId}/edit`)
                     img.small-icon(src = '/images/edit_icon.svg')
                     | &nbsp; Edit Workflow Type Form
 
@@ -94,7 +94,7 @@ block content
               if typeForm.tags && typeForm.tags.includes('Trash') 
                 tr
                   td
-                    a(href = `/workflows/${typeFormId}/list`) #{typeForm.formName}
+                    a(href = `/workflows/${typeFormId}/list`) #{typeForm.typeFormName}
 
                   if typeForm.componentTypes && typeForm.componentTypes.length > 0
                     td

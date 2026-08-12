@@ -161,7 +161,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       }
 
       for (const [typeFormID, typeForm] of Object.entries(actionTypeForms)) {
-        if (list_workflowActions.includes(typeForm.formName)) {
+        if (list_workflowActions.includes(typeForm.typeFormName)) {
           delete actionTypeForms[typeFormID];
         }
       }
@@ -749,8 +749,8 @@ router.get('/componentTypes/:typeFormId/new', permissions.checkPermission('forms
     // Use the form ID as the form name to start with - the user will have the option of changing the name later via the interface
     if (!typeForm) {
       typeForm = {
-        formId: req.params.typeFormId,
-        formName: req.params.typeFormId,
+        typeFormId: req.params.typeFormId,
+        typeFormName: req.params.typeFormId,
         schema: { components: [] },
       };
 
@@ -772,7 +772,7 @@ router.get('/componentTypes/:typeFormId/edit', permissions.checkPermission('form
     // Render the interface page
     res.render('component_editTypeForm.pug', {
       collection: 'componentForms',
-      formId: req.params.typeFormId,
+      typeFormId: req.params.typeFormId,
     });
   } catch (err) {
     logger.error(err);
@@ -839,14 +839,14 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
 
     // For certain component types, it is useful to display some extra information ... either directly about the component itself, or about a related component or action
     // Add whatever information is relevant to each component record (but using the same generic field name regardless of what the information actually is)
-    if (componentTypeForm.formId === 'APAFrame') {
+    if (componentTypeForm.typeFormId === 'APAFrame') {
       for (let apaFrame of components) {
         const assembledAPA = await Components.retrieve(MUUID.from(apaFrame.locationDetail));
 
         if (assembledAPA) { apaFrame.additionalInformation = assembledAPA.data.componentName; }
         else { apaFrame.additionalInformation = '[Not Currently in Use on an APA!]'; }
       }
-    } else if (componentTypeForm.formId === 'APAShippingFrame') {
+    } else if (componentTypeForm.typeFormId === 'APAShippingFrame') {
       for (let asf of components) {
         const assembledAPAShipments = await Search_OtherComponents.apaShipmentsByAPAorASFUUID(asf.componentUuid);
 
@@ -857,19 +857,19 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
           asf.additionalInformation = '[Not Currently in Use on a Shipment!]';
         }
       }
-    } else if (componentTypeForm.formId === 'AssembledAPA') {
+    } else if (componentTypeForm.typeFormId === 'AssembledAPA') {
       for (let assembledAPA of components) {
         const apaFrame = await Components.retrieve(MUUID.from(assembledAPA.data.frameUuid));
 
         if (apaFrame) { assembledAPA.additionalInformation = apaFrame.data.componentName; }
         else { assembledAPA.additionalInformation = '[No APA Frame UUID Found!]'; }
       }
-    } else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'InstallationHardwareShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.formId)) {
+    } else if (['APAFrameShipment', 'AssembledAPAShipment', 'CEAdapterBoardShipment', 'CRBoardShipment', 'CableHarnessShipment', 'DWAComponentShipment', 'GBiasBoardShipment', 'GeometryBoardShipment', 'GroundingMeshPanelShipment', 'InstallationHardwareShipment', 'PopulatedBoardShipment', 'SHVBoardShipment'].includes(componentTypeForm.typeFormId)) {
       for (let shipment of components) {
         if (shipment.location != null) { shipment.additionalInformation = utils.dictionary_locations[shipment.location]; }
         else { shipment.additionalInformation = '[location field missing!]'; }
       }
-    } else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.formId)) {
+    } else if (['CEAdapterBoard', 'CRBoard', 'CableHarness', 'DWA', 'DWAPDB', 'GBiasBoard', 'GeometryBoard', 'GroundingMeshPanel', 'SHVBoard'].includes(componentTypeForm.typeFormId)) {
       for (let board of components) {
         if (board.location != null) {
           if (board.location === 'rejected') {
@@ -881,7 +881,7 @@ router.get('/components/:typeFormId/list', permissions.checkPermission('componen
           board.additionalInformation = '[location field missing!]';
         }
       }
-    } else if (componentTypeForm.formId === 'Yoke') {
+    } else if (componentTypeForm.typeFormId === 'Yoke') {
       for (let yoke of components) {
         yoke.additionalInformation = dict_yokeLoadTestResults[yoke.data.loadTestStatus];
       }
