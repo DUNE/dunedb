@@ -1,7 +1,6 @@
 const MUUID = require('uuid-mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
-const commonSchema = require('./commonSchema');
 const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
