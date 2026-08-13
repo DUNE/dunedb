@@ -1,4 +1,3 @@
-const commonSchema = require('./commonSchema');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const permissions = require('./permissions');
