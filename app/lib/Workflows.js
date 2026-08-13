@@ -1,7 +1,6 @@
 const ObjectId = require('mongodb').ObjectId;
 
 const Actions = require('./Actions');
-const commonSchema = require('./commonSchema');
 const Components = require('./Components');
 const { db } = require('./db');
 const dbLock = require('./dbLock');

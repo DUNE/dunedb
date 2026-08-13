@@ -2,7 +2,6 @@ const Binary = require('mongodb').Binary;
 const MUUID = require('uuid-mongodb');
 const ShortUUID = require('short-uuid');
 
-const commonSchema = require('./commonSchema');
 const { db } = require('./db');
 const dbLock = require('./dbLock');
 const Forms = require('./Forms');
