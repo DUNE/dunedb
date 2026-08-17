@@ -333,6 +333,12 @@ async function updateLocation(componentUuid, location, date, detail) {
   //      * if a geometry board shipment is being retroactively received
   //      * when a board installation action has previously been only partially completed, and is now being edited with additional board entries
 
+  // For some reason, component shipments sometimes may contain a blank (i.e. empty string) component UUID, which obviously cannot be retrieved as a component record
+  // If the 'Components.retrieve' function used below receives a blank UUID, it will throw an error and stop the entire process of whatever else is being done ... 
+  // ... for example - if setting the locations of all sub-components in a shipment, a blank UUID will cause any further sub-components after the blank UUID to NOT have their locations set
+  // Instead of allowing that to happen, check if the specified component UUID is an empty string, and return immediately from HERE if this is the case
+  if (componentUuid === '') return 1;
+
   // First retrieve the component's record, then check for the current location, and only proceed to change it if we are NOT in one of the situations described above
   const component = await retrieve(componentUuid);
   let currentLocation = 'null object';
