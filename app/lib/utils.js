@@ -156,6 +156,7 @@ module.exports = {
   dictionary_frameNCRSignoff: {
     olgaBeltramello: 'Olga Beltramello',
     ericJames: 'Eric James',
+    niklasTempleton: 'Niklas Templeton',
     radosavPantelic: 'Radosav Pantelic',
   },
 
