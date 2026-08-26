@@ -1854,6 +1854,8 @@ function SetHeader_ncrsWithDisposition(disposition, count) {
 
 // Set up the schema for a single NCR entry (excluding any wire information)
 function SetEntry_NCR(ncrInfo) {
+  const ncr_link = `<a href = '/action/${ncrInfo.actionId}' > Link to Action on APA DB</a>`;
+
   const schema_ncr = {
     "components": [
       {
@@ -1912,19 +1914,34 @@ function SetEntry_NCR(ncrInfo) {
                       "currentWidth": 4
                     },
                     {
+                      "components": [],
+                      "size": "sm",
+                      "width": 1,
+                      "offset": 0,
+                      "push": 0,
+                      "pull": 0,
+                      "currentWidth": 1
+                    },
+                    {
                       "components": [
                         {
-                          "label": "APA Construction Database Action ID",
-                          "disabled": true,
-                          "tableView": true,
-                          "key": "apaConstructionDbActionId",
-                          "type": "textfield",
-                          "input": true,
-                          "defaultValue": ncrInfo.actionId
+                          "label": "HTML",
+                          "attrs": [
+                            {
+                              "attr": "",
+                              "value": ""
+                            }
+                          ],
+                          "refreshOnChange": false,
+                          "key": "ncrLink",
+                          "type": "htmlelement",
+                          "input": false,
+                          "tableView": false,
+                          "content": `<br></br><b>${ncr_link}</b>`
                         }
                       ],
                       "size": "sm",
-                      "width": 3,
+                      "width": 2,
                       "offset": 0,
                       "push": 0,
                       "pull": 0,
@@ -1945,6 +1962,16 @@ function SetEntry_NCR(ncrInfo) {
                   "type": "textarea",
                   "input": true,
                   "defaultValue": ncrInfo.description
+                },
+                {
+                  "label": "Corrective Actions",
+                  "autoExpand": false,
+                  "disabled": true,
+                  "tableView": true,
+                  "key": "correctiveActions",
+                  "type": "textarea",
+                  "input": true,
+                  "defaultValue": ncrInfo.correctiveActions
                 }
               ]
             }

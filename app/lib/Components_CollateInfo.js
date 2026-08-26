@@ -669,6 +669,7 @@ async function forExecSummary(componentUUID) {
       disposition: { '$first': '$data.disposition' },
       title: { '$first': '$data.nonConformanceTitle' },
       description: { '$first': '$data.nonConformanceDescription' },
+      correctiveActions: { '$first': '$data.actionToPreventMisuse' },
       nonConfType_APA: { '$first': '$data.nonConformanceType' },
       nonConfType_Frame: { '$first': '$data.frameNonConformanceType' },
       nonConfType_Mesh: { '$first': '$data.frameNonConformanceType1' },
