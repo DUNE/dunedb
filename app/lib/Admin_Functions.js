@@ -55,16 +55,16 @@ async function setAdditionalInfo_singleCollection(collection) {
 }
 
 
-async function removeValidityInsertion_singleCollection(collection) {
+async function removeOldFields_singleCollection(collection) {
   let result = await db.collection(collection)
     .updateMany(
       {},
       [
-        { $unset: ['validity', 'insertion'] },
+        { $unset: ['formId', 'formName'] },
       ]
     )
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::removeValidityInsertion_singleCollection() - failed to remove fields from the collection records!`);
+  if (result.ok === 0) throw new Error(`Admin_Functions::removeOldFields_singleCollection() - failed to remove fields from the collection records!`);
 
   return result;
 }
@@ -72,5 +72,5 @@ async function removeValidityInsertion_singleCollection(collection) {
 
 module.exports = {
   setAdditionalInfo_singleCollection,
-  removeValidityInsertion_singleCollection,
+  removeOldFields_singleCollection,
 }
