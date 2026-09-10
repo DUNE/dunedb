@@ -8,10 +8,10 @@ const { db } = require('./db');
 async function boardsByVisualInspection(disposition, issue) {
   let action_aggregation_stages = [];
 
-  // Match against the type form ID to get records of all 'Visual Inspection' actions
+  // Match against the type form ID to get records of all 'Geometry Board Visual Inspection' actions
   action_aggregation_stages.push({
     $match: {
-      'typeFormId': 'BoardVisualInspection',
+      'typeFormId': 'GeometryBoardVisualInspection',
     }
   });
 
@@ -127,10 +127,10 @@ async function boardsByVisualInspection(disposition, issue) {
 
       let perBoard_action_aggregation_stages = [];
 
-      // Match against the type form ID and component UUID to get records of all 'Visual Inspection' actions that have been performed on this board
+      // Match against the type form ID and component UUID to get records of all 'Geometry Board Visual Inspection' actions that have been performed on this board
       perBoard_action_aggregation_stages.push({
         $match: {
-          'typeFormId': 'BoardVisualInspection',
+          'typeFormId': 'GeometryBoardVisualInspection',
           'componentUuid': MUUID.from(boardUuid),
         }
       });
@@ -248,10 +248,10 @@ async function boardsByOrderNumber(orderNumber) {
 
     let action_aggregation_stages = [];
 
-    // Match against the type form ID and component UUID to get records of all 'Visual Inspection' actions that have been performed on the sub-component geometry boards
+    // Match against the type form ID and component UUID to get records of all 'Geometry Board Visual Inspection' actions that have been performed on the sub-component geometry boards
     action_aggregation_stages.push({
       $match: {
-        'typeFormId': 'BoardVisualInspection',
+        'typeFormId': 'GeometryBoardVisualInspection',
         'componentUuid': { $in: boardUUIDs },
       }
     });
