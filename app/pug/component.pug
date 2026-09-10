@@ -469,7 +469,7 @@ block content
             tbody 
               each entry in actions
                 tr 
-                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Geometry Board Shipment')
+                  if (entry.typeFormName === 'Record Created in DB') || (entry.typeFormName === 'Shipment')
                     td 
                       a(href = `/component/${entry.componentUuid}`) #{entry.typeFormName}
                   else 
@@ -479,7 +479,7 @@ block content
                   td #{entry.recordDate.toISOString().slice(0, 10)}
                   td #{dictionary_locations[entry.data.originOfShipment]}
 
-                  if entry.typeFormName === 'Geometry Board Shipment'
+                  if entry.typeFormName === 'Shipment'
                     if entry.location
                       if entry.location === 'in_transit'
                         td #{dictionary_locations[entry.data.destinationOfShipment]}
@@ -494,7 +494,7 @@ block content
                     td -
                     td -
 
-                  if (entry.typeFormName === 'Board DB Record Created') || (entry.typeFormName === 'Geometry Board Shipment')
+                  if (entry.typeFormName === 'Record Created in DB') || (entry.typeFormName === 'Shipment')
                     td -
                   else 
                     td #{entry.data.checksPassed}
