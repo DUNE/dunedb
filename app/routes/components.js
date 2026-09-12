@@ -66,7 +66,8 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
 
           const record = await Actions.retrieve(entry.actionId);
 
-          if (entry.typeFormId === 'BoardVisualInspection') {
+          if (entry.typeFormId === 'GeometryBoardVisualInspection') {
+            entry.typeFormName = 'Visual Inspection';
             entry.data.originOfShipment = 'lancaster';
 
             if ((record.data.nonConformingDisposition === 'boardIsConformant') || (record.data.nonConformingDisposition === 'useAsIs')) {
@@ -76,7 +77,8 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
             } else {
               entry.data.checksPassed = 'No';
             }
-          } else if (entry.typeFormId === 'BoardToothStripAttachment') {
+          } else if (entry.typeFormId === 'GeometryBoardToothStripAttachment') {
+            entry.typeFormName = 'Tooth Strip Attachment';
             entry.data.originOfShipment = record.data.locationWorkPerformed;
 
             let qcCheck_names = ['qcBoardDamage', 'qcGapWithBoard', 'qcToothStripDamage', 'qcStripFlushWithBoard', 'qcCorrectEpoxyApplication', 'qcSolderPadAlignment'];
@@ -106,7 +108,8 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
             } else {
               entry.data.checksPassed = 'No';
             }
-          } else if (entry.typeFormId === 'FactoryBoardRejection') {
+          } else if (entry.typeFormId === 'GeometryBoardRejection') {
+            entry.typeFormName = 'Rejection';
             entry.data.originOfShipment = record.data.boardRejectionLocation;
 
             if ((record.data.disposition === 'remediated') || (record.data.disposition === 'useAsIs')) {
@@ -115,11 +118,13 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
               entry.data.checksPassed = 'No';
             }
           }
+        } else {
+          entry.typeFormName = 'Shipment';
         }
       }
 
       actions.push({
-        'typeFormName': 'Board DB Record Created',
+        'typeFormName': 'Record Created in DB',
         'componentUuid': req.params.uuid,
         'recordDate': new Date(componentVersions[componentVersions.length - 1].recordDate),
         'data': { 'originOfShipment': 'lancaster' },
@@ -525,7 +530,7 @@ router.get('/component/:uuid/summary', permissions.checkPermission('components:v
 
     for (let i = 0; i < actions.length; i++) {
       if (actions[i].workflowId == null) {
-        if (actions[i].typeFormId === 'APANonConformance') {
+        if (actions[i].typeFormId === 'NonConformanceReport') {
           nonConformActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));
         } else {
           otherActions.push(await Actions.retrieve({ actionId: actions[i].actionId }));

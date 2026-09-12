@@ -325,7 +325,7 @@ class ComponentUUID extends TextFieldComponent {
               $.ajax({
                 contentType: 'application/json',
                 method: 'GET',
-                url: `/json/actions/${'MeshQAInspection'}/list?uuid=${value}`,
+                url: `/json/actions/${'GroundingMeshPanelQAInspection'}/list?uuid=${value}`,
                 dataType: 'json',
                 success: function (actionIDsList) {
                   if (actionIDsList.length > 0) {
@@ -357,7 +357,7 @@ class ComponentUUID extends TextFieldComponent {
               $.ajax({
                 contentType: 'application/json',
                 method: 'GET',
-                url: `/json/actions/${'FactoryBoardRejection'}/list?uuid=${value}`,
+                url: `/json/actions/${'GeometryBoardRejection'}/list?uuid=${value}`,
                 dataType: 'json',
                 success: function (actionIDsList) {
                   if (actionIDsList.length == 0) {
@@ -372,7 +372,7 @@ class ComponentUUID extends TextFieldComponent {
                         if ((action.data.disposition === 'useAsIs') || (action.data.disposition === 'remediated')) {
                           info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
                         } else {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - rejected via Factory Board Rejection action!`);
+                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - rejected via Geometry Board Rejection action!`);
                         }
                       },
                     }).fail();

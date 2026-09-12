@@ -64,7 +64,7 @@ async function nonConformanceByComponentType(componentType, disposition, status)
   // Match against the type form ID to get records of all NCRs applying to all types of components
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'APANonConformance',
+      'typeFormId': 'NonConformanceReport',
     }
   });
 
@@ -137,7 +137,7 @@ async function nonConformanceByUUID(componentUUID) {
   // Match against the type form ID and component UUID to get records of all NCR actions performed on the specified component
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'APANonConformance',
+      'typeFormId': 'NonConformanceReport',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
@@ -304,14 +304,14 @@ async function windingByReferencedComponent(componentUUID) {
 }
 
 
-/// Retrieve a list of board rejection actions that reference a single component, specified by its UUID
+/// Retrieve a list of geometry board rejection actions that reference a single component, specified by its UUID
 async function boardRejectionByReferencedComponent(componentUUID) {
   let aggregation_stages = [];
 
-  // Match against the type form ID and component UUID to get records of all 'Factory Board Rejection'actions performed on the specified component
+  // Match against the type form ID and component UUID to get records of all 'Geometry Board Rejection'actions performed on the specified component
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'FactoryBoardRejection',
+      'typeFormId': 'GeometryBoardRejection',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
