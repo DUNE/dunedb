@@ -9,10 +9,10 @@ const permissions = require('./permissions');
 const utils = require('./utils');
 
 // Declare a list of the available 'shipment transport' related action type forms
-const transport_typeFormIDs = ['APAShipmentTransport', 'CEAdapterBoardTransport'];
+const transport_typeFormIDs = ['APAShipmentTransport', 'CEAdapterBoardShipmentTransport'];
 
 // Declare a list of the available 'reception' related action type forms
-const reception_typeFormIDs = ['APAFrameShipmentReception', 'APAShipmentReception', 'BoardReception', 'CEAdapterBoardReception', 'DWAComponentShipmentReception', 'GroundingMeshShipmentReception', 'InstallationHardwareShipmentReception', 'PopulatedBoardKitReception'];
+const reception_typeFormIDs = ['APAFrameShipmentReception', 'APAShipmentReception', 'CEAdapterBoardShipmentReception', 'DWAComponentShipmentReception', 'GeometryBoardShipmentReception', 'GroundingMeshPanelShipmentReception', 'InstallationHardwareShipmentReception', 'MultiTypePopulatedBoardShipmentReception'];
 
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
 const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
@@ -148,7 +148,7 @@ async function save(input, req) {
     endPointsForMissingSegments: '',
   };
 
-  if (newRecord.typeFormId === 'APANonConformance') {
+  if (newRecord.typeFormId === 'NonConformanceReport') {
     if (newRecord.data.damagedWireGrid.length === 1) {
       if (!newRecord.data.damagedWireGrid[0].hasOwnProperty('wireLayer')) {
         newRecord.data.damagedWireGrid[0] = correctedEntry;
@@ -188,10 +188,10 @@ async function save(input, req) {
   // - for shipment transport actions, update the location of each individual sub-component (as well as the shipment itself) to be 'In Transit'
   // - for shipment or batch reception actions, update the location of each individual sub-component (as well as the shipment itself) to match where and when it was received
   // - for board and mesh installation actions, update the location of each component referenced in the action to be 'Installed on APA' 
-  // - for 'Factory Board Rejection' actions ...
+  // - for 'Geometry Board Rejection' actions ...
   //   ... where the rejection disposition is 'Rejected', update the board's location to indicate as such
   //   ... where the rejection disposition is something other than 'Rejected', update the board's location to match where and when the action was performed
-  // - for 'Tooth Strip Attachment' actions, update the board's location to match where and when the action was performed
+  // - for 'Geometry Board Tooth Strip Attachment' actions, update the board's location to match where and when the action was performed
   // - for some (but not all) actions performed on grounding mesh panels, update the mesh's location to match where and when the action was performed
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (transport_typeFormIDs.includes(newRecord.typeFormId)) {
@@ -240,7 +240,7 @@ async function save(input, req) {
         }
       }
     }
-  } else if (newRecord.typeFormId === 'FactoryBoardRejection') {
+  } else if (newRecord.typeFormId === 'GeometryBoardRejection') {
     const rejectionLocation = utils.dictionary_locations[newRecord.data.boardRejectionLocation];
 
     if (newRecord.data.disposition === 'rejected') {
@@ -267,9 +267,9 @@ async function save(input, req) {
     } else {
       const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.boardRejectionLocation, (new Date()).toISOString().slice(0, 10), '');
     }
-  } else if (newRecord.typeFormId === 'BoardToothStripAttachment') {
+  } else if (newRecord.typeFormId === 'GeometryBoardToothStripAttachment') {
     const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.locationWorkPerformed, (new Date()).toISOString().slice(0, 10), '');
-  } else if (['EpoxyApplication', 'FinalInspection', 'ReceiptInspection'].includes(newRecord.typeFormId)) {
+  } else if (['GroundingMeshPanelEpoxyApplication', 'GroundingMeshPanelFinalInspection', 'GroundingMeshPanelReceiptInspection'].includes(newRecord.typeFormId)) {
     const result = await Components.updateLocation(newRecord.componentUuid, newRecord.data.location, newRecord.data.date.slice(0, 10), '');
   }
 
@@ -519,7 +519,7 @@ async function boardRejectionCounts_byPartNumberAndLocation() {
     .aggregate(aggregation_stages)
     .toArray();
 
-  // Set up arrays of the possible board rejection locations (taken from the 'Factory Board Rejection' action type form) ...
+  // Set up arrays of the possible board rejection locations (taken from the 'Geometry Board Rejection' action type form) ...
   // ... and the geometry board part numbers (taken from the 'Search for Geometry Boards by Location or Part Number' interface page .pug code) ...
   // ... and an empty array of zeroes, each of which represents a single [location, part number] combination ... i.e. [0] = ['cambridge', '8760051'], [1] = ['cambridge', '8760054'], etc.
   const rejectionLocations = ['cambridge', 'chicago', 'daresbury', 'lancaster', 'manchester', 'sheffield', 'sussex', 'williamAndMary'];

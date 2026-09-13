@@ -656,7 +656,7 @@ async function forExecSummary(componentUUID) {
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'APANonConformance',
+      'typeFormId': 'NonConformanceReport',
       'componentUuid': MUUID.from(componentUUID),
     }
   });

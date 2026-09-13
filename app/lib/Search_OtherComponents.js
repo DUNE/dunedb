@@ -49,10 +49,10 @@ async function geoBoardShipmentsByReceptionDetails(status, origin, destination, 
   for (const shipmentRecord of component_results) {
     let action_aggregation_stages = [];
 
-    // Match against the type form ID and component UUID to get records of all 'Board Reception' actions performed on the specified geometry board shipment component
+    // Match against the type form ID and component UUID to get records of all 'Geometry Board Shipment Reception' actions performed on the specified geometry board shipment component
     action_aggregation_stages.push({
       $match: {
-        'typeFormId': 'BoardReception',
+        'typeFormId': 'GeometryBoardShipmentReception',
         'componentUuid': shipmentRecord.componentUuid,
       }
     });
@@ -547,7 +547,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
         let includeBoard_basedOnToothStripStatus = false;
 
         match_condition = {
-          typeFormId: 'BoardToothStripAttachment',
+          typeFormId: 'GeometryBoardToothStripAttachment',
           componentUuid: MUUID.from(boardUuid).toString(),
         }
 
@@ -634,7 +634,7 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
       let qaChecksPassed = false;
 
       let match_condition = {
-        typeFormId: 'PopulatedBoardQC',
+        typeFormId: 'PopulatedBoardCableHarnessQA',
         componentUuid: MUUID.from(result.componentUuid).toString(),
       };
 
@@ -767,7 +767,7 @@ async function componentsByTypeAndPartNumber(typeFormId, partNumber, acceptanceS
         let includeBoard_basedOnToothStripStatus = false;
 
         match_condition = {
-          typeFormId: 'BoardToothStripAttachment',
+          typeFormId: 'GeometryBoardToothStripAttachment',
           componentUuid: MUUID.from(boardUuid).toString(),
         }
 

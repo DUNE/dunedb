@@ -389,7 +389,7 @@ router.get('/actions/:typeFormId/list', permissions.checkPermission('actions:vie
 
     // For certain action types, it is useful to display some extra information
     // Add whatever information is relevant to each action record (but using the same generic field name regardless of what the information actually is)
-    if (actionTypeForm.typeFormId == 'APANonConformance') {
+    if (actionTypeForm.typeFormId == 'NonConformanceReport') {
       for (let ncrAction of actions) {
         ncrAction.additionalInformation = ncrAction.data.nonConformanceTitle;
       }
@@ -557,7 +557,7 @@ router.get(['/json/actions/ncrsByComponent/:uuid', '/api/actions/ncrsByComponent
   try {
     // Set up an object containing the conditions to match to ... the action type form ID and the component UUID
     let match_condition = {
-      typeFormId: 'APANonConformance',
+      typeFormId: 'NonConformanceReport',
       componentUuid: req.params.uuid,
     };
 
