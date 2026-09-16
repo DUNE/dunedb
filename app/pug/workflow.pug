@@ -81,9 +81,14 @@ block content
 
         .col-sm-4
           .vert-space-x2.form-inline
-            a.btn.btn-warning(href = `/workflow/${workflow.workflowId}/edit`)
-              img.small-icon(src = '/images/edit_icon.svg')
-              | &nbsp; Edit Workflow
+            if (workflow.recordVersion === workflowVersions.length)
+              a.btn.btn-warning(href = `/workflow/${workflow.workflowId}/edit`)
+                img.small-icon(src = '/images/edit_icon.svg')
+                | &nbsp; Edit Workflow
+            else 
+              a.btn.btn-warning.disabled(href = '')
+                img.small-icon(src = '/images/edit_icon.svg')
+                | &nbsp; Editing Disabled (Old Version)
 
             - let jsonURLString = `/json/workflow/${workflow.workflowId}`;
             - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;

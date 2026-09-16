@@ -133,9 +133,14 @@ block content
 
         .col-sm-4
           .vert-space-x2.form-inline
-            a.btn.btn-warning(href = `/component/${component.componentUuid}/edit`)
-              img.small-icon(src = '/images/edit_icon.svg')
-              | &nbsp; Edit Component
+            if (component.recordVersion === componentVersions.length)
+              a.btn.btn-warning(href = `/component/${component.componentUuid}/edit`)
+                img.small-icon(src = '/images/edit_icon.svg')
+                | &nbsp; Edit Component
+            else 
+              a.btn.btn-warning.disabled(href = '')
+                img.small-icon(src = '/images/edit_icon.svg')
+                | &nbsp; Editing Disabled (Old Version)
 
             - let jsonURLString = `/json/component/${component.componentUuid}`;
             - if ('version' in dictionary_queries) jsonURLString += `?version=${dictionary_queries.version}`;

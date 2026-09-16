@@ -127,7 +127,7 @@ class NumberArray_ScatterPlot extends TextFieldComponent {
     colorscale.min = min;
     colorscale.max = max;
 
-    let graph = new Histogram(numberOfEntries, 0, numberOfEntries);
+    let graph = new Histogram(numberOfEntries, 1, numberOfEntries + 1);
 
     graph.data = arr;
     graph.min_content = min;
@@ -136,7 +136,7 @@ class NumberArray_ScatterPlot extends TextFieldComponent {
     this.LizardGraph.SetHist(graph, colorscale);
     this.LizardGraph.SetMarkers([bounds[0].lo, bounds[0].hi, bounds[1].lo, bounds[1].hi]);
     this.LizardGraph.marker_color = 'rgba(100, 0,0, 0.5)';
-    this.LizardGraph.xlabel = 'Measurement Index';
+    this.LizardGraph.xlabel = '';
     this.LizardGraph.ylabel = this.component.units;
     this.LizardGraph.Draw();
   }

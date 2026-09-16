@@ -619,4 +619,27 @@ router.get(['/json/actions/tensionComparisonAcrossLocations/:uuid/:wireLayer/:or
 });
 
 
+/// Compare QA parameters across APAs and/or wire layers (client-side interface)
+router.get('/actions/qaParameterComparisonAcrossAPAs', async function (req, res, next) {
+  // Render the interface page
+  res.render('action_qaParameterComparisonAcrossAPAs.pug');
+});
+
+
+/// Compare QA parameters across APAs and/or wire layers (query to server-side)
+router.get(['/json/actions/qaParameterComparisonAcrossAPAs/:qaParameter', '/api/actions/qaParameterComparisonAcrossAPAs/:qaParameter'], async function (req, res, next) {
+  try {
+    // 
+    // If successful, this returns an object containing lists of the QA parameter values on each wire layer, with each entry in each list corresponding to a single APA
+    const qaParameters = await Search_ActionsWorkflows.qaParameterComparisonAcrossAPAs(req.params.qaParameter);
+
+    // Return the object in JSON format
+    return res.status(200).json(qaParameters);
+  } catch (err) {
+    logger.info({ route: req.route.path }, err.message);
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+
 module.exports = router;
