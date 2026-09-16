@@ -71,9 +71,14 @@ block content
 
         .col-sm-4 
           .vert-space-x2.form-inline
-            a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
-              img.small-icon(src = '/images/edit_icon.svg')
-              | &nbsp; Edit Action
+            if (action.recordVersion === actionVersions.length)
+              a.btn.btn-warning(href = `/action/${action.actionId}/edit`)
+                img.small-icon(src = '/images/edit_icon.svg')
+                | &nbsp; Edit Action
+            else 
+              a.btn.btn-warning.disabled(href = '')
+                img.small-icon(src = '/images/edit_icon.svg')
+                | &nbsp; Editing Disabled (Old Version)
 
             - let jsonURLString = `/json/action/${action.actionId}`;
             - if ('version' in queryDictionary) jsonURLString += `?version=${queryDictionary.version}`;
