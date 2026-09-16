@@ -134,6 +134,79 @@ async function save(input, req) {
     }
   }
 
+  // Installation (board or mesh) actions should not have any duplicated UUIDs, so check for if this has occurred
+  // This is best done by first storing all of the UUIDs in an array, and then using Javascript's 'Set' functionality to check for duplicates (a 'Set' can only contain unique entries) ...
+  // ... so if the array contains duplicates, then a 'Set' created from the array will have a different length to the array (since any duplicates will have been removed)
+  if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
+    if (newRecord.typeFormId === 'prep_mesh_panel_install') {
+      let arr_meshUuidsSideA = [];
+      let arr_meshUuidsSideB = [];
+
+      for (let i = 1; i < 11; i++) {
+        if (newRecord.data[`sideAMeshPanel${i}Uuid`] !== '') { arr_meshUuidsSideA.push(newRecord.data[`sideAMeshPanel${i}Uuid`]); }
+        if (newRecord.data[`sideBMeshPanel${i}Uuid`] !== '') { arr_meshUuidsSideB.push(newRecord.data[`sideBMeshPanel${i}Uuid`]); }
+      }
+
+      const set_meshUuidsSideA = new Set(arr_meshUuidsSideA);
+      const set_meshUuidsSideB = new Set(arr_meshUuidsSideB);
+
+      if (set_meshUuidsSideA.size !== arr_meshUuidsSideA.length) {
+        throw new Error(`Actions:save() - there are ${arr_meshUuidsSideA.length - set_meshUuidsSideA.size} duplicated UUIDs on Side A!`);
+      }
+
+      if (set_meshUuidsSideB.size !== arr_meshUuidsSideB.length) {
+        throw new Error(`Actions:save() - there are ${arr_meshUuidsSideB.length - set_meshUuidsSideB.size} duplicated UUIDs on Side B!`);
+      }
+    } else {
+      let arr_boardUuidsHeadA = [];
+      let arr_boardUuidsHeadB = [];
+      let arr_boardUuidsFoot = [];
+
+      for (let i = 0; i < 10; i++) {
+        if (newRecord.data.headBoardsA[i].boardUuid !== '') { arr_boardUuidsHeadA.push(newRecord.data.headBoardsA[i].boardUuid); }
+        if (newRecord.data.headBoardsB[i].boardUuid !== '') { arr_boardUuidsHeadB.push(newRecord.data.headBoardsB[i].boardUuid); }
+        if (newRecord.data.footBoards[i].boardUuid !== '') { arr_boardUuidsFoot.push(newRecord.data.footBoards[i].boardUuid); }
+      }
+
+      const set_boardUuidsHeadA = new Set(arr_boardUuidsHeadA);
+      const set_boardUuidsHeadB = new Set(arr_boardUuidsHeadB);
+      const set_boardUuidsFoot = new Set(arr_boardUuidsFoot);
+
+      if (set_boardUuidsHeadA.size !== arr_boardUuidsHeadA.length) {
+        throw new Error(`Actions:save() - there are ${arr_boardUuidsHeadA.length - set_boardUuidsHeadA.size} duplicated UUIDs in the Side A Head Boards!`);
+      }
+
+      if (set_boardUuidsHeadB.size !== arr_boardUuidsHeadB.length) {
+        throw new Error(`Actions:save() - there are ${arr_boardUuidsHeadB.length - set_boardUuidsHeadB.size} duplicated UUIDs in the Side B Head Boards!`);
+      }
+
+      if (set_boardUuidsFoot.size !== arr_boardUuidsFoot.length) {
+        throw new Error(`Actions:save() - there are ${arr_boardUuidsFoot.length - set_boardUuidsFoot.size} duplicated UUIDs in the Foot Boards!`);
+      }
+
+      if ((newRecord.typeFormId === 'v_boards') || (newRecord.typeFormId === 'u_boards')) {
+        let arr_boardUuidsSideHSB = [];
+        let arr_boardUuidsSideLSB = [];
+
+        for (let i = 0; i < 21; i++) {
+          if (newRecord.data.sideBoardsHSB[i].boardUuid !== '') { arr_boardUuidsSideHSB.push(newRecord.data.sideBoardsHSB[i].boardUuid); }
+          if (newRecord.data.sideBoardsLSB[i].boardUuid !== '') { arr_boardUuidsSideLSB.push(newRecord.data.sideBoardsLSB[i].boardUuid); }
+        }
+
+        const set_boardUuidsSideHSB = new Set(arr_boardUuidsSideHSB);
+        const set_boardUuidsSideLSB = new Set(arr_boardUuidsSideLSB);
+
+        if (set_boardUuidsSideHSB.size !== arr_boardUuidsSideHSB.length) {
+          throw new Error(`Actions:save() - there are ${arr_boardUuidsSideHSB.length - set_boardUuidsSideHSB.size} duplicated UUIDs in the HSB Side Boards!`);
+        }
+
+        if (set_boardUuidsSideLSB.size !== arr_boardUuidsSideLSB.length) {
+          throw new Error(`Actions:save() - there are ${arr_boardUuidsSideLSB.length - set_boardUuidsSideLSB.size} duplicated UUIDs in the LSB Side Boards!`);
+        }
+      }
+    }
+  }
+
   // NCR actions each always contain (4) arrays of damaged, misplaced, missing and shorted wires ...
   // ... however, depending on the specific user input, any number of them may not contain any information
   // Formio doesn't like this, and can sometimes write a partial (single) non-empty entry to any unused array ... which can lead to the APA Executive Summary not being created correctly
@@ -200,12 +273,11 @@ async function save(input, req) {
     const result = await Components.updateLocations_inShipment(newRecord.componentUuid, newRecord.data.receptionLocation, (newRecord.data.receptionDate).toString().slice(0, 10));
   } else if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
     if (newRecord.typeFormId === 'prep_mesh_panel_install') {
-      const uuid_format = new RegExp(/[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}/);
+      let result = null;
 
-      for (const [key, value] of Object.entries(newRecord.data)) {
-        if (uuid_format.test(value)) {
-          const result = await Components.updateLocation(value, 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
-        }
+      for (let i = 1; i < 11; i++) {
+        result = await Components.updateLocation(newRecord.data[`sideAMeshPanel${i}Uuid`], 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
+        result = await Components.updateLocation(newRecord.data[`sideBMeshPanel${i}Uuid`], 'installed_on_APA', (new Date()).toISOString().slice(0, 10), newRecord.componentUuid);
       }
     } else {
       for (const board of newRecord.data.headBoardsA) {
