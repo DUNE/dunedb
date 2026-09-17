@@ -1,0 +1,80 @@
+extend default
+
+block vars
+  - const page_title = 'Compare QA Parameters across APAs and/or Wire Layers';
+
+block extrascripts
+  script(type = 'text/javascript').
+
+  block workscripts
+    script(src = '/pages/action_qaParameterComparisonAcrossAPAs.js')
+
+block content
+  .container-fluid
+    .vert-space-x2
+      h2 Compare QA Parameters Across APAs and/or Wire Layers
+
+    .vert-space-x2
+      p This page may be used to compare the values of certain QA parameters that have been measured on <b>each wire layer</b> of <b>each Assembled APA</b>.
+
+      p Please first select the desired QA parameter from the dropdown menu.  The comparison tool can then be used in one of two ways:
+      ul 
+        li <b>Compare across All APAs</b> - press the <u>'Perform Comparison (All APAs)'</u> button.  The results will be displayed as a set of four 'APA Number vs. QA Parameter' scatter plots - one for each layer.
+        li <b>Compare on a Single APA</b> - additionally <u>specify an APA number</u>, and then press the <u>'Perform Comparison (Single APA)'</u> button.  The results will be displayed as a table of the QA parameter value on each wire layer of the specified APA.
+
+      p Please note that this tool is currently only applicable to Assembled APAs manufactured at <b>Daresbury</b> - i.e. US-manufactured APAs will not be included in the comparison across all APAs, and cannot be selected individually by APA number.
+
+    .vert-space-x2 
+      hr
+
+      .vert-space-x1
+        .row
+          .col-md-7 
+            .row
+              .col-md-5
+                p QA Parameter
+
+                select.form-control#qaParameterSelection
+                  option(value = '')
+                  option(value = 'winding_replacedWires') (Winding) Replaced Wires 
+                  option(value = 'winding_tensionAlarms') (Winding) Tension Alarms
+                  option(value = 'soldering_reworkedSolders') (Soldering) Reworked Solders 
+                  option(value = 'elecTest_leakingWires') (Electrical Test) Wires Failing Leakage Test
+                  option(value = 'nonConformanceReports') Non-Conformance Reports
+
+              .col-md-1
+
+              .col-md-5 
+                p APA Number
+
+                input.form-control#apaNumberSelection
+
+            .row.vert-space-x2
+              .col-md-5 
+                button.btn-primary.btn-lg#confirmButton_allAPAs Perform Comparison (All APAs)
+
+              .col-md-1
+
+              .col-md-5 
+                button.btn-primary.btn-lg#confirmButton_singleAPA Perform Comparison (Single APA)
+
+          .col-md-5
+            h4 Comparison Results (Single APA)
+
+            .vert-space-x1 
+              #results_singleAPA
+
+
+
+    .vert-space-x2
+      hr
+
+      h4 Comparison Results (All APAs)
+
+      .vert-space-x1
+        #results_allAPAs_xLayer 
+        #results_allAPAs_vLayer 
+        #results_allAPAs_uLayer 
+        #results_allAPAs_gLayer
+
+    .vert-space-x2

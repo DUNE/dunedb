@@ -1,6 +1,9 @@
 const MUUID = require('uuid-mongodb');
 
+const Actions = require('./Actions');
+const Components = require('./Components');
 const { db } = require('./db');
+const Workflows = require('./Workflows');
 
 const dictionary_apaNCRs_types = {
   damagedWireSegment: 'Damaged Wire Segment',
@@ -155,6 +158,7 @@ async function nonConformanceByUUID(componentUUID) {
       componentType: { '$first': '$data.componentType' },
       nonConfTypes_apas: { '$first': '$data.nonConformanceType' },
       nonConfTypes_meshes: { '$first': '$data.frameNonConformanceType1' },
+      affectedLayers: { '$first': '$data.affectedLayers' },
       disposition: { '$first': '$data.disposition' },
       status: { '$first': '$data.status' },
     },
@@ -414,6 +418,171 @@ async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin
 }
 
 
+/// Retrieve the values of a single QA parameter for every wire layer on every (UK) Assembled APA
+async function qaParameterComparisonAcrossAPAs(qaParameter) {
+  // The comparison tool associated with this function is only intended for use on APAs manufactured at Daresbury, so first retrieve a list of them
+  // This can be done using the existing 'Components.list' function, with match conditions on the component 'typeFormId' and the APA-specific assembly location
+  // From this, determine the current number of APAs (equal to the single highest 'typeRecordNumber') and set up arrays of the APA component UUIDs and 'typeRecordNumber' values ...
+  // ... since the list of APAs is returned in order of decreasing APA number, the highest 'typeRecordNumber' will simply be that of the first record in the list
+  const assembledAPAs = await Components.list({
+    typeFormId: 'AssembledAPA',
+    'data.apaAssemblyLocation': 'daresbury',
+  });
+
+  const numberOfAPAs = assembledAPAs[0].data.typeRecordNumber;
+  let apaUUIDs = [];
+  let apaNumbers = [];
+
+  for (const assembledAPA of assembledAPAs) {
+    apaUUIDs.push(assembledAPA.componentUuid);
+    apaNumbers.push(assembledAPA.data.typeRecordNumber);
+  }
+
+  // It will be useful to show certain QA parameters both as their raw value, and also as a percentage of a relevant total ...
+  // ... so set up an array of multiplication factors to convert each layer's QA parameter to a percentage (where the exact factors used will depend on the QA parameter)
+  // If the QA parameter is not something that can be shown as a percentage, just use a unity multiplier
+  let percentConversions = [1.0, 1.0, 1.0, 1.0];
+
+  if (qaParameter === 'winding_replacedWires') {
+    percentConversions = [100.0 / 480.0, 100.0 / 1151.0, 100.0 / 1151.0, 100.0 / 481.0];
+  } else if (qaParameter === 'soldering_reworkedSolders') {
+    percentConversions = [100.0 / 960.0, 100.0 / 2302.0, 100.0 / 2302.0, 100.0 / 962.0];
+  } else if (qaParameter === 'elecTest_leakingWires') {
+    percentConversions = [100.0 / 480.0, 100.0 / 1151.0, 100.0 / 1151.0, 100.0 / 481.0];
+  }
+
+  // Declare and initialise arrays to hold the QA parameter values (both raw and percentage) for each wire layer on each APA ...
+  // ... with one entry per layer, and each entry being a sub-array with length equal to the total number of APAs determined previously
+  // For certain QA parameters, each layer's winder number will also be useful to show - so set up an array for these as well
+  let results_winders = [new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1)];
+  let results_rawVals = [new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1)];
+  let results_percent = [new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1)];
+
+  // For each APA UUID ...
+  for (const [apaUUIDIndex, apaUUID] of apaUUIDs.entries()) {
+    // Get the APA number from the previously initialised array
+    const apaNumber = apaNumbers[apaUUIDIndex];
+
+    // If the QA parameter is found in an 'APA Assembly' workflow action ...
+    if (['winding_replacedWires', 'winding_tensionAlarms', 'soldering_reworkedSolders', 'elecTest_leakingWires'].includes(qaParameter)) {
+      // Retrieve the workflow associated with this APA
+      const workflows = await workflowsByUUID(apaUUID);
+
+      if (workflows.length === 1) {
+        const assemblyWorkflow = await Workflows.retrieve(workflows[0].workflowId);
+
+        // Retrieve each layer's winder number ... these can be found in the 'Winding' actions
+        // Set up a list of workflow step indices to indicate at which step each layer's 'Winding' action can be found
+        let workflowStepIndices = [11, 20, 29, 38];
+
+        // Retrieve each 'Winding' action, and from that the winder number ... which can then be stored in the corresponding entry of the nested array
+        for (const [layerIndex, workflowStepIndex] of workflowStepIndices.entries()) {
+          const actionId = assemblyWorkflow.path[workflowStepIndex].result;
+
+          if (actionId !== '') {
+            const action = await Actions.retrieve(actionId);
+            results_winders[layerIndex][apaNumber - 1] = parseInt(action.data.winder.slice(-1));
+          }
+        }
+
+        // For the specified QA parameter, set up a list of workflow step indices to indicate at which step each layer's relevant action can be found
+        if (qaParameter === 'winding_replacedWires') { workflowStepIndices = [11, 20, 29, 38]; }
+        else if (qaParameter === 'winding_tensionAlarms') { workflowStepIndices = [11, 20, 29, 38]; }
+        else if (qaParameter === 'soldering_reworkedSolders') { workflowStepIndices = [12, 21, 30, 39]; }
+        else if (qaParameter === 'elecTest_leakingWires') { workflowStepIndices = [14, 23, 32, 41]; }
+
+        // Retrieve each relevant action, and from that the QA parameter (directly or calculated) ... which can then be stored in the corresponding entry of the nested array
+        for (const [layerIndex, workflowStepIndex] of workflowStepIndices.entries()) {
+          const actionId = assemblyWorkflow.path[workflowStepIndex].result;
+
+          if (actionId !== '') {
+            const action = await Actions.retrieve(actionId);
+            let qaParameterValue = 0;
+
+            if (qaParameter === 'winding_replacedWires') {
+              for (let i = 0; i < action.data.replacedWires.length; i++) {
+                let singleWire_solderPads = action.data.replacedWires[i].solderPad;
+
+                if (typeof singleWire_solderPads === 'number') {
+                  singleWire_solderPads = `${singleWire_solderPads}`;
+                }
+
+                qaParameterValue += singleWire_solderPads.split(',').length;
+              }
+            } else if (qaParameter === 'winding_tensionAlarms') {
+              qaParameterValue = action.data.numberOfTensionAlarms;
+            } else if (qaParameter === 'soldering_reworkedSolders') {
+              for (let i = 0; i < action.data.badSolderJoints.length; i++) {
+                let singleJoint_solderPads = action.data.badSolderJoints[i].solderPad;
+
+                if (typeof singleJoint_solderPads === 'number') {
+                  singleJoint_solderPads = `${singleJoint_solderPads}`;
+                }
+
+                qaParameterValue += singleJoint_solderPads.split(',').length;
+              }
+            } else if (qaParameter === 'elecTest_leakingWires') {
+              if (action.data.dataGrid.length === 1) {
+                if (Object.keys(action.data.dataGrid[0]).length > 0) { qaParameterValue = action.data.dataGrid.length; }
+              } else {
+                qaParameterValue = action.data.dataGrid.length;
+              }
+            }
+
+            results_rawVals[layerIndex][apaNumber - 1] = qaParameterValue;
+            results_percent[layerIndex][apaNumber - 1] = Math.round(qaParameterValue * percentConversions[layerIndex]);
+          }
+        }
+      }
+    }
+
+    // If the QA parameter is the 'Number of Non-Conformance Reports' ...
+    else if (qaParameter === 'nonConformanceReports') {
+      // Retrieve a list of 'Non-Conformance Report' actions that have been performed on the APA
+      const ncrActions = await nonConformanceByUUID(apaUUID);
+
+      // For each NCR action, check that it applies to the actual 'Assembled APA' component (rather than an associated 'Grounding Mesh Panel') ...
+      // ... then check which layer(s) were affected, and increment the associated counter for that layer
+      let ncrCountsPerLayer = [0, 0, 0, 0];
+
+      for (const ncrAction of ncrActions) {
+        if (ncrAction.componentType === 'assembledApa') {
+          if (ncrAction.affectedLayers.x == true) { ncrCountsPerLayer[0] += 1; }
+          if (ncrAction.affectedLayers.v == true) { ncrCountsPerLayer[1] += 1; }
+          if (ncrAction.affectedLayers.u == true) { ncrCountsPerLayer[2] += 1; }
+          if (ncrAction.affectedLayers.g == true) { ncrCountsPerLayer[3] += 1; }
+        }
+      }
+
+      // Store each counter in the corresponding entry of the overall arrays
+      for (const [layerIndex, qaParameterValue] of ncrCountsPerLayer.entries()) {
+        results_rawVals[layerIndex][apaNumber - 1] = qaParameterValue;
+        results_percent[layerIndex][apaNumber - 1] = Math.round(qaParameterValue * percentConversions[layerIndex]);
+      }
+    }
+  }
+
+  // Set up an overall object to contain all of the results in one entity, and copy the individual wire layer results into it
+  let qaParameterResults = {
+    'xWinders': [...results_winders[0]],
+    'xRawVals': [...results_rawVals[0]],
+    'xPercent': [...results_percent[0]],
+    'vWinders': [...results_winders[1]],
+    'vRawVals': [...results_rawVals[1]],
+    'vPercent': [...results_percent[1]],
+    'uWinders': [...results_winders[2]],
+    'uRawVals': [...results_rawVals[2]],
+    'uPercent': [...results_percent[2]],
+    'gWinders': [...results_winders[3]],
+    'gRawVals': [...results_rawVals[3]],
+    'gPercent': [...results_percent[3]],
+  };
+
+  // Return the object
+  return qaParameterResults;
+}
+
+
 module.exports = {
   workflowsByUUID,
   nonConformanceByComponentType,
@@ -422,4 +591,5 @@ module.exports = {
   windingByReferencedComponent,
   boardRejectionByReferencedComponent,
   tensionComparisonAcrossLocations,
+  qaParameterComparisonAcrossAPAs,
 }

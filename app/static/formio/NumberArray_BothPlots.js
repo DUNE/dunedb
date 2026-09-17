@@ -128,7 +128,7 @@ class NumberArray_BothPlots extends TextFieldComponent {
     colorscale.min = min;
     colorscale.max = max;
 
-    let graph = new Histogram(numberOfEntries, 0, numberOfEntries);
+    let graph = new Histogram(numberOfEntries, 1, numberOfEntries + 1);
 
     graph.data = arr;
     graph.min_content = min;

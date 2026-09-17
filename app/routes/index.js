@@ -62,6 +62,8 @@ module.exports = routes;
   /json/actions/boardRejectionCounts_byPartNumberAndLocation
   /actions/tensionComparisonAcrossLocations
   /json/actions/tensionComparisonAcrossLocations/:uuid/:wireLayer/:origin/:destination
+  /actions/qaParameterComparisonAcrossAPAs
+  /json/actions/qaParameterComparisonAcrossAPAs/:qaParameter
 
   /workflow/:workflowId
   /workflow/:workflowId/edit
