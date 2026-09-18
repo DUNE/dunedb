@@ -152,7 +152,7 @@ async function forExecSummary(componentUUID) {
     signoff_date: '',
   };
 
-  collatedInfo.postProduction = {
+  collatedInfo.asfInstallAndCloseUp = {
     signoff_actionID: '[no record found]',
     signoff_name: '[no information found]',
     signoff_date: '',
@@ -300,8 +300,8 @@ async function forExecSummary(componentUUID) {
     collatedInfo.framePreparation.rtdInstall_actionID = results[0].actionId;
   }
 
-  // The QC signoff for post production can be found in the Assembled APA's 'Installation into ASF and Close Up' action
-  // Additional signoff information relating to post production can be found in the Assembled APA's 'Protection Panel Installation' and 'Cable Conduit Installation' actions
+  // The QC signoff for the ASF's close-up can be found in the Assembled APA's 'Installation into ASF and Close Up' action
+  // Additional signoff information relating to post-assembly activities can be found in the Assembled APA's 'Protection Panel Installation' and 'Cable Conduit Installation' actions
   aggregation_stages = [];
   results = [];
 
@@ -327,9 +327,9 @@ async function forExecSummary(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.postProduction.signoff_actionID = results[0].actionId;
-    collatedInfo.postProduction.signoff_name = utils.dictionary_apaFactoryLeads[results[0].name];
-    collatedInfo.postProduction.signoff_date = results[0].date;
+    collatedInfo.asfInstallAndCloseUp.signoff_actionID = results[0].actionId;
+    collatedInfo.asfInstallAndCloseUp.signoff_name = utils.dictionary_apaFactoryLeads[results[0].name];
+    collatedInfo.asfInstallAndCloseUp.signoff_date = results[0].date;
   }
 
   aggregation_stages = [];
@@ -355,7 +355,7 @@ async function forExecSummary(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.postProduction.panelInstall_actionID = results[0].actionId;
+    collatedInfo.asfInstallAndCloseUp.panelInstall_actionID = results[0].actionId;
   }
 
   aggregation_stages = [];
@@ -381,7 +381,7 @@ async function forExecSummary(componentUUID) {
     .toArray();
 
   if (results.length > 0) {
-    collatedInfo.postProduction.conduitInstall_actionID = results[0].actionId;
+    collatedInfo.asfInstallAndCloseUp.conduitInstall_actionID = results[0].actionId;
   }
 
   // The QC signoff for frame construction can be found in the APA Frame's 'Completed Frame QC Checklist'
@@ -832,7 +832,7 @@ async function forHWDB(componentUUID) {
           uLayer: {},
           gLayer: {},
           coverBoardsAndCaps: {},
-          postProduction: {},
+          asfInstallAndCloseUp: {},
           completedAPA: {},
         },
         brokenWires: [],
@@ -927,11 +927,11 @@ async function forHWDB(componentUUID) {
     component.data.signoffs.coverBoardsAndCaps['date'] = collatedInfo.coverBoardsAndCaps.signoff_date;
     component.data.signoffs.coverBoardsAndCaps['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.coverBoardsAndCaps.signoff_actionID}`;
 
-    component.data.signoffs.postProduction['name'] = collatedInfo.postProduction.signoff_name;
-    component.data.signoffs.postProduction['date'] = collatedInfo.postProduction.signoff_date;
-    component.data.signoffs.postProduction['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.signoff_actionID}`;
-    component.data.signoffs.postProduction['apaDB_panelInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.panelInstall_actionID}`;
-    component.data.signoffs.postProduction['apaDB_conduitInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.postProduction.conduitInstall_actionID}`;
+    component.data.signoffs.asfInstallAndCloseUp['name'] = collatedInfo.asfInstallAndCloseUp.signoff_name;
+    component.data.signoffs.asfInstallAndCloseUp['date'] = collatedInfo.asfInstallAndCloseUp.signoff_date;
+    component.data.signoffs.asfInstallAndCloseUp['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.signoff_actionID}`;
+    component.data.signoffs.asfInstallAndCloseUp['apaDB_panelInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.panelInstall_actionID}`;
+    component.data.signoffs.asfInstallAndCloseUp['apaDB_conduitInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.conduitInstall_actionID}`;
 
     component.data.signoffs.completedAPA['name'] = collatedInfo.completedAPA.signoff_name;
     component.data.signoffs.completedAPA['date'] = collatedInfo.completedAPA.signoff_date;
