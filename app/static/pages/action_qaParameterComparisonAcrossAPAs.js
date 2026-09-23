@@ -1,7 +1,16 @@
-// Declare a variable to hold the user-specified search parameters
+// Declare variables to hold the user-specified comparison parameters
 let qaParameter = null;
 let apaNumber = null;
-let results_allAPAs = null;
+
+// Set up an overall results object, to hold the results from each potential QA parameter
+// Once each parameter's results are stored, they can be reused until the interface page is reloaded (i.e. they don't have to be retrieved every single time the same QA parameter is re-selected)
+let results_allAPAs = {
+  winding_replacedWires: null,
+  winding_tensionAlarms: null,
+  soldering_reworkedSolders: null,
+  elecTest_leakingWires: null,
+  nonConformanceReports: null,
+}
 
 // Run a specific function when the page is loaded
 window.addEventListener('load', renderComparisonForms);
@@ -9,29 +18,28 @@ window.addEventListener('load', renderComparisonForms);
 
 // Function to run when the page is loaded
 async function renderComparisonForms() {
-  // Get and set the value of any search parameter that is changed
-  $('#qaParameterSelection').on('change', async function () {
-    qaParameter = $('#qaParameterSelection').val();
-  });
-
-  $('#apaNumberSelection').on('change', async function () {
-    apaNumber = $('#apaNumberSelection').val();
-  });
-
-  // When either confirmation button is pressed, perform the comparison using the appropriate jQuery 'ajax' call and the current values of the search parameters
-  // Additionally, disable both confirmation buttons while the current comparison is being performed
+  // When the 'Perform Comparison (All APAs)' confirmation button is pressed ...
   $('#confirmButton_allAPAs').on('click', function () {
+    // Disable both confirmation buttons while the comparison is being performed
     $('#confirmButton_allAPAs').prop('disabled', true);
     $('#confirmButton_singleAPA').prop('disabled', true);
 
-    $('#results_singleAPA').empty();
-    $('#results_allAPAs_xLayer').empty();
-    $('#results_allAPAs_xLayer').empty().append('<b>Working ...</b>');
-    $('#results_allAPAs_vLayer').empty();
-    $('#results_allAPAs_uLayer').empty();
-    $('#results_allAPAs_gLayer').empty();
+    // Retrieve the currently selected QA parameter
+    qaParameter = $('#qaParameterSelection').val();
 
-    if (qaParameter) {
+    // If there are no existing 'All APAs' results for this QA parameter ...
+    // ... clear any previously displayed results (for both 'All APAs' and 'Single APA' comparisons) from the corresponding page elements
+    // ... retrieve the 'All APAs' results by performing the comparison using the appropriate jQuery 'ajax' call
+    // ... use the 'postSuccess' function to display the newly-retrieved results
+    // On the other hand, if there are already 'All APAs' results available for this QA parameter ...
+    // ... skip directly to the 'postSuccess' function to display the existing results
+    if (results_allAPAs[qaParameter] === null) {
+      $('#results_singleAPA').empty();
+      $('#results_allAPAs_xLayer').empty().append('<b>Working ...</b>');
+      $('#results_allAPAs_vLayer').empty();
+      $('#results_allAPAs_uLayer').empty();
+      $('#results_allAPAs_gLayer').empty();
+
       $.ajax({
         contentType: 'application/json',
         method: 'GET',
@@ -39,56 +47,141 @@ async function renderComparisonForms() {
         dataType: 'json',
         success: postSuccess_allAPAs,
       }).fail(postFail);
+    } else {
+      postSuccess_allAPAs(results_allAPAs[qaParameter]);
     }
   })
 
+  // When the 'Perform Comparison (Single APA)' confirmation button is pressed ...
   $('#confirmButton_singleAPA').on('click', function () {
+    // Disable both confirmation buttons while the comparison is being performed
     $('#confirmButton_allAPAs').prop('disabled', true);
     $('#confirmButton_singleAPA').prop('disabled', true);
 
-    $('#results_singleAPA').empty();
-    $('#results_singleAPA').empty().append('<b>Working ...</b>');
+    // Retrieve the currently selected QA parameter
+    qaParameter = $('#qaParameterSelection').val();
 
-    if (qaParameter && apaNumber) {
-      if (results_allAPAs !== null) { postSuccess_singleAPA(results_allAPAs); }
-      else {
-        $.ajax({
-          contentType: 'application/json',
-          method: 'GET',
-          url: `/json/actions/qaParameterComparisonAcrossAPAs/${qaParameter}`,
-          dataType: 'json',
-          success: postSuccess_singleAPA,
-        }).fail(postFail);
+    // Check if there are 'All APAs' results available for this QA parameter
+    // If there are no results available, prompt the user to first perform the 'All APAs' comparison to retrieve them
+    // If there are results available, clear any previously displayed 'Single APA' results from the corresponding page element, then retrieve and display the currently selected APA's results
+    if (results_allAPAs[qaParameter] === null) {
+      $('#results_singleAPA').empty();
+      $('#results_singleAPA').empty().append('<b>Please first perform the \'All APAs\' comparison for this QA parameter!</b>');
+    } else {
+      $('#results_singleAPA').empty();
+
+      apaNumber = $('#apaNumberSelection').val();
+
+      let row1Title = '';
+      let row2Title = '';
+      let row3Title = '';
+
+      if (qaParameter === 'winding_replacedWires') {
+        row1Title = `APA ${apaNumber}: Winder Number`;
+        row2Title = `APA ${apaNumber}: Number of Replaced Wires`;
+        row3Title = `APA ${apaNumber}: Percentage Replaced Wires`;
+      } else if (qaParameter === 'winding_tensionAlarms') {
+        row1Title = `APA ${apaNumber}: Winder Number`;
+        row2Title = `APA ${apaNumber}: Number of Tension Alarms`;
+        row3Title = `[You Shouldn't See This!]`;
+      } else if (qaParameter === 'soldering_reworkedSolders') {
+        row1Title = `APA ${apaNumber}: Winder Number`;
+        row2Title = `APA ${apaNumber}: Number of Reworked Solders`;
+        row3Title = `APA ${apaNumber}: Percentage Reworked Solders`;
+      } else if (qaParameter === 'elecTest_leakingWires') {
+        row1Title = `APA ${apaNumber}: Winder Number`;
+        row2Title = `APA ${apaNumber}: Number of Wires Failing Leakage Test`;
+        row3Title = `APA ${apaNumber}: Percentage Wires Failing Leakage Test`;
+      } else if (qaParameter === 'nonConformanceReports') {
+        row1Title = `[You Shouldn't See This!]`;
+        row2Title = `APA ${apaNumber}: Number of Non-Conformance Reports`;
+        row3Title = `[You Shouldn't See This!]`;
+      }
+
+      const tableStart = `
+        <tr>
+          <th style = 'width: 60%'>Parameter</th>
+          <th style = 'width: 3%'></th>
+          <th style = 'width: 9%'>X</th>
+          <th style = 'width: 9%'>V</th>
+          <th style = 'width: 9%'>U</th>
+          <th style = 'width: 9%'>G</th>
+        </tr>`;
+
+      $('#results_singleAPA').append(tableStart);
+
+      if (['winding_replacedWires', 'winding_tensionAlarms', 'soldering_reworkedSolders', 'elecTest_leakingWires'].includes(qaParameter)) {
+        const row1Content = `
+          <tr>
+            <td>${row1Title}</td>
+            <td> </td>
+            <td>${results_allAPAs[qaParameter].xWinders[apaNumber - 1]}</td>
+            <td>${results_allAPAs[qaParameter].vWinders[apaNumber - 1]}</td>
+            <td>${results_allAPAs[qaParameter].uWinders[apaNumber - 1]}</td>
+            <td>${results_allAPAs[qaParameter].gWinders[apaNumber - 1]}</td>
+          </tr>`;
+
+        $('#results_singleAPA').append(row1Content);
+      }
+
+      const row2Content = `
+        <tr>
+          <td>${row2Title}</td>
+          <td> </td>
+          <td>${results_allAPAs[qaParameter].xRawVals[apaNumber - 1]}</td>
+          <td>${results_allAPAs[qaParameter].vRawVals[apaNumber - 1]}</td>
+          <td>${results_allAPAs[qaParameter].uRawVals[apaNumber - 1]}</td>
+          <td>${results_allAPAs[qaParameter].gRawVals[apaNumber - 1]}</td>
+        </tr>`;
+
+      $('#results_singleAPA').append(row2Content);
+
+      if (['winding_replacedWires', 'soldering_reworkedSolders', 'elecTest_leakingWires'].includes(qaParameter)) {
+        const row3Content = `
+          <tr>
+            <td>${row3Title}</td>
+            <td> </td>
+            <td>${results_allAPAs[qaParameter].xPercent[apaNumber - 1]}</td>
+            <td>${results_allAPAs[qaParameter].vPercent[apaNumber - 1]}</td>
+            <td>${results_allAPAs[qaParameter].uPercent[apaNumber - 1]}</td>
+            <td>${results_allAPAs[qaParameter].gPercent[apaNumber - 1]}</td>
+          </tr>`;
+
+        $('#results_singleAPA').append(row3Content);
       }
     }
+
+    // Re-enable both confirmation buttons once the comparison is finished
+    $('#confirmButton_singleAPA').prop('disabled', false);
+    $('#confirmButton_allAPAs').prop('disabled', false);
   })
 }
 
 
 // Function to run for a successful comparison query across all APAs
 function postSuccess_allAPAs(result) {
-  // Make sure that the page elements where the results will be displayed are empty
+  // Clear any previously displayed 'All APAs' results from the corresponding page elements
   $('#results_singleAPA').empty();
   $('#results_allAPAs_xLayer').empty();
   $('#results_allAPAs_vLayer').empty();
   $('#results_allAPAs_uLayer').empty();
   $('#results_allAPAs_gLayer').empty();
 
-  // Copy the returned results to a new (nested) array - they may be used for the 'singleAPA' comparison, which will therefore be faster if the already-existing results are simply reused
-  results_allAPAs = JSON.parse(JSON.stringify(result));
+  // Copy the returned results to the corresponding entry in the overall results object ... they can be reused, to avoid having to retrieve them all over again
+  results_allAPAs[qaParameter] = JSON.parse(JSON.stringify(result));
 
   // Set up a title for the scatter plots based on the selected QA parameter
   let plotLabel = '';
 
-  if ($('#qaParameterSelection').val() === 'winding_replacedWires') {
+  if (qaParameter === 'winding_replacedWires') {
     plotLabel = 'Number of Replaced Wires';
-  } else if ($('#qaParameterSelection').val() === 'winding_tensionAlarms') {
+  } else if (qaParameter === 'winding_tensionAlarms') {
     plotLabel = 'Number of Tension Alarms';
-  } else if ($('#qaParameterSelection').val() === 'soldering_reworkedSolders') {
+  } else if (qaParameter === 'soldering_reworkedSolders') {
     plotLabel = 'Number of Reworked Solders';
-  } else if ($('#qaParameterSelection').val() === 'elecTest_leakingWires') {
+  } else if (qaParameter === 'elecTest_leakingWires') {
     plotLabel = 'Number of Wires Failing Leakage Test';
-  } else if ($('#qaParameterSelection').val() === 'nonConformanceReports') {
+  } else if (qaParameter === 'nonConformanceReports') {
     plotLabel = 'Number of Non-Conformance Reports';
   }
 
@@ -150,104 +243,13 @@ function postSuccess_allAPAs(result) {
     };
   });
 
-  // Re-enable both confirmation buttons for the next comparison
+  // Re-enable both confirmation buttons once the comparison is finished
   $('#confirmButton_singleAPA').prop('disabled', false);
   $('#confirmButton_allAPAs').prop('disabled', false);
 };
 
 
-// Function to run for a successful comparison query on a single APA
-function postSuccess_singleAPA(result) {
-  // Make sure that the page elements where the 'single APA' results will be displayed are empty ...
-  // ... but do not reset the 'all APA' results elements - it would be useful to keep those displayed
-  $('#results_singleAPA').empty();
-
-  // Display the results as a table of wire layer vs. QA parameter value
-  let row1Title = '';
-  let row2Title = '';
-  let row3Title = '';
-
-  if ($('#qaParameterSelection').val() === 'winding_replacedWires') {
-    row1Title = `APA ${apaNumber}: Winder Number`;
-    row2Title = `APA ${apaNumber}: Number of Replaced Wires`;
-    row3Title = `APA ${apaNumber}: Percentage Replaced Wires`;
-  } else if ($('#qaParameterSelection').val() === 'winding_tensionAlarms') {
-    row1Title = `APA ${apaNumber}: Winder Number`;
-    row2Title = `APA ${apaNumber}: Number of Tension Alarms`;
-    row3Title = `[You Shouldn't See This!]`;
-  } else if ($('#qaParameterSelection').val() === 'soldering_reworkedSolders') {
-    row1Title = `APA ${apaNumber}: Winder Number`;
-    row2Title = `APA ${apaNumber}: Number of Reworked Solders`;
-    row3Title = `APA ${apaNumber}: Percentage Reworked Solders`;
-  } else if ($('#qaParameterSelection').val() === 'elecTest_leakingWires') {
-    row1Title = `APA ${apaNumber}: Winder Number`;
-    row2Title = `APA ${apaNumber}: Number of Wires Failing Leakage Test`;
-    row3Title = `APA ${apaNumber}: Percentage Wires Failing Leakage Test`;
-  } else if ($('#qaParameterSelection').val() === 'nonConformanceReports') {
-    row1Title = `[You Shouldn't See This!]`;
-    row2Title = `APA ${apaNumber}: Number of Non-Conformance Reports`;
-    row3Title = `[You Shouldn't See This!]`;
-  }
-
-  const tableStart = `
-    <tr>
-      <th style = 'width: 60%'>Parameter</th>
-      <th style = 'width: 3%'></th>
-      <th style = 'width: 9%'>X</th>
-      <th style = 'width: 9%'>V</th>
-      <th style = 'width: 9%'>U</th>
-      <th style = 'width: 9%'>G</th>
-    </tr>`;
-
-  $('#results_singleAPA').append(tableStart);
-
-  if (['winding_replacedWires', 'winding_tensionAlarms', 'soldering_reworkedSolders', 'elecTest_leakingWires'].includes($('#qaParameterSelection').val())) {
-    const row1Content = `
-      <tr>
-        <td>${row1Title}</td>
-        <td> </td>
-        <td>${result.xWinders[apaNumber - 1]}</td>
-        <td>${result.vWinders[apaNumber - 1]}</td>
-        <td>${result.uWinders[apaNumber - 1]}</td>
-        <td>${result.gWinders[apaNumber - 1]}</td>
-      </tr>`;
-
-    $('#results_singleAPA').append(row1Content);
-  }
-
-  const row2Content = `
-    <tr>
-      <td>${row2Title}</td>
-      <td> </td>
-      <td>${result.xRawVals[apaNumber - 1]}</td>
-      <td>${result.vRawVals[apaNumber - 1]}</td>
-      <td>${result.uRawVals[apaNumber - 1]}</td>
-      <td>${result.gRawVals[apaNumber - 1]}</td>
-    </tr>`;
-
-  $('#results_singleAPA').append(row2Content);
-
-  if (['winding_replacedWires', 'soldering_reworkedSolders', 'elecTest_leakingWires'].includes($('#qaParameterSelection').val())) {
-    const row3Content = `
-      <tr>
-        <td>${row3Title}</td>
-        <td> </td>
-        <td>${result.xPercent[apaNumber - 1]}</td>
-        <td>${result.vPercent[apaNumber - 1]}</td>
-        <td>${result.uPercent[apaNumber - 1]}</td>
-        <td>${result.gPercent[apaNumber - 1]}</td>
-      </tr>`;
-
-    $('#results_singleAPA').append(row3Content);
-  }
-
-  // Re-enable both confirmation buttons for the next comparison
-  $('#confirmButton_singleAPA').prop('disabled', false);
-  $('#confirmButton_allAPAs').prop('disabled', false);
-};
-
-
-// Function to run for a failed comparison query of either scenario
+// Function to run for a failed comparison query across all APAs
 function postFail(result, statusCode, statusMsg) {
   // If the query result contains a response message, display it, and if not, display any status message and error code instead
   if (result.responseText) {
@@ -256,7 +258,7 @@ function postFail(result, statusCode, statusMsg) {
     console.log('POSTFAIL: ', `${statusMsg} (${statusCode})`);
   }
 
-  // Re-enable both confirmation buttons for the next search
+  // Re-enable both confirmation buttons ready for the next comparison
   $('#confirmButton_singleAPA').prop('disabled', false);
   $('#confirmButton_allAPAs').prop('disabled', false);
 };
