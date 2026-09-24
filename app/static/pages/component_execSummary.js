@@ -1,5 +1,5 @@
 // Set up the schema for the QC signoffs
-function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, coverBoardsAndCaps, postProduction, completedAPA) {
+function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, coverBoardsAndCaps, asfInstallAndCloseUp, completedAPA) {
   const frameIntakeSurveys_link = (frameConstruction.intakeSurveys_actionID !== '' ? `<a href = '/action/${frameConstruction.intakeSurveys_actionID}' > Frame Intake Surveys </a>` : `[Frame Intake Surveys not found]`);
   const frameInstallSurveys_link = (frameConstruction.installSurveys_actionID !== '' ? `<a href = '/action/${frameConstruction.installSurveys_actionID}' > Frame Installation Surveys </a>` : `[Frame Installation Surveys not found]`);
 
@@ -22,8 +22,8 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
   const gSoldering_link = (g.soldering_actionID !== '' ? `<a href = '/action/${g.soldering_actionID}' > G Soldering </a>` : `[Soldering not found]`);
   const gTensions_link = (g.tensions_actionID !== '' ? `<a href = '/action/${g.tensions_actionID}' > G Tension Measurements </a>` : `[Tension Measurements not found]`);
 
-  const panelInstall_link = (postProduction.panelInstall_actionID !== '' ? `<a href = '/action/${postProduction.panelInstall_actionID}' > Protection Panels </a>` : `[Protection Panels not found]`);
-  const conduitInstall_link = (postProduction.conduitInstall_actionID !== '' ? `<a href = '/action/${postProduction.conduitInstall_actionID}' > Cable Conduits </a>` : `[Cable Conduits not found]`);
+  const panelInstall_link = (asfInstallAndCloseUp.panelInstall_actionID !== '' ? `<a href = '/action/${asfInstallAndCloseUp.panelInstall_actionID}' > Protection Panels </a>` : `[Protection Panels not found]`);
+  const conduitInstall_link = (asfInstallAndCloseUp.conduitInstall_actionID !== '' ? `<a href = '/action/${asfInstallAndCloseUp.conduitInstall_actionID}' > Cable Conduits </a>` : `[Cable Conduits not found]`);
 
   const schema_qcSignoffs = {
     "components": [
@@ -1083,7 +1083,7 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                       "components": [
                         {
                           "label": "Text Field",
-                          "placeholder": "Cover Boards and Caps",
+                          "placeholder": "Cover Boards & Caps",
                           "hideLabel": true,
                           "disabled": true,
                           "tableView": true,
@@ -1185,11 +1185,11 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                       "components": [
                         {
                           "label": "Text Field",
-                          "placeholder": "Post Production",
+                          "placeholder": "ASF Install. & Close Up",
                           "hideLabel": true,
                           "disabled": true,
                           "tableView": true,
-                          "key": "postProduction_label",
+                          "key": "asfInstallAndCloseUp_label",
                           "type": "textfield",
                           "input": true
                         }
@@ -1208,10 +1208,10 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                           "hideLabel": true,
                           "disabled": true,
                           "tableView": true,
-                          "key": "postProduction_signoff",
+                          "key": "asfInstallAndCloseUp_signoff",
                           "type": "textfield",
                           "input": true,
-                          "defaultValue": postProduction.signoff_name
+                          "defaultValue": asfInstallAndCloseUp.signoff_name
                         }
                       ],
                       "width": 2,
@@ -1234,10 +1234,10 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                             "disableWeekdays": false
                           },
                           "enableMaxDateInput": false,
-                          "key": "postProduction_date",
+                          "key": "asfInstallAndCloseUp_date",
                           "type": "datetime",
                           "input": true,
-                          "defaultValue": postProduction.signoff_date,
+                          "defaultValue": asfInstallAndCloseUp.signoff_date,
                           "widget": {
                             "type": "calendar",
                             "displayInTimezone": "viewer",
@@ -1285,7 +1285,7 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                             }
                           ],
                           "refreshOnChange": false,
-                          "key": "postProduction_protectionPanels",
+                          "key": "asfInstallAndCloseUp_protectionPanels",
                           "type": "htmlelement",
                           "input": false,
                           "tableView": false,
@@ -1310,7 +1310,7 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                             }
                           ],
                           "refreshOnChange": false,
-                          "key": "postProduction_cableConduits",
+                          "key": "asfInstallAndCloseUp_cableConduits",
                           "type": "htmlelement",
                           "input": false,
                           "tableView": false,
@@ -1439,7 +1439,7 @@ function SetEntry_qcSignoffs(frameConstruction, framePreparation, x, v, u, g, co
                       "components": [
                         {
                           "label": "Text Field",
-                          "placeholder": "FDHD Technical Coordinator",
+                          "placeholder": "FDHD Technical Coord.",
                           "hideLabel": true,
                           "disabled": true,
                           "tableView": true,
