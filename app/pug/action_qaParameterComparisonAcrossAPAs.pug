@@ -14,14 +14,30 @@ block content
     .vert-space-x2
       h2 Compare QA Parameters Across APAs and/or Wire Layers
 
-    .vert-space-x2
-      p This page may be used to compare the values of certain QA parameters that have been measured on <b>each wire layer</b> of <b>each Assembled APA</b>.
+    .vert-space-x1
+      .panel.panel-default
+      .foldable-heading.panel-heading.collapsed(data-toggle = 'collapse' data-target = '#descriptionBox')
+        | Description: 
+        i.chevron.fa.fa-fw 
 
-      p For any of the available QA parameters, users should <b>first perform the comparison across all APAs</b> by selecting the desired parameter from the dropdown menu and then pressing the <u>'Perform Comparison (All APAs)'</u> button.  The results will be displayed as a set of four 'APA Number vs. QA Parameter' scatter plots - one for each layer.
+      .collapse(id = 'descriptionBox', class = '')
+        p This page may be used to compare the values of certain QA parameters that have been measured on <b>each wire layer</b> of <b>each Assembled APA</b>.
 
-      p Following this, the results for a specific single APA may be retrieved and displayed by specifying an APA number</u> and then pressing the <u>'Perform Comparison (Single APA)'</u> button.  The results of this will be displayed as a table of the QA parameter values on each wire layer of the specified APA, along with certain other information that may be relevant to the selected QA parameter.
+        p For any of the available QA parameters, users should <b>first perform the comparison across all APAs</b> by selecting the desired parameter from the dropdown menu and then pressing the <u>'Perform Comparison (All APAs)'</u> button.  The results will be displayed as a set of four 'APA Number vs. QA Parameter' scatter plots - one for each layer.
 
-      p Please note that this tool is currently only applicable to Assembled APAs manufactured at <b>Daresbury</b> - i.e. US-manufactured APAs will not be included in the comparison across all APAs, and cannot be selected individually by APA number.
+        p Following this, the results for a specific single APA may be retrieved and displayed by specifying an APA number</u> and then pressing the <u>'Perform Comparison (Single APA)'</u> button.  The results of this will be displayed as a table of the QA parameter values on each wire layer of the specified APA, along with certain other information that may be relevant to the selected QA parameter.
+
+        p Please note that this tool is currently only applicable to Assembled APAs manufactured at <b>Daresbury</b> - i.e. US-manufactured APAs will not be included in the comparison across all APAs, and cannot be selected individually by APA number.
+
+    - const legend_labels = ['Winder 1', 'Winder 2', 'Winder 3', 'Winder 4', 'Winder 5', 'Winder 6', 'Winder 7']
+    - const legend_styles = ['background-color: red;', 'background-color: orange', 'background-color: yellow', 'background-color: green', 'background-color: cyan', 'background-color: blue', 'background-color: purple']
+
+    .vert-space-x1.form-inline
+      p #[strong Legend of Scatter Plot Colours:] &nbsp;
+
+      each legend_label, index in legend_labels
+        p(style = legend_styles[index]) &nbsp; #{legend_label} &nbsp;
+        p &nbsp; | &nbsp;
 
     .vert-space-x2 
       hr

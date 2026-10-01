@@ -1,21 +1,3 @@
-.disable-animations,
-.disable-animations * {
-  -o-transition-property: none;
-  -moz-transition-property: none;
-  -webkit-transition-property: none;
-  transition-property: none;
-
-  -o-transform: none;
-  -moz-transform: none;
-  -webkit-transform: none;
-  transform: none;
-
-  -o-animation: none;
-  -moz-animation: none;
-  -webkit-animation: none;
-  animation: none;
-}
-
 .wrapper {
   display: flex;
   flex-wrap: wrap;
