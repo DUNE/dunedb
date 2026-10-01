@@ -1,11 +1,6 @@
 // Set up sidebar animations before the page loads, since waiting for page loading creates an annoyingly slow flicker
 if (localStorage.getItem('sidebar') === '0') {
-  document.getElementById('body').classList.add('disable-animations');
   document.getElementById('sidebar').classList.add('inactive');
-
-  requestAnimationFrame(function () {
-    document.getElementById('body').classList.remove('disable-animations');
-  });
 }
 
 

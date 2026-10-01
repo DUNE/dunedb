@@ -10,12 +10,12 @@ block content
       p This is a <b>DEVELOPMENT</b> deployment of the DUNE APA Construction Database, hosted locally on your computer.
         br
         | It is <b>not</b> connected to either the 
-        a(href = 'https://apa-staging.dunedb.org') staging
+        a(href = 'https://apa-staging.dunedb.org') Staging
         |  or 
-        a(href = 'https://apa.dunedb.org') production
+        a(href = 'https://apa.dunedb.org') Production
         |  deployments, so any additions and/or alterations to database records that are made through this web interface will <b>not</b> be reflected outside of this deployment.
         br
-        | If you have any such content here that you wish moved to the staging and/or production deployments, please contact 
+        | If you have any such content here that you wish moved to the Staging and/or Production deployments, please contact 
         a(href = 'mailto:dune-fd-apa-db@fnal.gov') the DB Admin Team
         | .  Otherwise, this deployment is your own personal playground.
       p
@@ -30,7 +30,7 @@ block content
         br
         |  Please note that all records from the  
         a(href = 'https://apa.dunedb.org') production
-        |  database are copied to this deployment every Monday at 23:45 GMT, so any changes to records that are present here but not on the production deployment at that time will be lost.
+        |  database are copied to this deployment every Sunday at approximately 23:00 GMT, so any changes to records that are present here but not on the Production deployment at that time will be lost.
 
   if NODE_ENV == 'production'
     .alert.alert-success 

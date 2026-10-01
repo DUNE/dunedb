@@ -458,6 +458,20 @@ async function qaParameterComparisonAcrossAPAs(qaParameter) {
   let results_rawVals = [new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1)];
   let results_percent = [new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1), new Array(numberOfAPAs).fill(-1)];
 
+  // Set up a dictionary of RBG strings ... one for each possible winder (1 to 7) - use the same colours that are defined in '/static/css/custom.css'
+  // These will colour-code each plotted point according to which winder the layer was assembled on, so also declare a similar nested array to those above, for holding the winder colours
+  const dict_winderColours = {
+    1: '220, 53, 69',   // Red #dc3545
+    2: '253, 126, 20',  // Orange #fd7e14
+    3: '255, 193, 7',   // Yellow #ffc107
+    4: '40, 167, 69',   // Green #28a745
+    5: '23, 162, 184',  // Cyan #17a2b8
+    6: '0, 123, 255',   // Blue #007bff
+    7: '111, 66, 193',  // Purple #6f42c1
+  }
+
+  let results_winderColours = [new Array(numberOfAPAs).fill('0, 0, 0'), new Array(numberOfAPAs).fill('0, 0, 0'), new Array(numberOfAPAs).fill('0, 0, 0'), new Array(numberOfAPAs).fill('0, 0, 0')];
+
   // For each APA UUID ...
   for (const [apaUUIDIndex, apaUUID] of apaUUIDs.entries()) {
     // Get the APA number from the previously initialised array
@@ -476,12 +490,14 @@ async function qaParameterComparisonAcrossAPAs(qaParameter) {
         let workflowStepIndices = [11, 20, 29, 38];
 
         // Retrieve each 'Winding' action, and from that the winder number ... which can then be stored in the corresponding entry of the nested array
+        // Once the winder number is known, retrieve and store the associated RGB colour string
         for (const [layerIndex, workflowStepIndex] of workflowStepIndices.entries()) {
           const actionId = assemblyWorkflow.path[workflowStepIndex].result;
 
           if (actionId !== '') {
             const action = await Actions.retrieve(actionId);
             results_winders[layerIndex][apaNumber - 1] = parseInt(action.data.winder.slice(-1));
+            results_winderColours[layerIndex][apaNumber - 1] = dict_winderColours[parseInt(action.data.winder.slice(-1))];
           }
         }
 
@@ -565,15 +581,19 @@ async function qaParameterComparisonAcrossAPAs(qaParameter) {
   // Set up an overall object to contain all of the results in one entity, and copy the individual wire layer results into it
   let qaParameterResults = {
     'xWinders': [...results_winders[0]],
+    'xWinderColours': [...results_winderColours[0]],
     'xRawVals': [...results_rawVals[0]],
     'xPercent': [...results_percent[0]],
     'vWinders': [...results_winders[1]],
+    'vWinderColours': [...results_winderColours[1]],
     'vRawVals': [...results_rawVals[1]],
     'vPercent': [...results_percent[1]],
     'uWinders': [...results_winders[2]],
+    'uWinderColours': [...results_winderColours[2]],
     'uRawVals': [...results_rawVals[2]],
     'uPercent': [...results_percent[2]],
     'gWinders': [...results_winders[3]],
+    'gWinderColours': [...results_winderColours[3]],
     'gRawVals': [...results_rawVals[3]],
     'gPercent': [...results_percent[3]],
   };

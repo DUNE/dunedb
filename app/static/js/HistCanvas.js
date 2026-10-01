@@ -413,9 +413,13 @@ HistCanvas.prototype.DrawHist = function( iHist )
        if(x>(this.origin_x + this.span_x)) continue;
        if(o.skipZeroValues && f==0) continue;
        this.ctx.beginPath();
-       var c = colorscale.GetColor(t,f);
-       // console.log("dotcolor",t,f,c,colorscale);
-       this.ctx.fillStyle = "rgba(" + c + "," +o.alpha+ ")";
+
+       if ((hist.markerColours !== null) && (hist.markerColours.length === hist.data.length)) {
+         this.ctx.fillStyle = `rgba(${hist.markerColours[i]}, ${o.alpha})`;
+       } else {
+         this.ctx.fillStyle = `rgba(${colorscale.GetColor(t,f)}, ${o.alpha})`;
+       }
+
        this.ctx.arc(x,y,r,0,1.999*Math.PI);
        this.ctx.fill();
      }
