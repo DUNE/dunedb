@@ -130,6 +130,10 @@ class NumberArray_ScatterPlot extends TextFieldComponent {
     let graph = new Histogram(numberOfEntries, 1, numberOfEntries + 1);
 
     graph.data = arr;
+    graph.markerColours = null;
+
+    if ('markerColours' in this.component) graph.markerColours = this.component.markerColours;
+
     graph.min_content = min;
     graph.max_content = max;
 
@@ -234,6 +238,13 @@ NumberArray_ScatterPlot.editForm = function (a, b, c) {
       key: 'units',
       label: 'Units',
       tooltip: 'This is used as the scatter plot\'s vertical axis label',
+      input: true,
+    },
+    {
+      type: 'textfield',
+      key: 'markerColours',
+      label: 'Marker Colours',
+      tooltip: 'Array of per-marker RGB colour strings: "R, G, B" (each between 0 and 255)',
       input: true,
     },
   );
