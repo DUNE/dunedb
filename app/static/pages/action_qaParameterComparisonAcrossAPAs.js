@@ -194,6 +194,7 @@ function postSuccess_allAPAs(result) {
       key: 'qaParameterResults_xLayer',
       input: true,
       disabled: true,
+      markerColours: result.xWinderColours,
     }]
   }).then((form) => {
     form.submission = {
@@ -208,6 +209,7 @@ function postSuccess_allAPAs(result) {
       key: 'qaParameterResults_vLayer',
       input: true,
       disabled: true,
+      markerColours: result.vWinderColours,
     }]
   }).then((form) => {
     form.submission = {
@@ -222,6 +224,7 @@ function postSuccess_allAPAs(result) {
       key: 'qaParameterResults_uLayer',
       input: true,
       disabled: true,
+      markerColours: result.uWinderColours,
     }]
   }).then((form) => {
     form.submission = {
@@ -236,6 +239,7 @@ function postSuccess_allAPAs(result) {
       key: 'qaParameterResults_gLayer',
       input: true,
       disabled: true,
+      markerColours: result.gWinderColours,
     }]
   }).then((form) => {
     form.submission = {
