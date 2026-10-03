@@ -14,10 +14,6 @@
   transition: all 0.3s;
 }
 
-#sidebar.inactive {
-  margin-left: -160px;
-}
-
 #sidebar .nav-link {
   font-weight: 500;
   color: #333;
