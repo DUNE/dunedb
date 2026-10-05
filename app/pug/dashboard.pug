@@ -44,9 +44,6 @@ body(class = `deployment-${NODE_ENV}`)
     block navbar
       nav.navbar.navbar-expand-sm.navbar-dark.bg-dark.p-0
 
-        button.btn-btn-info#sidebarCollapse(type = 'button')
-          i.fa.fa-align-left
-
         nav.navbar-brand.pl-2#navbar-brand(style = 'width: 100%')
           span.text-capitalize #{NODE_ENV}
 
@@ -183,8 +180,6 @@ script(src = '/js/bootstrap-4.6.2.bundle.min.js')
 script(src = '/js/bootstrap-autocomplete-2.3.5.min.js')
 script(src = '/js/formio-4.13.3.full.min.js')
 script(src = '/js/jsQR-1.4.0.min.js')
-
-script(src = '/pages/dashboard.js')
 
 script.
   Formio.setBaseUrl('!{base_url}');
