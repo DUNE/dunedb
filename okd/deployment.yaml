@@ -1,89 +1,77 @@
-kind: Template
-apiVersion: template.openshift.io/v1
-metadata:
-  name: dunedb-deployment
-objects:
-  - kind: Deployment
-    apiVersion: v1
-    metadata:
-      name: dunedb-${DEPLOYMENT}
-      namespace: dune-apa-db
-    spec:
-      replicas: 1
-      selector:
-        app: dunedb-${DEPLOYMENT}
-      template: 
-        metadata:
-            labels:
-              app: dunedb-${DEPLOYMENT}
-              deployment: dunedb-${DEPLOYMENT}
-        spec:
-          containers:
-            - image: >-
-                docker-registry.default.svc:5000/dune-apa-db/dunedb
-              imagePullPolicy: Always
-              name: dunedb-${DEPLOYMENT}
-              envFrom:
-                - secretRef:
-                    name: ${DEPLOYMENT}-db-tls
-                - secretRef:
-                    name: ${DEPLOYMENT}
-              ports: 
-                - containerPort: 8443
-                  protocol: TCP
-              livenessProbe:
-                  failureThreshold: 3
-                  httpGet:
-                    path: /
-                    port: 8443
-                    scheme: HTTPS
-                  initialDelaySeconds: 5
-                  periodSeconds: 10
-                  successThreshold: 1
-                  timeoutSeconds: 1
-              readinessProbe:
-                failureThreshold: 3
-                httpGet:
-                  path: /
-                  port: 8443
-                  scheme: HTTPS
-                initialDelaySeconds: 5
-                periodSeconds: 10
-                successThreshold: 1
-                timeoutSeconds: 1
-      triggers:
-      - type: ConfigChange 
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-            - dunedb-${DEPLOYMENT}
-          from:
-            kind: ImageStreamTag
-            namespace: dune-apa-db
-            name: dunedb:${DEPLOYMENT}
-        type: ImageChange  
-      strategy:
-        type: RollingUpdate  
-  - kind: Service
-    apiVersion: v1
-    metadata:
-      name: dunedb-${DEPLOYMENT}
-      namespace: dune-apa-db
-    spec:
-        ports:
-          - name: 443-tcp
-            port: 443
-            protocol: TCP
-            targetPort: 8443
-        externalIPs:
-          - ${EXTERNAL_IP}
-        selector:
-          deploymentconfig: dunedb-${DEPLOYMENT}
-parameters:
-  - name: DEPLOYMENT
-    displayName: production, staging
-    require: true
-  - name: EXTERNAL_IP
-    displayName: external IP address for this instance
-    require: true
+#Caution: here the label/selector are ' app: dunedb-${DEPLOYMENT}' so we will need to update the service which uses the selector 'deploymentconfig'.
 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dunedb-${DEPLOYMENT}
+  namespace: dune-apa-db
+  annotations:
+    image.openshift.io/triggers: >-
+      [{"from":{"kind":"ImageStreamTag","name":"dunedb:"${DEPLOYMENT}",namespace":"dune-apa-db"},
+        "fieldPath":"spec.template.spec.containers[?(@.name==\"dunedb-${DEPLOYMENT}\")].image"}]
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+  selector:
+    matchLabels:
+      app: dunedb-${DEPLOYMENT}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: dunedb-${DEPLOYMENT}
+    spec:
+      containers:
+      - name: dunedb-${DEPLOYMENT}
+        image: image-registry.openshift-image-registry.svc:5000/dune-apa-db/dunedb@sha256:44b1b72a28098362c0092ec43a48c41853ac1d55b340c07ab252e4ecbed3d476
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: ${DEPLOYMENT}-db-tls
+        - secretRef:
+            name: ${DEPLOYMENT}
+        ports:
+        - containerPort: 8443
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /db-tls
+          name: ${DEPLOYMENT}-db-tls
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ${DEPLOYMENT}-db-tls
+        secret:
+          defaultMode: 420
+          secretName: ${DEPLOYMENT}-db-tls
