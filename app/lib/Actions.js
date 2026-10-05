@@ -264,7 +264,7 @@ async function save(input, req) {
   // - for 'Geometry Board Rejection' actions ...
   //   ... where the rejection disposition is 'Rejected', update the board's location to indicate as such
   //   ... where the rejection disposition is something other than 'Rejected', update the board's location to match where and when the action was performed
-  // - for 'Geometry Board Tooth Strip Attachment' actions, update the board's location to match where and when the action was performed
+  // - for some (but not all) other actions performed on geometry boards, update the board's location to match where and when the action was performed
   // - for some (but not all) actions performed on grounding mesh panels, update the mesh's location to match where and when the action was performed
   // In all cases, if successful, the updating function returns 'result = 1' in all cases, but we don't actually use this value anywhere
   if (transport_typeFormIDs.includes(newRecord.typeFormId)) {
@@ -312,6 +312,8 @@ async function save(input, req) {
         }
       }
     }
+  } else if (newRecord.typeFormId === 'GeometryBoardVisualInspection') {
+    const result = await Components.updateLocation(newRecord.componentUuid, 'lancaster', (new Date()).toISOString().slice(0, 10), '');
   } else if (newRecord.typeFormId === 'GeometryBoardRejection') {
     const rejectionLocation = utils.dictionary_locations[newRecord.data.boardRejectionLocation];
 
