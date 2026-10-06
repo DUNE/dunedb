@@ -414,7 +414,7 @@ HistCanvas.prototype.DrawHist = function( iHist )
        if(o.skipZeroValues && f==0) continue;
        this.ctx.beginPath();
 
-       if ((hist.markerColours !== null) && (hist.markerColours.length === hist.data.length)) {
+       if ((typeof hist.markerColours !== 'undefined') && (hist.markerColours !== null) && (hist.markerColours.length === hist.data.length)) {
          this.ctx.fillStyle = `rgba(${hist.markerColours[i]}, ${o.alpha})`;
        } else {
          this.ctx.fillStyle = `rgba(${colorscale.GetColor(t,f)}, ${o.alpha})`;
