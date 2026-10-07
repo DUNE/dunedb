@@ -163,12 +163,14 @@ module.exports = {
   // Frame Prep D-band personnel ('Frame Prep - ???' APA Assembly workflow actions and 'Grounding Mesh Panel Final Inspection' actions)
   dictionary_dBandFramePrep: {
     edBlucher: 'Ed Blucher',
+    daveBrown: 'Dave Brown',
     wayneGreen: 'Wayne Green',
     nicholasHays: 'Nicholas Hays',
     albertoMarchionni: 'Alberto Marchionni',
     grahamMitchell: 'Graham Mitchell',
     danielSalisbury: 'Daniel Salisbury',
     stephenSumner: 'Stephen Sumner',
+    jasonThornhill: 'Jason Thornhill',
     kimWilliams: 'Kim Williams',
   },
 
