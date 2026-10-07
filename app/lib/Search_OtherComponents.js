@@ -676,11 +676,19 @@ async function componentsByTypeAndLocation(typeFormId, location, toothStripStatu
     for (const result of results) {
       const component = await Components.retrieve(MUUID.from(result.componentUuid).toString());
 
-      cleanedResults.push({
-        'componentUuid': result.componentUuid,
-        'typeRecordNumber': component.data.typeRecordNumber,
-        'dateAtLocation': (component.dateAtLocation != null) ? component.dateAtLocation : 'unknown',
-      });
+      if (typeFormId === 'AssembledAPA') {
+        cleanedResults.push({
+          'componentUuid': result.componentUuid,
+          'typeRecordNumber': component.data.componentName.substring(4),
+          'dateAtLocation': (component.dateAtLocation != null) ? component.dateAtLocation : 'unknown',
+        });
+      } else {
+        cleanedResults.push({
+          'componentUuid': result.componentUuid,
+          'typeRecordNumber': component.data.typeRecordNumber,
+          'dateAtLocation': (component.dateAtLocation != null) ? component.dateAtLocation : 'unknown',
+        });
+      }
     }
   }
 
