@@ -257,8 +257,8 @@ module.exports = {
     denisDiyakov: 'Denis Diyakov',
   },
 
-  // Personnel who are authorised to signoff on APA shipment reception ('APA Shipment Reception' APA Post Production workflow actions)
-  dictionary_apaShipmentReceptionSignoff: {
+  // Personnel who are authorised to signoff on post-reception Assembled APA Shipment QA checks ('Assembled APA Shipment Post-Reception QA' APA Post Production workflow actions)
+  dictionary_apaShipmentPostReceptionSignoff: {
     alexandreAcerraGil: 'Alexandre Acerra Gil',
     brianRebel: 'Brian Rebel',
   },
