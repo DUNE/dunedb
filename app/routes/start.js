@@ -224,10 +224,10 @@ router.get(['/json/cernComplianceOffice.json', '/api/cernComplianceOffice.json']
 });
 
 
-/// List personnel who are authorised to signoff on APA shipment reception
-router.get(['/json/apaShipmentReceptionSignoff.json', '/api/apaShipmentReceptionSignoff.json'], async function (req, res, next) {
+/// List personnel who are authorised to signoff on post-reception Assembled APA Shipment QA checks
+router.get(['/json/apaShipmentPostReceptionSignoff.json', '/api/apaShipmentPostReceptionSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_apaShipmentReceptionSignoff));
+    return res.status(200).json(ConvertDictionaryToList(utils.dictionary_apaShipmentPostReceptionSignoff));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -268,7 +268,7 @@ router.post(['/json/administratorUtility/:inputString', '/api/administratorUtili
   try {
     logger.info(req.body, `Submission to /json/administratorUtility/${req.params.inputString}`);
 
-    let result = await Admin_Functions.cleanActionTypeFormIds(req.params.inputString);    // Change as appropriate for the required utility
+    let result = await Admin_Functions.addWorkflowStep(req.params.inputString);    // Change as appropriate for the required utility
 
     return res.status(201).json(result);
   } catch (err) {
