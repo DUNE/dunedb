@@ -834,6 +834,7 @@ async function forHWDB(componentUUID) {
           coverBoardsAndCaps: {},
           asfInstallAndCloseUp: {},
           completedAPA: {},
+          fdhdTechnicalCoord: {},
         },
         brokenWires: [],
         measurements: {
@@ -936,6 +937,9 @@ async function forHWDB(componentUUID) {
     component.data.signoffs.completedAPA['name'] = collatedInfo.completedAPA.signoff_name;
     component.data.signoffs.completedAPA['date'] = collatedInfo.completedAPA.signoff_date;
     component.data.signoffs.completedAPA['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
+
+    component.data.signoffs.fdhdTechnicalCoord['name'] = collatedInfo.completedAPA.signoff_fdhd;
+    component.data.signoffs.fdhdTechnicalCoord['date'] = collatedInfo.completedAPA.signoff_date;
 
     //////////////////
     // BROKEN WIRES //
