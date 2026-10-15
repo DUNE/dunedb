@@ -940,6 +940,7 @@ async function forHWDB(componentUUID) {
 
     component.data.signoffs.fdhdTechnicalCoord['name'] = collatedInfo.completedAPA.signoff_fdhd;
     component.data.signoffs.fdhdTechnicalCoord['date'] = collatedInfo.completedAPA.signoff_date;
+    component.data.signoffs.fdhdTechnicalCoord['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
 
     //////////////////
     // BROKEN WIRES //
