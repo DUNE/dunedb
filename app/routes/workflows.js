@@ -84,9 +84,14 @@ router.get('/workflow/:workflowId/edit', permissions.checkPermission('workflows:
     if (!workflow) return res.status(404).send(`There is no workflow record with workflow ID = ${req.params.workflowId}`);
 
     // Retrieve the workflow type form corresponding to the type form ID in the workflow record, and throw an error if there is no such type form
-    const workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);
+    let workflowTypeForm = await Forms.retrieve('workflowForms', workflow.typeFormId);
 
     if (!workflowTypeForm) return res.status(404).send(`There is no workflow type form with form ID = ${workflow.typeFormId}`);
+
+    // If the workflow type form includes any personnel lists, change them to the versions with only 'current' personnel (instead of the default 'all' personnel ones)
+    let workflowTypeForm_string = JSON.stringify(workflowTypeForm);
+    workflowTypeForm_string = workflowTypeForm_string.replace('.json', '_current.json');
+    workflowTypeForm = JSON.parse(workflowTypeForm_string);
 
     // Render the interface page
     res.render('workflow_edit.pug', {

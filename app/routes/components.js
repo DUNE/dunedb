@@ -345,9 +345,14 @@ router.get('/component/:uuid/edit', permissions.checkPermission('components:edit
     if (!component) return res.status(404).send(`There is no component record with component UUID = ${req.params.uuid}`);
 
     // Retrieve the component type form corresponding to the type form ID in the component record, and throw an error if there is no such type form
-    const componentTypeForm = await Forms.retrieve('componentForms', component.typeFormId);
+    let componentTypeForm = await Forms.retrieve('componentForms', component.typeFormId);
 
     if (!componentTypeForm) return res.status(404).send(`There is no component type form with form ID = ${component.typeFormId}`);
+
+    // If the component type form includes any personnel lists, change them to the versions with only 'current' personnel (instead of the default 'all' personnel ones)
+    let componentTypeForm_string = JSON.stringify(componentTypeForm);
+    componentTypeForm_string = componentTypeForm_string.replace('.json', '_current.json');
+    componentTypeForm = JSON.parse(componentTypeForm_string);
 
     // Render the interface page
     res.render('component_edit.pug', {
