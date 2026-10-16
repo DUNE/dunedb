@@ -47,14 +47,14 @@ async function save(input, req) {
   // This is intended to prevent users from completing these actions on behalf of someone else, i.e. putting someone else's name in for the signoff and then submitting it themselves
   // Note that this check only applies if the action is being submitted as 'complete' ... if not, it should still be editable by any user with the appropriate permissions
   if (input.typeFormId === 'prep_mesh_panel_install') {
-    if ((input.data.actionComplete) && (req.user.displayName !== utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy])) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_dBandFramePrep[input.data.meshPanelQCBy]}) - this is not permitted!`);
+    if ((input.data.actionComplete) && (req.user.displayName !== (Object.assign({}, utils.dictionary_dBandFramePrep_current, utils.dictionary_dBandFramePrep_former))[input.data.meshPanelQCBy])) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${(Object.assign({}, utils.dictionary_dBandFramePrep_current, utils.dictionary_dBandFramePrep_former))[input.data.meshPanelQCBy]}) - this is not permitted!`);
     }
   }
 
   if (input.typeFormId === 'AssembledAPAQACheck') {
-    if ((input.data.actionComplete) && (req.user.displayName !== utils.dictionary_apaFactoryLeads[input.data.personSigningOff])) {
-      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_apaFactoryLeads[input.data.personSigningOff]}) - this is not permitted!`);
+    if ((input.data.actionComplete) && (req.user.displayName !== (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[input.data.personSigningOff])) {
+      throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${(Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[input.data.personSigningOff]}) - this is not permitted!`);
     }
   }
 
@@ -62,8 +62,8 @@ async function save(input, req) {
     if (input.data.actionComplete) {
       if (input.data.fdhdTechCoordSigningOff === '') {
         throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to complete this action without a signoff from the FDHD Technical Coordinator - this is not permitted!`);
-      } else if (req.user.displayName !== utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]) {
-        throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${utils.dictionary_fdhdTechCoordSignoff[input.data.fdhdTechCoordSigningOff]}) - this is not permitted!`);
+      } else if (req.user.displayName !== (Object.assign({}, utils.dictionary_fdhdTechCoordSignoff_current, utils.dictionary_fdhdTechCoordSignoff_former))[input.data.fdhdTechCoordSigningOff]) {
+        throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${(Object.assign({}, utils.dictionary_fdhdTechCoordSignoff_current, utils.dictionary_fdhdTechCoordSignoff_former))[input.data.fdhdTechCoordSigningOff]}) - this is not permitted!`);
       }
     }
   }

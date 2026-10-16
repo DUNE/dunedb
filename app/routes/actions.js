@@ -150,9 +150,14 @@ router.get('/action/:actionId/edit', permissions.checkPermission('actions:perfor
     if (!action) return res.status(404).render(`There is no action record with action ID = ${req.params.actionId}`);
 
     // Retrieve the action type form corresponding to the type form ID in the action record, and throw an error if there is no such type form
-    const actionTypeForm = await Forms.retrieve('actionForms', action.typeFormId);
+    let actionTypeForm = await Forms.retrieve('actionForms', action.typeFormId);
 
     if (!actionTypeForm) return res.status(404).send(`There is no action type form with form ID = ${action.typeFormId}`);
+
+    // If the action type form includes any personnel lists, change them to the versions with only 'current' personnel (instead of the default 'all' personnel ones)
+    let actionTypeForm_string = JSON.stringify(actionTypeForm);
+    actionTypeForm_string = actionTypeForm_string.replace('.json', '_current.json');
+    actionTypeForm = JSON.parse(actionTypeForm_string);
 
     // Retrieve the workflow ID if the action record already contains such a field
     let workflowId = '';
