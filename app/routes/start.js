@@ -126,7 +126,7 @@ router.get(['/json/frameIntakeSignoff_current.json', '/api/frameIntakeSignoff_cu
 /// List personnel who are authorised to signoff on APA frame NCR concessions
 router.get(['/json/frameNCRSignoff.json', '/api/frameNCRSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_frameNCRSignoff_current, utils.dictionary_frameNCRSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_frameNCRSignoff_current, utils.dictionary_frameNCRSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -146,7 +146,7 @@ router.get(['/json/frameNCRSignoff_current.json', '/api/frameNCRSignoff_current.
 /// List Frame Prep D-band personnel
 router.get(['/json/dBandFramePrep.json', '/api/dBandFramePrep.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_dBandFramePrep_current, utils.dictionary_dBandFramePrep_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_dBandFramePrep_current, utils.dictionary_dBandFramePrep_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -166,14 +166,14 @@ router.get(['/json/dBandFramePrep_current.json', '/api/dBandFramePrep_current.js
 /// List personnel who are authorised to signoff on tension control verification
 router.get(['/json/tensionControlSignoff.json', '/api/tensionControlSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_tensionControlSignoff_current, utils.dictionary_tensionControlSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_tensionControlSignoff_current, utils.dictionary_tensionControlSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
   }
 });
 
-router.get(['/json/tensionControlSignoff-current.json', '/api/tensionControlSignoff_current.json'], async function (req, res, next) {
+router.get(['/json/tensionControlSignoff_current.json', '/api/tensionControlSignoff_current.json'], async function (req, res, next) {
   try {
     return res.status(200).json(ConvertDictionaryToList(utils.dictionary_tensionControlSignoff_current));
   } catch (err) {
@@ -186,7 +186,7 @@ router.get(['/json/tensionControlSignoff-current.json', '/api/tensionControlSign
 /// List personnel who are authorised to signoff on winder maintenance verification
 router.get(['/json/winderMaintenanceSignoff.json', '/api/winderMaintenanceSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_winderMaintenanceSignoff_current, utils.dictionary_winderMaintenanceSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_winderMaintenanceSignoff_current, utils.dictionary_winderMaintenanceSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -206,7 +206,7 @@ router.get(['/json/winderMaintenanceSignoff_current.json', '/api/winderMaintenan
 /// List Winding D-band personnel
 router.get(['/json/dBandWinding.json', '/api/dBandWinding.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_dBandWinding_current, utils.dictionary_dBandWinding_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_dBandWinding_current, utils.dictionary_dBandWinding_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -226,7 +226,7 @@ router.get(['/json/dBandWinding_current.json', '/api/dBandWinding_current.json']
 /// List Post-Production D-band personnel
 router.get(['/json/dBandPostProduction.json', '/api/dBandPostProduction.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_dBandPostProduction_current, utils.dictionary_dBandPostProduction_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_dBandPostProduction_current, utils.dictionary_dBandPostProduction_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -245,7 +245,7 @@ router.get(['/json/dBandPostProduction_current.json', '/api/dBandPostProduction_
 /// List personnel who are authorised to signoff on Conduit Insertion checks
 router.get(['/json/dBandConduitInsertion.json', '/api/dBandConduitInsertion.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_dBandConduitInsertion_current, utils.dictionary_dBandConduitInsertion_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_dBandConduitInsertion_current, utils.dictionary_dBandConduitInsertion_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -264,7 +264,7 @@ router.get(['/json/dBandConduitInsertion_current.json', '/api/dBandConduitInsert
 /// List FD-HD technical coordinators
 router.get(['/json/fdhdTechCoordSignoff.json', '/api/fdhdTechCoordSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_fdhdTechCoordSignoff_current, utils.dictionary_fdhdTechCoordSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_fdhdTechCoordSignoff_current, utils.dictionary_fdhdTechCoordSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -284,7 +284,7 @@ router.get(['/json/fdhdTechCoordSignoff_current.json', '/api/fdhdTechCoordSignof
 /// List personnel who are authorised to signoff on post-reception Assembled APA Shipment QA checks
 router.get(['/json/apaShipmentPostReceptionSignoff.json', '/api/apaShipmentPostReceptionSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_apaShipmentPostReceptionSignoff_current, utils.dictionary_apaShipmentPostReceptionSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_apaShipmentPostReceptionSignoff_current, utils.dictionary_apaShipmentPostReceptionSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -304,7 +304,7 @@ router.get(['/json/apaShipmentPostReceptionSignoff_current.json', '/api/apaShipm
 /// List lead personnel at the UK and US APA factories
 router.get(['/json/apaFactoryLeads.json', '/api/apaFactoryLeads.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -324,7 +324,7 @@ router.get(['/json/apaFactoryLeads_current.json', '/api/apaFactoryLeads_current.
 /// List personnel who are authorised to signoff on yokes
 router.get(['/json/yokeSignoff.json', '/api/yokeSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_yokeSignoff_current, utils.dictionary_yokeSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_yokeSignoff_current, utils.dictionary_yokeSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -344,7 +344,7 @@ router.get(['/json/yokeSignoff_current.json', '/api/yokeSignoff_current.json'], 
 /// List personnel who are authorised to signoff on populated board shipments
 router.get(['/json/populatedBoardShipmentSignoff.json', '/api/populatedBoardShipmentSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_populatedBoardShipmentSignoff_current, utils.dictionary_populatedBoardShipmentSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_populatedBoardShipmentSignoff_current, utils.dictionary_populatedBoardShipmentSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
@@ -364,7 +364,7 @@ router.get(['/json/populatedBoardShipmentSignoff_current.json', '/api/populatedB
 /// List personnel who are authorised to signoff on APA cold tests
 router.get(['/json/apaColdTestSignoff.json', '/api/apaColdTestSignoff.json'], async function (req, res, next) {
   try {
-    return res.status(200).json(Object.assign({}, utils.dictionary_apaColdTestSignoff_current, utils.dictionary_apaColdTestSignoff_former));
+    return res.status(200).json(ConvertDictionaryToList(Object.assign({}, utils.dictionary_apaColdTestSignoff_current, utils.dictionary_apaColdTestSignoff_former)));
   } catch (err) {
     logger.info({ route: req.route.path }, err.message);
     res.status(500).json({ error: err.toString() });
