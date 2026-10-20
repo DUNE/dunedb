@@ -10,26 +10,24 @@ const utils = require('./utils');
 const Workflows = require('./Workflows');
 
 
-async function addWorkflowStep(selectedTypeFormId) {
-  const newWorkflowStep = {
-    type: 'action',
-    formName: 'Assembled APA Shipment Post-Reception QA',
-    advice: '',
-    result: '',
-  }
-
-  const result = await db.collection('workflows')
+async function fixDuplicatedLocations() {
+  const result = await db.collection('actions')
     .updateMany(
-      { typeFormId: selectedTypeFormId },
-      { $push: { path: newWorkflowStep } },
-    )
+      {
+        'typeFormId': { $in: ['GroundingMeshPanelEpoxyApplication', 'GroundingMeshPanelFinalInspection', 'GroundingMeshPanelReceiptInspection'] },
+        'data.location': 'rokeby',
+      },
+      [
+        { $set: { 'data.location': 'ukWarehouse' } },
+      ]
+    );
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::addWorkflowStep() - failed to add step to path in the workflow records!`);
+  if (result.ok === 0) throw new Error(`Admin_Functions::fixDuplicatedLocations() - failed to change location in records!`);
 
-  return selectedTypeFormId;
+  return 0;
 }
 
 
 module.exports = {
-  addWorkflowStep,
+  fixDuplicatedLocations,
 }

@@ -27,7 +27,7 @@ async function renderInputForm() {
 
 
 function postSuccess(result) {    // Change as appropriate for the required utility
-  window.location.href = `/workflows/${result}/list`;
+  window.location.href = `/actionTypes/list`;
 }
 
 
