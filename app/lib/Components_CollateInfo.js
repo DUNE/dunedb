@@ -235,15 +235,15 @@ async function forExecSummary(componentUUID) {
   for (const result of results) {
     if (result.section === 'framePreparation') {
       collatedInfo.framePreparation.signoff_actionID = result.actionId;
-      collatedInfo.framePreparation.signoff_name = utils.dictionary_apaFactoryLeads[result.name];
+      collatedInfo.framePreparation.signoff_name = (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[result.name];
       collatedInfo.framePreparation.signoff_date = result.date;
     } else if ((result.section === 'xLayerAssembly') || (result.section === 'vLayerAssembly') || (result.section === 'uLayerAssembly') || (result.section === 'gLayerAssembly')) {
       collatedInfo[`${result.section[0]}`].signoff_actionID = result.actionId;
-      collatedInfo[`${result.section[0]}`].signoff_name = utils.dictionary_apaFactoryLeads[result.name];
+      collatedInfo[`${result.section[0]}`].signoff_name = (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[result.name];
       collatedInfo[`${result.section[0]}`].signoff_date = result.date;
     } else if (result.section === 'coverBoardsAndCaps') {
       collatedInfo.coverBoardsAndCaps.signoff_actionID = result.actionId;
-      collatedInfo.coverBoardsAndCaps.signoff_name = utils.dictionary_apaFactoryLeads[result.name];
+      collatedInfo.coverBoardsAndCaps.signoff_name = (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[result.name];
       collatedInfo.coverBoardsAndCaps.signoff_date = result.date;
     }
   };
@@ -328,7 +328,7 @@ async function forExecSummary(componentUUID) {
 
   if (results.length > 0) {
     collatedInfo.asfInstallAndCloseUp.signoff_actionID = results[0].actionId;
-    collatedInfo.asfInstallAndCloseUp.signoff_name = utils.dictionary_apaFactoryLeads[results[0].name];
+    collatedInfo.asfInstallAndCloseUp.signoff_name = (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[results[0].name];
     collatedInfo.asfInstallAndCloseUp.signoff_date = results[0].date;
   }
 
@@ -412,7 +412,7 @@ async function forExecSummary(componentUUID) {
 
   if (results.length > 0) {
     collatedInfo.frameConstruction.signoff_actionID = results[0].actionId;
-    collatedInfo.frameConstruction.signoff_name = utils.dictionary_frameIntakeSignoff[results[0].name];
+    collatedInfo.frameConstruction.signoff_name = (Object.assign({}, utils.dictionary_frameIntakeSignoff_current, utils.dictionary_frameIntakeSignoff_former))[results[0].name];
     collatedInfo.frameConstruction.signoff_date = results[0].date;
   }
 
@@ -496,9 +496,9 @@ async function forExecSummary(componentUUID) {
 
   if (results.length > 0) {
     collatedInfo.completedAPA.signoff_actionID = results[0].actionId;
-    collatedInfo.completedAPA.signoff_name = utils.dictionary_apaFactoryLeads[results[0].name];
+    collatedInfo.completedAPA.signoff_name = (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[results[0].name];
     collatedInfo.completedAPA.signoff_date = results[0].date;
-    collatedInfo.completedAPA.signoff_fdhd = utils.dictionary_fdhdTechCoordSignoff[results[0].fdhd];
+    collatedInfo.completedAPA.signoff_fdhd = (Object.assign({}, utils.dictionary_fdhdTechCoordSignoff_current, utils.dictionary_fdhdTechCoordSignoff_former))[results[0].fdhd];
   }
 
   ////////////////////////////////////////////
@@ -565,8 +565,8 @@ async function forExecSummary(componentUUID) {
       collatedInfo[layers[i]].winding_winder = dictionary_winders[results[0].winder];
       collatedInfo[layers[i]].winding_winderHead = dictionary_winderHeads[results[0].winderHead];
       collatedInfo[layers[i]].winding_bobbinManufacturers = bobbinManufacturers;
-      collatedInfo[layers[i]].winding_winderMaintenanceSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].winderMaintenanceSignoff];
-      collatedInfo[layers[i]].winding_tensionControlSignoff = utils.dictionary_winderMaintenanceSignoff[results[0].tensionControlSignoff];
+      collatedInfo[layers[i]].winding_winderMaintenanceSignoff = (Object.assign({}, utils.dictionary_winderMaintenanceSignoff_current, utils.dictionary_winderMaintenanceSignoff_former))[results[0].winderMaintenanceSignoff];
+      collatedInfo[layers[i]].winding_tensionControlSignoff = (Object.assign({}, utils.dictionary_winderMaintenanceSignoff_current, utils.dictionary_winderMaintenanceSignoff_former))[results[0].tensionControlSignoff];
       collatedInfo[layers[i]].winding_numberOfReplacedWires = numberOfReplacedWires;
       collatedInfo[layers[i]].winding_numberOfTensionAlarms = results[0].numberOfTensionAlarms;
     }
@@ -834,6 +834,7 @@ async function forHWDB(componentUUID) {
           coverBoardsAndCaps: {},
           asfInstallAndCloseUp: {},
           completedAPA: {},
+          fdhdTechnicalCoord: {},
         },
         brokenWires: [],
         measurements: {
@@ -936,6 +937,10 @@ async function forHWDB(componentUUID) {
     component.data.signoffs.completedAPA['name'] = collatedInfo.completedAPA.signoff_name;
     component.data.signoffs.completedAPA['date'] = collatedInfo.completedAPA.signoff_date;
     component.data.signoffs.completedAPA['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
+
+    component.data.signoffs.fdhdTechnicalCoord['name'] = collatedInfo.completedAPA.signoff_fdhd;
+    component.data.signoffs.fdhdTechnicalCoord['date'] = collatedInfo.completedAPA.signoff_date;
+    component.data.signoffs.fdhdTechnicalCoord['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
 
     //////////////////
     // BROKEN WIRES //

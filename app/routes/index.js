@@ -85,19 +85,35 @@ module.exports = routes;
   /
   /user
   /json/techicians.json
-  /json/meshPanelIntakeSignoff.json
+  /json/techicians_current.json
   /json/frameIntakeSignoff.json
+  /json/frameIntakeSignoff_current.json
   /json/frameNCRSignoff.json
-  /json/manchesterTechnicians.json
+  /json/frameNCRSignoff_current.json
+  /json/dBandFramePrep.json
+  /json/dBandFramePrep_current.json
   /json/tensionControlSignoff.json
+  /json/tensionControlSignoff_current.json
   /json/winderMaintenanceSignoff.json
-  /json/uwPCBTechnicians.json
-  /json/uwPCBApproval.json
-  /json/uwInstallationTechnicians.json
-  /json/uwInstallationApproval.json
-  /json/cernComplianceOffice.json
+  /json/winderMaintenanceSignoff_current.json
+  /json/dBandWinding.json
+  /json/dBandWinding_current.json
+  /json/dBandPostProduction.json
+  /json/dBandPostProduction_current.json
+  /json/dBandConduitInsertion.json
+  /json/dBandConduitInsertion_current.json
+  /json/fdhdTechCoordSignoff.json
+  /json/fdhdTechCoordSignoff_current.json
   /json/apaShipmentPostReceptionSignoff.json
+  /json/apaShipmentPostReceptionSignoff_current.json
   /json/apaFactoryLeads.json
+  /json/apaFactoryLeads_current.json
+  /json/yokeSignoff.json
+  /json/yokeSignoff.json
+  /json/populatedBoardShipmentSignoff.json
+  /json/populatedBoardShipmentSignoff_current.json
+  /json/apaColdTestSignoff.json
+  /json/apaColdTestSignoff_current.json
   /administratorUtility
   /json/administratorUtility/:inputString
 
