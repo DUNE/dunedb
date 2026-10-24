@@ -156,7 +156,7 @@ router.get('/action/:actionId/edit', permissions.checkPermission('actions:perfor
 
     // If the action type form includes any personnel lists, change them to the versions with only 'current' personnel (instead of the default 'all' personnel ones)
     let actionTypeForm_string = JSON.stringify(actionTypeForm);
-    actionTypeForm_string = actionTypeForm_string.replace('.json', '_current.json');
+    actionTypeForm_string = actionTypeForm_string.replaceAll('.json', '_current.json');
     actionTypeForm = JSON.parse(actionTypeForm_string);
 
     // Retrieve the workflow ID if the action record already contains such a field
