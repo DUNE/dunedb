@@ -40,7 +40,6 @@ module.exports = {
     lsu: 'LSU',
     manchester: 'Manchester',
     merlin: 'Merlin',
-    rokeby: 'Rokeby',    // This is only used in Grounding Mesh Panel actions, but is apparently the same real-world location as 'UK Warehouse' ... can be combined?
     rejected: 'Rejected',
     sheffield: 'Sheffield',
     sdWarehouse: 'South Dakota Warehouse',

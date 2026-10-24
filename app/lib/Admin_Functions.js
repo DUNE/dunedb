@@ -10,24 +10,24 @@ const utils = require('./utils');
 const Workflows = require('./Workflows');
 
 
-async function fixDuplicatedLocations() {
-  const result = await db.collection('actions')
+async function fixComponentLocations() {
+  const result = await db.collection('components')
     .updateMany(
       {
-        'typeFormId': { $in: ['GroundingMeshPanelEpoxyApplication', 'GroundingMeshPanelFinalInspection', 'GroundingMeshPanelReceiptInspection'] },
-        'data.location': 'rokeby',
+        'typeFormId': 'GroundingMeshPanel',
+        'location': 'rokeby',
       },
       [
-        { $set: { 'data.location': 'ukWarehouse' } },
+        { $set: { 'location': 'ukWarehouse' } },
       ]
     );
 
-  if (result.ok === 0) throw new Error(`Admin_Functions::fixDuplicatedLocations() - failed to change location in records!`);
+  if (result.ok === 0) throw new Error(`Admin_Functions::fixComponentLocations() - failed to change location in component records!`);
 
   return 0;
 }
 
 
 module.exports = {
-  fixDuplicatedLocations,
+  fixComponentLocations,
 }
