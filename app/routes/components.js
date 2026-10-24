@@ -351,7 +351,7 @@ router.get('/component/:uuid/edit', permissions.checkPermission('components:edit
 
     // If the component type form includes any personnel lists, change them to the versions with only 'current' personnel (instead of the default 'all' personnel ones)
     let componentTypeForm_string = JSON.stringify(componentTypeForm);
-    componentTypeForm_string = componentTypeForm_string.replace('.json', '_current.json');
+    componentTypeForm_string = componentTypeForm_string.replaceAll('.json', '_current.json');
     componentTypeForm = JSON.parse(componentTypeForm_string);
 
     // Render the interface page
