@@ -107,6 +107,7 @@ module.exports = {
     cernStaff: 'CERN Staff',
     edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
+    kaviChauhan: 'Kavi Chauhan',
     markFarrell: 'Mark Farrell',
     lewisGannon: 'Lewis Gannon',
     wayneGreen: 'Wayne Green',
