@@ -853,8 +853,7 @@ async function forHWDB(componentUUID) {
     // Information about the APA itself is found in the collated information object
     component.data.subComponents.assembledAPA['dunePID'] = collatedInfo.assembledAPA.dunePID;
     component.data.subComponents.assembledAPA['apaDB_componentName'] = collatedInfo.assembledAPA.componentName;
-    component.data.subComponents.assembledAPA['apaDB_componentUUID'] = collatedInfo.assembledAPA.componentUUID;
-    component.data.subComponents.assembledAPA['apaDB_componentQRCode'] = `https://apa.dunedb.org/c/${collatedInfo.assembledAPA.shortUUID}`;
+    component.data.subComponents.assembledAPA['apaDB_componentInfo'] = `https://apa.dunedb.org/component/${collatedInfo.assembledAPA.componentUUID}`;
     component.data.subComponents.assembledAPA['productionSite'] = collatedInfo.assembledAPA.productionSite;
     component.data.subComponents.assembledAPA['configuration'] = collatedInfo.assembledAPA.configuration;
     component.data.subComponents.assembledAPA['apaDB_assemblyWorkflow'] = `https://apa.dunedb.org/workflow/${collatedInfo.assembledAPA.workflowID}`;
@@ -864,10 +863,8 @@ async function forHWDB(componentUUID) {
     const assembledAPA = await Components.retrieve(componentUUID);
     const apaFrame = await Components.retrieve(assembledAPA.data.frameUuid);
 
-    component.data.subComponents.apaFrame['dunePID'] = apaFrame.data.dunePid;
     component.data.subComponents.apaFrame['apaDB_componentName'] = apaFrame.data.componentName;
-    component.data.subComponents.apaFrame['apaDB_componentUUID'] = apaFrame.componentUuid;
-    component.data.subComponents.apaFrame['apaDB_componentQRCode'] = `https://apa.dunedb.org/c/${apaFrame.shortUuid.toString()}`;
+    component.data.subComponents.apaFrame['apaDB_componentInfo'] = `https://apa.dunedb.org/c/${apaFrame.componentUuid}`;
 
     // Additional information about the temperature sensors is found in the 'Frame Prep - Photon Detector Cable and Temperature Sensor Installation' action of the workflow ...
     // ... use the mapping document to find the temperature sensors' DUNE PIDs from the serial numbers stored in the action
@@ -908,39 +905,39 @@ async function forHWDB(componentUUID) {
     // Information about the QC signoffs is found in the collated information object
     component.data.signoffs.frameConstruction['name'] = collatedInfo.frameConstruction.signoff_name;
     component.data.signoffs.frameConstruction['date'] = collatedInfo.frameConstruction.signoff_date;
-    component.data.signoffs.frameConstruction['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.signoff_actionID}`;
-    component.data.signoffs.frameConstruction['apaDB_intakeSurveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.intakeSurveys_actionID}`;
-    component.data.signoffs.frameConstruction['apaDB_installSurveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.installSurveys_actionID}`;
+    component.data.signoffs.frameConstruction['Signoff Details'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.signoff_actionID}`;
+    component.data.signoffs.frameConstruction['Frame Intake Surveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.intakeSurveys_actionID}`;
+    component.data.signoffs.frameConstruction['Frame Installation Surveys'] = `https://apa.dunedb.org/action/${collatedInfo.frameConstruction.installSurveys_actionID}`;
 
     component.data.signoffs.framePreparation['name'] = collatedInfo.framePreparation.signoff_name;
     component.data.signoffs.framePreparation['date'] = collatedInfo.framePreparation.signoff_date;
-    component.data.signoffs.framePreparation['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.signoff_actionID}`;
-    component.data.signoffs.framePreparation['apaDB_meshInstall'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.meshInstall_actionID}`;
-    component.data.signoffs.framePreparation['apaDB_rtdInstall'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.rtdInstall_actionID}`;
+    component.data.signoffs.framePreparation['Signoff Details'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.signoff_actionID}`;
+    component.data.signoffs.framePreparation['Mesh Panel Installation'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.meshInstall_actionID}`;
+    component.data.signoffs.framePreparation['PD & RTD Installation'] = `https://apa.dunedb.org/action/${collatedInfo.framePreparation.rtdInstall_actionID}`;
 
     for (let i = 0; i < layers.length; i++) {
       component.data.signoffs[`${layers[i]}Layer`]['name'] = collatedInfo[layers[i]].signoff_name;
       component.data.signoffs[`${layers[i]}Layer`]['date'] = collatedInfo[layers[i]].signoff_date;
-      component.data.signoffs[`${layers[i]}Layer`]['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].signoff_actionID}`;
+      component.data.signoffs[`${layers[i]}Layer`]['Signoff Details'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].signoff_actionID}`;
     };
 
     component.data.signoffs.coverBoardsAndCaps['name'] = collatedInfo.coverBoardsAndCaps.signoff_name;
     component.data.signoffs.coverBoardsAndCaps['date'] = collatedInfo.coverBoardsAndCaps.signoff_date;
-    component.data.signoffs.coverBoardsAndCaps['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.coverBoardsAndCaps.signoff_actionID}`;
+    component.data.signoffs.coverBoardsAndCaps['Signoff Details'] = `https://apa.dunedb.org/action/${collatedInfo.coverBoardsAndCaps.signoff_actionID}`;
 
     component.data.signoffs.asfInstallAndCloseUp['name'] = collatedInfo.asfInstallAndCloseUp.signoff_name;
     component.data.signoffs.asfInstallAndCloseUp['date'] = collatedInfo.asfInstallAndCloseUp.signoff_date;
-    component.data.signoffs.asfInstallAndCloseUp['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.signoff_actionID}`;
-    component.data.signoffs.asfInstallAndCloseUp['apaDB_panelInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.panelInstall_actionID}`;
-    component.data.signoffs.asfInstallAndCloseUp['apaDB_conduitInstallURL'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.conduitInstall_actionID}`;
+    component.data.signoffs.asfInstallAndCloseUp['Signoff Details'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.signoff_actionID}`;
+    component.data.signoffs.asfInstallAndCloseUp['Protection Panels Installation'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.panelInstall_actionID}`;
+    component.data.signoffs.asfInstallAndCloseUp['Cable Conduit Installation'] = `https://apa.dunedb.org/action/${collatedInfo.asfInstallAndCloseUp.conduitInstall_actionID}`;
 
     component.data.signoffs.completedAPA['name'] = collatedInfo.completedAPA.signoff_name;
     component.data.signoffs.completedAPA['date'] = collatedInfo.completedAPA.signoff_date;
-    component.data.signoffs.completedAPA['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
+    component.data.signoffs.completedAPA['Signoff Details'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
 
     component.data.signoffs.fdhdTechnicalCoord['name'] = collatedInfo.completedAPA.signoff_fdhd;
     component.data.signoffs.fdhdTechnicalCoord['date'] = collatedInfo.completedAPA.signoff_date;
-    component.data.signoffs.fdhdTechnicalCoord['apaDB_signoff'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
+    component.data.signoffs.fdhdTechnicalCoord['Signoff Details'] = `https://apa.dunedb.org/action/${collatedInfo.completedAPA.signoff_actionID}`;
 
     //////////////////
     // BROKEN WIRES //
@@ -983,16 +980,16 @@ async function forHWDB(componentUUID) {
       component.data.measurements[`${layers[i]}Layer`]['tensionControlSignoff'] = collatedInfo[layers[i]].winding_tensionControlSignoff;
       component.data.measurements[`${layers[i]}Layer`]['numberOfReplacedWires'] = collatedInfo[layers[i]].winding_numberOfReplacedWires;
       component.data.measurements[`${layers[i]}Layer`]['numberOfTensionAlarms'] = collatedInfo[layers[i]].winding_numberOfTensionAlarms;
-      component.data.measurements[`${layers[i]}Layer`]['apaDB_winding'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].winding_actionID}`;
+      component.data.measurements[`${layers[i]}Layer`]['Winding Details'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].winding_actionID}`;
 
       component.data.measurements[`${layers[i]}Layer`]['numberOfReworkedSolders'] = collatedInfo[layers[i]].soldering_numberOfReworkedSolders;
-      component.data.measurements[`${layers[i]}Layer`]['apaDB_soldering'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].soldering_actionID}`;
+      component.data.measurements[`${layers[i]}Layer`]['Soldering Details'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].soldering_actionID}`;
 
       component.data.measurements[`${layers[i]}Layer`]['tensionMeasurementLocation'] = collatedInfo[layers[i]].tensions_location;
       component.data.measurements[`${layers[i]}Layer`]['tensionSystem'] = collatedInfo[layers[i]].tensions_system;
       component.data.measurements[`${layers[i]}Layer`]['tensions_A'] = collatedInfo[layers[i]].tensions_A;
       component.data.measurements[`${layers[i]}Layer`]['tensions_B'] = collatedInfo[layers[i]].tensions_B;
-      component.data.measurements[`${layers[i]}Layer`]['apaDB_tensionMeasurements'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].tensions_actionID}`;
+      component.data.measurements[`${layers[i]}Layer`]['Tension Measurement Details'] = `https://apa.dunedb.org/action/${collatedInfo[layers[i]].tensions_actionID}`;
     }
 
     // Copy the APA information object to the designated 'component-specific' sub-object in the top-level component object, and then return the latter
