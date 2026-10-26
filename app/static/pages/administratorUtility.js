@@ -27,7 +27,7 @@ async function renderInputForm() {
 
 
 function postSuccess(result) {    // Change as appropriate for the required utility
-  window.location.href = `/actionTypes/list`;
+  window.location.href = `/componentTypes/list`;
 }
 
 

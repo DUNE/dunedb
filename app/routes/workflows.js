@@ -90,7 +90,7 @@ router.get('/workflow/:workflowId/edit', permissions.checkPermission('workflows:
 
     // If the workflow type form includes any personnel lists, change them to the versions with only 'current' personnel (instead of the default 'all' personnel ones)
     let workflowTypeForm_string = JSON.stringify(workflowTypeForm);
-    workflowTypeForm_string = workflowTypeForm_string.replace('.json', '_current.json');
+    workflowTypeForm_string = workflowTypeForm_string.replaceAll('.json', '_current.json');
     workflowTypeForm = JSON.parse(workflowTypeForm_string);
 
     // Render the interface page
