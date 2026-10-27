@@ -864,7 +864,7 @@ async function forHWDB(componentUUID) {
     const apaFrame = await Components.retrieve(assembledAPA.data.frameUuid);
 
     component.data.subComponents.apaFrame['apaDB_componentName'] = apaFrame.data.componentName;
-    component.data.subComponents.apaFrame['apaDB_componentInfo'] = `https://apa.dunedb.org/c/${apaFrame.componentUuid}`;
+    component.data.subComponents.apaFrame['apaDB_componentInfo'] = `https://apa.dunedb.org/component/${apaFrame.componentUuid}`;
 
     // Additional information about the temperature sensors is found in the 'Frame Prep - Photon Detector Cable and Temperature Sensor Installation' action of the workflow ...
     // ... use the mapping document to find the temperature sensors' DUNE PIDs from the serial numbers stored in the action
