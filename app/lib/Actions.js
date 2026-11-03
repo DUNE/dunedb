@@ -9,10 +9,10 @@ const permissions = require('./permissions');
 const utils = require('./utils');
 
 // Declare a list of the available 'shipment transport' related action type forms
-const transport_typeFormIDs = ['APAShipmentTransport', 'CEAdapterBoardShipmentTransport'];
+const transport_typeFormIDs = ['AssembledAPAShipmentSignoffTransport', 'CEAdapterBoardShipmentTransport'];
 
 // Declare a list of the available 'reception' related action type forms
-const reception_typeFormIDs = ['APAFrameShipmentReception', 'APAShipmentReception', 'CEAdapterBoardShipmentReception', 'DWAComponentShipmentReception', 'GeometryBoardShipmentReception', 'GroundingMeshPanelShipmentReception', 'InstallationHardwareShipmentReception', 'MultiTypePopulatedBoardShipmentReception'];
+const reception_typeFormIDs = ['APAFrameShipmentReception', 'AssembledAPAShipmentReception', 'CEAdapterBoardShipmentReception', 'DWAComponentShipmentReception', 'GeometryBoardShipmentReception', 'GroundingMeshPanelShipmentReception', 'InstallationHardwareShipmentReception', 'MultiTypePopulatedBoardShipmentReception'];
 
 // Declare a list of the available 'board installation' and 'mesh installation' action type forms
 const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
