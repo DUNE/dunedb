@@ -391,7 +391,7 @@ async function forExecSummary(componentUUID) {
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'CompletedFrameQCChecklist',
+      'typeFormId': 'APAFrameFinalQAChecks',
       'componentUuid': MUUID.from(frameUUID),
     }
   });
@@ -421,7 +421,7 @@ async function forExecSummary(componentUUID) {
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'IntakeSurveys',
+      'typeFormId': 'APAFrameIntakeSurveys',
       'componentUuid': MUUID.from(frameUUID),
     }
   });
@@ -447,7 +447,7 @@ async function forExecSummary(componentUUID) {
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'InstallationSurveys',
+      'typeFormId': 'APAFrameInstallationSurveys',
       'componentUuid': MUUID.from(frameUUID),
     }
   });
