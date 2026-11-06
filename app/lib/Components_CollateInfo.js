@@ -790,18 +790,18 @@ async function forHWDB(componentUUID) {
     component_type: {
       part_type_id: componentDUNEPID.substring(0, 12),
     },
-    country_code: 'GB',     // (KRISH) The HWDB currently has a bug that means it uses 'GB' instead of 'UK' ... once that is fixed, change this to 'componentDUNEPID.substring(19, 21),'
+    country_code: componentDUNEPID.substring(19, 21),
     institution: {
       id: parseInt(componentDUNEPID.substring(21, 24)),
     },
     serial_number: '',      // This field is required to exist by the HWDB, but is not actually relevant for our purposes - it can be safely set as an empty string
     status: {
-      id: 120,              // We will only send information to the HWDB about complete and finalised components, so this field will always have a value of '120' (signifying all QA/QC checks passed)
+      id: 120,              // We will only send information to the HWDB about complete and finalised components, so this field will always have a value of '120' (all QA/QC checks passed)
     },
     subcomponents: {},      // This sub-object will be populated below according to the specific component
     certified_qaqc: true,   // We will only send information to the HWDB about complete and finalised components, so this field will always have a value of 'true'
     qaqc_uploaded: true,    // We will only send information to the HWDB about complete and finalised components, so this field will always have a value of 'true'
-    comments: '',           // This field isn't actually required, but it may be useful in the future - in which case, it would be easier to just populate it rather than add it back in from scratch
+    comments: '',           // This field isn't actually required, but it may be useful in the future - in which case, it would be easier to just populate it rather than add it retroactively
     specifications: {
       component: {},        // This sub-object will be populated below according to the specific component
     },
