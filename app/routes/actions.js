@@ -56,7 +56,7 @@ router.get('/action/:actionId', permissions.checkPermission('actions:view'), asy
     let retensionedWires_values = [[], []];
     let numberOfReplacedWires = [null, null];
 
-    if (action.typeFormId === 'x_tension_testing') {
+    if (action.typeFormId === 'SingleLayerTensionMeasurements') {
       // Retrieve all versions of the action (ordered from latest to earliest)
       // Then filter the list of versions to only include those which satisfy the following criteria:
       //  - uploaded by the M2M Client (i.e. those where new tension measurements were uploaded)

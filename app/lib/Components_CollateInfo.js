@@ -9,8 +9,8 @@ const utils = require('./utils');
 const Workflows = require('./Workflows');
 
 const layers = ['x', 'v', 'u', 'g'];
-const typeForms_winding = ['x_winding', 'v_winding', 'u_winding', 'g_winding'];
-const typeForms_soldering = ['x_solder', 'v_solder', 'u_solder', 'g_solder'];
+const typeForms_winding = ['XLayerWinding', 'VLayerWinding', 'ULayerWinding', 'GLayerWinding'];
+const typeForms_soldering = ['XLayerSoldering', 'VLayerSoldering', 'ULayerSoldering', 'GLayerSoldering'];
 
 const dictionary_winders = {
   ukWinder1: 'UK Winder 1',
@@ -205,14 +205,14 @@ async function forExecSummary(componentUUID) {
   /////////////////
   // QC SIGNOFFS //
   /////////////////
-  // The QC signoffs for frame preparation and winding layers can be found in the Assembled APA's 'Assembled APA QA Check' actions
-  // Additional information relating to frame preparation can be found in the Assembled APA's 'Mesh Panel Installation' and 'PD & RTD Installation' actions
+  // The QC signoffs for frame preparation and winding layers can be found in the Assembled APA's 'Single Layer QA Check' actions
+  // Additional information relating to frame preparation can be found in the Assembled APA's 'Grounding Mesh Panel Installation' and 'PD Cable & Temperature Sensor Installation' actions
   aggregation_stages = [];
   results = [];
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'AssembledAPAQACheck',
+      'typeFormId': 'SingleLayerQACheck',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
@@ -253,7 +253,7 @@ async function forExecSummary(componentUUID) {
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'prep_mesh_panel_install',
+      'typeFormId': 'FramePrepGroundingMeshPanelInstallation',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
@@ -279,7 +279,7 @@ async function forExecSummary(componentUUID) {
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'pd_cable_temp_sensor_install',
+      'typeFormId': 'FramePrepPDCableTemperatureSensorInstallation',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
@@ -307,7 +307,7 @@ async function forExecSummary(componentUUID) {
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'InstallationIntoASF',
+      'typeFormId': 'InstallationIntoASFCloseUp',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
@@ -468,13 +468,13 @@ async function forExecSummary(componentUUID) {
     collatedInfo.frameConstruction.installSurveys_actionID = results[0].actionId;
   }
 
-  // The QC signoff information relating to the completed APA can be found in the Assembled APA's 'Completed APA QC Checklist' action
+  // The QC signoff information relating to the completed APA can be found in the Assembled APA's 'Completed APA QA Checklist' action
   aggregation_stages = [];
   results = [];
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'CompletedAPAQCChecklist',
+      'typeFormId': 'CompletedAPAQAChecklist',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
@@ -616,7 +616,7 @@ async function forExecSummary(componentUUID) {
 
     aggregation_stages.push({
       $match: {
-        'typeFormId': 'x_tension_testing',
+        'typeFormId': 'SingleLayerTensionMeasurements',
         'componentUuid': MUUID.from(componentUUID),
         'data.apaLayer': layers[i],
       }
