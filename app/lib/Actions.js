@@ -14,8 +14,8 @@ const transport_typeFormIDs = ['AssembledAPAShipmentSignoffTransport', 'CEAdapte
 // Declare a list of the available 'reception' related action type forms
 const reception_typeFormIDs = ['APAFrameShipmentReception', 'AssembledAPAShipmentReception', 'CEAdapterBoardShipmentReception', 'DWAComponentShipmentReception', 'GeometryBoardShipmentReception', 'GroundingMeshPanelShipmentReception', 'InstallationHardwareShipmentReception', 'MultiTypePopulatedBoardShipmentReception'];
 
-// Declare a list of the available 'board installation' and 'mesh installation' action type forms
-const installation_typeFormIDs = ['x_boards', 'v_boards', 'u_boards', 'g_boards', 'prep_mesh_panel_install'];
+// Declare a list of the available 'geometry board installation' and 'grounding mesh panel installation' action type forms
+const installation_typeFormIDs = ['XLayerBoardInstallation', 'VLayerBoardInstallation', 'ULayerBoardInstallation', 'GLayerBoardInstallation', 'FramePrepGroundingMeshPanelInstallation'];
 
 
 /// Save a new or edited action record
@@ -46,19 +46,19 @@ async function save(input, req) {
   // When submitting such actions, make sure that a) the required signoff has actually been entered, and b) the submitter is the same person as the person signing off
   // This is intended to prevent users from completing these actions on behalf of someone else, i.e. putting someone else's name in for the signoff and then submitting it themselves
   // Note that this check only applies if the action is being submitted as 'complete' ... if not, it should still be editable by any user with the appropriate permissions
-  if (input.typeFormId === 'prep_mesh_panel_install') {
+  if (input.typeFormId === 'FramePrepGroundingMeshPanelInstallation') {
     if ((input.data.actionComplete) && (req.user.displayName !== (Object.assign({}, utils.dictionary_dBandFramePrep_current, utils.dictionary_dBandFramePrep_former))[input.data.meshPanelQCBy])) {
       throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${(Object.assign({}, utils.dictionary_dBandFramePrep_current, utils.dictionary_dBandFramePrep_former))[input.data.meshPanelQCBy]}) - this is not permitted!`);
     }
   }
 
-  if (input.typeFormId === 'AssembledAPAQACheck') {
+  if (input.typeFormId === 'SingleLayerQACheck') {
     if ((input.data.actionComplete) && (req.user.displayName !== (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[input.data.personSigningOff])) {
       throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${(Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[input.data.personSigningOff]}) - this is not permitted!`);
     }
   }
 
-  if (input.typeFormId === 'CompletedAPAQCChecklist') {
+  if (input.typeFormId === 'CompletedAPAQAChecklist') {
     if (input.data.actionComplete) {
       if (input.data.fdhdTechCoordSigningOff === '') {
         throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to complete this action without a signoff from the FDHD Technical Coordinator - this is not permitted!`);
@@ -71,7 +71,7 @@ async function save(input, req) {
   // Check that certain relevant fields do actually have some user-defined data in them if the action is being 'completed' (specific to the particular action type form)
   // This is designed to stop users from performing and 'completing' blank actions in order to skip ahead in workflows, but this way it does not require any fields to be 'required' in the type form
   if (input.data.actionComplete) {
-    if ((input.typeFormId === 'x_tension_testing') && (input.data.measuredTensions_sideA.length === 0) && (input.data.measuredTensions_sideB.length === 0)) {
+    if ((input.typeFormId === 'SingleLayerTensionMeasurements') && (input.data.measuredTensions_sideA.length === 0) && (input.data.measuredTensions_sideB.length === 0)) {
       throw new Error(`Actions:save() - you are attempting to complete this action,  but it does not yet contain any tension measurements ... please uncheck the 'Action Complete' box to submit!`);
     }
   }
@@ -118,7 +118,7 @@ async function save(input, req) {
   // However, Formio does not allow an empty array - instead, it creates an array with one entry, which is itself full of empty strings
   // This is incorrect but unavoidable behaviour, since if there are no replaced wires or bad solders, the array should indeed be empty ...
   // ... so for these types of action, if the array contains a single entry of empty strings, reset the array to be empty (NOT NULL!) 
-  if ((newRecord.typeFormId === 'g_winding') || (newRecord.typeFormId === 'u_winding') || (newRecord.typeFormId === 'v_winding') || (newRecord.typeFormId === 'x_winding')) {
+  if ((newRecord.typeFormId === 'XLayerWinding') || (newRecord.typeFormId === 'VLayerWinding') || (newRecord.typeFormId === 'ULayerWinding') || (newRecord.typeFormId === 'GLayerWinding')) {
     if (newRecord.data.replacedWires.length === 1) {
       if ((newRecord.data.replacedWires[0].side === '') && (newRecord.data.replacedWires[0].boardLocation === '')) {
         newRecord.data.replacedWires = [];
@@ -126,7 +126,7 @@ async function save(input, req) {
     }
   }
 
-  if ((newRecord.typeFormId === 'g_solder') || (newRecord.typeFormId === 'u_solder') || (newRecord.typeFormId === 'v_solder') || (newRecord.typeFormId === 'x_solder')) {
+  if ((newRecord.typeFormId === 'XLayerSoldering') || (newRecord.typeFormId === 'VLayerSoldering') || (newRecord.typeFormId === 'ULayerSoldering') || (newRecord.typeFormId === 'GLayerSoldering')) {
     if (newRecord.data.badSolderJoints.length === 1) {
       if ((newRecord.data.badSolderJoints[0].side === '') && (newRecord.data.badSolderJoints[0].boardLocation === '')) {
         newRecord.data.badSolderJoints = [];
@@ -134,11 +134,11 @@ async function save(input, req) {
     }
   }
 
-  // Installation (board or mesh) actions should not have any duplicated UUIDs, so check for if this has occurred
+  // Geometry board or grounding mesh panel installation actions should not have any duplicated UUIDs, so check for if this has occurred
   // This is best done by first storing all of the UUIDs in an array, and then using Javascript's 'Set' functionality to check for duplicates (a 'Set' can only contain unique entries) ...
   // ... so if the array contains duplicates, then a 'Set' created from the array will have a different length to the array (since any duplicates will have been removed)
   if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
-    if (newRecord.typeFormId === 'prep_mesh_panel_install') {
+    if (newRecord.typeFormId === 'FramePrepGroundingMeshPanelInstallation') {
       let arr_meshUuidsSideA = [];
       let arr_meshUuidsSideB = [];
 
@@ -184,7 +184,7 @@ async function save(input, req) {
         throw new Error(`Actions:save() - there are ${arr_boardUuidsFoot.length - set_boardUuidsFoot.size} duplicated UUIDs in the Foot Boards!`);
       }
 
-      if ((newRecord.typeFormId === 'v_boards') || (newRecord.typeFormId === 'u_boards')) {
+      if ((newRecord.typeFormId === 'VLayerBoardInstallation') || (newRecord.typeFormId === 'ULayerBoardInstallation')) {
         let arr_boardUuidsSideHSB = [];
         let arr_boardUuidsSideLSB = [];
 
@@ -260,7 +260,7 @@ async function save(input, req) {
   // Once the action record has been successfully saved, deal with the locations of any related components
   // - for shipment transport actions, update the location of each individual sub-component (as well as the shipment itself) to be 'In Transit'
   // - for shipment or batch reception actions, update the location of each individual sub-component (as well as the shipment itself) to match where and when it was received
-  // - for board and mesh installation actions, update the location of each component referenced in the action to be 'Installed on APA' 
+  // - for geometry board and grounding mesh panel installation actions, update the location of each component referenced in the action to be 'Installed on APA' 
   // - for 'Geometry Board Rejection' actions ...
   //   ... where the rejection disposition is 'Rejected', update the board's location to indicate as such
   //   ... where the rejection disposition is something other than 'Rejected', update the board's location to match where and when the action was performed
@@ -272,7 +272,7 @@ async function save(input, req) {
   } else if (reception_typeFormIDs.includes(newRecord.typeFormId)) {
     const result = await Components.updateLocations_inShipment(newRecord.componentUuid, newRecord.data.receptionLocation, (newRecord.data.receptionDate).toString().slice(0, 10));
   } else if (installation_typeFormIDs.includes(newRecord.typeFormId)) {
-    if (newRecord.typeFormId === 'prep_mesh_panel_install') {
+    if (newRecord.typeFormId === 'FramePrepGroundingMeshPanelInstallation') {
       let result = null;
 
       for (let i = 1; i < 11; i++) {

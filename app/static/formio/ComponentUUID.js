@@ -383,7 +383,7 @@ class ComponentUUID extends TextFieldComponent {
               $.ajax({
                 contentType: 'application/json',
                 method: 'GET',
-                url: `/json/actions/${'CompletedAPAQCChecklist'}/list?uuid=${value}`,
+                url: `/json/actions/${'CompletedAPAQAChecklist'}/list?uuid=${value}`,
                 dataType: 'json',
                 success: function (actionIDsList) {
                   if (actionIDsList.length > 0) {
