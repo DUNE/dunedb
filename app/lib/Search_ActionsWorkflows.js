@@ -194,14 +194,14 @@ async function nonConformanceByUUID(componentUUID) {
 }
 
 
-/// Retrieve a list of board installation actions that reference a single component, specified by its UUID
+/// Retrieve a list of geometry board installation actions that reference a single component, specified by its UUID
 async function boardInstallByReferencedComponent(componentUUID) {
   let aggregation_stages = [];
 
-  // Match against the type form ID to get records of all 'Board Installation' actions
+  // Match against the type form ID to get records of all geometry board installation actions
   aggregation_stages.push({
     $match: {
-      'typeFormId': { $in: ['x_boards', 'v_boards', 'u_boards', 'g_boards'] },
+      'typeFormId': { $in: ['XLayerBoardInstallation', 'VLayerBoardInstallation', 'ULayerBoardInstallation', 'GLayerBoardInstallation'] },
     }
   });
 
@@ -268,7 +268,7 @@ async function windingByReferencedComponent(componentUUID) {
   // Match against the type form ID to get records of all 'Winding' actions
   aggregation_stages.push({
     $match: {
-      'typeFormId': { $in: ['g_winding', 'u_winding', 'v_winding', 'x_winding'] },
+      'typeFormId': { $in: ['XLayerWinding', 'VLayerWinding', 'ULayerWinding', 'GLayerWinding'] },
     }
   });
 
@@ -347,10 +347,10 @@ async function boardRejectionByReferencedComponent(componentUUID) {
 async function tensionComparisonAcrossLocations(componentUUID, wireLayer, origin, destination) {
   let aggregation_stages = [];
 
-  // Match against the type form ID, component UUID, APA layer and location to get records of all 'Single Layer Tension Measurement' actions performed on the given [APA, layer] combination at the given locations
+  // Match against the type form ID, component UUID, APA layer and location to get records of all 'Single Layer Tension Measurements' actions performed on the given [APA, layer] combination at the given locations
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'x_tension_testing',
+      'typeFormId': 'SingleLayerTensionMeasurements',
       'componentUuid': MUUID.from(componentUUID),
       'data.apaLayer': wireLayer,
       'data.location': { $in: [origin, destination] }
