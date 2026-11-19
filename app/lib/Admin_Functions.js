@@ -17,8 +17,8 @@ async function cleanActionTypeFormIds(oldTypeFormId) {
   let workflowStepIndex = null;
 
   if (oldTypeFormId === 'AssembledAPAQACheck') {
-    newTypeFormId = 'SingleLayerQACheck';
-    newTypeFormName = 'Single Layer QA Check';
+    newTypeFormId = 'SingleLayerQAChecks';
+    newTypeFormName = 'Single Layer QA Checks';
     workflowTypeFormId = 'APA_Assembly';
     workflowStepIndex = [10, 15, 24, 33, 42, 47];
   } else if (oldTypeFormId === 'clamp_plate_removal') {
@@ -146,7 +146,7 @@ async function cleanActionTypeFormIds(oldTypeFormId) {
     newTypeFormName = 'V Layer - Winding';
     workflowTypeFormId = 'APA_Assembly';
     workflowStepIndex = [20];
-  } else if (oldTypeFormId === 'v_comb_install') {
+  } else if (oldTypeFormId === 'v_combs') {
     newTypeFormId = 'VLayerWireCombInstallation';
     newTypeFormName = 'V Layer - Wire Comb Installation';
     workflowTypeFormId = 'APA_Assembly';

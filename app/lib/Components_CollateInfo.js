@@ -205,14 +205,14 @@ async function forExecSummary(componentUUID) {
   /////////////////
   // QC SIGNOFFS //
   /////////////////
-  // The QC signoffs for frame preparation and winding layers can be found in the Assembled APA's 'Single Layer QA Check' actions
+  // The QC signoffs for frame preparation and winding layers can be found in the Assembled APA's 'Single Layer QA Checks' actions
   // Additional information relating to frame preparation can be found in the Assembled APA's 'Grounding Mesh Panel Installation' and 'PD Cable & Temperature Sensor Installation' actions
   aggregation_stages = [];
   results = [];
 
   aggregation_stages.push({
     $match: {
-      'typeFormId': 'SingleLayerQACheck',
+      'typeFormId': 'SingleLayerQAChecks',
       'componentUuid': MUUID.from(componentUUID),
     }
   });
