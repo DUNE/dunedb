@@ -228,7 +228,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
   let action_aggregation_stages = [];
 
   // Depending on which assembly step string has been passed to this function, match against the type form ID to get:
-  // ... either records of all 'Single Layer QA Check' actions that have been performed and completed at the specified assembly step
+  // ... either records of all 'Single Layer QA Checks' actions that have been performed and completed at the specified assembly step
   // ... or records of all 'Completed APA QA Checklist' actions that have been performed and completed
   let match_condition = {};
 
@@ -239,7 +239,7 @@ async function apasByProductionLocationAndAssemblyStep(location, assemblyStep) {
     };
   } else {
     match_condition = {
-      'typeFormId': 'SingleLayerQACheck',
+      'typeFormId': 'SingleLayerQAChecks',
       'data.workflowSectionBeingQAed': assemblyStep,
       'data.actionComplete': true,
     };

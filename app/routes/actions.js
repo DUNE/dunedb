@@ -94,7 +94,7 @@ router.get('/action/:actionId', permissions.checkPermission('actions:view'), asy
       // Set up a match condition dictionary, where we want to find the Winding action performed on the same APA component and the same side as the tension measurements being viewed
       // Then attempt to get a list of all matching actions ... this should return at least one action, since the winding should already have been performed before the tension measurements
       let match_condition = {
-        typeFormId: `${action.data.apaLayer}_winding`,
+        typeFormId: `${action.data.apaLayer.toUpperCase()}LayerWinding`,
         componentUuid: action.componentUuid,
       };
 

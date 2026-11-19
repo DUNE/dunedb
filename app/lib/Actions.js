@@ -52,7 +52,7 @@ async function save(input, req) {
     }
   }
 
-  if (input.typeFormId === 'SingleLayerQACheck') {
+  if (input.typeFormId === 'SingleLayerQAChecks') {
     if ((input.data.actionComplete) && (req.user.displayName !== (Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[input.data.personSigningOff])) {
       throw new Error(`Actions:save() - the current user (${req.user.displayName}) is attempting to sign off and complete this action on behalf of someone else (${(Object.assign({}, utils.dictionary_apaFactoryLeads_current, utils.dictionary_apaFactoryLeads_former))[input.data.personSigningOff]}) - this is not permitted!`);
     }
