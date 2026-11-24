@@ -330,8 +330,10 @@ async function save(input, req) {
 async function updateLocation(componentUuid, location, date, detail) {
   // The location should NOT be changed in the following situations:
   //  - if the location is currently set to 'installed_on_APA' ... this can happen in the following circumstances:
-  //      * if a geometry board shipment is being retroactively received
+  //      * if a geometry board shipment is being retroactively received after some or all of the boards have already been installed on APAs
   //      * when a board installation action has previously been only partially completed, and is now being edited with additional board entries
+  //  - if the location is currently set to 'rejected' ... this can happen in the following circumstances:
+  //      * if a geometry board shipment is being retroactively received after some or all of the boards have already been rejected
 
   // For some reason, component shipments sometimes may contain a blank (i.e. empty string) component UUID, which obviously cannot be retrieved as a component record
   // If the 'Components.retrieve' function used below receives a blank UUID, it will throw an error and stop the entire process of whatever else is being done ... 
@@ -347,7 +349,7 @@ async function updateLocation(componentUuid, location, date, detail) {
     currentLocation = component.location;
   }
 
-  if (currentLocation !== 'installed_on_APA') {
+  if ((currentLocation !== 'installed_on_APA') && (currentLocation !== 'rejected')) {
     // Set up the DB query match condition to be that a record's component UUID must match the specified one
     let match_condition = { componentUuid };
 
