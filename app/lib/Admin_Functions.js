@@ -10,52 +10,34 @@ const utils = require('./utils');
 const Workflows = require('./Workflows');
 
 
-async function fixActionRecords(typeFormId) {
-  let result = await db.collection('actions')
+async function fixWorkflowRecords(oldTypeFormId) {
+  let newTypeFormId = null;
+  let newTypeFormName = null;
+
+  if (oldTypeFormId === 'FrameAssembly') {
+    newTypeFormId = 'APAFrame_Assembly';
+    newTypeFormName = 'APA Frame Assembly';
+  }
+
+  const result = await db.collection('workflows')
     .updateMany(
-      { typeFormId: typeFormId },
+      { typeFormId: oldTypeFormId },
       [
         {
           $set: {
-            'temp_humidityLoggers': { $arrayElemAt: ["$data.grid_humidityLogger", 0] },
-            'temp_foilSealing': { $arrayElemAt: ["$data.grid_foilSealing", 0] },
+            'typeFormId': newTypeFormId,
+            'typeFormName': newTypeFormName,
           }
         },
       ]
     )
 
-  result = await db.collection('actions')
-    .updateMany(
-      { typeFormId: typeFormId },
-      [
-        {
-          $set: {
-            'data.humidityLoggerSerialNumber': '$temp_humidityLoggers.humidityLoggerSerialNumber',
-            'data.dateTime_foilSealing': '$temp_foilSealing.dateTime_foilSealing',
-          }
-        },
-      ]
-    )
+  if (result.ok === 0) throw new Error(`Admin_Functions::fixWorkflowRecords() - failed to change fields in the workflow records!`);
 
-  result = await db.collection('actions')
-    .updateMany(
-      { typeFormId: typeFormId },
-      [
-        {
-          $unset: [
-            'temp_humidityLoggers',
-            'temp_foilSealing',
-          ]
-        },
-      ]
-    )
-
-  if (result.ok === 0) throw new Error(`Admin_Functions::fixActionRecords() - failed to change fields in the action records!`);
-
-  return typeFormId;
+  return newTypeFormId;
 }
 
 
 module.exports = {
-  fixActionRecords,
+  fixWorkflowRecords,
 }

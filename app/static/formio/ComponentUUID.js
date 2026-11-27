@@ -1,6 +1,14 @@
 var TextFieldComponent = Formio.Components.components.textfield;
 var gComponentUUIDComponent = null;
 
+var groundingMeshPanelDispositions = {
+  conformant: 'Conformant',
+  useAsIs: 'Use as-is',
+  rework: 'Rework',
+  repairAtFactory: 'Repair at Factory',
+  reject: 'Reject',
+}
+
 
 /// Define the modal that is displayed when the camera button is pressed
 $(function () {
@@ -310,14 +318,14 @@ class ComponentUUID extends TextFieldComponent {
                       dataType: 'json',
                       success: function (action) {
                         if (action.data.actionComplete) {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
+                          info_target.text(`\xa0 ${component.data.componentName} - ready for use`);
                         } else {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - QA Checklist action is not complete!`);
+                          info_target.text(`\xa0 ${component.data.componentName} - 'Final QA Checks' action is not complete!`);
                         }
                       },
                     }).fail();
                   } else {
-                    info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - QA Checklist action cannot be found!`);
+                    info_target.text(`\xa0 ${component.data.componentName} - 'Final QA Checks' action has not been performed!`);
                   }
                 },
               }).fail();
@@ -336,22 +344,22 @@ class ComponentUUID extends TextFieldComponent {
                       dataType: 'json',
                       success: function (action) {
                         if ((action.data.disposition === 'useAsIs') || (action.data.disposition === 'conformant')) {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
+                          info_target.text(`\xa0 ${component.data.componentName} - ready for use`);
                         } else {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - QA Inspection action disposition is not 'Use As Is' or 'Conformant'!`);
+                          info_target.text(`\xa0 ${component.data.componentName} - 'QA Inspection' action disposition is '${groundingMeshPanelDispositions[action.data.disposition]}'!`);
                         }
                       },
                     }).fail();
                   } else {
-                    info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - QA Inspection action cannot be found!`);
+                    info_target.text(`\xa0 ${component.data.componentName} - 'QA Inspection' action has not been performed!`);
                   }
                 },
               }).fail();
             } else if (component.typeFormId === 'WireBobbin') {
               if (component.data.meanBreakStrength >= 24.0) {
-                info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
+                info_target.text(`\xa0 ${component.data.componentName} - ready for use`);
               } else {
-                info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - mean break strength is less than 24.0 N!`);
+                info_target.text(`\xa0 ${component.data.componentName} - mean break strength is ${component.data.meanBreakStrength} N (< 24.0)!`);
               }
             } else if (component.typeFormId === 'GeometryBoard') {
               $.ajax({
@@ -361,7 +369,7 @@ class ComponentUUID extends TextFieldComponent {
                 dataType: 'json',
                 success: function (actionIDsList) {
                   if (actionIDsList.length == 0) {
-                    info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
+                    info_target.text(`\xa0 ${component.data.componentName} - ready for use`);
                   } else {
                     $.ajax({
                       contentType: 'application/json',
@@ -370,9 +378,9 @@ class ComponentUUID extends TextFieldComponent {
                       dataType: 'json',
                       success: function (action) {
                         if ((action.data.disposition === 'useAsIs') || (action.data.disposition === 'remediated')) {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for use`);
+                          info_target.text(`\xa0 ${component.data.componentName} - ready for use`);
                         } else {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - rejected via Geometry Board Rejection action!`);
+                          info_target.text(`\xa0 ${component.data.componentName} - rejected via 'Rejection' action!`);
                         }
                       },
                     }).fail();
@@ -394,19 +402,19 @@ class ComponentUUID extends TextFieldComponent {
                       dataType: 'json',
                       success: function (action) {
                         if (action.data.actionComplete) {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - ready for shipping`);
+                          info_target.text(`\xa0 ${component.data.componentName} - ready for shipping`);
                         } else {
-                          info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - QA Checklist action is not complete!`);
+                          info_target.text(`\xa0 ${component.data.componentName} - 'QA Checklist' action is not complete!`);
                         }
                       },
                     }).fail();
                   } else {
-                    info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName} - QA Checklist action cannot be found!`);
+                    info_target.text(`\xa0 ${component.data.componentName} - 'QA Checklist' action has not been performed!`);
                   }
                 },
               }).fail();
             } else {
-              info_target.text(`\xa0 [Click for Component Info] ${component.data.componentName}`);
+              info_target.text(`\xa0 ${component.data.componentName}`);
             }
           },
         }).fail();
