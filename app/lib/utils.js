@@ -155,7 +155,7 @@ module.exports = {
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
-  // Personnel who are authorised to signoff on APA frames (all Frame Assembly workflow actions)
+  // Personnel who are authorised to signoff on APA frames (all actions in 'APA Frame Assembly' workflows)
   dictionary_frameIntakeSignoff_current: {
     gedBell: 'Ged Bell',
     callumHolt: 'Callum Holt',
@@ -168,7 +168,7 @@ module.exports = {
     sotirisVlachos: 'Sotiris Vlachos',
   },
 
-  // Personnel who are authorised to signoff on APA frame NCR concessions ('Final Frame QA Checklist' Frame Assembly workflow actions)
+  // Personnel who are authorised to signoff on APA frame NCR concessions ('APA Frame Final QA Checks' actions in APA Frame Assembly workflows)
   dictionary_frameNCRSignoff_current: {
     ericJames: 'Eric James',
     niklasTempleton: 'Niklas Templeton',
@@ -179,7 +179,7 @@ module.exports = {
     radosavPantelic: 'Radosav Pantelic',
   },
 
-  // Frame Prep D-band personnel ('Frame Prep - ???' APA Assembly workflow actions and 'Grounding Mesh Panel Final Inspection' actions)
+  // Frame Prep D-band personnel ('Grounding Mesh Panel Final Inspection' actions and 'Frame Prep - ???' actions in 'APA Assembly' workflows)
   dictionary_dBandFramePrep_current: {
     edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
@@ -196,7 +196,7 @@ module.exports = {
     kimWilliams: 'Kim Williams',
   },
 
-  // Personnel who are authorised to signoff on tension control verification ('? Layer - Winding' APA Assembly workflow actions)
+  // Personnel who are authorised to signoff on tension control verification ('? Layer - Winding' actions in 'APA Assembly' workflows)
   dictionary_tensionControlSignoff_current: {
     vincentBaker: 'Vincent Baker',
     edBlucher: 'Ed Blucher',
@@ -210,7 +210,7 @@ module.exports = {
     daveSim: 'Dave Sim',
   },
 
-  // Personnel who are authorised to signoff on winder maintenance verification ('? Layer - Winding' APA Assembly workflow actions)
+  // Personnel who are authorised to signoff on winder maintenance verification ('? Layer - Winding' actions in 'APA Assembly' workflows)
   dictionary_winderMaintenanceSignoff_current: {
     vincentBaker: 'Vincent Baker',
     daveBrown: 'Dave Brown',
@@ -230,7 +230,7 @@ module.exports = {
     daveSim: 'Dave Sim',
   },
 
-  // Winding D-band personnel (winding-related APA Assembly workflow actions)
+  // Winding D-band personnel (winding-related actions in 'APA Assembly' workflows)
   dictionary_dBandWinding_current: {
     edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
@@ -246,7 +246,7 @@ module.exports = {
     andrewKelly: 'Andrew Kelly',
   },
 
-  // Post-Production D-band personnel (post-winding APA Assembly workflow actions except for 'Conduit Insertion', and all APA Post Production workflow actions)
+  // Post-Production D-band personnel (post-winding actions in 'APA Assembly' workflows except for 'Conduit Insertion', and all actions in 'APA Post Production' workflows)
   dictionary_dBandPostProduction_current: {
     edBlucher: 'Ed Blucher',
     albertoMarchionni: 'Alberto Marchionni',
@@ -258,7 +258,7 @@ module.exports = {
     radosavPantelic: 'Radosav Pantelic',
   },
 
-  // Personnel who are authorised to signoff on Conduit Insertion checks ('Conduit Insertion' APA Assembly workflow actions)
+  // Personnel who are authorised to signoff on Conduit Insertion checks ('Conduit Insertion' actions in 'APA Assembly' workflows)
   dictionary_dBandConduitInsertion_current: {
     edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
@@ -271,7 +271,7 @@ module.exports = {
     radosavPantelic: 'Radosav Pantelic',
   },
 
-  // FD-HD technical coordinators (final signoff in 'Completed APA QA Checklist' APA Assembly workflow actions)
+  // FD-HD technical coordinators ('Completed APA QA Checklist' actions in 'APA Assembly' workflows)
   dictionary_fdhdTechCoordSignoff_current: {
     ericJames: 'Eric James',
   },
@@ -280,7 +280,7 @@ module.exports = {
     // [empty dictionary]
   },
 
-  // Personnel who are authorised to signoff on post-reception Assembled APA Shipment QA checks ('Assembled APA Shipment Post-Reception QA' APA Post Production workflow actions)
+  // Personnel who are authorised to signoff on post-reception Assembled APA Shipment QA checks ('Assembled APA Shipment Post-Reception QA' actions in 'APA Post Production' workflows)
   dictionary_apaShipmentPostReceptionSignoff_current: {
     alexandreAcerraGil: 'Alexandre Acerra Gil',
     wayneGreen: 'Wayne Green',
@@ -291,7 +291,7 @@ module.exports = {
     // [empty dictionary]
   },
 
-  // Lead personnel at the UK and US APA factories (top-level signoffs in various APA Assembly and APA Post Production workflow actions)
+  // Lead personnel at the UK and US APA factories (top-level signoffs in various actions in 'APA Assembly' and 'APA Post Production' workflows)
   dictionary_apaFactoryLeads_current: {
     edBlucher: 'Ed Blucher',
     daveBrown: 'Dave Brown',
@@ -327,7 +327,7 @@ module.exports = {
     // [empty dictionary]
   },
 
-  // Personnel who are authorised to signoff on APA cold tests ('APA Cold Test' Assembled APA actions)
+  // Personnel who are authorised to signoff on APA cold tests ('Assembled APA Cold Test' actions)
   dictionary_apaColdTestSignoff_current: {
     pipHamilton: 'Pip Hamilton',
     brianRebel: 'Brian Rebel',

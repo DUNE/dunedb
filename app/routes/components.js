@@ -150,7 +150,7 @@ router.get('/component/:uuid', permissions.checkPermission('components:view'), a
       let workflowTypeForm = null;
 
       if (component.typeFormId === 'APAFrame') {
-        workflowTypeForm = await Forms.retrieve('workflowForms', 'FrameAssembly');
+        workflowTypeForm = await Forms.retrieve('workflowForms', 'APAFrame_Assembly');
       } else if (component.typeFormId === 'AssembledAPA') {
         workflowTypeForm = await Forms.retrieve('workflowForms', 'APA_Assembly');
       } else if (component.typeFormId === 'AssembledAPAShipment') {
